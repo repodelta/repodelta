@@ -5,6 +5,7 @@ PrismCode has one canonical path:
 ```text
 fixture or GitHub
   -> ReviewSourcePacket
+       -> linked Issue/Ticket + PR + changed files + CI/Actions observations
   -> deterministic criteria extraction + optional EvidenceHints
   -> DeterministicAnalyzer
   -> ReviewBrief
@@ -22,6 +23,12 @@ fixture or GitHub
 4. `DeterministicAnalyzer` is the only status authority. It emits separate implementation
    and verification assessments.
 5. Renderers consume `ReviewBrief` and never infer or upgrade an assessment.
+
+Acceptance criteria from an explicit linked Issue are primary. Deliverables receive stable
+display IDs (`R1`, `R2`, ...); negative scope constraints are separated as guardrails
+(`G1`, `G2`, ...). A verification result can pass a requirement only when an evidence hint
+names that exact observation, it belongs to the analyzed head, it succeeded, and assertion
+coverage is explicitly adequate. Generic green CI never verifies every requirement.
 
 ## Packet revisions
 

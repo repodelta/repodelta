@@ -41,6 +41,8 @@ This change exposes an inspect-only trace.
 def test_github_adapter_collects_only_source_facts() -> None:
     pr_path = "/repos/acme/widget/pulls/42"
     files_path = "/repos/acme/widget/pulls/42/files"
+    checks_path = "/repos/acme/widget/commits/head123/check-runs"
+    statuses_path = "/repos/acme/widget/commits/head123/status"
     client = FakeClient(
         {
             (pr_path, ()): {
@@ -67,6 +69,17 @@ def test_github_adapter_collects_only_source_facts() -> None:
                     "blob_url": "https://github.com/acme/widget/blob/head123/tests/test_a.py",
                 },
             ],
+            (checks_path, (("per_page", 100),)): {
+                "check_runs": [{
+                    "id": 9,
+                    "name": "test",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "head_sha": "head123",
+                    "html_url": "https://github.com/acme/widget/actions/runs/9"
+                }]
+            },
+            (statuses_path, ()): {"statuses": []},
         }
     )
 
@@ -75,6 +88,7 @@ def test_github_adapter_collects_only_source_facts() -> None:
     assert packet.head_sha == "head123"
     assert [item.path for item in packet.changed_files] == ["src/a.py", "tests/test_a.py"]
     assert [item.code for item in packet.diagnostics] == ["github_patch_unavailable"]
+    assert packet.verification_observations[0].kind == "check_run"
     assert not hasattr(packet, "requirements")
 
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
@@ -105,6 +119,35 @@ def test_github_adapter_reports_file_cap_without_inferring_requirements() -> Non
     assert [item.code for item in packet.diagnostics] == ["github_file_limit_reached"]
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
     assert brief.assessments[0].requirement.text == "Fallback requirement"
+
+
+def test_explicit_closing_issue_supplies_primary_acceptance_criteria() -> None:
+    pr_path = "/repos/acme/widget/pulls/8"
+    files_path = "/repos/acme/widget/pulls/8/files"
+    issue_path = "/repos/acme/widget/issues/41"
+    client = FakeClient(
+        {
+            (pr_path, ()): {
+                "html_url": "https://github.com/acme/widget/pull/8",
+                "title": "Implement trace",
+                "body": "Fixes #41",
+                "changed_files": 0,
+                "head": {},
+                "base": {},
+                "user": {},
+            },
+            (files_path, (("page", 1), ("per_page", 100))): [],
+            (issue_path, ()): {
+                "html_url": "https://github.com/acme/widget/issues/41",
+                "title": "Trace requirements",
+                "body": "## Acceptance criteria\n- Emit a bounded trace.\n- No UI changes.",
+            },
+        }
+    )
+    packet = GitHubPullRequestAdapter(client=client).load("acme/widget", 8)
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    assert [item.requirement.text for item in brief.assessments] == ["Emit a bounded trace."]
+    assert [item.text for item in brief.guardrails] == ["No UI changes."]
 
 
 def test_token_is_not_sent_to_untrusted_or_unsafe_api_url() -> None:

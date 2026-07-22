@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from dataclasses import replace
 
 from .contracts import Requirement, SourceRef
 
@@ -21,7 +22,7 @@ def _clean_markdown_text(value: str) -> str:
     value = re.sub(r"<!--.*?-->", "", value, flags=re.DOTALL)
     value = re.sub(r"`([^`]+)`", r"\1", value)
     value = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", value)
-    value = re.sub(r"[*_~]+", "", value)
+    value = re.sub(r"[*~]+", "", value)
     return " ".join(value.strip().split())
 
 
@@ -52,10 +53,48 @@ def extract_requirement_texts(body: str | None) -> tuple[str, ...]:
 
 
 def extract_requirements(body: str | None, *, source: SourceRef) -> tuple[Requirement, ...]:
-    return tuple(
-        Requirement(id=f"R{index}", text=text, sources=(source,))
-        for index, text in enumerate(extract_requirement_texts(body), start=1)
+    deliverable_index = 0
+    guardrail_index = 0
+    requirements: list[Requirement] = []
+    for text in extract_requirement_texts(body):
+        kind = _requirement_kind(text)
+        if kind == "guardrail":
+            guardrail_index += 1
+            requirement_id = f"G{guardrail_index}"
+        else:
+            deliverable_index += 1
+            requirement_id = f"R{deliverable_index}"
+        line_number = _source_line(body or "", text)
+        requirements.append(
+            Requirement(
+                id=requirement_id,
+                text=text,
+                kind=kind,
+                sources=(replace(source, line_start=line_number),),
+            )
+        )
+    return tuple(requirements)
+
+
+def _requirement_kind(text: str) -> str:
+    normalized = text.casefold().strip()
+    guardrail_prefixes = (
+        "no ",
+        "do not ",
+        "must not ",
+        "should not ",
+        "without changing ",
     )
+    return "guardrail" if normalized.startswith(guardrail_prefixes) else "deliverable"
+
+
+def _source_line(body: str, text: str) -> int | None:
+    normalized = text.casefold()
+    for line_number, line in enumerate(body.splitlines(), start=1):
+        candidate = _CHECKLIST_RE.match(line) or _BULLET_RE.match(line)
+        if candidate and _clean_markdown_text(candidate.group(1)).casefold() == normalized:
+            return line_number
+    return None
 
 
 def extract_intent(body: str | None, title: str) -> str:

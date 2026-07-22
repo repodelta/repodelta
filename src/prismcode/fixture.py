@@ -14,6 +14,7 @@ from .contracts import (
     ReviewSourcePacket,
     SourceRecord,
     SourceRef,
+    VerificationObservation,
 )
 
 
@@ -49,6 +50,10 @@ def load_fixture(path: str | Path) -> AnalysisInput:
         title=packet_raw["title"],
         source_records=tuple(SourceRecord(**item) for item in packet_raw.get("source_records", [])),
         changed_files=tuple(ChangedFile(**item) for item in packet_raw.get("changed_files", [])),
+        verification_observations=tuple(
+            VerificationObservation(**item)
+            for item in packet_raw.get("verification_observations", [])
+        ),
         source_url=packet_raw.get("source_url"),
         head_sha=packet_raw.get("head_sha"),
         base_sha=packet_raw.get("base_sha"),
@@ -71,8 +76,8 @@ def load_fixture(path: str | Path) -> AnalysisInput:
         EvidenceHint(
             requirement_id=item["requirement_id"],
             implementation=tuple(_evidence(value) for value in item.get("implementation", [])),
-            verification=tuple(_evidence(value) for value in item.get("verification", [])),
-            verification_outcome=item.get("verification_outcome", "not_observed"),
+            verification_evidence_ids=tuple(item.get("verification_evidence_ids", [])),
+            assertion_coverage=item.get("assertion_coverage", "not_established"),
             gaps=tuple(item.get("gaps", [])),
             provenance=tuple(_source(source) for source in item.get("provenance", [])),
         )
@@ -80,6 +85,6 @@ def load_fixture(path: str | Path) -> AnalysisInput:
     )
     known_ids = {requirement.id for requirement in requirements}
     unknown = sorted({hint.requirement_id for hint in hints} - known_ids)
-    if unknown:
+    if known_ids and unknown:
         raise ValueError("evidence hints reference unknown requirements: " + ", ".join(unknown))
     return AnalysisInput(packet=packet, requirements=requirements, evidence_hints=hints)

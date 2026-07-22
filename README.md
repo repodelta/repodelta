@@ -2,6 +2,13 @@
 
 PrismCode generates requirement-first, evidence-linked pull request review briefs.
 
+Its core workflow connects explicit Issue/Ticket acceptance criteria to pull-request code
+evidence and requirement-specific CI/Actions observations:
+
+```text
+Issue acceptance criteria -> R1/R2/... -> PR/code evidence -> checks/workflows -> review brief
+```
+
 This repository is the standalone open-core implementation. It does not import company-private packages. The fixture workflow requires no network, model API, or company credentials; the GitHub workflow talks only to the configured GitHub API.
 
 ## Current scope
@@ -12,13 +19,14 @@ The open core provides:
 - separate public contracts for source requirements, evidence hints, and analysis-owned assessments;
 - offline JSON fixture ingestion;
 - live GitHub pull request metadata and changed-file ingestion;
+- explicit closing-Issue ingestion plus current-head check-run and commit-status observations;
 - conservative requirement extraction in the analysis layer from explicit Markdown requirement sections;
 - a deterministic analyzer that owns implementation and verification status;
 - a requirement-first static HTML renderer;
 - a local CLI;
 - clean-install CI with network-free tests.
 
-The GitHub adapter intentionally emits source facts only. It cannot create requirements, evidence bindings, or final review status. Requirements without explicit evidence hints are reported as implementation and verification `not_observed`.
+The GitHub adapter intentionally emits source facts only. The analyzer prefers linked-Issue acceptance criteria, assigns delivery requirements `R1`, `R2`, ... and scope guardrails `G1`, `G2`, ..., then combines evidence hints with exact verification observation IDs. Requirements without requirement-specific execution remain verification `not_observed`, even when generic CI is green.
 
 ## Quick start
 

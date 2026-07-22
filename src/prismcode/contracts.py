@@ -54,6 +54,17 @@ class Diagnostic:
 
 
 @dataclass(frozen=True)
+class VerificationObservation:
+    id: str
+    name: str
+    kind: Literal["check_run", "commit_status", "workflow_run", "manual"]
+    status: str
+    conclusion: str = ""
+    head_sha: str | None = None
+    details_url: str | None = None
+
+
+@dataclass(frozen=True)
 class ReviewSourcePacket:
     """Canonical, conclusion-free facts collected for one review."""
 
@@ -62,6 +73,7 @@ class ReviewSourcePacket:
     title: str
     source_records: tuple[SourceRecord, ...]
     changed_files: tuple[ChangedFile, ...] = ()
+    verification_observations: tuple[VerificationObservation, ...] = ()
     source_url: str | None = None
     head_sha: str | None = None
     base_sha: str | None = None
@@ -114,10 +126,8 @@ class EvidenceHint:
 
     requirement_id: str
     implementation: tuple[Evidence, ...] = ()
-    verification: tuple[Evidence, ...] = ()
-    verification_outcome: Literal[
-        "success", "failure", "pending", "not_observed", "stale", "manual_required"
-    ] = "not_observed"
+    verification_evidence_ids: tuple[str, ...] = ()
+    assertion_coverage: Literal["adequate", "partial", "not_established"] = "not_established"
     gaps: tuple[str, ...] = ()
     provenance: tuple[SourceRef, ...] = ()
 
@@ -154,6 +164,7 @@ class ReviewBrief:
     packet: ReviewSourcePacket
     intent: str
     assessments: tuple[RequirementAssessment, ...]
+    guardrails: tuple[Requirement, ...] = ()
     generated_by: str = "prismcode-open-core"
     schema_version: str = "review_brief.v2"
 
