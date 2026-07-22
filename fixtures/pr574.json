@@ -1,0 +1,48 @@
+{
+  "repository": "interact-space/PrismCode",
+  "pull_request": 574,
+  "title": "Add inspect-only semantic alignment trace",
+  "intent": "Expose a bounded diagnostic artifact that explains how Review Units align with semantic change evidence without changing normal product behavior.",
+  "source_url": "https://github.com/interact-space/PrismCode/pull/574",
+  "changed_files": [
+    "prismcode/product_v1/inspection.py",
+    "prismcode/product_v1/state.py",
+    "tests/test_inspection.py"
+  ],
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "Produce an inspect-only unit semantic alignment trace.",
+      "status": "verified",
+      "implemented": [
+        {
+          "summary": "A dedicated trace artifact is assembled from existing semantic projections.",
+          "kind": "code",
+          "sources": [{"label": "inspection builder", "path": "prismcode/product_v1/inspection.py"}]
+        }
+      ],
+      "verification": [
+        {
+          "summary": "Fixture-level tests cover artifact presence and shape.",
+          "kind": "test",
+          "sources": [{"label": "inspection tests", "path": "tests/test_inspection.py"}]
+        }
+      ],
+      "gaps": []
+    },
+    {
+      "id": "R2",
+      "text": "Keep the artifact diagnostic-only and avoid changing normal review behavior.",
+      "status": "partial",
+      "implemented": [
+        {
+          "summary": "The artifact is attached through inspect-only state collection.",
+          "kind": "code",
+          "sources": [{"label": "state integration", "path": "prismcode/product_v1/state.py"}]
+        }
+      ],
+      "verification": [],
+      "gaps": ["No execution result or CI run is recorded in this public fixture."]
+    }
+  ]
+}
