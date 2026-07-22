@@ -116,7 +116,8 @@ def test_github_adapter_collects_only_source_facts() -> None:
     assert [item.requirement.text for item in brief.assessments] == ["Emit a trace.", "Preserve behavior."]
     assert all(item.implementation.status == "not_observed" for item in brief.assessments)
     html = render_html(brief)
-    assert "Collection notes" in html
+    assert "Collection notes" not in html
+    assert "Source coverage" in html
     assert "PR #42" in html
     assert "PR #42 · Requirements" in html
     assert "#requirements" in html

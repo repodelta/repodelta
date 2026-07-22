@@ -30,13 +30,25 @@ def test_fixture_to_requirement_first_html(tmp_path: Path) -> None:
     assert "inspect_only_debug_artifacts" in html
     assert "R1" in html and "R5" in html
     assert "G1" in html and "G5" in html
-    assert "Implementation observed · Verification not observed" in html
+    assert "Implementation observed · Verification not observed" not in html
+    assert "Implemented across 1 file" in html
+    assert "Tests present across 1 file" in html
+    assert "CI not observed" in html
     assert "6 changed files" in html
-    assert "CI/Actions observations" in html
+    assert "5 delivery requirements" not in html
+    assert "CI/Actions observations" not in html
+    assert "PR #574" in html and "Merged" in html and "CI: no run observed" in html
     assert "Needs attention" in html
     assert "Implemented" in html
-    assert "Verification" in html
-    assert "Gaps" in html
+    assert '<span class="block-title">Verification</span>' not in html
+    assert '<span class="block-title">Gaps</span>' not in html
+    assert "No verification evidence recorded." not in html
+    assert "CI gap" in html
+    assert "Scope guardrails" in html
+    assert "Collection notes" not in html
+    assert "CODE · unit_semantic_alignment_trace.py" in html
+    assert "TEST · test_workspace_public_review_map_routes.py" in html
+    assert "https://github.com/interact-space/PrismCode/blob/7de0211956a35e8f9c6c576cd2dbb7acd7fd5560/prismcode/workspace/unit_semantic_alignment_trace.py" in html
     assert "Data sources &amp; coverage" not in html
     assert "Issue #573" in html and "PR #574" in html
     assert "Issue #573 · Acceptance criteria" in html

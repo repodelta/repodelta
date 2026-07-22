@@ -3,9 +3,9 @@ from __future__ import annotations
 from html import escape
 from pathlib import Path
 import re
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import quote, urlparse, urlunparse
 
-from .contracts import ChangedFile, Diagnostic, Evidence, ReviewBrief, SourceRef
+from .contracts import ChangedFile, Evidence, ReviewBrief, SourceRef
 
 
 def _safe_href(value: str | None) -> str | None:
@@ -44,14 +44,43 @@ def _source(source: SourceRef) -> str:
     return f'<a class="source-link" href="{escape(href, quote=True)}" target="_blank" rel="noopener">{content}</a>' if href else content
 
 
-def _evidence(item: Evidence) -> str:
-    sources = " · ".join(_source(source) for source in item.sources)
-    return (
-        '<div class="evidence">'
-        f'<div class="block-copy"><span class="kind">{escape(item.kind)}</span> {escape(item.summary)}</div>'
-        + (f'<span class="source-note">Source: {sources}</span>' if sources else "")
-        + "</div>"
-    )
+def _is_test_path(path: str | None) -> bool:
+    lowered = (path or "").casefold()
+    return lowered.startswith("tests/") or "/test" in lowered or lowered.endswith("_test.py")
+
+
+def _evidence_source_chip(source: SourceRef, brief: ReviewBrief) -> str:
+    path = source.path
+    label = source.label
+    if path:
+        label = f"{'TEST' if _is_test_path(path) else 'CODE'} · {Path(path).name}"
+    href = _safe_href(source.url)
+    if not href and path and brief.packet.head_sha:
+        href = (
+            f"https://github.com/{brief.packet.repository}/blob/{brief.packet.head_sha}/"
+            + quote(path, safe="/")
+        )
+    content = escape(label)
+    if href:
+        return f'<a class="source-chip {"test" if _is_test_path(path) else "code"}" href="{escape(href, quote=True)}" target="_blank" rel="noopener">{content}</a>'
+    return f'<span class="source-chip {"test" if _is_test_path(path) else "code"}">{content}</span>'
+
+
+def _implementation(assessment: object, brief: ReviewBrief) -> tuple[str, str, int, int]:
+    evidence = getattr(getattr(assessment, "implementation"), "evidence")
+    copy = " ".join(item.summary for item in evidence) or "No implementation evidence recorded."
+    sources: list[SourceRef] = []
+    seen: set[tuple[str | None, str | None]] = set()
+    for item in evidence:
+        for source in item.sources:
+            key = (source.path, source.url)
+            if key not in seen:
+                sources.append(source)
+                seen.add(key)
+    source_chips = "".join(_evidence_source_chip(source, brief) for source in sources)
+    code_count = sum(not _is_test_path(source.path) for source in sources)
+    test_count = sum(_is_test_path(source.path) for source in sources)
+    return escape(copy), source_chips, code_count, test_count
 
 
 def _changed_file(item: ChangedFile) -> str:
@@ -74,83 +103,96 @@ def _changed_file(item: ChangedFile) -> str:
     )
 
 
-def _diagnostic(item: Diagnostic) -> str:
-    sources = " · ".join(_source(source) for source in item.sources)
-    return (
-        '<div class="attention-row">'
-        f'<div class="attention-kind">{escape(item.severity)} · {escape(item.code)}</div>'
-        f'<div class="attention-copy">{escape(item.message)}'
-        + (f'<span class="source-note">Source: {sources}</span>' if sources else "")
-        + "</div></div>"
-    )
-
-
-def _badge_class(implementation: str, verification: str) -> str:
-    if verification == "passed":
-        return "good"
-    if verification in {"failed", "stale"}:
-        return "danger"
-    if implementation == "observed":
-        return "info"
-    return "warn"
+def _ci_copy(observations: tuple[object, ...]) -> str:
+    if not observations:
+        return "CI: no run observed"
+    if any(getattr(item, "conclusion", "").casefold() in {"failure", "error", "cancelled", "timed_out"} for item in observations):
+        return "CI: failure observed"
+    if any(getattr(item, "status", "").casefold() in {"queued", "pending", "in_progress"} for item in observations):
+        return "CI: running"
+    if all(getattr(item, "conclusion", "").casefold() == "success" for item in observations):
+        return "CI: passed"
+    return f"CI: {len(observations)} observations"
 
 
 def render_html(brief: ReviewBrief) -> str:
     packet = brief.packet
     requirement_cards = []
-    attention_rows: list[str] = []
     for index, assessment in enumerate(brief.assessments):
         requirement = assessment.requirement
-        implemented = "".join(_evidence(x) for x in assessment.implementation.evidence) or '<p class="empty">No implementation evidence recorded.</p>'
-        verification = "".join(_evidence(x) for x in assessment.verification.evidence) or '<p class="empty">No verification evidence recorded.</p>'
-        gaps = "".join(f"<li>{escape(gap)}</li>" for gap in assessment.gaps) or "<li>None recorded.</li>"
+        implemented, evidence_sources, code_count, test_count = _implementation(assessment, brief)
         sources = " · ".join(_source(source) for source in requirement.sources)
-        status_copy = (
-            f"Implementation {assessment.implementation.status.replace('_', ' ')}"
-            f" · Verification {assessment.verification.status.replace('_', ' ')}"
-        )
-        badge_class = _badge_class(assessment.implementation.status, assessment.verification.status)
-        if assessment.gaps:
-            attention_rows.append(
-                '<div class="attention-row"><div class="attention-kind">'
-                + escape(requirement.id)
-                + ' · Verification gap</div><div class="attention-copy">'
-                + escape(" ".join(assessment.gaps))
-                + "</div></div>"
-            )
+        implementation_chip = f"Implemented across {code_count} file{'s' if code_count != 1 else ''}" if code_count else "Implementation not observed"
+        test_chip = f"Tests present across {test_count} file{'s' if test_count != 1 else ''}" if test_count else "No related test evidence"
+        verification_chip = {
+            "passed": "Requirement CI passed",
+            "failed": "Requirement CI failed",
+            "pending": "Requirement CI pending",
+            "stale": "Only stale CI observed",
+        }.get(assessment.verification.status, "CI not observed")
         requirement_cards.append(
             f'<details class="requirement"{" open" if index == 0 else ""}><summary>'
             f'<span class="req-id">{escape(requirement.id)}</span><span class="req-title">{escape(requirement.text)}</span>'
-            f'<span class="req-status badge {badge_class}">{escape(status_copy)}</span></summary>'
+            '<span class="req-chips">'
+            f'<span class="badge {"good" if code_count else "warn"}">{escape(implementation_chip)}</span>'
+            f'<span class="badge {"info" if test_count else "muted"}">{escape(test_chip)}</span>'
+            f'<span class="badge {"good" if assessment.verification.status == "passed" else "warn"}">{escape(verification_chip)}</span>'
+            '</span></summary>'
             '<div class="req-body">'
             + (f'<span class="source-note requirement-source">Source: {sources}</span>' if sources else "")
-            + '<div><span class="block-title">Implemented</span>' + implemented + '</div>'
-            + '<div class="verification"><div><span class="block-title">Verification</span>' + verification + '</div>'
-            + f'<div><span class="block-title">Gaps</span><ul class="gap-list">{gaps}</ul></div></div></div></details>'
+            + f'<div><span class="block-title">Implemented</span><div class="block-copy">{implemented}</div></div>'
+            + (f'<div class="evidence-sources"><span class="block-title">Sources</span>{evidence_sources}</div>' if evidence_sources else "")
+            + '</div></details>'
         )
     files = "".join(_changed_file(item) for item in packet.changed_files) or '<p class="empty">Not provided.</p>'
-    for guardrail in brief.guardrails:
+    attention_rows: list[str] = []
+    ci_gaps = [item.requirement.id for item in brief.assessments if item.verification.status != "passed"]
+    if ci_gaps:
         attention_rows.append(
-            '<div class="attention-row"><div class="attention-kind">Scope guardrail · '
-            + escape(guardrail.id)
+            '<div class="attention-row"><div class="attention-kind">CI gap</div><div class="attention-copy">'
+            + escape(", ".join(ci_gaps))
+            + " have no passing requirement-specific CI or independent runtime observation.</div></div>"
+        )
+    non_ci_gaps: dict[str, list[str]] = {}
+    for item in brief.assessments:
+        for gap in item.gaps:
+            if gap.startswith("No requirement-specific CI"):
+                continue
+            non_ci_gaps.setdefault(gap, []).append(item.requirement.id)
+    for gap, ids in non_ci_gaps.items():
+        attention_rows.append(
+            '<div class="attention-row"><div class="attention-kind">Verification gap · '
+            + escape(", ".join(ids))
             + '</div><div class="attention-copy">'
-            + escape(guardrail.text)
+            + escape(gap)
+            + "</div></div>"
+        )
+    if brief.guardrails:
+        guardrail_copy = " · ".join(f"{item.id}: {item.text}" for item in brief.guardrails)
+        attention_rows.append(
+            '<div class="attention-row"><div class="attention-kind">Scope guardrails</div><div class="attention-copy">'
+            + escape(guardrail_copy)
+            + "</div></div>"
+        )
+    source_gap_codes = {"github_linked_issue_not_found", "github_linked_issues_unavailable", "github_patch_unavailable", "github_file_limit_reached"}
+    source_gaps = [item.message for item in packet.diagnostics if item.code in source_gap_codes]
+    if source_gaps:
+        attention_rows.append(
+            '<div class="attention-row"><div class="attention-kind">Source coverage</div><div class="attention-copy">'
+            + escape(" ".join(source_gaps))
             + "</div></div>"
         )
     attention = "".join(attention_rows) or '<p class="empty">No unresolved attention items.</p>'
-    implementation_count = sum(
-        item.implementation.status == "observed" for item in brief.assessments
-    )
-    passed_count = sum(item.verification.status == "passed" for item in brief.assessments)
     source_links = []
     source_priority = {"linked_issue": 0, "ticket": 0, "pull_request": 1}
     for record in sorted(packet.source_records, key=lambda item: source_priority.get(item.kind, 2)):
         if record.kind in {"linked_issue", "ticket", "pull_request"} and record.url:
             source_links.append(_source(SourceRef(label=record.kind, url=record.url)))
     source_line = " · ".join(source_links) or "Source URL not provided."
-    diagnostics = "".join(_diagnostic(item) for item in packet.diagnostics)
-    diagnostics_section = f'<section class="section"><h2>Collection notes</h2><div class="attention-list">{diagnostics}</div></section>' if diagnostics else ""
     pr_label = f"PR #{packet.pull_request}" if packet.pull_request is not None else "Fixture review"
+    pr_state = "Merged" if packet.metadata.get("merged") else ("Draft" if packet.metadata.get("draft") else str(packet.metadata.get("state") or "Unknown").title())
+    pr_link = _source(SourceRef(label=pr_label, url=packet.source_url)) if packet.source_url else escape(pr_label)
+    ci_summary = _ci_copy(packet.verification_observations)
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{escape(packet.title)} · PrismCode</title>
@@ -159,18 +201,17 @@ def render_html(brief: ReviewBrief) -> str:
 *{{box-sizing:border-box}}html{{scroll-behavior:smooth}}body{{margin:0;color:var(--text);line-height:1.55;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 18% -8%,rgba(69,167,118,.12),transparent 31rem),radial-gradient(circle at 92% 8%,rgba(84,139,180,.06),transparent 28rem),var(--bg)}}
 code{{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:-.015em}}.shell{{width:min(1160px,calc(100% - 40px));margin:30px auto 84px}}.topbar{{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:22px}}.brand{{display:inline-flex;align-items:center;gap:11px;font-weight:720}}.brand-mark{{width:14px;height:14px;border:2px solid rgba(255,255,255,.92);transform:rotate(45deg);border-radius:3px;box-shadow:0 0 0 5px rgba(117,224,167,.06)}}
 .section{{border:2px solid var(--border);border-radius:18px;background:linear-gradient(180deg,rgba(17,24,28,.97),rgba(11,17,21,.98));box-shadow:var(--shadow);padding:28px;margin-bottom:22px}}h1{{font-size:31px;margin:0 0 14px;letter-spacing:-.025em}}h2{{font-size:22px;margin:0 0 12px;letter-spacing:-.02em}}.meta{{display:flex;flex-wrap:wrap;gap:9px;color:var(--muted);font-size:13px;margin-bottom:16px}}.intent{{max-width:850px;color:#d2dade;font-size:15px}}.source-link,.file-link{{color:#b9dfff;text-decoration:none;background-image:linear-gradient(currentColor,currentColor);background-size:0 1px;background-position:0 100%;background-repeat:no-repeat;transition:background-size .18s ease}}.source-link:hover,.file-link:hover{{background-size:100% 1px}}
-.summary{{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}}.badge{{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:760;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}}.badge.good{{background:var(--green-bg);color:#c7f4d9}}.badge.info{{background:var(--blue-bg);color:#cce8ff}}.badge.warn{{background:var(--amber-bg);color:#ffe3a0}}.badge.danger{{background:var(--red-bg);color:#ffb0a9}}
-.requirements{{border-top:1px solid rgba(111,128,135,.24)}}.requirement{{border-bottom:1px solid rgba(111,128,135,.24)}}.requirement summary{{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px minmax(0,1fr) 250px;gap:16px;align-items:center;padding:18px 0}}.requirement summary::-webkit-details-marker{{display:none}}.req-id{{color:var(--green);font-size:12px;font-weight:760;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}}.req-title{{font-size:14px;font-weight:640}}.req-status{{justify-self:end;text-align:center}}.req-body{{padding:0 0 20px 68px}}.requirement-source{{margin:0 0 16px}}.block-title{{display:block;margin-bottom:5px;color:#89979d;font-size:10px;letter-spacing:.045em;font-weight:700;text-transform:uppercase}}.block-copy{{color:#d7dddf;font-size:13px}}.source-note{{display:block;margin-top:8px;color:var(--faint);font-size:10px;line-height:1.45}}.evidence{{margin:0 0 12px}}.kind{{color:#a9d8fb;font-size:10px;font-weight:760;text-transform:uppercase;margin-right:5px}}.verification{{display:grid;grid-template-columns:1.25fr 1fr;gap:28px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(111,128,135,.18)}}.gap-list{{margin:0;padding-left:18px;color:#d9c88c;font-size:12px}}
+.badge{{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;font-size:10px;font-weight:760;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}}.badge.good{{background:var(--green-bg);color:#c7f4d9}}.badge.info{{background:var(--blue-bg);color:#cce8ff}}.badge.warn{{background:var(--amber-bg);color:#ffe3a0}}.badge.danger{{background:var(--red-bg);color:#ffb0a9}}.badge.muted{{background:rgba(111,128,135,.12);color:#aeb9be}}
+.requirements{{border-top:1px solid rgba(111,128,135,.24)}}.requirement{{border-bottom:1px solid rgba(111,128,135,.24)}}.requirement summary{{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px minmax(0,1fr) minmax(280px,auto);gap:16px;align-items:center;padding:18px 0}}.requirement summary::-webkit-details-marker{{display:none}}.req-id{{color:var(--green);font-size:12px;font-weight:760;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}}.req-title{{font-size:14px;font-weight:640}}.req-chips{{justify-self:end;display:flex;justify-content:flex-end;flex-wrap:wrap;gap:6px}}.req-body{{padding:0 0 20px 68px}}.requirement-source{{margin:0 0 16px}}.block-title{{display:block;margin-bottom:5px;color:#89979d;font-size:10px;letter-spacing:.045em;font-weight:700;text-transform:uppercase}}.block-copy{{color:#d7dddf;font-size:13px}}.source-note{{display:block;margin-top:8px;color:var(--faint);font-size:10px;line-height:1.45}}.evidence-sources{{margin-top:14px}}.source-chip{{display:inline-flex;margin:0 7px 7px 0;padding:4px 8px;border-radius:999px;text-decoration:none;font-size:10px;font-weight:740;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}}.source-chip.code{{background:var(--green-bg);color:#c7f4d9}}.source-chip.test{{background:var(--blue-bg);color:#cce8ff}}
 .sources{{color:var(--faint);font-size:11px;line-height:1.7}}.attention-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:210px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:#e7ca7c;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-list{{display:grid;gap:0;border-top:1px solid rgba(111,128,135,.24)}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px;white-space:nowrap}}.empty{{color:var(--faint);font-size:12px;font-style:italic}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}
-@media(max-width:900px){{.requirement summary{{grid-template-columns:46px 1fr}}.req-status{{grid-column:2;justify-self:start}}.req-body{{grid-template-columns:1fr;padding-left:62px}}.verification{{grid-template-columns:1fr}}.attention-row{{grid-template-columns:1fr;gap:8px}}}}@media(max-width:560px){{.shell{{width:min(100% - 18px,1160px);margin-top:16px}}.section{{padding:22px 20px}}.topbar{{align-items:flex-start;flex-direction:column}}.file-row{{grid-template-columns:1fr}}.file-state{{white-space:normal}}.req-body{{padding-left:0}}.coverage{{grid-template-columns:1fr}}}}
+@media(max-width:900px){{.requirement summary{{grid-template-columns:46px 1fr}}.req-chips{{grid-column:2;justify-self:start;justify-content:flex-start}}.req-body{{padding-left:62px}}.attention-row{{grid-template-columns:1fr;gap:8px}}}}@media(max-width:560px){{.shell{{width:min(100% - 18px,1160px);margin-top:16px}}.section{{padding:22px 20px}}.topbar{{align-items:flex-start;flex-direction:column}}.file-row{{grid-template-columns:1fr}}.file-state{{white-space:normal}}.req-body{{padding-left:0}}}}
 </style></head><body><main class="shell">
 <div class="topbar"><div class="brand"><span class="brand-mark"></span> PrismCode</div></div>
-<section class="section"><div class="meta"><span>{escape(packet.repository)}</span><span>·</span><span>{escape(pr_label)}</span><span>·</span><span>{len(packet.changed_files)} changed files</span></div>
+<section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{len(packet.changed_files)} changed files</span><span>·</span><span>{escape(ci_summary)}</span></div>
 <h1>{escape(packet.title)}</h1><div class="intent">{escape(brief.intent)}</div>
 <span class="source-note">Source: {source_line}</span>
-<div class="summary"><span class="badge info">{len(brief.assessments)} delivery requirements</span><span class="badge good">{implementation_count} with implementation evidence</span><span class="badge warn">{passed_count} independently verified</span><span class="badge warn">{len(packet.verification_observations)} CI/Actions observations</span></div></section>
+</section>
 <section class="section"><h2>Requirement checks</h2><div class="requirements">{"".join(requirement_cards)}</div></section>
-{diagnostics_section}
 <section class="section"><h2>Needs attention</h2><div class="attention-list">{attention}</div></section>
 <section class="section"><h2>Changed areas</h2><div class="file-list">{files}</div></section>
 <div class="footer">PrismCode · {escape(pr_label)} · Schema {escape(brief.schema_version)} · Generated by {escape(brief.generated_by)}</div>
