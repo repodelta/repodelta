@@ -64,13 +64,14 @@ def extract_requirements(body: str | None, *, source: SourceRef) -> tuple[Requir
         else:
             deliverable_index += 1
             requirement_id = f"R{deliverable_index}"
-        line_number = _source_line(body or "", text)
+        line_number, section = _source_location(body or "", text)
+        source_label = f"{source.label} · {section}" if section else source.label
         requirements.append(
             Requirement(
                 id=requirement_id,
                 text=text,
                 kind=kind,
-                sources=(replace(source, line_start=line_number),),
+                sources=(replace(source, label=source_label, line_start=line_number),),
             )
         )
     return tuple(requirements)
@@ -88,13 +89,18 @@ def _requirement_kind(text: str) -> str:
     return "guardrail" if normalized.startswith(guardrail_prefixes) else "deliverable"
 
 
-def _source_line(body: str, text: str) -> int | None:
+def _source_location(body: str, text: str) -> tuple[int | None, str | None]:
     normalized = text.casefold()
+    current_heading: str | None = None
     for line_number, line in enumerate(body.splitlines(), start=1):
+        heading_match = _HEADING_RE.match(line)
+        if heading_match:
+            current_heading = _clean_markdown_text(heading_match.group(1))
+            continue
         candidate = _CHECKLIST_RE.match(line) or _BULLET_RE.match(line)
         if candidate and _clean_markdown_text(candidate.group(1)).casefold() == normalized:
-            return line_number
-    return None
+            return line_number, current_heading
+    return None, None
 
 
 def extract_intent(body: str | None, title: str) -> str:

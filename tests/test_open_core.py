@@ -21,7 +21,8 @@ def test_fixture_to_requirement_first_html(tmp_path: Path) -> None:
     brief = DeterministicAnalyzer().analyze(analysis_input)
     html = render_html(brief)
 
-    assert "AI review brief · requirement-first" in html
+    assert "AI review brief · requirement-first" not in html
+    assert "What this PR is trying to do" not in html
     assert '<details class="requirement" open>' in html
     assert 'class="brand-mark"' in html
     assert "Existing semantic spine artifacts are reused." in html
@@ -36,9 +37,12 @@ def test_fixture_to_requirement_first_html(tmp_path: Path) -> None:
     assert "Implemented" in html
     assert "Verification" in html
     assert "Gaps" in html
-    assert "Data sources &amp; coverage" in html
-    assert "6 collected / unknown reported" in html
-    assert "Empty and unavailable sources are reported explicitly" in html
+    assert "Data sources &amp; coverage" not in html
+    assert "Issue #573" in html and "PR #574" in html
+    assert "Issue #573 · Acceptance criteria" in html
+    assert "#acceptance-criteria" in html
+    assert ">linked issue<" not in html
+    assert '<span class="block-title">Expected</span>' not in html
 
     output = write_html(brief, tmp_path / "review.html")
     assert output.read_text(encoding="utf-8") == html

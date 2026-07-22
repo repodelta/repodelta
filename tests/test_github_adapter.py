@@ -117,8 +117,9 @@ def test_github_adapter_collects_only_source_facts() -> None:
     assert all(item.implementation.status == "not_observed" for item in brief.assessments)
     html = render_html(brief)
     assert "Collection notes" in html
-    assert "2 collected / 2 reported" in html
-    assert "1 Check Runs / 0 commit statuses" in html
+    assert "PR #42" in html
+    assert "PR #42 · Requirements" in html
+    assert "#requirements" in html
 
 
 def test_github_adapter_reports_file_cap_without_inferring_requirements() -> None:
@@ -183,6 +184,10 @@ def test_github_graphql_linked_issue_supplies_primary_acceptance_criteria() -> N
     assert [item.requirement.text for item in brief.assessments] == ["Emit a bounded trace."]
     assert brief.assessments[0].implementation.status == "observed"
     assert [item.text for item in brief.guardrails] == ["No UI changes."]
+    html = render_html(brief)
+    assert "Issue #41 · Acceptance criteria" in html
+    assert "https://github.com/acme/widget/issues/41#acceptance-criteria" in html
+    assert ">linked issue<" not in html
 
 
 def test_token_is_not_sent_to_untrusted_or_unsafe_api_url() -> None:
