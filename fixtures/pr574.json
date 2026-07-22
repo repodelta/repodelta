@@ -1,48 +1,91 @@
 {
-  "repository": "interact-space/PrismCode",
-  "pull_request": 574,
-  "title": "Add inspect-only semantic alignment trace",
-  "intent": "Expose a bounded diagnostic artifact that explains how Review Units align with semantic change evidence without changing normal product behavior.",
-  "source_url": "https://github.com/interact-space/PrismCode/pull/574",
-  "changed_files": [
-    "prismcode/product_v1/inspection.py",
-    "prismcode/product_v1/state.py",
-    "tests/test_inspection.py"
-  ],
-  "requirements": [
+  "schema_version": "analysis_fixture.v2",
+  "source_packet": {
+    "schema_version": "review_source_packet.v1",
+    "packet_revision": "sha256:b0ee26a6f21a058cfd788ff594a229a01dd2aa1b1b13bddc339142983d7b3f8d",
+    "repository": "interact-space/PrismCode",
+    "pull_request": 574,
+    "title": "573 add bounded unit semantic alignment trace debug artifact for inspect only",
+    "source_url": "https://github.com/interact-space/PrismCode/pull/574",
+    "head_sha": "7de0211956a35e8f9c6c576cd2dbb7acd7fd5560",
+    "base_sha": "41cdb0740e82478adfd22fd03809911b6d73a8db",
+    "source_records": [
+      {
+        "id": "github-issue:interact-space/PrismCode#573",
+        "kind": "linked_issue",
+        "repository": "interact-space/PrismCode",
+        "url": "https://github.com/interact-space/PrismCode/issues/573",
+        "title": "Add bounded unit semantic alignment trace debug artifact for inspect_only",
+        "body": "## Goal\n\nAdd a bounded inspect-only debug/facts artifact that explains why each Review Unit has its current semantic alignment outcome.\n\n## Acceptance criteria\n\n- Existing semantic spine artifacts are reused.\n- A bounded `unit_semantic_alignment_trace` debug artifact is persisted in `inspect_only_debug_artifacts`.\n- `/state?debug=true` can expose the trace through existing debug artifact plumbing.\n- Facts collector exports compact trace summary and per-unit diagnostics.\n- No new semantic intake artifact is created.\n- No new semantic binding model is created.\n- No LLM is added.\n- No Review Unit boundary/grouping/workstream behavior changes.\n- No normal debug=false UI changes.\n- Golden PR report makes `exceeds_scope` root-cause analysis possible without guessing from final counts alone.",
+        "revision": "issue-573-capture.v1",
+        "availability": "available"
+      },
+      {
+        "id": "github-pr:interact-space/PrismCode#574",
+        "kind": "pull_request",
+        "repository": "interact-space/PrismCode",
+        "url": "https://github.com/interact-space/PrismCode/pull/574",
+        "title": "573 add bounded unit semantic alignment trace debug artifact for inspect only",
+        "body": "Implemented as diagnostics/facts/debug-only. This PR reuses the existing semantic spine, adds a bounded unit_semantic_alignment_trace artifact under inspect_only_debug_artifacts, and exposes compact facts via collect_review_map_fixture_facts. No LLM, no semantic-intake model, no Review Unit boundary changes, and no normal debug=false UI changes.",
+        "revision": "pr-574-capture.v1",
+        "availability": "available"
+      }
+    ],
+    "changed_files": [
+      {"path": "prismcode/tools/collect_review_map_fixture_facts.py", "status": "modified", "additions": 312, "deletions": 25, "changes": 337},
+      {"path": "prismcode/workspace/inspect_only_state.py", "status": "modified", "additions": 41, "deletions": 7, "changes": 48},
+      {"path": "prismcode/workspace/unit_semantic_alignment_trace.py", "status": "added", "additions": 1711, "deletions": 0, "changes": 1711},
+      {"path": "tests/infrastructure/http/test_workspace_public_review_map_routes.py", "status": "modified", "additions": 88, "deletions": 6, "changes": 94},
+      {"path": "tests/tools/test_collect_review_map_fixture_facts.py", "status": "modified", "additions": 173, "deletions": 10, "changes": 183},
+      {"path": "tests/workspace/test_unit_semantic_alignment_trace.py", "status": "added", "additions": 811, "deletions": 0, "changes": 811}
+    ],
+    "verification_observations": [],
+    "diagnostics": [
+      {"code": "github_ci_not_observed", "message": "No check run, commit status, workflow execution, or independent runtime result was observed for the captured PR head.", "severity": "warning"}
+    ],
+    "metadata": {"source": "github_capture", "linked_issue": 573, "merged": true}
+  },
+  "requirements": [],
+  "evidence_hints": [
     {
-      "id": "R1",
-      "text": "Produce an inspect-only unit semantic alignment trace.",
-      "status": "verified",
-      "implemented": [
-        {
-          "summary": "A dedicated trace artifact is assembled from existing semantic projections.",
-          "kind": "code",
-          "sources": [{"label": "inspection builder", "path": "prismcode/product_v1/inspection.py"}]
-        }
-      ],
-      "verification": [
-        {
-          "summary": "Fixture-level tests cover artifact presence and shape.",
-          "kind": "test",
-          "sources": [{"label": "inspection tests", "path": "tests/test_inspection.py"}]
-        }
-      ],
-      "gaps": []
+      "requirement_id": "R1",
+      "implementation": [{"summary": "The trace builder consumes existing inspection units, alignment projections, change projections, and language-source rows.", "kind": "code", "sources": [{"label": "trace builder", "path": "prismcode/workspace/unit_semantic_alignment_trace.py"}]}],
+      "verification_evidence_ids": [],
+      "assertion_coverage": "not_established",
+      "gaps": [],
+      "provenance": [{"label": "PR #574 captured code evidence"}]
     },
     {
-      "id": "R2",
-      "text": "Keep the artifact diagnostic-only and avoid changing normal review behavior.",
-      "status": "partial",
-      "implemented": [
-        {
-          "summary": "The artifact is attached through inspect-only state collection.",
-          "kind": "code",
-          "sources": [{"label": "state integration", "path": "prismcode/product_v1/state.py"}]
-        }
-      ],
-      "verification": [],
-      "gaps": ["No execution result or CI run is recorded in this public fixture."]
+      "requirement_id": "R2",
+      "implementation": [{"summary": "The builder applies unit, reference, and excerpt limits; inspect-only state persists its bounded output.", "kind": "code", "sources": [{"label": "bounded trace", "path": "prismcode/workspace/unit_semantic_alignment_trace.py"}, {"label": "inspect-only persistence", "path": "prismcode/workspace/inspect_only_state.py"}]}],
+      "verification_evidence_ids": [],
+      "assertion_coverage": "not_established",
+      "gaps": [],
+      "provenance": [{"label": "PR #574 captured code evidence"}]
+    },
+    {
+      "requirement_id": "R3",
+      "implementation": [{"summary": "The existing debug section manifest exposes unit_semantic_alignment_trace through the existing debug path.", "kind": "code", "sources": [{"label": "debug section manifest", "path": "prismcode/workspace/inspect_only_state.py"}, {"label": "route regression test", "path": "tests/infrastructure/http/test_workspace_public_review_map_routes.py"}]}],
+      "verification_evidence_ids": [],
+      "assertion_coverage": "not_established",
+      "gaps": [],
+      "provenance": [{"label": "PR #574 captured code evidence"}]
+    },
+    {
+      "requirement_id": "R4",
+      "implementation": [{"summary": "The facts collector exports aggregate trace counts and compact per-unit diagnostics, preferring the persisted artifact.", "kind": "code", "sources": [{"label": "facts collector", "path": "prismcode/tools/collect_review_map_fixture_facts.py"}, {"label": "collector tests", "path": "tests/tools/test_collect_review_map_fixture_facts.py"}]}],
+      "verification_evidence_ids": [],
+      "assertion_coverage": "not_established",
+      "gaps": [],
+      "provenance": [{"label": "PR #574 captured code evidence"}]
+    },
+    {
+      "requirement_id": "R5",
+      "implementation": [{"summary": "The collector exports reason buckets, source usage, unresolved refs, alignment basis, and per-unit stage counts that can support diagnosis.", "kind": "code", "sources": [{"label": "facts export", "path": "prismcode/tools/collect_review_map_fixture_facts.py"}]}],
+      "verification_evidence_ids": [],
+      "assertion_coverage": "not_established",
+      "gaps": ["The usefulness of the end-to-end golden PR report was author-reported and not independently executed in this capture."],
+      "provenance": [{"label": "PR #574 captured code evidence"}]
     }
   ]
 }
