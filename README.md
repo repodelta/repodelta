@@ -64,7 +64,7 @@ The adapter records explicit diagnostics when:
 
 It never converts missing patch, test, or execution evidence into a successful verification claim.
 
-### Team trial workflow
+### Automated review workflow
 
 `.github/workflows/review.yml` runs automatically for pull requests in this repository and can
 also be started with **Actions → PrismCode review → Run workflow** for any readable repository
