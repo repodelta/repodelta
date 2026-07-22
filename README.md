@@ -8,16 +8,17 @@ This repository is the standalone open-core implementation. It does not import c
 
 The open core provides:
 
-- public contracts for requirements, evidence, verification, gaps, changed files, diagnostics, and provenance;
+- a versioned, conclusion-free `ReviewSourcePacket` shared by fixture and GitHub ingestion;
+- separate public contracts for source requirements, evidence hints, and analysis-owned assessments;
 - offline JSON fixture ingestion;
 - live GitHub pull request metadata and changed-file ingestion;
-- conservative requirement extraction from explicit Markdown checklists and requirement-like sections;
-- a deterministic analyzer contract;
+- conservative requirement extraction in the analysis layer from explicit Markdown requirement sections;
+- a deterministic analyzer that owns implementation and verification status;
 - a requirement-first static HTML renderer;
 - a local CLI;
 - clean-install CI with network-free tests.
 
-The GitHub adapter intentionally does **not** infer requirement-to-code alignment. Requirements collected from a live pull request remain `unresolved` until requirement-specific implementation and verification evidence is supplied by a fixture or a future semantic provider.
+The GitHub adapter intentionally emits source facts only. It cannot create requirements, evidence bindings, or final review status. Requirements without explicit evidence hints are reported as implementation and verification `not_observed`.
 
 ## Quick start
 
@@ -43,11 +44,10 @@ prismcode review \
   --output build/pr-123.html
 ```
 
-The token is read from `GITHUB_TOKEN` by default. Use `--github-token-env OTHER_ENV_NAME` to select another environment variable. Use `--github-api-url` for GitHub Enterprise Server.
+The token is read from `GITHUB_TOKEN` by default. Use `--github-token-env OTHER_ENV_NAME` to select another environment variable. Use `--github-api-url` for GitHub Enterprise Server. When a token is present, an Enterprise host must also be explicitly trusted with `--trusted-github-api-host HOST`; only HTTPS URLs are accepted.
 
 The adapter records explicit diagnostics when:
 
-- no checklist or requirement-section bullets exist and the PR title is used as a fallback;
 - GitHub omits a line-level patch for a changed file;
 - `--max-files` prevents complete changed-file collection.
 
@@ -60,21 +60,23 @@ private managed services
         │ implement public protocols / call public core
         ▼
 PrismCode open core
-contracts → adapters → analyzer → renderer → HTML
+ReviewSourcePacket → criteria/evidence hints → analyzer → ReviewBrief → renderer
 ```
 
 The open core must remain independently installable and runnable. Optional hosted capabilities should integrate through public protocols or an explicit HTTPS backend, never through an unavailable private import.
 
-## Status semantics
+## Assessment semantics
 
-- `verified`: implementation and relevant verification evidence are present.
-- `partial`: some evidence exists, but a requirement is not fully demonstrated.
-- `unresolved`: available evidence is insufficient for a conclusion.
-- `not_implemented`: evidence indicates that the requirement is absent.
+Implementation and verification are separate axes:
+
+- implementation: `observed`, `partial`, `not_observed`, `contradicted`;
+- verification: `passed`, `failed`, `pending`, `not_observed`, `stale`, `manual_required`.
+
+Adapters and providers cannot set these values. Only the deterministic analyzer produces assessments.
 
 ## Security note
 
-Generated HTML only creates hyperlinks for absolute `http` and `https` URLs. Tokens are read from environment variables and are not stored in review metadata or generated output.
+Generated HTML only creates hyperlinks for absolute `http` and `https` URLs. Tokens are read from environment variables and are not stored in review metadata or generated output. A token is never sent to a custom API host unless that host is explicitly trusted.
 
 ## License
 

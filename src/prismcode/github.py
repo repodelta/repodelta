@@ -1,34 +1,19 @@
 from __future__ import annotations
 
 import json
-import re
+from hashlib import sha256
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from typing import Any, Protocol
 from urllib.error import HTTPError, URLError
-from urllib.parse import quote, urlencode
+from urllib.parse import quote, urlencode, urlparse
 from urllib.request import Request, urlopen
 
-from .contracts import ChangedFile, Diagnostic, Requirement, ReviewInput, SourceRef
+from .contracts import ChangedFile, Diagnostic, ReviewSourcePacket, SourceRecord, SourceRef
+from .criteria import extract_intent, extract_requirement_texts
 
 JsonValue = dict[str, Any] | list[Any]
 Transport = Callable[[Request, float], tuple[int, Mapping[str, str], bytes]]
-
-_REQUIREMENT_HEADINGS = {
-    "requirement",
-    "requirements",
-    "acceptance criteria",
-    "acceptance criterion",
-    "scope",
-    "goals",
-    "goal",
-    "expected behavior",
-    "expected behaviour",
-}
-_CHECKLIST_RE = re.compile(r"^\s*[-*+]\s+\[[ xX]\]\s+(.+?)\s*$")
-_BULLET_RE = re.compile(r"^\s*(?:[-*+]|\d+[.)])\s+(.+?)\s*$")
-_HEADING_RE = re.compile(r"^\s{0,3}#{1,6}\s+(.+?)\s*#*\s*$")
-
 
 class GitHubApiError(RuntimeError):
     def __init__(self, message: str, *, status_code: int | None = None, url: str | None = None) -> None:
@@ -71,8 +56,22 @@ def _http_error_message(status_code: int, body: bytes) -> str:
 class GitHubClient:
     token: str | None = None
     api_url: str = "https://api.github.com"
+    trusted_api_hosts: tuple[str, ...] = ("api.github.com",)
     timeout: float = 30.0
     transport: Transport = _default_transport
+
+    def __post_init__(self) -> None:
+        parsed = urlparse(self.api_url)
+        if parsed.scheme != "https" or not parsed.hostname:
+            raise ValueError("GitHub API URL must be an absolute HTTPS URL")
+        if parsed.username or parsed.password or parsed.query or parsed.fragment:
+            raise ValueError("GitHub API URL must not contain credentials, query, or fragment")
+        trusted_hosts = {host.casefold() for host in self.trusted_api_hosts}
+        if self.token and parsed.hostname.casefold() not in trusted_hosts:
+            raise ValueError(
+                "Refusing to send a token to an untrusted GitHub API host; "
+                "set trusted_api_hosts explicitly"
+            )
 
     def get_json(self, path: str, query: Mapping[str, str | int] | None = None) -> JsonValue:
         base = self.api_url.rstrip("/")
@@ -103,79 +102,12 @@ def _normalize_repo(repository: str) -> tuple[str, str]:
     return parts[0], parts[1]
 
 
-def _clean_markdown_text(value: str) -> str:
-    value = re.sub(r"<!--.*?-->", "", value, flags=re.DOTALL)
-    value = re.sub(r"`([^`]+)`", r"\1", value)
-    value = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", value)
-    value = re.sub(r"[*_~]+", "", value)
-    return " ".join(value.strip().split())
-
-
-def extract_requirement_texts(body: str | None) -> tuple[str, ...]:
-    """Extract explicit checklist items and bullets from requirement-like sections.
-
-    This is deliberately conservative. It does not claim semantic coverage and it does
-    not infer implementation evidence from a diff.
-    """
-
-    if not body:
-        return ()
-
-    current_heading: str | None = None
-    values: list[str] = []
-    seen: set[str] = set()
-
-    for raw_line in body.splitlines():
-        heading_match = _HEADING_RE.match(raw_line)
-        if heading_match:
-            current_heading = _clean_markdown_text(heading_match.group(1)).casefold()
-            continue
-
-        checklist_match = _CHECKLIST_RE.match(raw_line)
-        bullet_match = _BULLET_RE.match(raw_line)
-        candidate: str | None = None
-        if checklist_match:
-            candidate = checklist_match.group(1)
-        elif bullet_match and current_heading in _REQUIREMENT_HEADINGS:
-            candidate = bullet_match.group(1)
-
-        if candidate is None:
-            continue
-        cleaned = _clean_markdown_text(candidate)
-        key = cleaned.casefold()
-        if cleaned and key not in seen:
-            values.append(cleaned)
-            seen.add(key)
-
-    return tuple(values)
-
-
-def extract_intent(body: str | None, title: str) -> str:
-    if body:
-        paragraph: list[str] = []
-        for raw_line in body.splitlines():
-            stripped = raw_line.strip()
-            if not stripped:
-                if paragraph:
-                    break
-                continue
-            if _HEADING_RE.match(raw_line) or _CHECKLIST_RE.match(raw_line) or _BULLET_RE.match(raw_line):
-                if paragraph:
-                    break
-                continue
-            paragraph.append(stripped)
-        cleaned = _clean_markdown_text(" ".join(paragraph))
-        if cleaned:
-            return cleaned
-    return title
-
-
 @dataclass
 class GitHubPullRequestAdapter:
     client: GitHubJsonClient
     max_files: int = 300
 
-    def load(self, repository: str, pull_request: int) -> ReviewInput:
+    def load(self, repository: str, pull_request: int) -> ReviewSourcePacket:
         if pull_request <= 0:
             raise ValueError("pull request number must be positive")
         if self.max_files <= 0:
@@ -193,36 +125,7 @@ class GitHubPullRequestAdapter:
         title = str(raw_pr.get("title") or f"Pull request #{pull_request}")
         body = raw_pr.get("body")
         body_text = body if isinstance(body, str) else None
-        requirement_texts = extract_requirement_texts(body_text)
         diagnostics: list[Diagnostic] = []
-
-        if requirement_texts:
-            requirement_source = "pull_request_description"
-        else:
-            requirement_texts = (title,)
-            requirement_source = "title_fallback"
-            diagnostics.append(
-                Diagnostic(
-                    code="requirements_title_fallback",
-                    severity="warning",
-                    message=(
-                        "No explicit checklist or requirement-section bullets were found in the pull request "
-                        "description. PrismCode used the pull request title as one unresolved requirement."
-                    ),
-                    sources=(SourceRef(label="pull request", url=pr_url),),
-                )
-            )
-
-        requirements = tuple(
-            Requirement(
-                id=f"R{index}",
-                text=text,
-                status="unresolved",
-                gaps=("No requirement-specific implementation or verification evidence has been established.",),
-                sources=(SourceRef(label="pull request description", url=pr_url),),
-            )
-            for index, text in enumerate(requirement_texts, start=1)
-        )
 
         changed_files, file_diagnostics = self._load_files(
             repository=repository,
@@ -237,29 +140,39 @@ class GitHubPullRequestAdapter:
         base = raw_pr.get("base") if isinstance(raw_pr.get("base"), dict) else {}
         user = raw_pr.get("user") if isinstance(raw_pr.get("user"), dict) else {}
 
-        return ReviewInput(
+        record_body = body_text or ""
+        packet = ReviewSourcePacket(
             repository=repository,
             pull_request=pull_request,
             title=title,
-            intent=extract_intent(body_text, title),
-            requirements=requirements,
+            source_records=(
+                SourceRecord(
+                    id=f"github-pr:{repository}#{pull_request}",
+                    kind="pull_request",
+                    repository=repository,
+                    url=pr_url,
+                    title=title,
+                    body=record_body,
+                    revision="sha256:" + sha256(f"{title}\0{record_body}".encode("utf-8")).hexdigest(),
+                ),
+            ),
             changed_files=tuple(changed_files),
             source_url=pr_url,
+            head_sha=head.get("sha"),
+            base_sha=base.get("sha"),
             diagnostics=tuple(diagnostics),
             metadata={
                 "source": "github",
-                "requirements_source": requirement_source,
                 "state": raw_pr.get("state"),
                 "draft": bool(raw_pr.get("draft")),
                 "author": user.get("login"),
-                "base_sha": base.get("sha"),
-                "head_sha": head.get("sha"),
                 "additions": _as_int(raw_pr.get("additions")),
                 "deletions": _as_int(raw_pr.get("deletions")),
                 "changed_files_reported": _as_int(raw_pr.get("changed_files")),
                 "changed_files_collected": len(changed_files),
             },
         )
+        return packet.with_revision()
 
     def _load_files(
         self,

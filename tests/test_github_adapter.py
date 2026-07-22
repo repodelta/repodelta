@@ -2,20 +2,20 @@ from __future__ import annotations
 
 from typing import Any
 
+import pytest
+
 from prismcode.analysis import DeterministicAnalyzer
-from prismcode.github import GitHubPullRequestAdapter, extract_intent, extract_requirement_texts
+from prismcode.contracts import AnalysisInput
+from prismcode.github import GitHubClient, GitHubPullRequestAdapter, extract_intent, extract_requirement_texts
 from prismcode.rendering import render_html
 
 
 class FakeClient:
     def __init__(self, responses: dict[tuple[str, tuple[tuple[str, str | int], ...]], Any]) -> None:
         self.responses = responses
-        self.calls: list[tuple[str, tuple[tuple[str, str | int], ...]]] = []
 
     def get_json(self, path: str, query: dict[str, str | int] | None = None) -> Any:
-        key = (path, tuple(sorted((query or {}).items())))
-        self.calls.append(key)
-        return self.responses[key]
+        return self.responses[(path, tuple(sorted((query or {}).items())))]
 
 
 def test_extract_requirements_is_conservative_and_deduplicated() -> None:
@@ -38,7 +38,7 @@ This change exposes an inspect-only trace.
     assert extract_intent(body, "Fallback") == "This change exposes an inspect-only trace."
 
 
-def test_github_adapter_collects_real_pr_facts_without_claiming_alignment() -> None:
+def test_github_adapter_collects_only_source_facts() -> None:
     pr_path = "/repos/acme/widget/pulls/42"
     files_path = "/repos/acme/widget/pulls/42/files"
     client = FakeClient(
@@ -50,8 +50,6 @@ def test_github_adapter_collects_real_pr_facts_without_claiming_alignment() -> N
                 "state": "open",
                 "draft": False,
                 "changed_files": 2,
-                "additions": 20,
-                "deletions": 3,
                 "head": {"sha": "head123"},
                 "base": {"sha": "base123"},
                 "user": {"login": "octocat"},
@@ -60,48 +58,37 @@ def test_github_adapter_collects_real_pr_facts_without_claiming_alignment() -> N
                 {
                     "filename": "src/a.py",
                     "status": "modified",
-                    "additions": 18,
-                    "deletions": 2,
-                    "changes": 20,
                     "blob_url": "https://github.com/acme/widget/blob/head123/src/a.py",
                     "patch": "@@ -1 +1 @@",
                 },
                 {
                     "filename": "tests/test_a.py",
                     "status": "added",
-                    "additions": 2,
-                    "deletions": 1,
-                    "changes": 3,
                     "blob_url": "https://github.com/acme/widget/blob/head123/tests/test_a.py",
                 },
             ],
         }
     )
 
-    review = GitHubPullRequestAdapter(client=client).load("acme/widget", 42)
+    packet = GitHubPullRequestAdapter(client=client).load("acme/widget", 42)
+    packet.validate_consistency()
+    assert packet.head_sha == "head123"
+    assert [item.path for item in packet.changed_files] == ["src/a.py", "tests/test_a.py"]
+    assert [item.code for item in packet.diagnostics] == ["github_patch_unavailable"]
+    assert not hasattr(packet, "requirements")
 
-    assert [item.text for item in review.requirements] == ["Emit a trace.", "Preserve behavior."]
-    assert all(item.status == "unresolved" for item in review.requirements)
-    assert all(not item.implemented for item in review.requirements)
-    assert all(not item.verification for item in review.requirements)
-    assert [item.path for item in review.changed_files] == ["src/a.py", "tests/test_a.py"]
-    assert review.metadata["head_sha"] == "head123"
-    assert review.metadata["changed_files_collected"] == 2
-    assert [item.code for item in review.diagnostics] == ["github_patch_unavailable"]
-
-    html = render_html(DeterministicAnalyzer().analyze(review))
-    assert "Collection notes" in html
-    assert "github_patch_unavailable" in html
-    assert "https://github.com/acme/widget/blob/head123/src/a.py" in html
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    assert [item.requirement.text for item in brief.assessments] == ["Emit a trace.", "Preserve behavior."]
+    assert all(item.implementation.status == "not_observed" for item in brief.assessments)
+    assert "Collection notes" in render_html(brief)
 
 
-def test_github_adapter_reports_title_fallback_and_file_cap() -> None:
+def test_github_adapter_reports_file_cap_without_inferring_requirements() -> None:
     pr_path = "/repos/acme/widget/pulls/7"
     files_path = "/repos/acme/widget/pulls/7/files"
     client = FakeClient(
         {
             (pr_path, ()): {
-                "html_url": "https://github.com/acme/widget/pull/7",
                 "title": "Fallback requirement",
                 "body": "No structured requirements here.",
                 "changed_files": 2,
@@ -110,23 +97,25 @@ def test_github_adapter_reports_title_fallback_and_file_cap() -> None:
                 "user": {},
             },
             (files_path, (("page", 1), ("per_page", 1))): [
-                {
-                    "filename": "src/a.py",
-                    "status": "modified",
-                    "additions": 1,
-                    "deletions": 0,
-                    "changes": 1,
-                    "blob_url": "https://github.com/acme/widget/blob/head/src/a.py",
-                    "patch": "@@",
-                }
+                {"filename": "src/a.py", "status": "modified", "patch": "@@"}
             ],
         }
     )
+    packet = GitHubPullRequestAdapter(client=client, max_files=1).load("acme/widget", 7)
+    assert [item.code for item in packet.diagnostics] == ["github_file_limit_reached"]
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    assert brief.assessments[0].requirement.text == "Fallback requirement"
 
-    review = GitHubPullRequestAdapter(client=client, max_files=1).load("acme/widget", 7)
 
-    assert [item.text for item in review.requirements] == ["Fallback requirement"]
-    assert [item.code for item in review.diagnostics] == [
-        "requirements_title_fallback",
-        "github_file_limit_reached",
-    ]
+def test_token_is_not_sent_to_untrusted_or_unsafe_api_url() -> None:
+    with pytest.raises(ValueError, match="HTTPS"):
+        GitHubClient(token="secret", api_url="http://github.example/api/v3")
+    with pytest.raises(ValueError, match="untrusted"):
+        GitHubClient(token="secret", api_url="https://github.example/api/v3")
+
+    client = GitHubClient(
+        token="secret",
+        api_url="https://github.example/api/v3",
+        trusted_api_hosts=("github.example",),
+    )
+    assert client.api_url == "https://github.example/api/v3"
