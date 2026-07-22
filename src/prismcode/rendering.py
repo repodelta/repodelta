@@ -64,6 +64,15 @@ def _diagnostic(item: Diagnostic) -> str:
     )
 
 
+def _source_record(item: object) -> str:
+    label = f"{getattr(item, 'kind', 'source')}: {getattr(item, 'title', '')}".strip()
+    href = _safe_href(getattr(item, "url", None))
+    content = escape(label)
+    if href:
+        content = f'<a href="{escape(href, quote=True)}">{content}</a>'
+    return f'<li>{content} <span class="source-state">{escape(getattr(item, "availability", "available"))}</span></li>'
+
+
 def render_html(brief: ReviewBrief) -> str:
     packet = brief.packet
     requirement_cards = []
@@ -117,6 +126,19 @@ def render_html(brief: ReviewBrief) -> str:
     diagnostics_section = (
         f'<section class="changed"><h2>Collection notes</h2>{diagnostics}</section>' if diagnostics else ""
     )
+    source_records = "".join(_source_record(item) for item in packet.source_records)
+    linked_issue_count = sum(item.kind == "linked_issue" for item in packet.source_records)
+    check_count = sum(item.kind == "check_run" for item in packet.verification_observations)
+    status_count = sum(item.kind == "commit_status" for item in packet.verification_observations)
+    reported_files = packet.metadata.get("changed_files_reported")
+    reported_copy = str(reported_files) if isinstance(reported_files, int) else "unknown"
+    head_copy = escape(packet.head_sha[:12]) if packet.head_sha else "unavailable"
+    coverage_section = f"""<section class="changed"><h2>Data sources &amp; coverage</h2>
+<p class="meta">Collected from <strong>{escape(str(packet.metadata.get('source', 'fixture')))}</strong>. Empty and unavailable sources are reported explicitly; they are never treated as passing evidence.</p>
+<ul class="coverage"><li>Source records: {len(packet.source_records)} ({linked_issue_count} Development-linked Issues)</li>
+<li>Changed files: {len(packet.changed_files)} collected / {escape(reported_copy)} reported</li>
+<li>Current-head observations: {check_count} Check Runs / {status_count} commit statuses</li>
+<li>Analyzed head: <code>{head_copy}</code></li></ul><ul class="sources">{source_records}</ul></section>"""
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{escape(packet.title)} · PrismCode</title>
@@ -132,7 +154,7 @@ h1 {{ margin:8px 0 12px; font-size:32px; }} .intent {{ font-size:17px; line-heig
 h2 {{ margin:14px 0 22px; font-size:21px; }} h3 {{ margin:22px 0 10px; font-size:14px; text-transform:uppercase; letter-spacing:.06em; color:#475467; }}
 .evidence {{ border-left:3px solid #98a2b3; padding:8px 0 8px 14px; margin:10px 0; line-height:1.5; }} .kind {{ color:#475467; margin-right:6px; }}
 .sources {{ margin:6px 0 0; padding-left:20px; font-size:13px; color:#667085; }} a {{ color:#2457c5; }} code {{ font-family:ui-monospace,SFMono-Regular,monospace; }}
-.empty {{ color:#98a2b3; font-style:italic; }} .changed {{ padding:24px; margin-top:22px; }}
+.empty {{ color:#98a2b3; font-style:italic; }} .changed {{ padding:24px; margin-top:22px; }} .coverage {{ line-height:1.8; }} .source-state {{ color:#667085; font-size:12px; }}
 .diagnostic {{ border-left:3px solid #f0b429; padding:10px 0 10px 14px; margin:14px 0; }} .diagnostic.error {{ border-left-color:#d92d20; }} .diagnostic.info {{ border-left-color:#2457c5; }}
 .diagnostic p {{ margin:7px 0; line-height:1.5; }}
 .summary {{ display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }} .summary span {{ background:#eef2f6; border-radius:999px; padding:6px 10px; font-size:12px; font-weight:700; }}
@@ -141,6 +163,7 @@ h2 {{ margin:14px 0 22px; font-size:21px; }} h3 {{ margin:22px 0 10px; font-size
 <section class="hero"><div class="eyebrow">Requirement-first review brief</div><h1>{escape(packet.title)}</h1>
 <p class="intent">{escape(brief.intent)}</p><p class="meta">{escape(packet.repository)} · PR {packet.pull_request if packet.pull_request is not None else "fixture"} · {len(packet.changed_files)} changed files · {source}</p>
 <div class="summary"><span>{len(brief.assessments)} delivery requirements</span><span>{implementation_count} with implementation evidence</span><span>{passed_count} independently verified</span><span>{len(packet.verification_observations)} CI/Actions observations</span></div></section>
+{coverage_section}
 <h2 class="section-title">Requirement checks</h2>
 {"".join(requirement_cards)}
 {diagnostics_section}

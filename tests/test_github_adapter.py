@@ -105,14 +105,20 @@ def test_github_adapter_collects_only_source_facts() -> None:
     packet.validate_consistency()
     assert packet.head_sha == "head123"
     assert [item.path for item in packet.changed_files] == ["src/a.py", "tests/test_a.py"]
-    assert [item.code for item in packet.diagnostics] == ["github_patch_unavailable"]
+    assert [item.code for item in packet.diagnostics] == [
+        "github_patch_unavailable",
+        "github_linked_issue_not_found",
+    ]
     assert packet.verification_observations[0].kind == "check_run"
     assert not hasattr(packet, "requirements")
 
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
     assert [item.requirement.text for item in brief.assessments] == ["Emit a trace.", "Preserve behavior."]
     assert all(item.implementation.status == "not_observed" for item in brief.assessments)
-    assert "Collection notes" in render_html(brief)
+    html = render_html(brief)
+    assert "Collection notes" in html
+    assert "2 collected / 2 reported" in html
+    assert "1 Check Runs / 0 commit statuses" in html
 
 
 def test_github_adapter_reports_file_cap_without_inferring_requirements() -> None:
@@ -134,7 +140,11 @@ def test_github_adapter_reports_file_cap_without_inferring_requirements() -> Non
         }
     )
     packet = GitHubPullRequestAdapter(client=client, max_files=1).load("acme/widget", 7)
-    assert [item.code for item in packet.diagnostics] == ["github_file_limit_reached"]
+    assert [item.code for item in packet.diagnostics] == [
+        "github_file_limit_reached",
+        "github_linked_issue_not_found",
+        "github_head_sha_unavailable",
+    ]
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
     assert brief.assessments[0].requirement.text == "Fallback requirement"
 

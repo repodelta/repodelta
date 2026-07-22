@@ -34,6 +34,9 @@ def test_fixture_to_requirement_first_html(tmp_path: Path) -> None:
     assert "Implemented" in html
     assert "Verification" in html
     assert "Gaps" in html
+    assert "Data sources &amp; coverage" in html
+    assert "6 collected / unknown reported" in html
+    assert "Empty and unavailable sources are reported explicitly" in html
 
     output = write_html(brief, tmp_path / "review.html")
     assert output.read_text(encoding="utf-8") == html

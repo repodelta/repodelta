@@ -209,6 +209,15 @@ class GitHubPullRequestAdapter:
         )
         source_records.extend(linked_issue_records)
         diagnostics.extend(issue_diagnostics)
+        if not linked_issue_records and not issue_diagnostics:
+            diagnostics.append(
+                Diagnostic(
+                    code="github_linked_issue_not_found",
+                    severity="info",
+                    message="GitHub returned no Development-linked Issue for this pull request.",
+                    sources=(SourceRef(label="pull request", url=pr_url),),
+                )
+            )
         head_sha = head.get("sha") if isinstance(head.get("sha"), str) else None
         verification_observations: list[VerificationObservation] = []
         if head_sha:
@@ -218,6 +227,22 @@ class GitHubPullRequestAdapter:
                 head_sha=head_sha,
             )
             diagnostics.extend(verification_diagnostics)
+            if not verification_observations and not verification_diagnostics:
+                diagnostics.append(
+                    Diagnostic(
+                        code="github_verification_not_found",
+                        severity="info",
+                        message="GitHub returned no Check Run or commit-status observation for the current PR head.",
+                    )
+                )
+        else:
+            diagnostics.append(
+                Diagnostic(
+                    code="github_head_sha_unavailable",
+                    message="The PR head SHA is unavailable, so current-head verification could not be collected.",
+                    sources=(SourceRef(label="pull request", url=pr_url),),
+                )
+            )
         packet = ReviewSourcePacket(
             repository=repository,
             pull_request=pull_request,

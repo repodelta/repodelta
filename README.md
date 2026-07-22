@@ -24,6 +24,7 @@ The open core provides:
 - a deterministic analyzer that owns implementation and verification status;
 - a requirement-first static HTML renderer;
 - a local CLI;
+- an Actions workflow for automatic PR reports and manually targeted reviews;
 - clean-install CI with network-free tests.
 
 The GitHub adapter intentionally emits source facts only. Linked Issues come from GitHub's `closingIssuesReferences` GraphQL field, not Issue numbers typed into PR prose. The analyzer prefers linked-Issue acceptance criteria, assigns delivery requirements `R1`, `R2`, ... and scope guardrails `G1`, `G2`, ..., then combines diff evidence with exact verification observation IDs. Requirements without requirement-specific execution remain verification `not_observed`, even when generic CI is green.
@@ -58,8 +59,22 @@ The adapter records explicit diagnostics when:
 
 - GitHub omits a line-level patch for a changed file;
 - `--max-files` prevents complete changed-file collection.
+- no Development-linked Issue is present;
+- no current-head Check Run or commit status exists, or the head SHA is unavailable.
 
 It never converts missing patch, test, or execution evidence into a successful verification claim.
+
+### Automated review workflow
+
+`.github/workflows/review.yml` runs automatically for pull requests in this repository and can
+also be started with **Actions → PrismCode review → Run workflow** for any readable repository
+and PR number. Each run exposes a report link in the job summary and retains the HTML as a
+GitHub Actions artifact for 14 days.
+
+The built-in `GITHUB_TOKEN` covers pull requests in this repository. To review another private
+repository, configure a `PRISMCODE_GITHUB_TOKEN` Actions secret with read access to that target.
+The report includes a **Data sources & coverage** section so missing links, patches, head SHAs,
+checks, and statuses remain visible to reviewers.
 
 ## Architectural boundary
 
