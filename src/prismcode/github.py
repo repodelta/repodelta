@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import re
 from hashlib import sha256
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
@@ -22,9 +21,17 @@ from .criteria import extract_intent, extract_requirement_texts
 
 JsonValue = dict[str, Any] | list[Any]
 Transport = Callable[[Request, float], tuple[int, Mapping[str, str], bytes]]
-_CLOSING_ISSUE_RE = re.compile(
-    r"(?im)\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+(?:[\w.-]+/[\w.-]+)?#(?P<number>\d+)\b"
-)
+_LINKED_ISSUES_QUERY = """
+query PrismCodeLinkedIssues($owner: String!, $name: String!, $number: Int!) {
+  repository(owner: $owner, name: $name) {
+    pullRequest(number: $number) {
+      closingIssuesReferences(first: 20) {
+        nodes { number title url body }
+      }
+    }
+  }
+}
+"""
 
 class GitHubApiError(RuntimeError):
     def __init__(self, message: str, *, status_code: int | None = None, url: str | None = None) -> None:
@@ -35,6 +42,8 @@ class GitHubApiError(RuntimeError):
 
 class GitHubJsonClient(Protocol):
     def get_json(self, path: str, query: Mapping[str, str | int] | None = None) -> JsonValue: ...
+
+    def post_graphql(self, query: str, variables: Mapping[str, object]) -> JsonValue: ...
 
 
 def _default_transport(request: Request, timeout: float) -> tuple[int, Mapping[str, str], bytes]:
@@ -105,6 +114,35 @@ class GitHubClient:
         except (UnicodeDecodeError, json.JSONDecodeError) as exc:
             raise GitHubApiError("GitHub API returned invalid JSON", status_code=status, url=url) from exc
 
+    def post_graphql(self, query: str, variables: Mapping[str, object]) -> JsonValue:
+        base = self.api_url.rstrip("/")
+        url = (
+            base.removesuffix("/api/v3") + "/api/graphql"
+            if base.endswith("/api/v3")
+            else base + "/graphql"
+        )
+        headers = {
+            "Accept": "application/vnd.github+json",
+            "Content-Type": "application/json",
+            "User-Agent": "prismcode-open-core",
+        }
+        if self.token:
+            headers["Authorization"] = f"Bearer {self.token}"
+        encoded = json.dumps({"query": query, "variables": dict(variables)}).encode("utf-8")
+        status, _, body = self.transport(
+            Request(url, headers=headers, data=encoded, method="POST"),
+            self.timeout,
+        )
+        if status < 200 or status >= 300:
+            raise GitHubApiError(_http_error_message(status, body), status_code=status, url=url)
+        try:
+            payload = json.loads(body.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise GitHubApiError("GitHub GraphQL returned invalid JSON", status_code=status, url=url) from exc
+        if isinstance(payload, dict) and payload.get("errors"):
+            raise GitHubApiError("GitHub GraphQL returned errors", status_code=status, url=url)
+        return payload
+
 
 def _normalize_repo(repository: str) -> tuple[str, str]:
     parts = repository.strip().split("/")
@@ -163,29 +201,14 @@ class GitHubPullRequestAdapter:
                 revision="sha256:" + sha256(f"{title}\0{record_body}".encode("utf-8")).hexdigest(),
             )
         ]
-        linked_issue_match = _CLOSING_ISSUE_RE.search(record_body)
-        if linked_issue_match:
-            issue_number = int(linked_issue_match.group("number"))
-            issue_path = f"/repos/{owner_path}/{name_path}/issues/{issue_number}"
-            try:
-                raw_issue = self.client.get_json(issue_path)
-                if isinstance(raw_issue, dict) and "pull_request" not in raw_issue:
-                    issue_title = str(raw_issue.get("title") or f"Issue #{issue_number}")
-                    issue_body = str(raw_issue.get("body") or "")
-                    source_records.append(
-                        SourceRecord(
-                            id=f"github-issue:{repository}#{issue_number}",
-                            kind="linked_issue",
-                            repository=repository,
-                            url=raw_issue.get("html_url") if isinstance(raw_issue.get("html_url"), str) else None,
-                            title=issue_title,
-                            body=issue_body,
-                            revision="sha256:"
-                            + sha256(f"{issue_title}\0{issue_body}".encode("utf-8")).hexdigest(),
-                        )
-                    )
-            except GitHubApiError as exc:
-                diagnostics.append(Diagnostic(code="github_linked_issue_unavailable", message=str(exc)))
+        linked_issue_records, issue_diagnostics = self._load_linked_issues(
+            repository=repository,
+            owner=owner,
+            name=name,
+            pull_request=pull_request,
+        )
+        source_records.extend(linked_issue_records)
+        diagnostics.extend(issue_diagnostics)
         head_sha = head.get("sha") if isinstance(head.get("sha"), str) else None
         verification_observations: list[VerificationObservation] = []
         if head_sha:
@@ -218,6 +241,55 @@ class GitHubPullRequestAdapter:
             },
         )
         return packet.with_revision()
+
+    def _load_linked_issues(
+        self,
+        *,
+        repository: str,
+        owner: str,
+        name: str,
+        pull_request: int,
+    ) -> tuple[list[SourceRecord], list[Diagnostic]]:
+        try:
+            payload = self.client.post_graphql(
+                _LINKED_ISSUES_QUERY,
+                {"owner": owner, "name": name, "number": pull_request},
+            )
+        except GitHubApiError as exc:
+            return [], [Diagnostic(code="github_linked_issues_unavailable", message=str(exc))]
+        data = payload.get("data") if isinstance(payload, dict) else None
+        repository_row = data.get("repository") if isinstance(data, dict) else None
+        pr_row = repository_row.get("pullRequest") if isinstance(repository_row, dict) else None
+        references = pr_row.get("closingIssuesReferences") if isinstance(pr_row, dict) else None
+        nodes = references.get("nodes", []) if isinstance(references, dict) else []
+        records: list[SourceRecord] = []
+        for row in nodes if isinstance(nodes, list) else []:
+            if not isinstance(row, dict) or not isinstance(row.get("number"), int):
+                continue
+            issue_number = row["number"]
+            issue_title = str(row.get("title") or f"Issue #{issue_number}")
+            issue_body = str(row.get("body") or "")
+            records.append(
+                SourceRecord(
+                    id=f"github-issue:{repository}#{issue_number}",
+                    kind="linked_issue",
+                    repository=repository,
+                    url=row.get("url") if isinstance(row.get("url"), str) else None,
+                    title=issue_title,
+                    body=issue_body,
+                    revision="sha256:"
+                    + sha256(f"{issue_title}\0{issue_body}".encode("utf-8")).hexdigest(),
+                )
+            )
+        diagnostics = []
+        if len(records) > 1:
+            diagnostics.append(
+                Diagnostic(
+                    code="github_linked_issues_ambiguous",
+                    message=f"GitHub returned {len(records)} linked Issues; no single primary Issue was inferred.",
+                )
+            )
+        return records, diagnostics
 
     def _load_verification(
         self,

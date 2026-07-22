@@ -11,11 +11,29 @@ from prismcode.rendering import render_html
 
 
 class FakeClient:
-    def __init__(self, responses: dict[tuple[str, tuple[tuple[str, str | int], ...]], Any]) -> None:
+    def __init__(
+        self,
+        responses: dict[tuple[str, tuple[tuple[str, str | int], ...]], Any],
+        *,
+        linked_issues: list[dict[str, Any]] | None = None,
+    ) -> None:
         self.responses = responses
+        self.linked_issues = linked_issues or []
 
     def get_json(self, path: str, query: dict[str, str | int] | None = None) -> Any:
         return self.responses[(path, tuple(sorted((query or {}).items())))]
+
+    def post_graphql(self, query: str, variables: dict[str, object]) -> Any:
+        assert "closingIssuesReferences" in query
+        return {
+            "data": {
+                "repository": {
+                    "pullRequest": {
+                        "closingIssuesReferences": {"nodes": self.linked_issues}
+                    }
+                }
+            }
+        }
 
 
 def test_extract_requirements_is_conservative_and_deduplicated() -> None:
@@ -121,32 +139,39 @@ def test_github_adapter_reports_file_cap_without_inferring_requirements() -> Non
     assert brief.assessments[0].requirement.text == "Fallback requirement"
 
 
-def test_explicit_closing_issue_supplies_primary_acceptance_criteria() -> None:
+def test_github_graphql_linked_issue_supplies_primary_acceptance_criteria() -> None:
     pr_path = "/repos/acme/widget/pulls/8"
     files_path = "/repos/acme/widget/pulls/8/files"
-    issue_path = "/repos/acme/widget/issues/41"
     client = FakeClient(
         {
             (pr_path, ()): {
                 "html_url": "https://github.com/acme/widget/pull/8",
                 "title": "Implement trace",
-                "body": "Fixes #41",
-                "changed_files": 0,
+                "body": "Implementation notes only; no Issue number is required here.",
+                "changed_files": 1,
                 "head": {},
                 "base": {},
                 "user": {},
             },
-            (files_path, (("page", 1), ("per_page", 100))): [],
-            (issue_path, ()): {
-                "html_url": "https://github.com/acme/widget/issues/41",
+            (files_path, (("page", 1), ("per_page", 100))): [{
+                "filename": "src/bounded_trace.py",
+                "status": "added",
+                "patch": "+def emit_bounded_trace(): pass",
+            }],
+        },
+        linked_issues=[
+            {
+                "number": 41,
+                "url": "https://github.com/acme/widget/issues/41",
                 "title": "Trace requirements",
                 "body": "## Acceptance criteria\n- Emit a bounded trace.\n- No UI changes.",
-            },
-        }
+            }
+        ],
     )
     packet = GitHubPullRequestAdapter(client=client).load("acme/widget", 8)
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
     assert [item.requirement.text for item in brief.assessments] == ["Emit a bounded trace."]
+    assert brief.assessments[0].implementation.status == "observed"
     assert [item.text for item in brief.guardrails] == ["No UI changes."]
 
 

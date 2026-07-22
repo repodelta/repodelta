@@ -19,14 +19,14 @@ The open core provides:
 - separate public contracts for source requirements, evidence hints, and analysis-owned assessments;
 - offline JSON fixture ingestion;
 - live GitHub pull request metadata and changed-file ingestion;
-- explicit closing-Issue ingestion plus current-head check-run and commit-status observations;
+- GitHub GraphQL Development-link Issue ingestion plus current-head REST check-run and commit-status observations;
 - conservative requirement extraction in the analysis layer from explicit Markdown requirement sections;
 - a deterministic analyzer that owns implementation and verification status;
 - a requirement-first static HTML renderer;
 - a local CLI;
 - clean-install CI with network-free tests.
 
-The GitHub adapter intentionally emits source facts only. The analyzer prefers linked-Issue acceptance criteria, assigns delivery requirements `R1`, `R2`, ... and scope guardrails `G1`, `G2`, ..., then combines evidence hints with exact verification observation IDs. Requirements without requirement-specific execution remain verification `not_observed`, even when generic CI is green.
+The GitHub adapter intentionally emits source facts only. Linked Issues come from GitHub's `closingIssuesReferences` GraphQL field, not Issue numbers typed into PR prose. The analyzer prefers linked-Issue acceptance criteria, assigns delivery requirements `R1`, `R2`, ... and scope guardrails `G1`, `G2`, ..., then combines diff evidence with exact verification observation IDs. Requirements without requirement-specific execution remain verification `not_observed`, even when generic CI is green.
 
 ## Quick start
 

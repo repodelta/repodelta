@@ -30,6 +30,10 @@ display IDs (`R1`, `R2`, ...); negative scope constraints are separated as guard
 names that exact observation, it belongs to the analyzed head, it succeeded, and assertion
 coverage is explicitly adequate. Generic green CI never verifies every requirement.
 
+The linked-Issue relation is collected from GitHub GraphQL
+`PullRequest.closingIssuesReferences`. PR body text is not parsed to invent Issue links.
+Changed files and patches, check runs, and commit statuses come from GitHub REST endpoints.
+
 ## Packet revisions
 
 `packet_revision` is a deterministic SHA-256 consistency digest over the semantic packet

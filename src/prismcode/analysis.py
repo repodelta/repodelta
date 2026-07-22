@@ -15,6 +15,7 @@ from .contracts import (
     VerificationAssessment,
 )
 from .criteria import extract_intent, extract_requirements
+from .binding import build_deterministic_evidence_hints
 
 
 class ReviewAnalyzer(Protocol):
@@ -28,10 +29,10 @@ class DeterministicAnalyzer:
         packet = analysis_input.packet
         packet.validate_consistency()
         pr_body = next((r.body for r in packet.source_records if r.kind == "pull_request"), "")
-        issue_record = next(
-            (r for r in packet.source_records if r.kind in {"linked_issue", "ticket"}),
-            None,
+        issue_records = tuple(
+            r for r in packet.source_records if r.kind in {"linked_issue", "ticket"}
         )
+        issue_record = issue_records[0] if len(issue_records) == 1 else None
         requirements = analysis_input.requirements or extract_requirements(
             issue_record.body if issue_record else pr_body,
             source=SourceRef(
@@ -47,7 +48,11 @@ class DeterministicAnalyzer:
                     sources=(SourceRef(label="pull request title", url=packet.source_url),),
                 ),
             )
-        hints = {hint.requirement_id: hint for hint in analysis_input.evidence_hints}
+        provided_hints = analysis_input.evidence_hints or build_deterministic_evidence_hints(
+            requirements,
+            packet,
+        )
+        hints = {hint.requirement_id: hint for hint in provided_hints}
         deliverables = tuple(item for item in requirements if item.kind != "guardrail")
         guardrails = tuple(item for item in requirements if item.kind == "guardrail")
         assessments = tuple(
@@ -60,7 +65,10 @@ class DeterministicAnalyzer:
         )
         return ReviewBrief(
             packet=packet,
-            intent=extract_intent(pr_body, packet.title),
+            intent=extract_intent(
+                issue_record.body if issue_record else pr_body,
+                issue_record.title if issue_record else packet.title,
+            ),
             assessments=assessments,
             guardrails=guardrails,
         )
