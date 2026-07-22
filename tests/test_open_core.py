@@ -26,3 +26,17 @@ def test_missing_verification_is_explicit() -> None:
     brief = DeterministicAnalyzer().analyze(load_fixture("fixtures/pr574.json"))
     html = render_html(brief)
     assert "No verification evidence recorded." in html
+
+
+def test_unsafe_source_url_is_not_rendered_as_link(tmp_path: Path) -> None:
+    raw = """{
+      "repository": "example/repo",
+      "title": "Unsafe link",
+      "intent": "Verify safe rendering.",
+      "source_url": "javascript:alert(1)",
+      "requirements": []
+    }"""
+    fixture = tmp_path / "unsafe.json"
+    fixture.write_text(raw, encoding="utf-8")
+    html = render_html(DeterministicAnalyzer().analyze(load_fixture(fixture)))
+    assert 'href="javascript:' not in html
