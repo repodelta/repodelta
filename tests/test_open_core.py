@@ -21,7 +21,9 @@ def test_fixture_to_requirement_first_html(tmp_path: Path) -> None:
     brief = DeterministicAnalyzer().analyze(analysis_input)
     html = render_html(brief)
 
-    assert "Requirement-first review brief" in html
+    assert "AI review brief · requirement-first" in html
+    assert '<details class="requirement" open>' in html
+    assert 'class="brand-mark"' in html
     assert "Existing semantic spine artifacts are reused." in html
     assert "unit_semantic_alignment_trace" in html
     assert "inspect_only_debug_artifacts" in html
