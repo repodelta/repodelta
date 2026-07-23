@@ -10,7 +10,9 @@ fixture or GitHub
        -> unified-diff hunks + exact changed lines
        -> repository-local graph index status
        -> changed hunk / symbol-span overlaps
-  -> deterministic criteria extraction + optional EvidenceHints
+  -> one-pass semantic extraction + optional EvidenceHints
+       -> Issue/PR obligations (R/G)
+       -> objectives (O), claims (C), intent (I)
   -> DeterministicAnalyzer
   -> ReviewBrief
   -> HTML renderer
@@ -30,11 +32,31 @@ fixture or GitHub
 6. Structural graph providers return repository facts and diagnostics only. A
    hunk-symbol overlap is not, by itself, an implementation conclusion.
 
-Acceptance criteria from an explicit linked Issue are primary. Deliverables receive stable
-display IDs (`R1`, `R2`, ...); negative scope constraints are separated as guardrails
-(`G1`, `G2`, ...). A verification result can pass a requirement only when an evidence hint
-names that exact observation, it belongs to the analyzed head, it succeeded, and assertion
-coverage is explicitly adequate. Generic green CI never verifies every requirement.
+## Semantic authority
+
+Each Issue or PR Markdown body is parsed once into the canonical
+`ReviewStatement` model. A statement carries its role, authority, exact section
+source, and line. The analyzer applies the hierarchy rather than maintaining
+separate parsers or copies:
+
+1. A selected linked Issue's Acceptance Criteria, Requirements, Definition of
+   Done, or Success Criteria are authoritative obligations.
+2. Only when no Issue obligation exists may the same explicit PR-description
+   sections become provisional obligations.
+3. Goals and Objectives are retrieval context, not acceptance criteria.
+4. Summary, Implementation, Changes, What Changed, and Approach are
+   PR-authored claims to be checked against evidence.
+5. The PR introduction or title is intent only. A title is never manufactured
+   into `R1`.
+
+Deliverables receive stable display IDs (`R1`, `R2`, ...); negative scope
+constraints are separated as guardrails (`G1`, `G2`, ...), objectives use
+`O1`, and claims use `C1`. When no explicit obligation exists, assessments are
+empty and the renderer reports the missing acceptance basis. A verification
+result can pass a requirement only when an evidence hint names that exact
+observation, it belongs to the analyzed head, it succeeded, and assertion
+coverage is explicitly adequate. Generic green CI never verifies every
+requirement.
 
 The linked-Issue relation is collected from GitHub GraphQL
 `PullRequest.closingIssuesReferences`. PR body text is not parsed to invent Issue links.

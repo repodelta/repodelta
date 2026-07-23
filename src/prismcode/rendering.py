@@ -5,7 +5,7 @@ from pathlib import Path
 import re
 from urllib.parse import quote, urlparse, urlunparse
 
-from .contracts import ChangedFile, Evidence, ReviewBrief, SourceRef
+from .contracts import ChangedFile, Evidence, ReviewBrief, ReviewStatement, SourceRef
 
 
 def _safe_href(value: str | None) -> str | None:
@@ -115,6 +115,24 @@ def _ci_copy(observations: tuple[object, ...]) -> str:
     return f"CI: {len(observations)} observations"
 
 
+def _statement_row(statement: ReviewStatement) -> str:
+    sources = " · ".join(_source(source) for source in statement.sources)
+    authority = {
+        "issue": "Issue",
+        "pr_description": "PR description",
+        "pr_title": "PR title",
+        "provided": "Provided input",
+    }[statement.authority]
+    return (
+        '<div class="context-row">'
+        f'<span class="context-id">{escape(statement.id)}</span>'
+        f'<span class="context-copy">{escape(statement.text)}</span>'
+        f'<span class="context-authority">{escape(authority)}</span>'
+        + (f'<span class="context-source">Source: {sources}</span>' if sources else "")
+        + "</div>"
+    )
+
+
 def render_html(brief: ReviewBrief) -> str:
     packet = brief.packet
     requirement_cards = []
@@ -122,6 +140,13 @@ def render_html(brief: ReviewBrief) -> str:
         requirement = assessment.requirement
         implemented, evidence_sources, code_count, test_count = _implementation(assessment, brief)
         sources = " · ".join(_source(source) for source in requirement.sources)
+        authority_note = (
+            "Provisional PR-authored criterion"
+            if requirement.authority == "pr_description"
+            else "Issue acceptance criterion"
+            if requirement.authority == "issue"
+            else "Provided acceptance criterion"
+        )
         implementation_chip = f"Implemented across {code_count} file{'s' if code_count != 1 else ''}" if code_count else "Implementation not observed"
         test_chip = f"Tests present across {test_count} file{'s' if test_count != 1 else ''}" if test_count else "No related test evidence"
         verification_chip = {
@@ -139,13 +164,45 @@ def render_html(brief: ReviewBrief) -> str:
             f'<span class="badge {"good" if assessment.verification.status == "passed" else "warn"}">{escape(verification_chip)}</span>'
             '</span></summary>'
             '<div class="req-body">'
-            + (f'<span class="source-note requirement-source">Source: {sources}</span>' if sources else "")
+            + (
+                f'<span class="source-note requirement-source">Source: {sources}'
+                f" · {escape(authority_note)}</span>"
+                if sources
+                else ""
+            )
             + f'<div><span class="block-title">Implemented</span><div class="block-copy">{implemented}</div></div>'
             + (f'<div class="evidence-sources"><span class="block-title">Sources</span>{evidence_sources}</div>' if evidence_sources else "")
             + '</div></details>'
         )
+    requirements = (
+        "".join(requirement_cards)
+        or (
+            '<div class="empty-state"><strong>No explicit acceptance criteria found.</strong>'
+            "<span>The PR title and summary are retained as intent or claims, "
+            "not promoted to requirements.</span></div>"
+        )
+    )
+    context_rows = "".join(
+        _statement_row(statement)
+        for statement in (*brief.objectives, *brief.claims)
+    )
+    review_context = (
+        '<section class="section"><h2>Review context</h2>'
+        '<p class="section-copy">Objectives and PR-authored claims provide retrieval context; '
+        "they are not acceptance evidence.</p>"
+        f'<div class="context-list">{context_rows}</div></section>'
+        if context_rows
+        else ""
+    )
     files = "".join(_changed_file(item) for item in packet.changed_files) or '<p class="empty">Not provided.</p>'
     attention_rows: list[str] = []
+    if not brief.assessments and not brief.guardrails:
+        attention_rows.append(
+            '<div class="attention-row"><div class="attention-kind">Acceptance basis</div>'
+            '<div class="attention-copy">No explicit acceptance criteria were found. '
+            "Intent, objectives, and PR claims are not sufficient to determine "
+            "requirement satisfaction.</div></div>"
+        )
     ci_gaps = [item.requirement.id for item in brief.assessments if item.verification.status != "passed"]
     if ci_gaps:
         attention_rows.append(
@@ -203,15 +260,16 @@ code{{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-sp
 .section{{border:2px solid var(--border);border-radius:18px;background:linear-gradient(180deg,rgba(17,24,28,.97),rgba(11,17,21,.98));box-shadow:var(--shadow);padding:28px;margin-bottom:22px}}h1{{font-size:31px;margin:0 0 14px;letter-spacing:-.025em}}h2{{font-size:22px;margin:0 0 12px;letter-spacing:-.02em}}.meta{{display:flex;flex-wrap:wrap;gap:9px;color:var(--muted);font-size:13px;margin-bottom:16px}}.intent{{max-width:850px;color:#d2dade;font-size:15px}}.source-link,.file-link{{color:#b9dfff;text-decoration:none;background-image:linear-gradient(currentColor,currentColor);background-size:0 1px;background-position:0 100%;background-repeat:no-repeat;transition:background-size .18s ease}}.source-link:hover,.file-link:hover{{background-size:100% 1px}}
 .badge{{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;font-size:10px;font-weight:760;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}}.badge.good{{background:var(--green-bg);color:#c7f4d9}}.badge.info{{background:var(--blue-bg);color:#cce8ff}}.badge.warn{{background:var(--amber-bg);color:#ffe3a0}}.badge.danger{{background:var(--red-bg);color:#ffb0a9}}.badge.muted{{background:rgba(111,128,135,.12);color:#aeb9be}}
 .requirements{{border-top:1px solid rgba(111,128,135,.24)}}.requirement{{border-bottom:1px solid rgba(111,128,135,.24)}}.requirement summary{{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px minmax(0,1fr) minmax(280px,auto);gap:16px;align-items:center;padding:18px 0}}.requirement summary::-webkit-details-marker{{display:none}}.req-id{{color:var(--green);font-size:12px;font-weight:760;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}}.req-title{{font-size:14px;font-weight:640}}.req-chips{{justify-self:end;display:flex;justify-content:flex-end;flex-wrap:wrap;gap:6px}}.req-body{{padding:0 0 20px 68px}}.requirement-source{{margin:0 0 16px}}.block-title{{display:block;margin-bottom:5px;color:#89979d;font-size:10px;letter-spacing:.045em;font-weight:700;text-transform:uppercase}}.block-copy{{color:#d7dddf;font-size:13px}}.source-note{{display:block;margin-top:8px;color:var(--faint);font-size:10px;line-height:1.45}}.evidence-sources{{margin-top:14px}}.source-chip{{display:inline-flex;margin:0 7px 7px 0;padding:4px 8px;border-radius:999px;text-decoration:none;font-size:10px;font-weight:740;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}}.source-chip.code{{background:var(--green-bg);color:#c7f4d9}}.source-chip.test{{background:var(--blue-bg);color:#cce8ff}}
-.sources{{color:var(--faint);font-size:11px;line-height:1.7}}.attention-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:210px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:#e7ca7c;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-list{{display:grid;gap:0;border-top:1px solid rgba(111,128,135,.24)}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px;white-space:nowrap}}.empty{{color:var(--faint);font-size:12px;font-style:italic}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}
+.sources{{color:var(--faint);font-size:11px;line-height:1.7}}.section-copy{{margin:-4px 0 16px;color:var(--muted);font-size:12px}}.empty-state{{display:grid;gap:5px;padding:18px 0;color:var(--muted);font-size:12px}}.empty-state strong{{color:#e8d18e;font-size:13px}}.context-list{{border-top:1px solid rgba(111,128,135,.24)}}.context-row{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px;gap:12px;align-items:start;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.context-id{{color:#9fcdf0;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace}}.context-copy{{font-size:13px}}.context-authority{{color:var(--muted);font-size:10px;text-align:right}}.context-source{{grid-column:2/-1;color:var(--faint);font-size:10px}}.attention-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:210px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:#e7ca7c;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-list{{display:grid;gap:0;border-top:1px solid rgba(111,128,135,.24)}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px;white-space:nowrap}}.empty{{color:var(--faint);font-size:12px;font-style:italic}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}
 @media(max-width:900px){{.requirement summary{{grid-template-columns:46px 1fr}}.req-chips{{grid-column:2;justify-self:start;justify-content:flex-start}}.req-body{{padding-left:62px}}.attention-row{{grid-template-columns:1fr;gap:8px}}}}@media(max-width:560px){{.shell{{width:min(100% - 18px,1160px);margin-top:16px}}.section{{padding:22px 20px}}.topbar{{align-items:flex-start;flex-direction:column}}.file-row{{grid-template-columns:1fr}}.file-state{{white-space:normal}}.req-body{{padding-left:0}}}}
 </style></head><body><main class="shell">
 <div class="topbar"><div class="brand"><span class="brand-mark"></span> PrismCode</div></div>
 <section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{len(packet.changed_files)} changed files</span><span>·</span><span>{escape(ci_summary)}</span></div>
-<h1>{escape(packet.title)}</h1><div class="intent">{escape(brief.intent)}</div>
+<h1>{escape(packet.title)}</h1><div class="intent">{escape(brief.intent.text)}</div>
 <span class="source-note">Source: {source_line}</span>
 </section>
-<section class="section"><h2>Requirement checks</h2><div class="requirements">{"".join(requirement_cards)}</div></section>
+<section class="section"><h2>Requirement checks</h2><div class="requirements">{requirements}</div></section>
+{review_context}
 <section class="section"><h2>Needs attention</h2><div class="attention-list">{attention}</div></section>
 <section class="section"><h2>Changed areas</h2><div class="file-list">{files}</div></section>
 <div class="footer">PrismCode · {escape(pr_label)} · Schema {escape(brief.schema_version)} · Generated by {escape(brief.generated_by)}</div>
