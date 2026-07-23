@@ -24,6 +24,8 @@ The open core provides:
 - a deterministic analyzer that owns implementation and verification status;
 - a requirement-first static HTML renderer;
 - a local CLI;
+- optional repository-local Codegraph hunk-to-symbol mapping with explicit
+  availability and freshness diagnostics;
 - an Actions workflow for automatic PR reports and manually targeted reviews;
 - clean-install CI with network-free tests.
 
@@ -50,10 +52,19 @@ export GITHUB_TOKEN=...
 prismcode review \
   --repo owner/repository \
   --pr 123 \
+  --repo-root /path/to/repository-checkout \
   --output build/pr-123.html
 ```
 
 The token is read from `GITHUB_TOKEN` by default. Use `--github-token-env OTHER_ENV_NAME` to select another environment variable. Use `--github-api-url` for GitHub Enterprise Server. When a token is present, an Enterprise host must also be explicitly trusted with `--trusted-github-api-host HOST`; only HTTPS URLs are accepted.
+
+By default, the CLI looks for `.codegraph/codegraph.db` under the current
+directory and prints one structural-mapping status line to stderr. Pass
+`--repo-root` when the target checkout is elsewhere, `--verbose` for individual
+diagnostics, or `--no-structural-graph` to disable the probe. A missing, stale,
+partial, invalid, or unreadable index never prevents report generation; the
+current lexical requirement binding remains in use until bounded graph paths
+are introduced.
 
 The adapter records explicit diagnostics when:
 

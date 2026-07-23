@@ -4,8 +4,9 @@ import hashlib
 import sqlite3
 from pathlib import Path
 
+from prismcode.analysis import DeterministicAnalyzer
 from prismcode.codegraph import CodegraphProvider
-from prismcode.contracts import ChangedFile, ReviewSourcePacket
+from prismcode.contracts import AnalysisInput, ChangedFile, ReviewSourcePacket
 from prismcode.diff_hunks import parse_unified_patch
 from prismcode.structural_graph import StructuralGraphProvider
 from prismcode.structural_mapping import map_packet_changed_symbols
@@ -143,6 +144,8 @@ def test_changed_hunk_maps_to_narrowest_exact_symbol(tmp_path: Path) -> None:
     result = map_packet_changed_symbols(_packet(patch), CodegraphProvider(tmp_path))
 
     assert result.index.state == "available"
+    assert result.hunk_count == 1
+    assert result.mapped_hunk_count == 1
     assert len(result.overlaps) == 1
     overlap = result.overlaps[0]
     assert overlap.symbol.qualified_name == "src.service.Service.run"
@@ -229,6 +232,32 @@ def test_stale_index_is_not_used(tmp_path: Path) -> None:
     }
 
 
+def test_live_review_checkout_must_match_expected_head(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _create_index(tmp_path)
+    monkeypatch.setattr(
+        "prismcode.codegraph._checkout_revision",
+        lambda _root: "different-head",
+    )
+    hunks = parse_unified_patch(
+        "src/service.py",
+        "@@ -3 +3 @@\n-        return 1\n+        return 2\n",
+    )
+
+    result = CodegraphProvider(
+        tmp_path,
+        expected_revision="expected-head",
+    ).symbols_overlapping(hunks)
+
+    assert result.index.state == "stale"
+    assert result.overlaps == ()
+    assert "codegraph_checkout_revision_mismatch" in {
+        diagnostic.code for diagnostic in result.diagnostics
+    }
+
+
 def test_deletion_only_hunk_reports_base_index_requirement(tmp_path: Path) -> None:
     _create_index(tmp_path)
     hunks = parse_unified_patch(
@@ -253,3 +282,38 @@ def test_missing_patch_is_explicitly_reported(tmp_path: Path) -> None:
     assert [item.code for item in result.diagnostics] == [
         "structural_graph_patch_unavailable"
     ]
+
+
+def test_analyzer_preserves_structural_facts_without_using_them_as_conclusions(
+    tmp_path: Path,
+) -> None:
+    _create_index(
+        tmp_path,
+        source="class Service:\n    def run(self):\n        return 2\n",
+    )
+    patch = (
+        "@@ -3 +3 @@\n"
+        "-        return 1\n"
+        "+        return 2\n"
+    )
+    packet = _packet(patch)
+    structural = map_packet_changed_symbols(packet, CodegraphProvider(tmp_path))
+    lexical_only = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+
+    brief = DeterministicAnalyzer().analyze(
+        AnalysisInput(packet=packet, structural_graph=structural)
+    )
+
+    assert brief.structural_graph is structural
+    assert brief.schema_version == "review_brief.v3"
+    assert (
+        brief.assessments[0].implementation.status
+        == lexical_only.assessments[0].implementation.status
+    )
+    serialized = brief.to_dict()
+    assert serialized["structural_graph"]["schema_version"] == (
+        "structural_graph_result.v1"
+    )
+    assert serialized["structural_graph"]["overlaps"][0]["symbol"][
+        "qualified_name"
+    ] == "src.service.Service.run"

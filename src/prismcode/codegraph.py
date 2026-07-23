@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import sqlite3
+import subprocess
 from pathlib import Path
 
 from .contracts import Diagnostic, SourceRef
@@ -34,9 +35,15 @@ _REQUIRED_COLUMNS = {
 class CodegraphProvider:
     """Read a repository-local Codegraph SQLite index without mutating it."""
 
-    def __init__(self, repo_root: str | Path):
+    def __init__(
+        self,
+        repo_root: str | Path,
+        *,
+        expected_revision: str | None = None,
+    ):
         self.repo_root = Path(repo_root).resolve()
         self.database_path = self.repo_root / ".codegraph" / "codegraph.db"
+        self.expected_revision = str(expected_revision or "").strip()
 
     def inspect_index(
         self, *, requested_files: tuple[str, ...] = ()
@@ -96,6 +103,22 @@ class CodegraphProvider:
             )
 
         diagnostics: list[Diagnostic] = []
+        checkout_revision = _checkout_revision(self.repo_root)
+        revision_mismatch = bool(
+            self.expected_revision
+            and checkout_revision != self.expected_revision
+        )
+        if revision_mismatch:
+            diagnostics.append(
+                Diagnostic(
+                    code="codegraph_checkout_revision_mismatch",
+                    message=(
+                        "The target checkout is not at the analyzed PR head; "
+                        "its structural index was not used."
+                    ),
+                    severity="error",
+                )
+            )
         missing = [path for path in requested if path not in file_rows]
         stale: list[str] = []
         for path, expected_hash in file_rows.items():
@@ -119,7 +142,7 @@ class CodegraphProvider:
                 )
             )
 
-        if stale:
+        if revision_mismatch or stale:
             state = "stale"
         elif missing:
             state = "partial" if len(missing) < len(requested) else "missing"
@@ -128,6 +151,7 @@ class CodegraphProvider:
         return StructuralGraphIndexStatus(
             state=state,
             provider=_PROVIDER,
+            revision=checkout_revision,
             database_path=str(self.database_path),
             indexed_files=indexed_files,
             requested_files=len(requested),
@@ -141,7 +165,11 @@ class CodegraphProvider:
         index = self.inspect_index(requested_files=requested_files)
         diagnostics = list(index.diagnostics)
         if not index.usable:
-            return StructuralGraphResult(index=index, diagnostics=tuple(diagnostics))
+            return StructuralGraphResult(
+                index=index,
+                hunk_count=len(hunks),
+                diagnostics=tuple(diagnostics),
+            )
 
         queryable = tuple(hunk for hunk in hunks if hunk.added_lines)
         for hunk in hunks:
@@ -165,7 +193,11 @@ class CodegraphProvider:
                     )
                 )
         if not queryable:
-            return StructuralGraphResult(index=index, diagnostics=tuple(diagnostics))
+            return StructuralGraphResult(
+                index=index,
+                hunk_count=len(hunks),
+                diagnostics=tuple(diagnostics),
+            )
 
         overlaps: list[HunkSymbolOverlap] = []
         try:
@@ -214,6 +246,7 @@ class CodegraphProvider:
             )
         return StructuralGraphResult(
             index=index,
+            hunk_count=len(hunks),
             overlaps=tuple(overlaps),
             diagnostics=tuple(diagnostics),
         )
@@ -339,3 +372,18 @@ def _sha256(path: Path) -> str:
         for chunk in iter(lambda: source.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _checkout_revision(repo_root: Path) -> str:
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(repo_root), "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=5,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return ""
+    return result.stdout.strip() if result.returncode == 0 else ""

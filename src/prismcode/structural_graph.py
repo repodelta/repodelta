@@ -18,6 +18,7 @@ class StructuralGraphIndexStatus:
     indexed_files: int = 0
     requested_files: int = 0
     diagnostics: tuple[Diagnostic, ...] = ()
+    schema_version: str = "structural_graph_index_status.v1"
 
     @property
     def usable(self) -> bool:
@@ -48,8 +49,14 @@ class HunkSymbolOverlap:
 @dataclass(frozen=True)
 class StructuralGraphResult:
     index: StructuralGraphIndexStatus
+    hunk_count: int = 0
     overlaps: tuple[HunkSymbolOverlap, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
+    schema_version: str = "structural_graph_result.v1"
+
+    @property
+    def mapped_hunk_count(self) -> int:
+        return len({overlap.hunk_id for overlap in self.overlaps})
 
 
 @runtime_checkable

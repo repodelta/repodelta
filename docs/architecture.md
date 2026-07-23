@@ -46,7 +46,8 @@ Changed files and patches, check runs, and commit statuses come from GitHub REST
 `CodegraphProvider` is the first adapter and reads a repository-local
 `.codegraph/codegraph.db` in SQLite read-only mode. It verifies the expected
 schema and compares indexed content hashes with the current checkout before
-mapping evidence.
+mapping evidence. For live GitHub reviews, the checkout revision must also
+match the analyzed PR head SHA.
 
 Only exact new-file changed lines from GitHub unified-diff hunks are joined to
 symbol `[start_line, end_line]` spans. When symbols are nested, the narrowest
@@ -58,6 +59,14 @@ index and is never guessed from the head index.
 This layer does not traverse callers/callees, bind symbols to requirements, or
 call an LLM. Those remain separate follow-up stages so structural observations
 cannot silently become review conclusions.
+
+The `review` CLI enables this read-only mapping by default, using `--repo-root`
+(the current directory unless specified) to locate the target checkout. The
+result travels through `AnalysisInput` into `ReviewBrief` for downstream stages,
+while the current lexical requirement binding remains authoritative. The CLI
+prints one structural-coverage line to stderr. `--no-structural-graph` disables
+the probe explicitly; missing, stale, partial, invalid, and unreadable indexes
+degrade without failing report generation.
 
 ## Packet revisions
 
