@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from html import escape
 from pathlib import Path
-from urllib.parse import urlparse
+import re
+from urllib.parse import quote, urlparse, urlunparse
 
-from .contracts import ChangedFile, Diagnostic, Evidence, ReviewBrief, SourceRef
+from .contracts import ChangedFile, Evidence, ReviewBrief, SourceRef
 
 
 def _safe_href(value: str | None) -> str | None:
@@ -15,7 +16,19 @@ def _safe_href(value: str | None) -> str | None:
 
 
 def _source(source: SourceRef) -> str:
-    label = escape(source.label)
+    parsed = urlparse(source.url or "")
+    parts = tuple(part for part in parsed.path.split("/") if part)
+    concrete_label: str | None = None
+    if len(parts) >= 4 and parts[-2] == "issues" and parts[-1].isdigit():
+        concrete_label = f"Issue #{parts[-1]}"
+    elif len(parts) >= 4 and parts[-2] == "pull" and parts[-1].isdigit():
+        concrete_label = f"PR #{parts[-1]}"
+    label_parts = source.label.split(" · ", 1)
+    section = label_parts[1] if len(label_parts) == 2 else None
+    display_label = concrete_label or label_parts[0]
+    if section:
+        display_label += f" · {section}"
+    label = escape(display_label)
     location = ""
     if source.path:
         location = f"<code>{escape(source.path)}</code>"
@@ -25,17 +38,49 @@ def _source(source: SourceRef) -> str:
                 location += f"-{source.line_end}"
     content = " · ".join(part for part in (label, location) if part)
     href = _safe_href(source.url)
-    return f'<a href="{escape(href, quote=True)}">{content}</a>' if href else content
+    if href and section and not parsed.fragment:
+        fragment = re.sub(r"[^a-z0-9]+", "-", section.casefold()).strip("-")
+        href = urlunparse(parsed._replace(fragment=fragment))
+    return f'<a class="source-link" href="{escape(href, quote=True)}" target="_blank" rel="noopener">{content}</a>' if href else content
 
 
-def _evidence(item: Evidence) -> str:
-    sources = "".join(f"<li>{_source(source)}</li>" for source in item.sources)
-    return (
-        '<div class="evidence">'
-        f'<div><span class="kind">{escape(item.kind)}</span> {escape(item.summary)}</div>'
-        f'<ul class="sources">{sources}</ul>'
-        "</div>"
-    )
+def _is_test_path(path: str | None) -> bool:
+    lowered = (path or "").casefold()
+    return lowered.startswith("tests/") or "/test" in lowered or lowered.endswith("_test.py")
+
+
+def _evidence_source_chip(source: SourceRef, brief: ReviewBrief) -> str:
+    path = source.path
+    label = source.label
+    if path:
+        label = f"{'TEST' if _is_test_path(path) else 'CODE'} · {Path(path).name}"
+    href = _safe_href(source.url)
+    if not href and path and brief.packet.head_sha:
+        href = (
+            f"https://github.com/{brief.packet.repository}/blob/{brief.packet.head_sha}/"
+            + quote(path, safe="/")
+        )
+    content = escape(label)
+    if href:
+        return f'<a class="source-chip {"test" if _is_test_path(path) else "code"}" href="{escape(href, quote=True)}" target="_blank" rel="noopener">{content}</a>'
+    return f'<span class="source-chip {"test" if _is_test_path(path) else "code"}">{content}</span>'
+
+
+def _implementation(assessment: object, brief: ReviewBrief) -> tuple[str, str, int, int]:
+    evidence = getattr(getattr(assessment, "implementation"), "evidence")
+    copy = " ".join(item.summary for item in evidence) or "No implementation evidence recorded."
+    sources: list[SourceRef] = []
+    seen: set[tuple[str | None, str | None]] = set()
+    for item in evidence:
+        for source in item.sources:
+            key = (source.path, source.url)
+            if key not in seen:
+                sources.append(source)
+                seen.add(key)
+    source_chips = "".join(_evidence_source_chip(source, brief) for source in sources)
+    code_count = sum(not _is_test_path(source.path) for source in sources)
+    test_count = sum(_is_test_path(source.path) for source in sources)
+    return escape(copy), source_chips, code_count, test_count
 
 
 def _changed_file(item: ChangedFile) -> str:
@@ -45,130 +90,131 @@ def _changed_file(item: ChangedFile) -> str:
     if item.deletions is not None:
         stats.append(f"-{item.deletions}")
     suffix = f" · {' / '.join(stats)}" if stats else ""
-    content = (
-        f"<code>{escape(item.path)}</code>"
-        f'<span class="file-meta"> {escape(item.status)}{escape(suffix)}</span>'
-    )
+    name = Path(item.path).name
+    parent = str(Path(item.path).parent)
     href = _safe_href(item.source_url)
-    return f'<li><a href="{escape(href, quote=True)}">{content}</a></li>' if href else f"<li>{content}</li>"
-
-
-def _diagnostic(item: Diagnostic) -> str:
-    sources = "".join(f"<li>{_source(source)}</li>" for source in item.sources)
+    title = escape(name)
+    if href:
+        title = f'<a class="file-link file-name" href="{escape(href, quote=True)}" target="_blank" rel="noopener">{title}</a>'
     return (
-        f'<article class="diagnostic {escape(item.severity)}">'
-        f'<div><span class="kind">{escape(item.severity)}</span> <strong>{escape(item.code)}</strong></div>'
-        f"<p>{escape(item.message)}</p>"
-        f'<ul class="sources">{sources}</ul>'
-        "</article>"
+        '<div class="file-row"><div>'
+        f'{title}<span class="file-path">{escape(parent)}/</span>'
+        f'</div><span class="file-state">{escape(item.status)}{escape(suffix)}</span></div>'
     )
 
 
-def _source_record(item: object) -> str:
-    label = f"{getattr(item, 'kind', 'source')}: {getattr(item, 'title', '')}".strip()
-    href = _safe_href(getattr(item, "url", None))
-    content = escape(label)
-    if href:
-        content = f'<a href="{escape(href, quote=True)}">{content}</a>'
-    return f'<li>{content} <span class="source-state">{escape(getattr(item, "availability", "available"))}</span></li>'
+def _ci_copy(observations: tuple[object, ...]) -> str:
+    if not observations:
+        return "CI: no run observed"
+    if any(getattr(item, "conclusion", "").casefold() in {"failure", "error", "cancelled", "timed_out"} for item in observations):
+        return "CI: failure observed"
+    if any(getattr(item, "status", "").casefold() in {"queued", "pending", "in_progress"} for item in observations):
+        return "CI: running"
+    if all(getattr(item, "conclusion", "").casefold() == "success" for item in observations):
+        return "CI: passed"
+    return f"CI: {len(observations)} observations"
 
 
 def render_html(brief: ReviewBrief) -> str:
     packet = brief.packet
     requirement_cards = []
-    attention_rows: list[str] = []
-    for assessment in brief.assessments:
+    for index, assessment in enumerate(brief.assessments):
         requirement = assessment.requirement
-        implemented = "".join(_evidence(x) for x in assessment.implementation.evidence) or '<p class="empty">No implementation evidence recorded.</p>'
-        verification = "".join(_evidence(x) for x in assessment.verification.evidence) or '<p class="empty">No verification evidence recorded.</p>'
-        gaps = "".join(f"<li>{escape(gap)}</li>" for gap in assessment.gaps) or "<li>None recorded.</li>"
-        sources = "".join(f"<li>{_source(source)}</li>" for source in requirement.sources)
-        source_section = f'<section><h3>Requirement source</h3><ul class="sources">{sources}</ul></section>' if sources else ""
-        status_copy = (
-            f"Implementation {assessment.implementation.status.replace('_', ' ')}"
-            f" · Verification {assessment.verification.status.replace('_', ' ')}"
-        )
-        if assessment.gaps:
-            attention_rows.append(
-                '<article class="attention"><strong>'
-                + escape(requirement.id)
-                + " · Verification gap</strong><p>"
-                + escape(" ".join(assessment.gaps))
-                + "</p></article>"
-            )
+        implemented, evidence_sources, code_count, test_count = _implementation(assessment, brief)
+        sources = " · ".join(_source(source) for source in requirement.sources)
+        implementation_chip = f"Implemented across {code_count} file{'s' if code_count != 1 else ''}" if code_count else "Implementation not observed"
+        test_chip = f"Tests present across {test_count} file{'s' if test_count != 1 else ''}" if test_count else "No related test evidence"
+        verification_chip = {
+            "passed": "Requirement CI passed",
+            "failed": "Requirement CI failed",
+            "pending": "Requirement CI pending",
+            "stale": "Only stale CI observed",
+        }.get(assessment.verification.status, "CI not observed")
         requirement_cards.append(
-            '<article class="requirement">'
-            f'<header><span class="req-id">{escape(requirement.id)}</span><span class="status">{escape(status_copy)}</span></header>'
-            f"<h2>{escape(requirement.text)}</h2>"
-            f"{source_section}"
-            f"<section><h3>Implemented</h3>{implemented}</section>"
-            f"<section><h3>Verification</h3>{verification}</section>"
-            f"<section><h3>Gaps</h3><ul>{gaps}</ul></section>"
-            "</article>"
+            f'<details class="requirement"{" open" if index == 0 else ""}><summary>'
+            f'<span class="req-id">{escape(requirement.id)}</span><span class="req-title">{escape(requirement.text)}</span>'
+            '<span class="req-chips">'
+            f'<span class="badge {"good" if code_count else "warn"}">{escape(implementation_chip)}</span>'
+            f'<span class="badge {"info" if test_count else "muted"}">{escape(test_chip)}</span>'
+            f'<span class="badge {"good" if assessment.verification.status == "passed" else "warn"}">{escape(verification_chip)}</span>'
+            '</span></summary>'
+            '<div class="req-body">'
+            + (f'<span class="source-note requirement-source">Source: {sources}</span>' if sources else "")
+            + f'<div><span class="block-title">Implemented</span><div class="block-copy">{implemented}</div></div>'
+            + (f'<div class="evidence-sources"><span class="block-title">Sources</span>{evidence_sources}</div>' if evidence_sources else "")
+            + '</div></details>'
         )
-    files = "".join(_changed_file(item) for item in packet.changed_files) or "<li>Not provided.</li>"
-    for guardrail in brief.guardrails:
+    files = "".join(_changed_file(item) for item in packet.changed_files) or '<p class="empty">Not provided.</p>'
+    attention_rows: list[str] = []
+    ci_gaps = [item.requirement.id for item in brief.assessments if item.verification.status != "passed"]
+    if ci_gaps:
         attention_rows.append(
-            '<article class="attention"><strong>Scope guardrail · '
-            + escape(guardrail.id)
-            + "</strong><p>"
-            + escape(guardrail.text)
-            + "</p></article>"
+            '<div class="attention-row"><div class="attention-kind">CI gap</div><div class="attention-copy">'
+            + escape(", ".join(ci_gaps))
+            + " have no passing requirement-specific CI or independent runtime observation.</div></div>"
+        )
+    non_ci_gaps: dict[str, list[str]] = {}
+    for item in brief.assessments:
+        for gap in item.gaps:
+            if gap.startswith("No requirement-specific CI"):
+                continue
+            non_ci_gaps.setdefault(gap, []).append(item.requirement.id)
+    for gap, ids in non_ci_gaps.items():
+        attention_rows.append(
+            '<div class="attention-row"><div class="attention-kind">Verification gap · '
+            + escape(", ".join(ids))
+            + '</div><div class="attention-copy">'
+            + escape(gap)
+            + "</div></div>"
+        )
+    if brief.guardrails:
+        guardrail_copy = " · ".join(f"{item.id}: {item.text}" for item in brief.guardrails)
+        attention_rows.append(
+            '<div class="attention-row"><div class="attention-kind">Scope guardrails</div><div class="attention-copy">'
+            + escape(guardrail_copy)
+            + "</div></div>"
+        )
+    source_gap_codes = {"github_linked_issue_not_found", "github_linked_issues_unavailable", "github_patch_unavailable", "github_file_limit_reached"}
+    source_gaps = [item.message for item in packet.diagnostics if item.code in source_gap_codes]
+    if source_gaps:
+        attention_rows.append(
+            '<div class="attention-row"><div class="attention-kind">Source coverage</div><div class="attention-copy">'
+            + escape(" ".join(source_gaps))
+            + "</div></div>"
         )
     attention = "".join(attention_rows) or '<p class="empty">No unresolved attention items.</p>'
-    implementation_count = sum(
-        item.implementation.status == "observed" for item in brief.assessments
-    )
-    passed_count = sum(item.verification.status == "passed" for item in brief.assessments)
-    source_href = _safe_href(packet.source_url)
-    source = f'<a href="{escape(source_href, quote=True)}">Open source pull request</a>' if source_href else "Source URL not provided."
-    diagnostics = "".join(_diagnostic(item) for item in packet.diagnostics)
-    diagnostics_section = (
-        f'<section class="changed"><h2>Collection notes</h2>{diagnostics}</section>' if diagnostics else ""
-    )
-    source_records = "".join(_source_record(item) for item in packet.source_records)
-    linked_issue_count = sum(item.kind == "linked_issue" for item in packet.source_records)
-    check_count = sum(item.kind == "check_run" for item in packet.verification_observations)
-    status_count = sum(item.kind == "commit_status" for item in packet.verification_observations)
-    reported_files = packet.metadata.get("changed_files_reported")
-    reported_copy = str(reported_files) if isinstance(reported_files, int) else "unknown"
-    head_copy = escape(packet.head_sha[:12]) if packet.head_sha else "unavailable"
-    coverage_section = f"""<section class="changed"><h2>Data sources &amp; coverage</h2>
-<p class="meta">Collected from <strong>{escape(str(packet.metadata.get('source', 'fixture')))}</strong>. Empty and unavailable sources are reported explicitly; they are never treated as passing evidence.</p>
-<ul class="coverage"><li>Source records: {len(packet.source_records)} ({linked_issue_count} Development-linked Issues)</li>
-<li>Changed files: {len(packet.changed_files)} collected / {escape(reported_copy)} reported</li>
-<li>Current-head observations: {check_count} Check Runs / {status_count} commit statuses</li>
-<li>Analyzed head: <code>{head_copy}</code></li></ul><ul class="sources">{source_records}</ul></section>"""
+    source_links = []
+    source_priority = {"linked_issue": 0, "ticket": 0, "pull_request": 1}
+    for record in sorted(packet.source_records, key=lambda item: source_priority.get(item.kind, 2)):
+        if record.kind in {"linked_issue", "ticket", "pull_request"} and record.url:
+            source_links.append(_source(SourceRef(label=record.kind, url=record.url)))
+    source_line = " · ".join(source_links) or "Source URL not provided."
+    pr_label = f"PR #{packet.pull_request}" if packet.pull_request is not None else "Fixture review"
+    pr_state = "Merged" if packet.metadata.get("merged") else ("Draft" if packet.metadata.get("draft") else str(packet.metadata.get("state") or "Unknown").title())
+    pr_link = _source(SourceRef(label=pr_label, url=packet.source_url)) if packet.source_url else escape(pr_label)
+    ci_summary = _ci_copy(packet.verification_observations)
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{escape(packet.title)} · PrismCode</title>
 <style>
-:root {{ color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background:#f5f7fa; color:#172033; }}
-body {{ margin:0; }} main {{ max-width:960px; margin:0 auto; padding:48px 24px 80px; }}
-.hero,.requirement,.changed,.attention-section {{ background:white; border:1px solid #dfe5ec; border-radius:14px; box-shadow:0 6px 24px rgba(20,35,55,.05); }}
-.hero {{ padding:30px; margin-bottom:22px; }} .eyebrow {{ text-transform:uppercase; letter-spacing:.1em; font-size:12px; color:#667085; }}
-h1 {{ margin:8px 0 12px; font-size:32px; }} .intent {{ font-size:17px; line-height:1.6; }} .meta,.file-meta {{ color:#667085; }}
-.requirement {{ padding:24px; margin:18px 0; }} .requirement header {{ display:flex; justify-content:space-between; gap:12px; }}
-.req-id,.kind,.status {{ font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; }}
-.status {{ padding:5px 9px; border-radius:999px; background:#eef2f6; }}
-h2 {{ margin:14px 0 22px; font-size:21px; }} h3 {{ margin:22px 0 10px; font-size:14px; text-transform:uppercase; letter-spacing:.06em; color:#475467; }}
-.evidence {{ border-left:3px solid #98a2b3; padding:8px 0 8px 14px; margin:10px 0; line-height:1.5; }} .kind {{ color:#475467; margin-right:6px; }}
-.sources {{ margin:6px 0 0; padding-left:20px; font-size:13px; color:#667085; }} a {{ color:#2457c5; }} code {{ font-family:ui-monospace,SFMono-Regular,monospace; }}
-.empty {{ color:#98a2b3; font-style:italic; }} .changed {{ padding:24px; margin-top:22px; }} .coverage {{ line-height:1.8; }} .source-state {{ color:#667085; font-size:12px; }}
-.diagnostic {{ border-left:3px solid #f0b429; padding:10px 0 10px 14px; margin:14px 0; }} .diagnostic.error {{ border-left-color:#d92d20; }} .diagnostic.info {{ border-left-color:#2457c5; }}
-.diagnostic p {{ margin:7px 0; line-height:1.5; }}
-.summary {{ display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }} .summary span {{ background:#eef2f6; border-radius:999px; padding:6px 10px; font-size:12px; font-weight:700; }}
-.section-title {{ margin:30px 0 12px; }} .attention-section {{ padding:24px; margin-top:22px; }} .attention {{ border-top:1px solid #e4e7ec; padding:14px 0; }} .attention p {{ margin:6px 0 0; color:#475467; }}
-</style></head><body><main>
-<section class="hero"><div class="eyebrow">Requirement-first review brief</div><h1>{escape(packet.title)}</h1>
-<p class="intent">{escape(brief.intent)}</p><p class="meta">{escape(packet.repository)} · PR {packet.pull_request if packet.pull_request is not None else "fixture"} · {len(packet.changed_files)} changed files · {source}</p>
-<div class="summary"><span>{len(brief.assessments)} delivery requirements</span><span>{implementation_count} with implementation evidence</span><span>{passed_count} independently verified</span><span>{len(packet.verification_observations)} CI/Actions observations</span></div></section>
-{coverage_section}
-<h2 class="section-title">Requirement checks</h2>
-{"".join(requirement_cards)}
-{diagnostics_section}
-<section class="attention-section"><h2>Needs attention</h2>{attention}</section>
-<section class="changed"><h2>Changed areas</h2><ul>{files}</ul><p class="meta">Schema {escape(brief.schema_version)} · Generated by {escape(brief.generated_by)}</p></section>
+:root {{ color-scheme:dark;--bg:#080c0f;--panel:#10171b;--border:#26373f;--text:#edf3f0;--muted:#9eaaaf;--faint:#6f7d83;--green:#7be3ac;--green-bg:rgba(46,111,78,.18);--blue-bg:rgba(49,91,121,.18);--amber-bg:rgba(106,85,30,.20);--red-bg:rgba(131,55,49,.20);--shadow:0 22px 64px rgba(0,0,0,.28);}}
+*{{box-sizing:border-box}}html{{scroll-behavior:smooth}}body{{margin:0;color:var(--text);line-height:1.55;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 18% -8%,rgba(69,167,118,.12),transparent 31rem),radial-gradient(circle at 92% 8%,rgba(84,139,180,.06),transparent 28rem),var(--bg)}}
+code{{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:-.015em}}.shell{{width:min(1160px,calc(100% - 40px));margin:30px auto 84px}}.topbar{{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:22px}}.brand{{display:inline-flex;align-items:center;gap:11px;font-weight:720}}.brand-mark{{width:14px;height:14px;border:2px solid rgba(255,255,255,.92);transform:rotate(45deg);border-radius:3px;box-shadow:0 0 0 5px rgba(117,224,167,.06)}}
+.section{{border:2px solid var(--border);border-radius:18px;background:linear-gradient(180deg,rgba(17,24,28,.97),rgba(11,17,21,.98));box-shadow:var(--shadow);padding:28px;margin-bottom:22px}}h1{{font-size:31px;margin:0 0 14px;letter-spacing:-.025em}}h2{{font-size:22px;margin:0 0 12px;letter-spacing:-.02em}}.meta{{display:flex;flex-wrap:wrap;gap:9px;color:var(--muted);font-size:13px;margin-bottom:16px}}.intent{{max-width:850px;color:#d2dade;font-size:15px}}.source-link,.file-link{{color:#b9dfff;text-decoration:none;background-image:linear-gradient(currentColor,currentColor);background-size:0 1px;background-position:0 100%;background-repeat:no-repeat;transition:background-size .18s ease}}.source-link:hover,.file-link:hover{{background-size:100% 1px}}
+.badge{{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;font-size:10px;font-weight:760;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}}.badge.good{{background:var(--green-bg);color:#c7f4d9}}.badge.info{{background:var(--blue-bg);color:#cce8ff}}.badge.warn{{background:var(--amber-bg);color:#ffe3a0}}.badge.danger{{background:var(--red-bg);color:#ffb0a9}}.badge.muted{{background:rgba(111,128,135,.12);color:#aeb9be}}
+.requirements{{border-top:1px solid rgba(111,128,135,.24)}}.requirement{{border-bottom:1px solid rgba(111,128,135,.24)}}.requirement summary{{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px minmax(0,1fr) minmax(280px,auto);gap:16px;align-items:center;padding:18px 0}}.requirement summary::-webkit-details-marker{{display:none}}.req-id{{color:var(--green);font-size:12px;font-weight:760;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}}.req-title{{font-size:14px;font-weight:640}}.req-chips{{justify-self:end;display:flex;justify-content:flex-end;flex-wrap:wrap;gap:6px}}.req-body{{padding:0 0 20px 68px}}.requirement-source{{margin:0 0 16px}}.block-title{{display:block;margin-bottom:5px;color:#89979d;font-size:10px;letter-spacing:.045em;font-weight:700;text-transform:uppercase}}.block-copy{{color:#d7dddf;font-size:13px}}.source-note{{display:block;margin-top:8px;color:var(--faint);font-size:10px;line-height:1.45}}.evidence-sources{{margin-top:14px}}.source-chip{{display:inline-flex;margin:0 7px 7px 0;padding:4px 8px;border-radius:999px;text-decoration:none;font-size:10px;font-weight:740;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}}.source-chip.code{{background:var(--green-bg);color:#c7f4d9}}.source-chip.test{{background:var(--blue-bg);color:#cce8ff}}
+.sources{{color:var(--faint);font-size:11px;line-height:1.7}}.attention-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:210px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:#e7ca7c;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-list{{display:grid;gap:0;border-top:1px solid rgba(111,128,135,.24)}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px;white-space:nowrap}}.empty{{color:var(--faint);font-size:12px;font-style:italic}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}
+@media(max-width:900px){{.requirement summary{{grid-template-columns:46px 1fr}}.req-chips{{grid-column:2;justify-self:start;justify-content:flex-start}}.req-body{{padding-left:62px}}.attention-row{{grid-template-columns:1fr;gap:8px}}}}@media(max-width:560px){{.shell{{width:min(100% - 18px,1160px);margin-top:16px}}.section{{padding:22px 20px}}.topbar{{align-items:flex-start;flex-direction:column}}.file-row{{grid-template-columns:1fr}}.file-state{{white-space:normal}}.req-body{{padding-left:0}}}}
+</style></head><body><main class="shell">
+<div class="topbar"><div class="brand"><span class="brand-mark"></span> PrismCode</div></div>
+<section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{len(packet.changed_files)} changed files</span><span>·</span><span>{escape(ci_summary)}</span></div>
+<h1>{escape(packet.title)}</h1><div class="intent">{escape(brief.intent)}</div>
+<span class="source-note">Source: {source_line}</span>
+</section>
+<section class="section"><h2>Requirement checks</h2><div class="requirements">{"".join(requirement_cards)}</div></section>
+<section class="section"><h2>Needs attention</h2><div class="attention-list">{attention}</div></section>
+<section class="section"><h2>Changed areas</h2><div class="file-list">{files}</div></section>
+<div class="footer">PrismCode · {escape(pr_label)} · Schema {escape(brief.schema_version)} · Generated by {escape(brief.generated_by)}</div>
 </main></body></html>"""
 
 

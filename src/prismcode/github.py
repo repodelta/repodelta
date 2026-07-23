@@ -257,6 +257,7 @@ class GitHubPullRequestAdapter:
             metadata={
                 "source": "github",
                 "state": raw_pr.get("state"),
+                "merged": bool(raw_pr.get("merged")),
                 "draft": bool(raw_pr.get("draft")),
                 "author": user.get("login"),
                 "additions": _as_int(raw_pr.get("additions")),

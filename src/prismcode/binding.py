@@ -39,7 +39,7 @@ def build_deterministic_evidence_hints(
         implementation = tuple(
             Evidence(
                 summary=(
-                    f"{changed_file.path} contains requirement-related change terms: "
+                    "Requirement-related change terms observed: "
                     + ", ".join(sorted(overlap)[:8])
                 ),
                 kind="related_test" if _is_test_path(changed_file.path) else "code",
