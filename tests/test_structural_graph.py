@@ -212,6 +212,100 @@ def test_one_hunk_can_map_changes_in_two_sibling_symbols(tmp_path: Path) -> None
     ]
 
 
+def test_module_level_change_falls_back_to_file_symbol(tmp_path: Path) -> None:
+    source = "from package import dependency\n\ndef run():\n    return dependency()\n"
+    source_path = tmp_path / "src" / "service.py"
+    source_path.parent.mkdir(parents=True)
+    source_path.write_text(source, encoding="utf-8")
+    database = tmp_path / ".codegraph" / "codegraph.db"
+    database.parent.mkdir()
+    with sqlite3.connect(database) as connection:
+        connection.executescript(
+            """
+            CREATE TABLE nodes (
+                id TEXT PRIMARY KEY, kind TEXT NOT NULL, name TEXT NOT NULL,
+                qualified_name TEXT NOT NULL, file_path TEXT NOT NULL,
+                language TEXT NOT NULL, start_line INTEGER NOT NULL,
+                end_line INTEGER NOT NULL
+            );
+            CREATE TABLE edges (
+                source TEXT NOT NULL, target TEXT NOT NULL, kind TEXT NOT NULL
+            );
+            CREATE TABLE files (
+                path TEXT PRIMARY KEY, content_hash TEXT NOT NULL
+            );
+            """
+        )
+        connection.executemany(
+            "INSERT INTO nodes VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                (
+                    "file:service",
+                    "file",
+                    "service.py",
+                    "src/service.py",
+                    "src/service.py",
+                    "python",
+                    1,
+                    4,
+                ),
+                (
+                    "function:run",
+                    "function",
+                    "run",
+                    "run",
+                    "src/service.py",
+                    "python",
+                    3,
+                    4,
+                ),
+            ),
+        )
+        connection.execute(
+            "INSERT INTO files VALUES (?, ?)",
+            ("src/service.py", hashlib.sha256(source.encode()).hexdigest()),
+        )
+    hunks = parse_unified_patch(
+        "src/service.py",
+        "@@ -0,0 +1 @@\n+from package import dependency\n",
+    )
+
+    result = CodegraphProvider(tmp_path).symbols_overlapping(hunks)
+
+    assert [(item.symbol.kind, item.symbol.qualified_name) for item in result.overlaps] == [
+        ("file", "src/service.py"),
+    ]
+    assert "structural_graph_no_symbol_overlap" not in {
+        diagnostic.code for diagnostic in result.diagnostics
+    }
+
+
+def test_document_hunks_do_not_reduce_codegraph_coverage(tmp_path: Path) -> None:
+    _create_index(tmp_path)
+    code_hunks = parse_unified_patch(
+        "src/service.py",
+        "@@ -3 +3 @@\n-        return 1\n+        return 2\n",
+    )
+    document_hunks = parse_unified_patch(
+        "README.md",
+        "@@ -0,0 +1 @@\n+# Documentation\n",
+    )
+
+    result = CodegraphProvider(tmp_path).symbols_overlapping(
+        (*code_hunks, *document_hunks)
+    )
+
+    assert result.index.state == "available"
+    assert result.index.requested_files == 1
+    assert result.hunk_count == 1
+    assert "codegraph_file_not_indexed" not in {
+        diagnostic.code for diagnostic in result.diagnostics
+    }
+    assert "structural_graph_file_not_applicable" in {
+        diagnostic.code for diagnostic in result.diagnostics
+    }
+
+
 def test_stale_index_is_not_used(tmp_path: Path) -> None:
     _create_index(tmp_path)
     (tmp_path / "src" / "service.py").write_text(

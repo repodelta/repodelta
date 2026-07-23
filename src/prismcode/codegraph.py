@@ -15,7 +15,24 @@ from .structural_graph import (
 )
 
 _PROVIDER = "codegraph"
-_SUPPORTED_KINDS = ("function", "method", "class", "route", "variable", "constant")
+_SUPPORTED_KINDS = (
+    "file",
+    "function",
+    "method",
+    "class",
+    "route",
+    "variable",
+    "constant",
+)
+_NON_STRUCTURAL_SUFFIXES = {
+    ".md",
+    ".mdx",
+    ".rst",
+    ".txt",
+    ".pdf",
+    ".doc",
+    ".docx",
+}
 _REQUIRED_COLUMNS = {
     "nodes": {
         "id",
@@ -161,18 +178,55 @@ class CodegraphProvider:
     def symbols_overlapping(
         self, hunks: tuple[ChangedHunk, ...]
     ) -> StructuralGraphResult:
-        requested_files = tuple(dict.fromkeys(hunk.file_path for hunk in hunks))
+        eligible_hunks = tuple(
+            hunk for hunk in hunks if _is_structural_candidate(hunk.file_path)
+        )
+        skipped_files = tuple(
+            dict.fromkeys(
+                hunk.file_path
+                for hunk in hunks
+                if not _is_structural_candidate(hunk.file_path)
+            )
+        )
+        requested_files = tuple(
+            dict.fromkeys(hunk.file_path for hunk in eligible_hunks)
+        )
         index = self.inspect_index(requested_files=requested_files)
         diagnostics = list(index.diagnostics)
+        diagnostics.extend(
+            Diagnostic(
+                code="structural_graph_file_not_applicable",
+                message=(
+                    f"{path} is not a code-structure input and was excluded "
+                    "from Codegraph coverage."
+                ),
+                severity="info",
+                sources=(SourceRef(label="changed file", path=path),),
+            )
+            for path in skipped_files
+        )
         if not index.usable:
             return StructuralGraphResult(
                 index=index,
-                hunk_count=len(hunks),
+                hunk_count=len(eligible_hunks),
                 diagnostics=tuple(diagnostics),
             )
 
-        queryable = tuple(hunk for hunk in hunks if hunk.added_lines)
-        for hunk in hunks:
+        unindexed_files = {
+            source.path
+            for diagnostic in index.diagnostics
+            if diagnostic.code == "codegraph_file_not_indexed"
+            for source in diagnostic.sources
+            if source.path
+        }
+        queryable = tuple(
+            hunk
+            for hunk in eligible_hunks
+            if hunk.added_lines and hunk.file_path not in unindexed_files
+        )
+        for hunk in eligible_hunks:
+            if hunk.file_path in unindexed_files:
+                continue
             if hunk.is_deletion_only:
                 diagnostics.append(
                     Diagnostic(
@@ -195,7 +249,7 @@ class CodegraphProvider:
         if not queryable:
             return StructuralGraphResult(
                 index=index,
-                hunk_count=len(hunks),
+                hunk_count=len(eligible_hunks),
                 diagnostics=tuple(diagnostics),
             )
 
@@ -246,7 +300,7 @@ class CodegraphProvider:
             )
         return StructuralGraphResult(
             index=index,
-            hunk_count=len(hunks),
+            hunk_count=len(eligible_hunks),
             overlaps=tuple(overlaps),
             diagnostics=tuple(diagnostics),
         )
@@ -364,6 +418,10 @@ def _repo_path(path: str) -> str:
     if not normalized or normalized.startswith("/") or ".." in normalized.split("/"):
         return ""
     return normalized
+
+
+def _is_structural_candidate(path: str) -> bool:
+    return Path(path).suffix.casefold() not in _NON_STRUCTURAL_SUFFIXES
 
 
 def _sha256(path: Path) -> str:

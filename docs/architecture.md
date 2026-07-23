@@ -51,10 +51,13 @@ match the analyzed PR head SHA.
 
 Only exact new-file changed lines from GitHub unified-diff hunks are joined to
 symbol `[start_line, end_line]` spans. When symbols are nested, the narrowest
-symbol containing each changed line is selected. Missing patches, missing or
-stale indexes, unindexed files, unmatched lines, and deletion-only hunks are
-reported explicitly. Deletion-only mapping requires a future base-revision
-index and is never guessed from the head index.
+symbol containing each changed line is selected. Module-level changes such as
+imports fall back to the indexed file symbol, which owns Codegraph's import
+edges. Documentation files are reported as not applicable and do not reduce
+code-structure coverage. Missing patches, missing or stale indexes, unindexed
+code files, unmatched lines, and deletion-only hunks are reported explicitly.
+Deletion-only mapping requires a future base-revision index and is never
+guessed from the head index.
 
 This layer does not traverse callers/callees, bind symbols to requirements, or
 call an LLM. Those remain separate follow-up stages so structural observations
