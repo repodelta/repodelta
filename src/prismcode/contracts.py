@@ -3,7 +3,10 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import asdict, dataclass, field, replace
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
+
+if TYPE_CHECKING:
+    from .structural_graph import StructuralGraphResult
 
 DiagnosticSeverity = Literal["info", "warning", "error"]
 RequirementKind = Literal["deliverable", "guardrail", "manual_acceptance"]
@@ -137,6 +140,7 @@ class AnalysisInput:
     packet: ReviewSourcePacket
     requirements: tuple[Requirement, ...] = ()
     evidence_hints: tuple[EvidenceHint, ...] = ()
+    structural_graph: StructuralGraphResult | None = None
 
 
 @dataclass(frozen=True)
@@ -165,8 +169,9 @@ class ReviewBrief:
     intent: str
     assessments: tuple[RequirementAssessment, ...]
     guardrails: tuple[Requirement, ...] = ()
+    structural_graph: StructuralGraphResult | None = None
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v2"
+    schema_version: str = "review_brief.v3"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
