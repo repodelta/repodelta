@@ -71,7 +71,6 @@ class DeterministicAnalyzer:
             ),
             assessments=assessments,
             guardrails=guardrails,
-            structural_graph=analysis_input.structural_graph,
         )
 
     @staticmethod
