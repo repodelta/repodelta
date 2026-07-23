@@ -6,6 +6,10 @@ PrismCode has one canonical path:
 fixture or GitHub
   -> ReviewSourcePacket
        -> linked Issue/Ticket + PR + changed files + CI/Actions observations
+  -> optional StructuralGraphProvider
+       -> unified-diff hunks + exact changed lines
+       -> repository-local graph index status
+       -> changed hunk / symbol-span overlaps
   -> deterministic criteria extraction + optional EvidenceHints
   -> DeterministicAnalyzer
   -> ReviewBrief
@@ -23,6 +27,8 @@ fixture or GitHub
 4. `DeterministicAnalyzer` is the only status authority. It emits separate implementation
    and verification assessments.
 5. Renderers consume `ReviewBrief` and never infer or upgrade an assessment.
+6. Structural graph providers return repository facts and diagnostics only. A
+   hunk-symbol overlap is not, by itself, an implementation conclusion.
 
 Acceptance criteria from an explicit linked Issue are primary. Deliverables receive stable
 display IDs (`R1`, `R2`, ...); negative scope constraints are separated as guardrails
@@ -33,6 +39,37 @@ coverage is explicitly adequate. Generic green CI never verifies every requireme
 The linked-Issue relation is collected from GitHub GraphQL
 `PullRequest.closingIssuesReferences`. PR body text is not parsed to invent Issue links.
 Changed files and patches, check runs, and commit statuses come from GitHub REST endpoints.
+
+## Structural graph boundary
+
+`StructuralGraphProvider` is the open-core port for read-only code structure.
+`CodegraphProvider` is the first adapter and reads a repository-local
+`.codegraph/codegraph.db` in SQLite read-only mode. It verifies the expected
+schema and compares indexed content hashes with the current checkout before
+mapping evidence. For live GitHub reviews, the checkout revision must also
+match the analyzed PR head SHA.
+
+Only exact new-file changed lines from GitHub unified-diff hunks are joined to
+symbol `[start_line, end_line]` spans. When symbols are nested, the narrowest
+symbol containing each changed line is selected. Module-level changes such as
+imports fall back to the indexed file symbol, which owns Codegraph's import
+edges. Documentation files are reported as not applicable and do not reduce
+code-structure coverage. Missing patches, missing or stale indexes, unindexed
+code files, unmatched lines, and deletion-only hunks are reported explicitly.
+Deletion-only mapping requires a future base-revision index and is never
+guessed from the head index.
+
+This layer does not traverse callers/callees, bind symbols to requirements, or
+call an LLM. Those remain separate follow-up stages so structural observations
+cannot silently become review conclusions.
+
+The `review` CLI enables this read-only mapping by default, using `--repo-root`
+(the current directory unless specified) to locate the target checkout. The
+result travels through `AnalysisInput` into `ReviewBrief` for downstream stages,
+while the current lexical requirement binding remains authoritative. The CLI
+prints one structural-coverage line to stderr. `--no-structural-graph` disables
+the probe explicitly; missing, stale, partial, invalid, and unreadable indexes
+degrade without failing report generation.
 
 ## Packet revisions
 
