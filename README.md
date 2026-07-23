@@ -45,26 +45,79 @@ Open `build/pr574.html` in a browser.
 
 ### Review a live GitHub pull request
 
-For a private repository, export a token that can read the repository. Public repositories may work without a token, subject to GitHub's unauthenticated rate limits.
+#### Basic review from any directory
+
+This always collects the PR, its Development-linked Issue, changed-file
+patches, and CI observations from GitHub:
 
 ```bash
 export GITHUB_TOKEN=...
 prismcode review \
   --repo owner/repository \
   --pr 123 \
-  --repo-root /path/to/repository-checkout \
   --output build/pr-123.html
 ```
 
-The token is read from `GITHUB_TOKEN` by default. Use `--github-token-env OTHER_ENV_NAME` to select another environment variable. Use `--github-api-url` for GitHub Enterprise Server. When a token is present, an Enterprise host must also be explicitly trusted with `--trusted-github-api-host HOST`; only HTTPS URLs are accepted.
+PrismCode also probes the current directory (`.`) for
+`.codegraph/codegraph.db`. If the current directory is not the analyzed PR's
+exact head checkout, or its index is unavailable or stale, the report is still
+generated using lexical requirement binding:
 
-By default, the CLI looks for `.codegraph/codegraph.db` under the current
-directory and prints one structural-mapping status line to stderr. Pass
-`--repo-root` when the target checkout is elsewhere, `--verbose` for individual
-diagnostics, or `--no-structural-graph` to disable the probe. A missing, stale,
-partial, invalid, or unreadable index never prevents report generation; the
-current lexical requirement binding remains in use until bounded graph paths
-are introduced.
+```text
+Structural mapping: skipped · Codegraph index not found · lexical fallback used
+```
+
+#### Structure-aware review from the PR checkout
+
+Run the same command from a checkout whose `HEAD` is the PR head. The
+repository-local Codegraph index must be synchronized with that checkout:
+
+```bash
+cd /path/to/repository-at-pr-head
+# First index only: npx @colbymchenry/codegraph init -i
+npx @colbymchenry/codegraph sync
+
+prismcode review \
+  --repo owner/repository \
+  --pr 123 \
+  --output build/pr-123.html
+```
+
+When the checkout revision, indexed content hashes, and PR head all match,
+PrismCode maps exact changed hunk lines to Codegraph symbols:
+
+```text
+Structural mapping: Codegraph available · 4/4 hunks mapped to 3 symbols · lexical requirement binding retained
+```
+
+#### Structure-aware review using another checkout
+
+The CLI may run from anywhere. Use `--repo-root` to point it at the checkout
+and index belonging to the analyzed PR:
+
+```bash
+prismcode review \
+  --repo owner/repository \
+  --pr 123 \
+  --repo-root /path/to/repository-at-pr-head \
+  --output build/pr-123.html
+```
+
+This is also required when reviewing a historical or different PR while the
+current directory is checked out at another commit. `--repo-root` does not
+select or change a Git revision: the supplied checkout must already be at the
+PR's head SHA, and PrismCode verifies that before using its index.
+
+Use `--verbose` for individual structural diagnostics, or
+`--no-structural-graph` to skip the probe explicitly. Missing, stale, partial,
+invalid, or unreadable indexes never prevent report generation.
+
+For a private repository, `GITHUB_TOKEN` must be able to read the repository.
+Public repositories may work without a token, subject to GitHub's
+unauthenticated rate limits. Use `--github-token-env OTHER_ENV_NAME` to select
+another environment variable. Use `--github-api-url` for GitHub Enterprise
+Server. When a token is present, an Enterprise host must also be explicitly
+trusted with `--trusted-github-api-host HOST`; only HTTPS URLs are accepted.
 
 The adapter records explicit diagnostics when:
 
@@ -84,8 +137,8 @@ GitHub Actions artifact for 14 days.
 
 The built-in `GITHUB_TOKEN` covers pull requests in this repository. To review another private
 repository, configure a `PRISMCODE_GITHUB_TOKEN` Actions secret with read access to that target.
-The report includes a **Data sources & coverage** section so missing links, patches, head SHAs,
-checks, and statuses remain visible to reviewers.
+Missing links, patches, head SHAs, checks, and statuses remain explicit rather
+than being treated as passing evidence.
 
 ## Architectural boundary
 
