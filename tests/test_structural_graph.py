@@ -88,6 +88,8 @@ def _packet(patch: str | None) -> ReviewSourcePacket:
         repository="acme/widget",
         pull_request=7,
         title="Change service",
+        source_url="https://github.com/acme/widget/pull/7",
+        head_sha="head123",
         source_records=(),
         changed_files=(
             ChangedFile(
@@ -403,8 +405,130 @@ def test_analyzer_preserves_structural_facts_without_using_them_as_conclusions(
     assert brief.assessments == lexical_only.assessments == ()
     serialized = brief.to_dict()
     assert serialized["structural_graph"]["schema_version"] == (
-        "structural_graph_result.v1"
+        "structural_graph_result.v2"
     )
     assert serialized["structural_graph"]["overlaps"][0]["symbol"][
         "qualified_name"
     ] == "src.service.Service.run"
+
+
+def test_bounded_paths_load_unchanged_y_to_x_to_z_neighbors(tmp_path: Path) -> None:
+    sources = {
+        "src/adapter.py": "def adapt():\n    return core()\n",
+        "src/core.py": "def core():\n    return persist()\n",
+        "src/store.py": "def persist():\n    return True\n",
+        "src/audit.py": "def audit():\n    return notify()\n",
+        "src/notify.py": "def notify():\n    return True\n",
+        "tests/test_adapter.py": "def test_adapt():\n    assert adapt()\n",
+    }
+    for path, source in sources.items():
+        target = tmp_path / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(source, encoding="utf-8")
+    database = tmp_path / ".codegraph" / "codegraph.db"
+    database.parent.mkdir()
+    with sqlite3.connect(database) as connection:
+        connection.executescript(
+            """
+            CREATE TABLE nodes (
+                id TEXT PRIMARY KEY, kind TEXT NOT NULL, name TEXT NOT NULL,
+                qualified_name TEXT NOT NULL, file_path TEXT NOT NULL,
+                language TEXT NOT NULL, start_line INTEGER NOT NULL,
+                end_line INTEGER NOT NULL
+            );
+            CREATE TABLE edges (
+                source TEXT NOT NULL, target TEXT NOT NULL, kind TEXT NOT NULL
+            );
+            CREATE TABLE files (
+                path TEXT PRIMARY KEY, content_hash TEXT NOT NULL
+            );
+            """
+        )
+        connection.executemany(
+            "INSERT INTO nodes VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                (
+                    "Y", "function", "adapt", "src.adapter.adapt",
+                    "src/adapter.py", "python", 1, 2,
+                ),
+                (
+                    "X", "function", "core", "src.core.core",
+                    "src/core.py", "python", 1, 2,
+                ),
+                (
+                    "Z", "function", "persist", "src.store.persist",
+                    "src/store.py", "python", 1, 2,
+                ),
+                (
+                    "W", "function", "audit", "src.audit.audit",
+                    "src/audit.py", "python", 1, 2,
+                ),
+                (
+                    "V", "function", "notify", "src.notify.notify",
+                    "src/notify.py", "python", 1, 2,
+                ),
+                (
+                    "T", "function", "test_adapt", "tests.test_adapter.test_adapt",
+                    "tests/test_adapter.py", "python", 1, 2,
+                ),
+                (
+                    "F", "file", "adapter.py", "src/adapter.py",
+                    "src/adapter.py", "python", 1, 2,
+                ),
+            ),
+        )
+        connection.executemany(
+            "INSERT INTO edges VALUES (?, ?, ?)",
+            (
+                ("Y", "X", "calls"),
+                ("X", "Z", "calls"),
+                ("Z", "W", "calls"),
+                ("W", "V", "calls"),
+                ("T", "Y", "calls"),
+                ("F", "Y", "contains"),
+            ),
+        )
+        connection.executemany(
+            "INSERT INTO files VALUES (?, ?)",
+            tuple(
+                (path, hashlib.sha256(source.encode()).hexdigest())
+                for path, source in sources.items()
+            ),
+        )
+    packet = ReviewSourcePacket(
+        repository="acme/widget",
+        pull_request=10,
+        title="Wire adapter",
+        source_records=(),
+        changed_files=(
+            ChangedFile(
+                path="src/adapter.py",
+                patch="@@ -2 +2 @@\n-    return old()\n+    return core()\n",
+            ),
+        ),
+        source_url="https://github.com/acme/widget/pull/10",
+        head_sha="head123",
+    ).with_revision()
+
+    result = map_packet_changed_symbols(packet, CodegraphProvider(tmp_path))
+
+    y_x_z = next(
+        path
+        for path in result.paths
+        if [step.target.id for step in path.steps] == ["X", "Z"]
+    )
+    assert [step.direction for step in y_x_z.steps] == ["outgoing", "outgoing"]
+    assert y_x_z.classification == "runtime"
+    assert y_x_z.depth == 2
+    assert y_x_z.steps[-1].target.sources[0].url == (
+        "https://github.com/acme/widget/blob/head123/src/store.py#L1-L2"
+    )
+    incoming_test = next(
+        path for path in result.paths if [step.target.id for step in path.steps] == ["T"]
+    )
+    assert incoming_test.steps[0].direction == "incoming"
+    assert incoming_test.classification == "mixed"
+    assert any(path.depth == 3 and path.steps[-1].target.id == "W" for path in result.paths)
+    assert all(step.target.id != "V" for path in result.paths for step in path.steps)
+    assert max(path.depth for path in result.paths) == 3
+    assert all(step.relation != "contains" for path in result.paths for step in path.steps)

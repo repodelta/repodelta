@@ -7,6 +7,24 @@ from .contracts import Diagnostic, SourceRef
 from .diff_hunks import ChangedHunk
 
 IndexState = Literal["available", "partial", "missing", "stale", "invalid", "error"]
+PathClassification = Literal["runtime", "test", "mixed"]
+TraversalDirection = Literal["outgoing", "incoming"]
+
+
+@dataclass(frozen=True)
+class StructuralTraversalPolicy:
+    """Deterministic safety budget for provider-owned graph expansion."""
+
+    max_depth: int = 3
+    max_nodes: int = 80
+    max_paths: int = 120
+    relation_allowlist: tuple[str, ...] = (
+        "calls",
+        "imports",
+        "instantiates",
+        "references",
+        "extends",
+    )
 
 
 @dataclass(frozen=True)
@@ -47,12 +65,33 @@ class HunkSymbolOverlap:
 
 
 @dataclass(frozen=True)
+class GraphPathStep:
+    source: GraphSymbol
+    target: GraphSymbol
+    relation: str
+    direction: TraversalDirection
+
+
+@dataclass(frozen=True)
+class StructuralPath:
+    seed_symbol_id: str
+    steps: tuple[GraphPathStep, ...]
+    classification: PathClassification
+    sources: tuple[SourceRef, ...] = ()
+
+    @property
+    def depth(self) -> int:
+        return len(self.steps)
+
+
+@dataclass(frozen=True)
 class StructuralGraphResult:
     index: StructuralGraphIndexStatus
     hunk_count: int = 0
     overlaps: tuple[HunkSymbolOverlap, ...] = ()
+    paths: tuple[StructuralPath, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
-    schema_version: str = "structural_graph_result.v1"
+    schema_version: str = "structural_graph_result.v2"
 
     @property
     def mapped_hunk_count(self) -> int:
@@ -69,4 +108,11 @@ class StructuralGraphProvider(Protocol):
 
     def symbols_overlapping(
         self, hunks: tuple[ChangedHunk, ...]
+    ) -> StructuralGraphResult: ...
+
+    def expand_paths(
+        self,
+        result: StructuralGraphResult,
+        *,
+        policy: StructuralTraversalPolicy = StructuralTraversalPolicy(),
     ) -> StructuralGraphResult: ...

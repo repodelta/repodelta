@@ -10,6 +10,7 @@ fixture or GitHub
        -> unified-diff hunks + exact changed lines
        -> repository-local graph index status
        -> changed hunk / symbol-span overlaps
+       -> bounded, direction-aware structural paths
   -> one-pass semantic extraction + optional EvidenceHints
        -> Issue/PR obligations (R/G)
        -> objectives (O), claims (C), intent (I)
@@ -81,9 +82,18 @@ code files, unmatched lines, and deletion-only hunks are reported explicitly.
 Deletion-only mapping requires a future base-revision index and is never
 guessed from the head index.
 
-This layer does not traverse callers/callees, bind symbols to requirements, or
-call an LLM. Those remain separate follow-up stages so structural observations
-cannot silently become review conclusions.
+Exact changed symbols are the only traversal seeds. `CodegraphProvider` loads
+complete unchanged neighbor symbols with a direction-aware breadth-first
+search. Traversal is deterministic and bounded to three hops, 80 unique nodes,
+and 120 paths by default. Only `calls`, `imports`, `instantiates`, `references`,
+and `extends` edges are eligible; container edges such as `contains` are
+excluded to prevent file-wide fan-out. Each path records incoming/outgoing
+direction, runtime/test/mixed classification, and head-revision GitHub line
+sources.
+
+This layer does not bind paths to requirements or call an LLM. Paths remain
+candidate repository facts, so structural observations cannot silently become
+review conclusions.
 
 The `review` CLI enables this read-only mapping by default, using `--repo-root`
 (the current directory unless specified) to locate the target checkout. The
