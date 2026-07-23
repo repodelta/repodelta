@@ -12,14 +12,19 @@ ingestion:
 }
 ```
 
-`source_packet` is conclusion-free. `requirements` are explicit source assertions.
+`source_packet` is conclusion-free. `requirements` are explicit obligation
+statements and may include `role` (default `obligation`) and `authority`
+(default `provided`).
 `evidence_hints` are separate annotations with provenance. Loading fails when the packet
 revision is inconsistent or a hint names an unknown requirement.
 
-When `requirements` is empty, the analyzer extracts acceptance criteria from a
-`linked_issue`/`ticket` source record (falling back to the PR body). The packet may contain
-current-head `verification_observations`; hints bind a requirement to observations by exact
-ID and cannot turn unrelated green CI into a passing requirement.
+When `requirements` is empty, the analyzer applies the semantic authority
+hierarchy: linked-Issue criteria first, then explicit PR Acceptance
+Criteria/Requirements/Definition of Done as provisional obligations. Goals,
+claims, and intent are retained separately; a PR title never becomes a
+requirement. The packet may contain current-head `verification_observations`;
+hints bind a requirement to observations by exact ID and cannot turn unrelated
+green CI into a passing requirement.
 
 Fixtures are for deterministic replay, not proof of source authenticity. The next golden
 vertical slice will replace the current small PR #574 example with a complete source packet.

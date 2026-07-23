@@ -20,7 +20,8 @@ The open core provides:
 - offline JSON fixture ingestion;
 - live GitHub pull request metadata and changed-file ingestion;
 - GitHub GraphQL Development-link Issue ingestion plus current-head REST check-run and commit-status observations;
-- conservative requirement extraction in the analysis layer from explicit Markdown requirement sections;
+- one-pass semantic extraction with explicit authority for Issue/PR obligations,
+  objectives, claims, and intent;
 - a deterministic analyzer that owns implementation and verification status;
 - a requirement-first static HTML renderer;
 - a local CLI;
@@ -29,7 +30,22 @@ The open core provides:
 - an Actions workflow for automatic PR reports and manually targeted reviews;
 - clean-install CI with network-free tests.
 
-The GitHub adapter intentionally emits source facts only. Linked Issues come from GitHub's `closingIssuesReferences` GraphQL field, not Issue numbers typed into PR prose. The analyzer prefers linked-Issue acceptance criteria, assigns delivery requirements `R1`, `R2`, ... and scope guardrails `G1`, `G2`, ..., then combines diff evidence with exact verification observation IDs. Requirements without requirement-specific execution remain verification `not_observed`, even when generic CI is green.
+The GitHub adapter intentionally emits source facts only. Linked Issues come
+from GitHub's `closingIssuesReferences` GraphQL field, not Issue numbers typed
+into PR prose. The analyzer applies one authority policy:
+
+- linked-Issue Acceptance Criteria, Requirements, and Definition of Done become
+  authoritative `R1`, `R2`, ... obligations and `G1`, `G2`, ... guardrails;
+- without a selected linked Issue, the same explicit PR-description sections
+  become provisional obligations;
+- Goals/Objectives become `O1`, `O2`, ... retrieval context;
+- Summary/Implementation/Changes become `C1`, `C2`, ... PR-authored claims;
+- the PR introduction or title is intent only and is never promoted to `R1`.
+
+When no explicit acceptance criteria are present, the report says so instead
+of manufacturing a requirement from the PR title. Requirements without
+requirement-specific execution remain verification `not_observed`, even when
+generic CI is green.
 
 ## Quick start
 

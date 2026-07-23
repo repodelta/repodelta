@@ -148,7 +148,12 @@ def test_github_adapter_reports_file_cap_without_inferring_requirements() -> Non
         "github_head_sha_unavailable",
     ]
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
-    assert brief.assessments[0].requirement.text == "Fallback requirement"
+    assert brief.assessments == ()
+    assert brief.intent.text == "No structured requirements here."
+    assert brief.intent.authority == "pr_description"
+    html = render_html(brief)
+    assert "No explicit acceptance criteria found." in html
+    assert "R1" not in html
 
 
 def test_github_graphql_linked_issue_supplies_primary_acceptance_criteria() -> None:

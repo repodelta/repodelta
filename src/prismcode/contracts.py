@@ -10,6 +10,13 @@ if TYPE_CHECKING:
 
 DiagnosticSeverity = Literal["info", "warning", "error"]
 RequirementKind = Literal["deliverable", "guardrail", "manual_acceptance"]
+StatementRole = Literal["obligation", "objective", "claim", "intent"]
+StatementAuthority = Literal[
+    "issue",
+    "pr_description",
+    "pr_title",
+    "provided",
+]
 ImplementationStatus = Literal["observed", "partial", "not_observed", "contradicted"]
 VerificationStatus = Literal[
     "passed", "failed", "pending", "not_observed", "stale", "manual_required"
@@ -107,13 +114,21 @@ class ReviewSourcePacket:
 
 
 @dataclass(frozen=True)
-class Requirement:
-    """A source assertion. Analysis conclusions never belong in this record."""
+class ReviewStatement:
+    """A provenance-bearing source assertion, never an analysis conclusion."""
 
     id: str
     text: str
-    kind: RequirementKind = "deliverable"
+    role: StatementRole = "obligation"
+    authority: StatementAuthority = "provided"
     sources: tuple[SourceRef, ...] = ()
+
+
+@dataclass(frozen=True)
+class Requirement(ReviewStatement):
+    """An obligation statement that can be assessed by the analyzer."""
+
+    kind: RequirementKind = "deliverable"
 
 
 @dataclass(frozen=True)
@@ -166,12 +181,14 @@ class RequirementAssessment:
 @dataclass(frozen=True)
 class ReviewBrief:
     packet: ReviewSourcePacket
-    intent: str
+    intent: ReviewStatement
     assessments: tuple[RequirementAssessment, ...]
     guardrails: tuple[Requirement, ...] = ()
+    objectives: tuple[ReviewStatement, ...] = ()
+    claims: tuple[ReviewStatement, ...] = ()
     structural_graph: StructuralGraphResult | None = None
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v3"
+    schema_version: str = "review_brief.v4"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

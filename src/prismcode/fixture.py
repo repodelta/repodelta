@@ -67,6 +67,8 @@ def load_fixture(path: str | Path) -> AnalysisInput:
         Requirement(
             id=item["id"],
             text=item["text"],
+            role=item.get("role", "obligation"),
+            authority=item.get("authority", "provided"),
             kind=item.get("kind", "deliverable"),
             sources=tuple(_source(source) for source in item.get("sources", [])),
         )

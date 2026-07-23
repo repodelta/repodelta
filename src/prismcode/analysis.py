@@ -14,7 +14,7 @@ from .contracts import (
     SourceRef,
     VerificationAssessment,
 )
-from .criteria import extract_intent, extract_requirements
+from .criteria import extract_review_semantics
 from .binding import build_deterministic_evidence_hints
 
 
@@ -28,26 +28,30 @@ class DeterministicAnalyzer:
     def analyze(self, analysis_input: AnalysisInput) -> ReviewBrief:
         packet = analysis_input.packet
         packet.validate_consistency()
-        pr_body = next((r.body for r in packet.source_records if r.kind == "pull_request"), "")
+        pr_record = next(
+            (r for r in packet.source_records if r.kind == "pull_request"),
+            None,
+        )
+        pr_body = pr_record.body if pr_record else ""
         issue_records = tuple(
             r for r in packet.source_records if r.kind in {"linked_issue", "ticket"}
         )
         issue_record = issue_records[0] if len(issue_records) == 1 else None
-        requirements = analysis_input.requirements or extract_requirements(
-            issue_record.body if issue_record else pr_body,
-            source=SourceRef(
-                label="linked issue" if issue_record else "pull request description",
-                url=issue_record.url if issue_record else packet.source_url,
+        semantics = extract_review_semantics(
+            issue_body=issue_record.body if issue_record else None,
+            issue_source=(
+                SourceRef(label="linked issue", url=issue_record.url)
+                if issue_record
+                else None
             ),
+            pr_body=pr_body,
+            pr_source=SourceRef(
+                label="pull request description",
+                url=(pr_record.url if pr_record else None) or packet.source_url,
+            ),
+            pr_title=packet.title,
         )
-        if not requirements:
-            requirements = (
-                Requirement(
-                    id="R1",
-                    text=packet.title,
-                    sources=(SourceRef(label="pull request title", url=packet.source_url),),
-                ),
-            )
+        requirements = analysis_input.requirements or semantics.obligations
         provided_hints = analysis_input.evidence_hints or build_deterministic_evidence_hints(
             requirements,
             packet,
@@ -65,12 +69,11 @@ class DeterministicAnalyzer:
         )
         return ReviewBrief(
             packet=packet,
-            intent=extract_intent(
-                issue_record.body if issue_record else pr_body,
-                issue_record.title if issue_record else packet.title,
-            ),
+            intent=semantics.intent,
             assessments=assessments,
             guardrails=guardrails,
+            objectives=semantics.objectives,
+            claims=semantics.claims,
             structural_graph=analysis_input.structural_graph,
         )
 
