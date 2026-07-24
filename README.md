@@ -27,6 +27,8 @@ The open core provides:
 - a local CLI;
 - optional repository-local Codegraph hunk-to-symbol mapping with explicit
   availability and freshness diagnostics;
+- bounded Codegraph paths from changed symbols to unchanged runtime/test
+  neighbors;
 - an Actions workflow for automatic PR reports and manually targeted reviews;
 - clean-install CI with network-free tests.
 
@@ -100,11 +102,17 @@ prismcode review \
 ```
 
 When the checkout revision, indexed content hashes, and PR head all match,
-PrismCode maps exact changed hunk lines to Codegraph symbols:
+PrismCode maps exact changed hunk lines to Codegraph symbols and records
+bounded structural paths:
 
 ```text
-Structural mapping: Codegraph available · 4/4 hunks mapped to 3 symbols · lexical requirement binding retained
+Structural mapping: Codegraph available · 4/4 hunks mapped to 3 symbols · 12 bounded paths · lexical requirement binding retained
 ```
+
+Path expansion starts only from exact changed symbols, follows an explicit
+relation allowlist in both directions, and stops at deterministic three-hop,
+node, and path budgets. Runtime/test classification and GitHub line links are
+recorded as candidate facts; lexical requirement binding remains authoritative.
 
 #### Structure-aware review using another checkout
 

@@ -8,10 +8,13 @@ from pathlib import Path
 from .contracts import Diagnostic, SourceRef
 from .diff_hunks import ChangedHunk
 from .structural_graph import (
+    GraphPathStep,
     GraphSymbol,
     HunkSymbolOverlap,
     StructuralGraphIndexStatus,
     StructuralGraphResult,
+    StructuralPath,
+    StructuralTraversalPolicy,
 )
 
 _PROVIDER = "codegraph"
@@ -305,6 +308,162 @@ class CodegraphProvider:
             diagnostics=tuple(diagnostics),
         )
 
+    def expand_paths(
+        self,
+        result: StructuralGraphResult,
+        *,
+        policy: StructuralTraversalPolicy = StructuralTraversalPolicy(),
+    ) -> StructuralGraphResult:
+        """Expand exact changed-symbol seeds with a bounded, direction-aware BFS."""
+
+        if not result.index.usable or not result.overlaps:
+            return result
+        if policy.max_depth < 1 or policy.max_nodes < 1 or policy.max_paths < 1:
+            return result
+
+        seed_symbols = {
+            overlap.symbol.id: overlap.symbol for overlap in result.overlaps
+        }
+        paths: list[StructuralPath] = []
+        discovered = set(seed_symbols)
+        truncated = False
+        try:
+            with self._connect() as connection:
+                connection.row_factory = sqlite3.Row
+                for seed in sorted(
+                    seed_symbols.values(), key=lambda item: item.qualified_name
+                ):
+                    queue: list[tuple[GraphSymbol, tuple[GraphPathStep, ...], frozenset[str]]] = [
+                        (seed, (), frozenset({seed.id}))
+                    ]
+                    cursor = 0
+                    while cursor < len(queue):
+                        current, steps, visited = queue[cursor]
+                        cursor += 1
+                        if len(steps) >= policy.max_depth:
+                            continue
+                        for step in self._neighbor_steps(
+                            connection,
+                            current,
+                            policy.relation_allowlist,
+                        ):
+                            if step.target.id in visited:
+                                continue
+                            if len(paths) >= policy.max_paths:
+                                truncated = True
+                                break
+                            if (
+                                step.target.id not in discovered
+                                and len(discovered) >= policy.max_nodes
+                            ):
+                                truncated = True
+                                continue
+                            discovered.add(step.target.id)
+                            next_steps = (*steps, step)
+                            path_symbols = (seed, *(item.target for item in next_steps))
+                            paths.append(
+                                StructuralPath(
+                                    seed_symbol_id=seed.id,
+                                    steps=next_steps,
+                                    classification=_classify_path(path_symbols),
+                                    sources=tuple(
+                                        source
+                                        for symbol in path_symbols
+                                        for source in symbol.sources
+                                    ),
+                                )
+                            )
+                            queue.append(
+                                (
+                                    step.target,
+                                    next_steps,
+                                    visited | {step.target.id},
+                                )
+                            )
+                        if len(paths) >= policy.max_paths:
+                            break
+                    if len(paths) >= policy.max_paths:
+                        break
+        except sqlite3.Error as exc:
+            return StructuralGraphResult(
+                index=result.index,
+                hunk_count=result.hunk_count,
+                overlaps=result.overlaps,
+                diagnostics=(
+                    *result.diagnostics,
+                    Diagnostic(
+                        code="codegraph_path_query_failed",
+                        message=f"Codegraph path query failed: {type(exc).__name__}.",
+                        severity="error",
+                    ),
+                ),
+            )
+
+        diagnostics = list(result.diagnostics)
+        if truncated:
+            diagnostics.append(
+                Diagnostic(
+                    code="structural_graph_traversal_budget_reached",
+                    message=(
+                        "Structural path expansion stopped at its deterministic "
+                        f"budget ({policy.max_depth} hops, {policy.max_nodes} nodes, "
+                        f"{policy.max_paths} paths)."
+                    ),
+                    severity="info",
+                )
+            )
+        return StructuralGraphResult(
+            index=result.index,
+            hunk_count=result.hunk_count,
+            overlaps=result.overlaps,
+            paths=tuple(paths),
+            diagnostics=tuple(diagnostics),
+        )
+
+    def _neighbor_steps(
+        self,
+        connection: sqlite3.Connection,
+        symbol: GraphSymbol,
+        relation_allowlist: tuple[str, ...],
+    ) -> tuple[GraphPathStep, ...]:
+        relations = tuple(dict.fromkeys(relation_allowlist))
+        if not relations:
+            return ()
+        placeholders = ",".join("?" for _ in relations)
+        rows = connection.execute(
+            f"""
+            SELECT e.source, e.target, e.kind,
+                   s.id AS source_id, s.kind AS source_kind, s.name AS source_name,
+                   s.qualified_name AS source_qualified_name,
+                   s.file_path AS source_file_path, s.language AS source_language,
+                   s.start_line AS source_start_line, s.end_line AS source_end_line,
+                   t.id AS target_id, t.kind AS target_kind, t.name AS target_name,
+                   t.qualified_name AS target_qualified_name,
+                   t.file_path AS target_file_path, t.language AS target_language,
+                   t.start_line AS target_start_line, t.end_line AS target_end_line
+            FROM edges e
+            JOIN nodes s ON s.id = e.source
+            JOIN nodes t ON t.id = e.target
+            WHERE e.kind IN ({placeholders})
+              AND (e.source = ? OR e.target = ?)
+            ORDER BY e.kind, s.qualified_name, t.qualified_name
+            """,
+            (*relations, symbol.id, symbol.id),
+        ).fetchall()
+        steps: list[GraphPathStep] = []
+        for row in rows:
+            outgoing = str(row["source"]) == symbol.id
+            neighbor = _prefixed_symbol(row, "target" if outgoing else "source")
+            steps.append(
+                GraphPathStep(
+                    source=symbol,
+                    target=neighbor,
+                    relation=str(row["kind"]),
+                    direction="outgoing" if outgoing else "incoming",
+                )
+            )
+        return tuple(steps)
+
     def _symbols_for_hunk(
         self, connection: sqlite3.Connection, hunk: ChangedHunk
     ) -> list[tuple[GraphSymbol, tuple[int, ...]]]:
@@ -374,6 +533,51 @@ def _symbol(row: sqlite3.Row) -> GraphSymbol:
             ),
         ),
     )
+
+
+def _prefixed_symbol(row: sqlite3.Row, prefix: str) -> GraphSymbol:
+    file_path = str(row[f"{prefix}_file_path"])
+    start_line = int(row[f"{prefix}_start_line"])
+    end_line = int(row[f"{prefix}_end_line"])
+    return GraphSymbol(
+        id=str(row[f"{prefix}_id"]),
+        kind=str(row[f"{prefix}_kind"]),
+        name=str(row[f"{prefix}_name"]),
+        qualified_name=str(row[f"{prefix}_qualified_name"]),
+        file_path=file_path,
+        language=str(row[f"{prefix}_language"]),
+        start_line=start_line,
+        end_line=end_line,
+        sources=(
+            SourceRef(
+                label="Codegraph symbol",
+                path=file_path,
+                line_start=start_line,
+                line_end=end_line,
+            ),
+        ),
+    )
+
+
+def _is_test_path(path: str) -> bool:
+    normalized = path.casefold().replace("\\", "/")
+    name = Path(normalized).name
+    return (
+        normalized.startswith(("test/", "tests/"))
+        or "/test/" in normalized
+        or "/tests/" in normalized
+        or name.startswith("test_")
+        or name.endswith(("_test.py", ".test.js", ".test.ts", ".spec.js", ".spec.ts"))
+    )
+
+
+def _classify_path(symbols: tuple[GraphSymbol, ...]) -> str:
+    kinds = {_is_test_path(symbol.file_path) for symbol in symbols}
+    if kinds == {True}:
+        return "test"
+    if kinds == {False}:
+        return "runtime"
+    return "mixed"
 
 
 def _schema_error(connection: sqlite3.Connection) -> str:
