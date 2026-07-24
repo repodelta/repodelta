@@ -31,6 +31,7 @@ The open core provides:
   neighbors;
 - one canonical, deterministic evidence catalog for changed files, symbols,
   paths, and CI/runtime observations;
+- explainable deterministic R/G/O/C-to-evidence and R/G-to-claim candidates;
 - an Actions workflow for automatic PR reports and manually targeted reviews;
 - clean-install CI with network-free tests.
 

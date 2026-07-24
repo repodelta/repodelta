@@ -17,6 +17,9 @@ fixture or GitHub
   -> one-pass semantic extraction + optional EvidenceHints
        -> Issue/PR obligations (R/G)
        -> objectives (O), claims (C), intent (I)
+  -> deterministic CandidateBindingSet
+       -> R/G/O/C -> Evidence candidates
+       -> R/G -> C candidates
   -> DeterministicAnalyzer
   -> ReviewBrief
   -> HTML renderer
@@ -120,6 +123,28 @@ implementation objects are accepted only at the fixture adapter boundary,
 converted to provided evidence with deterministic IDs, and then referenced by
 ID. The catalog does not bind evidence to R/G/O/C; candidate binding remains a
 separate follow-up stage.
+
+## Candidate binding
+
+`CandidateBindingSet` connects semantic statements to the evidence catalog
+without changing either source. It emits two many-to-many relation kinds:
+
+- `statement_evidence` for R/G/O/C to canonical evidence;
+- `requirement_claim` for R/G to PR-authored C statements.
+
+Direct lexical candidates share one tokenizer with the legacy deterministic
+assessment hints. Every binding records feature-level reasons, integer weights,
+matched terms, stable IDs, and any bounded structural path IDs. A lexical
+symbol match may expand to symbols on the same bounded Codegraph path. A
+requirement may also receive a candidate through an aligned claim, but claims
+are optional: direct R/G-to-evidence retrieval always remains available.
+
+Candidate generation has deterministic per-statement/per-kind and total
+budgets. Coverage records requirements without evidence candidates, claims
+without requirement candidates, and evidence not reached by any statement.
+`candidate_support` means retrieval relevance only; it never means implemented,
+verified, satisfied, or in scope. The analyzer remains the sole status
+authority.
 
 The `review` CLI enables this read-only mapping by default, using `--repo-root`
 (the current directory unless specified) to locate the target checkout. The
