@@ -8,6 +8,12 @@ from dataclasses import replace
 from .analysis import DeterministicAnalyzer
 from .codegraph import CodegraphProvider
 from .contracts import AnalysisInput
+from .evaluation import (
+    evaluate_suite,
+    load_evaluation_suite,
+    write_evaluation_json,
+    write_evaluation_markdown,
+)
 from .fixture import load_fixture
 from .github import GitHubApiError, GitHubClient, GitHubPullRequestAdapter
 from .rendering import write_html
@@ -68,12 +74,41 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print individual collection and structural diagnostics",
     )
     review.add_argument("--output", required=True, help="Destination HTML file")
+    evaluate = subparsers.add_parser(
+        "evaluate",
+        help="Evaluate deterministic bindings against an offline golden suite",
+    )
+    evaluate.add_argument("--suite", required=True, help="Evaluation suite JSON")
+    evaluate.add_argument(
+        "--json-output",
+        required=True,
+        help="Destination machine-readable evaluation result",
+    )
+    evaluate.add_argument(
+        "--markdown-output",
+        required=True,
+        help="Destination Markdown evaluation summary",
+    )
     return parser
 
 
 def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
+    if args.command == "evaluate":
+        try:
+            suite = load_evaluation_suite(args.suite)
+            result = evaluate_suite(suite, suite_path=args.suite)
+            json_output = write_evaluation_json(result, args.json_output)
+            markdown_output = write_evaluation_markdown(
+                result, args.markdown_output
+            )
+        except (OSError, ValueError) as exc:
+            print(f"prismcode: error: {exc}", file=sys.stderr)
+            return 2
+        print(json_output)
+        print(markdown_output)
+        return 0 if result.passed else 1
     if args.command != "review":
         return 2
 

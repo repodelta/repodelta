@@ -1,0 +1,49 @@
+{
+  "schema_version": "analysis_fixture.v3",
+  "source_packet": {
+    "schema_version": "review_source_packet.v1",
+    "packet_revision": "sha256:e8b0cb07d144dc3bec9e3ea30dfe1405acbef4fa64eef8717f8e4ac52b55bf54",
+    "repository": "acme/widget",
+    "pull_request": 102,
+    "title": "Connect adapter to persistence",
+    "source_url": "https://github.com/acme/widget/pull/102",
+    "head_sha": "structural-head",
+    "base_sha": "structural-base",
+    "source_records": [
+      {
+        "id": "pr:102",
+        "kind": "pull_request",
+        "repository": "acme/widget",
+        "url": "https://github.com/acme/widget/pull/102",
+        "title": "Connect adapter to persistence",
+        "body": "## Summary\n- Adapter entrypoint invokes core processing and preserves persistence.",
+        "revision": "pr-102-v1",
+        "availability": "available"
+      }
+    ],
+    "changed_files": [
+      {
+        "path": "src/adapter.py",
+        "status": "modified",
+        "additions": 1,
+        "deletions": 1,
+        "changes": 2,
+        "source_url": "https://github.com/acme/widget/blob/structural-head/src/adapter.py",
+        "patch": "@@ -1 +1 @@\n-return old_entrypoint(payload)\n+return adapter_entrypoint(payload)\n"
+      }
+    ],
+    "verification_observations": [],
+    "diagnostics": [],
+    "metadata": {}
+  },
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "Adapter entrypoint invokes core processing and preserves persistence.",
+      "role": "obligation",
+      "authority": "provided",
+      "kind": "deliverable"
+    }
+  ],
+  "evidence": []
+}

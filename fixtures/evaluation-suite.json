@@ -1,0 +1,162 @@
+{
+  "schema_version": "evaluation_suite.v1",
+  "k": 5,
+  "thresholds": {
+    "precision_at_k": 1.0,
+    "recall_at_k": 1.0,
+    "mean_reciprocal_rank": 0.8,
+    "classification_accuracy": 1.0,
+    "max_no_candidate_rate": 0.0
+  },
+  "cases": [
+    {
+      "id": "direct-hunk-and-no-match",
+      "fixture": "evaluation/direct-hunk.json",
+      "expected_bindings": [
+        {
+          "kind": "statement_evidence",
+          "source_id": "R1",
+          "target_id": "E:changed_hunk:13c27ca8c4cfe45cfbcc"
+        },
+        {
+          "kind": "statement_evidence",
+          "source_id": "R1",
+          "target_id": "E:changed_hunk:5b5657b12be7abe2bf93"
+        },
+        {
+          "kind": "requirement_claim",
+          "source_id": "R1",
+          "target_id": "C1"
+        }
+      ],
+      "expected_no_bindings": [
+        {
+          "kind": "statement_evidence",
+          "source_id": "R2"
+        }
+      ],
+      "expected_evidence": [
+        {
+          "evidence_id": "E:changed_hunk:13c27ca8c4cfe45cfbcc",
+          "classification": "code"
+        },
+        {
+          "evidence_id": "E:changed_hunk:5b5657b12be7abe2bf93",
+          "classification": "test"
+        }
+      ]
+    },
+    {
+      "id": "bounded-y-x-z",
+      "fixture": "evaluation/structural-path.json",
+      "expected_bindings": [
+        {
+          "kind": "statement_evidence",
+          "source_id": "R1",
+          "target_id": "E:symbol:9e703e599343229d97c1"
+        },
+        {
+          "kind": "statement_evidence",
+          "source_id": "R1",
+          "target_id": "E:symbol:51c78d1cf2a276cc9a40"
+        },
+        {
+          "kind": "statement_evidence",
+          "source_id": "R1",
+          "target_id": "E:symbol:3c8a35c2cab106b983ca"
+        },
+        {
+          "kind": "statement_evidence",
+          "source_id": "R1",
+          "target_id": "E:structural_path:01124120c3c65a9b12f3"
+        },
+        {
+          "kind": "requirement_claim",
+          "source_id": "R1",
+          "target_id": "C1"
+        }
+      ],
+      "expected_evidence": [
+        {
+          "evidence_id": "E:symbol:9e703e599343229d97c1",
+          "classification": "code"
+        },
+        {
+          "evidence_id": "E:symbol:3c8a35c2cab106b983ca",
+          "classification": "test"
+        }
+      ],
+      "structural_graph": {
+        "index": {
+          "state": "available",
+          "provider": "golden",
+          "revision": "structural-head",
+          "database_path": "",
+          "indexed_files": 3,
+          "requested_files": 1,
+          "diagnostics": []
+        },
+        "hunk_count": 1,
+        "symbols": [
+          {
+            "id": "Y",
+            "kind": "function",
+            "name": "adapter_entrypoint",
+            "qualified_name": "src.adapter.adapter_entrypoint",
+            "file_path": "src/adapter.py",
+            "language": "python",
+            "start_line": 1,
+            "end_line": 3
+          },
+          {
+            "id": "X",
+            "kind": "function",
+            "name": "core_processing",
+            "qualified_name": "src.core.core_processing",
+            "file_path": "src/core.py",
+            "language": "python",
+            "start_line": 10,
+            "end_line": 20
+          },
+          {
+            "id": "Z",
+            "kind": "function",
+            "name": "test_persistence",
+            "qualified_name": "tests.test_core.test_persistence",
+            "file_path": "tests/test_core.py",
+            "language": "python",
+            "start_line": 30,
+            "end_line": 40
+          }
+        ],
+        "overlaps": [
+          {
+            "hunk_id": "hunk:src/adapter.py:0",
+            "symbol_id": "Y",
+            "changed_lines": [1]
+          }
+        ],
+        "paths": [
+          {
+            "seed_symbol_id": "Y",
+            "classification": "mixed",
+            "steps": [
+              {
+                "source_id": "Y",
+                "target_id": "X",
+                "relation": "calls",
+                "direction": "outgoing"
+              },
+              {
+                "source_id": "X",
+                "target_id": "Z",
+                "relation": "references",
+                "direction": "incoming"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
