@@ -35,6 +35,8 @@ def test_golden_suite_covers_hunks_claims_structure_and_classification() -> None
     assert result.metrics.no_match_accuracy == 1.0
     assert result.metrics.false_positive_rate == 0.0
     assert result.metrics.classification_accuracy == 1.0
+    assert result.metrics.statement_accuracy == 1.0
+    assert len(result.statements) == 10
     no_match = next(
         item
         for item in result.queries

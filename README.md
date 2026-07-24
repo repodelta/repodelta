@@ -20,8 +20,9 @@ The open core provides:
 - offline JSON fixture ingestion;
 - live GitHub pull request metadata and changed-file ingestion;
 - GitHub GraphQL Development-link Issue ingestion plus current-head REST check-run and commit-status observations;
-- one-pass semantic extraction with explicit authority for Issue/PR obligations,
-  objectives, claims, and intent;
+- one-pass semantic extraction with separate role, purpose, and authority for
+  Issue/PR obligations, goals, scope, boundaries, implementation, baselines,
+  verification claims, and intent;
 - a deterministic analyzer that builds explainable evidence candidates without declaring implementation or verification status;
 - a requirement-first static HTML renderer;
 - a local CLI;
@@ -31,7 +32,8 @@ The open core provides:
   neighbors;
 - one canonical, deterministic evidence catalog for changed hunks, exact
   symbols, bounded paths, file fallbacks, and CI/runtime observations;
-- explainable deterministic R/G/O/C-to-evidence and R/G-to-claim candidates;
+- explainable deterministic R/G/O/S/C/B/V-to-evidence and R/G-to-claim
+  candidates;
 - an R-first consistency view with claim/evidence candidates, binding basis,
   source links, and vertically aggregated coverage gaps;
 - an Actions workflow for automatic PR reports and manually targeted reviews;
@@ -48,7 +50,13 @@ into PR prose. The analyzer applies one authority policy:
 - without a selected linked Issue, the same explicit PR-description sections
   become provisional obligations;
 - Goals/Objectives become `O1`, `O2`, ... retrieval context;
-- Summary/Implementation/Changes become `C1`, `C2`, ... PR-authored claims;
+- Scope/In scope become `S1`, `S2`, ... retrieval context and never acceptance
+  criteria;
+- linked-Issue Out of scope/Boundary statements become authoritative
+  `G1`, `G2`, ... guardrails;
+- PR Summary/Implementation/Changes and Boundary statements become
+  `C1`, `C2`, ... PR-authored claims;
+- PR Baseline/Results and Verification/Testing become `B1` and `V1` claims;
 - the PR introduction or title is intent only and is never promoted to `R1`.
 
 When no explicit acceptance criteria are present, the report says so instead

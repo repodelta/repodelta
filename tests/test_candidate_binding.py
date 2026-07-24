@@ -282,7 +282,7 @@ def test_analyzer_serializes_candidates_without_using_them_as_status() -> None:
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
     serialized = brief.to_dict()
 
-    assert brief.schema_version == "review_brief.v7"
+    assert brief.schema_version == "review_brief.v8"
     assert brief.candidate_bindings.schema_version == "candidate_binding_set.v1"
     assert any(
         item.kind == "requirement_claim"

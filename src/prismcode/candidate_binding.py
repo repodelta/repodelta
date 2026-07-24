@@ -32,6 +32,7 @@ def build_candidate_bindings(
     objectives: tuple[ReviewStatement, ...],
     claims: tuple[ReviewStatement, ...],
     evidence_catalog: EvidenceCatalog,
+    scope: tuple[ReviewStatement, ...] = (),
     policy: CandidateBindingPolicy = CandidateBindingPolicy(),
 ) -> CandidateBindingSet:
     """Generate explainable retrieval candidates without review conclusions."""
@@ -40,6 +41,7 @@ def build_candidate_bindings(
     statements: tuple[ReviewStatement, ...] = (
         *requirements,
         *objectives,
+        *scope,
         *claims,
     )
     evidence = evidence_catalog.items

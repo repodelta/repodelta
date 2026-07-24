@@ -3,6 +3,7 @@ from __future__ import annotations
 from prismcode.analysis import DeterministicAnalyzer
 from prismcode.contracts import (
     AnalysisInput,
+    ChangedFile,
     Requirement,
     ReviewSourcePacket,
     SourceRef,
@@ -18,6 +19,7 @@ def _packet(
     title: str = "Add structural graph foundation",
     pr_body: str = "",
     issue_body: str | None = None,
+    changed_files: tuple[ChangedFile, ...] = (),
 ) -> ReviewSourcePacket:
     records = [
         SourceRecord(
@@ -45,6 +47,7 @@ def _packet(
         pull_request=8,
         title=title,
         source_records=tuple(records),
+        changed_files=changed_files,
         source_url="https://github.com/acme/widget/pull/8",
     ).with_revision()
 
@@ -286,3 +289,129 @@ def test_provided_requirements_override_extraction_without_losing_context() -> N
     assert [item.text for item in brief.claims] == [
         "Adds a structural port."
     ]
+
+
+def test_scope_boundary_baseline_and_verification_preserve_authority() -> None:
+    packet = _packet(
+        issue_body=(
+            "## Goal\n"
+            "- Make evaluation repeatable.\n\n"
+            "## Scope\n"
+            "- Define evaluation contracts.\n"
+            "- Add offline golden cases.\n\n"
+            "## Acceptance criteria\n"
+            "- Evaluation output is deterministic.\n\n"
+            "## Out of scope\n"
+            "- Changing candidate ranking.\n"
+            "- Adding an LLM.\n"
+        ),
+        pr_body=(
+            "Add an offline evaluation foundation.\n\n"
+            "## Summary\n"
+            "- Add evaluation contracts.\n\n"
+            "## Boundary\n"
+            "- Candidate ranking is unchanged.\n"
+            "- No LLM is introduced.\n\n"
+            "## Baseline\n"
+            "- Precision at five is 1.0.\n\n"
+            "## Verification\n"
+            "- The full test suite passes.\n"
+        ),
+    )
+
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+
+    assert [
+        (item.id, item.purpose, item.authority)
+        for item in brief.requirements
+    ] == [("R1", "acceptance", "issue")]
+    assert [
+        (item.id, item.purpose, item.authority)
+        for item in brief.guardrails
+    ] == [
+        ("G1", "guardrail", "issue"),
+        ("G2", "guardrail", "issue"),
+    ]
+    assert [
+        (item.id, item.purpose, item.authority)
+        for item in brief.objectives
+    ] == [("O1", "goal", "issue")]
+    assert [
+        (item.id, item.purpose, item.authority)
+        for item in brief.scope
+    ] == [
+        ("S1", "scope", "issue"),
+        ("S2", "scope", "issue"),
+    ]
+    assert [
+        (item.id, item.purpose, item.authority)
+        for item in brief.claims
+    ] == [
+        ("C1", "implementation", "pr_description"),
+        ("C2", "boundary", "pr_description"),
+        ("C3", "boundary", "pr_description"),
+        ("B1", "baseline", "pr_description"),
+        ("V1", "verification", "pr_description"),
+    ]
+    assert all(item.sources[0].line_start for item in (*brief.scope, *brief.claims))
+    html = render_html(brief)
+    assert "Scope context · 2 statements" in html
+    assert "Scope guardrails" in html
+
+
+def test_pr_scope_never_becomes_provisional_acceptance() -> None:
+    packet = _packet(
+        pr_body=(
+            "## Scope\n"
+            "- Add a deterministic evaluator.\n\n"
+            "## Results\n"
+            "- Precision at five is 1.0.\n\n"
+            "## Testing\n"
+            "- Evaluation tests pass.\n"
+        )
+    )
+
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+
+    assert brief.requirements == ()
+    assert [item.id for item in brief.scope] == ["S1"]
+    assert [(item.id, item.purpose) for item in brief.claims] == [
+        ("B1", "baseline"),
+        ("V1", "verification"),
+    ]
+
+
+def test_context_and_typed_claims_use_the_canonical_binding_path() -> None:
+    packet = _packet(
+        pr_body=(
+            "## Scope\n"
+            "- Serialize statement purpose and authority.\n\n"
+            "## Boundary\n"
+            "- Candidate ranking remains unchanged.\n\n"
+            "## Baseline\n"
+            "- Statement accuracy is measured offline.\n\n"
+            "## Verification\n"
+            "- Semantic taxonomy tests pass.\n"
+        ),
+        changed_files=(
+            ChangedFile(
+                path="src/prismcode/evaluation.py",
+                patch=(
+                    "@@ -1,1 +1,4 @@\n"
+                    "+statement purpose and authority\n"
+                    "+candidate ranking unchanged\n"
+                    "+statement accuracy measured offline\n"
+                    "+semantic taxonomy tests pass\n"
+                ),
+            ),
+        ),
+    )
+
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    source_ids = {
+        item.source_id
+        for item in brief.candidate_bindings.items
+        if item.kind == "statement_evidence"
+    }
+
+    assert {"S1", "C1", "B1", "V1"} <= source_ids

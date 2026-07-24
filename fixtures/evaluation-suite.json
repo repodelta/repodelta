@@ -6,6 +6,7 @@
     "recall_at_k": 1.0,
     "mean_reciprocal_rank": 0.8,
     "classification_accuracy": 1.0,
+    "statement_accuracy": 1.0,
     "max_no_candidate_rate": 0.0,
     "no_match_accuracy": 1.0,
     "max_false_positive_rate": 0.0
@@ -184,6 +185,73 @@
           }
         ]
       }
+    },
+    {
+      "id": "semantic-section-taxonomy",
+      "fixture": "evaluation/semantic-sections.json",
+      "expected_bindings": [],
+      "expected_statements": [
+        {
+          "statement_id": "R1",
+          "role": "obligation",
+          "purpose": "acceptance",
+          "authority": "issue"
+        },
+        {
+          "statement_id": "G1",
+          "role": "obligation",
+          "purpose": "guardrail",
+          "authority": "issue"
+        },
+        {
+          "statement_id": "G2",
+          "role": "obligation",
+          "purpose": "guardrail",
+          "authority": "issue"
+        },
+        {
+          "statement_id": "O1",
+          "role": "objective",
+          "purpose": "goal",
+          "authority": "issue"
+        },
+        {
+          "statement_id": "S1",
+          "role": "context",
+          "purpose": "scope",
+          "authority": "issue"
+        },
+        {
+          "statement_id": "C1",
+          "role": "claim",
+          "purpose": "implementation",
+          "authority": "pr_description"
+        },
+        {
+          "statement_id": "C2",
+          "role": "claim",
+          "purpose": "boundary",
+          "authority": "pr_description"
+        },
+        {
+          "statement_id": "B1",
+          "role": "claim",
+          "purpose": "baseline",
+          "authority": "pr_description"
+        },
+        {
+          "statement_id": "V1",
+          "role": "claim",
+          "purpose": "verification",
+          "authority": "pr_description"
+        },
+        {
+          "statement_id": "I1",
+          "role": "intent",
+          "purpose": "intent",
+          "authority": "pr_title"
+        }
+      ]
     }
   ]
 }
