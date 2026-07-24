@@ -37,15 +37,18 @@ is deterministic and explainable; it is not a probability.
 - Budgets cap candidates per statement/relation kind and across the review.
 - Coverage explicitly names requirements without evidence candidates, claims
   without requirement candidates, and evidence without statement candidates.
-- No candidate changes implementation or verification status.
+- Candidate relevance is never an implementation, verification, or acceptance
+  conclusion.
 
 ## Report projection
 
-Each R card keeps the formal implementation, test, and CI chips. A separate
-`Consistency candidates` area lists related C statements and canonical
-evidence. Each row exposes its retrieval score and every binding reason; source
-links remain attached to the underlying statement or evidence.
+`Review checks` uses R statements as its primary axis when explicit acceptance
+criteria exist and PR-authored C statements as a fallback axis otherwise.
+Related claims and canonical evidence appear inside the corresponding review
+card. Each evidence row exposes its retrieval score, binding reasons, and
+source links. The renderer limits visible evidence candidates per statement;
+this presentation limit does not alter the canonical binding set.
 
-Needs attention aggregates candidate coverage across the review. Its wording
-always includes `candidate` and distinguishes communication/retrieval gaps from
-implementation or verification conclusions.
+`Needs attention` aggregates acceptance-basis, claim, evidence, source, CI, and
+scope coverage across the review. Its wording distinguishes
+communication/retrieval gaps from implementation or verification conclusions.

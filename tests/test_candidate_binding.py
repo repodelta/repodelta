@@ -454,4 +454,4 @@ def test_report_limits_visible_candidates_without_discarding_bindings() -> None:
 
     assert len(bindings) == 8
     assert html.count("CHANGED HUNK") == 6
-    assert "2 additional candidates retained in report data." in html
+    assert "2 additional candidates not shown." in html

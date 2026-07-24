@@ -47,15 +47,10 @@ class DeterministicAnalyzer:
             pr_title=packet.title,
         )
         requirements = analysis_input.requirements or semantics.obligations
-        supplied = (
-            analysis_input.evidence_catalog.items
-            if analysis_input.evidence_catalog is not None
-            else ()
-        )
         evidence_catalog = build_evidence_catalog(
             packet,
             analysis_input.structural_graph,
-            supplied=supplied,
+            supplied=analysis_input.supplied_evidence,
         )
         deliverables = tuple(item for item in requirements if item.kind != "guardrail")
         guardrails = tuple(item for item in requirements if item.kind == "guardrail")

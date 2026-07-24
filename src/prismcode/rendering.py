@@ -206,7 +206,7 @@ def _candidate_evidence_rows(
     if hidden_count:
         rows.append(
             '<div class="candidate-overflow">'
-            f"{hidden_count} additional candidates retained in report data."
+            f"{hidden_count} additional candidates not shown."
             "</div>"
         )
     return "".join(rows)

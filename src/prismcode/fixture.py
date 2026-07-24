@@ -15,10 +15,7 @@ from .contracts import (
     SourceRef,
     VerificationObservation,
 )
-from .evidence_graph import (
-    build_evidence_catalog,
-    provided_evidence,
-)
+from .evidence_graph import provided_evidence
 
 
 def _source(value: dict[str, Any]) -> SourceRef:
@@ -86,7 +83,6 @@ def load_fixture(path: str | Path) -> AnalysisInput:
     )
     raw_evidence = tuple(raw.get("evidence", []))
     supplied = tuple(_evidence(value) for value in raw_evidence)
-    catalog = build_evidence_catalog(packet, supplied=supplied)
     known_ids = {requirement.id for requirement in requirements}
     unknown = sorted(
         {
@@ -101,5 +97,5 @@ def load_fixture(path: str | Path) -> AnalysisInput:
     return AnalysisInput(
         packet=packet,
         requirements=requirements,
-        evidence_catalog=catalog,
+        supplied_evidence=supplied,
     )

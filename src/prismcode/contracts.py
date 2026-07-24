@@ -195,7 +195,7 @@ class AnalysisInput:
     packet: ReviewSourcePacket
     requirements: tuple[Requirement, ...] = ()
     structural_graph: StructuralGraphResult | None = None
-    evidence_catalog: EvidenceCatalog | None = None
+    supplied_evidence: tuple[EvidenceItem, ...] = ()
 
 
 @dataclass(frozen=True)
