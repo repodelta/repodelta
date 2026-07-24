@@ -49,6 +49,7 @@ def test_fixture_to_requirement_first_html(tmp_path: Path) -> None:
     assert "No verification evidence recorded." not in html
     assert "CI gap" in html
     assert "Scope guardrails" in html
+    assert "G5, R5 have no canonical evidence candidate" not in html
     assert "Collection notes" not in html
     assert "CODE · unit_semantic_alignment_trace.py" in html
     assert "TEST · test_workspace_public_review_map_routes.py" in html

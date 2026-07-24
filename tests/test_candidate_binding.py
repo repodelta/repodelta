@@ -273,7 +273,7 @@ def test_analyzer_serializes_candidates_without_using_them_as_status() -> None:
         ),
         changed_files=(
             ChangedFile(
-                path="src/core.py",
+                path="src/core_processing.py",
                 patch="+def bounded_core_processing(): pass",
             ),
         ),
@@ -327,17 +327,52 @@ def test_consistency_report_keeps_candidates_separate_from_conclusions() -> None
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
     html = render_html(brief)
 
-    assert "Consistency candidates" in html
+    assert "Review checks" in html
+    assert "Review evidence" in html
     assert "Retrieval relevance only · not an acceptance conclusion" in html
     assert "Related PR claims" in html
-    assert "Candidate evidence" in html
-    assert "CHANGED FILE" in html
+    assert ">Evidence<" in html
+    assert "OBSERVED" in html
     assert "CHANGED CHANGED FILE" not in html
     assert "term overlap" in html and "relevance " in html
-    assert "Claim coverage candidates" in html and "R2" in html
-    assert "Evidence candidate coverage" in html
-    assert "Claim evidence candidates" in html and "C2" in html
-    assert "Unrelated claim candidates" in html
+    assert "PR claim coverage" in html and "R2" in html
+    assert "Requirement evidence coverage" in html
+    assert "Claim evidence coverage" in html and "C2" in html
+    assert "Claims without acceptance links" in html
     assert "Changed evidence without statement candidates" in html
     assert "Modified file: docs/notes.md" in html
     assert brief.assessments[1].implementation.status == "not_observed"
+
+
+def test_claims_are_fallback_review_axis_when_acceptance_is_missing() -> None:
+    packet = ReviewSourcePacket(
+        repository="acme/widget",
+        pull_request=13,
+        title="Report claim evidence",
+        source_records=(
+            SourceRecord(
+                id="pr:13",
+                kind="pull_request",
+                repository="acme/widget",
+                body="## Summary\n- Connect adapter to core processing.",
+            ),
+        ),
+        changed_files=(
+            ChangedFile(
+                path="src/core_processing.py",
+                patch="+def core_processing(): pass",
+            ),
+        ),
+    ).with_revision()
+
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    html = render_html(brief)
+
+    assert brief.assessments == ()
+    assert "Requirement checks" not in html
+    assert "Review context" not in html
+    assert "Review checks" in html
+    assert '<span class="req-id">C1</span>' in html
+    assert "No acceptance link" in html
+    assert "Modified file: src/core_processing.py" in html
+    assert "Acceptance basis" in html

@@ -38,9 +38,17 @@ _ROLE_BY_HEADING = {
     **{heading: "objective" for heading in _OBJECTIVE_HEADINGS},
     **{heading: "claim" for heading in _CLAIM_HEADINGS},
 }
-_CHECKLIST_RE = re.compile(r"^\s*[-*+]\s+\[[ xX]\]\s+(.+?)\s*$")
-_BULLET_RE = re.compile(r"^\s*(?:[-*+]|\d+[.)])\s+(.+?)\s*$")
+_LIST_ITEM_RE = re.compile(
+    r"^(?P<indent>[ \t]*)"
+    r"(?:(?:[-*+]|\u2022|\u00b7|\u25aa|\u25e6)\s+(?:\[[ xX]\]\s+)?"
+    r"|(?:\d+[.)]|\(\d+\)|\d+\u3001|[一二三四五六七八九十]+\u3001)\s*"
+    r"|(?:R|AC|REQ)[-_ ]?\d+\s*[:.\u3001]\s*)"
+    r"(?P<text>.+?)\s*$",
+    re.IGNORECASE,
+)
+_INLINE_NUMBER_RE = re.compile(r"(?:(?<=^)|(?<=[;\uff1b]))\s*(?:\d+[.)]|\(\d+\))\s*")
 _HEADING_RE = re.compile(r"^\s{0,3}#{1,6}\s+(.+?)\s*#*\s*$")
+_FENCE_RE = re.compile(r"^\s*(```+|~~~+)")
 
 
 @dataclass(frozen=True)
@@ -49,6 +57,17 @@ class _ParsedItem:
     role: StatementRole
     section: str
     line: int
+
+
+@dataclass
+class _ListItem:
+    text: str
+    role: StatementRole
+    section: str
+    line: int
+    indent: int
+    parent: int | None = None
+    has_children: bool = False
 
 
 @dataclass(frozen=True)
@@ -74,6 +93,26 @@ def _clean_markdown_text(value: str) -> str:
     return " ".join(value.strip().split())
 
 
+def _indent_width(value: str) -> int:
+    return sum(4 if character == "\t" else 1 for character in value)
+
+
+def _split_explicit_inline_items(value: str) -> tuple[str, ...]:
+    """Split only an explicit inline numbered sequence, never prose punctuation."""
+
+    matches = tuple(_INLINE_NUMBER_RE.finditer(value))
+    if not matches:
+        return (value,)
+    parts = [value[: matches[0].start()].strip().rstrip(";\uff1b").strip()]
+    for index, match in enumerate(matches):
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(value)
+        part = value[match.end() : end].strip().rstrip(";\uff1b").strip()
+        if part:
+            parts.append(part)
+    parts = [part for part in parts if part]
+    return tuple(parts) if len(parts) >= 2 else (value,)
+
+
 def parse_markdown_semantics(body: str | None) -> ParsedBody:
     """Parse one Markdown body once into typed section items and an intro."""
 
@@ -84,8 +123,11 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
     current_section = ""
     current_role: StatementRole | None = None
     paragraph: list[tuple[int, str]] = []
+    list_items: list[_ListItem] = []
+    list_stack: list[int] = []
     introductory: list[tuple[int, str]] = []
     intro_complete = False
+    fence_marker: str | None = None
 
     def append_item(text: str, role: StatementRole, section: str, line: int) -> None:
         cleaned = _clean_markdown_text(text)
@@ -105,35 +147,77 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
             )
         paragraph = []
 
+    def finish_list() -> None:
+        nonlocal list_items, list_stack
+        for item in list_items:
+            if item.has_children:
+                continue
+            parent_texts = []
+            parent = item.parent
+            while parent is not None:
+                parent_item = list_items[parent]
+                parent_texts.append(parent_item.text)
+                parent = parent_item.parent
+            parent_texts.reverse()
+            text = ": ".join((*parent_texts, item.text))
+            for statement in _split_explicit_inline_items(text):
+                append_item(statement, item.role, item.section, item.line)
+        list_items = []
+        list_stack = []
+
     heading_seen = False
     for line_number, raw_line in enumerate(body.splitlines(), start=1):
+        fence_match = _FENCE_RE.match(raw_line)
+        if fence_match:
+            finish_paragraph()
+            finish_list()
+            marker = fence_match.group(1)[0]
+            fence_marker = None if fence_marker == marker else marker
+            continue
+        if fence_marker is not None:
+            continue
+
         heading_match = _HEADING_RE.match(raw_line)
         if heading_match:
             finish_paragraph()
+            finish_list()
             heading_seen = True
             current_section = _clean_markdown_text(heading_match.group(1))
             current_role = _ROLE_BY_HEADING.get(current_section.casefold())
             continue
 
-        checklist_match = _CHECKLIST_RE.match(raw_line)
-        bullet_match = _BULLET_RE.match(raw_line)
-        list_match = checklist_match or bullet_match
+        list_match = _LIST_ITEM_RE.match(raw_line)
         if list_match:
             finish_paragraph()
             if current_role is not None:
-                append_item(
-                    list_match.group(1),
-                    current_role,
-                    current_section,
-                    line_number,
+                indent = _indent_width(list_match.group("indent"))
+                while list_stack and list_items[list_stack[-1]].indent >= indent:
+                    list_stack.pop()
+                parent = list_stack[-1] if list_stack else None
+                if parent is not None:
+                    list_items[parent].has_children = True
+                list_items.append(
+                    _ListItem(
+                        text=list_match.group("text"),
+                        role=current_role,
+                        section=current_section,
+                        line=line_number,
+                        indent=indent,
+                        parent=parent,
+                    )
                 )
+                list_stack.append(len(list_items) - 1)
             continue
 
         stripped = raw_line.strip()
         if not stripped:
             finish_paragraph()
+            finish_list()
             if introductory:
                 intro_complete = True
+            continue
+        if list_items and current_role is not None:
+            list_items[-1].text = f"{list_items[-1].text} {stripped}"
             continue
         if current_role in {"objective", "claim"}:
             paragraph.append((line_number, stripped))
@@ -141,6 +225,7 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
             introductory.append((line_number, stripped))
 
     finish_paragraph()
+    finish_list()
     intro = _clean_markdown_text(" ".join(text for _, text in introductory))
     return ParsedBody(
         items=tuple(items),

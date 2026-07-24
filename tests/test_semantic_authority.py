@@ -9,6 +9,7 @@ from prismcode.contracts import (
     SourceRecord,
 )
 from prismcode.criteria import extract_review_semantics
+from prismcode.criteria import parse_markdown_semantics
 from prismcode.rendering import render_html
 
 
@@ -94,6 +95,69 @@ def _pr_source():
     )
 
 
+def test_semantic_items_follow_explicit_human_and_ai_list_structure() -> None:
+    parsed = parse_markdown_semantics(
+        "## Goals\n"
+        "This paragraph wraps\n"
+        "onto another source line; it remains one objective.\n\n"
+        "1) First explicit goal\n"
+        "   with a continuation line.\n"
+        "2、Second explicit goal\n"
+        "• Third explicit goal\n"
+        "AC4: Fourth explicit goal\n\n"
+        "## Summary\n"
+        "1) Add the adapter; 2) connect it to runtime; 3) preserve fallback.\n"
+        "Normal prose; with a semicolon; remains one claim.\n"
+    )
+
+    assert [(item.role, item.text) for item in parsed.items] == [
+        (
+            "objective",
+            "This paragraph wraps onto another source line; "
+            "it remains one objective.",
+        ),
+        ("objective", "First explicit goal with a continuation line."),
+        ("objective", "Second explicit goal"),
+        ("objective", "Third explicit goal"),
+        ("objective", "Fourth explicit goal"),
+        ("claim", "Add the adapter"),
+        ("claim", "connect it to runtime"),
+        ("claim", "preserve fallback. Normal prose; with a semicolon; remains one claim."),
+    ]
+
+
+def test_nested_lists_flatten_leaves_with_parent_context() -> None:
+    parsed = parse_markdown_semantics(
+        "## Acceptance criteria\n"
+        "- Structural mapping\n"
+        "  - resolves exact changed symbols\n"
+        "  - preserves lexical fallback\n"
+        "- [ ] CI reports the current head\n"
+    )
+
+    assert [item.text for item in parsed.items] == [
+        "Structural mapping: resolves exact changed symbols",
+        "Structural mapping: preserves lexical fallback",
+        "CI reports the current head",
+    ]
+
+
+def test_code_fences_do_not_create_semantic_items() -> None:
+    parsed = parse_markdown_semantics(
+        "## Implementation\n"
+        "- Add the adapter.\n"
+        "```markdown\n"
+        "- This is an example, not a claim.\n"
+        "```\n"
+        "- Wire the adapter into runtime.\n"
+    )
+
+    assert [item.text for item in parsed.items] == [
+        "Add the adapter.",
+        "Wire the adapter into runtime.",
+    ]
+
+
 def test_pr_acceptance_criteria_are_provisional_without_linked_issue() -> None:
     packet = _packet(
         pr_body=(
@@ -123,7 +187,8 @@ def test_pr_acceptance_criteria_are_provisional_without_linked_issue() -> None:
     assert brief.intent.text == "Add structure-aware review support."
     html = render_html(brief)
     assert "Provisional PR-authored criterion" in html
-    assert "Review context" in html
+    assert "Review checks" in html
+    assert "Objective context · 1 statement" in html
     assert "Preserve deterministic review behavior." in html
     assert "Introduces a read-only provider boundary." in html
 
