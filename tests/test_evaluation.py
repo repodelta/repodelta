@@ -54,7 +54,15 @@ def test_golden_suite_covers_hunks_claims_structure_and_classification() -> None
         "E:symbol:51c78d1cf2a276cc9a40",
         "E:symbol:3c8a35c2cab106b983ca",
         "E:structural_path:01124120c3c65a9b12f3",
+        "E:structural_path:25dab9624b35bb9d49bd",
     } <= set(structural.observed_target_ids)
+    classifications = {
+        item.evidence_id: item.observed
+        for item in result.classifications
+        if item.case_id == "bounded-y-x-z"
+    }
+    assert classifications["E:structural_path:01124120c3c65a9b12f3"] == "mixed"
+    assert classifications["E:structural_path:25dab9624b35bb9d49bd"] == "runtime"
 
 
 def test_exact_symbol_replaces_the_mapped_hunk_in_golden_case() -> None:
@@ -117,13 +125,15 @@ def test_threshold_failure_is_explicit_and_returns_nonzero(
     assert result.passed is False
     assert result.diagnostics == (
         "query_mismatch: case=bounded-y-x-z kind=statement_evidence "
-        "statement=R1 expected=[E:symbol:3c8a35c2cab106b983ca, "
+        "statement=R1 expected=[E:structural_path:25dab9624b35bb9d49bd, "
+        "E:symbol:3c8a35c2cab106b983ca, "
         "E:symbol:51c78d1cf2a276cc9a40, E:symbol:9e703e599343229d97c1] "
         "observed=[E:structural_path:01124120c3c65a9b12f3, "
+        "E:structural_path:25dab9624b35bb9d49bd, "
         "E:symbol:51c78d1cf2a276cc9a40, "
         "E:symbol:9e703e599343229d97c1, "
         "E:symbol:3c8a35c2cab106b983ca]",
-        "threshold_failed: precision_at_k=0.9375 is below 1.0000",
+        "threshold_failed: precision_at_k=0.9500 is below 1.0000",
     )
 
     raw = json.loads(SUITE_PATH.read_text(encoding="utf-8"))

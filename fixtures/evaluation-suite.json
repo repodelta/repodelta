@@ -73,6 +73,11 @@
           "target_id": "E:structural_path:01124120c3c65a9b12f3"
         },
         {
+          "kind": "statement_evidence",
+          "source_id": "R1",
+          "target_id": "E:structural_path:25dab9624b35bb9d49bd"
+        },
+        {
           "kind": "requirement_claim",
           "source_id": "R1",
           "target_id": "C1"
@@ -86,6 +91,14 @@
         {
           "evidence_id": "E:symbol:3c8a35c2cab106b983ca",
           "classification": "test"
+        },
+        {
+          "evidence_id": "E:structural_path:01124120c3c65a9b12f3",
+          "classification": "mixed"
+        },
+        {
+          "evidence_id": "E:structural_path:25dab9624b35bb9d49bd",
+          "classification": "runtime"
         }
       ],
       "structural_graph": {
@@ -139,6 +152,18 @@
           }
         ],
         "paths": [
+          {
+            "seed_symbol_id": "Y",
+            "classification": "runtime",
+            "steps": [
+              {
+                "source_id": "Y",
+                "target_id": "X",
+                "relation": "calls",
+                "direction": "outgoing"
+              }
+            ]
+          },
           {
             "seed_symbol_id": "Y",
             "classification": "mixed",
