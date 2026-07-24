@@ -17,10 +17,6 @@ StatementAuthority = Literal[
     "pr_title",
     "provided",
 ]
-ImplementationStatus = Literal["observed", "partial", "not_observed", "contradicted"]
-VerificationStatus = Literal[
-    "passed", "failed", "pending", "not_observed", "stale", "manual_required"
-]
 EvidenceClassification = Literal[
     "code", "test", "document", "ci", "runtime", "mixed"
 ]
@@ -130,7 +126,7 @@ class ReviewStatement:
 
 @dataclass(frozen=True)
 class Requirement(ReviewStatement):
-    """An obligation statement that can be assessed by the analyzer."""
+    """An obligation statement used to retrieve review evidence candidates."""
 
     kind: RequirementKind = "deliverable"
 
@@ -195,51 +191,18 @@ class CandidateBindingSet:
 
 
 @dataclass(frozen=True)
-class EvidenceHint:
-    """Trusted fixture/provider input; it supplies facts, never final status."""
-
-    requirement_id: str
-    implementation_evidence_ids: tuple[str, ...] = ()
-    verification_evidence_ids: tuple[str, ...] = ()
-    assertion_coverage: Literal["adequate", "partial", "not_established"] = "not_established"
-    gaps: tuple[str, ...] = ()
-    provenance: tuple[SourceRef, ...] = ()
-
-
-@dataclass(frozen=True)
 class AnalysisInput:
     packet: ReviewSourcePacket
     requirements: tuple[Requirement, ...] = ()
-    evidence_hints: tuple[EvidenceHint, ...] = ()
     structural_graph: StructuralGraphResult | None = None
-    evidence_catalog: EvidenceCatalog | None = None
-
-
-@dataclass(frozen=True)
-class ImplementationAssessment:
-    status: ImplementationStatus
-    evidence: tuple[EvidenceItem, ...] = ()
-
-
-@dataclass(frozen=True)
-class VerificationAssessment:
-    status: VerificationStatus
-    evidence: tuple[EvidenceItem, ...] = ()
-
-
-@dataclass(frozen=True)
-class RequirementAssessment:
-    requirement: Requirement
-    implementation: ImplementationAssessment
-    verification: VerificationAssessment
-    gaps: tuple[str, ...] = ()
+    supplied_evidence: tuple[EvidenceItem, ...] = ()
 
 
 @dataclass(frozen=True)
 class ReviewBrief:
     packet: ReviewSourcePacket
     intent: ReviewStatement
-    assessments: tuple[RequirementAssessment, ...]
+    requirements: tuple[Requirement, ...]
     guardrails: tuple[Requirement, ...] = ()
     objectives: tuple[ReviewStatement, ...] = ()
     claims: tuple[ReviewStatement, ...] = ()
@@ -247,7 +210,7 @@ class ReviewBrief:
     evidence_catalog: EvidenceCatalog = EvidenceCatalog()
     candidate_bindings: CandidateBindingSet = CandidateBindingSet()
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v6"
+    schema_version: str = "review_brief.v7"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

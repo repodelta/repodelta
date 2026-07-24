@@ -82,8 +82,8 @@ def parse_unified_patch(file_path: str, patch: str) -> tuple[ChangedHunk, ...]:
                 new_count=int(current["new_count"]),
                 added_lines=tuple(current["added_lines"]),  # type: ignore[arg-type]
                 removed_lines=tuple(current["removed_lines"]),  # type: ignore[arg-type]
-                old_snippet=str(current["old_snippet"]),
-                new_snippet=str(current["new_snippet"]),
+                old_snippet="\n".join(current["old_snippet"]),  # type: ignore[arg-type]
+                new_snippet="\n".join(current["new_snippet"]),  # type: ignore[arg-type]
             )
         )
         current = None
@@ -101,8 +101,8 @@ def parse_unified_patch(file_path: str, patch: str) -> tuple[ChangedHunk, ...]:
                 "new_count": int(header.group("new_count") or 1),
                 "added_lines": [],
                 "removed_lines": [],
-                "old_snippet": "",
-                "new_snippet": "",
+                "old_snippet": [],
+                "new_snippet": [],
             }
             continue
         if current is None or raw_line == r"\ No newline at end of file":
@@ -111,15 +111,17 @@ def parse_unified_patch(file_path: str, patch: str) -> tuple[ChangedHunk, ...]:
             added_lines = current["added_lines"]
             assert isinstance(added_lines, list)
             added_lines.append(new_line)
-            if not current["new_snippet"]:
-                current["new_snippet"] = raw_line[1:]
+            new_snippet = current["new_snippet"]
+            assert isinstance(new_snippet, list)
+            new_snippet.append(raw_line[1:])
             new_line += 1
         elif raw_line.startswith("-") and not raw_line.startswith("---"):
             removed_lines = current["removed_lines"]
             assert isinstance(removed_lines, list)
             removed_lines.append(old_line)
-            if not current["old_snippet"]:
-                current["old_snippet"] = raw_line[1:]
+            old_snippet = current["old_snippet"]
+            assert isinstance(old_snippet, list)
+            old_snippet.append(raw_line[1:])
             old_line += 1
         else:
             old_line += 1

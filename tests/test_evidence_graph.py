@@ -6,7 +6,6 @@ from prismcode.analysis import DeterministicAnalyzer
 from prismcode.contracts import (
     AnalysisInput,
     ChangedFile,
-    EvidenceHint,
     ReviewSourcePacket,
     SourceRef,
     VerificationObservation,
@@ -146,25 +145,58 @@ def test_review_brief_serializes_one_canonical_catalog() -> None:
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
     serialized = brief.to_dict()
 
-    assert brief.schema_version == "review_brief.v6"
+    assert brief.schema_version == "review_brief.v7"
     assert serialized["evidence_catalog"]["schema_version"] == "evidence_catalog.v1"
     assert len(serialized["evidence_catalog"]["items"]) == 1
     assert serialized["evidence_catalog"]["items"][0]["kind"] == "changed_file"
 
 
-def test_hint_cannot_reference_evidence_outside_catalog() -> None:
+def test_patch_hunks_are_canonical_fallback_evidence() -> None:
     packet = ReviewSourcePacket(
         repository="acme/widget",
         pull_request=11,
-        title="Reject dangling evidence",
+        title="Canonical hunk evidence",
         source_records=(),
+        changed_files=(
+            ChangedFile(
+                path="src/service.py",
+                patch="@@ -1 +1 @@\n-old_call()\n+new_bounded_call()\n",
+            ),
+        ),
     ).with_revision()
-    hint = EvidenceHint(
-        requirement_id="R1",
-        implementation_evidence_ids=("E:missing",),
+    catalog = build_evidence_catalog(packet)
+    assert [item.kind for item in catalog.items] == ["changed_hunk"]
+    assert catalog.items[0].metadata["patch_excerpt"] == "new_bounded_call()"
+
+
+def test_exact_symbol_replaces_its_mapped_hunk_evidence() -> None:
+    symbol = _symbol("S", "src.service.run", "src/service.py")
+    packet = ReviewSourcePacket(
+        repository="acme/widget",
+        pull_request=11,
+        title="Map exact symbol",
+        source_records=(),
+        changed_files=(
+            ChangedFile(
+                path="src/service.py",
+                patch="@@ -1 +1 @@\n-old_call()\n+new_call()\n",
+            ),
+        ),
+    ).with_revision()
+    structural = StructuralGraphResult(
+        index=StructuralGraphIndexStatus(state="available", provider="codegraph"),
+        hunk_count=1,
+        overlaps=(
+            HunkSymbolOverlap(
+                "hunk:src/service.py:0",
+                symbol,
+                (1,),
+                sources=symbol.sources,
+            ),
+        ),
     )
 
-    with pytest.raises(ValueError, match="unknown canonical evidence IDs"):
-        DeterministicAnalyzer().analyze(
-            AnalysisInput(packet=packet, evidence_hints=(hint,))
-        )
+    catalog = build_evidence_catalog(packet, structural)
+
+    assert not [item for item in catalog.items if item.kind == "changed_hunk"]
+    assert [item.metadata["symbol_id"] for item in catalog.items] == ["S"]

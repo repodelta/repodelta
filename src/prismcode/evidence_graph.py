@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Iterable
 
 from .contracts import (
+    ChangedFile,
     EvidenceCatalog,
     EvidenceClassification,
     EvidenceItem,
@@ -14,6 +15,7 @@ from .contracts import (
     SourceRef,
     VerificationObservation,
 )
+from .diff_hunks import ChangedHunk, parse_changed_files
 from .structural_graph import GraphSymbol, StructuralGraphResult, StructuralPath
 
 _DOCUMENT_SUFFIXES = {".md", ".mdx", ".rst", ".txt", ".pdf", ".doc", ".docx"}
@@ -28,33 +30,24 @@ def build_evidence_catalog(
     """Normalize source, structural, and supplied facts into one ID-addressed catalog."""
 
     items: dict[str, EvidenceItem] = {}
+    hunk_collection = parse_changed_files(packet.changed_files)
+    hunks_by_path: dict[str, list[ChangedHunk]] = {}
+    for hunk in hunk_collection.hunks:
+        hunks_by_path.setdefault(hunk.file_path, []).append(hunk)
+    mapped_hunk_ids = (
+        {overlap.hunk_id for overlap in structural_graph.overlaps}
+        if structural_graph is not None
+        else set()
+    )
 
     for changed_file in packet.changed_files:
-        classification = _path_classification(changed_file.path)
-        _put(
-            items,
-            EvidenceItem(
-                id=evidence_id("changed_file", changed_file.path),
-                kind="changed_file",
-                summary=f"{changed_file.status.title()} file: {changed_file.path}",
-                classification=classification,
-                changed=True,
-                sources=(
-                    SourceRef(
-                        label="changed file",
-                        url=changed_file.source_url,
-                        path=changed_file.path,
-                    ),
-                ),
-                metadata={
-                    "path": changed_file.path,
-                    "status": changed_file.status,
-                    "additions": changed_file.additions,
-                    "deletions": changed_file.deletions,
-                    "changes": changed_file.changes,
-                },
-            ),
-        )
+        file_hunks = hunks_by_path.get(changed_file.path, ())
+        if not file_hunks:
+            _put(items, _changed_file_fallback(changed_file))
+            continue
+        for hunk in file_hunks:
+            if hunk.id not in mapped_hunk_ids:
+                _put(items, _changed_hunk_item(changed_file, hunk))
 
     if structural_graph is not None:
         changed_symbol_ids = {
@@ -132,6 +125,7 @@ def build_evidence_catalog(
 
     return EvidenceCatalog(
         items=tuple(sorted(items.values(), key=lambda item: item.id)),
+        diagnostics=hunk_collection.diagnostics,
     )
 
 
@@ -146,6 +140,7 @@ def provided_evidence(
     kind: str,
     classification: EvidenceClassification,
     sources: tuple[SourceRef, ...] = (),
+    statement_ids: tuple[str, ...] = (),
 ) -> EvidenceItem:
     identity = json.dumps(
         {
@@ -162,6 +157,7 @@ def provided_evidence(
                 }
                 for source in sources
             ],
+            "statement_ids": statement_ids,
         },
         sort_keys=True,
         separators=(",", ":"),
@@ -172,7 +168,69 @@ def provided_evidence(
         kind=kind,
         classification=classification,
         sources=sources,
-        metadata={"provided": True},
+        metadata={
+            "provided": True,
+            "provided_for_statement_ids": statement_ids,
+        },
+    )
+
+
+def _changed_file_fallback(changed_file: ChangedFile) -> EvidenceItem:
+    path = changed_file.path
+    return EvidenceItem(
+        id=evidence_id("changed_file", path),
+        kind="changed_file",
+        summary=f"{changed_file.status.title()} file: {path}",
+        classification=_path_classification(path),
+        changed=True,
+        sources=(
+            SourceRef(
+                label="changed file fallback",
+                url=changed_file.source_url,
+                path=path,
+            ),
+        ),
+        metadata={
+            "path": path,
+            "status": changed_file.status,
+            "additions": changed_file.additions,
+            "deletions": changed_file.deletions,
+            "changes": changed_file.changes,
+            "fallback_reason": "patch_or_hunk_unavailable",
+        },
+    )
+
+
+def _changed_hunk_item(changed_file: ChangedFile, hunk: ChangedHunk) -> EvidenceItem:
+    path = hunk.file_path
+    line_start = hunk.new_start
+    line_end = max(hunk.new_start, hunk.new_start + max(hunk.new_count, 1) - 1)
+    excerpt = hunk.new_snippet or hunk.old_snippet
+    return EvidenceItem(
+        id=evidence_id("changed_hunk", hunk.id),
+        kind="changed_hunk",
+        summary=f"Changed hunk: {path}:{line_start}-{line_end}",
+        classification=_path_classification(path),
+        changed=True,
+        sources=(
+            SourceRef(
+                label="diff hunk",
+                url=changed_file.source_url,
+                path=path,
+                line_start=line_start,
+                line_end=line_end,
+            ),
+        ),
+        metadata={
+            "hunk_id": hunk.id,
+            "path": path,
+            "old_start": hunk.old_start,
+            "old_count": hunk.old_count,
+            "new_start": hunk.new_start,
+            "new_count": hunk.new_count,
+            "patch_excerpt": excerpt[:4000],
+            "deletion_only": hunk.is_deletion_only,
+        },
     )
 
 

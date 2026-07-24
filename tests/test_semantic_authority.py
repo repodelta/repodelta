@@ -9,6 +9,7 @@ from prismcode.contracts import (
     SourceRecord,
 )
 from prismcode.criteria import extract_review_semantics
+from prismcode.criteria import parse_markdown_semantics
 from prismcode.rendering import render_html
 
 
@@ -94,6 +95,69 @@ def _pr_source():
     )
 
 
+def test_semantic_items_follow_explicit_human_and_ai_list_structure() -> None:
+    parsed = parse_markdown_semantics(
+        "## Goals\n"
+        "This paragraph wraps\n"
+        "onto another source line; it remains one objective.\n\n"
+        "1) First explicit goal\n"
+        "   with a continuation line.\n"
+        "2、Second explicit goal\n"
+        "• Third explicit goal\n"
+        "AC4: Fourth explicit goal\n\n"
+        "## Summary\n"
+        "1) Add the adapter; 2) connect it to runtime; 3) preserve fallback.\n"
+        "Normal prose; with a semicolon; remains one claim.\n"
+    )
+
+    assert [(item.role, item.text) for item in parsed.items] == [
+        (
+            "objective",
+            "This paragraph wraps onto another source line; "
+            "it remains one objective.",
+        ),
+        ("objective", "First explicit goal with a continuation line."),
+        ("objective", "Second explicit goal"),
+        ("objective", "Third explicit goal"),
+        ("objective", "Fourth explicit goal"),
+        ("claim", "Add the adapter"),
+        ("claim", "connect it to runtime"),
+        ("claim", "preserve fallback. Normal prose; with a semicolon; remains one claim."),
+    ]
+
+
+def test_nested_lists_flatten_leaves_with_parent_context() -> None:
+    parsed = parse_markdown_semantics(
+        "## Acceptance criteria\n"
+        "- Structural mapping\n"
+        "  - resolves exact changed symbols\n"
+        "  - preserves lexical fallback\n"
+        "- [ ] CI reports the current head\n"
+    )
+
+    assert [item.text for item in parsed.items] == [
+        "Structural mapping: resolves exact changed symbols",
+        "Structural mapping: preserves lexical fallback",
+        "CI reports the current head",
+    ]
+
+
+def test_code_fences_do_not_create_semantic_items() -> None:
+    parsed = parse_markdown_semantics(
+        "## Implementation\n"
+        "- Add the adapter.\n"
+        "```markdown\n"
+        "- This is an example, not a claim.\n"
+        "```\n"
+        "- Wire the adapter into runtime.\n"
+    )
+
+    assert [item.text for item in parsed.items] == [
+        "Add the adapter.",
+        "Wire the adapter into runtime.",
+    ]
+
+
 def test_pr_acceptance_criteria_are_provisional_without_linked_issue() -> None:
     packet = _packet(
         pr_body=(
@@ -110,12 +174,12 @@ def test_pr_acceptance_criteria_are_provisional_without_linked_issue() -> None:
 
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
 
-    assert [item.requirement.id for item in brief.assessments] == ["R1", "R2"]
+    assert [item.id for item in brief.requirements] == ["R1", "R2"]
     assert all(
-        item.requirement.authority == "pr_description"
-        for item in brief.assessments
+        item.authority == "pr_description"
+        for item in brief.requirements
     )
-    assert brief.assessments[0].requirement.sources[0].label == (
+    assert brief.requirements[0].sources[0].label == (
         "pull request description · Acceptance criteria"
     )
     assert [item.id for item in brief.objectives] == ["O1"]
@@ -123,7 +187,8 @@ def test_pr_acceptance_criteria_are_provisional_without_linked_issue() -> None:
     assert brief.intent.text == "Add structure-aware review support."
     html = render_html(brief)
     assert "Provisional PR-authored criterion" in html
-    assert "Review context" in html
+    assert "Review checks" in html
+    assert "Objective context · 1 statement" in html
     assert "Preserve deterministic review behavior." in html
     assert "Introduces a read-only provider boundary." in html
 
@@ -145,15 +210,15 @@ def test_issue_acceptance_is_primary_but_pr_claims_remain_context() -> None:
 
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
 
-    assert [item.requirement.text for item in brief.assessments] == [
+    assert [item.text for item in brief.requirements] == [
         "Map changed lines to exact symbols."
     ]
-    assert brief.assessments[0].requirement.authority == "issue"
+    assert brief.requirements[0].authority == "issue"
     assert [item.text for item in brief.claims] == [
         "Adds Codegraph index diagnostics."
     ]
     assert "Use every changed file as evidence." not in {
-        item.requirement.text for item in brief.assessments
+        item.text for item in brief.requirements
     }
 
 
@@ -168,7 +233,7 @@ def test_summary_and_title_do_not_become_requirements() -> None:
 
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
 
-    assert brief.assessments == ()
+    assert brief.requirements == ()
     assert brief.guardrails == ()
     assert brief.intent.text == "Expose structural facts to the report."
     assert brief.intent.authority == "pr_description"
@@ -191,7 +256,7 @@ def test_pr_title_is_intent_only_when_description_has_no_intro() -> None:
     assert brief.intent.text == "Add structural graph foundation"
     assert brief.intent.authority == "pr_title"
     assert brief.intent.role == "intent"
-    assert brief.assessments == ()
+    assert brief.requirements == ()
 
 
 def test_provided_requirements_override_extraction_without_losing_context() -> None:
@@ -212,7 +277,7 @@ def test_provided_requirements_override_extraction_without_losing_context() -> N
         AnalysisInput(packet=packet, requirements=(provided,))
     )
 
-    assert [item.requirement.text for item in brief.assessments] == [
+    assert [item.text for item in brief.requirements] == [
         "Provided criterion."
     ]
     assert [item.text for item in brief.objectives] == [

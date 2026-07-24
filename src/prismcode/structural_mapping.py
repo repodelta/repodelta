@@ -94,9 +94,9 @@ def format_structural_graph_status(
     disabled: bool = False,
 ) -> str:
     if disabled:
-        return "Structural mapping: disabled · lexical requirement binding used"
+        return "Structural mapping: disabled · changed-hunk fallback used"
     if result is None:
-        return "Structural mapping: unavailable · lexical fallback used"
+        return "Structural mapping: unavailable · changed-hunk fallback used"
 
     state = result.index.state
     if state == "available":
@@ -104,7 +104,7 @@ def format_structural_graph_status(
             "Structural mapping: Codegraph available · "
             f"{result.mapped_hunk_count}/{result.hunk_count} hunks mapped to "
             f"{len(result.overlaps)} symbols · {len(result.paths)} bounded paths · "
-            "lexical requirement binding retained"
+            "unmapped hunks retained"
         )
     if state == "partial":
         covered = result.index.requested_files - sum(
@@ -114,7 +114,7 @@ def format_structural_graph_status(
         return (
             "Structural mapping: partial · "
             f"{covered}/{result.index.requested_files} changed files indexed · "
-            "lexical fallback used for uncovered changes"
+            "changed-hunk fallback used for uncovered changes"
         )
     reason_by_state = {
         "stale": "Codegraph index is stale",
@@ -130,4 +130,4 @@ def format_structural_graph_status(
         )
     else:
         reason = reason_by_state.get(state, f"Codegraph index is {state}")
-    return f"Structural mapping: skipped · {reason} · lexical fallback used"
+    return f"Structural mapping: skipped · {reason} · changed-hunk fallback used"

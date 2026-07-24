@@ -16,22 +16,24 @@ This repository is the standalone open-core implementation. It does not import c
 The open core provides:
 
 - a versioned, conclusion-free `ReviewSourcePacket` shared by fixture and GitHub ingestion;
-- separate public contracts for source requirements, evidence hints, and analysis-owned assessments;
+- conclusion-free requirements plus one canonical evidence and candidate-binding graph;
 - offline JSON fixture ingestion;
 - live GitHub pull request metadata and changed-file ingestion;
 - GitHub GraphQL Development-link Issue ingestion plus current-head REST check-run and commit-status observations;
 - one-pass semantic extraction with explicit authority for Issue/PR obligations,
   objectives, claims, and intent;
-- a deterministic analyzer that owns implementation and verification status;
+- a deterministic analyzer that builds explainable evidence candidates without declaring implementation or verification status;
 - a requirement-first static HTML renderer;
 - a local CLI;
 - optional repository-local Codegraph hunk-to-symbol mapping with explicit
   availability and freshness diagnostics;
 - bounded Codegraph paths from changed symbols to unchanged runtime/test
   neighbors;
-- one canonical, deterministic evidence catalog for changed files, symbols,
-  paths, and CI/runtime observations;
+- one canonical, deterministic evidence catalog for changed hunks, exact
+  symbols, bounded paths, file fallbacks, and CI/runtime observations;
 - explainable deterministic R/G/O/C-to-evidence and R/G-to-claim candidates;
+- an R-first consistency view with claim/evidence candidates, binding basis,
+  source links, and vertically aggregated coverage gaps;
 - an Actions workflow for automatic PR reports and manually targeted reviews;
 - clean-install CI with network-free tests.
 
@@ -48,9 +50,8 @@ into PR prose. The analyzer applies one authority policy:
 - the PR introduction or title is intent only and is never promoted to `R1`.
 
 When no explicit acceptance criteria are present, the report says so instead
-of manufacturing a requirement from the PR title. Requirements without
-requirement-specific execution remain verification `not_observed`, even when
-generic CI is green.
+of manufacturing a requirement from the PR title. Candidate relevance is never
+presented as implementation, verification, or acceptance.
 
 ## Quick start
 
@@ -82,10 +83,10 @@ prismcode review \
 PrismCode also probes the current directory (`.`) for
 `.codegraph/codegraph.db`. If the current directory is not the analyzed PR's
 exact head checkout, or its index is unavailable or stale, the report is still
-generated using lexical requirement binding:
+generated from canonical changed-hunk evidence:
 
 ```text
-Structural mapping: skipped · Codegraph index not found · lexical fallback used
+Structural mapping: skipped · Codegraph index not found · changed-hunk fallback used
 ```
 
 #### Structure-aware review from the PR checkout
@@ -109,13 +110,14 @@ PrismCode maps exact changed hunk lines to Codegraph symbols and records
 bounded structural paths:
 
 ```text
-Structural mapping: Codegraph available · 4/4 hunks mapped to 3 symbols · 12 bounded paths · lexical requirement binding retained
+Structural mapping: Codegraph available · 4/4 hunks mapped to 3 symbols · 12 bounded paths · unmapped hunks retained
 ```
 
 Path expansion starts only from exact changed symbols, follows an explicit
 relation allowlist in both directions, and stops at deterministic three-hop,
-node, and path budgets. Runtime/test classification and GitHub line links are
-recorded as candidate facts; lexical requirement binding remains authoritative.
+node, and path budgets. An exact symbol replaces the corresponding changed-hunk
+fallback; unmapped hunks remain canonical evidence. File fallback is used only
+when GitHub supplies no parseable hunk.
 
 #### Structure-aware review using another checkout
 
@@ -174,19 +176,16 @@ private managed services
         │ implement public protocols / call public core
         ▼
 PrismCode open core
-ReviewSourcePacket → criteria/evidence hints → analyzer → ReviewBrief → renderer
+ReviewSourcePacket → canonical evidence → candidate bindings → ReviewBrief → renderer
 ```
 
 The open core must remain independently installable and runnable. Optional hosted capabilities should integrate through public protocols or an explicit HTTPS backend, never through an unavailable private import.
 
-## Assessment semantics
+## Evidence semantics
 
-Implementation and verification are separate axes:
-
-- implementation: `observed`, `partial`, `not_observed`, `contradicted`;
-- verification: `passed`, `failed`, `pending`, `not_observed`, `stale`, `manual_required`.
-
-Adapters and providers cannot set these values. Only the deterministic analyzer produces assessments.
+The report labels evidence granularity (`CHANGED HUNK`, exact symbol,
+`FILE FALLBACK`, execution observation) and explains retrieval relevance. It
+does not convert a lexical or structural relationship into a review conclusion.
 
 ## Security note
 

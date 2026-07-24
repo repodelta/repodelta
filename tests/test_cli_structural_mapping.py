@@ -35,10 +35,10 @@ def _write_fixture(tmp_path: Path) -> Path:
     fixture.write_text(
         json.dumps(
             {
-                "schema_version": "analysis_fixture.v2",
+                "schema_version": "analysis_fixture.v3",
                 "source_packet": asdict(packet),
                 "requirements": [],
-                "evidence_hints": [],
+                "evidence": [],
             }
         ),
         encoding="utf-8",
@@ -139,10 +139,10 @@ def test_cli_runs_available_codegraph_mapping(
     captured = capsys.readouterr()
     assert "Structural mapping: Codegraph available" in captured.err
     assert "1/1 hunks mapped to 1 symbols" in captured.err
-    assert "lexical requirement binding retained" in captured.err
+    assert "unmapped hunks retained" in captured.err
 
 
-def test_cli_missing_index_uses_lexical_fallback(
+def test_cli_missing_index_uses_changed_hunk_fallback(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -155,7 +155,7 @@ def test_cli_missing_index_uses_lexical_fallback(
 
     assert (
         "Structural mapping: skipped · Codegraph index not found · "
-        "lexical fallback used"
+        "changed-hunk fallback used"
     ) in capsys.readouterr().err
 
 
@@ -174,7 +174,7 @@ def test_cli_stale_index_is_skipped(
 
     assert (
         "Structural mapping: skipped · Codegraph index is stale · "
-        "lexical fallback used"
+        "changed-hunk fallback used"
     ) in capsys.readouterr().err
 
 
@@ -212,7 +212,7 @@ def test_cli_partial_index_reports_coverage(
 
     assert (
         "Structural mapping: partial · 1/2 changed files indexed · "
-        "lexical fallback used for uncovered changes"
+        "changed-hunk fallback used for uncovered changes"
     ) in capsys.readouterr().err
 
 
@@ -232,7 +232,7 @@ def test_cli_can_explicitly_disable_structural_mapping(
     ) == 0
 
     assert (
-        "Structural mapping: disabled · lexical requirement binding used"
+        "Structural mapping: disabled · changed-hunk fallback used"
     ) in capsys.readouterr().err
 
 
