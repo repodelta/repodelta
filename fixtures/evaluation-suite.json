@@ -6,7 +6,9 @@
     "recall_at_k": 1.0,
     "mean_reciprocal_rank": 0.8,
     "classification_accuracy": 1.0,
-    "max_no_candidate_rate": 0.0
+    "max_no_candidate_rate": 0.0,
+    "no_match_accuracy": 1.0,
+    "max_false_positive_rate": 0.0
   },
   "cases": [
     {

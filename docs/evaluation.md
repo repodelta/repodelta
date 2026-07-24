@@ -40,9 +40,17 @@ The result records:
 - recall@k;
 - mean reciprocal rank;
 - positive-query no-candidate rate;
+- negative-query no-match accuracy;
+- negative-query false-positive rate;
 - evidence classification accuracy;
 - missing and unexpected target IDs for every query;
 - candidate-budget and threshold diagnostics.
+
+Positive retrieval metrics exclude `expected_no_bindings` cases. Negative
+queries are scored separately so adding easy no-match examples cannot inflate
+precision, recall, or mean reciprocal rank. Every query or classification
+mismatch records its case, statement/evidence identity, expected values, and
+observed values before aggregate threshold diagnostics are applied.
 
 JSON output is sorted and contains no timestamp, so repeated runs over the same
 suite are byte-for-byte stable. The Markdown file is a concise human-readable

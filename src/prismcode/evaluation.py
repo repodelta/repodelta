@@ -54,6 +54,8 @@ class EvaluationThresholds:
     mean_reciprocal_rank: float = 0.0
     classification_accuracy: float = 0.0
     max_no_candidate_rate: float = 1.0
+    no_match_accuracy: float = 0.0
+    max_false_positive_rate: float = 1.0
 
 
 @dataclass(frozen=True)
@@ -90,10 +92,14 @@ class ClassificationEvaluation:
 @dataclass(frozen=True)
 class EvaluationMetrics:
     query_count: int
+    positive_query_count: int
+    negative_query_count: int
     precision_at_k: float
     recall_at_k: float
     mean_reciprocal_rank: float
     no_candidate_rate: float
+    no_match_accuracy: float
+    false_positive_rate: float
     classification_accuracy: float
 
 
@@ -221,6 +227,8 @@ def evaluate_suite(
             for item in brief.candidate_bindings.diagnostics
         )
 
+    diagnostics.extend(_query_diagnostics(tuple(query_results)))
+    diagnostics.extend(_classification_diagnostics(tuple(classification_results)))
     metrics = _metrics(tuple(query_results), tuple(classification_results))
     threshold_diagnostics = _threshold_diagnostics(metrics, suite.thresholds)
     diagnostics.extend(threshold_diagnostics)
@@ -266,7 +274,9 @@ def write_evaluation_markdown(
         f"- precision@{result.k}: {metrics.precision_at_k:.4f}",
         f"- recall@{result.k}: {metrics.recall_at_k:.4f}",
         f"- mean reciprocal rank: {metrics.mean_reciprocal_rank:.4f}",
-        f"- no-candidate rate: {metrics.no_candidate_rate:.4f}",
+        f"- positive-query no-candidate rate: {metrics.no_candidate_rate:.4f}",
+        f"- no-match accuracy: {metrics.no_match_accuracy:.4f}",
+        f"- false-positive rate: {metrics.false_positive_rate:.4f}",
         f"- classification accuracy: {metrics.classification_accuracy:.4f}",
         "",
         "## Queries",
@@ -380,28 +390,46 @@ def _metrics(
 ) -> EvaluationMetrics:
     query_count = len(queries)
     positive_queries = tuple(item for item in queries if item.expected_target_ids)
+    negative_queries = tuple(item for item in queries if not item.expected_target_ids)
     classification_count = len(classifications)
     return EvaluationMetrics(
         query_count=query_count,
+        positive_query_count=len(positive_queries),
+        negative_query_count=len(negative_queries),
         precision_at_k=(
-            sum(item.precision_at_k for item in queries) / query_count
-            if query_count
+            sum(item.precision_at_k for item in positive_queries)
+            / len(positive_queries)
+            if positive_queries
             else 0.0
         ),
         recall_at_k=(
-            sum(item.recall_at_k for item in queries) / query_count
-            if query_count
+            sum(item.recall_at_k for item in positive_queries)
+            / len(positive_queries)
+            if positive_queries
             else 0.0
         ),
         mean_reciprocal_rank=(
-            sum(item.reciprocal_rank for item in queries) / query_count
-            if query_count
+            sum(item.reciprocal_rank for item in positive_queries)
+            / len(positive_queries)
+            if positive_queries
             else 0.0
         ),
         no_candidate_rate=(
             sum(not item.observed_target_ids for item in positive_queries)
             / len(positive_queries)
             if positive_queries
+            else 0.0
+        ),
+        no_match_accuracy=(
+            sum(not item.observed_target_ids for item in negative_queries)
+            / len(negative_queries)
+            if negative_queries
+            else 1.0
+        ),
+        false_positive_rate=(
+            sum(bool(item.observed_target_ids) for item in negative_queries)
+            / len(negative_queries)
+            if negative_queries
             else 0.0
         ),
         classification_accuracy=(
@@ -429,6 +457,11 @@ def _threshold_diagnostics(
             metrics.classification_accuracy,
             thresholds.classification_accuracy,
         ),
+        (
+            "no_match_accuracy",
+            metrics.no_match_accuracy,
+            thresholds.no_match_accuracy,
+        ),
     )
     for name, observed, required in minimums:
         if observed < required:
@@ -441,7 +474,38 @@ def _threshold_diagnostics(
             f"no_candidate_rate={metrics.no_candidate_rate:.4f} exceeds "
             f"{thresholds.max_no_candidate_rate:.4f}"
         )
+    if metrics.false_positive_rate > thresholds.max_false_positive_rate:
+        failures.append(
+            "threshold_failed: "
+            f"false_positive_rate={metrics.false_positive_rate:.4f} exceeds "
+            f"{thresholds.max_false_positive_rate:.4f}"
+        )
     return tuple(failures)
+
+
+def _query_diagnostics(
+    queries: tuple[QueryEvaluation, ...],
+) -> tuple[str, ...]:
+    return tuple(
+        "query_mismatch: "
+        f"case={item.case_id} kind={item.kind} statement={item.source_id} "
+        f"expected=[{', '.join(item.expected_target_ids) or 'none'}] "
+        f"observed=[{', '.join(item.observed_target_ids) or 'none'}]"
+        for item in queries
+        if item.missing_target_ids or item.unexpected_target_ids
+    )
+
+
+def _classification_diagnostics(
+    classifications: tuple[ClassificationEvaluation, ...],
+) -> tuple[str, ...]:
+    return tuple(
+        "classification_mismatch: "
+        f"case={item.case_id} evidence={item.evidence_id} "
+        f"expected={item.expected} observed={item.observed or 'missing'}"
+        for item in classifications
+        if not item.matched
+    )
 
 
 def _validate_thresholds(thresholds: EvaluationThresholds) -> None:

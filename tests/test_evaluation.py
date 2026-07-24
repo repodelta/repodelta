@@ -8,6 +8,7 @@ from pathlib import Path
 from prismcode.analysis import DeterministicAnalyzer
 from prismcode.cli import main
 from prismcode.evaluation import (
+    ExpectedNoBinding,
     evaluate_suite,
     load_evaluation_suite,
     write_evaluation_json,
@@ -25,10 +26,14 @@ def test_golden_suite_covers_hunks_claims_structure_and_classification() -> None
 
     assert result.passed is True
     assert result.metrics.query_count == 5
+    assert result.metrics.positive_query_count == 4
+    assert result.metrics.negative_query_count == 1
     assert result.metrics.precision_at_k == 1.0
     assert result.metrics.recall_at_k == 1.0
     assert result.metrics.mean_reciprocal_rank == 1.0
     assert result.metrics.no_candidate_rate == 0.0
+    assert result.metrics.no_match_accuracy == 1.0
+    assert result.metrics.false_positive_rate == 0.0
     assert result.metrics.classification_accuracy == 1.0
     no_match = next(
         item
@@ -111,7 +116,14 @@ def test_threshold_failure_is_explicit_and_returns_nonzero(
 
     assert result.passed is False
     assert result.diagnostics == (
-        "threshold_failed: precision_at_k=0.9500 is below 1.0000",
+        "query_mismatch: case=bounded-y-x-z kind=statement_evidence "
+        "statement=R1 expected=[E:symbol:3c8a35c2cab106b983ca, "
+        "E:symbol:51c78d1cf2a276cc9a40, E:symbol:9e703e599343229d97c1] "
+        "observed=[E:structural_path:01124120c3c65a9b12f3, "
+        "E:symbol:51c78d1cf2a276cc9a40, "
+        "E:symbol:9e703e599343229d97c1, "
+        "E:symbol:3c8a35c2cab106b983ca]",
+        "threshold_failed: precision_at_k=0.9375 is below 1.0000",
     )
 
     raw = json.loads(SUITE_PATH.read_text(encoding="utf-8"))
@@ -145,3 +157,41 @@ def test_threshold_failure_is_explicit_and_returns_nonzero(
     )
 
     assert main() == 1
+
+
+def test_no_match_metrics_do_not_inflate_positive_retrieval_metrics() -> None:
+    suite = load_evaluation_suite(SUITE_PATH)
+    direct = suite.cases[0]
+    false_positive = replace(
+        direct,
+        expected_bindings=tuple(
+            item
+            for item in direct.expected_bindings
+            if not (
+                item.kind == "requirement_claim"
+                and item.source_id == "R1"
+            )
+        ),
+        expected_no_bindings=(
+            *direct.expected_no_bindings,
+            ExpectedNoBinding(kind="requirement_claim", source_id="R1"),
+        ),
+    )
+
+    result = evaluate_suite(
+        replace(suite, cases=(false_positive, *suite.cases[1:])),
+        suite_path=SUITE_PATH,
+    )
+
+    assert result.metrics.positive_query_count == 3
+    assert result.metrics.negative_query_count == 2
+    assert result.metrics.precision_at_k == 1.0
+    assert result.metrics.recall_at_k == 1.0
+    assert result.metrics.mean_reciprocal_rank == 1.0
+    assert result.metrics.no_match_accuracy == 0.5
+    assert result.metrics.false_positive_rate == 0.5
+    assert any(
+        "case=direct-hunk-and-no-match kind=requirement_claim statement=R1"
+        in item
+        for item in result.diagnostics
+    )
