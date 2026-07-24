@@ -38,3 +38,14 @@ is deterministic and explainable; it is not a probability.
 - Coverage explicitly names requirements without evidence candidates, claims
   without requirement candidates, and evidence without statement candidates.
 - No candidate changes implementation or verification status.
+
+## Report projection
+
+Each R card keeps the formal implementation, test, and CI chips. A separate
+`Consistency candidates` area lists related C statements and canonical
+evidence. Each row exposes its retrieval score and every binding reason; source
+links remain attached to the underlying statement or evidence.
+
+Needs attention aggregates candidate coverage across the review. Its wording
+always includes `candidate` and distinguishes communication/retrieval gaps from
+implementation or verification conclusions.

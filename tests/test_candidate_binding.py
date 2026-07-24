@@ -15,6 +15,7 @@ from prismcode.contracts import (
     ReviewStatement,
     SourceRecord,
 )
+from prismcode.rendering import render_html
 
 
 def _catalog() -> EvidenceCatalog:
@@ -291,3 +292,52 @@ def test_analyzer_serializes_candidates_without_using_them_as_status() -> None:
     )
     assert serialized["candidate_bindings"]["items"]
     assert brief.assessments[0].implementation.status == "observed"
+
+
+def test_consistency_report_keeps_candidates_separate_from_conclusions() -> None:
+    packet = ReviewSourcePacket(
+        repository="acme/widget",
+        pull_request=13,
+        title="Report consistency candidates",
+        source_records=(
+            SourceRecord(
+                id="pr:13",
+                kind="pull_request",
+                repository="acme/widget",
+                body=(
+                    "Show review consistency.\n\n"
+                    "## Requirements\n"
+                    "- Core processing remains bounded.\n"
+                    "- Manual color approval is recorded.\n\n"
+                    "## Summary\n"
+                    "- Connect core processing.\n"
+                    "- Redesign unrelated navigation."
+                ),
+            ),
+        ),
+        changed_files=(
+            ChangedFile(
+                path="src/core.py",
+                patch="+def bounded_core_processing(): pass",
+            ),
+            ChangedFile(path="docs/notes.md", patch="+miscellaneous notes"),
+        ),
+    ).with_revision()
+
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    html = render_html(brief)
+
+    assert "Consistency candidates" in html
+    assert "Retrieval relevance only · not an acceptance conclusion" in html
+    assert "Related PR claims" in html
+    assert "Candidate evidence" in html
+    assert "CHANGED FILE" in html
+    assert "CHANGED CHANGED FILE" not in html
+    assert "term overlap" in html and "relevance " in html
+    assert "Claim coverage candidates" in html and "R2" in html
+    assert "Evidence candidate coverage" in html
+    assert "Claim evidence candidates" in html and "C2" in html
+    assert "Unrelated claim candidates" in html
+    assert "Changed evidence without statement candidates" in html
+    assert "Modified file: docs/notes.md" in html
+    assert brief.assessments[1].implementation.status == "not_observed"

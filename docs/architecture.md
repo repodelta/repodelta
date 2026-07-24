@@ -146,6 +146,16 @@ without requirement candidates, and evidence not reached by any statement.
 verified, satisfied, or in scope. The analyzer remains the sole status
 authority.
 
+The HTML consistency report is a projection of this data. Requirement cards
+retain their existing implementation/test/CI status chips and add a separate
+candidate area for related claims, canonical evidence, exact source links,
+retrieval scores, and binding reasons. Scores are labeled as relevance and are
+never rendered as confidence or acceptance status. Candidate gaps are
+aggregated vertically in Needs attention, including requirements without claim
+or evidence candidates, claims without requirement or evidence candidates,
+changed evidence without statement candidates, and budget diagnostics.
+Guardrails remain aggregated rather than becoming a second per-item report.
+
 The `review` CLI enables this read-only mapping by default, using `--repo-root`
 (the current directory unless specified) to locate the target checkout. The
 result travels through `AnalysisInput` into `ReviewBrief` for downstream stages,

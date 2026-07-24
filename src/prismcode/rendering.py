@@ -6,7 +6,9 @@ import re
 from urllib.parse import quote, urlparse, urlunparse
 
 from .contracts import (
+    CandidateBinding,
     ChangedFile,
+    EvidenceItem,
     ReviewBrief,
     ReviewStatement,
     SourceRef,
@@ -138,12 +140,143 @@ def _statement_row(statement: ReviewStatement) -> str:
     )
 
 
+def _binding_basis(binding: CandidateBinding) -> str:
+    reasons = []
+    for reason in binding.reasons:
+        terms = (
+            " · " + ", ".join(reason.matched_terms)
+            if reason.matched_terms
+            else ""
+        )
+        reasons.append(
+            '<span class="basis-chip" title="'
+            + escape(reason.detail, quote=True)
+            + '">'
+            + escape(reason.feature.replace("_", " "))
+            + escape(terms)
+            + f" · +{reason.weight}</span>"
+        )
+    return "".join(reasons)
+
+
+def _candidate_sources(item: EvidenceItem) -> str:
+    unique: list[SourceRef] = []
+    seen: set[tuple[object, ...]] = set()
+    for source in item.sources:
+        key = (
+            source.url,
+            source.path,
+            source.line_start,
+            source.line_end,
+        )
+        if key not in seen:
+            seen.add(key)
+            unique.append(source)
+    shown = " · ".join(_source(source) for source in unique[:3])
+    suffix = (
+        f' <span class="candidate-more">+{len(unique) - 3} sources</span>'
+        if len(unique) > 3
+        else ""
+    )
+    return shown + suffix
+
+
+def _candidate_context(
+    requirement_id: str,
+    brief: ReviewBrief,
+) -> str:
+    claims = {item.id: item for item in brief.claims}
+    evidence = brief.evidence_catalog.by_id()
+    claim_bindings = [
+        item
+        for item in brief.candidate_bindings.items
+        if item.kind == "requirement_claim" and item.source_id == requirement_id
+    ]
+    evidence_bindings = [
+        item
+        for item in brief.candidate_bindings.items
+        if item.kind == "statement_evidence" and item.source_id == requirement_id
+    ]
+    claim_rows = []
+    for binding in claim_bindings:
+        claim = claims.get(binding.target_id)
+        if claim is None:
+            continue
+        source = " · ".join(_source(item) for item in claim.sources)
+        claim_rows.append(
+            '<div class="claim-candidate">'
+            f'<span class="candidate-id">{escape(claim.id)}</span>'
+            f'<span class="candidate-copy">{escape(claim.text)}</span>'
+            f'<span class="candidate-score">relevance {binding.score}</span>'
+            f'<div class="candidate-basis">{_binding_basis(binding)}</div>'
+            + (
+                f'<div class="candidate-source">Source: {source}</div>'
+                if source
+                else ""
+            )
+            + "</div>"
+    )
+    evidence_rows = []
+    for binding in evidence_bindings:
+        item = evidence.get(binding.target_id)
+        if item is None:
+            continue
+        is_execution = bool(item.metadata.get("observation_id"))
+        kind_label = (
+            "EXECUTION"
+            if is_execution
+            else "CHANGED FILE"
+            if item.kind == "changed_file" and item.changed
+            else "FILE"
+            if item.kind == "changed_file"
+            else "CHANGED " + item.kind.replace("_", " ").upper()
+            if item.changed
+            else item.kind.replace("_", " ").upper()
+        )
+        sources = _candidate_sources(item)
+        evidence_rows.append(
+            '<details class="evidence-candidate">'
+            '<summary>'
+            f'<span class="evidence-kind">{escape(kind_label)}</span>'
+            f'<span class="candidate-copy">{escape(item.summary)}</span>'
+            f'<span class="candidate-score">relevance {binding.score}</span>'
+            "</summary>"
+            '<div class="candidate-detail">'
+            f'<div class="candidate-basis">{_binding_basis(binding)}</div>'
+            + (
+                f'<div class="candidate-source">Source: {sources}</div>'
+                if sources
+                else ""
+            )
+            + "</div></details>"
+        )
+    claim_copy = (
+        "".join(claim_rows)
+        or '<p class="candidate-empty">No PR claim candidate was found for this requirement.</p>'
+    )
+    evidence_copy = (
+        "".join(evidence_rows)
+        or '<p class="candidate-empty">No canonical evidence candidate was found for this requirement.</p>'
+    )
+    content = (
+        '<div class="candidate-context">'
+        '<div class="candidate-heading"><span>Consistency candidates</span>'
+        '<span class="candidate-disclaimer">Retrieval relevance only · not an acceptance conclusion</span></div>'
+        '<div class="candidate-group"><span class="block-title">Related PR claims</span>'
+        f"{claim_copy}</div>"
+        '<div class="candidate-group"><span class="block-title">Candidate evidence</span>'
+        f"{evidence_copy}</div></div>"
+    )
+    return content
+
+
 def render_html(brief: ReviewBrief) -> str:
     packet = brief.packet
     requirement_cards = []
     for index, assessment in enumerate(brief.assessments):
         requirement = assessment.requirement
         implemented, evidence_sources, code_count, test_count = _implementation(assessment, brief)
+        candidate_context = _candidate_context(requirement.id, brief)
         sources = " · ".join(_source(source) for source in requirement.sources)
         authority_note = (
             "Provisional PR-authored criterion"
@@ -177,6 +310,7 @@ def render_html(brief: ReviewBrief) -> str:
             )
             + f'<div><span class="block-title">Implemented</span><div class="block-copy">{implemented}</div></div>'
             + (f'<div class="evidence-sources"><span class="block-title">Sources</span>{evidence_sources}</div>' if evidence_sources else "")
+            + candidate_context
             + '</div></details>'
         )
     requirements = (
@@ -207,6 +341,88 @@ def render_html(brief: ReviewBrief) -> str:
             '<div class="attention-copy">No explicit acceptance criteria were found. '
             "Intent, objectives, and PR claims are not sufficient to determine "
             "requirement satisfaction.</div></div>"
+        )
+    all_requirements = (
+        *(item.requirement for item in brief.assessments),
+        *brief.guardrails,
+    )
+    requirement_ids_with_claims = {
+        item.source_id
+        for item in brief.candidate_bindings.items
+        if item.kind == "requirement_claim"
+    }
+    requirement_ids_without_claims = [
+        item.id for item in all_requirements if item.id not in requirement_ids_with_claims
+    ]
+    if requirement_ids_without_claims:
+        attention_rows.append(
+            '<div class="attention-row"><div class="attention-kind">Claim coverage candidates</div>'
+            '<div class="attention-copy">'
+            + escape(", ".join(requirement_ids_without_claims))
+            + " have no related PR claim candidate. This is a communication gap, "
+            "not evidence that the requirement is unimplemented.</div></div>"
+        )
+    requirement_ids_without_evidence = (
+        brief.candidate_bindings.coverage.requirement_ids_without_evidence_candidates
+    )
+    if requirement_ids_without_evidence:
+        attention_rows.append(
+            '<div class="attention-row"><div class="attention-kind">Evidence candidate coverage</div>'
+            '<div class="attention-copy">'
+            + escape(", ".join(requirement_ids_without_evidence))
+            + " have no canonical evidence candidate. Manual review is still required.</div></div>"
+        )
+    claim_ids_with_evidence = {
+        item.source_id
+        for item in brief.candidate_bindings.items
+        if item.kind == "statement_evidence"
+    }
+    claim_ids_without_evidence = [
+        item.id for item in brief.claims if item.id not in claim_ids_with_evidence
+    ]
+    if claim_ids_without_evidence:
+        attention_rows.append(
+            '<div class="attention-row"><div class="attention-kind">Claim evidence candidates</div>'
+            '<div class="attention-copy">'
+            + escape(", ".join(claim_ids_without_evidence))
+            + " have no supporting evidence candidate.</div></div>"
+        )
+    claims_without_requirements = (
+        brief.candidate_bindings.coverage.claim_ids_without_requirement_candidates
+    )
+    if claims_without_requirements:
+        attention_rows.append(
+            '<div class="attention-row"><div class="attention-kind">Unrelated claim candidates</div>'
+            '<div class="attention-copy">'
+            + escape(", ".join(claims_without_requirements))
+            + " have no related R/G candidate and may need scope review.</div></div>"
+        )
+    evidence_by_id = brief.evidence_catalog.by_id()
+    changed_without_statement = [
+        evidence_by_id[item_id]
+        for item_id in brief.candidate_bindings.coverage.evidence_ids_without_statement_candidates
+        if item_id in evidence_by_id and evidence_by_id[item_id].changed
+    ]
+    if changed_without_statement:
+        summaries = "; ".join(item.summary for item in changed_without_statement[:8])
+        suffix = (
+            f" (+{len(changed_without_statement) - 8} more)"
+            if len(changed_without_statement) > 8
+            else ""
+        )
+        attention_rows.append(
+            '<div class="attention-row"><div class="attention-kind">Changed evidence without statement candidates</div>'
+            f'<div class="attention-copy">{escape(summaries + suffix)}</div></div>'
+        )
+    candidate_limits = [
+        item.message
+        for item in brief.candidate_bindings.diagnostics
+        if item.code == "candidate_binding_budget_reached"
+    ]
+    if candidate_limits:
+        attention_rows.append(
+            '<div class="attention-row"><div class="attention-kind">Candidate coverage limit</div>'
+            f'<div class="attention-copy">{escape(" ".join(candidate_limits))}</div></div>'
         )
     ci_gaps = [item.requirement.id for item in brief.assessments if item.verification.status != "passed"]
     if ci_gaps:
@@ -265,8 +481,8 @@ code{{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-sp
 .section{{border:2px solid var(--border);border-radius:18px;background:linear-gradient(180deg,rgba(17,24,28,.97),rgba(11,17,21,.98));box-shadow:var(--shadow);padding:28px;margin-bottom:22px}}h1{{font-size:31px;margin:0 0 14px;letter-spacing:-.025em}}h2{{font-size:22px;margin:0 0 12px;letter-spacing:-.02em}}.meta{{display:flex;flex-wrap:wrap;gap:9px;color:var(--muted);font-size:13px;margin-bottom:16px}}.intent{{max-width:850px;color:#d2dade;font-size:15px}}.source-link,.file-link{{color:#b9dfff;text-decoration:none;background-image:linear-gradient(currentColor,currentColor);background-size:0 1px;background-position:0 100%;background-repeat:no-repeat;transition:background-size .18s ease}}.source-link:hover,.file-link:hover{{background-size:100% 1px}}
 .badge{{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;font-size:10px;font-weight:760;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}}.badge.good{{background:var(--green-bg);color:#c7f4d9}}.badge.info{{background:var(--blue-bg);color:#cce8ff}}.badge.warn{{background:var(--amber-bg);color:#ffe3a0}}.badge.danger{{background:var(--red-bg);color:#ffb0a9}}.badge.muted{{background:rgba(111,128,135,.12);color:#aeb9be}}
 .requirements{{border-top:1px solid rgba(111,128,135,.24)}}.requirement{{border-bottom:1px solid rgba(111,128,135,.24)}}.requirement summary{{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px minmax(0,1fr) minmax(280px,auto);gap:16px;align-items:center;padding:18px 0}}.requirement summary::-webkit-details-marker{{display:none}}.req-id{{color:var(--green);font-size:12px;font-weight:760;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}}.req-title{{font-size:14px;font-weight:640}}.req-chips{{justify-self:end;display:flex;justify-content:flex-end;flex-wrap:wrap;gap:6px}}.req-body{{padding:0 0 20px 68px}}.requirement-source{{margin:0 0 16px}}.block-title{{display:block;margin-bottom:5px;color:#89979d;font-size:10px;letter-spacing:.045em;font-weight:700;text-transform:uppercase}}.block-copy{{color:#d7dddf;font-size:13px}}.source-note{{display:block;margin-top:8px;color:var(--faint);font-size:10px;line-height:1.45}}.evidence-sources{{margin-top:14px}}.source-chip{{display:inline-flex;margin:0 7px 7px 0;padding:4px 8px;border-radius:999px;text-decoration:none;font-size:10px;font-weight:740;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}}.source-chip.code{{background:var(--green-bg);color:#c7f4d9}}.source-chip.test{{background:var(--blue-bg);color:#cce8ff}}
-.sources{{color:var(--faint);font-size:11px;line-height:1.7}}.section-copy{{margin:-4px 0 16px;color:var(--muted);font-size:12px}}.empty-state{{display:grid;gap:5px;padding:18px 0;color:var(--muted);font-size:12px}}.empty-state strong{{color:#e8d18e;font-size:13px}}.context-list{{border-top:1px solid rgba(111,128,135,.24)}}.context-row{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px;gap:12px;align-items:start;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.context-id{{color:#9fcdf0;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace}}.context-copy{{font-size:13px}}.context-authority{{color:var(--muted);font-size:10px;text-align:right}}.context-source{{grid-column:2/-1;color:var(--faint);font-size:10px}}.attention-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:210px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:#e7ca7c;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-list{{display:grid;gap:0;border-top:1px solid rgba(111,128,135,.24)}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px;white-space:nowrap}}.empty{{color:var(--faint);font-size:12px;font-style:italic}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}
-@media(max-width:900px){{.requirement summary{{grid-template-columns:46px 1fr}}.req-chips{{grid-column:2;justify-self:start;justify-content:flex-start}}.req-body{{padding-left:62px}}.attention-row{{grid-template-columns:1fr;gap:8px}}}}@media(max-width:560px){{.shell{{width:min(100% - 18px,1160px);margin-top:16px}}.section{{padding:22px 20px}}.topbar{{align-items:flex-start;flex-direction:column}}.file-row{{grid-template-columns:1fr}}.file-state{{white-space:normal}}.req-body{{padding-left:0}}}}
+.sources{{color:var(--faint);font-size:11px;line-height:1.7}}.candidate-context{{margin-top:22px;padding-top:18px;border-top:1px solid rgba(111,128,135,.24)}}.candidate-heading{{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:15px;font-size:12px;font-weight:720}}.candidate-disclaimer{{color:var(--faint);font-size:9px;font-weight:560}}.candidate-group+ .candidate-group{{margin-top:16px}}.claim-candidate{{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:8px 10px;padding:10px 0;border-bottom:1px solid rgba(111,128,135,.16)}}.candidate-id{{color:#9fcdf0;font:700 10px ui-monospace,SFMono-Regular,Menlo,monospace}}.candidate-copy{{font-size:11px;color:#d7dddf}}.candidate-score{{color:var(--faint);font-size:9px;white-space:nowrap}}.candidate-basis{{grid-column:2/-1;display:flex;flex-wrap:wrap;gap:5px}}.basis-chip{{display:inline-flex;padding:3px 7px;border-radius:999px;background:rgba(92,116,128,.13);color:#aebdc4;font-size:8px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}}.candidate-source{{grid-column:2/-1;color:var(--faint);font-size:9px}}.candidate-more{{color:var(--faint)}}.candidate-empty{{margin:4px 0 0;color:var(--faint);font-size:10px;font-style:italic}}.evidence-candidate{{border-bottom:1px solid rgba(111,128,135,.16)}}.evidence-candidate summary{{display:grid;grid-template-columns:112px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 0;cursor:pointer;list-style:none}}.evidence-candidate summary::-webkit-details-marker{{display:none}}.evidence-kind{{color:#a7d8bd;font-size:8px;font-weight:760;letter-spacing:.035em}}.candidate-detail{{padding:0 0 10px 122px}}.section-copy{{margin:-4px 0 16px;color:var(--muted);font-size:12px}}.empty-state{{display:grid;gap:5px;padding:18px 0;color:var(--muted);font-size:12px}}.empty-state strong{{color:#e8d18e;font-size:13px}}.context-list{{border-top:1px solid rgba(111,128,135,.24)}}.context-row{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px;gap:12px;align-items:start;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.context-id{{color:#9fcdf0;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace}}.context-copy{{font-size:13px}}.context-authority{{color:var(--muted);font-size:10px;text-align:right}}.context-source{{grid-column:2/-1;color:var(--faint);font-size:10px}}.attention-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:210px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:#e7ca7c;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-list{{display:grid;gap:0;border-top:1px solid rgba(111,128,135,.24)}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px;white-space:nowrap}}.empty{{color:var(--faint);font-size:12px;font-style:italic}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}
+@media(max-width:900px){{.requirement summary{{grid-template-columns:46px 1fr}}.req-chips{{grid-column:2;justify-self:start;justify-content:flex-start}}.req-body{{padding-left:62px}}.attention-row{{grid-template-columns:1fr;gap:8px}}}}@media(max-width:560px){{.shell{{width:min(100% - 18px,1160px);margin-top:16px}}.section{{padding:22px 20px}}.topbar{{align-items:flex-start;flex-direction:column}}.file-row{{grid-template-columns:1fr}}.file-state{{white-space:normal}}.req-body{{padding-left:0}}.candidate-heading{{align-items:flex-start;flex-direction:column}}.claim-candidate{{grid-template-columns:32px minmax(0,1fr)}}.candidate-score{{grid-column:2}}.evidence-candidate summary{{grid-template-columns:1fr}}.candidate-detail{{padding-left:0}}.candidate-basis,.candidate-source{{grid-column:1/-1}}}}
 </style></head><body><main class="shell">
 <div class="topbar"><div class="brand"><span class="brand-mark"></span> PrismCode</div></div>
 <section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{len(packet.changed_files)} changed files</span><span>·</span><span>{escape(ci_summary)}</span></div>
