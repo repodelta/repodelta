@@ -24,6 +24,7 @@ VerificationStatus = Literal[
 EvidenceClassification = Literal[
     "code", "test", "document", "ci", "runtime", "mixed"
 ]
+CandidateBindingKind = Literal["statement_evidence", "requirement_claim"]
 
 
 @dataclass(frozen=True)
@@ -159,6 +160,41 @@ class EvidenceCatalog:
 
 
 @dataclass(frozen=True)
+class BindingReason:
+    feature: str
+    detail: str
+    weight: int
+    matched_terms: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class CandidateBinding:
+    id: str
+    kind: CandidateBindingKind
+    source_id: str
+    target_id: str
+    score: int
+    reasons: tuple[BindingReason, ...]
+    structural_path_ids: tuple[str, ...] = ()
+    relation: Literal["candidate_support"] = "candidate_support"
+
+
+@dataclass(frozen=True)
+class CandidateCoverage:
+    requirement_ids_without_evidence_candidates: tuple[str, ...] = ()
+    claim_ids_without_requirement_candidates: tuple[str, ...] = ()
+    evidence_ids_without_statement_candidates: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class CandidateBindingSet:
+    items: tuple[CandidateBinding, ...] = ()
+    coverage: CandidateCoverage = CandidateCoverage()
+    diagnostics: tuple[Diagnostic, ...] = ()
+    schema_version: str = "candidate_binding_set.v1"
+
+
+@dataclass(frozen=True)
 class EvidenceHint:
     """Trusted fixture/provider input; it supplies facts, never final status."""
 
@@ -209,8 +245,9 @@ class ReviewBrief:
     claims: tuple[ReviewStatement, ...] = ()
     structural_graph: StructuralGraphResult | None = None
     evidence_catalog: EvidenceCatalog = EvidenceCatalog()
+    candidate_bindings: CandidateBindingSet = CandidateBindingSet()
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v5"
+    schema_version: str = "review_brief.v6"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

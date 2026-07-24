@@ -16,6 +16,7 @@ from .contracts import (
 )
 from .criteria import extract_review_semantics
 from .binding import build_deterministic_evidence_hints
+from .candidate_binding import build_candidate_bindings
 from .evidence_graph import build_evidence_catalog
 
 
@@ -72,6 +73,12 @@ class DeterministicAnalyzer:
         hints = {hint.requirement_id: hint for hint in provided_hints}
         deliverables = tuple(item for item in requirements if item.kind != "guardrail")
         guardrails = tuple(item for item in requirements if item.kind == "guardrail")
+        candidate_bindings = build_candidate_bindings(
+            requirements=requirements,
+            objectives=semantics.objectives,
+            claims=semantics.claims,
+            evidence_catalog=evidence_catalog,
+        )
         assessments = tuple(
             self._assess(
                 requirement,
@@ -90,6 +97,7 @@ class DeterministicAnalyzer:
             claims=semantics.claims,
             structural_graph=analysis_input.structural_graph,
             evidence_catalog=evidence_catalog,
+            candidate_bindings=candidate_bindings,
         )
 
     @staticmethod

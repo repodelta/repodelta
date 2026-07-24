@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import re
-
 from .contracts import (
     EvidenceCatalog,
     EvidenceHint,
@@ -10,14 +8,7 @@ from .contracts import (
     SourceRef,
 )
 from .evidence_graph import evidence_id, verification_evidence_id
-
-_TOKEN_RE = re.compile(r"[a-z][a-z0-9_]{3,}", re.IGNORECASE)
-_STOP_WORDS = {
-    "acceptance", "artifact", "behavior", "change", "changes", "compact",
-    "current", "debug", "existing", "exports", "from", "makes", "normal",
-    "possible", "report", "requirement", "reused", "summary", "through",
-    "without", "with", "each", "into", "that", "this", "true",
-}
+from .matching import semantic_tokens
 _GENERIC_CHECK_NAMES = {"ci", "check", "checks", "test", "tests", "github actions"}
 
 
@@ -30,12 +21,12 @@ def build_deterministic_evidence_hints(
 
     hints: list[EvidenceHint] = []
     for requirement in requirements:
-        requirement_tokens = _tokens(requirement.text)
+        requirement_tokens = set(semantic_tokens(requirement.text))
         scored: list[tuple[int, object, set[str]]] = []
         for changed_file in packet.changed_files:
             haystack = f"{changed_file.path}\n{changed_file.patch or ''}"
-            overlap = requirement_tokens & _tokens(haystack)
-            path_overlap = requirement_tokens & _tokens(changed_file.path)
+            overlap = requirement_tokens & semantic_tokens(haystack)
+            path_overlap = requirement_tokens & semantic_tokens(changed_file.path)
             explicit = {token for token in overlap if "_" in token or "/" in token}
             score = len(overlap) + (2 * len(path_overlap)) + (3 * len(explicit))
             if score >= 2 or explicit:
@@ -74,20 +65,7 @@ def _matching_verification_ids(
         name = observation.name.strip().casefold()
         if name in _GENERIC_CHECK_NAMES:
             continue
-        overlap = requirement_tokens & _tokens(name)
+        overlap = requirement_tokens & semantic_tokens(name)
         if len(overlap) >= 2 or any("_" in token for token in overlap):
             result.append(verification_evidence_id(observation.id))
     return tuple(result)
-
-
-def _tokens(value: str) -> set[str]:
-    result: set[str] = set()
-    for raw_token in _TOKEN_RE.findall(value):
-        token = raw_token.casefold()
-        candidates = (token, *token.split("_"))
-        result.update(
-            candidate
-            for candidate in candidates
-            if len(candidate) >= 4 and candidate not in _STOP_WORDS
-        )
-    return result
