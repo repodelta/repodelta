@@ -20,7 +20,19 @@ jobs:
       - run: pip install -e .[dev]
       - run: pytest -q
       - run: prismcode review --fixture fixtures/pr574.json --output build/pr574.html
+      - name: Run offline evaluation baseline
+        run: |
+          prismcode evaluate \
+            --suite fixtures/evaluation-suite.json \
+            --json-output build/evaluation.json \
+            --markdown-output build/evaluation.md
       - uses: actions/upload-artifact@v4
         with:
           name: review-brief
           path: build/pr574.html
+      - uses: actions/upload-artifact@v4
+        with:
+          name: evaluation-baseline
+          path: |
+            build/evaluation.json
+            build/evaluation.md

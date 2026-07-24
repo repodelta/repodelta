@@ -36,6 +36,8 @@ The open core provides:
   source links, and vertically aggregated coverage gaps;
 - an Actions workflow for automatic PR reports and manually targeted reviews;
 - clean-install CI with network-free tests.
+- a deterministic offline evaluation suite for binding, structural-path, and
+  evidence-classification baselines.
 
 The GitHub adapter intentionally emits source facts only. Linked Issues come
 from GitHub's `closingIssuesReferences` GraphQL field, not Issue numbers typed
@@ -64,6 +66,21 @@ prismcode review --fixture fixtures/pr574.json --output build/pr574.html
 ```
 
 Open `build/pr574.html` in a browser.
+
+### Evaluate retrieval offline
+
+Run the golden suite without GitHub, Codegraph, or model credentials:
+
+```bash
+prismcode evaluate \
+  --suite fixtures/evaluation-suite.json \
+  --json-output build/evaluation.json \
+  --markdown-output build/evaluation.md
+```
+
+The command returns non-zero when configured thresholds fail. See
+[`docs/evaluation.md`](docs/evaluation.md) for the versioned contracts, metrics,
+and safety boundary.
 
 ### Review a live GitHub pull request
 

@@ -1,0 +1,65 @@
+{
+  "schema_version": "analysis_fixture.v3",
+  "source_packet": {
+    "schema_version": "review_source_packet.v1",
+    "packet_revision": "sha256:75afa4a59460294e9c43463638a27ec35fe8b18a77c30cfd52f2d1f88c012b41",
+    "repository": "acme/widget",
+    "pull_request": 101,
+    "title": "Expose bounded semantic trace",
+    "source_url": "https://github.com/acme/widget/pull/101",
+    "head_sha": "direct-hunk-head",
+    "base_sha": "direct-hunk-base",
+    "source_records": [
+      {
+        "id": "pr:101",
+        "kind": "pull_request",
+        "repository": "acme/widget",
+        "url": "https://github.com/acme/widget/pull/101",
+        "title": "Expose bounded semantic trace",
+        "body": "## Summary\n- Expose the bounded semantic trace from the runtime endpoint.",
+        "revision": "pr-101-v1",
+        "availability": "available"
+      }
+    ],
+    "changed_files": [
+      {
+        "path": "src/runtime.py",
+        "status": "modified",
+        "additions": 1,
+        "deletions": 1,
+        "changes": 2,
+        "source_url": "https://github.com/acme/widget/blob/direct-hunk-head/src/runtime.py",
+        "patch": "@@ -10 +10 @@\n-return payload\n+return bounded_semantic_trace(payload)\n"
+      },
+      {
+        "path": "tests/test_runtime.py",
+        "status": "modified",
+        "additions": 1,
+        "deletions": 0,
+        "changes": 1,
+        "source_url": "https://github.com/acme/widget/blob/direct-hunk-head/tests/test_runtime.py",
+        "patch": "@@ -20,0 +21 @@\n+assert bounded_semantic_trace(payload)\n"
+      }
+    ],
+    "verification_observations": [],
+    "diagnostics": [],
+    "metadata": {}
+  },
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "The runtime endpoint exposes a bounded semantic trace.",
+      "role": "obligation",
+      "authority": "provided",
+      "kind": "deliverable"
+    },
+    {
+      "id": "R2",
+      "text": "Manual color approval is recorded.",
+      "role": "obligation",
+      "authority": "provided",
+      "kind": "manual_acceptance"
+    }
+  ],
+  "evidence": []
+}
