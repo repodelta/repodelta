@@ -21,6 +21,9 @@ ImplementationStatus = Literal["observed", "partial", "not_observed", "contradic
 VerificationStatus = Literal[
     "passed", "failed", "pending", "not_observed", "stale", "manual_required"
 ]
+EvidenceClassification = Literal[
+    "code", "test", "document", "ci", "runtime", "mixed"
+]
 
 
 @dataclass(frozen=True)
@@ -132,10 +135,27 @@ class Requirement(ReviewStatement):
 
 
 @dataclass(frozen=True)
-class Evidence:
+class EvidenceItem:
+    """Canonical evidence fact. All downstream relationships reference its ID."""
+
+    id: str
     summary: str
     kind: str
+    classification: EvidenceClassification
+    changed: bool = False
     sources: tuple[SourceRef, ...] = ()
+    structural_path_ids: tuple[str, ...] = ()
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class EvidenceCatalog:
+    items: tuple[EvidenceItem, ...] = ()
+    diagnostics: tuple[Diagnostic, ...] = ()
+    schema_version: str = "evidence_catalog.v1"
+
+    def by_id(self) -> dict[str, EvidenceItem]:
+        return {item.id: item for item in self.items}
 
 
 @dataclass(frozen=True)
@@ -143,7 +163,7 @@ class EvidenceHint:
     """Trusted fixture/provider input; it supplies facts, never final status."""
 
     requirement_id: str
-    implementation: tuple[Evidence, ...] = ()
+    implementation_evidence_ids: tuple[str, ...] = ()
     verification_evidence_ids: tuple[str, ...] = ()
     assertion_coverage: Literal["adequate", "partial", "not_established"] = "not_established"
     gaps: tuple[str, ...] = ()
@@ -156,18 +176,19 @@ class AnalysisInput:
     requirements: tuple[Requirement, ...] = ()
     evidence_hints: tuple[EvidenceHint, ...] = ()
     structural_graph: StructuralGraphResult | None = None
+    evidence_catalog: EvidenceCatalog | None = None
 
 
 @dataclass(frozen=True)
 class ImplementationAssessment:
     status: ImplementationStatus
-    evidence: tuple[Evidence, ...] = ()
+    evidence: tuple[EvidenceItem, ...] = ()
 
 
 @dataclass(frozen=True)
 class VerificationAssessment:
     status: VerificationStatus
-    evidence: tuple[Evidence, ...] = ()
+    evidence: tuple[EvidenceItem, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -187,8 +208,9 @@ class ReviewBrief:
     objectives: tuple[ReviewStatement, ...] = ()
     claims: tuple[ReviewStatement, ...] = ()
     structural_graph: StructuralGraphResult | None = None
+    evidence_catalog: EvidenceCatalog = EvidenceCatalog()
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v4"
+    schema_version: str = "review_brief.v5"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

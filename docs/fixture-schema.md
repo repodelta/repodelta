@@ -15,8 +15,12 @@ ingestion:
 `source_packet` is conclusion-free. `requirements` are explicit obligation
 statements and may include `role` (default `obligation`) and `authority`
 (default `provided`).
-`evidence_hints` are separate annotations with provenance. Loading fails when the packet
-revision is inconsistent or a hint names an unknown requirement.
+`evidence_hints` are separate annotations with provenance. Their legacy inline
+`implementation` objects are converted once by the fixture loader into
+deterministically identified provided evidence; the resulting hints retain
+only canonical evidence IDs. Loading or analysis fails when the packet revision
+is inconsistent, a hint names an unknown requirement, or a hint references an
+unknown evidence ID.
 
 When `requirements` is empty, the analyzer applies the semantic authority
 hierarchy: linked-Issue criteria first, then explicit PR Acceptance

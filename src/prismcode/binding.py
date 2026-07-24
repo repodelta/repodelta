@@ -2,7 +2,14 @@ from __future__ import annotations
 
 import re
 
-from .contracts import Evidence, EvidenceHint, Requirement, ReviewSourcePacket, SourceRef
+from .contracts import (
+    EvidenceCatalog,
+    EvidenceHint,
+    Requirement,
+    ReviewSourcePacket,
+    SourceRef,
+)
+from .evidence_graph import evidence_id, verification_evidence_id
 
 _TOKEN_RE = re.compile(r"[a-z][a-z0-9_]{3,}", re.IGNORECASE)
 _STOP_WORDS = {
@@ -17,6 +24,7 @@ _GENERIC_CHECK_NAMES = {"ci", "check", "checks", "test", "tests", "github action
 def build_deterministic_evidence_hints(
     requirements: tuple[Requirement, ...],
     packet: ReviewSourcePacket,
+    catalog: EvidenceCatalog,
 ) -> tuple[EvidenceHint, ...]:
     """Produce conservative lexical pointers; never produce a final assessment."""
 
@@ -36,28 +44,19 @@ def build_deterministic_evidence_hints(
             continue
         highest = max(score for score, _, _ in scored)
         selected = [row for row in scored if row[0] >= max(2, highest - 1)]
-        implementation = tuple(
-            Evidence(
-                summary=(
-                    "Requirement-related change terms observed: "
-                    + ", ".join(sorted(overlap)[:8])
-                ),
-                kind="related_test" if _is_test_path(changed_file.path) else "code",
-                sources=(
-                    SourceRef(
-                        label="changed file",
-                        url=changed_file.source_url,
-                        path=changed_file.path,
-                    ),
-                ),
-            )
-            for _, changed_file, overlap in selected
+        catalog_ids = catalog.by_id()
+        implementation_ids = tuple(
+            item_id
+            for _, changed_file, _ in selected
+            if (
+                item_id := evidence_id("changed_file", changed_file.path)
+            ) in catalog_ids
         )
         verification_ids = _matching_verification_ids(requirement_tokens, packet)
         hints.append(
             EvidenceHint(
                 requirement_id=requirement.id,
-                implementation=implementation,
+                implementation_evidence_ids=implementation_ids,
                 verification_evidence_ids=verification_ids,
                 assertion_coverage="adequate" if verification_ids else "not_established",
                 provenance=(SourceRef(label="deterministic diff binding"),),
@@ -77,7 +76,7 @@ def _matching_verification_ids(
             continue
         overlap = requirement_tokens & _tokens(name)
         if len(overlap) >= 2 or any("_" in token for token in overlap):
-            result.append(observation.id)
+            result.append(verification_evidence_id(observation.id))
     return tuple(result)
 
 
@@ -92,8 +91,3 @@ def _tokens(value: str) -> set[str]:
             if len(candidate) >= 4 and candidate not in _STOP_WORDS
         )
     return result
-
-
-def _is_test_path(path: str) -> bool:
-    lowered = path.casefold()
-    return lowered.startswith("tests/") or "/test" in lowered or lowered.endswith("_test.py")

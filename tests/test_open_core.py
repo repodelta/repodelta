@@ -6,11 +6,15 @@ import pytest
 from prismcode.analysis import DeterministicAnalyzer
 from prismcode.contracts import (
     AnalysisInput,
-    Evidence,
     EvidenceHint,
     Requirement,
     ReviewSourcePacket,
     VerificationObservation,
+)
+from prismcode.evidence_graph import (
+    build_evidence_catalog,
+    provided_evidence,
+    verification_evidence_id,
 )
 from prismcode.fixture import load_fixture
 from prismcode.rendering import render_html, write_html
@@ -90,13 +94,23 @@ def test_current_head_requirement_specific_check_can_verify_requirement() -> Non
             "packet_revision": "",
         }
     ).with_revision()
+    implementation = provided_evidence(
+        summary="R1 implementation",
+        kind="code",
+        classification="code",
+    )
     hint = EvidenceHint(
         requirement_id="R1",
-        implementation=(Evidence(summary="R1 implementation", kind="code"),),
-        verification_evidence_ids=("check:requirement-r1",),
+        implementation_evidence_ids=(implementation.id,),
+        verification_evidence_ids=(
+            verification_evidence_id("check:requirement-r1"),
+        ),
         assertion_coverage="adequate",
     )
-    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet, evidence_hints=(hint,)))
+    catalog = build_evidence_catalog(packet, supplied=(implementation,))
+    brief = DeterministicAnalyzer().analyze(
+        AnalysisInput(packet=packet, evidence_hints=(hint,), evidence_catalog=catalog)
+    )
     assert brief.assessments[0].verification.status == "passed"
 
 
@@ -118,13 +132,21 @@ def test_success_from_another_head_is_stale_not_passed() -> None:
             "packet_revision": "",
         }
     ).with_revision()
+    implementation = provided_evidence(
+        summary="R1 implementation",
+        kind="code",
+        classification="code",
+    )
+    catalog = build_evidence_catalog(packet, supplied=(implementation,))
     hint = EvidenceHint(
         requirement_id="R1",
-        implementation=(Evidence(summary="R1 implementation", kind="code"),),
-        verification_evidence_ids=("check:stale",),
+        implementation_evidence_ids=(implementation.id,),
+        verification_evidence_ids=(verification_evidence_id("check:stale"),),
         assertion_coverage="adequate",
     )
-    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet, evidence_hints=(hint,)))
+    brief = DeterministicAnalyzer().analyze(
+        AnalysisInput(packet=packet, evidence_hints=(hint,), evidence_catalog=catalog)
+    )
     assert brief.assessments[0].verification.status == "stale"
 
 
