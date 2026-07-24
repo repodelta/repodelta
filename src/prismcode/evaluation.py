@@ -6,7 +6,13 @@ from pathlib import Path
 from typing import Any
 
 from .analysis import DeterministicAnalyzer
-from .contracts import CandidateBinding, EvidenceClassification
+from .contracts import (
+    CandidateBinding,
+    EvidenceClassification,
+    StatementAuthority,
+    StatementPurpose,
+    StatementRole,
+)
 from .fixture import load_fixture
 from .structural_graph import (
     GraphPathStep,
@@ -38,12 +44,21 @@ class ExpectedNoBinding:
 
 
 @dataclass(frozen=True)
+class ExpectedStatement:
+    statement_id: str
+    role: StatementRole
+    purpose: StatementPurpose
+    authority: StatementAuthority
+
+
+@dataclass(frozen=True)
 class EvaluationCase:
     id: str
     fixture: str
     expected_bindings: tuple[ExpectedBinding, ...]
     expected_no_bindings: tuple[ExpectedNoBinding, ...] = ()
     expected_evidence: tuple[ExpectedEvidence, ...] = ()
+    expected_statements: tuple[ExpectedStatement, ...] = ()
     structural_graph: StructuralGraphResult | None = None
 
 
@@ -56,6 +71,7 @@ class EvaluationThresholds:
     max_no_candidate_rate: float = 1.0
     no_match_accuracy: float = 0.0
     max_false_positive_rate: float = 1.0
+    statement_accuracy: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -90,6 +106,19 @@ class ClassificationEvaluation:
 
 
 @dataclass(frozen=True)
+class StatementEvaluation:
+    case_id: str
+    statement_id: str
+    expected_role: StatementRole
+    expected_purpose: StatementPurpose
+    expected_authority: StatementAuthority
+    observed_role: str | None
+    observed_purpose: str | None
+    observed_authority: str | None
+    matched: bool
+
+
+@dataclass(frozen=True)
 class EvaluationMetrics:
     query_count: int
     positive_query_count: int
@@ -101,6 +130,7 @@ class EvaluationMetrics:
     no_match_accuracy: float
     false_positive_rate: float
     classification_accuracy: float
+    statement_accuracy: float
 
 
 @dataclass(frozen=True)
@@ -111,6 +141,7 @@ class EvaluationResult:
     metrics: EvaluationMetrics
     queries: tuple[QueryEvaluation, ...]
     classifications: tuple[ClassificationEvaluation, ...]
+    statements: tuple[StatementEvaluation, ...]
     diagnostics: tuple[str, ...] = ()
     schema_version: str = "evaluation_result.v1"
 
@@ -152,6 +183,15 @@ def load_evaluation_suite(path: str | Path) -> EvaluationSuite:
                 )
                 for item in case.get("expected_evidence", ())
             ),
+            expected_statements=tuple(
+                ExpectedStatement(
+                    statement_id=str(item["statement_id"]),
+                    role=item["role"],
+                    purpose=item["purpose"],
+                    authority=item["authority"],
+                )
+                for item in case.get("expected_statements", ())
+            ),
             structural_graph=(
                 _structural_graph(case["structural_graph"])
                 if case.get("structural_graph") is not None
@@ -180,6 +220,7 @@ def evaluate_suite(
 ) -> EvaluationResult:
     query_results: list[QueryEvaluation] = []
     classification_results: list[ClassificationEvaluation] = []
+    statement_results: list[StatementEvaluation] = []
     diagnostics: list[str] = []
 
     for case in suite.cases:
@@ -222,6 +263,41 @@ def evaluate_suite(
                     ),
                 )
             )
+        statements = {
+            item.id: item
+            for item in (
+                *brief.requirements,
+                *brief.guardrails,
+                *brief.objectives,
+                *brief.scope,
+                *brief.claims,
+                brief.intent,
+            )
+        }
+        for expected in case.expected_statements:
+            observed = statements.get(expected.statement_id)
+            statement_results.append(
+                StatementEvaluation(
+                    case_id=case.id,
+                    statement_id=expected.statement_id,
+                    expected_role=expected.role,
+                    expected_purpose=expected.purpose,
+                    expected_authority=expected.authority,
+                    observed_role=observed.role if observed is not None else None,
+                    observed_purpose=(
+                        observed.purpose if observed is not None else None
+                    ),
+                    observed_authority=(
+                        observed.authority if observed is not None else None
+                    ),
+                    matched=(
+                        observed is not None
+                        and observed.role == expected.role
+                        and observed.purpose == expected.purpose
+                        and observed.authority == expected.authority
+                    ),
+                )
+            )
         diagnostics.extend(
             f"{case.id}: {item.code}: {item.message}"
             for item in brief.candidate_bindings.diagnostics
@@ -229,7 +305,12 @@ def evaluate_suite(
 
     diagnostics.extend(_query_diagnostics(tuple(query_results)))
     diagnostics.extend(_classification_diagnostics(tuple(classification_results)))
-    metrics = _metrics(tuple(query_results), tuple(classification_results))
+    diagnostics.extend(_statement_diagnostics(tuple(statement_results)))
+    metrics = _metrics(
+        tuple(query_results),
+        tuple(classification_results),
+        tuple(statement_results),
+    )
     threshold_diagnostics = _threshold_diagnostics(metrics, suite.thresholds)
     diagnostics.extend(threshold_diagnostics)
     passed = not threshold_diagnostics
@@ -240,6 +321,7 @@ def evaluate_suite(
         metrics=metrics,
         queries=tuple(query_results),
         classifications=tuple(classification_results),
+        statements=tuple(statement_results),
         diagnostics=tuple(diagnostics),
     )
 
@@ -278,6 +360,7 @@ def write_evaluation_markdown(
         f"- no-match accuracy: {metrics.no_match_accuracy:.4f}",
         f"- false-positive rate: {metrics.false_positive_rate:.4f}",
         f"- classification accuracy: {metrics.classification_accuracy:.4f}",
+        f"- statement accuracy: {metrics.statement_accuracy:.4f}",
         "",
         "## Queries",
         "",
@@ -300,6 +383,17 @@ def write_evaluation_markdown(
             lines.append(
                 f"- `{item.case_id}` · `{item.evidence_id}` · "
                 f"expected `{item.expected}` · observed `{item.observed or 'missing'}`"
+            )
+    if result.statements:
+        lines.extend(("", "## Statement semantics", ""))
+        for item in result.statements:
+            lines.append(
+                f"- `{item.case_id}` · `{item.statement_id}` · "
+                f"expected `{item.expected_role}/{item.expected_purpose}/"
+                f"{item.expected_authority}` · observed "
+                f"`{item.observed_role or 'missing'}/"
+                f"{item.observed_purpose or 'missing'}/"
+                f"{item.observed_authority or 'missing'}`"
             )
     if result.diagnostics:
         lines.extend(("", "## Diagnostics", ""))
@@ -387,11 +481,13 @@ def _evaluate_query(
 def _metrics(
     queries: tuple[QueryEvaluation, ...],
     classifications: tuple[ClassificationEvaluation, ...],
+    statements: tuple[StatementEvaluation, ...],
 ) -> EvaluationMetrics:
     query_count = len(queries)
     positive_queries = tuple(item for item in queries if item.expected_target_ids)
     negative_queries = tuple(item for item in queries if not item.expected_target_ids)
     classification_count = len(classifications)
+    statement_count = len(statements)
     return EvaluationMetrics(
         query_count=query_count,
         positive_query_count=len(positive_queries),
@@ -437,6 +533,11 @@ def _metrics(
             if classification_count
             else 1.0
         ),
+        statement_accuracy=(
+            sum(item.matched for item in statements) / statement_count
+            if statement_count
+            else 1.0
+        ),
     )
 
 
@@ -461,6 +562,11 @@ def _threshold_diagnostics(
             "no_match_accuracy",
             metrics.no_match_accuracy,
             thresholds.no_match_accuracy,
+        ),
+        (
+            "statement_accuracy",
+            metrics.statement_accuracy,
+            thresholds.statement_accuracy,
         ),
     )
     for name, observed, required in minimums:
@@ -504,6 +610,21 @@ def _classification_diagnostics(
         f"case={item.case_id} evidence={item.evidence_id} "
         f"expected={item.expected} observed={item.observed or 'missing'}"
         for item in classifications
+        if not item.matched
+    )
+
+
+def _statement_diagnostics(
+    statements: tuple[StatementEvaluation, ...],
+) -> tuple[str, ...]:
+    return tuple(
+        "statement_mismatch: "
+        f"case={item.case_id} statement={item.statement_id} "
+        f"expected={item.expected_role}/{item.expected_purpose}/"
+        f"{item.expected_authority} observed={item.observed_role or 'missing'}/"
+        f"{item.observed_purpose or 'missing'}/"
+        f"{item.observed_authority or 'missing'}"
+        for item in statements
         if not item.matched
     )
 

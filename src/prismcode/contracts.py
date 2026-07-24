@@ -10,7 +10,19 @@ if TYPE_CHECKING:
 
 DiagnosticSeverity = Literal["info", "warning", "error"]
 RequirementKind = Literal["deliverable", "guardrail", "manual_acceptance"]
-StatementRole = Literal["obligation", "objective", "claim", "intent"]
+StatementRole = Literal["obligation", "objective", "claim", "context", "intent"]
+StatementPurpose = Literal[
+    "unspecified",
+    "acceptance",
+    "guardrail",
+    "goal",
+    "scope",
+    "implementation",
+    "baseline",
+    "verification",
+    "boundary",
+    "intent",
+]
 StatementAuthority = Literal[
     "issue",
     "pr_description",
@@ -120,6 +132,7 @@ class ReviewStatement:
     id: str
     text: str
     role: StatementRole = "obligation"
+    purpose: StatementPurpose = "unspecified"
     authority: StatementAuthority = "provided"
     sources: tuple[SourceRef, ...] = ()
 
@@ -205,12 +218,13 @@ class ReviewBrief:
     requirements: tuple[Requirement, ...]
     guardrails: tuple[Requirement, ...] = ()
     objectives: tuple[ReviewStatement, ...] = ()
+    scope: tuple[ReviewStatement, ...] = ()
     claims: tuple[ReviewStatement, ...] = ()
     structural_graph: StructuralGraphResult | None = None
     evidence_catalog: EvidenceCatalog = EvidenceCatalog()
     candidate_bindings: CandidateBindingSet = CandidateBindingSet()
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v7"
+    schema_version: str = "review_brief.v8"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

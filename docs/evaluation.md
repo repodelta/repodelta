@@ -28,7 +28,9 @@ Golden expectations use stable statement and evidence IDs:
   `requirement_claim` targets;
 - `expected_no_bindings` declares a query that should remain empty;
 - `expected_evidence` checks canonical code/test/document/CI/runtime/mixed
-  classification.
+  classification;
+- `expected_statements` checks a statement's stable ID, role, purpose, and
+  authority.
 
 No path, filename, or display-text heuristic is used to decide correctness.
 
@@ -43,13 +45,14 @@ The result records:
 - negative-query no-match accuracy;
 - negative-query false-positive rate;
 - evidence classification accuracy;
+- statement semantic accuracy;
 - missing and unexpected target IDs for every query;
 - candidate-budget and threshold diagnostics.
 
 Positive retrieval metrics exclude `expected_no_bindings` cases. Negative
 queries are scored separately so adding easy no-match examples cannot inflate
-precision, recall, or mean reciprocal rank. Every query or classification
-mismatch records its case, statement/evidence identity, expected values, and
+precision, recall, or mean reciprocal rank. Every query, classification, or
+statement-semantic mismatch records its case, identity, expected values, and
 observed values before aggregate threshold diagnostics are applied.
 
 JSON output is sorted and contains no timestamp, so repeated runs over the same

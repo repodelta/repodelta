@@ -57,6 +57,7 @@ class DeterministicAnalyzer:
         candidate_bindings = build_candidate_bindings(
             requirements=requirements,
             objectives=semantics.objectives,
+            scope=semantics.scope,
             claims=semantics.claims,
             evidence_catalog=evidence_catalog,
         )
@@ -66,6 +67,7 @@ class DeterministicAnalyzer:
             requirements=deliverables,
             guardrails=guardrails,
             objectives=semantics.objectives,
+            scope=semantics.scope,
             claims=semantics.claims,
             structural_graph=analysis_input.structural_graph,
             evidence_catalog=evidence_catalog,

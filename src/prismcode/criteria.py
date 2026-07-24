@@ -8,6 +8,7 @@ from .contracts import (
     ReviewStatement,
     SourceRef,
     StatementAuthority,
+    StatementPurpose,
     StatementRole,
 )
 
@@ -25,7 +26,7 @@ _OBJECTIVE_HEADINGS = {
     "objective",
     "objectives",
 }
-_CLAIM_HEADINGS = {
+_IMPLEMENTATION_HEADINGS = {
     "summary",
     "implementation",
     "implementation summary",
@@ -33,10 +34,30 @@ _CLAIM_HEADINGS = {
     "what changed",
     "approach",
 }
-_ROLE_BY_HEADING = {
-    **{heading: "obligation" for heading in _OBLIGATION_HEADINGS},
-    **{heading: "objective" for heading in _OBJECTIVE_HEADINGS},
-    **{heading: "claim" for heading in _CLAIM_HEADINGS},
+_SCOPE_HEADINGS = {"scope", "in scope"}
+_BOUNDARY_HEADINGS = {
+    "out of scope",
+    "non-goals",
+    "non goals",
+    "boundary",
+    "boundaries",
+}
+_BASELINE_HEADINGS = {"baseline", "baselines", "result", "results"}
+_VERIFICATION_HEADINGS = {
+    "verification",
+    "testing",
+    "tests",
+    "test plan",
+    "validation",
+}
+_SEMANTICS_BY_HEADING: dict[str, tuple[StatementRole, StatementPurpose]] = {
+    **{heading: ("obligation", "acceptance") for heading in _OBLIGATION_HEADINGS},
+    **{heading: ("objective", "goal") for heading in _OBJECTIVE_HEADINGS},
+    **{heading: ("context", "scope") for heading in _SCOPE_HEADINGS},
+    **{heading: ("claim", "boundary") for heading in _BOUNDARY_HEADINGS},
+    **{heading: ("claim", "implementation") for heading in _IMPLEMENTATION_HEADINGS},
+    **{heading: ("claim", "baseline") for heading in _BASELINE_HEADINGS},
+    **{heading: ("claim", "verification") for heading in _VERIFICATION_HEADINGS},
 }
 _LIST_ITEM_RE = re.compile(
     r"^(?P<indent>[ \t]*)"
@@ -55,6 +76,7 @@ _FENCE_RE = re.compile(r"^\s*(```+|~~~+)")
 class _ParsedItem:
     text: str
     role: StatementRole
+    purpose: StatementPurpose
     section: str
     line: int
 
@@ -63,6 +85,7 @@ class _ParsedItem:
 class _ListItem:
     text: str
     role: StatementRole
+    purpose: StatementPurpose
     section: str
     line: int
     indent: int
@@ -82,6 +105,7 @@ class ReviewSemantics:
     intent: ReviewStatement
     obligations: tuple[Requirement, ...] = ()
     objectives: tuple[ReviewStatement, ...] = ()
+    scope: tuple[ReviewStatement, ...] = ()
     claims: tuple[ReviewStatement, ...] = ()
 
 
@@ -119,9 +143,10 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
     if not body:
         return ParsedBody()
     items: list[_ParsedItem] = []
-    seen: set[tuple[StatementRole, str]] = set()
+    seen: set[tuple[StatementRole, StatementPurpose, str]] = set()
     current_section = ""
     current_role: StatementRole | None = None
+    current_purpose: StatementPurpose | None = None
     paragraph: list[tuple[int, str]] = []
     list_items: list[_ListItem] = []
     list_stack: list[int] = []
@@ -129,19 +154,30 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
     intro_complete = False
     fence_marker: str | None = None
 
-    def append_item(text: str, role: StatementRole, section: str, line: int) -> None:
+    def append_item(
+        text: str,
+        role: StatementRole,
+        purpose: StatementPurpose,
+        section: str,
+        line: int,
+    ) -> None:
         cleaned = _clean_markdown_text(text)
-        marker = (role, cleaned.casefold())
+        marker = (role, purpose, cleaned.casefold())
         if cleaned and marker not in seen:
-            items.append(_ParsedItem(cleaned, role, section, line))
+            items.append(_ParsedItem(cleaned, role, purpose, section, line))
             seen.add(marker)
 
     def finish_paragraph() -> None:
         nonlocal paragraph
-        if paragraph and current_role in {"objective", "claim"}:
+        if (
+            paragraph
+            and current_role in {"objective", "claim", "context"}
+            and current_purpose is not None
+        ):
             append_item(
                 " ".join(text for _, text in paragraph),
                 current_role,
+                current_purpose,
                 current_section,
                 paragraph[0][0],
             )
@@ -161,7 +197,13 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
             parent_texts.reverse()
             text = ": ".join((*parent_texts, item.text))
             for statement in _split_explicit_inline_items(text):
-                append_item(statement, item.role, item.section, item.line)
+                append_item(
+                    statement,
+                    item.role,
+                    item.purpose,
+                    item.section,
+                    item.line,
+                )
         list_items = []
         list_stack = []
 
@@ -183,13 +225,15 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
             finish_list()
             heading_seen = True
             current_section = _clean_markdown_text(heading_match.group(1))
-            current_role = _ROLE_BY_HEADING.get(current_section.casefold())
+            semantics = _SEMANTICS_BY_HEADING.get(current_section.casefold())
+            current_role = semantics[0] if semantics is not None else None
+            current_purpose = semantics[1] if semantics is not None else None
             continue
 
         list_match = _LIST_ITEM_RE.match(raw_line)
         if list_match:
             finish_paragraph()
-            if current_role is not None:
+            if current_role is not None and current_purpose is not None:
                 indent = _indent_width(list_match.group("indent"))
                 while list_stack and list_items[list_stack[-1]].indent >= indent:
                     list_stack.pop()
@@ -200,6 +244,7 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
                     _ListItem(
                         text=list_match.group("text"),
                         role=current_role,
+                        purpose=current_purpose,
                         section=current_section,
                         line=line_number,
                         indent=indent,
@@ -219,7 +264,7 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
         if list_items and current_role is not None:
             list_items[-1].text = f"{list_items[-1].text} {stripped}"
             continue
-        if current_role in {"objective", "claim"}:
+        if current_role in {"objective", "claim", "context"}:
             paragraph.append((line_number, stripped))
         elif not heading_seen and not intro_complete:
             introductory.append((line_number, stripped))
@@ -258,10 +303,23 @@ def extract_review_semantics(
     )
     obligation_source = issue_source if issue_obligations else pr_source
 
-    requirements = _number_requirements(
-        selected_obligations,
-        source=obligation_source or pr_source,
-        authority=obligation_authority,
+    issue_boundaries = (
+        tuple(item for item in issue.items if item.purpose == "boundary")
+        if issue_source is not None
+        else ()
+    )
+    requirements = _number_requirement_items(
+        (
+            *(
+                (item, obligation_source or pr_source, obligation_authority)
+                for item in selected_obligations
+            ),
+            *(
+                (item, issue_source, "issue")
+                for item in issue_boundaries
+                if issue_source is not None
+            ),
+        )
     )
     objective_items = (
         *(
@@ -280,24 +338,33 @@ def extract_review_semantics(
         prefix="O",
         role="objective",
     )
-    claims = tuple(
-        ReviewStatement(
-            id=f"C{index}",
-            text=item.text,
-            role="claim",
-            authority="pr_description",
-            sources=(_located_source(pr_source, item),),
-        )
-        for index, item in enumerate(
-            (item for item in pr.items if item.role == "claim"),
-            start=1,
-        )
+    scope_items = (
+        *(
+            (item, issue_source, "issue")
+            for item in issue.items
+            if item.purpose == "scope" and issue_source is not None
+        ),
+        *(
+            (item, pr_source, "pr_description")
+            for item in pr.items
+            if item.purpose == "scope"
+        ),
+    )
+    scope = _number_statements(
+        scope_items,
+        prefix="S",
+        role="context",
+    )
+    claims = _number_claims(
+        tuple(item for item in pr.items if item.role == "claim"),
+        source=pr_source,
     )
     if pr.introductory_intent:
         intent = ReviewStatement(
             id="I1",
             text=pr.introductory_intent,
             role="intent",
+            purpose="intent",
             authority="pr_description",
             sources=(
                 replace(
@@ -312,6 +379,7 @@ def extract_review_semantics(
             id="I1",
             text=pr_title,
             role="intent",
+            purpose="intent",
             authority="pr_title",
             sources=(SourceRef(label="pull request title", url=pr_source.url),),
         )
@@ -319,6 +387,7 @@ def extract_review_semantics(
         intent=intent,
         obligations=requirements,
         objectives=objectives,
+        scope=scope,
         claims=claims,
     )
 
@@ -336,7 +405,11 @@ def extract_requirements(
 ) -> tuple[Requirement, ...]:
     parsed = parse_markdown_semantics(body)
     return _number_requirements(
-        tuple(item for item in parsed.items if item.role == "obligation"),
+        tuple(
+            item
+            for item in parsed.items
+            if item.role == "obligation" or item.purpose == "boundary"
+        ),
         source=source,
         authority=authority,
     )
@@ -352,11 +425,26 @@ def _number_requirements(
     source: SourceRef,
     authority: StatementAuthority,
 ) -> tuple[Requirement, ...]:
+    return _number_requirement_items(
+        tuple((item, source, authority) for item in items)
+    )
+
+
+def _number_requirement_items(
+    items: tuple[tuple[_ParsedItem, SourceRef, StatementAuthority], ...],
+) -> tuple[Requirement, ...]:
     deliverable_index = 0
     guardrail_index = 0
     requirements: list[Requirement] = []
-    for item in items:
+    seen_text: set[str] = set()
+    for item, source, authority in items:
+        normalized_text = item.text.casefold()
+        if normalized_text in seen_text:
+            continue
+        seen_text.add(normalized_text)
         kind = _requirement_kind(item.text)
+        if item.purpose == "boundary":
+            kind = "guardrail"
         if kind == "guardrail":
             guardrail_index += 1
             statement_id = f"G{guardrail_index}"
@@ -368,6 +456,7 @@ def _number_requirements(
                 id=statement_id,
                 text=item.text,
                 role="obligation",
+                purpose="guardrail" if kind == "guardrail" else "acceptance",
                 authority=authority,
                 kind=kind,
                 sources=(_located_source(source, item),),
@@ -389,7 +478,43 @@ def _number_statements(
                 id=f"{prefix}{index}",
                 text=item.text,
                 role=role,
+                purpose=item.purpose,
                 authority=authority,
+                sources=(_located_source(source, item),),
+            )
+        )
+    return tuple(statements)
+
+
+def _number_claims(
+    items: tuple[_ParsedItem, ...],
+    *,
+    source: SourceRef,
+) -> tuple[ReviewStatement, ...]:
+    counters = {"baseline": 0, "verification": 0}
+    prefixes = {
+        "implementation": "C",
+        "boundary": "C",
+        "baseline": "B",
+        "verification": "V",
+    }
+    statements = []
+    claim_index = 0
+    for item in items:
+        purpose = item.purpose
+        if purpose in {"implementation", "boundary"}:
+            claim_index += 1
+            statement_id = f"C{claim_index}"
+        else:
+            counters[purpose] += 1
+            statement_id = f"{prefixes[purpose]}{counters[purpose]}"
+        statements.append(
+            ReviewStatement(
+                id=statement_id,
+                text=item.text,
+                role="claim",
+                purpose=purpose,
+                authority="pr_description",
                 sources=(_located_source(source, item),),
             )
         )

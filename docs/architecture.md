@@ -17,9 +17,11 @@ fixture or GitHub
        -> bounded paths + CI/runtime observations
   -> one-pass semantic extraction
        -> obligations and guardrails (R/G)
-       -> objectives (O), claims (C), intent (I)
+       -> objectives (O), scope context (S)
+       -> implementation/boundary (C), baseline (B), verification (V) claims
+       -> intent (I)
   -> deterministic CandidateBindingSet
-       -> R/G/O/C -> evidence candidates
+       -> R/G/O/S/C/B/V -> evidence candidates
        -> R/G -> C candidates
   -> ReviewBrief
   -> HTML renderer
@@ -44,14 +46,22 @@ Each Issue or PR Markdown body is parsed once into canonical
    Done, or Success Criteria are authoritative obligations.
 2. Only when no Issue obligation exists may the corresponding explicit
    PR-description sections become provisional obligations.
-3. Goals and Objectives are retrieval context.
-4. Summary, Implementation, Changes, What Changed, and Approach are
-   PR-authored claims that may connect requirements to evidence.
-5. The PR introduction and title are intent only.
+3. Goals and Objectives are objective retrieval context.
+4. Scope and In scope are context, never obligations.
+5. Out of scope and Boundary from a linked Issue are authoritative
+   guardrails. The same headings in a PR are boundary claims, because the
+   author cannot redefine the Issue contract by describing the implementation.
+6. Summary, Implementation, Changes, What Changed, and Approach are
+   implementation claims. Baseline/Results and Verification/Testing are typed
+   baseline and verification claims.
+7. The PR introduction and title are intent only.
 
 Deliverables use stable IDs (`R1`, `R2`, ...), negative scope constraints use
-`G1`, objectives use `O1`, and claims use `C1`. If no explicit obligation
-exists, the renderer reports the missing acceptance basis.
+`G1`, objectives use `O1`, scope uses `S1`, implementation and PR boundary
+claims use `C1`, baselines use `B1`, and verification claims use `V1`. Role,
+purpose, and authority are separate fields: for example, both `C1` and `V1`
+are claims, but their purposes differ. If no explicit obligation exists, the
+renderer reports the missing acceptance basis.
 
 The linked-Issue relation comes from GitHub GraphQL
 `PullRequest.closingIssuesReferences`; PR prose is not parsed to invent Issue
@@ -103,7 +113,7 @@ and paths merge by identity.
 
 `CandidateBindingSet` contains:
 
-- `statement_evidence` relations from R/G/O/C to canonical evidence;
+- `statement_evidence` relations from R/G/O/S/C/B/V to canonical evidence;
 - `requirement_claim` relations from R/G to PR-authored C statements.
 
 Direct retrieval uses one tokenizer over statement text and evidence content,
