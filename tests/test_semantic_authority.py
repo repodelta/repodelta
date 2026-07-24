@@ -174,12 +174,12 @@ def test_pr_acceptance_criteria_are_provisional_without_linked_issue() -> None:
 
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
 
-    assert [item.requirement.id for item in brief.assessments] == ["R1", "R2"]
+    assert [item.id for item in brief.requirements] == ["R1", "R2"]
     assert all(
-        item.requirement.authority == "pr_description"
-        for item in brief.assessments
+        item.authority == "pr_description"
+        for item in brief.requirements
     )
-    assert brief.assessments[0].requirement.sources[0].label == (
+    assert brief.requirements[0].sources[0].label == (
         "pull request description · Acceptance criteria"
     )
     assert [item.id for item in brief.objectives] == ["O1"]
@@ -210,15 +210,15 @@ def test_issue_acceptance_is_primary_but_pr_claims_remain_context() -> None:
 
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
 
-    assert [item.requirement.text for item in brief.assessments] == [
+    assert [item.text for item in brief.requirements] == [
         "Map changed lines to exact symbols."
     ]
-    assert brief.assessments[0].requirement.authority == "issue"
+    assert brief.requirements[0].authority == "issue"
     assert [item.text for item in brief.claims] == [
         "Adds Codegraph index diagnostics."
     ]
     assert "Use every changed file as evidence." not in {
-        item.requirement.text for item in brief.assessments
+        item.text for item in brief.requirements
     }
 
 
@@ -233,7 +233,7 @@ def test_summary_and_title_do_not_become_requirements() -> None:
 
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
 
-    assert brief.assessments == ()
+    assert brief.requirements == ()
     assert brief.guardrails == ()
     assert brief.intent.text == "Expose structural facts to the report."
     assert brief.intent.authority == "pr_description"
@@ -256,7 +256,7 @@ def test_pr_title_is_intent_only_when_description_has_no_intro() -> None:
     assert brief.intent.text == "Add structural graph foundation"
     assert brief.intent.authority == "pr_title"
     assert brief.intent.role == "intent"
-    assert brief.assessments == ()
+    assert brief.requirements == ()
 
 
 def test_provided_requirements_override_extraction_without_losing_context() -> None:
@@ -277,7 +277,7 @@ def test_provided_requirements_override_extraction_without_losing_context() -> N
         AnalysisInput(packet=packet, requirements=(provided,))
     )
 
-    assert [item.requirement.text for item in brief.assessments] == [
+    assert [item.text for item in brief.requirements] == [
         "Provided criterion."
     ]
     assert [item.text for item in brief.objectives] == [

@@ -116,7 +116,7 @@ def test_unified_patch_tracks_exact_new_and_old_line_numbers() -> None:
     assert hunks[0].added_lines == (2, 3)
     assert hunks[0].removed_lines == (2,)
     assert hunks[0].old_snippet == "    def old(self):"
-    assert hunks[0].new_snippet == "    def run(self):"
+    assert hunks[0].new_snippet == "    def run(self):\n        value = 1"
 
 
 def test_provider_protocol_and_missing_index_diagnostic(tmp_path: Path) -> None:
@@ -401,8 +401,8 @@ def test_analyzer_preserves_structural_facts_without_using_them_as_conclusions(
     )
 
     assert brief.structural_graph is structural
-    assert brief.schema_version == "review_brief.v6"
-    assert brief.assessments == lexical_only.assessments == ()
+    assert brief.schema_version == "review_brief.v7"
+    assert brief.requirements == lexical_only.requirements == ()
     serialized = brief.to_dict()
     assert serialized["structural_graph"]["schema_version"] == (
         "structural_graph_result.v2"

@@ -1,34 +1,30 @@
-# Analysis fixture v2
+# Analysis fixture v3
 
-An offline fixture is an envelope around the same `ReviewSourcePacket` used by live GitHub
-ingestion:
+An offline fixture is an envelope around the same conclusion-free
+`ReviewSourcePacket` used by live GitHub ingestion:
 
 ```json
 {
-  "schema_version": "analysis_fixture.v2",
+  "schema_version": "analysis_fixture.v3",
   "source_packet": { "schema_version": "review_source_packet.v1" },
   "requirements": [],
-  "evidence_hints": []
+  "evidence": []
 }
 ```
 
-`source_packet` is conclusion-free. `requirements` are explicit obligation
-statements and may include `role` (default `obligation`) and `authority`
-(default `provided`).
-`evidence_hints` are separate annotations with provenance. Their legacy inline
-`implementation` objects are converted once by the fixture loader into
-deterministically identified provided evidence; the resulting hints retain
-only canonical evidence IDs. Loading or analysis fails when the packet revision
-is inconsistent, a hint names an unknown requirement, or a hint references an
-unknown evidence ID.
+`requirements` are optional explicit obligation statements. Each may include
+`role` (default `obligation`) and `authority` (default `provided`). When the
+array is empty, the analyzer applies the normal semantic authority hierarchy:
+linked-Issue criteria first, then explicit PR Acceptance Criteria,
+Requirements, Definition of Done, or Success Criteria. Goals, claims, and
+intent remain separate; a PR title never becomes a requirement.
 
-When `requirements` is empty, the analyzer applies the semantic authority
-hierarchy: linked-Issue criteria first, then explicit PR Acceptance
-Criteria/Requirements/Definition of Done as provisional obligations. Goals,
-claims, and intent are retained separately; a PR title never becomes a
-requirement. The packet may contain current-head `verification_observations`;
-hints bind a requirement to observations by exact ID and cannot turn unrelated
-green CI into a passing requirement.
+`evidence` contains supplied facts that are normalized into the same canonical
+`EvidenceCatalog` as changed hunks, exact symbols, structural paths, and
+execution observations. An item may list `statement_ids` to record an explicit
+provided association. That association affects retrieval ordering only; it
+does not assert implementation, verification, or acceptance.
 
-Fixtures are for deterministic replay, not proof of source authenticity. The next golden
-vertical slice will replace the current small PR #574 example with a complete source packet.
+Loading fails when the packet revision is inconsistent or supplied evidence
+names an unknown explicit requirement. Fixtures support deterministic replay;
+they are not proof of source authenticity.

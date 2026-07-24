@@ -113,8 +113,7 @@ def test_github_adapter_collects_only_source_facts() -> None:
     assert not hasattr(packet, "requirements")
 
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
-    assert [item.requirement.text for item in brief.assessments] == ["Emit a trace.", "Preserve behavior."]
-    assert all(item.implementation.status == "not_observed" for item in brief.assessments)
+    assert [item.text for item in brief.requirements] == ["Emit a trace.", "Preserve behavior."]
     html = render_html(brief)
     assert "Collection notes" not in html
     assert "Source coverage" in html
@@ -148,7 +147,7 @@ def test_github_adapter_reports_file_cap_without_inferring_requirements() -> Non
         "github_head_sha_unavailable",
     ]
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
-    assert brief.assessments == ()
+    assert brief.requirements == ()
     assert brief.intent.text == "No structured requirements here."
     assert brief.intent.authority == "pr_description"
     html = render_html(brief)
@@ -187,8 +186,7 @@ def test_github_graphql_linked_issue_supplies_primary_acceptance_criteria() -> N
     )
     packet = GitHubPullRequestAdapter(client=client).load("acme/widget", 8)
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
-    assert [item.requirement.text for item in brief.assessments] == ["Emit a bounded trace."]
-    assert brief.assessments[0].implementation.status == "observed"
+    assert [item.text for item in brief.requirements] == ["Emit a bounded trace."]
     assert [item.text for item in brief.guardrails] == ["No UI changes."]
     html = render_html(brief)
     assert "Issue #41 · Acceptance criteria" in html

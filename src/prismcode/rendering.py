@@ -14,6 +14,8 @@ from .contracts import (
     SourceRef,
 )
 
+_VISIBLE_EVIDENCE_CANDIDATES = 6
+
 
 def _safe_href(value: str | None) -> str | None:
     if not value:
@@ -49,28 +51,6 @@ def _source(source: SourceRef) -> str:
         fragment = re.sub(r"[^a-z0-9]+", "-", section.casefold()).strip("-")
         href = urlunparse(parsed._replace(fragment=fragment))
     return f'<a class="source-link" href="{escape(href, quote=True)}" target="_blank" rel="noopener">{content}</a>' if href else content
-
-
-def _is_test_path(path: str | None) -> bool:
-    lowered = (path or "").casefold()
-    return lowered.startswith("tests/") or "/test" in lowered or lowered.endswith("_test.py")
-
-
-def _evidence_source_chip(source: SourceRef, brief: ReviewBrief) -> str:
-    path = source.path
-    label = source.label
-    if path:
-        label = f"{'TEST' if _is_test_path(path) else 'CODE'} · {Path(path).name}"
-    href = _safe_href(source.url)
-    if not href and path and brief.packet.head_sha:
-        href = (
-            f"https://github.com/{brief.packet.repository}/blob/{brief.packet.head_sha}/"
-            + quote(path, safe="/")
-        )
-    content = escape(label)
-    if href:
-        return f'<a class="source-chip {"test" if _is_test_path(path) else "code"}" href="{escape(href, quote=True)}" target="_blank" rel="noopener">{content}</a>'
-    return f'<span class="source-chip {"test" if _is_test_path(path) else "code"}">{content}</span>'
 
 
 def _changed_file(item: ChangedFile) -> str:
@@ -142,7 +122,7 @@ def _binding_basis(binding: CandidateBinding) -> str:
     return "".join(reasons)
 
 
-def _candidate_sources(item: EvidenceItem) -> str:
+def _candidate_sources(item: EvidenceItem, brief: ReviewBrief) -> str:
     unique: list[SourceRef] = []
     seen: set[tuple[object, ...]] = set()
     for source in item.sources:
@@ -154,6 +134,17 @@ def _candidate_sources(item: EvidenceItem) -> str:
         )
         if key not in seen:
             seen.add(key)
+            if not source.url and source.path and brief.packet.head_sha:
+                source = SourceRef(
+                    label=source.label,
+                    url=(
+                        f"https://github.com/{brief.packet.repository}/blob/"
+                        f"{brief.packet.head_sha}/{quote(source.path, safe='/')}"
+                    ),
+                    path=source.path,
+                    line_start=source.line_start,
+                    line_end=source.line_end,
+                )
             unique.append(source)
     shown = " · ".join(_source(source) for source in unique[:3])
     suffix = (
@@ -167,8 +158,6 @@ def _candidate_sources(item: EvidenceItem) -> str:
 def _candidate_evidence_rows(
     statement_id: str,
     brief: ReviewBrief,
-    *,
-    excluded_ids: set[str] | None = None,
 ) -> str:
     evidence = brief.evidence_catalog.by_id()
     evidence_bindings = [
@@ -177,23 +166,26 @@ def _candidate_evidence_rows(
         if item.kind == "statement_evidence" and item.source_id == statement_id
     ]
     rows = []
-    for binding in evidence_bindings:
+    visible_bindings = evidence_bindings[:_VISIBLE_EVIDENCE_CANDIDATES]
+    for binding in visible_bindings:
         item = evidence.get(binding.target_id)
-        if item is None or item.id in (excluded_ids or set()):
+        if item is None:
             continue
         is_execution = bool(item.metadata.get("observation_id"))
         kind_label = (
             "EXECUTION"
             if is_execution
-            else "CHANGED FILE"
+            else "FILE FALLBACK"
             if item.kind == "changed_file" and item.changed
             else "FILE"
             if item.kind == "changed_file"
+            else "CHANGED HUNK"
+            if item.kind == "changed_hunk"
             else "CHANGED " + item.kind.replace("_", " ").upper()
             if item.changed
             else item.kind.replace("_", " ").upper()
         )
-        sources = _candidate_sources(item)
+        sources = _candidate_sources(item, brief)
         rows.append(
             '<details class="evidence-candidate">'
             '<summary>'
@@ -210,41 +202,19 @@ def _candidate_evidence_rows(
             )
             + "</div></details>"
         )
-    return "".join(rows)
-
-
-def _assessment_evidence_rows(assessment: object, brief: ReviewBrief) -> tuple[str, set[str]]:
-    evidence = getattr(getattr(assessment, "implementation"), "evidence")
-    rows = []
-    evidence_ids = set()
-    for item in evidence:
-        evidence_ids.add(item.id)
-        sources = "".join(_evidence_source_chip(source, brief) for source in item.sources)
-        label = (
-            "FILE-LEVEL MATCH"
-            if item.kind == "changed_file"
-            else "PROVIDED EVIDENCE"
-            if item.metadata.get("provided")
-            else item.kind.replace("_", " ").upper()
-        )
+    hidden_count = len(evidence_bindings) - len(visible_bindings)
+    if hidden_count:
         rows.append(
-            '<div class="assessment-evidence">'
-            f'<span class="evidence-kind">{escape(label)}</span>'
-            f'<span class="candidate-copy">{escape(item.summary)}</span>'
-            + (
-                f'<div class="candidate-source">{sources}</div>'
-                if sources
-                else ""
-            )
-            + "</div>"
+            '<div class="candidate-overflow">'
+            f"{hidden_count} additional candidates retained in report data."
+            "</div>"
         )
-    return "".join(rows), evidence_ids
+    return "".join(rows)
 
 
 def _requirement_candidate_context(
     requirement_id: str,
     brief: ReviewBrief,
-    assessment: object,
 ) -> str:
     claims = {item.id: item for item in brief.claims}
     claim_bindings = [
@@ -271,12 +241,7 @@ def _requirement_candidate_context(
             )
             + "</div>"
     )
-    assessment_rows, assessment_ids = _assessment_evidence_rows(assessment, brief)
-    evidence_rows = assessment_rows + _candidate_evidence_rows(
-        requirement_id,
-        brief,
-        excluded_ids=assessment_ids,
-    )
+    evidence_rows = _candidate_evidence_rows(requirement_id, brief)
     groups = []
     if claim_rows:
         groups.append(
@@ -337,12 +302,10 @@ def _claim_card(statement: ReviewStatement, brief: ReviewBrief, *, open_card: bo
 def render_html(brief: ReviewBrief) -> str:
     packet = brief.packet
     requirement_cards = []
-    for index, assessment in enumerate(brief.assessments):
-        requirement = assessment.requirement
+    for index, requirement in enumerate(brief.requirements):
         candidate_context = _requirement_candidate_context(
             requirement.id,
             brief,
-            assessment,
         )
         sources = " · ".join(_source(source) for source in requirement.sources)
         authority_note = (
@@ -388,14 +351,14 @@ def render_html(brief: ReviewBrief) -> str:
     )
     files = "".join(_changed_file(item) for item in packet.changed_files) or '<p class="empty">Not provided.</p>'
     attention_rows: list[str] = []
-    if not brief.assessments and not brief.guardrails:
+    if not brief.requirements and not brief.guardrails:
         attention_rows.append(
             '<div class="attention-row"><div class="attention-kind">Acceptance basis</div>'
             '<div class="attention-copy">No explicit acceptance criteria found. '
             "Intent, objectives, and PR claims are not sufficient to determine "
             "requirement satisfaction.</div></div>"
         )
-    delivery_requirements = tuple(item.requirement for item in brief.assessments)
+    delivery_requirements = brief.requirements
     requirement_ids_with_claims = {
         item.source_id
         for item in brief.candidate_bindings.items
@@ -484,27 +447,6 @@ def render_html(brief: ReviewBrief) -> str:
             '<div class="attention-row"><div class="attention-kind">Candidate coverage limit</div>'
             f'<div class="attention-copy">{escape(" ".join(candidate_limits))}</div></div>'
         )
-    ci_gaps = [item.requirement.id for item in brief.assessments if item.verification.status != "passed"]
-    if ci_gaps:
-        attention_rows.append(
-            '<div class="attention-row"><div class="attention-kind">CI gap</div><div class="attention-copy">'
-            + escape(", ".join(ci_gaps))
-            + " have no passing requirement-specific CI or independent runtime observation.</div></div>"
-        )
-    non_ci_gaps: dict[str, list[str]] = {}
-    for item in brief.assessments:
-        for gap in item.gaps:
-            if gap.startswith("No requirement-specific CI"):
-                continue
-            non_ci_gaps.setdefault(gap, []).append(item.requirement.id)
-    for gap, ids in non_ci_gaps.items():
-        attention_rows.append(
-            '<div class="attention-row"><div class="attention-kind">Verification gap · '
-            + escape(", ".join(ids))
-            + '</div><div class="attention-copy">'
-            + escape(gap)
-            + "</div></div>"
-        )
     if brief.guardrails:
         guardrail_copy = " · ".join(f"{item.id}: {item.text}" for item in brief.guardrails)
         attention_rows.append(
@@ -541,7 +483,7 @@ code{{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-sp
 .section{{border:2px solid var(--border);border-radius:18px;background:linear-gradient(180deg,rgba(17,24,28,.97),rgba(11,17,21,.98));box-shadow:var(--shadow);padding:28px;margin-bottom:22px}}h1{{font-size:31px;margin:0 0 14px;letter-spacing:-.025em}}h2{{font-size:22px;margin:0 0 12px;letter-spacing:-.02em}}.meta{{display:flex;flex-wrap:wrap;gap:9px;color:var(--muted);font-size:13px;margin-bottom:16px}}.intent{{max-width:850px;color:#d2dade;font-size:15px}}.source-link,.file-link{{color:#b9dfff;text-decoration:none;background-image:linear-gradient(currentColor,currentColor);background-size:0 1px;background-position:0 100%;background-repeat:no-repeat;transition:background-size .18s ease}}.source-link:hover,.file-link:hover{{background-size:100% 1px}}
 .badge{{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;font-size:10px;font-weight:760;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}}.badge.good{{background:var(--green-bg);color:#c7f4d9}}.badge.info{{background:var(--blue-bg);color:#cce8ff}}.badge.warn{{background:var(--amber-bg);color:#ffe3a0}}.badge.danger{{background:var(--red-bg);color:#ffb0a9}}.badge.muted{{background:rgba(111,128,135,.12);color:#aeb9be}}
 .requirements{{border-top:1px solid rgba(111,128,135,.24)}}.requirement{{border-bottom:1px solid rgba(111,128,135,.24)}}.requirement summary{{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px minmax(0,1fr);gap:16px;align-items:center;padding:18px 0}}.requirement summary::-webkit-details-marker{{display:none}}.req-id{{color:var(--green);font-size:12px;font-weight:760;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}}.req-title{{font-size:14px;font-weight:640}}.req-body{{padding:0 0 20px 68px}}.requirement-source{{margin:0 0 12px}}.block-title{{display:block;margin-bottom:5px;color:#89979d;font-size:10px;letter-spacing:.045em;font-weight:700;text-transform:uppercase}}.block-copy{{color:#d7dddf;font-size:13px}}.source-note{{display:block;margin-top:8px;color:var(--faint);font-size:10px;line-height:1.45}}.evidence-sources{{margin-top:14px}}.source-chip{{display:inline-flex;margin:0 7px 7px 0;padding:4px 8px;border-radius:999px;text-decoration:none;font-size:10px;font-weight:740;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}}.source-chip.code{{background:var(--green-bg);color:#c7f4d9}}.source-chip.test{{background:var(--blue-bg);color:#cce8ff}}
-.sources{{color:var(--faint);font-size:11px;line-height:1.7}}.objective-context{{margin-bottom:12px;padding:0 0 12px;border-bottom:1px solid rgba(111,128,135,.24)}}.objective-context>summary{{cursor:pointer;color:var(--muted);font-size:11px;font-weight:680;list-style:none}}.objective-context>summary::-webkit-details-marker{{display:none}}.objective-context .context-list{{margin-top:10px}}.candidate-context{{margin-top:16px;padding-top:14px;border-top:1px solid rgba(111,128,135,.24)}}.candidate-heading{{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:15px;font-size:12px;font-weight:720}}.candidate-disclaimer{{color:var(--faint);font-size:9px;font-weight:560}}.candidate-group+ .candidate-group{{margin-top:16px}}.claim-candidate,.assessment-evidence{{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:8px 10px;padding:10px 0;border-bottom:1px solid rgba(111,128,135,.16)}}.assessment-evidence{{grid-template-columns:112px minmax(0,1fr)}}.assessment-evidence .candidate-source{{grid-column:2}}.candidate-id{{color:#9fcdf0;font:700 10px ui-monospace,SFMono-Regular,Menlo,monospace}}.candidate-copy{{font-size:11px;color:#d7dddf}}.candidate-score{{color:var(--faint);font-size:9px;white-space:nowrap}}.candidate-basis{{grid-column:2/-1;display:flex;flex-wrap:wrap;gap:5px}}.basis-chip{{display:inline-flex;padding:3px 7px;border-radius:999px;background:rgba(92,116,128,.13);color:#aebdc4;font-size:8px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}}.candidate-source{{grid-column:2/-1;color:var(--faint);font-size:9px}}.candidate-more{{color:var(--faint)}}.candidate-empty{{margin:4px 0 0;color:var(--faint);font-size:10px;font-style:italic}}.evidence-candidate{{border-bottom:1px solid rgba(111,128,135,.16)}}.evidence-candidate summary{{display:grid;grid-template-columns:112px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 0;cursor:pointer;list-style:none}}.evidence-candidate summary::-webkit-details-marker{{display:none}}.evidence-kind{{color:#a7d8bd;font-size:8px;font-weight:760;letter-spacing:.035em}}.candidate-detail{{padding:0 0 10px 122px}}.section-copy{{margin:-4px 0 16px;color:var(--muted);font-size:12px}}.empty-state{{display:grid;gap:5px;padding:18px 0;color:var(--muted);font-size:12px}}.empty-state strong{{color:#e8d18e;font-size:13px}}.context-list{{border-top:1px solid rgba(111,128,135,.24)}}.context-row{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px;gap:12px;align-items:start;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.context-id{{color:#9fcdf0;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace}}.context-copy{{font-size:13px}}.context-authority{{color:var(--muted);font-size:10px;text-align:right}}.context-source{{grid-column:2/-1;color:var(--faint);font-size:10px}}.attention-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:210px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:#e7ca7c;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-list{{display:grid;gap:0;border-top:1px solid rgba(111,128,135,.24)}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px;white-space:nowrap}}.empty{{color:var(--faint);font-size:12px;font-style:italic}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}
+.sources{{color:var(--faint);font-size:11px;line-height:1.7}}.objective-context{{margin-bottom:12px;padding:0 0 12px;border-bottom:1px solid rgba(111,128,135,.24)}}.objective-context>summary{{cursor:pointer;color:var(--muted);font-size:11px;font-weight:680;list-style:none}}.objective-context>summary::-webkit-details-marker{{display:none}}.objective-context .context-list{{margin-top:10px}}.candidate-context{{margin-top:16px;padding-top:14px;border-top:1px solid rgba(111,128,135,.24)}}.candidate-heading{{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:15px;font-size:12px;font-weight:720}}.candidate-disclaimer{{color:var(--faint);font-size:9px;font-weight:560}}.candidate-group+ .candidate-group{{margin-top:16px}}.claim-candidate{{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:8px 10px;padding:10px 0;border-bottom:1px solid rgba(111,128,135,.16)}}.candidate-id{{color:#9fcdf0;font:700 10px ui-monospace,SFMono-Regular,Menlo,monospace}}.candidate-copy{{font-size:11px;color:#d7dddf}}.candidate-score{{color:var(--faint);font-size:9px;white-space:nowrap}}.candidate-basis{{grid-column:2/-1;display:flex;flex-wrap:wrap;gap:5px}}.basis-chip{{display:inline-flex;padding:3px 7px;border-radius:999px;background:rgba(92,116,128,.13);color:#aebdc4;font-size:8px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}}.candidate-source{{grid-column:2/-1;color:var(--faint);font-size:9px}}.candidate-more{{color:var(--faint)}}.candidate-empty{{margin:4px 0 0;color:var(--faint);font-size:10px;font-style:italic}}.candidate-overflow{{padding:9px 0;color:var(--faint);font-size:9px}}.evidence-candidate{{border-bottom:1px solid rgba(111,128,135,.16)}}.evidence-candidate summary{{display:grid;grid-template-columns:112px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 0;cursor:pointer;list-style:none}}.evidence-candidate summary::-webkit-details-marker{{display:none}}.evidence-kind{{color:#a7d8bd;font-size:8px;font-weight:760;letter-spacing:.035em}}.candidate-detail{{padding:0 0 10px 122px}}.section-copy{{margin:-4px 0 16px;color:var(--muted);font-size:12px}}.empty-state{{display:grid;gap:5px;padding:18px 0;color:var(--muted);font-size:12px}}.empty-state strong{{color:#e8d18e;font-size:13px}}.context-list{{border-top:1px solid rgba(111,128,135,.24)}}.context-row{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px;gap:12px;align-items:start;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.context-id{{color:#9fcdf0;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace}}.context-copy{{font-size:13px}}.context-authority{{color:var(--muted);font-size:10px;text-align:right}}.context-source{{grid-column:2/-1;color:var(--faint);font-size:10px}}.attention-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:210px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:#e7ca7c;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-list{{display:grid;gap:0;border-top:1px solid rgba(111,128,135,.24)}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px;white-space:nowrap}}.empty{{color:var(--faint);font-size:12px;font-style:italic}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}
 @media(max-width:900px){{.requirement summary{{grid-template-columns:46px 1fr}}.req-body{{padding-left:62px}}.attention-row{{grid-template-columns:1fr;gap:8px}}}}@media(max-width:560px){{.shell{{width:min(100% - 18px,1160px);margin-top:16px}}.section{{padding:22px 20px}}.topbar{{align-items:flex-start;flex-direction:column}}.file-row{{grid-template-columns:1fr}}.file-state{{white-space:normal}}.req-body{{padding-left:0}}.candidate-heading{{align-items:flex-start;flex-direction:column}}.claim-candidate{{grid-template-columns:32px minmax(0,1fr)}}.candidate-score{{grid-column:2}}.evidence-candidate summary{{grid-template-columns:1fr}}.candidate-detail{{padding-left:0}}.candidate-basis,.candidate-source{{grid-column:1/-1}}}}
 </style></head><body><main class="shell">
 <div class="topbar"><div class="brand"><span class="brand-mark"></span> PrismCode</div></div>

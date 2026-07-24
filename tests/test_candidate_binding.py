@@ -282,7 +282,7 @@ def test_analyzer_serializes_candidates_without_using_them_as_status() -> None:
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
     serialized = brief.to_dict()
 
-    assert brief.schema_version == "review_brief.v6"
+    assert brief.schema_version == "review_brief.v7"
     assert brief.candidate_bindings.schema_version == "candidate_binding_set.v1"
     assert any(
         item.kind == "requirement_claim"
@@ -291,7 +291,7 @@ def test_analyzer_serializes_candidates_without_using_them_as_status() -> None:
         for item in brief.candidate_bindings.items
     )
     assert serialized["candidate_bindings"]["items"]
-    assert brief.assessments[0].implementation.status == "observed"
+    assert [item.id for item in brief.requirements] == ["R1"]
 
 
 def test_consistency_report_keeps_candidates_separate_from_conclusions() -> None:
@@ -332,7 +332,7 @@ def test_consistency_report_keeps_candidates_separate_from_conclusions() -> None
     assert "Retrieval relevance only · not an acceptance conclusion" in html
     assert "Related PR claims" in html
     assert ">Evidence<" in html
-    assert "FILE-LEVEL MATCH" in html
+    assert "FILE FALLBACK" in html
     assert "CHANGED CHANGED FILE" not in html
     assert "term overlap" in html and "relevance " in html
     assert "PR claim coverage" in html and "R2" in html
@@ -341,7 +341,7 @@ def test_consistency_report_keeps_candidates_separate_from_conclusions() -> None
     assert "Claims without acceptance links" in html
     assert "Changed evidence without statement candidates" in html
     assert "Modified file: docs/notes.md" in html
-    assert brief.assessments[1].implementation.status == "not_observed"
+    assert [item.id for item in brief.requirements] == ["R1", "R2"]
 
 
 def test_claims_are_fallback_review_axis_when_acceptance_is_missing() -> None:
@@ -368,7 +368,7 @@ def test_claims_are_fallback_review_axis_when_acceptance_is_missing() -> None:
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
     html = render_html(brief)
 
-    assert brief.assessments == ()
+    assert brief.requirements == ()
     assert "Requirement checks" not in html
     assert "Review context" not in html
     assert "Review checks" in html
@@ -376,3 +376,82 @@ def test_claims_are_fallback_review_axis_when_acceptance_is_missing() -> None:
     assert "No acceptance link" in html
     assert "Modified file: src/core_processing.py" in html
     assert "Acceptance basis" in html
+
+
+def test_hunk_text_binds_when_filename_has_no_requirement_terms() -> None:
+    packet = ReviewSourcePacket(
+        repository="acme/widget",
+        pull_request=14,
+        title="Expose debug trace",
+        source_records=(
+            SourceRecord(
+                id="pr:14",
+                kind="pull_request",
+                repository="acme/widget",
+                body=(
+                    "## Requirements\n"
+                    "- State debug endpoint exposes the semantic trace.\n"
+                ),
+            ),
+        ),
+        changed_files=(
+            ChangedFile(
+                path="src/runtime.py",
+                patch=(
+                    "@@ -1 +1 @@\n"
+                    "-return payload\n"
+                    "+return state_debug_semantic_trace(payload)\n"
+                ),
+            ),
+        ),
+    ).with_revision()
+
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    binding = next(
+        item
+        for item in brief.candidate_bindings.items
+        if item.kind == "statement_evidence" and item.source_id == "R1"
+    )
+    evidence = brief.evidence_catalog.by_id()[binding.target_id]
+
+    assert evidence.kind == "changed_hunk"
+    assert "semantic_trace" in evidence.metadata["patch_excerpt"]
+    assert "term_overlap" in {reason.feature for reason in binding.reasons}
+
+
+def test_report_limits_visible_candidates_without_discarding_bindings() -> None:
+    packet = ReviewSourcePacket(
+        repository="acme/widget",
+        pull_request=15,
+        title="Bound core processing",
+        source_records=(
+            SourceRecord(
+                id="pr:15",
+                kind="pull_request",
+                repository="acme/widget",
+                body="## Requirements\n- Core processing remains bounded.\n",
+            ),
+        ),
+        changed_files=tuple(
+            ChangedFile(
+                path=f"src/runtime_{index}.py",
+                patch=(
+                    "@@ -0,0 +1 @@\n"
+                    f"+def bounded_core_processing_{index}(): pass\n"
+                ),
+            )
+            for index in range(8)
+        ),
+    ).with_revision()
+
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    html = render_html(brief)
+    bindings = [
+        item
+        for item in brief.candidate_bindings.items
+        if item.kind == "statement_evidence" and item.source_id == "R1"
+    ]
+
+    assert len(bindings) == 8
+    assert html.count("CHANGED HUNK") == 6
+    assert "2 additional candidates retained in report data." in html

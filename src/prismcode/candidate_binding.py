@@ -46,7 +46,22 @@ def build_candidate_bindings(
 
     for statement in statements:
         for item in evidence:
-            reasons = _lexical_reasons(statement.text, _evidence_text(item), item)
+            reasons = list(
+                _lexical_reasons(statement.text, _evidence_text(item), item)
+            )
+            if statement.id in item.metadata.get(
+                "provided_for_statement_ids", ()
+            ):
+                reasons.append(
+                    BindingReason(
+                        feature="provided_association",
+                        detail=(
+                            "The supplied fixture/provider evidence explicitly "
+                            "references this statement."
+                        ),
+                        weight=100,
+                    )
+                )
             if sum(reason.weight for reason in reasons) >= policy.min_lexical_score:
                 _merge(
                     bindings,
@@ -54,7 +69,7 @@ def build_candidate_bindings(
                         "statement_evidence",
                         statement.id,
                         item.id,
-                        reasons,
+                        tuple(reasons),
                         item.structural_path_ids,
                     ),
                 )
@@ -415,6 +430,7 @@ def _evidence_text(item: EvidenceItem) -> str:
         str(metadata.get("path") or ""),
         str(metadata.get("qualified_name") or ""),
         str(metadata.get("name") or ""),
+        str(metadata.get("patch_excerpt") or ""),
     )
     return "\n".join(value for value in values if value)
 
