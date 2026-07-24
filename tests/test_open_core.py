@@ -35,9 +35,10 @@ def test_fixture_to_requirement_first_html(tmp_path: Path) -> None:
     assert "R1" in html and "R5" in html
     assert "G1" in html and "G5" in html
     assert "Implementation observed · Verification not observed" not in html
-    assert "Implemented across 1 file" in html
-    assert "Tests present across 1 file" in html
-    assert "CI not observed" in html
+    assert "Implemented across" not in html
+    assert "Tests present across" not in html
+    assert "CI not observed" not in html
+    assert "PROVIDED EVIDENCE" in html
     assert "6 changed files" in html
     assert "5 delivery requirements" not in html
     assert "CI/Actions observations" not in html

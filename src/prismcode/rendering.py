@@ -73,23 +73,6 @@ def _evidence_source_chip(source: SourceRef, brief: ReviewBrief) -> str:
     return f'<span class="source-chip {"test" if _is_test_path(path) else "code"}">{content}</span>'
 
 
-def _implementation(assessment: object, brief: ReviewBrief) -> tuple[str, str, int, int]:
-    evidence = getattr(getattr(assessment, "implementation"), "evidence")
-    copy = " ".join(item.summary for item in evidence) or "No implementation evidence recorded."
-    sources: list[SourceRef] = []
-    seen: set[tuple[str | None, str | None]] = set()
-    for item in evidence:
-        for source in item.sources:
-            key = (source.path, source.url)
-            if key not in seen:
-                sources.append(source)
-                seen.add(key)
-    source_chips = "".join(_evidence_source_chip(source, brief) for source in sources)
-    code_count = sum(not _is_test_path(source.path) for source in sources)
-    test_count = sum(_is_test_path(source.path) for source in sources)
-    return escape(copy), source_chips, code_count, test_count
-
-
 def _changed_file(item: ChangedFile) -> str:
     stats = []
     if item.additions is not None:
@@ -230,16 +213,23 @@ def _candidate_evidence_rows(
     return "".join(rows)
 
 
-def _observed_evidence_rows(assessment: object, brief: ReviewBrief) -> tuple[str, set[str]]:
+def _assessment_evidence_rows(assessment: object, brief: ReviewBrief) -> tuple[str, set[str]]:
     evidence = getattr(getattr(assessment, "implementation"), "evidence")
     rows = []
     evidence_ids = set()
     for item in evidence:
         evidence_ids.add(item.id)
         sources = "".join(_evidence_source_chip(source, brief) for source in item.sources)
+        label = (
+            "FILE-LEVEL MATCH"
+            if item.kind == "changed_file"
+            else "PROVIDED EVIDENCE"
+            if item.metadata.get("provided")
+            else item.kind.replace("_", " ").upper()
+        )
         rows.append(
-            '<div class="observed-evidence">'
-            '<span class="evidence-kind">OBSERVED</span>'
+            '<div class="assessment-evidence">'
+            f'<span class="evidence-kind">{escape(label)}</span>'
             f'<span class="candidate-copy">{escape(item.summary)}</span>'
             + (
                 f'<div class="candidate-source">{sources}</div>'
@@ -281,11 +271,11 @@ def _requirement_candidate_context(
             )
             + "</div>"
     )
-    observed_rows, observed_ids = _observed_evidence_rows(assessment, brief)
-    evidence_rows = observed_rows + _candidate_evidence_rows(
+    assessment_rows, assessment_ids = _assessment_evidence_rows(assessment, brief)
+    evidence_rows = assessment_rows + _candidate_evidence_rows(
         requirement_id,
         brief,
-        excluded_ids=observed_ids,
+        excluded_ids=assessment_ids,
     )
     groups = []
     if claim_rows:
@@ -328,8 +318,8 @@ def _claim_card(statement: ReviewStatement, brief: ReviewBrief, *, open_card: bo
         f'<details class="requirement claim-check"{" open" if open_card else ""}><summary>'
         f'<span class="req-id">{escape(statement.id)}</span>'
         f'<span class="req-title">{escape(statement.text)}</span>'
-        f'<span class="req-chips"><span class="badge muted">{escape(acceptance)}</span></span>'
         "</summary><div class=\"req-body\">"
+        f'<span class="source-note requirement-source">{escape(acceptance)}</span>'
         + (f'<span class="source-note requirement-source">Source: {sources}</span>' if sources else "")
         + (
             '<div class="candidate-context"><div class="candidate-heading">'
@@ -349,7 +339,6 @@ def render_html(brief: ReviewBrief) -> str:
     requirement_cards = []
     for index, assessment in enumerate(brief.assessments):
         requirement = assessment.requirement
-        _, _, code_count, test_count = _implementation(assessment, brief)
         candidate_context = _requirement_candidate_context(
             requirement.id,
             brief,
@@ -363,22 +352,10 @@ def render_html(brief: ReviewBrief) -> str:
             if requirement.authority == "issue"
             else "Provided acceptance criterion"
         )
-        implementation_chip = f"Implemented across {code_count} file{'s' if code_count != 1 else ''}" if code_count else "Implementation not observed"
-        test_chip = f"Tests present across {test_count} file{'s' if test_count != 1 else ''}" if test_count else "No related test evidence"
-        verification_chip = {
-            "passed": "Requirement CI passed",
-            "failed": "Requirement CI failed",
-            "pending": "Requirement CI pending",
-            "stale": "Only stale CI observed",
-        }.get(assessment.verification.status, "CI not observed")
         requirement_cards.append(
             f'<details class="requirement"{" open" if index == 0 else ""}><summary>'
             f'<span class="req-id">{escape(requirement.id)}</span><span class="req-title">{escape(requirement.text)}</span>'
-            '<span class="req-chips">'
-            f'<span class="badge {"good" if code_count else "warn"}">{escape(implementation_chip)}</span>'
-            f'<span class="badge {"info" if test_count else "muted"}">{escape(test_chip)}</span>'
-            f'<span class="badge {"good" if assessment.verification.status == "passed" else "warn"}">{escape(verification_chip)}</span>'
-            '</span></summary>'
+            '</summary>'
             '<div class="req-body">'
             + (
                 f'<span class="source-note requirement-source">Source: {sources}'
@@ -563,9 +540,9 @@ def render_html(brief: ReviewBrief) -> str:
 code{{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:-.015em}}.shell{{width:min(1160px,calc(100% - 40px));margin:30px auto 84px}}.topbar{{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:22px}}.brand{{display:inline-flex;align-items:center;gap:11px;font-weight:720}}.brand-mark{{width:14px;height:14px;border:2px solid rgba(255,255,255,.92);transform:rotate(45deg);border-radius:3px;box-shadow:0 0 0 5px rgba(117,224,167,.06)}}
 .section{{border:2px solid var(--border);border-radius:18px;background:linear-gradient(180deg,rgba(17,24,28,.97),rgba(11,17,21,.98));box-shadow:var(--shadow);padding:28px;margin-bottom:22px}}h1{{font-size:31px;margin:0 0 14px;letter-spacing:-.025em}}h2{{font-size:22px;margin:0 0 12px;letter-spacing:-.02em}}.meta{{display:flex;flex-wrap:wrap;gap:9px;color:var(--muted);font-size:13px;margin-bottom:16px}}.intent{{max-width:850px;color:#d2dade;font-size:15px}}.source-link,.file-link{{color:#b9dfff;text-decoration:none;background-image:linear-gradient(currentColor,currentColor);background-size:0 1px;background-position:0 100%;background-repeat:no-repeat;transition:background-size .18s ease}}.source-link:hover,.file-link:hover{{background-size:100% 1px}}
 .badge{{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;font-size:10px;font-weight:760;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}}.badge.good{{background:var(--green-bg);color:#c7f4d9}}.badge.info{{background:var(--blue-bg);color:#cce8ff}}.badge.warn{{background:var(--amber-bg);color:#ffe3a0}}.badge.danger{{background:var(--red-bg);color:#ffb0a9}}.badge.muted{{background:rgba(111,128,135,.12);color:#aeb9be}}
-.requirements{{border-top:1px solid rgba(111,128,135,.24)}}.requirement{{border-bottom:1px solid rgba(111,128,135,.24)}}.requirement summary{{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px minmax(0,1fr) minmax(280px,auto);gap:16px;align-items:center;padding:18px 0}}.requirement summary::-webkit-details-marker{{display:none}}.req-id{{color:var(--green);font-size:12px;font-weight:760;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}}.req-title{{font-size:14px;font-weight:640}}.req-chips{{justify-self:end;display:flex;justify-content:flex-end;flex-wrap:wrap;gap:6px}}.req-body{{padding:0 0 20px 68px}}.requirement-source{{margin:0 0 16px}}.block-title{{display:block;margin-bottom:5px;color:#89979d;font-size:10px;letter-spacing:.045em;font-weight:700;text-transform:uppercase}}.block-copy{{color:#d7dddf;font-size:13px}}.source-note{{display:block;margin-top:8px;color:var(--faint);font-size:10px;line-height:1.45}}.evidence-sources{{margin-top:14px}}.source-chip{{display:inline-flex;margin:0 7px 7px 0;padding:4px 8px;border-radius:999px;text-decoration:none;font-size:10px;font-weight:740;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}}.source-chip.code{{background:var(--green-bg);color:#c7f4d9}}.source-chip.test{{background:var(--blue-bg);color:#cce8ff}}
-.sources{{color:var(--faint);font-size:11px;line-height:1.7}}.objective-context{{margin-bottom:12px;padding:0 0 12px;border-bottom:1px solid rgba(111,128,135,.24)}}.objective-context>summary{{cursor:pointer;color:var(--muted);font-size:11px;font-weight:680;list-style:none}}.objective-context>summary::-webkit-details-marker{{display:none}}.objective-context .context-list{{margin-top:10px}}.candidate-context{{margin-top:16px;padding-top:14px;border-top:1px solid rgba(111,128,135,.24)}}.candidate-heading{{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:15px;font-size:12px;font-weight:720}}.candidate-disclaimer{{color:var(--faint);font-size:9px;font-weight:560}}.candidate-group+ .candidate-group{{margin-top:16px}}.claim-candidate,.observed-evidence{{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:8px 10px;padding:10px 0;border-bottom:1px solid rgba(111,128,135,.16)}}.observed-evidence{{grid-template-columns:112px minmax(0,1fr)}}.observed-evidence .candidate-source{{grid-column:2}}.candidate-id{{color:#9fcdf0;font:700 10px ui-monospace,SFMono-Regular,Menlo,monospace}}.candidate-copy{{font-size:11px;color:#d7dddf}}.candidate-score{{color:var(--faint);font-size:9px;white-space:nowrap}}.candidate-basis{{grid-column:2/-1;display:flex;flex-wrap:wrap;gap:5px}}.basis-chip{{display:inline-flex;padding:3px 7px;border-radius:999px;background:rgba(92,116,128,.13);color:#aebdc4;font-size:8px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}}.candidate-source{{grid-column:2/-1;color:var(--faint);font-size:9px}}.candidate-more{{color:var(--faint)}}.candidate-empty{{margin:4px 0 0;color:var(--faint);font-size:10px;font-style:italic}}.evidence-candidate{{border-bottom:1px solid rgba(111,128,135,.16)}}.evidence-candidate summary{{display:grid;grid-template-columns:112px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 0;cursor:pointer;list-style:none}}.evidence-candidate summary::-webkit-details-marker{{display:none}}.evidence-kind{{color:#a7d8bd;font-size:8px;font-weight:760;letter-spacing:.035em}}.candidate-detail{{padding:0 0 10px 122px}}.section-copy{{margin:-4px 0 16px;color:var(--muted);font-size:12px}}.empty-state{{display:grid;gap:5px;padding:18px 0;color:var(--muted);font-size:12px}}.empty-state strong{{color:#e8d18e;font-size:13px}}.context-list{{border-top:1px solid rgba(111,128,135,.24)}}.context-row{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px;gap:12px;align-items:start;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.context-id{{color:#9fcdf0;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace}}.context-copy{{font-size:13px}}.context-authority{{color:var(--muted);font-size:10px;text-align:right}}.context-source{{grid-column:2/-1;color:var(--faint);font-size:10px}}.attention-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:210px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:#e7ca7c;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-list{{display:grid;gap:0;border-top:1px solid rgba(111,128,135,.24)}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px;white-space:nowrap}}.empty{{color:var(--faint);font-size:12px;font-style:italic}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}
-@media(max-width:900px){{.requirement summary{{grid-template-columns:46px 1fr}}.req-chips{{grid-column:2;justify-self:start;justify-content:flex-start}}.req-body{{padding-left:62px}}.attention-row{{grid-template-columns:1fr;gap:8px}}}}@media(max-width:560px){{.shell{{width:min(100% - 18px,1160px);margin-top:16px}}.section{{padding:22px 20px}}.topbar{{align-items:flex-start;flex-direction:column}}.file-row{{grid-template-columns:1fr}}.file-state{{white-space:normal}}.req-body{{padding-left:0}}.candidate-heading{{align-items:flex-start;flex-direction:column}}.claim-candidate{{grid-template-columns:32px minmax(0,1fr)}}.candidate-score{{grid-column:2}}.evidence-candidate summary{{grid-template-columns:1fr}}.candidate-detail{{padding-left:0}}.candidate-basis,.candidate-source{{grid-column:1/-1}}}}
+.requirements{{border-top:1px solid rgba(111,128,135,.24)}}.requirement{{border-bottom:1px solid rgba(111,128,135,.24)}}.requirement summary{{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px minmax(0,1fr);gap:16px;align-items:center;padding:18px 0}}.requirement summary::-webkit-details-marker{{display:none}}.req-id{{color:var(--green);font-size:12px;font-weight:760;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}}.req-title{{font-size:14px;font-weight:640}}.req-body{{padding:0 0 20px 68px}}.requirement-source{{margin:0 0 12px}}.block-title{{display:block;margin-bottom:5px;color:#89979d;font-size:10px;letter-spacing:.045em;font-weight:700;text-transform:uppercase}}.block-copy{{color:#d7dddf;font-size:13px}}.source-note{{display:block;margin-top:8px;color:var(--faint);font-size:10px;line-height:1.45}}.evidence-sources{{margin-top:14px}}.source-chip{{display:inline-flex;margin:0 7px 7px 0;padding:4px 8px;border-radius:999px;text-decoration:none;font-size:10px;font-weight:740;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}}.source-chip.code{{background:var(--green-bg);color:#c7f4d9}}.source-chip.test{{background:var(--blue-bg);color:#cce8ff}}
+.sources{{color:var(--faint);font-size:11px;line-height:1.7}}.objective-context{{margin-bottom:12px;padding:0 0 12px;border-bottom:1px solid rgba(111,128,135,.24)}}.objective-context>summary{{cursor:pointer;color:var(--muted);font-size:11px;font-weight:680;list-style:none}}.objective-context>summary::-webkit-details-marker{{display:none}}.objective-context .context-list{{margin-top:10px}}.candidate-context{{margin-top:16px;padding-top:14px;border-top:1px solid rgba(111,128,135,.24)}}.candidate-heading{{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:15px;font-size:12px;font-weight:720}}.candidate-disclaimer{{color:var(--faint);font-size:9px;font-weight:560}}.candidate-group+ .candidate-group{{margin-top:16px}}.claim-candidate,.assessment-evidence{{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:8px 10px;padding:10px 0;border-bottom:1px solid rgba(111,128,135,.16)}}.assessment-evidence{{grid-template-columns:112px minmax(0,1fr)}}.assessment-evidence .candidate-source{{grid-column:2}}.candidate-id{{color:#9fcdf0;font:700 10px ui-monospace,SFMono-Regular,Menlo,monospace}}.candidate-copy{{font-size:11px;color:#d7dddf}}.candidate-score{{color:var(--faint);font-size:9px;white-space:nowrap}}.candidate-basis{{grid-column:2/-1;display:flex;flex-wrap:wrap;gap:5px}}.basis-chip{{display:inline-flex;padding:3px 7px;border-radius:999px;background:rgba(92,116,128,.13);color:#aebdc4;font-size:8px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}}.candidate-source{{grid-column:2/-1;color:var(--faint);font-size:9px}}.candidate-more{{color:var(--faint)}}.candidate-empty{{margin:4px 0 0;color:var(--faint);font-size:10px;font-style:italic}}.evidence-candidate{{border-bottom:1px solid rgba(111,128,135,.16)}}.evidence-candidate summary{{display:grid;grid-template-columns:112px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 0;cursor:pointer;list-style:none}}.evidence-candidate summary::-webkit-details-marker{{display:none}}.evidence-kind{{color:#a7d8bd;font-size:8px;font-weight:760;letter-spacing:.035em}}.candidate-detail{{padding:0 0 10px 122px}}.section-copy{{margin:-4px 0 16px;color:var(--muted);font-size:12px}}.empty-state{{display:grid;gap:5px;padding:18px 0;color:var(--muted);font-size:12px}}.empty-state strong{{color:#e8d18e;font-size:13px}}.context-list{{border-top:1px solid rgba(111,128,135,.24)}}.context-row{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px;gap:12px;align-items:start;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.context-id{{color:#9fcdf0;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace}}.context-copy{{font-size:13px}}.context-authority{{color:var(--muted);font-size:10px;text-align:right}}.context-source{{grid-column:2/-1;color:var(--faint);font-size:10px}}.attention-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:210px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:#e7ca7c;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-list{{display:grid;gap:0;border-top:1px solid rgba(111,128,135,.24)}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px;white-space:nowrap}}.empty{{color:var(--faint);font-size:12px;font-style:italic}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}
+@media(max-width:900px){{.requirement summary{{grid-template-columns:46px 1fr}}.req-body{{padding-left:62px}}.attention-row{{grid-template-columns:1fr;gap:8px}}}}@media(max-width:560px){{.shell{{width:min(100% - 18px,1160px);margin-top:16px}}.section{{padding:22px 20px}}.topbar{{align-items:flex-start;flex-direction:column}}.file-row{{grid-template-columns:1fr}}.file-state{{white-space:normal}}.req-body{{padding-left:0}}.candidate-heading{{align-items:flex-start;flex-direction:column}}.claim-candidate{{grid-template-columns:32px minmax(0,1fr)}}.candidate-score{{grid-column:2}}.evidence-candidate summary{{grid-template-columns:1fr}}.candidate-detail{{padding-left:0}}.candidate-basis,.candidate-source{{grid-column:1/-1}}}}
 </style></head><body><main class="shell">
 <div class="topbar"><div class="brand"><span class="brand-mark"></span> PrismCode</div></div>
 <section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{len(packet.changed_files)} changed files</span><span>·</span><span>{escape(ci_summary)}</span></div>

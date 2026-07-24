@@ -332,7 +332,7 @@ def test_consistency_report_keeps_candidates_separate_from_conclusions() -> None
     assert "Retrieval relevance only · not an acceptance conclusion" in html
     assert "Related PR claims" in html
     assert ">Evidence<" in html
-    assert "OBSERVED" in html
+    assert "FILE-LEVEL MATCH" in html
     assert "CHANGED CHANGED FILE" not in html
     assert "term overlap" in html and "relevance " in html
     assert "PR claim coverage" in html and "R2" in html
