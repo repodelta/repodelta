@@ -30,7 +30,9 @@ Golden expectations use stable statement and evidence IDs:
 - `expected_evidence` checks canonical code/test/document/CI/runtime/mixed
   classification;
 - `expected_statements` checks a statement's stable ID, role, purpose, and
-  authority.
+  authority;
+- `expected_projection` checks the exact canonical IDs selected into each
+  bounded review slice.
 
 No path, filename, or display-text heuristic is used to decide correctness.
 
@@ -46,14 +48,16 @@ The result records:
 - negative-query false-positive rate;
 - evidence classification accuracy;
 - statement semantic accuracy;
+- review-projection accuracy;
 - missing and unexpected target IDs for every query;
 - candidate-budget and threshold diagnostics.
 
 Positive retrieval metrics exclude `expected_no_bindings` cases. Negative
 queries are scored separately so adding easy no-match examples cannot inflate
 precision, recall, or mean reciprocal rank. Every query, classification, or
-statement-semantic mismatch records its case, identity, expected values, and
-observed values before aggregate threshold diagnostics are applied.
+statement-semantic, or projection mismatch records its case, identity,
+expected values, and observed values before aggregate threshold diagnostics
+are applied.
 
 JSON output is sorted and contains no timestamp, so repeated runs over the same
 suite are byte-for-byte stable. The Markdown file is a concise human-readable

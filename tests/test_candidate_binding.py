@@ -282,7 +282,7 @@ def test_analyzer_serializes_candidates_without_using_them_as_status() -> None:
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
     serialized = brief.to_dict()
 
-    assert brief.schema_version == "review_brief.v8"
+    assert brief.schema_version == "review_brief.v9"
     assert brief.candidate_bindings.schema_version == "candidate_binding_set.v1"
     assert any(
         item.kind == "requirement_claim"
@@ -328,13 +328,12 @@ def test_consistency_report_keeps_candidates_separate_from_conclusions() -> None
     html = render_html(brief)
 
     assert "Review checks" in html
-    assert "Review evidence" in html
-    assert "Retrieval relevance only · not an acceptance conclusion" in html
-    assert "Related PR claims" in html
-    assert ">Evidence<" in html
-    assert "FILE FALLBACK" in html
-    assert "CHANGED CHANGED FILE" not in html
-    assert "term overlap" in html and "relevance " in html
+    assert "PR criterion" in html
+    assert "PR says" in html
+    assert "Repository facts" in html
+    assert "No acceptance conclusion" in html
+    assert "candidate relation" in html
+    assert "changed fact" in html
     assert "PR claim coverage" in html and "R2" in html
     assert "Requirement evidence coverage" in html
     assert "Claim evidence coverage" in html and "C2" in html
@@ -453,5 +452,5 @@ def test_report_limits_visible_candidates_without_discarding_bindings() -> None:
     ]
 
     assert len(bindings) == 8
-    assert html.count("CHANGED HUNK") == 6
-    assert "2 additional candidates not shown." in html
+    assert html.count("Changed hunk: src/runtime_") == 2
+    assert len(brief.projection.slices[0].changed_evidence_ids) == 2

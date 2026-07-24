@@ -354,9 +354,14 @@ def test_scope_boundary_baseline_and_verification_preserve_authority() -> None:
         ("V1", "verification", "pr_description"),
     ]
     assert all(item.sources[0].line_start for item in (*brief.scope, *brief.claims))
+    assert [item.focus_statement_id for item in brief.projection.slices] == [
+        "R1",
+        "G1",
+        "G2",
+    ]
     html = render_html(brief)
     assert "Scope context · 2 statements" in html
-    assert "Scope guardrails" in html
+    assert "Issue guardrail" in html
 
 
 def test_pr_scope_never_becomes_provisional_acceptance() -> None:

@@ -52,6 +52,17 @@ class ExpectedStatement:
 
 
 @dataclass(frozen=True)
+class ExpectedProjectionSlice:
+    focus_statement_id: str
+    claim_binding_ids: tuple[str, ...] = ()
+    changed_evidence_ids: tuple[str, ...] = ()
+    runtime_evidence_ids: tuple[str, ...] = ()
+    test_evidence_ids: tuple[str, ...] = ()
+    ci_evidence_ids: tuple[str, ...] = ()
+    structural_path_evidence_ids: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
 class EvaluationCase:
     id: str
     fixture: str
@@ -59,6 +70,7 @@ class EvaluationCase:
     expected_no_bindings: tuple[ExpectedNoBinding, ...] = ()
     expected_evidence: tuple[ExpectedEvidence, ...] = ()
     expected_statements: tuple[ExpectedStatement, ...] = ()
+    expected_projection: tuple[ExpectedProjectionSlice, ...] = ()
     structural_graph: StructuralGraphResult | None = None
 
 
@@ -72,6 +84,7 @@ class EvaluationThresholds:
     no_match_accuracy: float = 0.0
     max_false_positive_rate: float = 1.0
     statement_accuracy: float = 0.0
+    projection_accuracy: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -119,6 +132,15 @@ class StatementEvaluation:
 
 
 @dataclass(frozen=True)
+class ProjectionEvaluation:
+    case_id: str
+    focus_statement_id: str
+    expected: ExpectedProjectionSlice
+    observed: ExpectedProjectionSlice | None
+    matched: bool
+
+
+@dataclass(frozen=True)
 class EvaluationMetrics:
     query_count: int
     positive_query_count: int
@@ -131,6 +153,7 @@ class EvaluationMetrics:
     false_positive_rate: float
     classification_accuracy: float
     statement_accuracy: float
+    projection_accuracy: float
 
 
 @dataclass(frozen=True)
@@ -142,8 +165,9 @@ class EvaluationResult:
     queries: tuple[QueryEvaluation, ...]
     classifications: tuple[ClassificationEvaluation, ...]
     statements: tuple[StatementEvaluation, ...]
+    projections: tuple[ProjectionEvaluation, ...]
     diagnostics: tuple[str, ...] = ()
-    schema_version: str = "evaluation_result.v1"
+    schema_version: str = "evaluation_result.v2"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -192,6 +216,24 @@ def load_evaluation_suite(path: str | Path) -> EvaluationSuite:
                 )
                 for item in case.get("expected_statements", ())
             ),
+            expected_projection=tuple(
+                ExpectedProjectionSlice(
+                    focus_statement_id=str(item["focus_statement_id"]),
+                    claim_binding_ids=tuple(item.get("claim_binding_ids", ())),
+                    changed_evidence_ids=tuple(
+                        item.get("changed_evidence_ids", ())
+                    ),
+                    runtime_evidence_ids=tuple(
+                        item.get("runtime_evidence_ids", ())
+                    ),
+                    test_evidence_ids=tuple(item.get("test_evidence_ids", ())),
+                    ci_evidence_ids=tuple(item.get("ci_evidence_ids", ())),
+                    structural_path_evidence_ids=tuple(
+                        item.get("structural_path_evidence_ids", ())
+                    ),
+                )
+                for item in case.get("expected_projection", ())
+            ),
             structural_graph=(
                 _structural_graph(case["structural_graph"])
                 if case.get("structural_graph") is not None
@@ -221,6 +263,7 @@ def evaluate_suite(
     query_results: list[QueryEvaluation] = []
     classification_results: list[ClassificationEvaluation] = []
     statement_results: list[StatementEvaluation] = []
+    projection_results: list[ProjectionEvaluation] = []
     diagnostics: list[str] = []
 
     for case in suite.cases:
@@ -298,6 +341,29 @@ def evaluate_suite(
                     ),
                 )
             )
+        observed_slices = {
+            item.focus_statement_id: ExpectedProjectionSlice(
+                focus_statement_id=item.focus_statement_id,
+                claim_binding_ids=item.claim_binding_ids,
+                changed_evidence_ids=item.changed_evidence_ids,
+                runtime_evidence_ids=item.runtime_evidence_ids,
+                test_evidence_ids=item.test_evidence_ids,
+                ci_evidence_ids=item.ci_evidence_ids,
+                structural_path_evidence_ids=item.structural_path_evidence_ids,
+            )
+            for item in brief.projection.slices
+        }
+        for expected in case.expected_projection:
+            observed = observed_slices.get(expected.focus_statement_id)
+            projection_results.append(
+                ProjectionEvaluation(
+                    case_id=case.id,
+                    focus_statement_id=expected.focus_statement_id,
+                    expected=expected,
+                    observed=observed,
+                    matched=observed == expected,
+                )
+            )
         diagnostics.extend(
             f"{case.id}: {item.code}: {item.message}"
             for item in brief.candidate_bindings.diagnostics
@@ -306,10 +372,12 @@ def evaluate_suite(
     diagnostics.extend(_query_diagnostics(tuple(query_results)))
     diagnostics.extend(_classification_diagnostics(tuple(classification_results)))
     diagnostics.extend(_statement_diagnostics(tuple(statement_results)))
+    diagnostics.extend(_projection_diagnostics(tuple(projection_results)))
     metrics = _metrics(
         tuple(query_results),
         tuple(classification_results),
         tuple(statement_results),
+        tuple(projection_results),
     )
     threshold_diagnostics = _threshold_diagnostics(metrics, suite.thresholds)
     diagnostics.extend(threshold_diagnostics)
@@ -322,6 +390,7 @@ def evaluate_suite(
         queries=tuple(query_results),
         classifications=tuple(classification_results),
         statements=tuple(statement_results),
+        projections=tuple(projection_results),
         diagnostics=tuple(diagnostics),
     )
 
@@ -361,6 +430,7 @@ def write_evaluation_markdown(
         f"- false-positive rate: {metrics.false_positive_rate:.4f}",
         f"- classification accuracy: {metrics.classification_accuracy:.4f}",
         f"- statement accuracy: {metrics.statement_accuracy:.4f}",
+        f"- projection accuracy: {metrics.projection_accuracy:.4f}",
         "",
         "## Queries",
         "",
@@ -394,6 +464,13 @@ def write_evaluation_markdown(
                 f"`{item.observed_role or 'missing'}/"
                 f"{item.observed_purpose or 'missing'}/"
                 f"{item.observed_authority or 'missing'}`"
+            )
+    if result.projections:
+        lines.extend(("", "## Review projections", ""))
+        for item in result.projections:
+            lines.append(
+                f"- `{item.case_id}` · `{item.focus_statement_id}` · "
+                f"**{'PASS' if item.matched else 'MISS'}**"
             )
     if result.diagnostics:
         lines.extend(("", "## Diagnostics", ""))
@@ -482,12 +559,14 @@ def _metrics(
     queries: tuple[QueryEvaluation, ...],
     classifications: tuple[ClassificationEvaluation, ...],
     statements: tuple[StatementEvaluation, ...],
+    projections: tuple[ProjectionEvaluation, ...],
 ) -> EvaluationMetrics:
     query_count = len(queries)
     positive_queries = tuple(item for item in queries if item.expected_target_ids)
     negative_queries = tuple(item for item in queries if not item.expected_target_ids)
     classification_count = len(classifications)
     statement_count = len(statements)
+    projection_count = len(projections)
     return EvaluationMetrics(
         query_count=query_count,
         positive_query_count=len(positive_queries),
@@ -538,6 +617,11 @@ def _metrics(
             if statement_count
             else 1.0
         ),
+        projection_accuracy=(
+            sum(item.matched for item in projections) / projection_count
+            if projection_count
+            else 1.0
+        ),
     )
 
 
@@ -567,6 +651,11 @@ def _threshold_diagnostics(
             "statement_accuracy",
             metrics.statement_accuracy,
             thresholds.statement_accuracy,
+        ),
+        (
+            "projection_accuracy",
+            metrics.projection_accuracy,
+            thresholds.projection_accuracy,
         ),
     )
     for name, observed, required in minimums:
@@ -625,6 +714,18 @@ def _statement_diagnostics(
         f"{item.observed_purpose or 'missing'}/"
         f"{item.observed_authority or 'missing'}"
         for item in statements
+        if not item.matched
+    )
+
+
+def _projection_diagnostics(
+    projections: tuple[ProjectionEvaluation, ...],
+) -> tuple[str, ...]:
+    return tuple(
+        "projection_mismatch: "
+        f"case={item.case_id} statement={item.focus_statement_id} "
+        f"expected={item.expected} observed={item.observed or 'missing'}"
+        for item in projections
         if not item.matched
     )
 

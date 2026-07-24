@@ -23,6 +23,9 @@ fixture or GitHub
   -> deterministic CandidateBindingSet
        -> R/G/O/S/C/B/V -> evidence candidates
        -> R/G -> C candidates
+  -> deterministic ReviewProjection
+       -> one bounded slice per R/G
+       -> PR claims + changed anchors + selected runtime/test/CI context
   -> ReviewBrief
   -> HTML renderer
 ```
@@ -126,6 +129,27 @@ Each binding records feature-level reasons, weights, matched terms, stable IDs,
 and relevant structural path IDs. Deterministic per-statement and total budgets
 bound output. Coverage reports statements without candidates and evidence not
 reached by any statement.
+
+## Review projection
+
+`ReviewProjection` is a bounded view over the existing statement, binding, and
+evidence identities. It stores references only; statement text, evidence
+metadata, sources, and structural paths remain canonical in `ReviewBrief`.
+
+Each explicit `R/G` receives at most one `ReviewSlice`. A slice may reference
+up to two PR-claim bindings, two changed anchors, two runtime symbols, two test
+symbols, one current-head CI observation, and two structural paths. Selection
+is stable and deterministic.
+
+Codegraph does not create a second projection path. Exact changed symbols are
+preferred when present; otherwise the canonical changed hunk or changed-file
+fallback anchors the same slice. Runtime/test context is included only when an
+existing candidate binding and a selected bounded path connect it to a changed
+anchor.
+
+Projection labels candidate relations, changed facts, structural facts, and
+current-head observations separately. It never produces implementation,
+verification, satisfaction, support, or contradiction conclusions.
 
 ## Packet revisions
 

@@ -204,6 +204,27 @@ class CandidateBindingSet:
 
 
 @dataclass(frozen=True)
+class ReviewSlice:
+    """A bounded projection over canonical statements, bindings, and evidence."""
+
+    focus_statement_id: str
+    claim_binding_ids: tuple[str, ...] = ()
+    changed_evidence_ids: tuple[str, ...] = ()
+    runtime_evidence_ids: tuple[str, ...] = ()
+    test_evidence_ids: tuple[str, ...] = ()
+    ci_evidence_ids: tuple[str, ...] = ()
+    structural_path_evidence_ids: tuple[str, ...] = ()
+    diagnostics: tuple[Diagnostic, ...] = ()
+
+
+@dataclass(frozen=True)
+class ReviewProjection:
+    slices: tuple[ReviewSlice, ...] = ()
+    diagnostics: tuple[Diagnostic, ...] = ()
+    schema_version: str = "review_projection.v1"
+
+
+@dataclass(frozen=True)
 class AnalysisInput:
     packet: ReviewSourcePacket
     requirements: tuple[Requirement, ...] = ()
@@ -223,8 +244,9 @@ class ReviewBrief:
     structural_graph: StructuralGraphResult | None = None
     evidence_catalog: EvidenceCatalog = EvidenceCatalog()
     candidate_bindings: CandidateBindingSet = CandidateBindingSet()
+    projection: ReviewProjection = ReviewProjection()
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v8"
+    schema_version: str = "review_brief.v9"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

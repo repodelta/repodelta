@@ -36,6 +36,8 @@ The open core provides:
   candidates;
 - an R-first consistency view with claim/evidence candidates, binding basis,
   source links, and vertically aggregated coverage gaps;
+- deterministic, bounded review slices that project Issue/PR context and
+  canonical repository facts through one graph-optional contract;
 - an Actions workflow for automatic PR reports and manually targeted reviews;
 - clean-install CI with network-free tests.
 - a deterministic offline evaluation suite for binding, structural-path, and
@@ -89,6 +91,11 @@ prismcode evaluate \
 The command returns non-zero when configured thresholds fail. See
 [`docs/evaluation.md`](docs/evaluation.md) for the versioned contracts, metrics,
 and safety boundary.
+
+Review reports use the same projection contract with or without Codegraph.
+When structure is available, exact changed symbols and selected shortest paths
+add runtime/test context. Otherwise, canonical changed hunks or file fallbacks
+remain the anchors. See [`docs/review-projection.md`](docs/review-projection.md).
 
 ### Review a live GitHub pull request
 

@@ -40,10 +40,12 @@ def test_fixture_to_requirement_first_html(tmp_path: Path) -> None:
     assert '<span class="block-title">Verification</span>' not in html
     assert '<span class="block-title">Gaps</span>' not in html
     assert "No verification evidence recorded." not in html
-    assert "Scope guardrails" in html
+    assert "Issue guardrail" in html
     assert "G5, R5 have no canonical evidence candidate" not in html
     assert "Collection notes" not in html
-    assert "The trace builder consumes existing inspection units" in html
+    assert "Issue contract" in html
+    assert "PR says" in html
+    assert "Repository facts" in html
     assert "unit_semantic_alignment_trace.py" in html
     assert "test_workspace_public_review_map_routes.py" in html
     assert "https://github.com/interact-space/PrismCode/blob/7de0211956a35e8f9c6c576cd2dbb7acd7fd5560/prismcode/workspace/unit_semantic_alignment_trace.py" in html

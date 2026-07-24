@@ -36,7 +36,9 @@ def test_golden_suite_covers_hunks_claims_structure_and_classification() -> None
     assert result.metrics.false_positive_rate == 0.0
     assert result.metrics.classification_accuracy == 1.0
     assert result.metrics.statement_accuracy == 1.0
+    assert result.metrics.projection_accuracy == 1.0
     assert len(result.statements) == 10
+    assert len(result.projections) == 5
     no_match = next(
         item
         for item in result.queries
@@ -98,7 +100,7 @@ def test_evaluation_outputs_are_byte_stable(tmp_path: Path) -> None:
     assert first_json.read_bytes() == second_json.read_bytes()
     assert first_markdown.read_bytes() == second_markdown.read_bytes()
     payload = json.loads(first_json.read_text(encoding="utf-8"))
-    assert payload["schema_version"] == "evaluation_result.v1"
+    assert payload["schema_version"] == "evaluation_result.v2"
     assert payload["queries"][0]["case_id"] == "direct-hunk-and-no-match"
 
 

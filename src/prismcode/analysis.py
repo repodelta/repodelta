@@ -11,6 +11,7 @@ from .contracts import (
 from .criteria import extract_review_semantics
 from .candidate_binding import build_candidate_bindings
 from .evidence_graph import build_evidence_catalog
+from .projection import build_review_projection
 
 
 class ReviewAnalyzer(Protocol):
@@ -61,6 +62,12 @@ class DeterministicAnalyzer:
             claims=semantics.claims,
             evidence_catalog=evidence_catalog,
         )
+        projection = build_review_projection(
+            requirements=requirements,
+            evidence_catalog=evidence_catalog,
+            candidate_bindings=candidate_bindings,
+            structural_graph=analysis_input.structural_graph,
+        )
         return ReviewBrief(
             packet=packet,
             intent=semantics.intent,
@@ -72,4 +79,5 @@ class DeterministicAnalyzer:
             structural_graph=analysis_input.structural_graph,
             evidence_catalog=evidence_catalog,
             candidate_bindings=candidate_bindings,
+            projection=projection,
         )

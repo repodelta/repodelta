@@ -7,6 +7,7 @@
     "mean_reciprocal_rank": 0.8,
     "classification_accuracy": 1.0,
     "statement_accuracy": 1.0,
+    "projection_accuracy": 1.0,
     "max_no_candidate_rate": 0.0,
     "no_match_accuracy": 1.0,
     "max_false_positive_rate": 0.0
@@ -46,6 +47,21 @@
         {
           "evidence_id": "E:changed_hunk:5b5657b12be7abe2bf93",
           "classification": "test"
+        }
+      ],
+      "expected_projection": [
+        {
+          "focus_statement_id": "R1",
+          "claim_binding_ids": [
+            "B:requirement_claim:15f5b80955529ec866dc"
+          ],
+          "changed_evidence_ids": [
+            "E:changed_hunk:13c27ca8c4cfe45cfbcc",
+            "E:changed_hunk:5b5657b12be7abe2bf93"
+          ]
+        },
+        {
+          "focus_statement_id": "R2"
         }
       ]
     },
@@ -100,6 +116,27 @@
         {
           "evidence_id": "E:structural_path:25dab9624b35bb9d49bd",
           "classification": "runtime"
+        }
+      ],
+      "expected_projection": [
+        {
+          "focus_statement_id": "R1",
+          "claim_binding_ids": [
+            "B:requirement_claim:15f5b80955529ec866dc"
+          ],
+          "changed_evidence_ids": [
+            "E:symbol:9e703e599343229d97c1"
+          ],
+          "runtime_evidence_ids": [
+            "E:symbol:51c78d1cf2a276cc9a40"
+          ],
+          "test_evidence_ids": [
+            "E:symbol:3c8a35c2cab106b983ca"
+          ],
+          "structural_path_evidence_ids": [
+            "E:structural_path:25dab9624b35bb9d49bd",
+            "E:structural_path:01124120c3c65a9b12f3"
+          ]
         }
       ],
       "structural_graph": {
@@ -178,6 +215,119 @@
               {
                 "source_id": "X",
                 "target_id": "Z",
+                "relation": "references",
+                "direction": "incoming"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "direct-hunk-with-structure",
+      "fixture": "evaluation/direct-hunk.json",
+      "expected_bindings": [],
+      "expected_projection": [
+        {
+          "focus_statement_id": "R1",
+          "claim_binding_ids": [
+            "B:requirement_claim:15f5b80955529ec866dc"
+          ],
+          "changed_evidence_ids": [
+            "E:symbol:f04d230b7387d7e935b2",
+            "E:changed_hunk:5b5657b12be7abe2bf93"
+          ],
+          "runtime_evidence_ids": [
+            "E:symbol:442a9dc45ef2300890a2"
+          ],
+          "test_evidence_ids": [
+            "E:symbol:ba0abc463978a8c0c479"
+          ],
+          "structural_path_evidence_ids": [
+            "E:structural_path:c664d9e202a691188440",
+            "E:structural_path:7e53a699b6722f7e5c93"
+          ]
+        },
+        {
+          "focus_statement_id": "R2"
+        }
+      ],
+      "structural_graph": {
+        "index": {
+          "state": "available",
+          "provider": "golden",
+          "revision": "direct-hunk-head",
+          "database_path": "",
+          "indexed_files": 3,
+          "requested_files": 2,
+          "diagnostics": []
+        },
+        "hunk_count": 2,
+        "symbols": [
+          {
+            "id": "DY",
+            "kind": "function",
+            "name": "bounded_semantic_trace",
+            "qualified_name": "src.runtime.bounded_semantic_trace",
+            "file_path": "src/runtime.py",
+            "language": "python",
+            "start_line": 10,
+            "end_line": 10
+          },
+          {
+            "id": "DX",
+            "kind": "function",
+            "name": "build_trace",
+            "qualified_name": "src.core.build_trace",
+            "file_path": "src/core.py",
+            "language": "python",
+            "start_line": 1,
+            "end_line": 10
+          },
+          {
+            "id": "DZ",
+            "kind": "function",
+            "name": "test_trace",
+            "qualified_name": "tests.test_core.test_trace",
+            "file_path": "tests/test_core.py",
+            "language": "python",
+            "start_line": 1,
+            "end_line": 20
+          }
+        ],
+        "overlaps": [
+          {
+            "hunk_id": "hunk:src/runtime.py:0",
+            "symbol_id": "DY",
+            "changed_lines": [10]
+          }
+        ],
+        "paths": [
+          {
+            "seed_symbol_id": "DY",
+            "classification": "runtime",
+            "steps": [
+              {
+                "source_id": "DY",
+                "target_id": "DX",
+                "relation": "calls",
+                "direction": "outgoing"
+              }
+            ]
+          },
+          {
+            "seed_symbol_id": "DY",
+            "classification": "mixed",
+            "steps": [
+              {
+                "source_id": "DY",
+                "target_id": "DX",
+                "relation": "calls",
+                "direction": "outgoing"
+              },
+              {
+                "source_id": "DX",
+                "target_id": "DZ",
                 "relation": "references",
                 "direction": "incoming"
               }
