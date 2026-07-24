@@ -4,7 +4,7 @@ from typing import Protocol
 
 from .contracts import (
     AnalysisInput,
-    Evidence,
+    EvidenceCatalog,
     EvidenceHint,
     ImplementationAssessment,
     Requirement,
@@ -16,6 +16,7 @@ from .contracts import (
 )
 from .criteria import extract_review_semantics
 from .binding import build_deterministic_evidence_hints
+from .evidence_graph import build_evidence_catalog
 
 
 class ReviewAnalyzer(Protocol):
@@ -52,10 +53,22 @@ class DeterministicAnalyzer:
             pr_title=packet.title,
         )
         requirements = analysis_input.requirements or semantics.obligations
+        supplied = (
+            analysis_input.evidence_catalog.items
+            if analysis_input.evidence_catalog is not None
+            else ()
+        )
+        evidence_catalog = build_evidence_catalog(
+            packet,
+            analysis_input.structural_graph,
+            supplied=supplied,
+        )
         provided_hints = analysis_input.evidence_hints or build_deterministic_evidence_hints(
             requirements,
             packet,
+            evidence_catalog,
         )
+        _validate_hint_evidence(provided_hints, evidence_catalog)
         hints = {hint.requirement_id: hint for hint in provided_hints}
         deliverables = tuple(item for item in requirements if item.kind != "guardrail")
         guardrails = tuple(item for item in requirements if item.kind == "guardrail")
@@ -64,6 +77,7 @@ class DeterministicAnalyzer:
                 requirement,
                 hints.get(requirement.id),
                 packet=packet,
+                evidence_catalog=evidence_catalog,
             )
             for requirement in deliverables
         )
@@ -75,6 +89,7 @@ class DeterministicAnalyzer:
             objectives=semantics.objectives,
             claims=semantics.claims,
             structural_graph=analysis_input.structural_graph,
+            evidence_catalog=evidence_catalog,
         )
 
     @staticmethod
@@ -83,6 +98,7 @@ class DeterministicAnalyzer:
         hint: EvidenceHint | None,
         *,
         packet: ReviewSourcePacket,
+        evidence_catalog: EvidenceCatalog,
     ) -> RequirementAssessment:
         if hint is None:
             return RequirementAssessment(
@@ -94,34 +110,48 @@ class DeterministicAnalyzer:
                 gaps=("No requirement-specific implementation or verification evidence has been established.",),
             )
 
-        implementation_status = "observed" if hint.implementation else "not_observed"
-        registry = {item.id: item for item in packet.verification_observations}
+        registry = evidence_catalog.by_id()
+        implementation_evidence = tuple(
+            registry[evidence_id]
+            for evidence_id in hint.implementation_evidence_ids
+        )
+        implementation_status = (
+            "observed" if implementation_evidence else "not_observed"
+        )
         observations = [
             registry[evidence_id]
             for evidence_id in hint.verification_evidence_ids
-            if evidence_id in registry
         ]
-        current = [item for item in observations if not item.head_sha or item.head_sha == packet.head_sha]
+        current = [
+            item
+            for item in observations
+            if not item.metadata.get("head_sha")
+            or item.metadata.get("head_sha") == packet.head_sha
+        ]
         verification_status = "not_observed"
         if observations and not current:
             verification_status = "stale"
-        elif any(item.status.casefold() in {"queued", "pending", "in_progress"} for item in current):
+        elif any(
+            str(item.metadata.get("status", "")).casefold()
+            in {"queued", "pending", "in_progress"}
+            for item in current
+        ):
             verification_status = "pending"
-        elif any(item.conclusion.casefold() in {"failure", "error", "cancelled", "timed_out"} for item in current):
+        elif any(
+            str(item.metadata.get("conclusion", "")).casefold()
+            in {"failure", "error", "cancelled", "timed_out"}
+            for item in current
+        ):
             verification_status = "failed"
         elif (
-            any(item.conclusion.casefold() == "success" for item in current)
+            any(
+                str(item.metadata.get("conclusion", "")).casefold() == "success"
+                for item in current
+            )
             and hint.assertion_coverage == "adequate"
         ):
             verification_status = "passed"
-        verification_evidence = tuple(
-            Evidence(
-                summary=f"{item.name}: {item.status}/{item.conclusion or 'no conclusion'}",
-                kind=item.kind,
-                sources=(SourceRef(label=item.name, url=item.details_url),),
-            )
-            for item in observations
-        )
+        verification_evidence = tuple(observations)
         gaps = list(hint.gaps)
         if not observations:
             gaps.append("No requirement-specific CI, check, workflow, or runtime execution was observed.")
@@ -131,11 +161,31 @@ class DeterministicAnalyzer:
             requirement=requirement,
             implementation=ImplementationAssessment(
                 status=implementation_status,
-                evidence=hint.implementation,
+                evidence=implementation_evidence,
             ),
             verification=VerificationAssessment(
                 status=verification_status,
                 evidence=verification_evidence,
             ),
             gaps=tuple(dict.fromkeys(gaps)),
+        )
+
+
+def _validate_hint_evidence(
+    hints: tuple[EvidenceHint, ...], catalog: EvidenceCatalog
+) -> None:
+    known = set(catalog.by_id())
+    referenced = {
+        evidence_id
+        for hint in hints
+        for evidence_id in (
+            *hint.implementation_evidence_ids,
+            *hint.verification_evidence_ids,
+        )
+    }
+    unknown = sorted(referenced - known)
+    if unknown:
+        raise ValueError(
+            "evidence hints reference unknown canonical evidence IDs: "
+            + ", ".join(unknown)
         )

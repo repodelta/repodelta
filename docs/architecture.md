@@ -11,6 +11,9 @@ fixture or GitHub
        -> repository-local graph index status
        -> changed hunk / symbol-span overlaps
        -> bounded, direction-aware structural paths
+  -> canonical EvidenceCatalog
+       -> changed files + changed/unchanged symbols
+       -> structural paths + CI/runtime observations
   -> one-pass semantic extraction + optional EvidenceHints
        -> Issue/PR obligations (R/G)
        -> objectives (O), claims (C), intent (I)
@@ -25,8 +28,9 @@ fixture or GitHub
    revisions, collection diagnostics, and metadata; it contains no review conclusion.
 2. `Requirement` is a source assertion. It cannot contain implementation, verification,
    gaps, or status.
-3. Fixture or provider evidence enters through `EvidenceHint`. A hint identifies evidence
-   and provenance but cannot declare an implementation status.
+3. Source and provider facts are normalized once into an ID-addressed
+   `EvidenceCatalog`. `EvidenceHint` contains evidence IDs and provenance; it
+   cannot copy evidence content or declare an implementation status.
 4. `DeterministicAnalyzer` is the only status authority. It emits separate implementation
    and verification assessments.
 5. Renderers consume `ReviewBrief` and never infer or upgrade an assessment.
@@ -94,6 +98,28 @@ sources.
 This layer does not bind paths to requirements or call an LLM. Paths remain
 candidate repository facts, so structural observations cannot silently become
 review conclusions.
+
+## Canonical evidence
+
+`EvidenceCatalog` is the only downstream evidence store. It assigns
+deterministic IDs to changed files, exact symbols, unchanged structural
+neighbors, bounded paths, and verification observations. Repeated hunks,
+symbols, files, and paths merge by identity; sources and structural-path
+references are unioned rather than copied into parallel records.
+
+Each `EvidenceItem` records:
+
+- stable ID, kind, summary, and code/test/document/CI/runtime/mixed
+  classification;
+- whether the underlying item changed in the PR;
+- exact source links and any bounded structural path IDs;
+- kind-specific source metadata without an analysis conclusion.
+
+`EvidenceHint` and assessments resolve catalog IDs. Legacy fixture
+implementation objects are accepted only at the fixture adapter boundary,
+converted to provided evidence with deterministic IDs, and then referenced by
+ID. The catalog does not bind evidence to R/G/O/C; candidate binding remains a
+separate follow-up stage.
 
 The `review` CLI enables this read-only mapping by default, using `--repo-root`
 (the current directory unless specified) to locate the target checkout. The

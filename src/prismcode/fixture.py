@@ -8,7 +8,7 @@ from .contracts import (
     AnalysisInput,
     ChangedFile,
     Diagnostic,
-    Evidence,
+    EvidenceItem,
     EvidenceHint,
     Requirement,
     ReviewSourcePacket,
@@ -16,16 +16,27 @@ from .contracts import (
     SourceRef,
     VerificationObservation,
 )
+from .evidence_graph import (
+    build_evidence_catalog,
+    provided_evidence,
+    verification_evidence_id,
+)
 
 
 def _source(value: dict[str, Any]) -> SourceRef:
     return SourceRef(**value)
 
 
-def _evidence(value: dict[str, Any]) -> Evidence:
-    return Evidence(
+def _evidence(value: dict[str, Any]) -> EvidenceItem:
+    kind = value["kind"]
+    return provided_evidence(
         summary=value["summary"],
-        kind=value["kind"],
+        kind=kind,
+        classification=(
+            "test"
+            if kind in {"test", "related_test"}
+            else value.get("classification", "code")
+        ),
         sources=tuple(_source(item) for item in value.get("sources", [])),
     )
 
@@ -74,19 +85,38 @@ def load_fixture(path: str | Path) -> AnalysisInput:
         )
         for item in raw.get("requirements", [])
     )
+    raw_hints = tuple(raw.get("evidence_hints", []))
+    implementations = tuple(
+        tuple(_evidence(value) for value in item.get("implementation", []))
+        for item in raw_hints
+    )
+    supplied = tuple(evidence for group in implementations for evidence in group)
+    catalog = build_evidence_catalog(packet, supplied=supplied)
     hints = tuple(
         EvidenceHint(
             requirement_id=item["requirement_id"],
-            implementation=tuple(_evidence(value) for value in item.get("implementation", [])),
-            verification_evidence_ids=tuple(item.get("verification_evidence_ids", [])),
-            assertion_coverage=item.get("assertion_coverage", "not_established"),
+            implementation_evidence_ids=tuple(evidence.id for evidence in implementation),
+            verification_evidence_ids=tuple(
+                verification_evidence_id(observation_id)
+                for observation_id in item.get("verification_evidence_ids", [])
+            ),
+            assertion_coverage=item.get(
+                "assertion_coverage", "not_established"
+            ),
             gaps=tuple(item.get("gaps", [])),
-            provenance=tuple(_source(source) for source in item.get("provenance", [])),
+            provenance=tuple(
+                _source(source) for source in item.get("provenance", [])
+            ),
         )
-        for item in raw.get("evidence_hints", [])
+        for item, implementation in zip(raw_hints, implementations)
     )
     known_ids = {requirement.id for requirement in requirements}
     unknown = sorted({hint.requirement_id for hint in hints} - known_ids)
     if known_ids and unknown:
         raise ValueError("evidence hints reference unknown requirements: " + ", ".join(unknown))
-    return AnalysisInput(packet=packet, requirements=requirements, evidence_hints=hints)
+    return AnalysisInput(
+        packet=packet,
+        requirements=requirements,
+        evidence_hints=hints,
+        evidence_catalog=catalog,
+    )

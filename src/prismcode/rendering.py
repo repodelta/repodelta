@@ -5,7 +5,12 @@ from pathlib import Path
 import re
 from urllib.parse import quote, urlparse, urlunparse
 
-from .contracts import ChangedFile, Evidence, ReviewBrief, ReviewStatement, SourceRef
+from .contracts import (
+    ChangedFile,
+    ReviewBrief,
+    ReviewStatement,
+    SourceRef,
+)
 
 
 def _safe_href(value: str | None) -> str | None:

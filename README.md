@@ -29,6 +29,8 @@ The open core provides:
   availability and freshness diagnostics;
 - bounded Codegraph paths from changed symbols to unchanged runtime/test
   neighbors;
+- one canonical, deterministic evidence catalog for changed files, symbols,
+  paths, and CI/runtime observations;
 - an Actions workflow for automatic PR reports and manually targeted reviews;
 - clean-install CI with network-free tests.
 
