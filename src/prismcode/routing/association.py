@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import re
 
-from .contracts import AssociationReason, ReviewStatement
-from .matching import semantic_tokens
+from prismcode.model.contracts import AssociationReason, ReviewStatement
+from prismcode.facts.lexical import semantic_tokens
 
 _REFERENCE_RE = re.compile(r"\b(?:R|G|AC|REQ)[-_ ]?\d+\b", re.IGNORECASE)
 _WORD_RE = re.compile(r"[A-Za-z][A-Za-z0-9_]{2,}")

@@ -5,22 +5,23 @@ import os
 import sys
 from dataclasses import replace
 
-from .analysis import DeterministicAnalyzer
-from .codegraph import CodegraphProvider
-from .contracts import AnalysisInput
-from .evaluation import (
+from prismcode.pipeline import DeterministicAnalyzer
+from prismcode.providers.codegraph import CodegraphProvider
+from prismcode.model.contracts import AnalysisInput
+from prismcode.evaluation.core import (
     evaluate_suite,
     load_evaluation_suite,
     write_evaluation_json,
     write_evaluation_markdown,
 )
-from .fixture import load_fixture
-from .github import GitHubApiError, GitHubClient, GitHubPullRequestAdapter
-from .rendering import write_html
-from .structural_mapping import (
-    format_structural_graph_status,
+from prismcode.intake.fixture import load_fixture
+from prismcode.intake.github import GitHubApiError, GitHubClient, GitHubPullRequestAdapter
+from prismcode.presentation.html import write_html
+from prismcode.providers.mapping import (
     map_packet_changed_symbols,
 )
+from prismcode.presentation.status import format_structural_coverage
+from prismcode.changes.hunks import parse_changed_files
 
 
 def _positive_int(value: str) -> int:
@@ -129,9 +130,18 @@ def main() -> int:
             packet = GitHubPullRequestAdapter(client=client, max_files=args.max_files).load(args.repo, args.pr)
             analysis_input = AnalysisInput(packet=packet)
         structural_graph = None
+        changes = analysis_input.changes or parse_changed_files(
+            analysis_input.packet.changed_files
+        )
+        analysis_input = replace(
+            analysis_input,
+            changes=changes,
+            structural_graph_disabled=args.no_structural_graph,
+        )
         if not args.no_structural_graph:
             structural_graph = map_packet_changed_symbols(
                 analysis_input.packet,
+                changes,
                 CodegraphProvider(
                     args.repo_root,
                     expected_revision=(
@@ -153,16 +163,13 @@ def main() -> int:
 
     print(output)
     print(
-        format_structural_graph_status(
-            structural_graph,
-            disabled=args.no_structural_graph,
-        ),
+        format_structural_coverage(brief.overview.structural_coverage),
         file=sys.stderr,
     )
-    if args.verbose and structural_graph is not None:
-        for diagnostic in structural_graph.diagnostics:
+    if args.verbose:
+        for diagnostic in brief.overview.attention:
             print(
-                f"  - {diagnostic.code}: {diagnostic.message}",
+                f"  - {diagnostic.label}: {diagnostic.message}",
                 file=sys.stderr,
             )
     return 0

@@ -4,10 +4,11 @@ from typing import Any
 
 import pytest
 
-from prismcode.analysis import DeterministicAnalyzer
-from prismcode.contracts import AnalysisInput
-from prismcode.github import GitHubClient, GitHubPullRequestAdapter, extract_intent, extract_requirement_texts
-from prismcode.rendering import render_html
+from prismcode.pipeline import DeterministicAnalyzer
+from prismcode.model.contracts import AnalysisInput
+from prismcode.intake.github import GitHubClient, GitHubPullRequestAdapter
+from prismcode.semantics.criteria import extract_intent, extract_requirement_texts
+from prismcode.presentation.html import render_html
 
 
 class FakeClient:

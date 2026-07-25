@@ -5,9 +5,9 @@ import sqlite3
 import subprocess
 from pathlib import Path
 
-from .contracts import Diagnostic, SourceRef
-from .diff_hunks import ChangedHunk
-from .structural_graph import (
+from prismcode.model.contracts import Diagnostic, SourceRef
+from prismcode.changes.hunks import ChangedHunk
+from prismcode.providers.structural import (
     GraphPathStep,
     GraphSymbol,
     HunkSymbolOverlap,

@@ -4,34 +4,28 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .contracts import (
+from prismcode.model.contracts import (
     AnalysisInput,
     ChangedFile,
     Diagnostic,
-    EvidenceItem,
     Requirement,
     ReviewSourcePacket,
     SourceRecord,
     SourceRef,
+    SuppliedEvidence,
     VerificationObservation,
 )
-from .evidence_graph import provided_evidence
 
 
 def _source(value: dict[str, Any]) -> SourceRef:
     return SourceRef(**value)
 
 
-def _evidence(value: dict[str, Any]) -> EvidenceItem:
-    kind = value["kind"]
-    return provided_evidence(
+def _evidence(value: dict[str, Any]) -> SuppliedEvidence:
+    return SuppliedEvidence(
         summary=value["summary"],
-        kind=kind,
-        classification=(
-            "test"
-            if kind in {"test", "related_test"}
-            else value.get("classification", "code")
-        ),
+        kind=value["kind"],
+        classification=value.get("classification", "code"),
         sources=tuple(_source(item) for item in value.get("sources", [])),
         statement_ids=tuple(value.get("statement_ids", ())),
     )

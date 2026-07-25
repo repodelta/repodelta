@@ -6,7 +6,8 @@ from dataclasses import asdict, dataclass, field, replace
 from typing import TYPE_CHECKING, Any, Literal
 
 if TYPE_CHECKING:
-    from .structural_graph import StructuralGraphResult
+    from prismcode.changes.hunks import DiffHunkCollection
+    from prismcode.providers.structural import StructuralGraphResult
 
 DiagnosticSeverity = Literal["info", "warning", "error"]
 RequirementKind = Literal["deliverable", "guardrail", "manual_acceptance"]
@@ -110,6 +111,18 @@ CoverageState = Literal[
     "budget_truncated",
     "unsupported_change_type",
 ]
+ReviewCiState = Literal["not_observed", "failure", "passing", "pending"]
+ReviewPullRequestState = Literal["merged", "draft", "open", "closed", "unknown"]
+StructuralCoverageState = Literal[
+    "disabled",
+    "unavailable",
+    "available",
+    "partial",
+    "missing",
+    "stale",
+    "invalid",
+    "error",
+]
 
 
 @dataclass(frozen=True)
@@ -200,6 +213,17 @@ class ReviewSourcePacket:
             raise ValueError(f"unsupported source packet schema: {self.schema_version}")
         if not self.packet_revision or self.packet_revision != self.recompute_revision():
             raise ValueError("review source packet content does not match packet_revision")
+        pull_requests = tuple(
+            item for item in self.source_records if item.kind == "pull_request"
+        )
+        if len(pull_requests) > 1:
+            raise ValueError("review source packet contains multiple pull request records")
+        if pull_requests:
+            record = pull_requests[0]
+            if record.title and record.title != self.title:
+                raise ValueError("packet title conflicts with pull request source record")
+            if record.url and self.source_url and record.url != self.source_url:
+                raise ValueError("packet URL conflicts with pull request source record")
 
 
 @dataclass(frozen=True)
@@ -220,6 +244,19 @@ class Requirement(ReviewStatement):
 
     kind: RequirementKind = "deliverable"
 
+    def validate_consistency(self) -> None:
+        if self.role != "obligation":
+            raise ValueError(f"{self.id}: requirement must own obligation role")
+        if self.kind == "guardrail":
+            if not self.id.startswith("G") or self.purpose != "guardrail":
+                raise ValueError(
+                    f"{self.id}: guardrail kind requires G identity and guardrail purpose"
+                )
+        elif self.id.startswith("G") or self.purpose == "guardrail":
+            raise ValueError(
+                f"{self.id}: guardrail identity/purpose requires guardrail kind"
+            )
+
 
 @dataclass(frozen=True)
 class EvidenceItem:
@@ -235,19 +272,63 @@ class EvidenceItem:
     operation: ChangeOperation = "observed"
     role: FactRole = "changed_anchor"
     changed: bool = False
+    associated_statement_ids: tuple[str, ...] = ()
+    observed_head_sha: str | None = None
     sources: tuple[SourceRef, ...] = ()
     structural_path_ids: tuple[str, ...] = ()
     metadata: dict[str, Any] = field(default_factory=dict)
+
+    def validate_consistency(self) -> None:
+        if self.changed:
+            if self.role != "changed_anchor":
+                raise ValueError(f"{self.id}: changed fact must own changed_anchor role")
+            if self.revision_side not in {"head", "base"}:
+                raise ValueError(f"{self.id}: changed fact must identify head or base")
+            if self.operation not in {"added", "modified", "removed", "renamed"}:
+                raise ValueError(f"{self.id}: changed fact has invalid operation")
+        elif self.role == "changed_anchor":
+            raise ValueError(f"{self.id}: changed_anchor role requires changed=True")
+        if self.operation == "removed" and self.revision_side != "base":
+            raise ValueError(f"{self.id}: removed fact must belong to base revision")
+        if self.role == "verification" and self.profile != "verification":
+            raise ValueError(f"{self.id}: verification role requires verification profile")
+        if self.role == "structural_path" and self.profile != "structural_path":
+            raise ValueError(f"{self.id}: structural path role requires structural path profile")
+        expected_classifications = {
+            "test": {"test"},
+            "document": {"document"},
+            "verification": {"ci", "runtime"},
+            "structural_path": {"runtime", "test", "mixed"},
+        }
+        expected = expected_classifications.get(self.profile)
+        if expected is not None and self.classification not in expected:
+            raise ValueError(
+                f"{self.id}: {self.profile} profile conflicts with "
+                f"{self.classification} classification"
+            )
 
 
 @dataclass(frozen=True)
 class EvidenceCatalog:
     items: tuple[EvidenceItem, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
-    schema_version: str = "evidence_catalog.v2"
+    schema_version: str = "evidence_catalog.v3"
 
     def by_id(self) -> dict[str, EvidenceItem]:
         return {item.id: item for item in self.items}
+
+    def validate_consistency(self) -> None:
+        for item in self.items:
+            item.validate_consistency()
+
+
+@dataclass(frozen=True)
+class SuppliedEvidence:
+    summary: str
+    kind: str
+    classification: EvidenceClassification
+    sources: tuple[SourceRef, ...] = ()
+    statement_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -282,13 +363,27 @@ class ProjectionDiagnostic:
     sources: tuple[SourceRef, ...] = ()
     scope: Literal["review", "focus"] = "focus"
 
+    @property
+    def id(self) -> str:
+        identity = "\0".join(
+            (
+                self.focus_statement_id,
+                self.slot,
+                self.state,
+                self.provider,
+                self.message,
+                *self.affected_ids,
+            )
+        )
+        return "D:" + hashlib.sha256(identity.encode("utf-8")).hexdigest()[:20]
+
 
 @dataclass(frozen=True)
 class ProjectionCandidateGroup:
     focus_statement_id: str
     profile: RequirementProfile
     relation_ids: tuple[str, ...] = ()
-    diagnostics: tuple[ProjectionDiagnostic, ...] = ()
+    diagnostic_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -296,38 +391,102 @@ class ProjectionCandidateSet:
     relations: tuple[ProjectionRelation, ...] = ()
     groups: tuple[ProjectionCandidateGroup, ...] = ()
     diagnostics: tuple[ProjectionDiagnostic, ...] = ()
-    schema_version: str = "projection_candidate_set.v2"
+    schema_version: str = "projection_candidate_set.v3"
 
     def by_id(self) -> dict[str, ProjectionRelation]:
         return {item.id: item for item in self.relations}
+
+    def diagnostics_by_id(self) -> dict[str, ProjectionDiagnostic]:
+        return {item.id: item for item in self.diagnostics}
+
+    def validate_consistency(self) -> None:
+        relations = self.by_id()
+        diagnostics = self.diagnostics_by_id()
+        if len(relations) != len(self.relations):
+            raise ValueError("projection candidate set contains duplicate relation IDs")
+        if len(diagnostics) != len(self.diagnostics):
+            raise ValueError("projection candidate set contains duplicate diagnostic IDs")
+        for group in self.groups:
+            for relation_id in group.relation_ids:
+                relation = relations.get(relation_id)
+                if relation is None:
+                    raise ValueError(
+                        f"{group.focus_statement_id}: missing relation {relation_id}"
+                    )
+                if relation.focus_statement_id != group.focus_statement_id:
+                    raise ValueError(
+                        f"{relation_id}: relation belongs to a different focus statement"
+                    )
+            for diagnostic_id in group.diagnostic_ids:
+                diagnostic = diagnostics.get(diagnostic_id)
+                if diagnostic is None:
+                    raise ValueError(
+                        f"{group.focus_statement_id}: missing diagnostic {diagnostic_id}"
+                    )
+                if diagnostic.focus_statement_id != group.focus_statement_id:
+                    raise ValueError(
+                        f"{diagnostic_id}: diagnostic belongs to a different focus statement"
+                    )
 
 
 @dataclass(frozen=True)
 class ReviewSlice:
     focus_statement_id: str
-    profile: RequirementProfile
     claim_relation_ids: tuple[str, ...] = ()
     changed_anchor_relation_ids: tuple[str, ...] = ()
     runtime_relation_ids: tuple[str, ...] = ()
     test_relation_ids: tuple[str, ...] = ()
     verification_relation_ids: tuple[str, ...] = ()
     structural_path_relation_ids: tuple[str, ...] = ()
-    diagnostics: tuple[ProjectionDiagnostic, ...] = ()
+    diagnostic_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
 class ReviewProjection:
     slices: tuple[ReviewSlice, ...] = ()
-    diagnostics: tuple[ProjectionDiagnostic, ...] = ()
-    schema_version: str = "review_projection.v2"
+    schema_version: str = "review_projection.v3"
+
+
+@dataclass(frozen=True)
+class ReviewAttention:
+    id: str
+    label: str
+    message: str
+    focus_statement_ids: tuple[str, ...] = ()
+    sources: tuple[SourceRef, ...] = ()
+
+
+@dataclass(frozen=True)
+class ReviewOverview:
+    pull_request_state: ReviewPullRequestState
+    ci_state: ReviewCiState
+    changed_file_count: int
+    structural_coverage: StructuralCoverage
+    attention: tuple[ReviewAttention, ...] = ()
+    empty_review_message: str | None = None
+
+
+@dataclass(frozen=True)
+class StructuralCoverage:
+    state: StructuralCoverageState
+    provider: str = ""
+    hunk_count: int = 0
+    mapped_hunk_count: int = 0
+    symbol_count: int = 0
+    path_count: int = 0
+    requested_files: int = 0
+    indexed_files: int = 0
+    missing_reason: Literal["index_absent", "files_unindexed", ""] = ""
 
 
 @dataclass(frozen=True)
 class AnalysisInput:
     packet: ReviewSourcePacket
     requirements: tuple[Requirement, ...] = ()
+    changes: DiffHunkCollection | None = None
     structural_graph: StructuralGraphResult | None = None
-    supplied_evidence: tuple[EvidenceItem, ...] = ()
+    structural_graph_disabled: bool = False
+    supplied_evidence: tuple[SuppliedEvidence, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -339,12 +498,17 @@ class ReviewBrief:
     objectives: tuple[ReviewStatement, ...] = ()
     scope: tuple[ReviewStatement, ...] = ()
     claims: tuple[ReviewStatement, ...] = ()
-    structural_graph: StructuralGraphResult | None = None
     evidence_catalog: EvidenceCatalog = EvidenceCatalog()
     projection_candidates: ProjectionCandidateSet = ProjectionCandidateSet()
     projection: ReviewProjection = ReviewProjection()
+    overview: ReviewOverview = ReviewOverview(
+        pull_request_state="unknown",
+        ci_state="not_observed",
+        changed_file_count=0,
+        structural_coverage=StructuralCoverage(state="unavailable"),
+    )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v10"
+    schema_version: str = "review_brief.v11"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

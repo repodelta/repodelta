@@ -9,7 +9,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode, urlparse
 from urllib.request import Request, urlopen
 
-from .contracts import (
+from prismcode.model.contracts import (
     ChangedFile,
     Diagnostic,
     ReviewSourcePacket,
@@ -17,7 +17,6 @@ from .contracts import (
     SourceRef,
     VerificationObservation,
 )
-from .criteria import extract_intent, extract_requirement_texts
 
 JsonValue = dict[str, Any] | list[Any]
 Transport = Callable[[Request, float], tuple[int, Mapping[str, str], bytes]]

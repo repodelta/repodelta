@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, replace
 
-from .contracts import (
+from prismcode.model.contracts import (
     Requirement,
     ReviewStatement,
     SourceRef,

@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-from .contracts import ChangedFile, Diagnostic, SourceRef
+from prismcode.model.contracts import ChangedFile, Diagnostic, SourceRef
 
 _HUNK_HEADER = re.compile(
     r"^@@\s+-(?P<old_start>\d+)(?:,(?P<old_count>\d+))?"

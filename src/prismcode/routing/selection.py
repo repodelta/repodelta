@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from .contracts import (
+from prismcode.model.contracts import (
     AssociationKind,
     ProjectionDiagnostic,
     ProjectionRelation,

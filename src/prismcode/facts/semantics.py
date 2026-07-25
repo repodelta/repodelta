@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from .contracts import EvidenceItem, Requirement, RequirementProfile
-from .matching import semantic_tokens
+from prismcode.model.contracts import EvidenceItem, Requirement, RequirementProfile
+from prismcode.facts.lexical import semantic_tokens
 
 
 def requirement_profile(focus: Requirement) -> RequirementProfile:

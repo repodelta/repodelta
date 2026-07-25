@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 
 from prismcode.cli import main
-from prismcode.contracts import ChangedFile, ReviewSourcePacket
+from prismcode.model.contracts import ChangedFile, ReviewSourcePacket
 
 
 def _write_fixture(tmp_path: Path) -> Path:
@@ -253,4 +253,4 @@ def test_cli_verbose_prints_structural_diagnostics(
 
     stderr = capsys.readouterr().err
     assert "Structural mapping: skipped" in stderr
-    assert "  - codegraph_index_missing:" in stderr
+    assert "  - structural path · provider unavailable:" in stderr

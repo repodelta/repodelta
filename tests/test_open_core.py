@@ -1,16 +1,17 @@
-from dataclasses import fields
+from dataclasses import fields, replace
 from pathlib import Path
 
 import pytest
 
-from prismcode.analysis import DeterministicAnalyzer
-from prismcode.contracts import (
+from prismcode.pipeline import DeterministicAnalyzer
+from prismcode.model.contracts import (
     AnalysisInput,
     Requirement,
     ReviewSourcePacket,
+    VerificationObservation,
 )
-from prismcode.fixture import load_fixture
-from prismcode.rendering import render_html, write_html
+from prismcode.intake.fixture import load_fixture
+from prismcode.presentation.html import render_html, write_html
 
 
 def test_fixture_to_requirement_first_html(tmp_path: Path) -> None:
@@ -79,11 +80,47 @@ def test_source_packet_detects_content_inconsistency() -> None:
         tampered.validate_consistency()
 
 
+def test_top_level_ci_uses_only_canonical_current_head_state() -> None:
+    packet = ReviewSourcePacket(
+        repository="acme/widget",
+        pull_request=7,
+        title="Stale CI",
+        source_records=(),
+        head_sha="current",
+        verification_observations=(
+            VerificationObservation(
+                id="old",
+                name="test",
+                kind="check_run",
+                status="completed",
+                conclusion="success",
+                head_sha="previous",
+            ),
+        ),
+    ).with_revision()
+
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    assert brief.overview.ci_state == "not_observed"
+    assert "CI: no run observed" in render_html(brief)
+    assert "CI: passing" not in render_html(brief)
+
+
 def test_unsafe_source_url_is_not_rendered_as_link(tmp_path: Path) -> None:
     analysis_input = load_fixture("fixtures/pr574.json")
     packet = analysis_input.packet
+    source_records = tuple(
+        replace(item, url="javascript:alert(1)")
+        if item.kind == "pull_request"
+        else item
+        for item in packet.source_records
+    )
     unsafe = ReviewSourcePacket(
-        **{**packet.__dict__, "source_url": "javascript:alert(1)", "packet_revision": ""}
+        **{
+            **packet.__dict__,
+            "source_records": source_records,
+            "source_url": "javascript:alert(1)",
+            "packet_revision": "",
+        }
     ).with_revision()
     html = render_html(
         DeterministicAnalyzer().analyze(

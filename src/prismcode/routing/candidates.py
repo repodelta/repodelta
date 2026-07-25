@@ -4,8 +4,8 @@ import hashlib
 from dataclasses import dataclass
 from typing import Iterable, Literal
 
-from .association import evidence_reasons, statement_reasons
-from .contracts import (
+from prismcode.routing.association import evidence_reasons, statement_reasons
+from prismcode.model.contracts import (
     AssociationKind,
     AssociationReason,
     CoverageState,
@@ -17,19 +17,17 @@ from .contracts import (
     ProjectionRelation,
     ProjectionSlot,
     Requirement,
-    ReviewProjection,
-    ReviewSlice,
     ReviewStatement,
 )
-from .coverage import review_provider_diagnostics
-from .fact_semantics import (
+from prismcode.routing.coverage import review_provider_diagnostics
+from prismcode.facts.semantics import (
     anchor_key,
     eligible_changed_anchor,
     evidence_text,
     requirement_profile,
 )
-from .selection import relation_key, select_relations
-from .structural_graph import StructuralGraphResult
+from prismcode.routing.selection import relation_key, select_relations
+from prismcode.providers.structural import StructuralGraphResult
 
 
 @dataclass(frozen=True)
@@ -299,7 +297,7 @@ def build_projection_candidates(
                 focus_statement_id=focus.id,
                 profile=profile,
                 relation_ids=tuple(item.id for item in focus_relations),
-                diagnostics=tuple(focus_diagnostics),
+                diagnostic_ids=tuple(item.id for item in focus_diagnostics),
             )
         )
 
@@ -307,47 +305,6 @@ def build_projection_candidates(
         relations=tuple(relations),
         groups=tuple(groups),
         diagnostics=tuple(diagnostics),
-    )
-
-
-def build_review_projection(
-    candidates: ProjectionCandidateSet,
-) -> ReviewProjection:
-    relations = candidates.by_id()
-    slices = []
-    for group in candidates.groups:
-        selected = tuple(
-            relations[relation_id]
-            for relation_id in group.relation_ids
-            if relation_id in relations and relations[relation_id].state == "selected"
-        )
-        by_slot = {
-            slot: tuple(item.id for item in selected if item.slot == slot)
-            for slot in (
-                "claim",
-                "changed_anchor",
-                "runtime_context",
-                "test_context",
-                "verification",
-                "structural_path",
-            )
-        }
-        slices.append(
-            ReviewSlice(
-                focus_statement_id=group.focus_statement_id,
-                profile=group.profile,
-                claim_relation_ids=by_slot["claim"],
-                changed_anchor_relation_ids=by_slot["changed_anchor"],
-                runtime_relation_ids=by_slot["runtime_context"],
-                test_relation_ids=by_slot["test_context"],
-                verification_relation_ids=by_slot["verification"],
-                structural_path_relation_ids=by_slot["structural_path"],
-                diagnostics=group.diagnostics,
-            )
-        )
-    return ReviewProjection(
-        slices=tuple(slices),
-        diagnostics=candidates.diagnostics,
     )
 
 
@@ -382,7 +339,7 @@ def _anchor_relations(
     claims_by_id = {item.id: item for item in claims}
     result = []
     for ordinal, anchor in enumerate(anchors):
-        provided = tuple(anchor.metadata.get("provided_for_statement_ids", ()))
+        provided = anchor.associated_statement_ids
         if focus.id in provided:
             reasons = (
                 AssociationReason(
@@ -523,7 +480,7 @@ def _verification_relations(
     for item in evidence:
         if item.profile != "verification":
             continue
-        observed_sha = str(item.metadata.get("head_sha") or "")
+        observed_sha = item.observed_head_sha or ""
         if observed_sha != head_sha:
             continue
         result.append(
@@ -550,9 +507,7 @@ def _provided_context_relations(
 ) -> tuple[ProjectionRelation, ...]:
     result = []
     for item in evidence:
-        if item.changed or focus.id not in item.metadata.get(
-            "provided_for_statement_ids", ()
-        ):
+        if item.changed or focus.id not in item.associated_statement_ids:
             continue
         slot: ProjectionSlot | None = (
             "test_context"

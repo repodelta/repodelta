@@ -6,7 +6,7 @@ from dataclasses import replace
 from pathlib import Path
 
 from prismcode.cli import main
-from prismcode.evaluation import (
+from prismcode.evaluation.core import (
     evaluate_suite,
     load_evaluation_suite,
     write_evaluation_json,

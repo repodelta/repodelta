@@ -1,0 +1,1 @@
+"""Canonical cross-stage contracts."""

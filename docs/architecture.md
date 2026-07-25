@@ -6,7 +6,12 @@ PrismCode has one canonical review path:
 fixture or GitHub
   -> conclusion-free ReviewSourcePacket
        -> linked Issue/Ticket + PR + changed files + CI/Actions observations
-  -> parse unified-diff hunks
+  -> one-pass source semantics
+       -> obligations and guardrails (R/G)
+       -> objectives (O), scope context (S)
+       -> implementation/boundary (C), baseline (B), verification (V) claims
+       -> intent (I)
+  -> one canonical DiffHunkCollection
   -> optional StructuralGraphProvider
        -> exact changed-hunk / symbol-span overlaps
        -> bounded direction-aware paths to unchanged runtime/test neighbors
@@ -15,19 +20,33 @@ fixture or GitHub
        -> changed-hunk evidence for each unmapped hunk
        -> changed-file fallback only when no parseable hunk exists
        -> bounded paths + CI/runtime observations
-  -> one-pass semantic extraction
-       -> obligations and guardrails (R/G)
-       -> objectives (O), scope context (S)
-       -> implementation/boundary (C), baseline (B), verification (V) claims
-       -> intent (I)
   -> deterministic typed fact routing
        -> eligibility by fact profile and projection slot
        -> per-R/G claim, changed-anchor, runtime, test, CI, path, boundary candidates
        -> ordered association reasons within each slot
   -> bounded ReviewProjection
+  -> canonical ReviewOverview
   -> ReviewBrief
-  -> HTML renderer
+  -> HTML / CLI presentation
 ```
+
+Each stage owns one transformation and documents its local contract beside the
+code:
+
+- [`model`](../src/prismcode/model/README.md)
+- [`intake`](../src/prismcode/intake/README.md)
+- [`semantics`](../src/prismcode/semantics/README.md)
+- [`changes`](../src/prismcode/changes/README.md)
+- [`providers`](../src/prismcode/providers/README.md)
+- [`facts`](../src/prismcode/facts/README.md)
+- [`routing`](../src/prismcode/routing/README.md)
+- [`projection`](../src/prismcode/projection/README.md)
+- [`presentation`](../src/prismcode/presentation/README.md)
+- [`evaluation`](../src/prismcode/evaluation/README.md)
+
+`pipeline.py` orchestrates these contracts without owning a semantic
+transformation. A dependency-boundary test prevents downstream stages from
+becoming alternate intake, classification, routing, or presentation paths.
 
 ## Authority rules
 
@@ -99,7 +118,7 @@ Each parseable changed hunk has exactly one canonical representation:
 
 - when Codegraph maps it, the exact symbol represents it;
 - otherwise, a `changed_hunk` item retains its path, ranges, bounded patch
-  excerpt, and GitHub source;
+   head/base excerpts, and GitHub source;
 - only an absent or unparsable patch produces a `changed_file` fallback.
 
 This replacement rule prevents `CHANGED FILE`, `CHANGED HUNK`, and exact symbol
@@ -144,9 +163,12 @@ Every slot has its own inspection and selection budget. There is no
 all-statement/all-evidence numeric score and no source-ID-ordered global
 candidate budget. Every R/G is visited independently.
 
-`ReviewProjection` references selected typed relation IDs only. The renderer
-resolves those IDs and typed coverage diagnostics; it does not match,
-classify, select paths, or infer why a slot is empty.
+`ReviewProjection` references selected typed relation IDs only. Profiles and
+diagnostics remain canonical in `ProjectionCandidateSet`; slices reference
+their IDs. `ReviewOverview` owns review-wide CI, source, empty-state, and
+structural coverage facts. HTML and CLI resolve and format these contracts;
+they do not match, classify, select paths, interpret provider codes, or infer
+why a slot is empty.
 
 ## Packet revisions
 

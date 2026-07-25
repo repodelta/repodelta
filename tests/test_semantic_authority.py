@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from prismcode.analysis import DeterministicAnalyzer
-from prismcode.contracts import (
+from prismcode.pipeline import DeterministicAnalyzer
+from prismcode.model.contracts import (
     AnalysisInput,
     ChangedFile,
     Requirement,
@@ -9,9 +9,9 @@ from prismcode.contracts import (
     SourceRef,
     SourceRecord,
 )
-from prismcode.criteria import extract_review_semantics
-from prismcode.criteria import parse_markdown_semantics
-from prismcode.rendering import render_html
+from prismcode.semantics.criteria import extract_review_semantics
+from prismcode.semantics.criteria import parse_markdown_semantics
+from prismcode.presentation.html import render_html
 
 
 def _packet(
@@ -189,7 +189,8 @@ def test_pr_acceptance_criteria_are_provisional_without_linked_issue() -> None:
     assert [item.id for item in brief.claims] == ["C1"]
     assert brief.intent.text == "Add structure-aware review support."
     html = render_html(brief)
-    assert "Provisional PR-authored criterion" in html
+    assert "pr description" in html
+    assert "obligation · acceptance" in html
     assert "Review checks" in html
     assert "Objective context · 1 statement" in html
     assert "Preserve deterministic review behavior." in html
@@ -395,7 +396,7 @@ def test_context_and_typed_claims_use_the_canonical_binding_path() -> None:
         ),
         changed_files=(
             ChangedFile(
-                path="src/prismcode/evaluation.py",
+                path="src/prismcode/evaluation/core.py",
                 patch=(
                     "@@ -1,1 +1,4 @@\n"
                     "+statement purpose and authority\n"

@@ -5,7 +5,7 @@ from pathlib import Path
 import re
 from urllib.parse import quote, urlparse, urlunparse
 
-from .contracts import (
+from prismcode.model.contracts import (
     ChangedFile,
     EvidenceItem,
     ProjectionDiagnostic,
@@ -14,7 +14,6 @@ from .contracts import (
     ReviewSlice,
     ReviewStatement,
     SourceRef,
-    VerificationObservation,
 )
 
 
@@ -84,17 +83,6 @@ def _sources(item: EvidenceItem, brief: ReviewBrief) -> str:
     )
 
 
-def _ci_copy(observations: tuple[VerificationObservation, ...]) -> str:
-    if not observations:
-        return "CI: no run observed"
-    conclusions = {item.conclusion.casefold() for item in observations if item.conclusion}
-    if conclusions & {"failure", "failed", "error", "cancelled", "timed_out"}:
-        return "CI: failure observed"
-    if conclusions and conclusions <= {"success", "neutral", "skipped"}:
-        return "CI: passing"
-    return "CI: queued or running"
-
-
 def _changed_file(item: ChangedFile) -> str:
     href = _safe_href(item.source_url)
     source = (
@@ -150,7 +138,7 @@ def _relation_fact(
 ) -> str:
     evidence = brief.evidence_catalog.by_id().get(relation.target_id)
     if evidence is None:
-        return ""
+        raise ValueError(f"projection references missing evidence: {relation.target_id}")
     sources = _sources(evidence, brief)
     reason = relation.reasons[0] if relation.reasons else None
     reason_copy = reason.detail if reason else relation.association.replace("_", " ")
@@ -190,6 +178,9 @@ def _projection_slice(
     review_slice: ReviewSlice,
     statement: ReviewStatement,
     brief: ReviewBrief,
+    *,
+    profile: str,
+    diagnostics: tuple[ProjectionDiagnostic, ...],
 ) -> str:
     relations = brief.projection_candidates.by_id()
     claims = {item.id: item for item in brief.claims}
@@ -199,7 +190,7 @@ def _projection_slice(
         relation = relations.get(relation_id)
         claim = claims.get(relation.target_id) if relation else None
         if relation is None or claim is None:
-            continue
+            raise ValueError(f"projection references missing claim relation: {relation_id}")
         source = " · ".join(_source(item) for item in claim.sources)
         reason = relation.reasons[0] if relation.reasons else None
         claim_rows.append(
@@ -248,11 +239,11 @@ def _projection_slice(
             )
 
     claim_diagnostics = _diagnostic_rows(
-        review_slice.diagnostics,
+        diagnostics,
         slots={"claim"},
     )
     fact_diagnostics = _diagnostic_rows(
-        review_slice.diagnostics,
+        diagnostics,
         slots={
             "changed_anchor",
             "runtime_context",
@@ -262,25 +253,14 @@ def _projection_slice(
             "boundary_fact",
         },
     )
-    contract_label = {
-        "issue": "Issue contract",
-        "pr_description": "PR criterion",
-        "provided": "Provided contract",
-        "pr_title": "PR title",
-    }[statement.authority]
+    contract_label = statement.authority.replace("_", " ")
     statement_sources = " · ".join(_source(source) for source in statement.sources)
-    authority_note = (
-        "Provisional PR-authored criterion"
-        if statement.authority == "pr_description"
-        else "Issue acceptance criterion"
-        if statement.authority == "issue"
-        else "Provided acceptance criterion"
-    )
+    authority_note = f"{statement.role.replace('_', ' ')} · {statement.purpose.replace('_', ' ')}"
     return (
         '<div class="projection">'
         '<div class="projection-column">'
         f'<span class="projection-heading">{escape(contract_label)}</span>'
-        f'<span class="profile-chip">{escape(review_slice.profile.replace("_", " "))}</span>'
+        f'<span class="profile-chip">{escape(profile.replace("_", " "))}</span>'
         f'<p class="projection-copy">{escape(statement.text)}</p>'
         f'<span class="relation-reason">{escape(authority_note)}</span>'
         + (
@@ -305,58 +285,16 @@ def _projection_slice(
 
 
 def _attention(brief: ReviewBrief) -> str:
-    grouped: dict[tuple[str, str], list[str]] = {}
-    for diagnostic in brief.projection.diagnostics:
-        if diagnostic.state == "not_applicable":
-            continue
-        grouped.setdefault((diagnostic.slot, diagnostic.state), []).append(
-            diagnostic.focus_statement_id
-        )
-    rows = []
-    for (slot, state), focus_ids in sorted(grouped.items()):
-        ids = tuple(dict.fromkeys(focus_ids))
-        messages = tuple(
-            dict.fromkeys(
-                item.message
-                for item in brief.projection.diagnostics
-                if item.slot == slot and item.state == state
-            )
-        )
-        attention_label = (
-            "Acceptance basis"
-            if focus_ids == ["I1"] and state == "source_absent"
-            else f"{slot.replace('_', ' ')} · {state.replace('_', ' ')}"
-        )
-        rows.append(
-            '<div class="attention-row">'
-            f'<div class="attention-kind">{escape(attention_label)}</div>'
-            f'<div class="attention-copy">{escape(", ".join(ids))} · '
-            f'{escape(" ".join(messages))}</div></div>'
-        )
-    source_codes = {
-        "github_linked_issue_not_found",
-        "github_linked_issues_unavailable",
-        "github_patch_unavailable",
-        "github_file_limit_reached",
-    }
-    source_messages = [
-        item.message for item in brief.packet.diagnostics if item.code in source_codes
-    ]
-    if source_messages:
-        rows.append(
-            '<div class="attention-row"><div class="attention-kind">Source coverage</div>'
-            f'<div class="attention-copy">{escape(" ".join(source_messages))}</div></div>'
-        )
-    if brief.guardrails:
-        rows.append(
-            '<div class="attention-row"><div class="attention-kind">Scope guardrails</div>'
-            '<div class="attention-copy">'
-            + escape(
-                " · ".join(f"{item.id}: {item.text}" for item in brief.guardrails)
-            )
-            + "</div></div>"
-        )
-    return "".join(rows) or '<p class="empty">No unresolved attention items.</p>'
+    rows = (
+        '<div class="attention-row">'
+        f'<div class="attention-kind">{escape(item.label)}</div>'
+        f'<div class="attention-copy">{escape(", ".join(item.focus_statement_ids))}'
+        + (" · " if item.focus_statement_ids else "")
+        + f"{escape(item.message)}</div></div>"
+        for item in brief.overview.attention
+    )
+    rendered = "".join(rows)
+    return rendered or '<p class="empty">No unresolved attention items.</p>'
 
 
 def render_html(brief: ReviewBrief) -> str:
@@ -364,24 +302,41 @@ def render_html(brief: ReviewBrief) -> str:
     statements = {
         item.id: item for item in (*brief.requirements, *brief.guardrails)
     }
+    groups = {
+        item.focus_statement_id: item
+        for item in brief.projection_candidates.groups
+    }
+    diagnostics = brief.projection_candidates.diagnostics_by_id()
     cards = []
     for index, review_slice in enumerate(brief.projection.slices):
         statement = statements.get(review_slice.focus_statement_id)
-        if statement is None:
-            continue
+        group = groups.get(review_slice.focus_statement_id)
+        if statement is None or group is None:
+            raise ValueError(
+                f"projection references missing focus: {review_slice.focus_statement_id}"
+            )
+        slice_diagnostics = tuple(
+            diagnostics[diagnostic_id]
+            for diagnostic_id in review_slice.diagnostic_ids
+            if diagnostic_id in diagnostics
+        )
+        if len(slice_diagnostics) != len(review_slice.diagnostic_ids):
+            raise ValueError(
+                f"projection references missing diagnostic: {review_slice.focus_statement_id}"
+            )
         cards.append(
             f'<details class="requirement"{" open" if index == 0 else ""}>'
             '<summary>'
             f'<span class="req-id">{escape(statement.id)}</span>'
             f'<span class="req-title">{escape(statement.text)}</span>'
             '</summary><div class="req-body">'
-            f"{_projection_slice(review_slice, statement, brief)}</div></details>"
+            f"{_projection_slice(review_slice, statement, brief, profile=group.profile, diagnostics=slice_diagnostics)}</div></details>"
         )
     if not cards:
+        if brief.overview.empty_review_message is None:
+            raise ValueError("projection rendered no cards without an empty-review fact")
         cards.append(
-            '<div class="empty-state"><strong>No explicit acceptance criteria found.</strong>'
-            "<span>Intent and PR claims remain context and were not promoted to "
-            "requirements.</span></div>"
+            f'<div class="empty-state">{escape(brief.overview.empty_review_message)}</div>'
         )
 
     source_priority = {"linked_issue": 0, "ticket": 0, "pull_request": 1}
@@ -399,13 +354,13 @@ def render_html(brief: ReviewBrief) -> str:
         if packet.pull_request is not None
         else "Fixture review"
     )
-    pr_state = (
-        "Merged"
-        if packet.metadata.get("merged")
-        else "Draft"
-        if packet.metadata.get("draft")
-        else str(packet.metadata.get("state") or "Unknown").title()
-    )
+    pr_state = brief.overview.pull_request_state.title()
+    ci_copy = {
+        "not_observed": "CI: no run observed",
+        "failure": "CI: failure observed",
+        "passing": "CI: passing",
+        "pending": "CI: queued or running",
+    }[brief.overview.ci_state]
     pr_link = (
         _source(SourceRef(label=pr_label, url=packet.source_url))
         if packet.source_url
@@ -427,7 +382,7 @@ def render_html(brief: ReviewBrief) -> str:
 :root{{color-scheme:dark;--bg:#080c0f;--panel:#10171b;--border:#26373f;--text:#edf3f0;--muted:#9eaaaf;--faint:#6f7d83;--green:#7be3ac;--amber:#e7ca7c;--shadow:0 22px 64px rgba(0,0,0,.28)}}*{{box-sizing:border-box}}body{{margin:0;color:var(--text);line-height:1.55;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 18% -8%,rgba(69,167,118,.12),transparent 31rem),var(--bg)}}code{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}}.shell{{width:min(1180px,calc(100% - 40px));margin:30px auto 84px}}.topbar{{margin-bottom:22px;font-weight:720}}.brand-mark{{display:inline-block;width:14px;height:14px;margin-right:10px;border:2px solid white;transform:rotate(45deg);border-radius:3px}}.section{{border:2px solid var(--border);border-radius:18px;background:linear-gradient(180deg,rgba(17,24,28,.97),rgba(11,17,21,.98));box-shadow:var(--shadow);padding:28px;margin-bottom:22px}}h1{{font-size:31px;margin:0 0 14px}}h2{{font-size:22px;margin:0 0 14px}}.meta{{display:flex;flex-wrap:wrap;gap:9px;color:var(--muted);font-size:13px;margin-bottom:16px}}.intent{{max-width:850px;color:#d2dade;font-size:15px}}.source-link,.file-link{{color:#b9dfff;text-decoration:none}}.source-note,.projection-source,.context-source{{display:block;color:var(--faint);font-size:10px;line-height:1.45}}.requirements{{border-top:1px solid rgba(111,128,135,.24)}}.requirement{{border-bottom:1px solid rgba(111,128,135,.24)}}.requirement summary{{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px minmax(0,1fr);gap:16px;padding:18px 0}}.requirement summary::-webkit-details-marker{{display:none}}.req-id{{color:var(--green);font:760 12px ui-monospace,SFMono-Regular,Menlo,monospace}}.req-title{{font-size:14px;font-weight:640}}.req-body{{padding:0 0 22px 68px}}.projection{{display:grid;grid-template-columns:minmax(0,.85fr) 24px minmax(0,1fr) 24px minmax(0,1.35fr);gap:10px;align-items:start}}.projection-column{{min-width:0;padding:14px;border:1px solid rgba(111,128,135,.22);border-radius:12px;background:rgba(5,10,13,.24)}}.projection-heading,.block-title{{display:block;margin-bottom:9px;color:#89979d;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.045em}}.projection-arrow{{align-self:center;color:var(--faint);text-align:center}}.profile-chip,.relation-label{{display:inline-flex;margin:0 0 8px;padding:3px 7px;border-radius:999px;background:rgba(54,118,87,.20);color:#bfeacf;font-size:8px;font-weight:720}}.projection-copy{{margin:0 0 7px;color:#d7dddf;font-size:11px}}.projection-item{{padding:9px 0;border-bottom:1px solid rgba(111,128,135,.16)}}.projection-item:last-child{{border-bottom:0}}.relation-reason{{display:block;color:var(--faint);font-size:9px;margin-bottom:6px}}.projection-group+.projection-group{{margin-top:15px}}.slot-diagnostic{{margin:9px 0;padding:9px;border-radius:8px;background:rgba(106,85,30,.16);color:#e8d18e;font-size:9px}}.slot-diagnostic p{{margin:3px 0 0;color:var(--muted)}}.context{{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(111,128,135,.24)}}.context>summary{{cursor:pointer;color:var(--muted);font-size:11px}}.context-row{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px;gap:12px;padding:12px 0;border-bottom:1px solid rgba(111,128,135,.18)}}.context-id{{color:#9fcdf0;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace}}.context-copy{{font-size:12px}}.context-authority{{color:var(--muted);font-size:10px;text-align:right}}.context-source{{grid-column:2/-1}}.attention-list,.file-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:var(--amber);font-size:10px;font-weight:700;text-transform:uppercase}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px}}.empty,.empty-state{{color:var(--faint);font-size:12px}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}@media(max-width:950px){{.projection{{grid-template-columns:1fr}}.projection-arrow{{transform:rotate(90deg)}}.req-body{{padding-left:0}}}}@media(max-width:600px){{.shell{{width:calc(100% - 18px);margin-top:16px}}.section{{padding:22px 20px}}.attention-row,.context-row{{grid-template-columns:1fr}}}}
 </style></head><body><main class="shell">
 <div class="topbar"><span class="brand-mark"></span>PrismCode</div>
-<section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{len(packet.changed_files)} changed files</span><span>·</span><span>{escape(_ci_copy(packet.verification_observations))}</span></div><h1>{escape(packet.title)}</h1><div class="intent">{escape(brief.intent.text)}</div><span class="source-note">Source: {source_line}</span></section>
+<section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{brief.overview.changed_file_count} changed files</span><span>·</span><span>{escape(ci_copy)}</span></div><h1>{escape(packet.title)}</h1><div class="intent">{escape(brief.intent.text)}</div><span class="source-note">Source: {source_line}</span></section>
 <section class="section"><h2>Review checks</h2>{semantic_context}<div class="requirements">{"".join(cards)}</div></section>
 <section class="section"><h2>Needs attention</h2><div class="attention-list">{_attention(brief)}</div></section>
 <section class="section"><h2>Changed areas</h2><div class="file-list">{files or '<p class="empty">Not provided.</p>'}</div></section>
