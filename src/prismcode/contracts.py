@@ -32,7 +32,62 @@ StatementAuthority = Literal[
 EvidenceClassification = Literal[
     "code", "test", "document", "ci", "runtime", "mixed"
 ]
-CandidateBindingKind = Literal["statement_evidence", "requirement_claim"]
+FactProfile = Literal[
+    "production",
+    "test",
+    "document",
+    "workflow",
+    "configuration",
+    "dependency",
+    "schema",
+    "generated",
+    "verification",
+    "structural_path",
+    "unknown",
+]
+RequirementProfile = Literal[
+    "behavior",
+    "api_contract",
+    "ui",
+    "test_verification",
+    "workflow_configuration",
+    "documentation",
+    "schema_migration",
+    "guardrail",
+    "generic",
+]
+ProjectionSlot = Literal[
+    "claim",
+    "changed_anchor",
+    "runtime_context",
+    "test_context",
+    "verification",
+    "structural_path",
+    "boundary_fact",
+]
+AssociationKind = Literal[
+    "provided_association",
+    "explicit_reference",
+    "exact_identifier",
+    "distinctive_phrase",
+    "claim_bridge",
+    "structural_bridge",
+    "current_head",
+    "boundary_scan",
+]
+SelectionState = Literal["selected", "not_selected", "ineligible", "truncated"]
+CoverageState = Literal[
+    "source_absent",
+    "not_applicable",
+    "no_eligible_fact",
+    "no_association",
+    "ambiguous",
+    "provider_unavailable",
+    "partial_coverage",
+    "stale_source",
+    "budget_truncated",
+    "unsupported_change_type",
+]
 
 
 @dataclass(frozen=True)
@@ -152,6 +207,7 @@ class EvidenceItem:
     summary: str
     kind: str
     classification: EvidenceClassification
+    profile: FactProfile = "unknown"
     changed: bool = False
     sources: tuple[SourceRef, ...] = ()
     structural_path_ids: tuple[str, ...] = ()
@@ -169,38 +225,74 @@ class EvidenceCatalog:
 
 
 @dataclass(frozen=True)
-class BindingReason:
-    feature: str
+class AssociationReason:
+    kind: AssociationKind
     detail: str
-    weight: int
     matched_terms: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
-class CandidateBinding:
+class ProjectionRelation:
     id: str
-    kind: CandidateBindingKind
-    source_id: str
+    focus_statement_id: str
+    slot: ProjectionSlot
+    target_type: Literal["statement", "evidence"]
     target_id: str
-    score: int
-    reasons: tuple[BindingReason, ...]
-    structural_path_ids: tuple[str, ...] = ()
-    relation: Literal["candidate_support"] = "candidate_support"
+    association: AssociationKind
+    reasons: tuple[AssociationReason, ...]
+    bridge_ids: tuple[str, ...] = ()
+    state: SelectionState = "selected"
 
 
 @dataclass(frozen=True)
-class CandidateCoverage:
-    requirement_ids_without_evidence_candidates: tuple[str, ...] = ()
-    claim_ids_without_requirement_candidates: tuple[str, ...] = ()
-    evidence_ids_without_statement_candidates: tuple[str, ...] = ()
+class ProjectionDiagnostic:
+    focus_statement_id: str
+    slot: ProjectionSlot
+    state: CoverageState
+    message: str
+    provider: str = ""
+    affected_ids: tuple[str, ...] = ()
+    sources: tuple[SourceRef, ...] = ()
 
 
 @dataclass(frozen=True)
-class CandidateBindingSet:
-    items: tuple[CandidateBinding, ...] = ()
-    coverage: CandidateCoverage = CandidateCoverage()
-    diagnostics: tuple[Diagnostic, ...] = ()
-    schema_version: str = "candidate_binding_set.v1"
+class ProjectionCandidateGroup:
+    focus_statement_id: str
+    profile: RequirementProfile
+    relation_ids: tuple[str, ...] = ()
+    diagnostics: tuple[ProjectionDiagnostic, ...] = ()
+
+
+@dataclass(frozen=True)
+class ProjectionCandidateSet:
+    relations: tuple[ProjectionRelation, ...] = ()
+    groups: tuple[ProjectionCandidateGroup, ...] = ()
+    diagnostics: tuple[ProjectionDiagnostic, ...] = ()
+    schema_version: str = "projection_candidate_set.v1"
+
+    def by_id(self) -> dict[str, ProjectionRelation]:
+        return {item.id: item for item in self.relations}
+
+
+@dataclass(frozen=True)
+class ReviewSlice:
+    focus_statement_id: str
+    profile: RequirementProfile
+    claim_relation_ids: tuple[str, ...] = ()
+    changed_anchor_relation_ids: tuple[str, ...] = ()
+    runtime_relation_ids: tuple[str, ...] = ()
+    test_relation_ids: tuple[str, ...] = ()
+    verification_relation_ids: tuple[str, ...] = ()
+    structural_path_relation_ids: tuple[str, ...] = ()
+    boundary_relation_ids: tuple[str, ...] = ()
+    diagnostics: tuple[ProjectionDiagnostic, ...] = ()
+
+
+@dataclass(frozen=True)
+class ReviewProjection:
+    slices: tuple[ReviewSlice, ...] = ()
+    diagnostics: tuple[ProjectionDiagnostic, ...] = ()
+    schema_version: str = "review_projection.v1"
 
 
 @dataclass(frozen=True)
@@ -222,9 +314,10 @@ class ReviewBrief:
     claims: tuple[ReviewStatement, ...] = ()
     structural_graph: StructuralGraphResult | None = None
     evidence_catalog: EvidenceCatalog = EvidenceCatalog()
-    candidate_bindings: CandidateBindingSet = CandidateBindingSet()
+    projection_candidates: ProjectionCandidateSet = ProjectionCandidateSet()
+    projection: ReviewProjection = ReviewProjection()
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v8"
+    schema_version: str = "review_brief.v9"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
