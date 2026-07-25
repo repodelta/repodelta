@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import hashlib
-import re
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from typing import Iterable, Literal
 
+from .association import evidence_reasons, statement_reasons
 from .contracts import (
     AssociationKind,
     AssociationReason,
@@ -17,26 +17,19 @@ from .contracts import (
     ProjectionRelation,
     ProjectionSlot,
     Requirement,
-    RequirementProfile,
     ReviewProjection,
     ReviewSlice,
     ReviewStatement,
 )
-from .matching import semantic_tokens
+from .coverage import review_provider_diagnostics
+from .fact_semantics import (
+    anchor_key,
+    eligible_changed_anchor,
+    evidence_text,
+    requirement_profile,
+)
+from .selection import relation_key, select_relations
 from .structural_graph import StructuralGraphResult
-
-_REFERENCE_RE = re.compile(r"\b(?:R|G|AC|REQ)[-_ ]?\d+\b", re.IGNORECASE)
-_WORD_RE = re.compile(r"[A-Za-z][A-Za-z0-9_]{2,}")
-_ASSOCIATION_ORDER: dict[AssociationKind, int] = {
-    "provided_association": 0,
-    "explicit_reference": 1,
-    "exact_identifier": 2,
-    "distinctive_phrase": 3,
-    "claim_bridge": 4,
-    "structural_bridge": 5,
-    "current_head": 6,
-    "boundary_scan": 7,
-}
 
 
 @dataclass(frozen=True)
@@ -47,7 +40,6 @@ class ProjectionPolicy:
     max_tests: int = 2
     max_verification: int = 1
     max_paths: int = 2
-    max_boundary: int = 2
     max_candidates_per_slot: int = 12
 
 
@@ -58,6 +50,9 @@ def build_projection_candidates(
     evidence_catalog: EvidenceCatalog,
     structural_graph: StructuralGraphResult | None,
     head_sha: str | None,
+    claim_source_state: Literal[
+        "source_absent", "extraction_missing", "available"
+    ] = "available",
     policy: ProjectionPolicy = ProjectionPolicy(),
 ) -> ProjectionCandidateSet:
     """Route canonical facts into typed per-focus slots without conclusions."""
@@ -71,12 +66,14 @@ def build_projection_candidates(
                 if item.changed
                 and item.kind in {"symbol", "changed_hunk", "changed_file"}
             ),
-            key=_anchor_key,
+            key=anchor_key,
         )
     )
     relations: list[ProjectionRelation] = []
     groups: list[ProjectionCandidateGroup] = []
-    diagnostics: list[ProjectionDiagnostic] = []
+    diagnostics: list[ProjectionDiagnostic] = list(
+        review_provider_diagnostics(structural_graph)
+    )
     if not requirements:
         diagnostics.append(
             ProjectionDiagnostic(
@@ -91,12 +88,12 @@ def build_projection_candidates(
         )
 
     for focus in requirements:
-        profile = _requirement_profile(focus)
+        profile = requirement_profile(focus)
         focus_relations: list[ProjectionRelation] = []
         focus_diagnostics: list[ProjectionDiagnostic] = []
 
         claim_relations = _claim_relations(focus, claims)
-        claim_relations = _bound(
+        claim_relations = select_relations(
             claim_relations,
             slot="claim",
             selected_limit=policy.max_claims,
@@ -111,19 +108,34 @@ def build_projection_candidates(
             if relation.state == "selected"
         }
         if not claim_relations:
+            claim_state: CoverageState = (
+                "source_absent"
+                if claim_source_state == "source_absent"
+                else "no_eligible_fact"
+                if claim_source_state == "extraction_missing"
+                else "no_association"
+            )
             focus_diagnostics.append(
                 _missing(
                     focus.id,
                     "claim",
-                    "source_absent" if not claims else "no_association",
-                    "No PR-authored claim was available."
-                    if not claims
-                    else "No deterministic PR-claim association was found.",
+                    claim_state,
+                    {
+                        "source_absent": "No PR description source was collected.",
+                        "no_eligible_fact": (
+                            "A PR description was collected, but no typed claim "
+                            "was extracted from its recognized sections."
+                        ),
+                        "no_association": (
+                            "Typed PR claims exist, but none has a deterministic "
+                            "association with this focus."
+                        ),
+                    }[claim_state],
                 )
             )
 
         eligible_anchors = tuple(
-            item for item in changed if _eligible_anchor(item, profile)
+            item for item in changed if eligible_changed_anchor(item, profile, focus)
         )
         anchor_relations = _anchor_relations(
             focus,
@@ -131,7 +143,7 @@ def build_projection_candidates(
             claims,
             eligible_anchors,
         )
-        anchor_relations = _bound(
+        anchor_relations = select_relations(
             anchor_relations,
             slot="changed_anchor",
             selected_limit=policy.max_changed,
@@ -186,15 +198,12 @@ def build_projection_candidates(
             ),
             *_provided_context_relations(focus, evidence.values()),
         )
-        focus_diagnostics.extend(
-            _structural_coverage_diagnostics(focus, structural_graph)
-        )
         for slot, selected_limit in (
             ("runtime_context", policy.max_runtime),
             ("test_context", policy.max_tests),
             ("structural_path", policy.max_paths),
         ):
-            slot_relations = _bound(
+            slot_relations = select_relations(
                 tuple(item for item in structural if item.slot == slot),
                 slot=slot,
                 selected_limit=selected_limit,
@@ -223,7 +232,7 @@ def build_projection_candidates(
             evidence.values(),
             head_sha=head_sha,
         )
-        verification_relations = _bound(
+        verification_relations = select_relations(
             verification_relations,
             slot="verification",
             selected_limit=policy.max_verification,
@@ -247,45 +256,17 @@ def build_projection_candidates(
             )
 
         if focus.kind == "guardrail":
-            boundary = tuple(
-                _relation(
+            focus_diagnostics.append(
+                _missing(
                     focus.id,
                     "boundary_fact",
-                    "evidence",
-                    relation.target_id,
-                    "boundary_scan",
+                    "provider_unavailable",
                     (
-                        AssociationReason(
-                            kind="boundary_scan",
-                            detail=(
-                                "The selected changed anchor is inside the explicit "
-                                "guardrail review scan."
-                            ),
-                        ),
+                        "No bounded repository scan fact was collected for this "
+                        "guardrail; selected changed anchors are not absence proof."
                     ),
-                    bridge_ids=(relation.id,),
                 )
-                for relation in anchor_relations
-                if relation.state == "selected"
             )
-            boundary = _bound(
-                boundary,
-                slot="boundary_fact",
-                selected_limit=policy.max_boundary,
-                candidate_limit=policy.max_candidates_per_slot,
-                diagnostics=focus_diagnostics,
-                focus_id=focus.id,
-            )
-            focus_relations.extend(boundary)
-            if not boundary:
-                focus_diagnostics.append(
-                    _missing(
-                        focus.id,
-                        "boundary_fact",
-                        "no_association",
-                        "No changed anchor entered the bounded guardrail scan.",
-                    )
-                )
         else:
             focus_diagnostics.append(
                 _missing(
@@ -298,7 +279,7 @@ def build_projection_candidates(
 
         focus_relations = sorted(
             {item.id: item for item in focus_relations}.values(),
-            key=_relation_key,
+            key=relation_key,
         )
         focus_diagnostics = list(
             {
@@ -349,7 +330,6 @@ def build_review_projection(
                 "test_context",
                 "verification",
                 "structural_path",
-                "boundary_fact",
             )
         }
         slices.append(
@@ -362,7 +342,6 @@ def build_review_projection(
                 test_relation_ids=by_slot["test_context"],
                 verification_relation_ids=by_slot["verification"],
                 structural_path_relation_ids=by_slot["structural_path"],
-                boundary_relation_ids=by_slot["boundary_fact"],
                 diagnostics=group.diagnostics,
             )
         )
@@ -378,7 +357,7 @@ def _claim_relations(
 ) -> tuple[ProjectionRelation, ...]:
     result = []
     for claim in claims:
-        reasons = _text_reasons(focus, claim.text)
+        reasons = statement_reasons(focus, claim)
         if not reasons:
             continue
         result.append(
@@ -391,7 +370,7 @@ def _claim_relations(
                 reasons,
             )
         )
-    return tuple(sorted(result, key=_relation_key))
+    return tuple(sorted(result, key=relation_key))
 
 
 def _anchor_relations(
@@ -402,7 +381,7 @@ def _anchor_relations(
 ) -> tuple[ProjectionRelation, ...]:
     claims_by_id = {item.id: item for item in claims}
     result = []
-    for anchor in anchors:
+    for ordinal, anchor in enumerate(anchors):
         provided = tuple(anchor.metadata.get("provided_for_statement_ids", ()))
         if focus.id in provided:
             reasons = (
@@ -419,14 +398,15 @@ def _anchor_relations(
                     anchor.id,
                     "provided_association",
                     reasons,
+                    selection_ordinal=ordinal,
                 )
             )
             continue
-        direct = _text_reasons(focus, _evidence_text(anchor))
+        direct = evidence_reasons(focus, evidence_text(anchor))
         bridges = []
         for claim_id in sorted(selected_claim_ids):
             claim = claims_by_id.get(claim_id)
-            if claim is None or not _text_reasons(claim, _evidence_text(anchor)):
+            if claim is None or not evidence_reasons(claim, evidence_text(anchor)):
                 continue
             bridges.append(claim_id)
         if direct:
@@ -438,6 +418,7 @@ def _anchor_relations(
                     anchor.id,
                     direct[0].kind,
                     direct,
+                    selection_ordinal=ordinal,
                 )
             )
         elif bridges:
@@ -458,9 +439,10 @@ def _anchor_relations(
                         ),
                     ),
                     bridge_ids=tuple(bridges),
+                    selection_ordinal=ordinal,
                 )
             )
-    return tuple(sorted(result, key=_relation_key))
+    return tuple(sorted(result, key=relation_key))
 
 
 def _structural_relations(
@@ -526,7 +508,7 @@ def _structural_relations(
                     bridge_ids=(path_id,),
                 )
             )
-    return tuple(sorted(result, key=_relation_key))
+    return tuple(sorted(result, key=relation_key))
 
 
 def _verification_relations(
@@ -559,7 +541,7 @@ def _verification_relations(
                 ),
             )
         )
-    return tuple(sorted(result, key=_relation_key))
+    return tuple(sorted(result, key=relation_key))
 
 
 def _provided_context_relations(
@@ -599,166 +581,7 @@ def _provided_context_relations(
                 ),
             )
         )
-    return tuple(sorted(result, key=_relation_key))
-
-
-def _text_reasons(
-    source: ReviewStatement,
-    target_text: str,
-) -> tuple[AssociationReason, ...]:
-    references = {
-        value.replace("_", "").replace("-", "").replace(" ", "").casefold()
-        for value in _REFERENCE_RE.findall(target_text)
-    }
-    focus_reference = source.id.replace("_", "").replace("-", "").casefold()
-    if focus_reference in references:
-        return (
-            AssociationReason(
-                kind="explicit_reference",
-                detail=f"The candidate explicitly references {source.id}.",
-                matched_terms=(source.id,),
-            ),
-        )
-    identifiers = tuple(sorted(_identifier_keys(source.text) & _identifier_keys(target_text)))
-    if identifiers:
-        return (
-            AssociationReason(
-                kind="exact_identifier",
-                detail="A distinctive identifier occurs in both texts.",
-                matched_terms=identifiers,
-            ),
-        )
-    overlap = tuple(sorted(semantic_tokens(source.text) & semantic_tokens(target_text)))
-    if len(overlap) >= 2:
-        return (
-            AssociationReason(
-                kind="distinctive_phrase",
-                detail="At least two meaningful terms occur in both texts.",
-                matched_terms=overlap,
-            ),
-        )
-    return ()
-
-
-def _identifier_keys(value: str) -> frozenset[str]:
-    keys: set[str] = set()
-    for token in _WORD_RE.findall(value):
-        has_shape = "_" in token or any(char.isupper() for char in token[1:])
-        if not has_shape:
-            continue
-        raw_parts = [part.casefold() for part in token.split("_") if part]
-        parts = [
-            part
-            for part in raw_parts
-            if len(part) >= 3 or part.isdigit()
-        ]
-        collapsed = "".join(parts)
-        if len(collapsed) >= 5:
-            keys.add(collapsed)
-        for index in range(1, len(parts)):
-            suffix = "".join(parts[index:])
-            if len(suffix) >= 5:
-                keys.add(suffix)
-    return frozenset(keys)
-
-
-def _requirement_profile(focus: Requirement) -> RequirementProfile:
-    if focus.kind == "guardrail":
-        return "guardrail"
-    tokens = semantic_tokens(focus.text)
-    if tokens & {"documentation", "document", "readme", "docs"}:
-        return "documentation"
-    if tokens & {"workflow", "configuration", "config", "action", "actions", "pipeline"}:
-        return "workflow_configuration"
-    if tokens & {"schema", "migration", "database"}:
-        return "schema_migration"
-    if tokens & {"test", "tests", "testing", "verification", "verified"}:
-        return "test_verification"
-    if tokens & {"api", "contract", "interface", "schema", "versioned"}:
-        return "api_contract"
-    if tokens & {"render", "renderer", "html", "component", "display"}:
-        return "ui"
-    if tokens & {"runtime", "behavior", "execute", "execution", "call"}:
-        return "behavior"
-    return "generic"
-
-
-def _eligible_anchor(item: EvidenceItem, profile: RequirementProfile) -> bool:
-    if item.profile == "generated":
-        return False
-    allowed = {
-        "documentation": {"document"},
-        "workflow_configuration": {
-            "workflow",
-            "configuration",
-            "dependency",
-            "production",
-            "test",
-        },
-        "schema_migration": {"schema", "production", "test", "configuration"},
-        "test_verification": {"test", "workflow", "production"},
-        "api_contract": {"production", "test", "schema"},
-        "ui": {"production", "test", "document"},
-        "behavior": {"production", "test", "configuration"},
-        "guardrail": {
-            "production",
-            "test",
-            "document",
-            "workflow",
-            "configuration",
-            "dependency",
-            "schema",
-        },
-        "generic": {
-            "production",
-            "test",
-            "document",
-            "workflow",
-            "configuration",
-            "dependency",
-            "schema",
-            "unknown",
-        },
-    }
-    return item.profile in allowed[profile]
-
-
-def _bound(
-    relations: tuple[ProjectionRelation, ...],
-    *,
-    slot: ProjectionSlot,
-    selected_limit: int,
-    candidate_limit: int,
-    diagnostics: list[ProjectionDiagnostic],
-    focus_id: str,
-) -> tuple[ProjectionRelation, ...]:
-    ordered = tuple(sorted(relations, key=_relation_key))
-    kept = ordered[:candidate_limit]
-    result = tuple(
-        replace(
-            item,
-            state=(
-                "selected"
-                if index < selected_limit
-                else "not_selected"
-            ),
-        )
-        for index, item in enumerate(kept)
-    )
-    if len(ordered) > candidate_limit:
-        diagnostics.append(
-            _missing(
-                focus_id,
-                slot,
-                "budget_truncated",
-                (
-                    f"{slot.replace('_', ' ')} candidate inspection stopped at "
-                    f"{candidate_limit} items for {focus_id}."
-                ),
-                affected_ids=tuple(item.target_id for item in ordered[candidate_limit:]),
-            )
-        )
-    return result
+    return tuple(sorted(result, key=relation_key))
 
 
 def _missing(
@@ -788,56 +611,15 @@ def _structural_missing(
     if not selected_anchor_ids:
         return "not_applicable", f"{label} requires a selected changed anchor."
     if graph is None:
-        return "provider_unavailable", f"{label} is unavailable without a structural provider."
-    if graph.index.state == "partial":
-        return "partial_coverage", f"{label} was not selected from the partial structural index."
-    if graph.index.state == "stale":
-        return "stale_source", f"{label} is unavailable because the structural index is stale."
+        return "not_applicable", (
+            f"{label} was not collected because no structural provider was used."
+        )
     if not graph.index.usable:
-        return "provider_unavailable", (
-            f"{label} is unavailable because the structural provider state is "
-            f"{graph.index.state}."
+        return "not_applicable", (
+            f"{label} was not collected; review-level provider coverage reports "
+            "the structural source state."
         )
     return "no_association", f"No eligible {label} was connected to the selected anchor."
-
-
-def _structural_coverage_diagnostics(
-    focus: Requirement,
-    graph: StructuralGraphResult | None,
-) -> tuple[ProjectionDiagnostic, ...]:
-    if graph is None:
-        return ()
-    result = []
-    if graph.index.state == "partial":
-        result.append(
-            ProjectionDiagnostic(
-                focus_statement_id=focus.id,
-                slot="structural_path",
-                state="partial_coverage",
-                provider=graph.index.provider,
-                message=(
-                    "Structural facts come from a partial index; selected paths "
-                    "do not represent complete repository coverage."
-                ),
-            )
-        )
-    if any(
-        item.code == "structural_graph_traversal_budget_reached"
-        for item in graph.diagnostics
-    ):
-        result.append(
-            ProjectionDiagnostic(
-                focus_statement_id=focus.id,
-                slot="structural_path",
-                state="budget_truncated",
-                provider=graph.index.provider,
-                message=(
-                    "Structural path collection reached the provider traversal "
-                    "budget before projection selection."
-                ),
-            )
-        )
-    return tuple(result)
 
 
 def _relation(
@@ -849,6 +631,7 @@ def _relation(
     reasons: tuple[AssociationReason, ...],
     *,
     bridge_ids: tuple[str, ...] = (),
+    selection_ordinal: int = 0,
 ) -> ProjectionRelation:
     identity = f"{focus_id}\0{slot}\0{target_type}\0{target_id}\0{association}"
     digest = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:20]
@@ -861,37 +644,5 @@ def _relation(
         association=association,
         reasons=reasons,
         bridge_ids=bridge_ids,
-    )
-
-
-def _anchor_key(item: EvidenceItem) -> tuple[object, ...]:
-    precision = {"symbol": 0, "changed_hunk": 1, "changed_file": 2}
-    return (
-        precision.get(item.kind, 3),
-        str(item.metadata.get("path") or ""),
-        str(item.metadata.get("qualified_name") or ""),
-        item.id,
-    )
-
-
-def _relation_key(item: ProjectionRelation) -> tuple[object, ...]:
-    return (
-        item.slot,
-        _ASSOCIATION_ORDER[item.association],
-        item.target_id,
-        item.id,
-    )
-
-
-def _evidence_text(item: EvidenceItem) -> str:
-    metadata = item.metadata
-    return "\n".join(
-        value
-        for value in (
-            item.summary,
-            str(metadata.get("path") or ""),
-            str(metadata.get("qualified_name") or ""),
-            str(metadata.get("patch_excerpt") or ""),
-        )
-        if value
+        selection_ordinal=selection_ordinal,
     )

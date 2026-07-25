@@ -9,6 +9,7 @@ from prismcode.contracts import (
     EvidenceCatalog,
     EvidenceItem,
     Requirement,
+    ReviewStatement,
     ReviewSourcePacket,
     SourceRecord,
 )
@@ -154,7 +155,117 @@ def test_one_generic_shared_term_is_not_a_default_relation() -> None:
     ]
 
 
-def test_partial_structure_is_a_typed_projection_diagnostic() -> None:
+def test_repository_local_r1_token_is_not_an_issue_reference() -> None:
+    candidates = build_projection_candidates(
+        requirements=(Requirement(id="R1", text="Expose bounded_trace"),),
+        claims=(),
+        evidence_catalog=EvidenceCatalog(
+            items=(
+                EvidenceItem(
+                    id="E:fixture",
+                    summary="Delete test fixture containing R1",
+                    kind="changed_hunk",
+                    classification="test",
+                    profile="test",
+                    changed=True,
+                    authority="github_diff",
+                    revision_side="base",
+                    operation="removed",
+                    role="changed_anchor",
+                    metadata={"base_excerpt": '{"id": "R1"}'},
+                ),
+            )
+        ),
+        structural_graph=None,
+        head_sha=None,
+    )
+
+    assert not [
+        item
+        for item in candidates.relations
+        if item.slot == "changed_anchor"
+    ]
+
+
+def test_only_authored_claims_can_explicitly_reference_requirement_ids() -> None:
+    claims = (
+        ReviewStatement(
+            id="C1",
+            text="R1: expose bounded_trace",
+            role="claim",
+            purpose="implementation",
+            authority="pr_description",
+        ),
+    )
+    candidates = build_projection_candidates(
+        requirements=(Requirement(id="R1", text="Expose bounded_trace"),),
+        claims=claims,
+        evidence_catalog=EvidenceCatalog(),
+        structural_graph=None,
+        head_sha=None,
+    )
+
+    relation = next(item for item in candidates.relations if item.slot == "claim")
+    assert relation.association == "explicit_reference"
+
+
+def test_changed_anchor_selection_uses_typed_ordinal_not_hashed_id() -> None:
+    evidence = EvidenceCatalog(
+        items=(
+            EvidenceItem(
+                id="E:zzz",
+                summary="Changed function: bounded_trace",
+                kind="changed_hunk",
+                classification="code",
+                profile="production",
+                changed=True,
+                authority="github_diff",
+                revision_side="head",
+                operation="modified",
+                role="changed_anchor",
+                metadata={
+                    "path": "src/b.py",
+                    "new_start": 20,
+                    "head_excerpt": "bounded_trace()",
+                },
+            ),
+            EvidenceItem(
+                id="E:aaa",
+                summary="Changed function: bounded_trace",
+                kind="changed_hunk",
+                classification="code",
+                profile="production",
+                changed=True,
+                authority="github_diff",
+                revision_side="head",
+                operation="modified",
+                role="changed_anchor",
+                metadata={
+                    "path": "src/a.py",
+                    "new_start": 10,
+                    "head_excerpt": "bounded_trace()",
+                },
+            ),
+        )
+    )
+    candidates = build_projection_candidates(
+        requirements=(Requirement(id="R1", text="Expose bounded_trace"),),
+        claims=(),
+        evidence_catalog=evidence,
+        structural_graph=None,
+        head_sha=None,
+        policy=ProjectionPolicy(max_changed=1),
+    )
+
+    selected = [
+        item.target_id
+        for item in candidates.relations
+        if item.slot == "changed_anchor" and item.state == "selected"
+    ]
+    assert selected == ["E:aaa"]
+
+
+def test_partial_structure_is_one_review_level_diagnostic() -> None:
     candidates = build_projection_candidates(
         requirements=(Requirement(id="R1", text="Expose bounded_trace"),),
         claims=(),
@@ -182,15 +293,37 @@ def test_partial_structure_is_a_typed_projection_diagnostic() -> None:
         head_sha=None,
     )
 
-    assert {
-        (item.slot, item.state)
+    provider_diagnostics = [
+        item
         for item in candidates.diagnostics
-        if item.focus_statement_id == "R1"
-    } >= {
-        ("runtime_context", "partial_coverage"),
-        ("test_context", "partial_coverage"),
-        ("structural_path", "partial_coverage"),
-    }
+        if item.state == "partial_coverage" and item.provider == "codegraph"
+    ]
+    assert len(provider_diagnostics) == 1
+    assert provider_diagnostics[0].focus_statement_id == "review"
+    assert provider_diagnostics[0].scope == "review"
+
+
+def test_stale_structure_is_one_review_level_diagnostic() -> None:
+    candidates = build_projection_candidates(
+        requirements=(
+            Requirement(id="R1", text="Expose bounded_trace"),
+            Requirement(id="R2", text="Call bounded_trace"),
+        ),
+        claims=(),
+        evidence_catalog=EvidenceCatalog(),
+        structural_graph=StructuralGraphResult(
+            index=StructuralGraphIndexStatus(
+                state="stale",
+                provider="codegraph",
+            )
+        ),
+        head_sha=None,
+    )
+
+    stale = [item for item in candidates.diagnostics if item.state == "stale_source"]
+    assert len(stale) == 1
+    assert stale[0].focus_statement_id == "review"
+    assert stale[0].scope == "review"
 
 
 def test_selection_and_rendering_are_byte_stable() -> None:

@@ -107,9 +107,19 @@ records from competing as parallel truths for the same diff. Documentation
 hunks remain evidence with document classification; they are not forced into
 code symbols.
 
-Every `EvidenceItem` has a stable ID, kind, classification, fact profile,
-changed flag, sources, structural-path IDs, and fact-only metadata. Duplicate
-symbols and paths merge by identity.
+Every `EvidenceItem` has a stable ID plus one semantic identity:
+
+- authority (`github_diff`, structural provider, verification provider, or
+  supplied);
+- revision side (`head`, `base`, `review`, or `unchanged`);
+- change operation (`added`, `modified`, `removed`, `renamed`, `observed`, or
+  `unchanged`);
+- fact role and profile.
+
+Hunks retain separate bounded head- and base-side excerpts. Base-side removal
+facts are not eligible as current implementation unless the focus is explicitly
+about removal, deprecation, cleanup, or a guardrail. Duplicate symbols and
+paths merge by identity.
 
 ## Typed fact routing
 
@@ -121,13 +131,14 @@ before association or selection into:
 - runtime and test context;
 - current-head verification;
 - structural paths;
-- guardrail boundary facts.
+- guardrail coverage diagnostics (until a bounded scan provider exists).
 
 Eligibility is determined from canonical fact and requirement profiles.
 Ordered association kinds include explicit provider association, explicit R/G
 reference, exact identifier, distinctive phrase, claim bridge, structural
-bridge, current-head observation, and boundary scan. A generic one-token
-overlap does not become a selected relation.
+bridge, and current-head observation. Explicit R/G references are recognized
+only across authored statement boundaries, never in arbitrary code or fixture
+text. A generic one-token overlap does not become a selected relation.
 
 Every slot has its own inspection and selection budget. There is no
 all-statement/all-evidence numeric score and no source-ID-ordered global

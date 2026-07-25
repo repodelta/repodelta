@@ -233,7 +233,6 @@ def _projection_slice(
             review_slice.structural_path_relation_ids,
             "structural fact",
         ),
-        ("Boundary scan", review_slice.boundary_relation_ids, "bounded scan fact"),
     )
     fact_groups = []
     for heading, relation_ids, label in groups:

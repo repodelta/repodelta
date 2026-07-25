@@ -20,7 +20,7 @@ Every R/G is visited independently. Its candidates are separated into:
 - test context;
 - current-head verification observations;
 - bounded structural paths;
-- guardrail boundary facts.
+- guardrail coverage diagnostics.
 
 PR claims, changed symbols, paths, and CI observations never compete in one
 numeric score or global candidate budget.
@@ -36,7 +36,6 @@ Ordered deterministic association kinds are:
 5. claim bridge;
 6. structural bridge;
 7. current-head observation;
-8. bounded guardrail scan.
 
 A generic one-token overlap is not enough for default selection. Numbers are
 not used to compare facts from different slots.
@@ -57,3 +56,21 @@ types.
 
 `EvidenceCatalog` remains the only evidence store. Candidate relations and
 projection slices contain canonical IDs only.
+
+## Semantic identity and ordering
+
+Eligibility runs before association and uses fact authority, revision side,
+change operation, role, and profile. Head- and base-side hunk text are never
+collapsed into one matching string. Repository-local `R1`/`G1` tokens are not
+treated as issue references.
+
+Selection is ordinal inside each typed slot. Changed anchors use canonical
+file, line, symbol, and precision order; opaque evidence hashes are stable
+identifiers, not ranking signals.
+
+Provider coverage belongs to the review and carries affected IDs. Claim
+coverage distinguishes an absent PR description, a present description with no
+typed extracted claims, and extracted claims with no association.
+
+Guardrails currently emit an explicit missing bounded-scan diagnostic. Selected
+changed anchors are not relabeled as absence proof.

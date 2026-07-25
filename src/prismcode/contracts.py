@@ -45,6 +45,29 @@ FactProfile = Literal[
     "structural_path",
     "unknown",
 ]
+FactAuthority = Literal[
+    "github_diff",
+    "structural_provider",
+    "verification_provider",
+    "supplied",
+]
+RevisionSide = Literal["head", "base", "review", "unchanged"]
+ChangeOperation = Literal[
+    "added",
+    "modified",
+    "removed",
+    "renamed",
+    "observed",
+    "unchanged",
+]
+FactRole = Literal[
+    "changed_anchor",
+    "runtime_context",
+    "test_context",
+    "verification",
+    "structural_path",
+    "provided_context",
+]
 RequirementProfile = Literal[
     "behavior",
     "api_contract",
@@ -73,7 +96,6 @@ AssociationKind = Literal[
     "claim_bridge",
     "structural_bridge",
     "current_head",
-    "boundary_scan",
 ]
 SelectionState = Literal["selected", "not_selected", "ineligible", "truncated"]
 CoverageState = Literal[
@@ -208,6 +230,10 @@ class EvidenceItem:
     kind: str
     classification: EvidenceClassification
     profile: FactProfile = "unknown"
+    authority: FactAuthority = "supplied"
+    revision_side: RevisionSide = "review"
+    operation: ChangeOperation = "observed"
+    role: FactRole = "changed_anchor"
     changed: bool = False
     sources: tuple[SourceRef, ...] = ()
     structural_path_ids: tuple[str, ...] = ()
@@ -218,7 +244,7 @@ class EvidenceItem:
 class EvidenceCatalog:
     items: tuple[EvidenceItem, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
-    schema_version: str = "evidence_catalog.v1"
+    schema_version: str = "evidence_catalog.v2"
 
     def by_id(self) -> dict[str, EvidenceItem]:
         return {item.id: item for item in self.items}
@@ -241,6 +267,7 @@ class ProjectionRelation:
     association: AssociationKind
     reasons: tuple[AssociationReason, ...]
     bridge_ids: tuple[str, ...] = ()
+    selection_ordinal: int = 0
     state: SelectionState = "selected"
 
 
@@ -253,6 +280,7 @@ class ProjectionDiagnostic:
     provider: str = ""
     affected_ids: tuple[str, ...] = ()
     sources: tuple[SourceRef, ...] = ()
+    scope: Literal["review", "focus"] = "focus"
 
 
 @dataclass(frozen=True)
@@ -268,7 +296,7 @@ class ProjectionCandidateSet:
     relations: tuple[ProjectionRelation, ...] = ()
     groups: tuple[ProjectionCandidateGroup, ...] = ()
     diagnostics: tuple[ProjectionDiagnostic, ...] = ()
-    schema_version: str = "projection_candidate_set.v1"
+    schema_version: str = "projection_candidate_set.v2"
 
     def by_id(self) -> dict[str, ProjectionRelation]:
         return {item.id: item for item in self.relations}
@@ -284,7 +312,6 @@ class ReviewSlice:
     test_relation_ids: tuple[str, ...] = ()
     verification_relation_ids: tuple[str, ...] = ()
     structural_path_relation_ids: tuple[str, ...] = ()
-    boundary_relation_ids: tuple[str, ...] = ()
     diagnostics: tuple[ProjectionDiagnostic, ...] = ()
 
 
@@ -292,7 +319,7 @@ class ReviewSlice:
 class ReviewProjection:
     slices: tuple[ReviewSlice, ...] = ()
     diagnostics: tuple[ProjectionDiagnostic, ...] = ()
-    schema_version: str = "review_projection.v1"
+    schema_version: str = "review_projection.v2"
 
 
 @dataclass(frozen=True)
@@ -317,7 +344,7 @@ class ReviewBrief:
     projection_candidates: ProjectionCandidateSet = ProjectionCandidateSet()
     projection: ReviewProjection = ReviewProjection()
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v9"
+    schema_version: str = "review_brief.v10"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

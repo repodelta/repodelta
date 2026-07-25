@@ -296,7 +296,6 @@ ProjectionCandidateSet
     test_relation_ids[]
     verification_relation_ids[]
     structural_path_relation_ids[]
-    boundary_relation_ids[]
     diagnostics[]
 ```
 
@@ -343,7 +342,8 @@ Default selection can remain compact:
 - two test nodes;
 - one current-head verification observation per distinct check identity;
 - two paths;
-- bounded boundary facts.
+- a typed missing-coverage diagnostic for guardrails until a real bounded scan
+  provider is implemented.
 
 Those are projection limits, not retrieval limits.
 

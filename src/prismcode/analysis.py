@@ -60,6 +60,13 @@ class DeterministicAnalyzer:
             evidence_catalog=evidence_catalog,
             structural_graph=analysis_input.structural_graph,
             head_sha=packet.head_sha,
+            claim_source_state=(
+                "source_absent"
+                if pr_record is None or not pr_body.strip()
+                else "extraction_missing"
+                if not semantics.claims
+                else "available"
+            ),
         )
         projection = build_review_projection(projection_candidates)
         return ReviewBrief(

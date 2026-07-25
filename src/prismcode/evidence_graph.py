@@ -8,6 +8,7 @@ from typing import Iterable
 
 from .contracts import (
     ChangedFile,
+    ChangeOperation,
     EvidenceCatalog,
     EvidenceClassification,
     EvidenceItem,
@@ -58,6 +59,7 @@ def build_evidence_catalog(
         if structural_graph is not None
         else set()
     )
+    hunks_by_id = {hunk.id: hunk for hunk in hunk_collection.hunks}
 
     for changed_file in packet.changed_files:
         file_hunks = hunks_by_path.get(changed_file.path, ())
@@ -85,11 +87,19 @@ def build_evidence_catalog(
                 symbol_paths.setdefault(step.target.id, set()).add(path_id)
 
         for overlap in structural_graph.overlaps:
+            hunk = hunks_by_id.get(overlap.hunk_id)
             _put(
                 items,
                 _symbol_item(
                     overlap.symbol,
                     changed=True,
+                    operation=(
+                        "added"
+                        if hunk is not None
+                        and hunk.added_lines
+                        and not hunk.removed_lines
+                        else "modified"
+                    ),
                     structural_path_ids=tuple(
                         sorted(symbol_paths.get(overlap.symbol.id, ()))
                     ),
@@ -104,6 +114,11 @@ def build_evidence_catalog(
                         _symbol_item(
                             symbol,
                             changed=symbol.id in changed_symbol_ids,
+                            operation=(
+                                "modified"
+                                if symbol.id in changed_symbol_ids
+                                else "unchanged"
+                            ),
                             structural_path_ids=tuple(
                                 sorted(symbol_paths.get(symbol.id, ()))
                             ),
@@ -118,6 +133,10 @@ def build_evidence_catalog(
                     summary=_path_summary(path),
                     classification=path.classification,
                     profile="structural_path",
+                    authority="structural_provider",
+                    revision_side="unchanged",
+                    operation="observed",
+                    role="structural_path",
                     sources=path.sources,
                     structural_path_ids=(path_id,),
                     metadata={
@@ -196,6 +215,10 @@ def provided_evidence(
             if classification == "document"
             else "production"
         ),
+        authority="supplied",
+        revision_side="review",
+        operation="observed",
+        role="provided_context",
         sources=sources,
         metadata={
             "provided": True,
@@ -212,6 +235,20 @@ def _changed_file_fallback(changed_file: ChangedFile) -> EvidenceItem:
         summary=f"{changed_file.status.title()} file: {path}",
         classification=_path_classification(path),
         profile=_fact_profile(path),
+        authority="github_diff",
+        revision_side=(
+            "base" if changed_file.status == "removed" else "head"
+        ),
+        operation=(
+            "removed"
+            if changed_file.status == "removed"
+            else "added"
+            if changed_file.status == "added"
+            else "renamed"
+            if changed_file.status == "renamed"
+            else "modified"
+        ),
+        role="changed_anchor",
         changed=True,
         sources=(
             SourceRef(
@@ -235,13 +272,23 @@ def _changed_hunk_item(changed_file: ChangedFile, hunk: ChangedHunk) -> Evidence
     path = hunk.file_path
     line_start = hunk.new_start
     line_end = max(hunk.new_start, hunk.new_start + max(hunk.new_count, 1) - 1)
-    excerpt = hunk.new_snippet or hunk.old_snippet
+    operation = (
+        "removed"
+        if hunk.is_deletion_only
+        else "added"
+        if hunk.added_lines and not hunk.removed_lines
+        else "modified"
+    )
     return EvidenceItem(
         id=evidence_id("changed_hunk", hunk.id),
         kind="changed_hunk",
         summary=f"Changed hunk: {path}:{line_start}-{line_end}",
         classification=_path_classification(path),
         profile=_fact_profile(path),
+        authority="github_diff",
+        revision_side="base" if operation == "removed" else "head",
+        operation=operation,
+        role="changed_anchor",
         changed=True,
         sources=(
             SourceRef(
@@ -259,7 +306,8 @@ def _changed_hunk_item(changed_file: ChangedFile, hunk: ChangedHunk) -> Evidence
             "old_count": hunk.old_count,
             "new_start": hunk.new_start,
             "new_count": hunk.new_count,
-            "patch_excerpt": excerpt[:4000],
+            "head_excerpt": hunk.new_snippet[:4000],
+            "base_excerpt": hunk.old_snippet[:4000],
             "deletion_only": hunk.is_deletion_only,
         },
     )
@@ -279,6 +327,10 @@ def verification_evidence(observation: VerificationObservation) -> EvidenceItem:
         kind=observation.kind,
         classification="runtime" if observation.kind == "manual" else "ci",
         profile="verification",
+        authority="verification_provider",
+        revision_side="review",
+        operation="observed",
+        role="verification",
         sources=(SourceRef(label=observation.name, url=observation.details_url),),
         metadata={
             "observation_id": observation.id,
@@ -294,6 +346,7 @@ def _symbol_item(
     symbol: GraphSymbol,
     *,
     changed: bool,
+    operation: ChangeOperation,
     structural_path_ids: tuple[str, ...],
     extra_sources: tuple[SourceRef, ...] = (),
 ) -> EvidenceItem:
@@ -303,6 +356,16 @@ def _symbol_item(
         summary=f"{'Changed' if changed else 'Unchanged'} {symbol.kind}: {symbol.qualified_name}",
         classification=_path_classification(symbol.file_path),
         profile=_fact_profile(symbol.file_path),
+        authority="structural_provider",
+        revision_side="head" if changed else "unchanged",
+        operation=operation,
+        role=(
+            "changed_anchor"
+            if changed
+            else "test_context"
+            if _fact_profile(symbol.file_path) == "test"
+            else "runtime_context"
+        ),
         changed=changed,
         sources=_unique_sources((*symbol.sources, *extra_sources)),
         structural_path_ids=structural_path_ids,
