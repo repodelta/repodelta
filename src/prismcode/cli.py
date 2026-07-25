@@ -66,7 +66,7 @@ def build_parser() -> argparse.ArgumentParser:
     review.add_argument(
         "--no-structural-graph",
         action="store_true",
-        help="Skip repository-local structural mapping and use lexical binding only",
+        help="Skip repository-local structural mapping and use changed-hunk/file anchors",
     )
     review.add_argument(
         "--verbose",

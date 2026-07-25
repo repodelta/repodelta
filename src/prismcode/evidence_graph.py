@@ -19,6 +19,25 @@ from .diff_hunks import ChangedHunk, parse_changed_files
 from .structural_graph import GraphSymbol, StructuralGraphResult, StructuralPath
 
 _DOCUMENT_SUFFIXES = {".md", ".mdx", ".rst", ".txt", ".pdf", ".doc", ".docx"}
+_WORKFLOW_PREFIXES = (".github/workflows/", ".circleci/")
+_CONFIG_NAMES = {
+    "pyproject.toml",
+    "setup.cfg",
+    "tox.ini",
+    "package.json",
+    "tsconfig.json",
+    "dockerfile",
+}
+_DEPENDENCY_NAMES = {
+    "requirements.txt",
+    "poetry.lock",
+    "uv.lock",
+    "package-lock.json",
+    "pnpm-lock.yaml",
+    "yarn.lock",
+    "cargo.lock",
+    "go.sum",
+}
 
 
 def build_evidence_catalog(
@@ -98,6 +117,7 @@ def build_evidence_catalog(
                     kind="structural_path",
                     summary=_path_summary(path),
                     classification=path.classification,
+                    profile="structural_path",
                     sources=path.sources,
                     structural_path_ids=(path_id,),
                     metadata={
@@ -167,6 +187,15 @@ def provided_evidence(
         summary=summary,
         kind=kind,
         classification=classification,
+        profile=(
+            "verification"
+            if classification in {"ci", "runtime"}
+            else "test"
+            if classification == "test"
+            else "document"
+            if classification == "document"
+            else "production"
+        ),
         sources=sources,
         metadata={
             "provided": True,
@@ -182,6 +211,7 @@ def _changed_file_fallback(changed_file: ChangedFile) -> EvidenceItem:
         kind="changed_file",
         summary=f"{changed_file.status.title()} file: {path}",
         classification=_path_classification(path),
+        profile=_fact_profile(path),
         changed=True,
         sources=(
             SourceRef(
@@ -211,6 +241,7 @@ def _changed_hunk_item(changed_file: ChangedFile, hunk: ChangedHunk) -> Evidence
         kind="changed_hunk",
         summary=f"Changed hunk: {path}:{line_start}-{line_end}",
         classification=_path_classification(path),
+        profile=_fact_profile(path),
         changed=True,
         sources=(
             SourceRef(
@@ -247,6 +278,7 @@ def verification_evidence(observation: VerificationObservation) -> EvidenceItem:
         ),
         kind=observation.kind,
         classification="runtime" if observation.kind == "manual" else "ci",
+        profile="verification",
         sources=(SourceRef(label=observation.name, url=observation.details_url),),
         metadata={
             "observation_id": observation.id,
@@ -270,6 +302,7 @@ def _symbol_item(
         kind="symbol",
         summary=f"{'Changed' if changed else 'Unchanged'} {symbol.kind}: {symbol.qualified_name}",
         classification=_path_classification(symbol.file_path),
+        profile=_fact_profile(symbol.file_path),
         changed=changed,
         sources=_unique_sources((*symbol.sources, *extra_sources)),
         structural_path_ids=structural_path_ids,
@@ -317,6 +350,27 @@ def _path_classification(path: str) -> EvidenceClassification:
     if Path(normalized).suffix in _DOCUMENT_SUFFIXES:
         return "document"
     return "code"
+
+
+def _fact_profile(path: str) -> str:
+    normalized = path.casefold().replace("\\", "/")
+    name = Path(normalized).name
+    suffix = Path(normalized).suffix
+    if _path_classification(path) == "test":
+        return "test"
+    if suffix in _DOCUMENT_SUFFIXES:
+        return "document"
+    if normalized.startswith(_WORKFLOW_PREFIXES):
+        return "workflow"
+    if name in _DEPENDENCY_NAMES:
+        return "dependency"
+    if name in _CONFIG_NAMES or suffix in {".ini", ".toml", ".yaml", ".yml", ".json"}:
+        return "configuration"
+    if "migration" in normalized or "schema" in normalized:
+        return "schema"
+    if any(part in normalized.split("/") for part in ("vendor", "generated", "dist")):
+        return "generated"
+    return "production"
 
 
 def _put(items: dict[str, EvidenceItem], candidate: EvidenceItem) -> None:

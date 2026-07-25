@@ -9,8 +9,8 @@ from .contracts import (
     SourceRef,
 )
 from .criteria import extract_review_semantics
-from .candidate_binding import build_candidate_bindings
 from .evidence_graph import build_evidence_catalog
+from .projection import build_projection_candidates, build_review_projection
 
 
 class ReviewAnalyzer(Protocol):
@@ -54,13 +54,14 @@ class DeterministicAnalyzer:
         )
         deliverables = tuple(item for item in requirements if item.kind != "guardrail")
         guardrails = tuple(item for item in requirements if item.kind == "guardrail")
-        candidate_bindings = build_candidate_bindings(
+        projection_candidates = build_projection_candidates(
             requirements=requirements,
-            objectives=semantics.objectives,
-            scope=semantics.scope,
             claims=semantics.claims,
             evidence_catalog=evidence_catalog,
+            structural_graph=analysis_input.structural_graph,
+            head_sha=packet.head_sha,
         )
+        projection = build_review_projection(projection_candidates)
         return ReviewBrief(
             packet=packet,
             intent=semantics.intent,
@@ -71,5 +72,6 @@ class DeterministicAnalyzer:
             claims=semantics.claims,
             structural_graph=analysis_input.structural_graph,
             evidence_catalog=evidence_catalog,
-            candidate_bindings=candidate_bindings,
+            projection_candidates=projection_candidates,
+            projection=projection,
         )
