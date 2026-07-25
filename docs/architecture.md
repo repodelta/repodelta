@@ -20,9 +20,11 @@ fixture or GitHub
        -> objectives (O), scope context (S)
        -> implementation/boundary (C), baseline (B), verification (V) claims
        -> intent (I)
-  -> deterministic CandidateBindingSet
-       -> R/G/O/S/C/B/V -> evidence candidates
-       -> R/G -> C candidates
+  -> deterministic typed fact routing
+       -> eligibility by fact profile and projection slot
+       -> per-R/G claim, changed-anchor, runtime, test, CI, path, boundary candidates
+       -> ordered association reasons within each slot
+  -> bounded ReviewProjection
   -> ReviewBrief
   -> HTML renderer
 ```
@@ -32,8 +34,8 @@ fixture or GitHub
 1. Adapters collect facts; they never emit review conclusions.
 2. `Requirement` is a provenance-bearing source assertion, not an assessment.
 3. `EvidenceCatalog` is the only evidence store downstream of ingestion.
-4. `CandidateBindingSet` records retrieval relevance and its reasons. It never
-   means implemented, verified, satisfied, or in scope.
+4. `ProjectionCandidateSet` records typed retrieval relevance and its reasons.
+   It never means implemented, verified, satisfied, or in scope.
 5. Renderers project the brief and never infer or upgrade a conclusion.
 6. Structural providers return repository facts and diagnostics only.
 
@@ -105,27 +107,35 @@ records from competing as parallel truths for the same diff. Documentation
 hunks remain evidence with document classification; they are not forced into
 code symbols.
 
-Every `EvidenceItem` has a stable ID, kind, summary, classification, changed
-flag, sources, structural-path IDs, and fact-only metadata. Duplicate symbols
-and paths merge by identity.
+Every `EvidenceItem` has a stable ID, kind, classification, fact profile,
+changed flag, sources, structural-path IDs, and fact-only metadata. Duplicate
+symbols and paths merge by identity.
 
-## Candidate binding
+## Typed fact routing
 
-`CandidateBindingSet` contains:
+`ProjectionCandidateSet` contains one group per R/G. Relations are separated
+before association or selection into:
 
-- `statement_evidence` relations from R/G/O/S/C/B/V to canonical evidence;
-- `requirement_claim` relations from R/G to PR-authored C statements.
+- PR-authored claims;
+- changed anchors;
+- runtime and test context;
+- current-head verification;
+- structural paths;
+- guardrail boundary facts.
 
-Direct retrieval uses one tokenizer over statement text and evidence content,
-including changed-hunk excerpts. A matched exact symbol may expand through its
-bounded Codegraph paths. Requirements can also inherit evidence candidates
-through aligned claims, while direct R/G-to-evidence retrieval remains
-available.
+Eligibility is determined from canonical fact and requirement profiles.
+Ordered association kinds include explicit provider association, explicit R/G
+reference, exact identifier, distinctive phrase, claim bridge, structural
+bridge, current-head observation, and boundary scan. A generic one-token
+overlap does not become a selected relation.
 
-Each binding records feature-level reasons, weights, matched terms, stable IDs,
-and relevant structural path IDs. Deterministic per-statement and total budgets
-bound output. Coverage reports statements without candidates and evidence not
-reached by any statement.
+Every slot has its own inspection and selection budget. There is no
+all-statement/all-evidence numeric score and no source-ID-ordered global
+candidate budget. Every R/G is visited independently.
+
+`ReviewProjection` references selected typed relation IDs only. The renderer
+resolves those IDs and typed coverage diagnostics; it does not match,
+classify, select paths, or infer why a slot is empty.
 
 ## Packet revisions
 

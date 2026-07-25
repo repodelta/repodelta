@@ -1,7 +1,7 @@
 # Offline evaluation
 
-PrismCode evaluates retrieval and structural evidence behavior against explicit
-golden IDs before changing ranking, evidence-map projection, or an eventual LLM
+PrismCode evaluates typed fact routing and structural evidence behavior against
+explicit golden IDs before changing projection selection or an eventual LLM
 reranker.
 
 ```bash
@@ -17,18 +17,18 @@ or an I/O error.
 
 ## Suite contract
 
-An `evaluation_suite.v1` document references ordinary
+An `evaluation_suite.v2` document references ordinary
 `analysis_fixture.v3` inputs. A case can additionally provide a serialized
 `StructuralGraphResult`, allowing exact-symbol and bounded-path behavior to be
 replayed without installing Codegraph.
 
 Golden expectations use stable statement and evidence IDs:
 
-- `expected_bindings` declares relevant `statement_evidence` or
-  `requirement_claim` targets;
-- `expected_no_bindings` declares a query that should remain empty;
+- `expected_selections` declares the canonical target selected for one R/G and
+  one projection slot;
+- `expected_no_selections` declares a typed slot that should remain empty;
 - `expected_evidence` checks canonical code/test/document/CI/runtime/mixed
-  classification;
+  classification and fact profile;
 - `expected_statements` checks a statement's stable ID, role, purpose, and
   authority.
 
@@ -47,9 +47,9 @@ The result records:
 - evidence classification accuracy;
 - statement semantic accuracy;
 - missing and unexpected target IDs for every query;
-- candidate-budget and threshold diagnostics.
+- per-focus/per-slot budget and threshold diagnostics.
 
-Positive retrieval metrics exclude `expected_no_bindings` cases. Negative
+Positive retrieval metrics exclude `expected_no_selections` cases. Negative
 queries are scored separately so adding easy no-match examples cannot inflate
 precision, recall, or mean reciprocal rank. Every query, classification, or
 statement-semantic mismatch records its case, identity, expected values, and
@@ -61,10 +61,11 @@ projection of the same result.
 
 ## Safety boundary
 
-Evaluation observes the existing `CandidateBindingSet` and
-`EvidenceCatalog`. It does not implement another retriever, mutate ranking,
-render review HTML, or turn candidate relevance into an implementation,
-verification, or acceptance conclusion.
+Evaluation observes the production `ProjectionCandidateSet`,
+`ReviewProjection`, and `EvidenceCatalog`. It does not implement another
+retriever, render review HTML, or turn candidate relevance into an
+implementation, verification, or acceptance conclusion. A suite with no
+projection selection assertions fails rather than reporting vacuous success.
 
 Future evidence-map and LLM work should add golden cases or thresholds before
 changing production behavior.

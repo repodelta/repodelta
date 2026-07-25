@@ -25,7 +25,8 @@ becomes a requirement.
 `EvidenceCatalog` as changed hunks, exact symbols, structural paths, and
 execution observations. An item may list `statement_ids` to record an explicit
 provided association. That association affects retrieval ordering only; it
-does not assert implementation, verification, or acceptance.
+routes the fact into an eligible projection slot but does not assert
+implementation, verification, or acceptance.
 
 Loading fails when the packet revision is inconsistent or supplied evidence
 names an unknown explicit requirement. Fixtures support deterministic replay;
