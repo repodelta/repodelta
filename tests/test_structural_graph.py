@@ -305,6 +305,7 @@ def test_document_hunks_do_not_reduce_codegraph_coverage(tmp_path: Path) -> None
 
     assert result.index.state == "available"
     assert result.index.requested_files == 1
+    assert result.index.indexed_files == 1
     assert result.hunk_count == 1
     assert "codegraph_file_not_indexed" not in {
         diagnostic.code for diagnostic in result.diagnostics
