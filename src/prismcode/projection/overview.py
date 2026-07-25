@@ -4,6 +4,7 @@ import hashlib
 from typing import Literal
 
 from prismcode.model.contracts import (
+    CandidateConvergence,
     ProjectionCandidateSet,
     ProjectionDiagnostic,
     EvidenceCatalog,
@@ -32,11 +33,16 @@ def build_review_overview(
     evidence_catalog: EvidenceCatalog,
     structural_graph: StructuralGraphResult | None,
     *,
+    convergence: CandidateConvergence,
     structural_graph_disabled: bool,
 ) -> ReviewOverview:
     """Normalize review-wide status once for every presentation adapter."""
 
-    attention = list(_projection_attention(candidates))
+    attention = list(
+        _projection_attention(
+            (*candidates.diagnostics, *convergence.diagnostics)
+        )
+    )
     source_messages = tuple(
         item
         for item in packet.diagnostics
@@ -116,10 +122,10 @@ def build_review_overview(
 
 
 def _projection_attention(
-    candidates: ProjectionCandidateSet,
+    diagnostics: tuple[ProjectionDiagnostic, ...],
 ) -> tuple[ReviewAttention, ...]:
     grouped: dict[tuple[str, str], list[ProjectionDiagnostic]] = {}
-    for diagnostic in candidates.diagnostics:
+    for diagnostic in diagnostics:
         if diagnostic.state == "not_applicable":
             continue
         grouped.setdefault((diagnostic.slot, diagnostic.state), []).append(diagnostic)

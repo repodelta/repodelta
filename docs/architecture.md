@@ -23,7 +23,11 @@ fixture or GitHub
   -> deterministic typed fact routing
        -> eligibility by fact profile and projection slot
        -> per-R/G claim, changed-anchor, runtime, test, CI, path, boundary candidates
-       -> ordered association reasons within each slot
+       -> complete typed relations with association reasons
+  -> deterministic candidate convergence
+       -> same-R/G, same-slot typed dominance
+       -> claim/anchor/path bridge reachability
+       -> bounded inspection, display selection, and explicit ambiguity
   -> bounded ReviewProjection
   -> canonical ReviewOverview
   -> ReviewBrief
@@ -40,6 +44,7 @@ code:
 - [`providers`](../src/prismcode/providers/README.md)
 - [`facts`](../src/prismcode/facts/README.md)
 - [`routing`](../src/prismcode/routing/README.md)
+- [`convergence`](../src/prismcode/convergence/README.md)
 - [`projection`](../src/prismcode/projection/README.md)
 - [`presentation`](../src/prismcode/presentation/README.md)
 - [`evaluation`](../src/prismcode/evaluation/README.md)
@@ -142,8 +147,8 @@ paths merge by identity.
 
 ## Typed fact routing
 
-`ProjectionCandidateSet` contains one group per R/G. Relations are separated
-before association or selection into:
+`ProjectionCandidateSet` contains one group per R/G. Routing enumerates
+relations without selecting or truncating them:
 
 - PR-authored claims;
 - changed anchors;
@@ -153,22 +158,25 @@ before association or selection into:
 - guardrail coverage diagnostics (until a bounded scan provider exists).
 
 Eligibility is determined from canonical fact and requirement profiles.
-Ordered association kinds include explicit provider association, explicit R/G
+Typed association kinds include explicit provider association, explicit R/G
 reference, exact identifier, distinctive phrase, claim bridge, structural
 bridge, and current-head observation. Explicit R/G references are recognized
 only across authored statement boundaries, never in arbitrary code or fixture
-text. A generic one-token overlap does not become a selected relation.
+text. A generic one-token overlap does not become a candidate relation.
 
-Every slot has its own inspection and selection budget. There is no
-all-statement/all-evidence numeric score and no source-ID-ordered global
-candidate budget. Every R/G is visited independently.
+`CandidateConvergence` then applies typed dominance, bridge reachability,
+inspection budgets, and display budgets inside one R/G and one slot at a time.
+When an equivalent semantic tier crosses the display budget, stable source
+order is disclosed as a tie-break through an `ambiguous` diagnostic. There is
+no all-statement/all-evidence numeric score or global candidate budget.
 
-`ReviewProjection` references selected typed relation IDs only. Profiles and
-diagnostics remain canonical in `ProjectionCandidateSet`; slices reference
-their IDs. `ReviewOverview` owns review-wide CI, source, empty-state, and
-structural coverage facts. HTML and CLI resolve and format these contracts;
-they do not match, classify, select paths, interpret provider codes, or infer
-why a slot is empty.
+`ReviewProjection` references only relation IDs selected by
+`CandidateConvergence`. Profiles remain canonical in
+`ProjectionCandidateSet`; convergence and routing diagnostics remain in their
+own canonical contracts. `ReviewOverview` owns review-wide CI, source,
+empty-state, and structural coverage facts. HTML and CLI resolve and format
+these contracts; they do not match, classify, select paths, interpret provider
+codes, or infer why a slot is empty.
 
 ## Packet revisions
 

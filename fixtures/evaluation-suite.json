@@ -193,6 +193,44 @@
       }
     },
     {
+      "id": "same-slot-convergence",
+      "fixture": "evaluation/convergence.json",
+      "expected_selections": [
+        {
+          "slot": "claim",
+          "focus_statement_id": "R1",
+          "target_id": "C1"
+        },
+        {
+          "slot": "claim",
+          "focus_statement_id": "R1",
+          "target_id": "C2"
+        },
+        {
+          "slot": "changed_anchor",
+          "focus_statement_id": "R1",
+          "target_id": "E:changed_hunk:4d6aefe91f8fea634e24"
+        },
+        {
+          "slot": "changed_anchor",
+          "focus_statement_id": "R1",
+          "target_id": "E:changed_hunk:13c27ca8c4cfe45cfbcc"
+        }
+      ],
+      "expected_evidence": [
+        {
+          "evidence_id": "E:changed_hunk:4d6aefe91f8fea634e24",
+          "classification": "code",
+          "profile": "production"
+        },
+        {
+          "evidence_id": "E:changed_hunk:13c27ca8c4cfe45cfbcc",
+          "classification": "code",
+          "profile": "production"
+        }
+      ]
+    },
+    {
       "id": "semantic-section-taxonomy",
       "fixture": "evaluation/semantic-sections.json",
       "expected_selections": [],

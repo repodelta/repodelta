@@ -6,13 +6,14 @@ Reference-only selected slices and canonical review-wide overview facts.
 
 ## Input / output
 
-Typed candidates plus packet/provider state → `ReviewProjection` and
-`ReviewOverview`.
+Typed candidates, `CandidateConvergence`, and packet/provider state →
+`ReviewProjection` and `ReviewOverview`.
 
 ## Invariants
 
-Profiles and diagnostics remain canonical in the candidate set; slices carry
-only their IDs. Review-wide CI, source coverage, empty state, and structural
+Profiles remain canonical in the candidate set; selected relations and
+convergence diagnostics are referenced from `CandidateConvergence`. Slices
+carry only IDs. Review-wide CI, source coverage, empty state, and structural
 coverage are computed once here.
 
 ## Must not

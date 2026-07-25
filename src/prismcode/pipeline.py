@@ -10,6 +10,7 @@ from prismcode.semantics.review import extract_packet_semantics
 from prismcode.changes.hunks import parse_changed_files
 from prismcode.facts.catalog import build_evidence_catalog
 from prismcode.routing.candidates import build_projection_candidates
+from prismcode.convergence.core import converge_candidates
 from prismcode.projection.build import build_review_projection
 from prismcode.projection.overview import build_review_overview
 
@@ -47,13 +48,19 @@ class DeterministicAnalyzer:
             claim_source_state=extracted.claim_source_state,
         )
         projection_candidates.validate_consistency()
-        projection = build_review_projection(projection_candidates)
+        candidate_convergence = converge_candidates(projection_candidates)
+        candidate_convergence.validate_consistency(projection_candidates)
+        projection = build_review_projection(
+            projection_candidates,
+            candidate_convergence,
+        )
         overview = build_review_overview(
             packet,
             requirements,
             projection_candidates,
             evidence_catalog,
             analysis_input.structural_graph,
+            convergence=candidate_convergence,
             structural_graph_disabled=analysis_input.structural_graph_disabled,
         )
         return ReviewBrief(
@@ -66,6 +73,7 @@ class DeterministicAnalyzer:
             claims=semantics.claims,
             evidence_catalog=evidence_catalog,
             projection_candidates=projection_candidates,
+            candidate_convergence=candidate_convergence,
             projection=projection,
             overview=overview,
         )

@@ -7,6 +7,7 @@ canonical statements + EvidenceCatalog
   -> eligibility by fact profile and projection slot
   -> deterministic association inside each slot
   -> ProjectionCandidateSet
+  -> deterministic same-slot CandidateConvergence
   -> ReviewProjection
 ```
 
@@ -27,7 +28,7 @@ numeric score or global candidate budget.
 
 ## Associations
 
-Ordered deterministic association kinds are:
+Typed deterministic association kinds, in convergence dominance order, are:
 
 1. provider-supplied explicit association;
 2. explicit R/G reference;
@@ -42,9 +43,10 @@ not used to compare facts from different slots.
 
 ## Structural routing
 
-Only a selected exact changed symbol can seed structural context. Runtime and
-test symbols must occur on a bounded path rooted at that anchor. Without
-Codegraph, the same projection uses the canonical changed hunk or changed-file
+Routing enumerates structural relations for candidate exact changed symbols.
+Convergence retains paths only when their typed seed anchor was selected, then
+retains runtime/test context only when its path was selected. Without
+Codegraph, the same projection uses canonical changed-hunk or changed-file
 fallback and records typed structural diagnostics.
 
 ## Coverage
@@ -54,8 +56,8 @@ fact, no deterministic association, ambiguity, provider unavailability,
 partial coverage, stale sources, per-slot truncation, and unsupported change
 types.
 
-`EvidenceCatalog` remains the only evidence store. Candidate relations and
-projection slices contain canonical IDs only.
+`EvidenceCatalog` remains the only evidence store. Candidate relations,
+convergence groups, and projection slices contain canonical IDs only.
 
 ## Semantic identity and ordering
 
@@ -64,9 +66,11 @@ change operation, role, and profile. Head- and base-side hunk text are never
 collapsed into one matching string. Repository-local `R1`/`G1` tokens are not
 treated as issue references.
 
-Selection is ordinal inside each typed slot. Changed anchors use canonical
-file, line, symbol, and precision order; opaque evidence hashes are stable
-identifiers, not ranking signals.
+Convergence is ordinal inside each typed slot. Typed association dominance is
+applied before stable source ordinal. Opaque evidence hashes are stable
+identifiers, not ranking signals. When an equivalent tier crosses a display
+budget, the selected prefix remains deterministic and an ambiguity diagnostic
+states that source order is only a presentation tie-break.
 
 Provider coverage belongs to the review and carries affected IDs. Claim
 coverage distinguishes an absent PR description, a present description with no

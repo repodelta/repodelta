@@ -1,0 +1,76 @@
+{
+  "schema_version": "analysis_fixture.v3",
+  "source_packet": {
+    "schema_version": "review_source_packet.v1",
+    "packet_revision": "sha256:892d332692b7c7e77b210bc31ba8670719125680fd02a7653a126722956fcd78",
+    "repository": "acme/widget",
+    "pull_request": 103,
+    "title": "Converge bounded trace candidates",
+    "source_url": "https://github.com/acme/widget/pull/103",
+    "head_sha": "convergence-head",
+    "base_sha": "convergence-base",
+    "source_records": [
+      {
+        "id": "pr:103",
+        "kind": "pull_request",
+        "repository": "acme/widget",
+        "url": "https://github.com/acme/widget/pull/103",
+        "title": "Converge bounded trace candidates",
+        "body": "## Summary\n- R1: connect the cache_writer adapter.\n- The runtime endpoint exposes a bounded semantic trace.",
+        "revision": "pr-103-v1",
+        "availability": "available"
+      }
+    ],
+    "changed_files": [
+      {
+        "path": "src/api.py",
+        "status": "modified",
+        "additions": 1,
+        "deletions": 0,
+        "changes": 1,
+        "source_url": "https://github.com/acme/widget/blob/convergence-head/src/api.py",
+        "patch": "@@ -10,0 +11 @@\n+return bounded_semantic_trace(payload)\n"
+      },
+      {
+        "path": "src/runtime.py",
+        "status": "modified",
+        "additions": 1,
+        "deletions": 0,
+        "changes": 1,
+        "source_url": "https://github.com/acme/widget/blob/convergence-head/src/runtime.py",
+        "patch": "@@ -20,0 +21 @@\n+result = bounded_semantic_trace(payload)\n"
+      },
+      {
+        "path": "src/service.py",
+        "status": "modified",
+        "additions": 1,
+        "deletions": 0,
+        "changes": 1,
+        "source_url": "https://github.com/acme/widget/blob/convergence-head/src/service.py",
+        "patch": "@@ -30,0 +31 @@\n+trace = bounded_semantic_trace(payload)\n"
+      },
+      {
+        "path": "src/adapter.py",
+        "status": "modified",
+        "additions": 1,
+        "deletions": 0,
+        "changes": 1,
+        "source_url": "https://github.com/acme/widget/blob/convergence-head/src/adapter.py",
+        "patch": "@@ -40,0 +41 @@\n+cache_writer.connect(adapter)\n"
+      }
+    ],
+    "verification_observations": [],
+    "diagnostics": [],
+    "metadata": {}
+  },
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "The runtime endpoint exposes bounded_semantic_trace.",
+      "role": "obligation",
+      "authority": "provided",
+      "kind": "deliverable"
+    }
+  ],
+  "evidence": []
+}

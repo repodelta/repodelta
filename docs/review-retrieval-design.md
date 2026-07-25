@@ -305,9 +305,12 @@ Relations reference canonical statement and evidence IDs and contain:
 - association kind;
 - ordered reasons;
 - optional bridge IDs;
-- eligibility/profile decision;
-- selection state (`selected`, `not_selected`, `ineligible`, `truncated`);
+- stable source ordinal;
 - no copied statement or evidence content.
+
+`CandidateConvergence` separately references selected and deferred relation
+IDs plus typed ambiguity and budget diagnostics. Selection truth is not copied
+onto each routed relation.
 
 This replaces the current use of one untyped `statement_evidence` relation for
 every evidence role. It does not create a second evidence store.

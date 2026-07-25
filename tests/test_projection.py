@@ -15,9 +15,10 @@ from prismcode.model.contracts import (
 )
 from prismcode.evaluation.core import load_evaluation_suite
 from prismcode.intake.fixture import load_fixture
-from prismcode.routing.candidates import (
-    ProjectionPolicy,
-    build_projection_candidates,
+from prismcode.routing.candidates import build_projection_candidates
+from prismcode.convergence.core import (
+    ConvergencePolicy,
+    converge_candidates,
 )
 from prismcode.projection.build import build_review_projection
 from prismcode.presentation.html import render_html
@@ -31,12 +32,13 @@ SUITE = Path("fixtures/evaluation-suite.json")
 
 
 def _selected_targets(brief, focus_id: str, slot: str) -> tuple[str, ...]:
+    selected = set(brief.candidate_convergence.selected_relation_ids())
     return tuple(
         item.target_id
         for item in brief.projection_candidates.relations
         if item.focus_statement_id == focus_id
         and item.slot == slot
-        and item.state == "selected"
+        and item.id in selected
     )
 
 
@@ -115,14 +117,15 @@ def test_every_requirement_is_routed_without_a_global_statement_budget() -> None
         structural_graph=None,
         head_sha=None,
     )
-    projection = build_review_projection(candidates)
+    convergence = converge_candidates(candidates)
+    projection = build_review_projection(candidates, convergence)
 
     assert len(candidates.groups) == 80
     assert len(projection.slices) == 80
     assert all(item.changed_anchor_relation_ids for item in projection.slices)
     assert not [
         item
-        for item in candidates.diagnostics
+        for item in convergence.diagnostics
         if item.state == "budget_truncated"
     ]
 
@@ -254,13 +257,17 @@ def test_changed_anchor_selection_uses_typed_ordinal_not_hashed_id() -> None:
         evidence_catalog=evidence,
         structural_graph=None,
         head_sha=None,
-        policy=ProjectionPolicy(max_changed=1),
     )
+    convergence = converge_candidates(
+        candidates,
+        policy=ConvergencePolicy(max_changed=1),
+    )
+    selected_ids = set(convergence.selected_relation_ids())
 
     selected = [
         item.target_id
         for item in candidates.relations
-        if item.slot == "changed_anchor" and item.state == "selected"
+        if item.slot == "changed_anchor" and item.id in selected_ids
     ]
     assert selected == ["E:aaa"]
 
@@ -359,17 +366,24 @@ def test_per_slot_budget_marks_only_that_focus_and_slot() -> None:
         evidence_catalog=EvidenceCatalog(items=evidence),
         structural_graph=None,
         head_sha=None,
-        policy=ProjectionPolicy(max_changed=2, max_candidates_per_slot=4),
     )
+    convergence = converge_candidates(
+        candidates,
+        policy=ConvergencePolicy(
+            max_changed=2,
+            max_candidates_per_slot=4,
+        ),
+    )
+    selected_ids = set(convergence.selected_relation_ids())
 
     selected = [
         item
         for item in candidates.relations
-        if item.slot == "changed_anchor" and item.state == "selected"
+        if item.slot == "changed_anchor" and item.id in selected_ids
     ]
     truncated = [
         item
-        for item in candidates.diagnostics
+        for item in convergence.diagnostics
         if item.slot == "changed_anchor"
         and item.state == "budget_truncated"
     ]
@@ -439,10 +453,12 @@ def test_document_and_workflow_facts_are_routed_by_profile() -> None:
         structural_graph=None,
         head_sha=None,
     )
+    convergence = converge_candidates(candidates)
+    selected_ids = set(convergence.selected_relation_ids())
     selected = {
         (item.focus_statement_id, item.target_id)
         for item in candidates.relations
-        if item.slot == "changed_anchor" and item.state == "selected"
+        if item.slot == "changed_anchor" and item.id in selected_ids
     }
 
     assert ("R1", "E:doc") in selected

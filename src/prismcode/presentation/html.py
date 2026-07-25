@@ -306,7 +306,10 @@ def render_html(brief: ReviewBrief) -> str:
         item.focus_statement_id: item
         for item in brief.projection_candidates.groups
     }
-    diagnostics = brief.projection_candidates.diagnostics_by_id()
+    diagnostics = {
+        **brief.projection_candidates.diagnostics_by_id(),
+        **brief.candidate_convergence.diagnostics_by_id(),
+    }
     cards = []
     for index, review_slice in enumerate(brief.projection.slices):
         statement = statements.get(review_slice.focus_statement_id)

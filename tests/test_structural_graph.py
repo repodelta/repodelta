@@ -305,6 +305,7 @@ def test_document_hunks_do_not_reduce_codegraph_coverage(tmp_path: Path) -> None
 
     assert result.index.state == "available"
     assert result.index.requested_files == 1
+    assert result.index.indexed_files == 1
     assert result.hunk_count == 1
     assert "codegraph_file_not_indexed" not in {
         diagnostic.code for diagnostic in result.diagnostics
@@ -411,7 +412,7 @@ def test_analyzer_preserves_structural_facts_without_using_them_as_conclusions(
         AnalysisInput(packet=packet, structural_graph=structural)
     )
 
-    assert brief.schema_version == "review_brief.v11"
+    assert brief.schema_version == "review_brief.v12"
     assert brief.requirements == lexical_only.requirements == ()
     serialized = brief.to_dict()
     assert "structural_graph" not in serialized

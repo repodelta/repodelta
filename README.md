@@ -34,6 +34,8 @@ The open core provides:
   symbols, bounded paths, file fallbacks, and CI/runtime observations;
 - explainable deterministic R/G/O/S/C/B/V-to-evidence and R/G-to-claim
   candidates;
+- deterministic same-R/G, same-slot candidate convergence with typed
+  dominance, bridge reachability, bounded selection, and explicit ambiguity;
 - an R-first consistency view with claim/evidence candidates, binding basis,
   source links, and vertically aggregated coverage gaps;
 - an Actions workflow for automatic PR reports and manually targeted reviews;
@@ -205,7 +207,7 @@ private managed services
         │ implement public protocols / call public core
         ▼
 PrismCode open core
-ReviewSourcePacket → canonical evidence → typed fact routing → ReviewProjection → renderer
+ReviewSourcePacket → canonical evidence → typed routing → convergence → ReviewProjection → renderer
 ```
 
 The open core must remain independently installable and runnable. Optional hosted capabilities should integrate through public protocols or an explicit HTTPS backend, never through an unavailable private import.

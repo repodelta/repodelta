@@ -3,27 +3,28 @@
 ## Owns
 
 Requirement profiles, fact eligibility, authority-aware association, and
-per-R/G typed candidate groups.
+complete per-R/G typed candidate enumeration.
 
 ## Input / output
 
-Canonical statements and `EvidenceCatalog` → `ProjectionCandidateSet`.
+Canonical statements and `EvidenceCatalog` → unselected
+`ProjectionCandidateSet`.
 
 ## Invariants
 
 Eligibility precedes association. Every explicit R/G is visited. Relations
-reference canonical IDs and are not acceptance conclusions.
+reference canonical IDs, retain typed association reasons, and carry no
+selection state.
 
 ## Must not
 
-Collect providers, parse patches, implement same-slot semantic convergence,
+Collect providers, parse patches, order/truncate/select same-slot candidates,
 construct final layout, or render diagnostics.
 
 ## Diagnostics
 
-Produces typed focus/slot coverage and budget diagnostics.
+Produces typed focus/slot source and association coverage diagnostics.
 
 ## Extension points
 
-Same-slot semantic convergence will consume these typed candidates before
-projection selection.
+The convergence stage consumes all typed candidates before projection.

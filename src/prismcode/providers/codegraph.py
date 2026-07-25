@@ -103,9 +103,6 @@ class CodegraphProvider:
                             ),
                         ),
                     )
-                indexed_files = int(
-                    connection.execute("SELECT COUNT(*) FROM files").fetchone()[0]
-                )
                 file_rows = _file_rows(connection, requested)
         except (OSError, sqlite3.Error) as exc:
             return StructuralGraphIndexStatus(
@@ -173,7 +170,7 @@ class CodegraphProvider:
             provider=_PROVIDER,
             revision=checkout_revision,
             database_path=str(self.database_path),
-            indexed_files=indexed_files,
+            indexed_files=len(file_rows),
             requested_files=len(requested),
             diagnostics=tuple(diagnostics),
         )

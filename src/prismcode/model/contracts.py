@@ -98,7 +98,6 @@ AssociationKind = Literal[
     "structural_bridge",
     "current_head",
 ]
-SelectionState = Literal["selected", "not_selected", "ineligible", "truncated"]
 CoverageState = Literal[
     "source_absent",
     "not_applicable",
@@ -348,8 +347,7 @@ class ProjectionRelation:
     association: AssociationKind
     reasons: tuple[AssociationReason, ...]
     bridge_ids: tuple[str, ...] = ()
-    selection_ordinal: int = 0
-    state: SelectionState = "selected"
+    source_ordinal: int = 0
 
 
 @dataclass(frozen=True)
@@ -391,7 +389,7 @@ class ProjectionCandidateSet:
     relations: tuple[ProjectionRelation, ...] = ()
     groups: tuple[ProjectionCandidateGroup, ...] = ()
     diagnostics: tuple[ProjectionDiagnostic, ...] = ()
-    schema_version: str = "projection_candidate_set.v3"
+    schema_version: str = "projection_candidate_set.v4"
 
     def by_id(self) -> dict[str, ProjectionRelation]:
         return {item.id: item for item in self.relations}
@@ -406,8 +404,16 @@ class ProjectionCandidateSet:
             raise ValueError("projection candidate set contains duplicate relation IDs")
         if len(diagnostics) != len(self.diagnostics):
             raise ValueError("projection candidate set contains duplicate diagnostic IDs")
+        if len({item.focus_statement_id for item in self.groups}) != len(self.groups):
+            raise ValueError("projection candidate set contains duplicate focus groups")
+        referenced_relations: set[str] = set()
         for group in self.groups:
             for relation_id in group.relation_ids:
+                if relation_id in referenced_relations:
+                    raise ValueError(
+                        f"{relation_id}: candidate relation belongs to multiple groups"
+                    )
+                referenced_relations.add(relation_id)
                 relation = relations.get(relation_id)
                 if relation is None:
                     raise ValueError(
@@ -426,6 +432,86 @@ class ProjectionCandidateSet:
                 if diagnostic.focus_statement_id != group.focus_statement_id:
                     raise ValueError(
                         f"{diagnostic_id}: diagnostic belongs to a different focus statement"
+                    )
+        if referenced_relations != set(relations):
+            raise ValueError("projection candidate groups must reference every relation")
+
+
+@dataclass(frozen=True)
+class ConvergenceGroup:
+    focus_statement_id: str
+    selected_relation_ids: tuple[str, ...] = ()
+    deferred_relation_ids: tuple[str, ...] = ()
+    diagnostic_ids: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class CandidateConvergence:
+    groups: tuple[ConvergenceGroup, ...] = ()
+    diagnostics: tuple[ProjectionDiagnostic, ...] = ()
+    schema_version: str = "candidate_convergence.v1"
+
+    def diagnostics_by_id(self) -> dict[str, ProjectionDiagnostic]:
+        return {item.id: item for item in self.diagnostics}
+
+    def selected_relation_ids(self) -> tuple[str, ...]:
+        return tuple(
+            relation_id
+            for group in self.groups
+            for relation_id in group.selected_relation_ids
+        )
+
+    def validate_consistency(self, candidates: ProjectionCandidateSet) -> None:
+        relations = candidates.by_id()
+        candidate_groups = {
+            item.focus_statement_id: item for item in candidates.groups
+        }
+        diagnostics = self.diagnostics_by_id()
+        if len(diagnostics) != len(self.diagnostics):
+            raise ValueError("candidate convergence contains duplicate diagnostic IDs")
+        if len({item.focus_statement_id for item in self.groups}) != len(self.groups):
+            raise ValueError("candidate convergence contains duplicate focus groups")
+        if {item.focus_statement_id for item in self.groups} != set(candidate_groups):
+            raise ValueError("candidate convergence must contain every candidate focus")
+        for group in self.groups:
+            candidate_group = candidate_groups.get(group.focus_statement_id)
+            if candidate_group is None:
+                raise ValueError(
+                    f"{group.focus_statement_id}: convergence focus has no candidates"
+                )
+            selected = set(group.selected_relation_ids)
+            deferred = set(group.deferred_relation_ids)
+            if len(selected) != len(group.selected_relation_ids):
+                raise ValueError(
+                    f"{group.focus_statement_id}: duplicate selected relation"
+                )
+            if len(deferred) != len(group.deferred_relation_ids):
+                raise ValueError(
+                    f"{group.focus_statement_id}: duplicate deferred relation"
+                )
+            if selected & deferred:
+                raise ValueError(
+                    f"{group.focus_statement_id}: relation is both selected and deferred"
+                )
+            if selected | deferred != set(candidate_group.relation_ids):
+                raise ValueError(
+                    f"{group.focus_statement_id}: convergence must partition candidates"
+                )
+            for relation_id in (*group.selected_relation_ids, *group.deferred_relation_ids):
+                relation = relations.get(relation_id)
+                if relation is None or relation.focus_statement_id != group.focus_statement_id:
+                    raise ValueError(
+                        f"{group.focus_statement_id}: invalid convergence relation {relation_id}"
+                    )
+            for diagnostic_id in group.diagnostic_ids:
+                diagnostic = diagnostics.get(diagnostic_id)
+                if (
+                    diagnostic is None
+                    or diagnostic.focus_statement_id != group.focus_statement_id
+                ):
+                    raise ValueError(
+                        f"{group.focus_statement_id}: invalid convergence diagnostic "
+                        f"{diagnostic_id}"
                     )
 
 
@@ -500,6 +586,7 @@ class ReviewBrief:
     claims: tuple[ReviewStatement, ...] = ()
     evidence_catalog: EvidenceCatalog = EvidenceCatalog()
     projection_candidates: ProjectionCandidateSet = ProjectionCandidateSet()
+    candidate_convergence: CandidateConvergence = CandidateConvergence()
     projection: ReviewProjection = ReviewProjection()
     overview: ReviewOverview = ReviewOverview(
         pull_request_state="unknown",
@@ -508,7 +595,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v11"
+    schema_version: str = "review_brief.v12"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
