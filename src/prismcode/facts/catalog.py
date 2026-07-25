@@ -6,7 +6,7 @@ from dataclasses import replace
 from pathlib import Path
 from typing import Iterable
 
-from .contracts import (
+from prismcode.model.contracts import (
     ChangedFile,
     ChangeOperation,
     EvidenceCatalog,
@@ -14,10 +14,11 @@ from .contracts import (
     EvidenceItem,
     ReviewSourcePacket,
     SourceRef,
+    SuppliedEvidence,
     VerificationObservation,
 )
-from .diff_hunks import ChangedHunk, parse_changed_files
-from .structural_graph import GraphSymbol, StructuralGraphResult, StructuralPath
+from prismcode.changes.hunks import ChangedHunk, DiffHunkCollection
+from prismcode.providers.structural import GraphSymbol, StructuralGraphResult, StructuralPath
 
 _DOCUMENT_SUFFIXES = {".md", ".mdx", ".rst", ".txt", ".pdf", ".doc", ".docx"}
 _WORKFLOW_PREFIXES = (".github/workflows/", ".circleci/")
@@ -43,23 +44,23 @@ _DEPENDENCY_NAMES = {
 
 def build_evidence_catalog(
     packet: ReviewSourcePacket,
+    changes: DiffHunkCollection,
     structural_graph: StructuralGraphResult | None = None,
     *,
-    supplied: tuple[EvidenceItem, ...] = (),
+    supplied: tuple[SuppliedEvidence, ...] = (),
 ) -> EvidenceCatalog:
     """Normalize source, structural, and supplied facts into one ID-addressed catalog."""
 
     items: dict[str, EvidenceItem] = {}
-    hunk_collection = parse_changed_files(packet.changed_files)
     hunks_by_path: dict[str, list[ChangedHunk]] = {}
-    for hunk in hunk_collection.hunks:
+    for hunk in changes.hunks:
         hunks_by_path.setdefault(hunk.file_path, []).append(hunk)
     mapped_hunk_ids = (
         {overlap.hunk_id for overlap in structural_graph.overlaps}
         if structural_graph is not None
         else set()
     )
-    hunks_by_id = {hunk.id: hunk for hunk in hunk_collection.hunks}
+    hunks_by_id = {hunk.id: hunk for hunk in changes.hunks}
 
     for changed_file in packet.changed_files:
         file_hunks = hunks_by_path.get(changed_file.path, ())
@@ -158,14 +159,23 @@ def build_evidence_catalog(
     for observation in packet.verification_observations:
         _put(items, verification_evidence(observation))
     for item in supplied:
-        if not item.id:
-            raise ValueError("supplied evidence must have a stable ID")
-        _put(items, item)
+        _put(
+            items,
+            provided_evidence(
+                summary=item.summary,
+                kind=item.kind,
+                classification=item.classification,
+                sources=item.sources,
+                statement_ids=item.statement_ids,
+            ),
+        )
 
-    return EvidenceCatalog(
+    catalog = EvidenceCatalog(
         items=tuple(sorted(items.values(), key=lambda item: item.id)),
-        diagnostics=hunk_collection.diagnostics,
+        diagnostics=changes.diagnostics,
     )
+    catalog.validate_consistency()
+    return catalog
 
 
 def evidence_id(kind: str, identity: str) -> str:
@@ -219,10 +229,10 @@ def provided_evidence(
         revision_side="review",
         operation="observed",
         role="provided_context",
+        associated_statement_ids=statement_ids,
         sources=sources,
         metadata={
             "provided": True,
-            "provided_for_statement_ids": statement_ids,
         },
     )
 
@@ -331,13 +341,13 @@ def verification_evidence(observation: VerificationObservation) -> EvidenceItem:
         revision_side="review",
         operation="observed",
         role="verification",
+        observed_head_sha=observation.head_sha,
         sources=(SourceRef(label=observation.name, url=observation.details_url),),
         metadata={
             "observation_id": observation.id,
             "name": observation.name,
             "status": observation.status,
             "conclusion": observation.conclusion,
-            "head_sha": observation.head_sha,
         },
     )
 

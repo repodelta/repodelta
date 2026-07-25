@@ -63,6 +63,10 @@ When no explicit acceptance criteria are present, the report says so instead
 of manufacturing a requirement from the PR title. Candidate relevance is never
 presented as implementation, verification, or acceptance.
 
+The canonical stage map, ownership rules, and dependency direction are
+documented in [`docs/architecture.md`](docs/architecture.md). Each stage also
+keeps its local input/output contract beside its code.
+
 ## Quick start
 
 ```bash

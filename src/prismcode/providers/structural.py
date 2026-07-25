@@ -3,8 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal, Protocol, runtime_checkable
 
-from .contracts import Diagnostic, SourceRef
-from .diff_hunks import ChangedHunk
+from prismcode.model.contracts import Diagnostic, SourceRef
+from prismcode.changes.hunks import ChangedHunk
 
 IndexState = Literal["available", "partial", "missing", "stale", "invalid", "error"]
 PathClassification = Literal["runtime", "test", "mixed"]

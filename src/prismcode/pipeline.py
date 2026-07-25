@@ -2,15 +2,16 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from .contracts import (
+from prismcode.model.contracts import (
     AnalysisInput,
-    Requirement,
     ReviewBrief,
-    SourceRef,
 )
-from .criteria import extract_review_semantics
-from .evidence_graph import build_evidence_catalog
-from .projection import build_projection_candidates, build_review_projection
+from prismcode.semantics.review import extract_packet_semantics
+from prismcode.changes.hunks import parse_changed_files
+from prismcode.facts.catalog import build_evidence_catalog
+from prismcode.routing.candidates import build_projection_candidates
+from prismcode.projection.build import build_review_projection
+from prismcode.projection.overview import build_review_overview
 
 
 class ReviewAnalyzer(Protocol):
@@ -23,32 +24,15 @@ class DeterministicAnalyzer:
     def analyze(self, analysis_input: AnalysisInput) -> ReviewBrief:
         packet = analysis_input.packet
         packet.validate_consistency()
-        pr_record = next(
-            (r for r in packet.source_records if r.kind == "pull_request"),
-            None,
-        )
-        pr_body = pr_record.body if pr_record else ""
-        issue_records = tuple(
-            r for r in packet.source_records if r.kind in {"linked_issue", "ticket"}
-        )
-        issue_record = issue_records[0] if len(issue_records) == 1 else None
-        semantics = extract_review_semantics(
-            issue_body=issue_record.body if issue_record else None,
-            issue_source=(
-                SourceRef(label="linked issue", url=issue_record.url)
-                if issue_record
-                else None
-            ),
-            pr_body=pr_body,
-            pr_source=SourceRef(
-                label="pull request description",
-                url=(pr_record.url if pr_record else None) or packet.source_url,
-            ),
-            pr_title=packet.title,
-        )
+        changes = analysis_input.changes or parse_changed_files(packet.changed_files)
+        extracted = extract_packet_semantics(packet)
+        semantics = extracted.statements
         requirements = analysis_input.requirements or semantics.obligations
+        for requirement in requirements:
+            requirement.validate_consistency()
         evidence_catalog = build_evidence_catalog(
             packet,
+            changes,
             analysis_input.structural_graph,
             supplied=analysis_input.supplied_evidence,
         )
@@ -60,15 +44,18 @@ class DeterministicAnalyzer:
             evidence_catalog=evidence_catalog,
             structural_graph=analysis_input.structural_graph,
             head_sha=packet.head_sha,
-            claim_source_state=(
-                "source_absent"
-                if pr_record is None or not pr_body.strip()
-                else "extraction_missing"
-                if not semantics.claims
-                else "available"
-            ),
+            claim_source_state=extracted.claim_source_state,
         )
+        projection_candidates.validate_consistency()
         projection = build_review_projection(projection_candidates)
+        overview = build_review_overview(
+            packet,
+            requirements,
+            projection_candidates,
+            evidence_catalog,
+            analysis_input.structural_graph,
+            structural_graph_disabled=analysis_input.structural_graph_disabled,
+        )
         return ReviewBrief(
             packet=packet,
             intent=semantics.intent,
@@ -77,8 +64,8 @@ class DeterministicAnalyzer:
             objectives=semantics.objectives,
             scope=semantics.scope,
             claims=semantics.claims,
-            structural_graph=analysis_input.structural_graph,
             evidence_catalog=evidence_catalog,
             projection_candidates=projection_candidates,
             projection=projection,
+            overview=overview,
         )

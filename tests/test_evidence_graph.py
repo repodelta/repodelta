@@ -2,16 +2,19 @@ from __future__ import annotations
 
 import pytest
 
-from prismcode.analysis import DeterministicAnalyzer
-from prismcode.contracts import (
+from prismcode.pipeline import DeterministicAnalyzer
+from prismcode.model.contracts import (
     AnalysisInput,
     ChangedFile,
     ReviewSourcePacket,
     SourceRef,
     VerificationObservation,
+    EvidenceItem,
+    EvidenceCatalog,
 )
-from prismcode.evidence_graph import build_evidence_catalog
-from prismcode.structural_graph import (
+from prismcode.facts.catalog import build_evidence_catalog
+from prismcode.changes.hunks import parse_changed_files
+from prismcode.providers.structural import (
     GraphPathStep,
     GraphSymbol,
     HunkSymbolOverlap,
@@ -107,7 +110,9 @@ def test_catalog_deduplicates_facts_and_links_unchanged_path_symbols() -> None:
         head_sha="head123",
     ).with_revision()
 
-    catalog = build_evidence_catalog(packet, structural)
+    catalog = build_evidence_catalog(
+        packet, parse_changed_files(packet.changed_files), structural
+    )
 
     assert len([item for item in catalog.items if item.kind == "changed_file"]) == 3
     symbols = [item for item in catalog.items if item.kind == "symbol"]
@@ -127,9 +132,11 @@ def test_catalog_deduplicates_facts_and_links_unchanged_path_symbols() -> None:
     verification = next(item for item in catalog.items if item.kind == "check_run")
     assert verification.classification == "ci"
     assert verification.metadata["observation_id"] == "check:test"
-    assert catalog.schema_version == "evidence_catalog.v2"
+    assert catalog.schema_version == "evidence_catalog.v3"
 
-    repeated = build_evidence_catalog(packet, structural)
+    repeated = build_evidence_catalog(
+        packet, parse_changed_files(packet.changed_files), structural
+    )
     assert [item.id for item in repeated.items] == [item.id for item in catalog.items]
 
 
@@ -145,10 +152,32 @@ def test_review_brief_serializes_one_canonical_catalog() -> None:
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
     serialized = brief.to_dict()
 
-    assert brief.schema_version == "review_brief.v10"
-    assert serialized["evidence_catalog"]["schema_version"] == "evidence_catalog.v2"
+    assert brief.schema_version == "review_brief.v11"
+    assert serialized["evidence_catalog"]["schema_version"] == "evidence_catalog.v3"
+    assert "structural_graph" not in serialized
     assert len(serialized["evidence_catalog"]["items"]) == 1
     assert serialized["evidence_catalog"]["items"][0]["kind"] == "changed_file"
+
+
+def test_canonical_evidence_rejects_contradictory_identity() -> None:
+    catalog = EvidenceCatalog(
+        items=(
+            EvidenceItem(
+                id="E:bad",
+                summary="Contradictory",
+                kind="changed_hunk",
+                classification="code",
+                profile="production",
+                changed=True,
+                role="changed_anchor",
+                revision_side="review",
+                operation="observed",
+            ),
+        )
+    )
+
+    with pytest.raises(ValueError, match="head or base"):
+        catalog.validate_consistency()
 
 
 def test_patch_hunks_are_canonical_fallback_evidence() -> None:
@@ -164,7 +193,9 @@ def test_patch_hunks_are_canonical_fallback_evidence() -> None:
             ),
         ),
     ).with_revision()
-    catalog = build_evidence_catalog(packet)
+    catalog = build_evidence_catalog(
+        packet, parse_changed_files(packet.changed_files)
+    )
     assert [item.kind for item in catalog.items] == ["changed_hunk"]
     assert catalog.items[0].metadata["head_excerpt"] == "new_bounded_call()"
     assert catalog.items[0].metadata["base_excerpt"] == "old_call()"
@@ -199,7 +230,9 @@ def test_exact_symbol_replaces_its_mapped_hunk_evidence() -> None:
         ),
     )
 
-    catalog = build_evidence_catalog(packet, structural)
+    catalog = build_evidence_catalog(
+        packet, parse_changed_files(packet.changed_files), structural
+    )
 
     assert not [item for item in catalog.items if item.kind == "changed_hunk"]
     assert [item.metadata["symbol_id"] for item in catalog.items] == ["S"]

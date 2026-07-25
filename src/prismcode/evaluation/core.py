@@ -5,8 +5,8 @@ from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from typing import Any
 
-from .analysis import DeterministicAnalyzer
-from .contracts import (
+from prismcode.pipeline import DeterministicAnalyzer
+from prismcode.model.contracts import (
     EvidenceClassification,
     FactProfile,
     ProjectionRelation,
@@ -15,8 +15,8 @@ from .contracts import (
     StatementPurpose,
     StatementRole,
 )
-from .fixture import load_fixture
-from .structural_graph import (
+from prismcode.intake.fixture import load_fixture
+from prismcode.providers.structural import (
     GraphPathStep,
     GraphSymbol,
     HunkSymbolOverlap,
@@ -307,7 +307,7 @@ def evaluate_suite(
             )
         diagnostics.extend(
             f"{case.id}: {item.slot}: {item.state}: {item.message}"
-            for item in brief.projection.diagnostics
+            for item in brief.projection_candidates.diagnostics
             if item.state in {"ambiguous", "budget_truncated"}
         )
 

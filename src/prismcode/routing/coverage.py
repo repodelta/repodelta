@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from .contracts import ProjectionDiagnostic
-from .structural_graph import StructuralGraphResult
+from prismcode.model.contracts import ProjectionDiagnostic
+from prismcode.providers.structural import StructuralGraphResult
 
 
 def review_provider_diagnostics(

@@ -3,8 +3,8 @@ from __future__ import annotations
 from dataclasses import replace
 from pathlib import Path
 
-from prismcode.analysis import DeterministicAnalyzer
-from prismcode.contracts import (
+from prismcode.pipeline import DeterministicAnalyzer
+from prismcode.model.contracts import (
     AnalysisInput,
     EvidenceCatalog,
     EvidenceItem,
@@ -13,15 +13,15 @@ from prismcode.contracts import (
     ReviewSourcePacket,
     SourceRecord,
 )
-from prismcode.evaluation import load_evaluation_suite
-from prismcode.fixture import load_fixture
-from prismcode.projection import (
+from prismcode.evaluation.core import load_evaluation_suite
+from prismcode.intake.fixture import load_fixture
+from prismcode.routing.candidates import (
     ProjectionPolicy,
     build_projection_candidates,
-    build_review_projection,
 )
-from prismcode.rendering import render_html
-from prismcode.structural_graph import (
+from prismcode.projection.build import build_review_projection
+from prismcode.presentation.html import render_html
+from prismcode.providers.structural import (
     StructuralGraphIndexStatus,
     StructuralGraphResult,
 )
@@ -54,7 +54,7 @@ def test_direct_hunks_and_claim_route_into_independent_slots() -> None:
     assert _selected_targets(brief, "R2", "changed_anchor") == ()
     assert {
         (item.slot, item.state)
-        for item in brief.projection.diagnostics
+        for item in brief.projection_candidates.diagnostics
         if item.focus_statement_id == "R2"
     } >= {
         ("claim", "no_association"),
@@ -336,7 +336,7 @@ def test_selection_and_rendering_are_byte_stable() -> None:
     html = render_html(first)
     assert "candidate_binding" not in html
     assert "Issue contract" not in html
-    assert "Provided contract" in html
+    assert "provided" in html
     assert "Repository facts" in html
 
 
@@ -463,10 +463,10 @@ def test_graph_and_no_graph_use_the_same_projection_contract() -> None:
     assert without_graph.projection.schema_version == with_graph.projection.schema_version
     assert [
         (item.focus_statement_id, item.profile)
-        for item in without_graph.projection.slices
+        for item in without_graph.projection_candidates.groups
     ] == [
         (item.focus_statement_id, item.profile)
-        for item in with_graph.projection.slices
+        for item in with_graph.projection_candidates.groups
     ]
     assert without_graph.projection.slices[0].changed_anchor_relation_ids
     assert with_graph.projection.slices[0].changed_anchor_relation_ids

@@ -4,12 +4,12 @@ import hashlib
 import sqlite3
 from pathlib import Path
 
-from prismcode.analysis import DeterministicAnalyzer
-from prismcode.codegraph import CodegraphProvider
-from prismcode.contracts import AnalysisInput, ChangedFile, ReviewSourcePacket
-from prismcode.diff_hunks import parse_unified_patch
-from prismcode.structural_graph import StructuralGraphProvider
-from prismcode.structural_mapping import map_packet_changed_symbols
+from prismcode.pipeline import DeterministicAnalyzer
+from prismcode.providers.codegraph import CodegraphProvider
+from prismcode.model.contracts import AnalysisInput, ChangedFile, ReviewSourcePacket
+from prismcode.changes.hunks import parse_changed_files, parse_unified_patch
+from prismcode.providers.structural import StructuralGraphProvider
+from prismcode.providers.mapping import map_packet_changed_symbols
 
 
 def _create_index(
@@ -143,7 +143,10 @@ def test_changed_hunk_maps_to_narrowest_exact_symbol(tmp_path: Path) -> None:
         "+        return 2\n"
     )
 
-    result = map_packet_changed_symbols(_packet(patch), CodegraphProvider(tmp_path))
+    packet = _packet(patch)
+    result = map_packet_changed_symbols(
+        packet, parse_changed_files(packet.changed_files), CodegraphProvider(tmp_path)
+    )
 
     assert result.index.state == "available"
     assert result.hunk_count == 1
@@ -206,7 +209,10 @@ def test_one_hunk_can_map_changes_in_two_sibling_symbols(tmp_path: Path) -> None
         "+    return 4\n"
     )
 
-    result = map_packet_changed_symbols(_packet(patch), CodegraphProvider(tmp_path))
+    packet = _packet(patch)
+    result = map_packet_changed_symbols(
+        packet, parse_changed_files(packet.changed_files), CodegraphProvider(tmp_path)
+    )
 
     assert [(item.symbol.id, item.changed_lines) for item in result.overlaps] == [
         ("first", (2,)),
@@ -334,7 +340,7 @@ def test_live_review_checkout_must_match_expected_head(
 ) -> None:
     _create_index(tmp_path)
     monkeypatch.setattr(
-        "prismcode.codegraph._checkout_revision",
+        "prismcode.providers.codegraph._checkout_revision",
         lambda _root: "different-head",
     )
     hunks = parse_unified_patch(
@@ -372,7 +378,10 @@ def test_deletion_only_hunk_reports_base_index_requirement(tmp_path: Path) -> No
 def test_missing_patch_is_explicitly_reported(tmp_path: Path) -> None:
     _create_index(tmp_path)
 
-    result = map_packet_changed_symbols(_packet(None), CodegraphProvider(tmp_path))
+    packet = _packet(None)
+    result = map_packet_changed_symbols(
+        packet, parse_changed_files(packet.changed_files), CodegraphProvider(tmp_path)
+    )
 
     assert result.overlaps == ()
     assert [item.code for item in result.diagnostics] == [
@@ -393,23 +402,24 @@ def test_analyzer_preserves_structural_facts_without_using_them_as_conclusions(
         "+        return 2\n"
     )
     packet = _packet(patch)
-    structural = map_packet_changed_symbols(packet, CodegraphProvider(tmp_path))
+    structural = map_packet_changed_symbols(
+        packet, parse_changed_files(packet.changed_files), CodegraphProvider(tmp_path)
+    )
     lexical_only = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
 
     brief = DeterministicAnalyzer().analyze(
         AnalysisInput(packet=packet, structural_graph=structural)
     )
 
-    assert brief.structural_graph is structural
-    assert brief.schema_version == "review_brief.v10"
+    assert brief.schema_version == "review_brief.v11"
     assert brief.requirements == lexical_only.requirements == ()
     serialized = brief.to_dict()
-    assert serialized["structural_graph"]["schema_version"] == (
-        "structural_graph_result.v2"
+    assert "structural_graph" not in serialized
+    symbol = next(
+        item for item in serialized["evidence_catalog"]["items"]
+        if item["kind"] == "symbol"
     )
-    assert serialized["structural_graph"]["overlaps"][0]["symbol"][
-        "qualified_name"
-    ] == "src.service.Service.run"
+    assert symbol["metadata"]["qualified_name"] == "src.service.Service.run"
 
 
 def test_bounded_paths_load_unchanged_y_to_x_to_z_neighbors(tmp_path: Path) -> None:
@@ -510,7 +520,9 @@ def test_bounded_paths_load_unchanged_y_to_x_to_z_neighbors(tmp_path: Path) -> N
         head_sha="head123",
     ).with_revision()
 
-    result = map_packet_changed_symbols(packet, CodegraphProvider(tmp_path))
+    result = map_packet_changed_symbols(
+        packet, parse_changed_files(packet.changed_files), CodegraphProvider(tmp_path)
+    )
 
     y_x_z = next(
         path
