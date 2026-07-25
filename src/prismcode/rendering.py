@@ -6,15 +6,16 @@ import re
 from urllib.parse import quote, urlparse, urlunparse
 
 from .contracts import (
-    CandidateBinding,
     ChangedFile,
     EvidenceItem,
+    ProjectionDiagnostic,
+    ProjectionRelation,
     ReviewBrief,
+    ReviewSlice,
     ReviewStatement,
     SourceRef,
+    VerificationObservation,
 )
-
-_VISIBLE_EVIDENCE_CANDIDATES = 6
 
 
 def _safe_href(value: str | None) -> str | None:
@@ -27,7 +28,7 @@ def _safe_href(value: str | None) -> str | None:
 def _source(source: SourceRef) -> str:
     parsed = urlparse(source.url or "")
     parts = tuple(part for part in parsed.path.split("/") if part)
-    concrete_label: str | None = None
+    concrete_label = None
     if len(parts) >= 4 and parts[-2] == "issues" and parts[-1].isdigit():
         concrete_label = f"Issue #{parts[-1]}"
     elif len(parts) >= 4 and parts[-2] == "pull" and parts[-1].isdigit():
@@ -38,479 +39,399 @@ def _source(source: SourceRef) -> str:
     if section:
         display_label += f" · {section}"
     label = escape(display_label)
-    location = ""
-    if source.path:
-        location = f"<code>{escape(source.path)}</code>"
-        if source.line_start:
-            location += f":{source.line_start}"
-            if source.line_end and source.line_end != source.line_start:
-                location += f"-{source.line_end}"
-    content = " · ".join(part for part in (label, location) if part)
     href = _safe_href(source.url)
     if href and section and not parsed.fragment:
         fragment = re.sub(r"[^a-z0-9]+", "-", section.casefold()).strip("-")
         href = urlunparse(parsed._replace(fragment=fragment))
-    return f'<a class="source-link" href="{escape(href, quote=True)}" target="_blank" rel="noopener">{content}</a>' if href else content
-
-
-def _changed_file(item: ChangedFile) -> str:
-    stats = []
-    if item.additions is not None:
-        stats.append(f"+{item.additions}")
-    if item.deletions is not None:
-        stats.append(f"-{item.deletions}")
-    suffix = f" · {' / '.join(stats)}" if stats else ""
-    name = Path(item.path).name
-    parent = str(Path(item.path).parent)
-    href = _safe_href(item.source_url)
-    title = escape(name)
     if href:
-        title = f'<a class="file-link file-name" href="{escape(href, quote=True)}" target="_blank" rel="noopener">{title}</a>'
-    return (
-        '<div class="file-row"><div>'
-        f'{title}<span class="file-path">{escape(parent)}/</span>'
-        f'</div><span class="file-state">{escape(item.status)}{escape(suffix)}</span></div>'
+        return (
+            f'<a class="source-link" href="{escape(href, quote=True)}" '
+            f'target="_blank" rel="noopener">{label}</a>'
+        )
+    if source.path:
+        return f"<code>{escape(source.path)}</code>"
+    return label
+
+
+def _sources(item: EvidenceItem, brief: ReviewBrief) -> str:
+    unique: list[SourceRef] = []
+    seen: set[tuple[object, ...]] = set()
+    for source in item.sources:
+        key = (source.url, source.path, source.line_start, source.line_end)
+        if key in seen:
+            continue
+        seen.add(key)
+        if not source.url and source.path and brief.packet.head_sha:
+            line = f"#L{source.line_start}" if source.line_start else ""
+            if source.line_end and source.line_end != source.line_start:
+                line += f"-L{source.line_end}"
+            source = SourceRef(
+                label=source.label,
+                url=(
+                    f"https://github.com/{brief.packet.repository}/blob/"
+                    f"{brief.packet.head_sha}/{quote(source.path, safe='/')}{line}"
+                ),
+                path=source.path,
+                line_start=source.line_start,
+                line_end=source.line_end,
+            )
+        unique.append(source)
+    shown = " · ".join(_source(source) for source in unique[:3])
+    return shown + (
+        f' <span class="more">+{len(unique) - 3} sources</span>'
+        if len(unique) > 3
+        else ""
     )
 
 
-def _ci_copy(observations: tuple[object, ...]) -> str:
+def _ci_copy(observations: tuple[VerificationObservation, ...]) -> str:
     if not observations:
         return "CI: no run observed"
-    if any(getattr(item, "conclusion", "").casefold() in {"failure", "error", "cancelled", "timed_out"} for item in observations):
+    conclusions = {item.conclusion.casefold() for item in observations if item.conclusion}
+    if conclusions & {"failure", "failed", "error", "cancelled", "timed_out"}:
         return "CI: failure observed"
-    if any(getattr(item, "status", "").casefold() in {"queued", "pending", "in_progress"} for item in observations):
-        return "CI: running"
-    if all(getattr(item, "conclusion", "").casefold() == "success" for item in observations):
-        return "CI: passed"
-    return f"CI: {len(observations)} observations"
+    if conclusions and conclusions <= {"success", "neutral", "skipped"}:
+        return "CI: passing"
+    return "CI: queued or running"
 
 
-def _statement_row(statement: ReviewStatement) -> str:
-    sources = " · ".join(_source(source) for source in statement.sources)
-    authority = {
-        "issue": "Issue",
-        "pr_description": "PR description",
-        "pr_title": "PR title",
-        "provided": "Provided input",
-    }[statement.authority]
+def _changed_file(item: ChangedFile) -> str:
+    href = _safe_href(item.source_url)
+    source = (
+        f'<a class="file-link" href="{escape(href, quote=True)}" '
+        f'target="_blank" rel="noopener">{escape(Path(item.path).name)}</a>'
+    if href
+        else escape(Path(item.path).name)
+    )
+    counts = []
+    if item.additions is not None:
+        counts.append(f"+{item.additions}")
+    if item.deletions is not None:
+        counts.append(f"-{item.deletions}")
     return (
-        '<div class="context-row">'
-        f'<span class="context-id">{escape(statement.id)}</span>'
-        f'<span class="context-copy">{escape(statement.text)}</span>'
-        f'<span class="context-authority">{escape(authority)}</span>'
-        + (f'<span class="context-source">Source: {sources}</span>' if sources else "")
+        '<div class="file-row"><div class="file-name">'
+        f'{source}<span class="file-path">{escape(item.path)}</span></div>'
+        f'<div class="file-state">{escape(item.status)}'
+        + (f" · {' '.join(counts)}" if counts else "")
+        + "</div></div>"
+    )
+
+
+def _statement_context(label: str, statements: tuple[ReviewStatement, ...]) -> str:
+    if not statements:
+        return ""
+    rows = []
+    for item in statements:
+        sources = " · ".join(_source(source) for source in item.sources)
+        rows.append(
+            '<div class="context-row">'
+            f'<span class="context-id">{escape(item.id)}</span>'
+            f'<span class="context-copy">{escape(item.text)}</span>'
+            f'<span class="context-authority">{escape(item.authority.replace("_", " "))}</span>'
+            + (
+                f'<span class="context-source">Source: {sources}</span>'
+                if sources
+                else ""
+            )
+            + "</div>"
+        )
+    return (
+        f'<details class="context"><summary>{escape(label)} · {len(statements)} '
+        f"statement{'s' if len(statements) != 1 else ''}</summary>"
+        f'<div class="context-list">{"".join(rows)}</div></details>'
+    )
+
+
+def _relation_fact(
+    relation: ProjectionRelation,
+    brief: ReviewBrief,
+    *,
+    label: str,
+) -> str:
+    evidence = brief.evidence_catalog.by_id().get(relation.target_id)
+    if evidence is None:
+        return ""
+    sources = _sources(evidence, brief)
+    reason = relation.reasons[0] if relation.reasons else None
+    reason_copy = reason.detail if reason else relation.association.replace("_", " ")
+    return (
+        '<div class="projection-item">'
+        f'<span class="relation-label">{escape(label)}</span>'
+        f'<span class="projection-copy">{escape(evidence.summary)}</span>'
+        f'<span class="relation-reason">{escape(reason_copy)}</span>'
+        + (
+            f'<span class="projection-source">Source: {sources}</span>'
+            if sources
+            else ""
+        )
         + "</div>"
     )
 
 
-def _statement_context(
+def _diagnostic_rows(
+    diagnostics: tuple[ProjectionDiagnostic, ...],
     *,
-    label: str,
-    statements: tuple[ReviewStatement, ...],
+    slots: set[str],
 ) -> str:
-    rows = "".join(_statement_row(item) for item in statements)
-    if not rows:
-        return ""
-    return (
-        f'<details class="objective-context"><summary>{escape(label)} · '
-        f"{len(statements)} statement"
-        f"{'s' if len(statements) != 1 else ''}</summary>"
-        f'<div class="context-list">{rows}</div></details>'
-    )
-
-
-def _binding_basis(binding: CandidateBinding) -> str:
-    reasons = []
-    for reason in binding.reasons:
-        terms = (
-            " · " + ", ".join(reason.matched_terms)
-            if reason.matched_terms
-            else ""
-        )
-        reasons.append(
-            '<span class="basis-chip" title="'
-            + escape(reason.detail, quote=True)
-            + '">'
-            + escape(reason.feature.replace("_", " "))
-            + escape(terms)
-            + f" · +{reason.weight}</span>"
-        )
-    return "".join(reasons)
-
-
-def _candidate_sources(item: EvidenceItem, brief: ReviewBrief) -> str:
-    unique: list[SourceRef] = []
-    seen: set[tuple[object, ...]] = set()
-    for source in item.sources:
-        key = (
-            source.url,
-            source.path,
-            source.line_start,
-            source.line_end,
-        )
-        if key not in seen:
-            seen.add(key)
-            if not source.url and source.path and brief.packet.head_sha:
-                source = SourceRef(
-                    label=source.label,
-                    url=(
-                        f"https://github.com/{brief.packet.repository}/blob/"
-                        f"{brief.packet.head_sha}/{quote(source.path, safe='/')}"
-                    ),
-                    path=source.path,
-                    line_start=source.line_start,
-                    line_end=source.line_end,
-                )
-            unique.append(source)
-    shown = " · ".join(_source(source) for source in unique[:3])
-    suffix = (
-        f' <span class="candidate-more">+{len(unique) - 3} sources</span>'
-        if len(unique) > 3
-        else ""
-    )
-    return shown + suffix
-
-
-def _candidate_evidence_rows(
-    statement_id: str,
-    brief: ReviewBrief,
-) -> str:
-    evidence = brief.evidence_catalog.by_id()
-    evidence_bindings = [
-        item
-        for item in brief.candidate_bindings.items
-        if item.kind == "statement_evidence" and item.source_id == statement_id
-    ]
     rows = []
-    visible_bindings = evidence_bindings[:_VISIBLE_EVIDENCE_CANDIDATES]
-    for binding in visible_bindings:
-        item = evidence.get(binding.target_id)
-        if item is None:
+    for item in diagnostics:
+        if item.slot not in slots or item.state == "not_applicable":
             continue
-        is_execution = bool(item.metadata.get("observation_id"))
-        kind_label = (
-            "EXECUTION"
-            if is_execution
-            else "FILE FALLBACK"
-            if item.kind == "changed_file" and item.changed
-            else "FILE"
-            if item.kind == "changed_file"
-            else "CHANGED HUNK"
-            if item.kind == "changed_hunk"
-            else "CHANGED " + item.kind.replace("_", " ").upper()
-            if item.changed
-            else item.kind.replace("_", " ").upper()
-        )
-        sources = _candidate_sources(item, brief)
         rows.append(
-            '<details class="evidence-candidate">'
-            '<summary>'
-            f'<span class="evidence-kind">{escape(kind_label)}</span>'
-            f'<span class="candidate-copy">{escape(item.summary)}</span>'
-            f'<span class="candidate-score">relevance {binding.score}</span>'
-            "</summary>"
-            '<div class="candidate-detail">'
-            f'<div class="candidate-basis">{_binding_basis(binding)}</div>'
-            + (
-                f'<div class="candidate-source">Source: {sources}</div>'
-                if sources
-                else ""
-            )
-            + "</div></details>"
-        )
-    hidden_count = len(evidence_bindings) - len(visible_bindings)
-    if hidden_count:
-        rows.append(
-            '<div class="candidate-overflow">'
-            f"{hidden_count} additional candidates not shown."
-            "</div>"
+            '<div class="slot-diagnostic">'
+            f'<span>{escape(item.slot.replace("_", " "))} · '
+            f'{escape(item.state.replace("_", " "))}</span>'
+            f"<p>{escape(item.message)}</p></div>"
         )
     return "".join(rows)
 
 
-def _requirement_candidate_context(
-    requirement_id: str,
+def _projection_slice(
+    review_slice: ReviewSlice,
+    statement: ReviewStatement,
     brief: ReviewBrief,
 ) -> str:
+    relations = brief.projection_candidates.by_id()
     claims = {item.id: item for item in brief.claims}
-    claim_bindings = [
-        item
-        for item in brief.candidate_bindings.items
-        if item.kind == "requirement_claim" and item.source_id == requirement_id
-    ]
+
     claim_rows = []
-    for binding in claim_bindings:
-        claim = claims.get(binding.target_id)
-        if claim is None:
+    for relation_id in review_slice.claim_relation_ids:
+        relation = relations.get(relation_id)
+        claim = claims.get(relation.target_id) if relation else None
+        if relation is None or claim is None:
             continue
         source = " · ".join(_source(item) for item in claim.sources)
+        reason = relation.reasons[0] if relation.reasons else None
         claim_rows.append(
-            '<div class="claim-candidate">'
-            f'<span class="candidate-id">{escape(claim.id)}</span>'
-            f'<span class="candidate-copy">{escape(claim.text)}</span>'
-            f'<span class="candidate-score">relevance {binding.score}</span>'
-            f'<div class="candidate-basis">{_binding_basis(binding)}</div>'
+            '<div class="projection-item">'
+            f'<span class="relation-label">{escape(relation.association.replace("_", " "))}</span>'
+            f'<span class="projection-copy"><b>{escape(claim.id)}</b> {escape(claim.text)}</span>'
             + (
-                f'<div class="candidate-source">Source: {source}</div>'
+                f'<span class="relation-reason">{escape(reason.detail)}</span>'
+                if reason
+                else ""
+            )
+            + (
+                f'<span class="projection-source">Source: {source}</span>'
                 if source
                 else ""
             )
             + "</div>"
-    )
-    evidence_rows = _candidate_evidence_rows(requirement_id, brief)
-    groups = []
-    if claim_rows:
-        groups.append(
-            '<div class="candidate-group"><span class="block-title">Related PR claims</span>'
-            + "".join(claim_rows)
-            + "</div>"
         )
-    if evidence_rows:
-        groups.append(
-            '<div class="candidate-group"><span class="block-title">Evidence</span>'
-            + evidence_rows
-            + "</div>"
+
+    groups = (
+        ("Changed anchors", review_slice.changed_anchor_relation_ids, "changed fact"),
+        ("Runtime context", review_slice.runtime_relation_ids, "structural fact"),
+        ("Test context", review_slice.test_relation_ids, "structural fact"),
+        (
+            "Verification",
+            review_slice.verification_relation_ids,
+            "current-head observation",
+        ),
+        (
+            "Structural paths",
+            review_slice.structural_path_relation_ids,
+            "structural fact",
+        ),
+        ("Boundary scan", review_slice.boundary_relation_ids, "bounded scan fact"),
+    )
+    fact_groups = []
+    for heading, relation_ids, label in groups:
+        rows = "".join(
+            _relation_fact(relations[relation_id], brief, label=label)
+            for relation_id in relation_ids
+            if relation_id in relations
         )
-    if not groups:
-        return ""
-    return (
-        '<div class="candidate-context">'
-        '<div class="candidate-heading"><span>Review evidence</span>'
-        '<span class="candidate-disclaimer">Retrieval relevance only · not an acceptance conclusion</span></div>'
-        + "".join(groups)
-        + "</div>"
-    )
+        if rows:
+            fact_groups.append(
+                f'<div class="projection-group"><span class="block-title">'
+                f"{escape(heading)}</span>{rows}</div>"
+            )
 
-
-def _claim_card(statement: ReviewStatement, brief: ReviewBrief, *, open_card: bool) -> str:
-    sources = " · ".join(_source(source) for source in statement.sources)
-    evidence_rows = _candidate_evidence_rows(statement.id, brief)
-    acceptance_ids = [
-        item.source_id
-        for item in brief.candidate_bindings.items
-        if item.kind == "requirement_claim" and item.target_id == statement.id
-    ]
-    acceptance = (
-        "Acceptance link: " + ", ".join(acceptance_ids)
-        if acceptance_ids
-        else "No acceptance link"
+    claim_diagnostics = _diagnostic_rows(
+        review_slice.diagnostics,
+        slots={"claim"},
+    )
+    fact_diagnostics = _diagnostic_rows(
+        review_slice.diagnostics,
+        slots={
+            "changed_anchor",
+            "runtime_context",
+            "test_context",
+            "verification",
+            "structural_path",
+            "boundary_fact",
+        },
+    )
+    contract_label = {
+        "issue": "Issue contract",
+        "pr_description": "PR criterion",
+        "provided": "Provided contract",
+        "pr_title": "PR title",
+    }[statement.authority]
+    statement_sources = " · ".join(_source(source) for source in statement.sources)
+    authority_note = (
+        "Provisional PR-authored criterion"
+        if statement.authority == "pr_description"
+        else "Issue acceptance criterion"
+        if statement.authority == "issue"
+        else "Provided acceptance criterion"
     )
     return (
-        f'<details class="requirement claim-check"{" open" if open_card else ""}><summary>'
-        f'<span class="req-id">{escape(statement.id)}</span>'
-        f'<span class="req-title">{escape(statement.text)}</span>'
-        "</summary><div class=\"req-body\">"
-        f'<span class="source-note requirement-source">{escape(acceptance)}</span>'
-        + (f'<span class="source-note requirement-source">Source: {sources}</span>' if sources else "")
+        '<div class="projection">'
+        '<div class="projection-column">'
+        f'<span class="projection-heading">{escape(contract_label)}</span>'
+        f'<span class="profile-chip">{escape(review_slice.profile.replace("_", " "))}</span>'
+        f'<p class="projection-copy">{escape(statement.text)}</p>'
+        f'<span class="relation-reason">{escape(authority_note)}</span>'
         + (
-            '<div class="candidate-context"><div class="candidate-heading">'
-            '<span>Evidence</span><span class="candidate-disclaimer">'
-            "Retrieval relevance only · not an acceptance conclusion</span></div>"
-            + evidence_rows
-            + "</div>"
-            if evidence_rows
-            else '<p class="candidate-empty">No canonical evidence candidate was found.</p>'
+            f'<span class="projection-source">Source: {statement_sources}</span>'
+            if statement_sources
+            else ""
         )
-        + "</div></details>"
+        + "</div>"
+        '<div class="projection-arrow">→</div>'
+        '<div class="projection-column">'
+        '<span class="projection-heading">PR says</span>'
+        + "".join(claim_rows)
+        + claim_diagnostics
+        + "</div>"
+        '<div class="projection-arrow">→</div>'
+        '<div class="projection-column projection-facts">'
+        '<span class="projection-heading">Repository facts</span>'
+        + "".join(fact_groups)
+        + fact_diagnostics
+        + "</div></div>"
     )
+
+
+def _attention(brief: ReviewBrief) -> str:
+    grouped: dict[tuple[str, str], list[str]] = {}
+    for diagnostic in brief.projection.diagnostics:
+        if diagnostic.state == "not_applicable":
+            continue
+        grouped.setdefault((diagnostic.slot, diagnostic.state), []).append(
+            diagnostic.focus_statement_id
+        )
+    rows = []
+    for (slot, state), focus_ids in sorted(grouped.items()):
+        ids = tuple(dict.fromkeys(focus_ids))
+        messages = tuple(
+            dict.fromkeys(
+                item.message
+                for item in brief.projection.diagnostics
+                if item.slot == slot and item.state == state
+            )
+        )
+        attention_label = (
+            "Acceptance basis"
+            if focus_ids == ["I1"] and state == "source_absent"
+            else f"{slot.replace('_', ' ')} · {state.replace('_', ' ')}"
+        )
+        rows.append(
+            '<div class="attention-row">'
+            f'<div class="attention-kind">{escape(attention_label)}</div>'
+            f'<div class="attention-copy">{escape(", ".join(ids))} · '
+            f'{escape(" ".join(messages))}</div></div>'
+        )
+    source_codes = {
+        "github_linked_issue_not_found",
+        "github_linked_issues_unavailable",
+        "github_patch_unavailable",
+        "github_file_limit_reached",
+    }
+    source_messages = [
+        item.message for item in brief.packet.diagnostics if item.code in source_codes
+    ]
+    if source_messages:
+        rows.append(
+            '<div class="attention-row"><div class="attention-kind">Source coverage</div>'
+            f'<div class="attention-copy">{escape(" ".join(source_messages))}</div></div>'
+        )
+    if brief.guardrails:
+        rows.append(
+            '<div class="attention-row"><div class="attention-kind">Scope guardrails</div>'
+            '<div class="attention-copy">'
+            + escape(
+                " · ".join(f"{item.id}: {item.text}" for item in brief.guardrails)
+            )
+            + "</div></div>"
+        )
+    return "".join(rows) or '<p class="empty">No unresolved attention items.</p>'
 
 
 def render_html(brief: ReviewBrief) -> str:
     packet = brief.packet
-    requirement_cards = []
-    for index, requirement in enumerate(brief.requirements):
-        candidate_context = _requirement_candidate_context(
-            requirement.id,
-            brief,
-        )
-        sources = " · ".join(_source(source) for source in requirement.sources)
-        authority_note = (
-            "Provisional PR-authored criterion"
-            if requirement.authority == "pr_description"
-            else "Issue acceptance criterion"
-            if requirement.authority == "issue"
-            else "Provided acceptance criterion"
-        )
-        requirement_cards.append(
-            f'<details class="requirement"{" open" if index == 0 else ""}><summary>'
-            f'<span class="req-id">{escape(requirement.id)}</span><span class="req-title">{escape(requirement.text)}</span>'
-            '</summary>'
-            '<div class="req-body">'
-            + (
-                f'<span class="source-note requirement-source">Source: {sources}'
-                f" · {escape(authority_note)}</span>"
-                if sources
-                else ""
-            )
-            + candidate_context
-            + '</div></details>'
-        )
-    claim_cards = "".join(
-        _claim_card(statement, brief, open_card=index == 0)
-        for index, statement in enumerate(brief.claims)
-    )
-    checks = "".join(requirement_cards) if requirement_cards else claim_cards
-    if not checks:
-        checks = (
-            '<div class="empty-state"><strong>No explicit acceptance criteria or PR claims found.</strong>'
-            "<span>The title and prose intent are retained as context, not promoted "
-            "to review checks.</span></div>"
-        )
-    semantic_context = (
-        _statement_context(
-            label="Objective context",
-            statements=brief.objectives,
-        )
-        + _statement_context(
-            label="Scope context",
-            statements=brief.scope,
-        )
-    )
-    files = "".join(_changed_file(item) for item in packet.changed_files) or '<p class="empty">Not provided.</p>'
-    attention_rows: list[str] = []
-    if not brief.requirements and not brief.guardrails:
-        attention_rows.append(
-            '<div class="attention-row"><div class="attention-kind">Acceptance basis</div>'
-            '<div class="attention-copy">No explicit acceptance criteria found. '
-            "Intent, objectives, and PR claims are not sufficient to determine "
-            "requirement satisfaction.</div></div>"
-        )
-    delivery_requirements = brief.requirements
-    requirement_ids_with_claims = {
-        item.source_id
-        for item in brief.candidate_bindings.items
-        if item.kind == "requirement_claim"
+    statements = {
+        item.id: item for item in (*brief.requirements, *brief.guardrails)
     }
-    requirement_ids_without_claims = [
-        item.id for item in delivery_requirements if item.id not in requirement_ids_with_claims
-    ]
-    if requirement_ids_without_claims:
-        attention_rows.append(
-            '<div class="attention-row"><div class="attention-kind">PR claim coverage</div>'
-            '<div class="attention-copy">'
-            + escape(", ".join(requirement_ids_without_claims))
-            + " have no related PR claim candidate. This is a communication gap, "
-            "not evidence that the requirement is unimplemented.</div></div>"
+    cards = []
+    for index, review_slice in enumerate(brief.projection.slices):
+        statement = statements.get(review_slice.focus_statement_id)
+        if statement is None:
+            continue
+        cards.append(
+            f'<details class="requirement"{" open" if index == 0 else ""}>'
+            '<summary>'
+            f'<span class="req-id">{escape(statement.id)}</span>'
+            f'<span class="req-title">{escape(statement.text)}</span>'
+            '</summary><div class="req-body">'
+            f"{_projection_slice(review_slice, statement, brief)}</div></details>"
         )
-    delivery_requirement_ids = {item.id for item in delivery_requirements}
-    requirement_ids_without_evidence = tuple(
-        item_id
-        for item_id in brief.candidate_bindings.coverage.requirement_ids_without_evidence_candidates
-        if item_id in delivery_requirement_ids
-    )
-    if requirement_ids_without_evidence:
-        attention_rows.append(
-            '<div class="attention-row"><div class="attention-kind">Requirement evidence coverage</div>'
-            '<div class="attention-copy">'
-            + escape(", ".join(requirement_ids_without_evidence))
-            + " have no canonical evidence candidate. Manual review is still required.</div></div>"
+    if not cards:
+        cards.append(
+            '<div class="empty-state"><strong>No explicit acceptance criteria found.</strong>'
+            "<span>Intent and PR claims remain context and were not promoted to "
+            "requirements.</span></div>"
         )
-    claim_ids_with_evidence = {
-        item.source_id
-        for item in brief.candidate_bindings.items
-        if item.kind == "statement_evidence"
-    }
-    claim_ids_without_evidence = [
-        item.id for item in brief.claims if item.id not in claim_ids_with_evidence
-    ]
-    if claim_ids_without_evidence:
-        attention_rows.append(
-            '<div class="attention-row"><div class="attention-kind">Claim evidence coverage</div>'
-            '<div class="attention-copy">'
-            + escape(", ".join(claim_ids_without_evidence))
-            + " have no supporting evidence candidate.</div></div>"
-        )
-    claims_without_requirements = (
-        brief.candidate_bindings.coverage.claim_ids_without_requirement_candidates
-    )
-    if claims_without_requirements:
-        claims_by_id = {item.id: item for item in brief.claims}
-        claim_copy = " · ".join(
-            f"{claim_id}: {claims_by_id[claim_id].text}"
-            for claim_id in claims_without_requirements
-            if claim_id in claims_by_id
-        )
-        attention_rows.append(
-            '<div class="attention-row"><div class="attention-kind">Claims without acceptance links</div>'
-            '<div class="attention-copy">'
-            + escape(claim_copy or ", ".join(claims_without_requirements))
-            + " · No related delivery requirement candidate. These remain PR-authored "
-            "review context and may need scope review.</div></div>"
-        )
-    evidence_by_id = brief.evidence_catalog.by_id()
-    changed_without_statement = [
-        evidence_by_id[item_id]
-        for item_id in brief.candidate_bindings.coverage.evidence_ids_without_statement_candidates
-        if item_id in evidence_by_id and evidence_by_id[item_id].changed
-    ]
-    if changed_without_statement:
-        summaries = "; ".join(item.summary for item in changed_without_statement[:8])
-        suffix = (
-            f" (+{len(changed_without_statement) - 8} more)"
-            if len(changed_without_statement) > 8
-            else ""
-        )
-        attention_rows.append(
-            '<div class="attention-row"><div class="attention-kind">Changed evidence without statement candidates</div>'
-            f'<div class="attention-copy">{escape(summaries + suffix)}</div></div>'
-        )
-    candidate_limits = [
-        item.message
-        for item in brief.candidate_bindings.diagnostics
-        if item.code == "candidate_binding_budget_reached"
-    ]
-    if candidate_limits:
-        attention_rows.append(
-            '<div class="attention-row"><div class="attention-kind">Candidate coverage limit</div>'
-            f'<div class="attention-copy">{escape(" ".join(candidate_limits))}</div></div>'
-        )
-    if brief.guardrails:
-        guardrail_copy = " · ".join(f"{item.id}: {item.text}" for item in brief.guardrails)
-        attention_rows.append(
-            '<div class="attention-row"><div class="attention-kind">Scope guardrails</div><div class="attention-copy">'
-            + escape(guardrail_copy)
-            + "</div></div>"
-        )
-    source_gap_codes = {"github_linked_issue_not_found", "github_linked_issues_unavailable", "github_patch_unavailable", "github_file_limit_reached"}
-    source_gaps = [item.message for item in packet.diagnostics if item.code in source_gap_codes]
-    if source_gaps:
-        attention_rows.append(
-            '<div class="attention-row"><div class="attention-kind">Source coverage</div><div class="attention-copy">'
-            + escape(" ".join(source_gaps))
-            + "</div></div>"
-        )
-    attention = "".join(attention_rows) or '<p class="empty">No unresolved attention items.</p>'
-    source_links = []
+
     source_priority = {"linked_issue": 0, "ticket": 0, "pull_request": 1}
-    for record in sorted(packet.source_records, key=lambda item: source_priority.get(item.kind, 2)):
-        if record.kind in {"linked_issue", "ticket", "pull_request"} and record.url:
-            source_links.append(_source(SourceRef(label=record.kind, url=record.url)))
+    source_links = [
+        _source(SourceRef(label=record.kind, url=record.url))
+        for record in sorted(
+            packet.source_records,
+            key=lambda item: source_priority.get(item.kind, 2),
+        )
+        if record.kind in {"linked_issue", "ticket", "pull_request"} and record.url
+    ]
     source_line = " · ".join(source_links) or "Source URL not provided."
-    pr_label = f"PR #{packet.pull_request}" if packet.pull_request is not None else "Fixture review"
-    pr_state = "Merged" if packet.metadata.get("merged") else ("Draft" if packet.metadata.get("draft") else str(packet.metadata.get("state") or "Unknown").title())
-    pr_link = _source(SourceRef(label=pr_label, url=packet.source_url)) if packet.source_url else escape(pr_label)
-    ci_summary = _ci_copy(packet.verification_observations)
+    pr_label = (
+        f"PR #{packet.pull_request}"
+        if packet.pull_request is not None
+        else "Fixture review"
+    )
+    pr_state = (
+        "Merged"
+        if packet.metadata.get("merged")
+        else "Draft"
+        if packet.metadata.get("draft")
+        else str(packet.metadata.get("state") or "Unknown").title()
+    )
+    pr_link = (
+        _source(SourceRef(label=pr_label, url=packet.source_url))
+        if packet.source_url
+        else escape(pr_label)
+    )
+    files = "".join(_changed_file(item) for item in packet.changed_files)
+    semantic_context = _statement_context(
+        "Objective context",
+        brief.objectives,
+    ) + _statement_context("Scope context", brief.scope) + _statement_context(
+        "PR claim context",
+        brief.claims,
+    )
+
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{escape(packet.title)} · PrismCode</title>
 <style>
-:root {{ color-scheme:dark;--bg:#080c0f;--panel:#10171b;--border:#26373f;--text:#edf3f0;--muted:#9eaaaf;--faint:#6f7d83;--green:#7be3ac;--green-bg:rgba(46,111,78,.18);--blue-bg:rgba(49,91,121,.18);--amber-bg:rgba(106,85,30,.20);--red-bg:rgba(131,55,49,.20);--shadow:0 22px 64px rgba(0,0,0,.28);}}
-*{{box-sizing:border-box}}html{{scroll-behavior:smooth}}body{{margin:0;color:var(--text);line-height:1.55;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 18% -8%,rgba(69,167,118,.12),transparent 31rem),radial-gradient(circle at 92% 8%,rgba(84,139,180,.06),transparent 28rem),var(--bg)}}
-code{{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:-.015em}}.shell{{width:min(1160px,calc(100% - 40px));margin:30px auto 84px}}.topbar{{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:22px}}.brand{{display:inline-flex;align-items:center;gap:11px;font-weight:720}}.brand-mark{{width:14px;height:14px;border:2px solid rgba(255,255,255,.92);transform:rotate(45deg);border-radius:3px;box-shadow:0 0 0 5px rgba(117,224,167,.06)}}
-.section{{border:2px solid var(--border);border-radius:18px;background:linear-gradient(180deg,rgba(17,24,28,.97),rgba(11,17,21,.98));box-shadow:var(--shadow);padding:28px;margin-bottom:22px}}h1{{font-size:31px;margin:0 0 14px;letter-spacing:-.025em}}h2{{font-size:22px;margin:0 0 12px;letter-spacing:-.02em}}.meta{{display:flex;flex-wrap:wrap;gap:9px;color:var(--muted);font-size:13px;margin-bottom:16px}}.intent{{max-width:850px;color:#d2dade;font-size:15px}}.source-link,.file-link{{color:#b9dfff;text-decoration:none;background-image:linear-gradient(currentColor,currentColor);background-size:0 1px;background-position:0 100%;background-repeat:no-repeat;transition:background-size .18s ease}}.source-link:hover,.file-link:hover{{background-size:100% 1px}}
-.badge{{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;font-size:10px;font-weight:760;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}}.badge.good{{background:var(--green-bg);color:#c7f4d9}}.badge.info{{background:var(--blue-bg);color:#cce8ff}}.badge.warn{{background:var(--amber-bg);color:#ffe3a0}}.badge.danger{{background:var(--red-bg);color:#ffb0a9}}.badge.muted{{background:rgba(111,128,135,.12);color:#aeb9be}}
-.requirements{{border-top:1px solid rgba(111,128,135,.24)}}.requirement{{border-bottom:1px solid rgba(111,128,135,.24)}}.requirement summary{{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px minmax(0,1fr);gap:16px;align-items:center;padding:18px 0}}.requirement summary::-webkit-details-marker{{display:none}}.req-id{{color:var(--green);font-size:12px;font-weight:760;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}}.req-title{{font-size:14px;font-weight:640}}.req-body{{padding:0 0 20px 68px}}.requirement-source{{margin:0 0 12px}}.block-title{{display:block;margin-bottom:5px;color:#89979d;font-size:10px;letter-spacing:.045em;font-weight:700;text-transform:uppercase}}.block-copy{{color:#d7dddf;font-size:13px}}.source-note{{display:block;margin-top:8px;color:var(--faint);font-size:10px;line-height:1.45}}.evidence-sources{{margin-top:14px}}.source-chip{{display:inline-flex;margin:0 7px 7px 0;padding:4px 8px;border-radius:999px;text-decoration:none;font-size:10px;font-weight:740;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}}.source-chip.code{{background:var(--green-bg);color:#c7f4d9}}.source-chip.test{{background:var(--blue-bg);color:#cce8ff}}
-.sources{{color:var(--faint);font-size:11px;line-height:1.7}}.objective-context{{margin-bottom:12px;padding:0 0 12px;border-bottom:1px solid rgba(111,128,135,.24)}}.objective-context>summary{{cursor:pointer;color:var(--muted);font-size:11px;font-weight:680;list-style:none}}.objective-context>summary::-webkit-details-marker{{display:none}}.objective-context .context-list{{margin-top:10px}}.candidate-context{{margin-top:16px;padding-top:14px;border-top:1px solid rgba(111,128,135,.24)}}.candidate-heading{{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:15px;font-size:12px;font-weight:720}}.candidate-disclaimer{{color:var(--faint);font-size:9px;font-weight:560}}.candidate-group+ .candidate-group{{margin-top:16px}}.claim-candidate{{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:8px 10px;padding:10px 0;border-bottom:1px solid rgba(111,128,135,.16)}}.candidate-id{{color:#9fcdf0;font:700 10px ui-monospace,SFMono-Regular,Menlo,monospace}}.candidate-copy{{font-size:11px;color:#d7dddf}}.candidate-score{{color:var(--faint);font-size:9px;white-space:nowrap}}.candidate-basis{{grid-column:2/-1;display:flex;flex-wrap:wrap;gap:5px}}.basis-chip{{display:inline-flex;padding:3px 7px;border-radius:999px;background:rgba(92,116,128,.13);color:#aebdc4;font-size:8px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}}.candidate-source{{grid-column:2/-1;color:var(--faint);font-size:9px}}.candidate-more{{color:var(--faint)}}.candidate-empty{{margin:4px 0 0;color:var(--faint);font-size:10px;font-style:italic}}.candidate-overflow{{padding:9px 0;color:var(--faint);font-size:9px}}.evidence-candidate{{border-bottom:1px solid rgba(111,128,135,.16)}}.evidence-candidate summary{{display:grid;grid-template-columns:112px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 0;cursor:pointer;list-style:none}}.evidence-candidate summary::-webkit-details-marker{{display:none}}.evidence-kind{{color:#a7d8bd;font-size:8px;font-weight:760;letter-spacing:.035em}}.candidate-detail{{padding:0 0 10px 122px}}.section-copy{{margin:-4px 0 16px;color:var(--muted);font-size:12px}}.empty-state{{display:grid;gap:5px;padding:18px 0;color:var(--muted);font-size:12px}}.empty-state strong{{color:#e8d18e;font-size:13px}}.context-list{{border-top:1px solid rgba(111,128,135,.24)}}.context-row{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px;gap:12px;align-items:start;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.context-id{{color:#9fcdf0;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace}}.context-copy{{font-size:13px}}.context-authority{{color:var(--muted);font-size:10px;text-align:right}}.context-source{{grid-column:2/-1;color:var(--faint);font-size:10px}}.attention-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:210px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:#e7ca7c;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-list{{display:grid;gap:0;border-top:1px solid rgba(111,128,135,.24)}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px;white-space:nowrap}}.empty{{color:var(--faint);font-size:12px;font-style:italic}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}
-@media(max-width:900px){{.requirement summary{{grid-template-columns:46px 1fr}}.req-body{{padding-left:62px}}.attention-row{{grid-template-columns:1fr;gap:8px}}}}@media(max-width:560px){{.shell{{width:min(100% - 18px,1160px);margin-top:16px}}.section{{padding:22px 20px}}.topbar{{align-items:flex-start;flex-direction:column}}.file-row{{grid-template-columns:1fr}}.file-state{{white-space:normal}}.req-body{{padding-left:0}}.candidate-heading{{align-items:flex-start;flex-direction:column}}.claim-candidate{{grid-template-columns:32px minmax(0,1fr)}}.candidate-score{{grid-column:2}}.evidence-candidate summary{{grid-template-columns:1fr}}.candidate-detail{{padding-left:0}}.candidate-basis,.candidate-source{{grid-column:1/-1}}}}
+:root{{color-scheme:dark;--bg:#080c0f;--panel:#10171b;--border:#26373f;--text:#edf3f0;--muted:#9eaaaf;--faint:#6f7d83;--green:#7be3ac;--amber:#e7ca7c;--shadow:0 22px 64px rgba(0,0,0,.28)}}*{{box-sizing:border-box}}body{{margin:0;color:var(--text);line-height:1.55;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 18% -8%,rgba(69,167,118,.12),transparent 31rem),var(--bg)}}code{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}}.shell{{width:min(1180px,calc(100% - 40px));margin:30px auto 84px}}.topbar{{margin-bottom:22px;font-weight:720}}.brand-mark{{display:inline-block;width:14px;height:14px;margin-right:10px;border:2px solid white;transform:rotate(45deg);border-radius:3px}}.section{{border:2px solid var(--border);border-radius:18px;background:linear-gradient(180deg,rgba(17,24,28,.97),rgba(11,17,21,.98));box-shadow:var(--shadow);padding:28px;margin-bottom:22px}}h1{{font-size:31px;margin:0 0 14px}}h2{{font-size:22px;margin:0 0 14px}}.meta{{display:flex;flex-wrap:wrap;gap:9px;color:var(--muted);font-size:13px;margin-bottom:16px}}.intent{{max-width:850px;color:#d2dade;font-size:15px}}.source-link,.file-link{{color:#b9dfff;text-decoration:none}}.source-note,.projection-source,.context-source{{display:block;color:var(--faint);font-size:10px;line-height:1.45}}.requirements{{border-top:1px solid rgba(111,128,135,.24)}}.requirement{{border-bottom:1px solid rgba(111,128,135,.24)}}.requirement summary{{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px minmax(0,1fr);gap:16px;padding:18px 0}}.requirement summary::-webkit-details-marker{{display:none}}.req-id{{color:var(--green);font:760 12px ui-monospace,SFMono-Regular,Menlo,monospace}}.req-title{{font-size:14px;font-weight:640}}.req-body{{padding:0 0 22px 68px}}.projection{{display:grid;grid-template-columns:minmax(0,.85fr) 24px minmax(0,1fr) 24px minmax(0,1.35fr);gap:10px;align-items:start}}.projection-column{{min-width:0;padding:14px;border:1px solid rgba(111,128,135,.22);border-radius:12px;background:rgba(5,10,13,.24)}}.projection-heading,.block-title{{display:block;margin-bottom:9px;color:#89979d;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.045em}}.projection-arrow{{align-self:center;color:var(--faint);text-align:center}}.profile-chip,.relation-label{{display:inline-flex;margin:0 0 8px;padding:3px 7px;border-radius:999px;background:rgba(54,118,87,.20);color:#bfeacf;font-size:8px;font-weight:720}}.projection-copy{{margin:0 0 7px;color:#d7dddf;font-size:11px}}.projection-item{{padding:9px 0;border-bottom:1px solid rgba(111,128,135,.16)}}.projection-item:last-child{{border-bottom:0}}.relation-reason{{display:block;color:var(--faint);font-size:9px;margin-bottom:6px}}.projection-group+.projection-group{{margin-top:15px}}.slot-diagnostic{{margin:9px 0;padding:9px;border-radius:8px;background:rgba(106,85,30,.16);color:#e8d18e;font-size:9px}}.slot-diagnostic p{{margin:3px 0 0;color:var(--muted)}}.context{{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(111,128,135,.24)}}.context>summary{{cursor:pointer;color:var(--muted);font-size:11px}}.context-row{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px;gap:12px;padding:12px 0;border-bottom:1px solid rgba(111,128,135,.18)}}.context-id{{color:#9fcdf0;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace}}.context-copy{{font-size:12px}}.context-authority{{color:var(--muted);font-size:10px;text-align:right}}.context-source{{grid-column:2/-1}}.attention-list,.file-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:var(--amber);font-size:10px;font-weight:700;text-transform:uppercase}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px}}.empty,.empty-state{{color:var(--faint);font-size:12px}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}@media(max-width:950px){{.projection{{grid-template-columns:1fr}}.projection-arrow{{transform:rotate(90deg)}}.req-body{{padding-left:0}}}}@media(max-width:600px){{.shell{{width:calc(100% - 18px);margin-top:16px}}.section{{padding:22px 20px}}.attention-row,.context-row{{grid-template-columns:1fr}}}}
 </style></head><body><main class="shell">
-<div class="topbar"><div class="brand"><span class="brand-mark"></span> PrismCode</div></div>
-<section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{len(packet.changed_files)} changed files</span><span>·</span><span>{escape(ci_summary)}</span></div>
-<h1>{escape(packet.title)}</h1><div class="intent">{escape(brief.intent.text)}</div>
-<span class="source-note">Source: {source_line}</span>
-</section>
-<section class="section"><h2>Review checks</h2>{semantic_context}<div class="requirements">{checks}</div></section>
-<section class="section"><h2>Needs attention</h2><div class="attention-list">{attention}</div></section>
-<section class="section"><h2>Changed areas</h2><div class="file-list">{files}</div></section>
+<div class="topbar"><span class="brand-mark"></span>PrismCode</div>
+<section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{len(packet.changed_files)} changed files</span><span>·</span><span>{escape(_ci_copy(packet.verification_observations))}</span></div><h1>{escape(packet.title)}</h1><div class="intent">{escape(brief.intent.text)}</div><span class="source-note">Source: {source_line}</span></section>
+<section class="section"><h2>Review checks</h2>{semantic_context}<div class="requirements">{"".join(cards)}</div></section>
+<section class="section"><h2>Needs attention</h2><div class="attention-list">{_attention(brief)}</div></section>
+<section class="section"><h2>Changed areas</h2><div class="file-list">{files or '<p class="empty">Not provided.</p>'}</div></section>
 <div class="footer">PrismCode · {escape(pr_label)} · Schema {escape(brief.schema_version)} · Generated by {escape(brief.generated_by)}</div>
 </main></body></html>"""
 
