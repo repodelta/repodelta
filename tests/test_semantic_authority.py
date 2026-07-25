@@ -408,10 +408,6 @@ def test_context_and_typed_claims_use_the_canonical_binding_path() -> None:
     )
 
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
-    source_ids = {
-        item.source_id
-        for item in brief.candidate_bindings.items
-        if item.kind == "statement_evidence"
-    }
-
-    assert {"S1", "C1", "B1", "V1"} <= source_ids
+    assert [item.id for item in brief.scope] == ["S1"]
+    assert [item.id for item in brief.claims] == ["C1", "B1", "V1"]
+    assert brief.projection.slices == ()

@@ -16,7 +16,7 @@ This repository is the standalone open-core implementation. It does not import c
 The open core provides:
 
 - a versioned, conclusion-free `ReviewSourcePacket` shared by fixture and GitHub ingestion;
-- conclusion-free requirements plus one canonical evidence and candidate-binding graph;
+- conclusion-free requirements plus one canonical evidence catalog and typed fact-routing projection;
 - offline JSON fixture ingestion;
 - live GitHub pull request metadata and changed-file ingestion;
 - GitHub GraphQL Development-link Issue ingestion plus current-head REST check-run and commit-status observations;
@@ -201,7 +201,7 @@ private managed services
         │ implement public protocols / call public core
         ▼
 PrismCode open core
-ReviewSourcePacket → canonical evidence → candidate bindings → ReviewBrief → renderer
+ReviewSourcePacket → canonical evidence → typed fact routing → ReviewProjection → renderer
 ```
 
 The open core must remain independently installable and runnable. Optional hosted capabilities should integrate through public protocols or an explicit HTTPS backend, never through an unavailable private import.

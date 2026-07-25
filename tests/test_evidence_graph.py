@@ -127,7 +127,7 @@ def test_catalog_deduplicates_facts_and_links_unchanged_path_symbols() -> None:
     verification = next(item for item in catalog.items if item.kind == "check_run")
     assert verification.classification == "ci"
     assert verification.metadata["observation_id"] == "check:test"
-    assert catalog.schema_version == "evidence_catalog.v1"
+    assert catalog.schema_version == "evidence_catalog.v2"
 
     repeated = build_evidence_catalog(packet, structural)
     assert [item.id for item in repeated.items] == [item.id for item in catalog.items]
@@ -145,8 +145,8 @@ def test_review_brief_serializes_one_canonical_catalog() -> None:
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
     serialized = brief.to_dict()
 
-    assert brief.schema_version == "review_brief.v8"
-    assert serialized["evidence_catalog"]["schema_version"] == "evidence_catalog.v1"
+    assert brief.schema_version == "review_brief.v10"
+    assert serialized["evidence_catalog"]["schema_version"] == "evidence_catalog.v2"
     assert len(serialized["evidence_catalog"]["items"]) == 1
     assert serialized["evidence_catalog"]["items"][0]["kind"] == "changed_file"
 
@@ -166,7 +166,10 @@ def test_patch_hunks_are_canonical_fallback_evidence() -> None:
     ).with_revision()
     catalog = build_evidence_catalog(packet)
     assert [item.kind for item in catalog.items] == ["changed_hunk"]
-    assert catalog.items[0].metadata["patch_excerpt"] == "new_bounded_call()"
+    assert catalog.items[0].metadata["head_excerpt"] == "new_bounded_call()"
+    assert catalog.items[0].metadata["base_excerpt"] == "old_call()"
+    assert catalog.items[0].revision_side == "head"
+    assert catalog.items[0].operation == "modified"
 
 
 def test_exact_symbol_replaces_its_mapped_hunk_evidence() -> None:

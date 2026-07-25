@@ -401,7 +401,7 @@ def test_analyzer_preserves_structural_facts_without_using_them_as_conclusions(
     )
 
     assert brief.structural_graph is structural
-    assert brief.schema_version == "review_brief.v8"
+    assert brief.schema_version == "review_brief.v10"
     assert brief.requirements == lexical_only.requirements == ()
     serialized = brief.to_dict()
     assert serialized["structural_graph"]["schema_version"] == (
