@@ -16,6 +16,7 @@ from prismcode.model.contracts import (
     SourceRef,
     SuppliedEvidence,
     VerificationObservation,
+    VerificationIdentity,
 )
 from prismcode.changes.hunks import ChangedHunk, DiffHunkCollection
 from prismcode.providers.structural import GraphSymbol, StructuralGraphResult, StructuralPath
@@ -328,6 +329,11 @@ def verification_evidence_id(observation_id: str) -> str:
 
 
 def verification_evidence(observation: VerificationObservation) -> EvidenceItem:
+    identity = VerificationIdentity(
+        provider=observation.provider.strip().casefold() or "unknown",
+        kind=observation.kind,
+        name=" ".join(observation.name.split()).casefold(),
+    )
     return EvidenceItem(
         id=verification_evidence_id(observation.id),
         summary=(
@@ -342,13 +348,10 @@ def verification_evidence(observation: VerificationObservation) -> EvidenceItem:
         operation="observed",
         role="verification",
         observed_head_sha=observation.head_sha,
+        verification_identity=identity,
+        verification_status=observation.status.strip().casefold() or "unknown",
+        verification_conclusion=observation.conclusion.strip().casefold(),
         sources=(SourceRef(label=observation.name, url=observation.details_url),),
-        metadata={
-            "observation_id": observation.id,
-            "name": observation.name,
-            "status": observation.status,
-            "conclusion": observation.conclusion,
-        },
     )
 
 

@@ -8,6 +8,7 @@ from prismcode.model.contracts import (
     ChangedFile,
     ReviewSourcePacket,
     SourceRef,
+    VerificationIdentity,
     VerificationObservation,
     EvidenceItem,
     EvidenceCatalog,
@@ -131,8 +132,14 @@ def test_catalog_deduplicates_facts_and_links_unchanged_path_symbols() -> None:
     assert all(item.id in item.structural_path_ids for item in paths)
     verification = next(item for item in catalog.items if item.kind == "check_run")
     assert verification.classification == "ci"
-    assert verification.metadata["observation_id"] == "check:test"
-    assert catalog.schema_version == "evidence_catalog.v3"
+    assert verification.verification_identity == VerificationIdentity(
+        provider="unknown",
+        kind="check_run",
+        name="test",
+    )
+    assert verification.verification_status == "completed"
+    assert verification.verification_conclusion == "success"
+    assert catalog.schema_version == "evidence_catalog.v4"
 
     repeated = build_evidence_catalog(
         packet, parse_changed_files(packet.changed_files), structural
@@ -152,8 +159,8 @@ def test_review_brief_serializes_one_canonical_catalog() -> None:
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
     serialized = brief.to_dict()
 
-    assert brief.schema_version == "review_brief.v12"
-    assert serialized["evidence_catalog"]["schema_version"] == "evidence_catalog.v3"
+    assert brief.schema_version == "review_brief.v13"
+    assert serialized["evidence_catalog"]["schema_version"] == "evidence_catalog.v4"
     assert "structural_graph" not in serialized
     assert len(serialized["evidence_catalog"]["items"]) == 1
     assert serialized["evidence_catalog"]["items"][0]["kind"] == "changed_file"

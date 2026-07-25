@@ -166,9 +166,17 @@ text. A generic one-token overlap does not become a candidate relation.
 
 `CandidateConvergence` then applies typed dominance, bridge reachability,
 inspection budgets, and display budgets inside one R/G and one slot at a time.
-When an equivalent semantic tier crosses the display budget, stable source
-order is disclosed as a tie-break through an `ambiguous` diagnostic. There is
-no all-statement/all-evidence numeric score or global candidate budget.
+Claim, changed-anchor, context, and structural-path slots are competitive.
+Verification is a set slot keyed by first-class provider, kind, and normalized
+name: distinct current-head checks remain visible together, equivalent
+duplicates collapse, and conflicting completed outcomes remain explicit.
+Verification has a separate identity-count safety limit and different identities
+never create semantic ambiguity.
+
+When an equivalent semantic tier in a competitive slot crosses the display
+budget, stable source order is disclosed as a tie-break through an `ambiguous`
+diagnostic. There is no all-statement/all-evidence numeric score or global
+candidate budget.
 
 `ReviewProjection` references only relation IDs selected by
 `CandidateConvergence`. Profiles remain canonical in

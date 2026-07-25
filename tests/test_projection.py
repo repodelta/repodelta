@@ -12,6 +12,7 @@ from prismcode.model.contracts import (
     ReviewStatement,
     ReviewSourcePacket,
     SourceRecord,
+    VerificationIdentity,
 )
 from prismcode.evaluation.core import load_evaluation_suite
 from prismcode.intake.fixture import load_fixture
@@ -117,7 +118,7 @@ def test_every_requirement_is_routed_without_a_global_statement_budget() -> None
         structural_graph=None,
         head_sha=None,
     )
-    convergence = converge_candidates(candidates)
+    convergence = converge_candidates(candidates, evidence_catalog=EvidenceCatalog())
     projection = build_review_projection(candidates, convergence)
 
     assert len(candidates.groups) == 80
@@ -260,6 +261,7 @@ def test_changed_anchor_selection_uses_typed_ordinal_not_hashed_id() -> None:
     )
     convergence = converge_candidates(
         candidates,
+        evidence_catalog=evidence,
         policy=ConvergencePolicy(max_changed=1),
     )
     selected_ids = set(convergence.selected_relation_ids())
@@ -369,6 +371,7 @@ def test_per_slot_budget_marks_only_that_focus_and_slot() -> None:
     )
     convergence = converge_candidates(
         candidates,
+        evidence_catalog=EvidenceCatalog(items=evidence),
         policy=ConvergencePolicy(
             max_changed=2,
             max_candidates_per_slot=4,
@@ -417,6 +420,63 @@ def test_verification_is_current_head_fact_not_pr_claim() -> None:
     assert _selected_targets(brief, "R1", "verification") == ()
 
 
+def test_verification_routing_excludes_stale_head_observations() -> None:
+    evidence = EvidenceCatalog(
+        items=(
+            EvidenceItem(
+                id="E:current",
+                summary="test: completed/success",
+                kind="check_run",
+                classification="ci",
+                profile="verification",
+                authority="verification_provider",
+                role="verification",
+                observed_head_sha="head",
+                verification_identity=VerificationIdentity(
+                    provider="github",
+                    kind="check_run",
+                    name="test",
+                ),
+                verification_status="completed",
+                verification_conclusion="success",
+            ),
+            EvidenceItem(
+                id="E:stale",
+                summary="review: completed/success",
+                kind="check_run",
+                classification="ci",
+                profile="verification",
+                authority="verification_provider",
+                role="verification",
+                observed_head_sha="old-head",
+                verification_identity=VerificationIdentity(
+                    provider="github",
+                    kind="check_run",
+                    name="review",
+                ),
+                verification_status="completed",
+                verification_conclusion="success",
+            ),
+        )
+    )
+    candidates = build_projection_candidates(
+        requirements=(Requirement(id="R1", text="Tests pass"),),
+        claims=(),
+        evidence_catalog=evidence,
+        structural_graph=None,
+        head_sha="head",
+    )
+    convergence = converge_candidates(candidates, evidence_catalog=evidence)
+
+    selected = {
+        relation.target_id
+        for relation in candidates.relations
+        if relation.id in convergence.selected_relation_ids()
+        and relation.slot == "verification"
+    }
+    assert selected == {"E:current"}
+
+
 def test_document_and_workflow_facts_are_routed_by_profile() -> None:
     requirements = (
         Requirement(id="R1", text="Documentation explains bounded_trace."),
@@ -453,7 +513,10 @@ def test_document_and_workflow_facts_are_routed_by_profile() -> None:
         structural_graph=None,
         head_sha=None,
     )
-    convergence = converge_candidates(candidates)
+    convergence = converge_candidates(
+        candidates,
+        evidence_catalog=evidence,
+    )
     selected_ids = set(convergence.selected_relation_ids())
     selected = {
         (item.focus_statement_id, item.target_id)

@@ -24,7 +24,8 @@ Every R/G is visited independently. Its candidates are separated into:
 - guardrail coverage diagnostics.
 
 PR claims, changed symbols, paths, and CI observations never compete in one
-numeric score or global candidate budget.
+numeric score or global candidate budget. The first five evidence-bearing slots
+are competitive selections; current-head verification is a set.
 
 ## Associations
 
@@ -66,11 +67,18 @@ change operation, role, and profile. Head- and base-side hunk text are never
 collapsed into one matching string. Repository-local `R1`/`G1` tokens are not
 treated as issue references.
 
-Convergence is ordinal inside each typed slot. Typed association dominance is
-applied before stable source ordinal. Opaque evidence hashes are stable
-identifiers, not ranking signals. When an equivalent tier crosses a display
-budget, the selected prefix remains deterministic and an ambiguity diagnostic
-states that source order is only a presentation tie-break.
+Convergence is ordinal inside each competitive typed slot. Typed association
+dominance is applied before stable source ordinal. Opaque evidence hashes are
+stable identifiers, not ranking signals. When an equivalent tier crosses a
+display budget, the selected prefix remains deterministic and an ambiguity
+diagnostic states that source order is only a presentation tie-break.
+
+Verification convergence uses first-class `(provider, kind, normalized name)`
+identity. Different identities are retained together. Equivalent observations
+for one identity collapse; conflicting completed outcomes for one identity
+remain visible as `conflicting_facts`. Only a separate identity-count safety
+limit can truncate verification, retaining failure before pending before success
+at that boundary. Stale-head observations are filtered during routing.
 
 Provider coverage belongs to the review and carries affected IDs. Claim
 coverage distinguishes an absent PR description, a present description with no
