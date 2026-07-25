@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from prismcode.model.contracts import (
+    CandidateConvergence,
     ProjectionCandidateSet,
     ReviewProjection,
     ReviewSlice,
@@ -9,16 +10,20 @@ from prismcode.model.contracts import (
 
 def build_review_projection(
     candidates: ProjectionCandidateSet,
+    convergence: CandidateConvergence,
 ) -> ReviewProjection:
-    """Project selected typed relation IDs without performing retrieval."""
+    """Project converged relation IDs without performing retrieval or selection."""
 
     relations = candidates.by_id()
+    convergence_groups = {
+        item.focus_statement_id: item for item in convergence.groups
+    }
     slices = []
     for group in candidates.groups:
+        converged = convergence_groups[group.focus_statement_id]
         selected = tuple(
             relations[relation_id]
-            for relation_id in group.relation_ids
-            if relations[relation_id].state == "selected"
+            for relation_id in converged.selected_relation_ids
         )
         by_slot = {
             slot: tuple(item.id for item in selected if item.slot == slot)
@@ -40,7 +45,10 @@ def build_review_projection(
                 test_relation_ids=by_slot["test_context"],
                 verification_relation_ids=by_slot["verification"],
                 structural_path_relation_ids=by_slot["structural_path"],
-                diagnostic_ids=group.diagnostic_ids,
+                diagnostic_ids=(
+                    *group.diagnostic_ids,
+                    *converged.diagnostic_ids,
+                ),
             )
         )
     return ReviewProjection(slices=tuple(slices))

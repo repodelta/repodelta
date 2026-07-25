@@ -62,10 +62,11 @@ projection of the same result.
 ## Safety boundary
 
 Evaluation observes the production `ProjectionCandidateSet`,
-`ReviewProjection`, and `EvidenceCatalog`. It does not implement another
-retriever, render review HTML, or turn candidate relevance into an
-implementation, verification, or acceptance conclusion. A suite with no
-projection selection assertions fails rather than reporting vacuous success.
+`CandidateConvergence`, `ReviewProjection`, and `EvidenceCatalog`. It does not
+implement another retriever or convergence path, render review HTML, or turn
+candidate relevance into an implementation, verification, or acceptance
+conclusion. A suite with no projection selection assertions fails rather than
+reporting vacuous success.
 
 Future evidence-map and LLM work should add golden cases or thresholds before
 changing production behavior.

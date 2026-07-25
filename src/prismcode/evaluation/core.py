@@ -240,7 +240,10 @@ def evaluate_suite(
             case.expected_no_selections,
         )
         observed_by_query = _observed_queries(
-            brief.projection_candidates.relations
+            brief.projection_candidates.relations,
+            selected_relation_ids=set(
+                brief.candidate_convergence.selected_relation_ids()
+            ),
         )
         for (slot, focus_statement_id), expected_ids in grouped.items():
             observed_ids = observed_by_query.get((slot, focus_statement_id), ())
@@ -307,7 +310,10 @@ def evaluate_suite(
             )
         diagnostics.extend(
             f"{case.id}: {item.slot}: {item.state}: {item.message}"
-            for item in brief.projection_candidates.diagnostics
+            for item in (
+                *brief.projection_candidates.diagnostics,
+                *brief.candidate_convergence.diagnostics,
+            )
             if item.state in {"ambiguous", "budget_truncated"}
         )
 
@@ -437,10 +443,12 @@ def _expected_queries(
 
 def _observed_queries(
     relations: tuple[ProjectionRelation, ...],
+    *,
+    selected_relation_ids: set[str],
 ) -> dict[tuple[str, str], tuple[str, ...]]:
     grouped: dict[tuple[str, str], list[str]] = {}
     for relation in relations:
-        if relation.state != "selected":
+        if relation.id not in selected_relation_ids:
             continue
         grouped.setdefault(
             (relation.slot, relation.focus_statement_id), []

@@ -16,6 +16,7 @@ STAGES = (
     "providers",
     "facts",
     "routing",
+    "convergence",
     "projection",
     "presentation",
     "evaluation",
@@ -28,6 +29,7 @@ ALLOWED = {
     "providers": {"model", "changes", "providers"},
     "facts": {"model", "changes", "providers", "facts"},
     "routing": {"model", "facts", "providers", "routing"},
+    "convergence": {"model", "convergence"},
     "projection": {"model", "providers", "projection"},
     "presentation": {"model", "presentation"},
     "evaluation": set(STAGES),
@@ -87,6 +89,7 @@ def test_each_stage_documents_its_local_contract() -> None:
 
 def test_obsolete_root_modules_are_not_compatibility_paths() -> None:
     assert [name for name in REMOVED_ROOT_MODULES if (SOURCE / name).is_file()] == []
+    assert not (SOURCE / "routing" / "selection.py").exists()
 
 
 def test_presentation_does_not_read_raw_truth_sources() -> None:

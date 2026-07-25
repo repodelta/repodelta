@@ -22,8 +22,8 @@ def test_golden_suite_covers_typed_slots_structure_and_profiles() -> None:
     result = evaluate_suite(suite, suite_path=SUITE_PATH)
 
     assert result.passed is True
-    assert result.metrics.query_count == 8
-    assert result.metrics.positive_query_count == 7
+    assert result.metrics.query_count == 10
+    assert result.metrics.positive_query_count == 9
     assert result.metrics.negative_query_count == 1
     assert result.metrics.precision_at_k == 1.0
     assert result.metrics.recall_at_k == 1.0
