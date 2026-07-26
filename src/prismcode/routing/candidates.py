@@ -31,7 +31,7 @@ from prismcode.facts.semantics import (
     evidence_signature,
     requirement_profile,
 )
-from prismcode.providers.structural import StructuralGraphResult
+from prismcode.providers.structural import StructuralGraphCollection
 
 
 def build_projection_candidates(
@@ -39,7 +39,7 @@ def build_projection_candidates(
     requirements: tuple[Requirement, ...],
     claims: tuple[ReviewStatement, ...],
     evidence_catalog: EvidenceCatalog,
-    structural_graph: StructuralGraphResult | None,
+    structural_graph: StructuralGraphCollection | None,
     head_sha: str | None,
     claim_source_state: Literal[
         "source_absent", "extraction_missing", "available"
@@ -655,7 +655,7 @@ def _structural_missing(
     focus: Requirement,
     slot: ProjectionSlot,
     candidate_anchor_ids: tuple[str, ...],
-    graph: StructuralGraphResult | None,
+    graph: StructuralGraphCollection | None,
 ) -> tuple[CoverageState, str]:
     label = slot.replace("_", " ")
     if not candidate_anchor_ids:
@@ -664,7 +664,8 @@ def _structural_missing(
         return "not_applicable", (
             f"{label} was not collected because no structural provider was used."
         )
-    if not graph.index.usable:
+    head = graph.for_revision("head")
+    if head is None or not head.index.usable:
         return "not_applicable", (
             f"{label} was not collected; review-level provider coverage reports "
             "the structural source state."

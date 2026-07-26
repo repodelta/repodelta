@@ -29,12 +29,19 @@ from prismcode.convergence.core import (
 from prismcode.projection.build import build_review_projection
 from prismcode.presentation.html import render_html
 from prismcode.providers.structural import (
+    StructuralGraphCollection,
     StructuralGraphIndexStatus,
     StructuralGraphResult,
 )
 
 
 SUITE = Path("fixtures/evaluation-suite.json")
+
+
+def _head_graph(**values) -> StructuralGraphCollection:
+    return StructuralGraphCollection(
+        revisions=(StructuralGraphResult(**values),)
+    )
 
 
 def _selected_targets(brief, focus_id: str, slot: str) -> tuple[str, ...]:
@@ -661,7 +668,7 @@ def test_partial_structure_is_one_review_level_diagnostic() -> None:
                 ),
             )
         ),
-        structural_graph=StructuralGraphResult(
+        structural_graph=_head_graph(
             index=StructuralGraphIndexStatus(
                 state="partial",
                 provider="codegraph",
@@ -690,7 +697,7 @@ def test_stale_structure_is_one_review_level_diagnostic() -> None:
         ),
         claims=(),
         evidence_catalog=EvidenceCatalog(),
-        structural_graph=StructuralGraphResult(
+        structural_graph=_head_graph(
             index=StructuralGraphIndexStatus(
                 state="stale",
                 provider="codegraph",

@@ -32,8 +32,10 @@ from prismcode.facts.lexical import association_signature, merge_signatures
 from prismcode.providers.structural import (
     GraphSymbol,
     HunkSymbolOverlap,
+    StructuralGraphCollection,
     StructuralGraphResult,
     StructuralPath,
+    StructuralRevision,
 )
 
 _DOCUMENT_SUFFIXES = {".md", ".mdx", ".rst", ".txt", ".pdf", ".doc", ".docx"}
@@ -61,7 +63,7 @@ _DEPENDENCY_NAMES = {
 def build_evidence_catalog(
     packet: ReviewSourcePacket,
     changes: DiffHunkCollection,
-    structural_graph: StructuralGraphResult | None = None,
+    structural_graph: StructuralGraphCollection | None = None,
     *,
     supplied: tuple[SuppliedEvidence, ...] = (),
     guardrail_scan_results: GuardrailScanResultSet = GuardrailScanResultSet(),
@@ -77,8 +79,13 @@ def build_evidence_catalog(
         relation for hunk in changes.hunks for relation in hunk.relations
     )
     overlaps_by_hunk: dict[str, list[HunkSymbolOverlap]] = {}
-    if structural_graph is not None:
-        for overlap in structural_graph.overlaps:
+    head_graph = (
+        structural_graph.for_revision("head")
+        if structural_graph is not None
+        else None
+    )
+    if head_graph is not None:
+        for overlap in head_graph.overlaps:
             overlaps_by_hunk.setdefault(overlap.hunk_id, []).append(overlap)
 
     for changed_file in packet.changed_files:
@@ -108,91 +115,11 @@ def build_evidence_catalog(
                     )
 
     if structural_graph is not None:
-        changed_symbol_ids = {
-            overlap.symbol.id for overlap in structural_graph.overlaps
-        }
-        path_ids = {
-            _path_key(path): evidence_id("structural_path", _path_key(path))
-            for path in structural_graph.paths
-        }
-        symbol_paths: dict[str, set[str]] = {}
-        for path in structural_graph.paths:
-            path_id = path_ids[_path_key(path)]
-            symbol_paths.setdefault(path.seed_symbol_id, set()).add(path_id)
-            for step in path.steps:
-                symbol_paths.setdefault(step.source.id, set()).add(path_id)
-                symbol_paths.setdefault(step.target.id, set()).add(path_id)
-
-        for overlap in structural_graph.overlaps:
-            hunk = hunks_by_id.get(overlap.hunk_id)
-            relation_ids, operation, head_signature, base_signature = (
-                _overlap_change(
-                    hunk,
-                    overlap.changed_lines,
-                )
-            )
-            _put(
+        for revision_graph in structural_graph.revisions:
+            _put_structural_revision(
                 items,
-                _symbol_item(
-                    overlap.symbol,
-                    changed=True,
-                    operation=operation,
-                    change_relation_ids=relation_ids,
-                    structural_path_ids=tuple(
-                        sorted(symbol_paths.get(overlap.symbol.id, ()))
-                    ),
-                    extra_sources=overlap.sources,
-                    head_signature=head_signature,
-                    base_signature=base_signature,
-                    changed_hunk_ids=(overlap.hunk_id,),
-                    changed_lines=overlap.changed_lines,
-                ),
-            )
-        for path in structural_graph.paths:
-            for step in path.steps:
-                for symbol in (step.source, step.target):
-                    if symbol.id in changed_symbol_ids:
-                        continue
-                    _put(
-                        items,
-                        _symbol_item(
-                            symbol,
-                            changed=False,
-                            operation="unchanged",
-                            structural_path_ids=tuple(
-                                sorted(symbol_paths.get(symbol.id, ()))
-                            ),
-                        ),
-                    )
-            path_id = path_ids[_path_key(path)]
-            _put(
-                items,
-                EvidenceItem(
-                    id=path_id,
-                    kind="structural_path",
-                    summary=_path_summary(path),
-                    classification=path.classification,
-                    profile="structural_path",
-                    authority="structural_provider",
-                    revision_side="unchanged",
-                    operation="observed",
-                    role="structural_path",
-                    sources=path.sources,
-                    structural_path_ids=(path_id,),
-                    metadata={
-                        "seed_symbol_id": path.seed_symbol_id,
-                        "depth": path.depth,
-                        "steps": tuple(
-                            {
-                                "source_symbol_id": step.source.id,
-                                "target_symbol_id": step.target.id,
-                                "relation": step.relation,
-                                "direction": step.direction,
-                            }
-                            for step in path.steps
-                        ),
-                    },
-                ),
+                revision_graph,
+                hunks_by_id=hunks_by_id,
             )
 
     for observation in packet.verification_observations:
@@ -238,6 +165,104 @@ def build_evidence_catalog(
     return catalog
 
 
+def _put_structural_revision(
+    items: dict[str, EvidenceItem],
+    structural_graph: StructuralGraphResult,
+    *,
+    hunks_by_id: dict[str, ChangedHunk],
+) -> None:
+        revision_side = structural_graph.revision_side
+        changed_symbol_ids = {
+            overlap.symbol.id for overlap in structural_graph.overlaps
+        }
+        path_ids = {
+            _path_key(path, revision_side): evidence_id(
+                "structural_path", _path_key(path, revision_side)
+            )
+            for path in structural_graph.paths
+        }
+        symbol_paths: dict[str, set[str]] = {}
+        for path in structural_graph.paths:
+            path_id = path_ids[_path_key(path, revision_side)]
+            symbol_paths.setdefault(path.seed_symbol_id, set()).add(path_id)
+            for step in path.steps:
+                symbol_paths.setdefault(step.source.id, set()).add(path_id)
+                symbol_paths.setdefault(step.target.id, set()).add(path_id)
+
+        for overlap in structural_graph.overlaps:
+            hunk = hunks_by_id.get(overlap.hunk_id)
+            relation_ids, operation, head_signature, base_signature = (
+                _overlap_change(
+                    hunk,
+                    overlap.changed_lines,
+                    revision_side=revision_side,
+                )
+            )
+            _put(
+                items,
+                _symbol_item(
+                    overlap.symbol,
+                    changed=True,
+                    operation=operation,
+                    revision_side=revision_side,
+                    change_relation_ids=relation_ids,
+                    structural_path_ids=tuple(
+                        sorted(symbol_paths.get(overlap.symbol.id, ()))
+                    ),
+                    extra_sources=overlap.sources,
+                    head_signature=head_signature,
+                    base_signature=base_signature,
+                    changed_hunk_ids=(overlap.hunk_id,),
+                    changed_lines=overlap.changed_lines,
+                ),
+            )
+        for path in structural_graph.paths:
+            for step in path.steps:
+                for symbol in (step.source, step.target):
+                    if symbol.id in changed_symbol_ids:
+                        continue
+                    _put(
+                        items,
+                        _symbol_item(
+                            symbol,
+                            changed=False,
+                            operation="unchanged",
+                            revision_side=revision_side,
+                            structural_path_ids=tuple(
+                                sorted(symbol_paths.get(symbol.id, ()))
+                            ),
+                        ),
+                    )
+            path_id = path_ids[_path_key(path, revision_side)]
+            _put(
+                items,
+                EvidenceItem(
+                    id=path_id,
+                    kind="structural_path",
+                    summary=_path_summary(path),
+                    classification=path.classification,
+                    profile="structural_path",
+                    authority="structural_provider",
+                    revision_side=revision_side,
+                    operation="observed",
+                    role="structural_path",
+                    sources=path.sources,
+                    structural_path_ids=(path_id,),
+                    metadata={
+                        "seed_symbol_id": path.seed_symbol_id,
+                        "depth": path.depth,
+                        "steps": tuple(
+                            {
+                                "source_symbol_id": step.source.id,
+                                "target_symbol_id": step.target.id,
+                                "relation": step.relation,
+                                "direction": step.direction,
+                            }
+                            for step in path.steps
+                        ),
+                    },
+                ),
+            )
 def evidence_id(kind: str, identity: str) -> str:
     digest = hashlib.sha256(f"{kind}\0{identity}".encode("utf-8")).hexdigest()[:20]
     return f"E:{kind}:{digest}"
@@ -461,6 +486,7 @@ def _symbol_item(
     *,
     changed: bool,
     operation: ChangeOperation,
+    revision_side: StructuralRevision = "head",
     structural_path_ids: tuple[str, ...],
     extra_sources: tuple[SourceRef, ...] = (),
     head_signature: AssociationSignature = AssociationSignature(),
@@ -474,13 +500,18 @@ def _symbol_item(
         symbol.file_path,
     )
     return EvidenceItem(
-        id=evidence_id("symbol", symbol.id),
+        id=evidence_id(
+            "symbol",
+            symbol.id
+            if revision_side == "head"
+            else f"base:{symbol.id}",
+        ),
         kind="symbol",
         summary=f"{'Changed' if changed else 'Unchanged'} {symbol.kind}: {symbol.qualified_name}",
         classification=_path_classification(symbol.file_path),
         profile=_fact_profile(symbol.file_path),
         authority="structural_provider",
-        revision_side="head" if changed else "unchanged",
+        revision_side=revision_side,
         operation=operation,
         role=(
             "changed_anchor"
@@ -490,8 +521,16 @@ def _symbol_item(
             else "runtime_context"
         ),
         changed=changed,
-        head_signature=merge_signatures(canonical_signature, head_signature),
-        base_signature=base_signature,
+        head_signature=(
+            merge_signatures(canonical_signature, head_signature)
+            if revision_side == "head"
+            else head_signature
+        ),
+        base_signature=(
+            merge_signatures(canonical_signature, base_signature)
+            if revision_side == "base"
+            else base_signature
+        ),
         sources=_unique_sources((*symbol.sources, *extra_sources)),
         change_relation_ids=change_relation_ids,
         structural_path_ids=structural_path_ids,
@@ -512,6 +551,8 @@ def _symbol_item(
 def _overlap_change(
     hunk: ChangedHunk | None,
     changed_lines: tuple[int, ...],
+    *,
+    revision_side: StructuralRevision,
 ) -> tuple[
     tuple[str, ...],
     ChangeOperation,
@@ -529,37 +570,60 @@ def _overlap_change(
     selected_relations = tuple(
         relation
         for relation in hunk.relations
-        if covered & set(relation.added_lines)
+        if covered
+        & set(
+            relation.added_lines
+            if revision_side == "head"
+            else relation.removed_lines
+        )
     )
     head_values = []
     base_values = []
     for relation in selected_relations:
         selected = tuple(
-            item.text for item in relation.added if item.number in covered
+            item.text
+            for item in (
+                relation.added
+                if revision_side == "head"
+                else relation.removed
+            )
+            if item.number in covered
         )
         if not selected:
             continue
-        head_values.extend(selected)
-        base_values.extend(item.text for item in relation.removed)
+        if revision_side == "head":
+            head_values.extend(selected)
+            base_values.extend(item.text for item in relation.removed)
+        else:
+            base_values.extend(selected)
+            head_values.extend(item.text for item in relation.added)
     return (
         tuple(item.id for item in selected_relations),
         (
-            "added"
-            if selected_relations
-            and all(item.kind == "added" for item in selected_relations)
-            else "replaced"
+            (
+                "added"
+                if all(item.kind == "added" for item in selected_relations)
+                else "replaced"
+            )
+            if revision_side == "head"
+            else (
+                "removed"
+                if all(item.kind == "removed" for item in selected_relations)
+                else "replaced"
+            )
         ),
         association_signature(*head_values),
         association_signature(*base_values),
     )
 
 
-def _path_key(path: StructuralPath) -> str:
+def _path_key(path: StructuralPath, revision_side: StructuralRevision) -> str:
     steps = "|".join(
         f"{step.source.id}>{step.direction}:{step.relation}>{step.target.id}"
         for step in path.steps
     )
-    return f"{path.seed_symbol_id}|{steps}"
+    identity = f"{path.seed_symbol_id}|{steps}"
+    return identity if revision_side == "head" else f"base|{identity}"
 
 
 def _path_summary(path: StructuralPath) -> str:

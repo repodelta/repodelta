@@ -145,11 +145,11 @@ prismcode review \
 ```
 
 When the checkout revision, indexed content hashes, and PR head all match,
-PrismCode maps exact changed hunk lines to Codegraph symbols and records
+PrismCode maps exact added hunk lines to Codegraph symbols and records
 bounded structural paths:
 
 ```text
-Structural mapping: Codegraph available · 4/4 hunks mapped to 3 symbols · 12 bounded paths · uncovered change spans retained
+Structural mapping: Codegraph available · 4/4 hunks mapped to 3 symbols · 12 bounded paths · base unavailable · uncovered change relations retained
 ```
 
 Path expansion starts only from exact changed symbols and follows an explicit
@@ -174,6 +174,7 @@ prismcode review \
   --repo owner/repository \
   --pr 123 \
   --repo-root /path/to/repository-at-pr-head \
+  --base-repo-root /path/to/repository-at-pr-base \
   --output build/pr-123.html
 ```
 
@@ -181,7 +182,10 @@ This is also required when reviewing a historical or different PR while the
 current directory is checked out at another commit. `--repo-root` does not
 select or change a Git revision: the supplied checkout must already be at the
 PR's head SHA. PrismCode verifies that revision before using either the
-Codegraph index or the bounded G guardrail scanner. Guardrail plans own their
+Codegraph index or the bounded G guardrail scanner. The optional
+`--base-repo-root` must independently match the PR base SHA and contain its
+own synchronized Codegraph index; it supplies exact base symbols for removed
+and replaced relations. Guardrail plans own their
 deterministic selectors; the scanner inspects eligible paths and text under
 explicit file, byte, and match limits and reports per-surface coverage. It
 scans only tracked head files, excluding untracked checkout content and

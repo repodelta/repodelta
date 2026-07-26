@@ -16,7 +16,7 @@ from prismcode.model.contracts import (
     ReviewSourcePacket,
     StructuralCoverage,
 )
-from prismcode.providers.structural import StructuralGraphResult
+from prismcode.providers.structural import StructuralGraphCollection
 
 _SOURCE_COVERAGE_CODES = {
     "github_linked_issue_not_found",
@@ -41,7 +41,7 @@ def build_review_overview(
     requirements: tuple[Requirement, ...],
     candidates: ProjectionCandidateSet,
     evidence_catalog: EvidenceCatalog,
-    structural_graph: StructuralGraphResult | None,
+    structural_graph: StructuralGraphCollection | None,
     *,
     convergence: CandidateConvergence,
     structural_graph_disabled: bool,
@@ -268,7 +268,7 @@ def _attention_id(label: str, values: tuple[str, ...]) -> str:
 
 
 def _structural_coverage(
-    result: StructuralGraphResult | None,
+    result: StructuralGraphCollection | None,
     *,
     disabled: bool,
 ) -> StructuralCoverage:
@@ -276,29 +276,41 @@ def _structural_coverage(
         return StructuralCoverage(state="disabled")
     if result is None:
         return StructuralCoverage(state="unavailable")
+    head = result.for_revision("head")
+    if head is None:
+        return StructuralCoverage(state="unavailable")
     missing_reason: Literal["index_absent", "files_unindexed", ""] = ""
-    if result.index.state == "missing":
-        codes = {item.code for item in result.index.diagnostics}
+    if head.index.state == "missing":
+        codes = {item.code for item in head.index.diagnostics}
         missing_reason = (
             "index_absent"
             if "codegraph_index_missing" in codes
             else "files_unindexed"
         )
+    base = result.for_revision("base")
     return StructuralCoverage(
-        state=result.index.state,
-        provider=result.index.provider,
-        hunk_count=result.hunk_count,
-        mapped_hunk_count=result.mapped_hunk_count,
-        symbol_count=len(result.overlaps),
-        path_count=len(result.paths),
-        seed_count=len(result.traversal_coverage),
+        state=head.index.state,
+        provider=head.index.provider,
+        hunk_count=head.hunk_count,
+        mapped_hunk_count=head.mapped_hunk_count,
+        symbol_count=len(head.overlaps),
+        path_count=len(head.paths),
+        seed_count=len(head.traversal_coverage),
         complete_seed_count=sum(
-            item.state == "complete" for item in result.traversal_coverage
+            item.state == "complete" for item in head.traversal_coverage
         ),
         truncated_seed_count=sum(
-            item.state == "truncated" for item in result.traversal_coverage
+            item.state == "truncated" for item in head.traversal_coverage
         ),
-        requested_files=result.index.requested_files,
-        indexed_files=result.index.indexed_files,
+        requested_files=head.index.requested_files,
+        indexed_files=head.index.indexed_files,
         missing_reason=missing_reason,
+        base_state=(
+            base.index.state if base is not None else "unavailable"
+        ),
+        base_mapped_hunk_count=(
+            base.mapped_hunk_count if base is not None else 0
+        ),
+        base_hunk_count=base.hunk_count if base is not None else 0,
+        base_symbol_count=len(base.overlaps) if base is not None else 0,
     )

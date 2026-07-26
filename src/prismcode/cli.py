@@ -72,6 +72,13 @@ def build_parser() -> argparse.ArgumentParser:
         help="Skip repository-local structural mapping and use changed-hunk/file anchors",
     )
     review.add_argument(
+        "--base-repo-root",
+        help=(
+            "Optional PR-base repository checkout at the GitHub base SHA, "
+            "containing its own .codegraph/codegraph.db"
+        ),
+    )
+    review.add_argument(
         "--verbose",
         action="store_true",
         help="Print individual collection and structural diagnostics",
@@ -151,6 +158,20 @@ def main() -> int:
                         if not args.fixture
                         else None
                     ),
+                    revision_side="head",
+                ),
+                base_provider=(
+                    CodegraphProvider(
+                        args.base_repo_root,
+                        expected_revision=(
+                            analysis_input.packet.base_sha
+                            if not args.fixture
+                            else None
+                        ),
+                        revision_side="base",
+                    )
+                    if args.base_repo_root
+                    else None
                 ),
             )
             analysis_input = replace(

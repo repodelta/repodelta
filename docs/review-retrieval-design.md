@@ -69,7 +69,8 @@ The retained sources and metadata continue to provide provenance.
 
 ### Structural facts currently emitted
 
-`StructuralGraphResult` contains:
+`StructuralGraphCollection` contains typed head/base
+`StructuralGraphResult`s. Each revision result contains:
 
 - index state and coverage;
 - exact hunk/symbol overlaps;

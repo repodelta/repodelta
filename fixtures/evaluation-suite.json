@@ -109,9 +109,13 @@
         }
       ],
       "structural_graph": {
+        "revisions": [
+          {
+            "revision_side": "head",
         "index": {
           "state": "available",
           "provider": "golden",
+          "revision_side": "head",
           "revision": "structural-head",
           "database_path": "",
           "indexed_files": 3,
@@ -188,6 +192,8 @@
                 "direction": "incoming"
               }
             ]
+          }
+        ]
           }
         ]
       }

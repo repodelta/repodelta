@@ -3,37 +3,71 @@ from __future__ import annotations
 from dataclasses import replace
 from urllib.parse import ParseResult, quote, urlparse
 
-from prismcode.model.contracts import ReviewSourcePacket, SourceRef
+from prismcode.model.contracts import Diagnostic, ReviewSourcePacket, SourceRef
 from prismcode.changes.hunks import DiffHunkCollection
 from prismcode.providers.structural import (
     GraphSymbol,
+    StructuralGraphCollection,
     StructuralGraphProvider,
     StructuralGraphResult,
+    StructuralRevision,
 )
 
 
 def map_packet_changed_symbols(
     packet: ReviewSourcePacket,
     changes: DiffHunkCollection,
-    provider: StructuralGraphProvider,
-) -> StructuralGraphResult:
-    """Map real PR patch hunks to exact structural symbols without conclusions."""
+    head_provider: StructuralGraphProvider,
+    *,
+    base_provider: StructuralGraphProvider | None = None,
+) -> StructuralGraphCollection:
+    """Collect revision-aware structural facts without computing a delta."""
 
-    result = provider.symbols_overlapping(changes.hunks)
-    result = provider.expand_paths(result)
-    result = _attach_github_line_sources(packet, result)
-    if not changes.diagnostics:
-        return result
-    return replace(
-        result,
-        diagnostics=(*changes.diagnostics, *result.diagnostics),
+    head = _map_revision(packet, changes, head_provider, "head")
+    revisions = [head]
+    diagnostics = list(changes.diagnostics)
+    if base_provider is not None:
+        revisions.append(_map_revision(packet, changes, base_provider, "base"))
+    elif any(hunk.removed_lines for hunk in changes.hunks):
+        diagnostics.append(
+            Diagnostic(
+                code="structural_graph_base_input_missing",
+                message=(
+                    "Changed base lines exist, but no base-revision checkout "
+                    "was provided; base structural facts were not collected."
+                ),
+            )
+        )
+    result = StructuralGraphCollection(
+        revisions=tuple(revisions),
+        diagnostics=tuple(diagnostics),
     )
+    result.validate_consistency()
+    return result
+
+
+def _map_revision(
+    packet: ReviewSourcePacket,
+    changes: DiffHunkCollection,
+    provider: StructuralGraphProvider,
+    revision_side: StructuralRevision,
+) -> StructuralGraphResult:
+    result = provider.symbols_overlapping(changes.hunks)
+    if result.revision_side != revision_side:
+        raise ValueError("structural provider returned the wrong revision side")
+    result = provider.expand_paths(result)
+    return _attach_github_line_sources(packet, result)
 
 
 def _attach_github_line_sources(
     packet: ReviewSourcePacket, result: StructuralGraphResult
 ) -> StructuralGraphResult:
-    if not packet.head_sha:
+    revision = (
+        packet.head_sha
+        if result.revision_side == "head"
+        else packet.base_sha
+    )
+    if not revision:
         return result
     parsed = urlparse(packet.source_url or "")
     if parsed.scheme not in {"http", "https"} or not parsed.netloc:
@@ -42,14 +76,20 @@ def _attach_github_line_sources(
     def enrich_symbol(symbol: GraphSymbol) -> GraphSymbol:
         return replace(
             symbol,
-            sources=tuple(_line_source(packet, parsed, source) for source in symbol.sources),
+            sources=tuple(
+                _line_source(packet, parsed, source, revision)
+                for source in symbol.sources
+            ),
         )
 
     overlaps = tuple(
         replace(
             overlap,
             symbol=enrich_symbol(overlap.symbol),
-            sources=tuple(_line_source(packet, parsed, source) for source in overlap.sources),
+            sources=tuple(
+                _line_source(packet, parsed, source, revision)
+                for source in overlap.sources
+            ),
         )
         for overlap in result.overlaps
     )
@@ -64,7 +104,10 @@ def _attach_github_line_sources(
                 )
                 for step in path.steps
             ),
-            sources=tuple(_line_source(packet, parsed, source) for source in path.sources),
+            sources=tuple(
+                _line_source(packet, parsed, source, revision)
+                for source in path.sources
+            ),
         )
         for path in result.paths
     )
@@ -72,7 +115,10 @@ def _attach_github_line_sources(
 
 
 def _line_source(
-    packet: ReviewSourcePacket, parsed: ParseResult, source: SourceRef
+    packet: ReviewSourcePacket,
+    parsed: ParseResult,
+    source: SourceRef,
+    revision: str,
 ) -> SourceRef:
     if not source.path or source.url:
         return source
@@ -83,7 +129,7 @@ def _line_source(
             fragment += f"-L{source.line_end}"
     root = f"{parsed.scheme}://{parsed.netloc}"
     url = (
-        f"{root}/{packet.repository}/blob/{packet.head_sha}/"
+        f"{root}/{packet.repository}/blob/{revision}/"
         f"{quote(source.path, safe='/')}{fragment}"
     )
     return replace(source, url=url)

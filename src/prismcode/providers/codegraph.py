@@ -14,6 +14,7 @@ from prismcode.providers.structural import (
     HunkSymbolOverlap,
     StructuralGraphIndexStatus,
     StructuralGraphResult,
+    StructuralRevision,
     StructuralPath,
     StructuralSeedCoverage,
     StructuralTraversalPolicy,
@@ -81,10 +82,12 @@ class CodegraphProvider:
         repo_root: str | Path,
         *,
         expected_revision: str | None = None,
+        revision_side: StructuralRevision = "head",
     ):
         self.repo_root = Path(repo_root).resolve()
         self.database_path = self.repo_root / ".codegraph" / "codegraph.db"
         self.expected_revision = str(expected_revision or "").strip()
+        self.revision_side = revision_side
 
     def inspect_index(
         self, *, requested_files: tuple[str, ...] = ()
@@ -95,6 +98,7 @@ class CodegraphProvider:
             return StructuralGraphIndexStatus(
                 state="missing",
                 provider=_PROVIDER,
+                revision_side=self.revision_side,
                 database_path=str(self.database_path),
                 requested_files=len(requested),
                 diagnostics=(
@@ -114,6 +118,7 @@ class CodegraphProvider:
                     return StructuralGraphIndexStatus(
                         state="invalid",
                         provider=_PROVIDER,
+                        revision_side=self.revision_side,
                         database_path=str(self.database_path),
                         requested_files=len(requested),
                         diagnostics=(
@@ -129,6 +134,7 @@ class CodegraphProvider:
             return StructuralGraphIndexStatus(
                 state="error",
                 provider=_PROVIDER,
+                revision_side=self.revision_side,
                 database_path=str(self.database_path),
                 requested_files=len(requested),
                 diagnostics=(
@@ -151,7 +157,8 @@ class CodegraphProvider:
                 Diagnostic(
                     code="codegraph_checkout_revision_mismatch",
                     message=(
-                        "The target checkout is not at the analyzed PR head; "
+                        f"The {self.revision_side} checkout is not at the "
+                        f"analyzed PR {self.revision_side}; "
                         "its structural index was not used."
                     ),
                     severity="error",
@@ -189,6 +196,7 @@ class CodegraphProvider:
         return StructuralGraphIndexStatus(
             state=state,
             provider=_PROVIDER,
+            revision_side=self.revision_side,
             revision=checkout_revision,
             database_path=str(self.database_path),
             indexed_files=len(file_rows),
@@ -228,6 +236,7 @@ class CodegraphProvider:
         )
         if not index.usable:
             return StructuralGraphResult(
+                revision_side=self.revision_side,
                 index=index,
                 hunk_count=len(eligible_hunks),
                 diagnostics=tuple(diagnostics),
@@ -243,32 +252,27 @@ class CodegraphProvider:
         queryable = tuple(
             hunk
             for hunk in eligible_hunks
-            if hunk.added_lines and hunk.file_path not in unindexed_files
+            if self._changed_lines(hunk)
+            and hunk.file_path not in unindexed_files
         )
         for hunk in eligible_hunks:
-            if hunk.file_path in unindexed_files:
-                continue
-            if hunk.is_deletion_only:
-                diagnostics.append(
-                    Diagnostic(
-                        code="structural_graph_base_index_required",
-                        message=(
-                            f"{hunk.id} only removes lines; exact symbol mapping "
-                            "requires a base-revision structural index."
-                        ),
-                        sources=(SourceRef(label="diff hunk", path=hunk.file_path),),
-                    )
-                )
-            elif not hunk.added_lines:
+            if (
+                hunk.file_path not in unindexed_files
+                and not self._changed_lines(hunk)
+            ):
                 diagnostics.append(
                     Diagnostic(
                         code="structural_graph_hunk_has_no_changed_lines",
-                        message=f"{hunk.id} has no new-file changed lines to map.",
+                        message=(
+                            f"{hunk.id} has no {self.revision_side}-revision "
+                            "changed lines to map."
+                        ),
                         sources=(SourceRef(label="diff hunk", path=hunk.file_path),),
                     )
                 )
         if not queryable:
             return StructuralGraphResult(
+                revision_side=self.revision_side,
                 index=index,
                 hunk_count=len(eligible_hunks),
                 diagnostics=tuple(diagnostics),
@@ -279,7 +283,11 @@ class CodegraphProvider:
             with self._connect() as connection:
                 connection.row_factory = sqlite3.Row
                 for hunk in queryable:
-                    symbols = self._symbols_for_hunk(connection, hunk)
+                    symbols = self._symbols_for_hunk(
+                        connection,
+                        hunk,
+                        self._changed_lines(hunk),
+                    )
                     if not symbols:
                         diagnostics.append(
                             Diagnostic(
@@ -320,6 +328,7 @@ class CodegraphProvider:
                 )
             )
         return StructuralGraphResult(
+            revision_side=self.revision_side,
             index=index,
             hunk_count=len(eligible_hunks),
             overlaps=tuple(overlaps),
@@ -391,6 +400,7 @@ class CodegraphProvider:
                             break
         except sqlite3.Error as exc:
             return StructuralGraphResult(
+                revision_side=self.revision_side,
                 index=result.index,
                 hunk_count=result.hunk_count,
                 overlaps=result.overlaps,
@@ -427,6 +437,7 @@ class CodegraphProvider:
                 )
             )
         return StructuralGraphResult(
+            revision_side=self.revision_side,
             index=result.index,
             hunk_count=result.hunk_count,
             overlaps=result.overlaps,
@@ -560,9 +571,12 @@ class CodegraphProvider:
         return tuple(steps)
 
     def _symbols_for_hunk(
-        self, connection: sqlite3.Connection, hunk: ChangedHunk
+        self,
+        connection: sqlite3.Connection,
+        hunk: ChangedHunk,
+        changed_lines: tuple[int, ...],
     ) -> list[tuple[GraphSymbol, tuple[int, ...]]]:
-        low, high = min(hunk.added_lines), max(hunk.added_lines)
+        low, high = min(changed_lines), max(changed_lines)
         placeholders = ",".join("?" for _ in _SUPPORTED_KINDS)
         rows = connection.execute(
             f"""
@@ -579,7 +593,7 @@ class CodegraphProvider:
         ).fetchall()
         symbols = [_symbol(row) for row in rows]
         selected: dict[str, tuple[GraphSymbol, set[int]]] = {}
-        for line in hunk.added_lines:
+        for line in changed_lines:
             containing = [
                 symbol
                 for symbol in symbols
@@ -601,6 +615,13 @@ class CodegraphProvider:
             (symbol, tuple(sorted(lines)))
             for symbol, lines in selected.values()
         ]
+
+    def _changed_lines(self, hunk: ChangedHunk) -> tuple[int, ...]:
+        return (
+            hunk.added_lines
+            if self.revision_side == "head"
+            else hunk.removed_lines
+        )
 
     def _connect(self) -> sqlite3.Connection:
         return sqlite3.connect(self.database_path.as_uri() + "?mode=ro", uri=True)

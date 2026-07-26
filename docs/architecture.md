@@ -116,10 +116,13 @@ GitHub REST endpoints.
 `StructuralGraphProvider` is the read-only structure port.
 `CodegraphProvider` reads a repository-local `.codegraph/codegraph.db` in
 SQLite read-only mode. It validates the schema, compares indexed file hashes
-with the checkout, and for live reviews verifies that the checkout revision
-matches the PR head SHA.
+with its checkout, and for live reviews verifies that checkout against the
+corresponding PR revision. `--repo-root` supplies head; the optional
+`--base-repo-root` supplies a separate base checkout and index. Both feed one
+revision-aware `StructuralGraphCollection`.
 
-Only exact changed lines from unified-diff hunks are joined to symbol spans.
+Only exact changed lines from unified-diff hunks are joined to symbol spans:
+head providers map added lines and base providers map removed lines.
 The narrowest containing symbol wins. Module-level changes may map to the
 indexed file symbol, which owns Codegraph import edges. Exact changed symbols
 are the only traversal seeds.
@@ -134,7 +137,7 @@ and `extends`; container edges are excluded. Each path retains direction,
 runtime/test/mixed classification, and head-line sources.
 
 Missing patches, stale or missing indexes, unindexed code, unmatched lines,
-and deletion-only hunks remain explicit diagnostics. A graph failure never
+and unavailable base input remain explicit diagnostics. A graph failure never
 prevents report generation.
 
 ## Canonical evidence and fallback

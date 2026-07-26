@@ -49,10 +49,10 @@ def _write_fixture(tmp_path: Path) -> Path:
 def _write_index(
     repo_root: Path,
     *,
+    source: str = "def run():\n    return 2\n",
     content_hash: str | None = None,
     include_file: bool = True,
 ) -> None:
-    source = "def run():\n    return 2\n"
     source_path = repo_root / "src" / "service.py"
     source_path.parent.mkdir(parents=True)
     source_path.write_text(source, encoding="utf-8")
@@ -139,7 +139,30 @@ def test_cli_runs_available_codegraph_mapping(
     captured = capsys.readouterr()
     assert "Structural mapping: Codegraph available" in captured.err
     assert "1/1 hunks mapped to 1 symbols" in captured.err
-    assert "uncovered change spans retained" in captured.err
+    assert "base unavailable · uncovered change relations retained" in captured.err
+
+
+def test_cli_maps_optional_base_checkout(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    fixture = _write_fixture(tmp_path)
+    head_root = tmp_path / "head"
+    base_root = tmp_path / "base"
+    _write_index(head_root)
+    _write_index(base_root, source="def run():\n    return 1\n")
+
+    assert _run_cli(
+        monkeypatch,
+        fixture,
+        head_root,
+        tmp_path / "review.html",
+        "--base-repo-root",
+        str(base_root),
+    ) == 0
+
+    assert "base 1/1 hunks mapped to 1 symbols" in capsys.readouterr().err
 
 
 def test_cli_missing_index_uses_change_relation_fallback(
@@ -212,7 +235,7 @@ def test_cli_partial_index_reports_coverage(
 
     assert (
         "Structural mapping: partial · 1/2 changed files indexed · "
-        "change-relation fallback used for uncovered changes"
+        "base unavailable · change-relation fallback used for uncovered changes"
     ) in capsys.readouterr().err
 
 

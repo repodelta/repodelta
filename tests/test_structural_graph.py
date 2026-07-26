@@ -108,6 +108,7 @@ def _packet(patch: str | None) -> ReviewSourcePacket:
         title="Change service",
         source_url="https://github.com/acme/widget/pull/7",
         head_sha="head123",
+        base_sha="base123",
         source_records=(),
         changed_files=(
             ChangedFile(
@@ -209,9 +210,11 @@ def test_changed_hunk_maps_to_narrowest_exact_symbol(tmp_path: Path) -> None:
     )
 
     packet = _packet(patch)
-    result = map_packet_changed_symbols(
+    graph = map_packet_changed_symbols(
         packet, parse_changed_files(packet.changed_files), CodegraphProvider(tmp_path)
     )
+    result = graph.for_revision("head")
+    assert result is not None
 
     assert result.index.state == "available"
     assert result.hunk_count == 1
@@ -226,6 +229,103 @@ def test_changed_hunk_maps_to_narrowest_exact_symbol(tmp_path: Path) -> None:
         "diff hunk",
         "Codegraph symbol",
     }
+
+
+def test_replacement_collects_distinct_head_and_base_symbol_facts(
+    tmp_path: Path,
+) -> None:
+    head_root = tmp_path / "head"
+    base_root = tmp_path / "base"
+    _create_index(
+        head_root,
+        source="class Service:\n    def run(self):\n        return 2\n",
+    )
+    _create_index(
+        base_root,
+        source="class Service:\n    def run(self):\n        return 1\n",
+    )
+    packet = _packet(
+        "@@ -3 +3 @@\n-        return 1\n+        return 2\n"
+    )
+    changes = parse_changed_files(packet.changed_files)
+
+    graph = map_packet_changed_symbols(
+        packet,
+        changes,
+        CodegraphProvider(head_root, revision_side="head"),
+        base_provider=CodegraphProvider(base_root, revision_side="base"),
+    )
+    brief = DeterministicAnalyzer().analyze(
+        AnalysisInput(
+            packet=packet,
+            changes=changes,
+            structural_graph=graph,
+        )
+    )
+
+    head = graph.for_revision("head")
+    base = graph.for_revision("base")
+    assert head is not None and base is not None
+    assert head.mapped_hunk_count == base.mapped_hunk_count == 1
+    symbols = tuple(
+        sorted(
+            (
+                item
+                for item in brief.evidence_catalog.items
+                if item.kind == "symbol" and item.changed
+            ),
+            key=lambda item: item.revision_side,
+        )
+    )
+    assert [(item.revision_side, item.operation) for item in symbols] == [
+        ("base", "replaced"),
+        ("head", "replaced"),
+    ]
+    assert len({item.id for item in symbols}) == 2
+    assert symbols[0].metadata["symbol_id"] == symbols[1].metadata["symbol_id"]
+    assert "/blob/base123/" in symbols[0].sources[0].url
+    assert "/blob/head123/" in symbols[1].sources[0].url
+
+
+def test_removed_relation_maps_exact_base_symbol(tmp_path: Path) -> None:
+    head_root = tmp_path / "head"
+    base_root = tmp_path / "base"
+    _create_index(
+        head_root,
+        source="class Service:\n    pass\n",
+    )
+    _create_index(base_root)
+    packet = _packet(
+        "@@ -2,2 +2,0 @@\n"
+        "-    def run(self):\n"
+        "-        return 1\n"
+    )
+    changes = parse_changed_files(packet.changed_files)
+
+    graph = map_packet_changed_symbols(
+        packet,
+        changes,
+        CodegraphProvider(head_root, revision_side="head"),
+        base_provider=CodegraphProvider(base_root, revision_side="base"),
+    )
+    brief = DeterministicAnalyzer().analyze(
+        AnalysisInput(
+            packet=packet,
+            changes=changes,
+            structural_graph=graph,
+        )
+    )
+
+    removed = tuple(
+        item
+        for item in brief.evidence_catalog.items
+        if item.kind == "symbol" and item.revision_side == "base"
+    )
+    assert len(removed) == 1
+    assert removed[0].operation == "removed"
+    assert removed[0].change_relation_ids == (
+        changes.hunks[0].relations[0].id,
+    )
 
 
 def test_one_hunk_can_map_changes_in_two_sibling_symbols(tmp_path: Path) -> None:
@@ -275,9 +375,11 @@ def test_one_hunk_can_map_changes_in_two_sibling_symbols(tmp_path: Path) -> None
     )
 
     packet = _packet(patch)
-    result = map_packet_changed_symbols(
+    graph = map_packet_changed_symbols(
         packet, parse_changed_files(packet.changed_files), CodegraphProvider(tmp_path)
     )
+    result = graph.for_revision("head")
+    assert result is not None
 
     assert [(item.symbol.id, item.changed_lines) for item in result.overlaps] == [
         ("first", (2,)),
@@ -426,31 +528,87 @@ def test_live_review_checkout_must_match_expected_head(
     }
 
 
-def test_deletion_only_hunk_reports_base_index_requirement(tmp_path: Path) -> None:
-    _create_index(tmp_path)
-    hunks = parse_unified_patch(
-        "src/service.py",
-        "@@ -2,1 +2,0 @@\n-    def run(self):\n",
+def test_stale_base_revision_preserves_head_and_excludes_base_facts(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    head_root = tmp_path / "head"
+    base_root = tmp_path / "base"
+    _create_index(
+        head_root,
+        source="class Service:\n    def run(self):\n        return 2\n",
+    )
+    _create_index(base_root)
+    monkeypatch.setattr(
+        "prismcode.providers.codegraph._checkout_revision",
+        lambda root: "head123" if root == head_root else "wrong-base",
+    )
+    packet = _packet(
+        "@@ -3 +3 @@\n-        return 1\n+        return 2\n"
+    )
+    changes = parse_changed_files(packet.changed_files)
+
+    graph = map_packet_changed_symbols(
+        packet,
+        changes,
+        CodegraphProvider(
+            head_root,
+            expected_revision=packet.head_sha,
+            revision_side="head",
+        ),
+        base_provider=CodegraphProvider(
+            base_root,
+            expected_revision=packet.base_sha,
+            revision_side="base",
+        ),
+    )
+    brief = DeterministicAnalyzer().analyze(
+        AnalysisInput(
+            packet=packet,
+            changes=changes,
+            structural_graph=graph,
+        )
     )
 
-    result = CodegraphProvider(tmp_path).symbols_overlapping(hunks)
+    head = graph.for_revision("head")
+    base = graph.for_revision("base")
+    assert head is not None and head.index.state == "available"
+    assert base is not None and base.index.state == "stale"
+    assert base.overlaps == ()
+    assert {
+        item.revision_side
+        for item in brief.evidence_catalog.items
+        if item.kind == "symbol" and item.changed
+    } == {"head"}
 
-    assert result.overlaps == ()
-    assert "structural_graph_base_index_required" in {
-        diagnostic.code for diagnostic in result.diagnostics
-    }
+
+def test_deletion_only_hunk_reports_one_missing_base_input(tmp_path: Path) -> None:
+    _create_index(tmp_path)
+    packet = _packet("@@ -2,1 +2,0 @@\n-    def run(self):\n")
+
+    graph = map_packet_changed_symbols(
+        packet,
+        parse_changed_files(packet.changed_files),
+        CodegraphProvider(tmp_path),
+    )
+
+    assert [item.code for item in graph.diagnostics] == [
+        "structural_graph_base_input_missing"
+    ]
 
 
 def test_missing_patch_is_explicitly_reported(tmp_path: Path) -> None:
     _create_index(tmp_path)
 
     packet = _packet(None)
-    result = map_packet_changed_symbols(
+    graph = map_packet_changed_symbols(
         packet, parse_changed_files(packet.changed_files), CodegraphProvider(tmp_path)
     )
+    result = graph.for_revision("head")
+    assert result is not None
 
     assert result.overlaps == ()
-    assert [item.code for item in result.diagnostics] == [
+    assert [item.code for item in graph.diagnostics] == [
         "structural_graph_patch_unavailable"
     ]
 
@@ -477,7 +635,7 @@ def test_analyzer_preserves_structural_facts_without_using_them_as_conclusions(
         AnalysisInput(packet=packet, structural_graph=structural)
     )
 
-    assert brief.schema_version == "review_brief.v27"
+    assert brief.schema_version == "review_brief.v28"
     assert brief.requirements == lexical_only.requirements == ()
     serialized = brief.to_dict()
     assert "structural_graph" not in serialized
@@ -586,9 +744,11 @@ def test_bounded_paths_load_unchanged_y_to_x_to_z_neighbors(tmp_path: Path) -> N
         head_sha="head123",
     ).with_revision()
 
-    result = map_packet_changed_symbols(
+    graph = map_packet_changed_symbols(
         packet, parse_changed_files(packet.changed_files), CodegraphProvider(tmp_path)
     )
+    result = graph.for_revision("head")
+    assert result is not None
 
     y_x_z = next(
         path

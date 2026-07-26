@@ -7,7 +7,8 @@ structural paths.
 
 ## Input / output
 
-Canonical changes plus provider configuration → provider result and raw
+Canonical changes plus revision-specific provider configuration → one
+`StructuralGraphCollection` containing typed head/base results and raw
 provider diagnostics.
 
 ## Invariants
@@ -22,7 +23,9 @@ and HTML copy.
 
 ## Diagnostics
 
-Reports provider availability, revision, coverage, and traversal limits.
+Reports provider availability, revision side, checkout revision, coverage, and
+traversal limits. Head maps added lines; base maps removed lines through the
+same provider implementation.
 
 ## Extension points
 
