@@ -274,12 +274,12 @@ def test_exact_symbol_replaces_its_mapped_hunk_evidence() -> None:
     )
 
 
-def test_partial_symbol_mapping_keeps_only_uncovered_span_content() -> None:
+def test_partial_symbol_mapping_keeps_only_uncovered_relation_content() -> None:
     symbol = _symbol("S", "src.service.first", "src/service.py")
     packet = ReviewSourcePacket(
         repository="acme/widget",
         pull_request=11,
-        title="Partially map span",
+        title="Partially map relation",
         source_records=(),
         changed_files=(
             ChangedFile(
