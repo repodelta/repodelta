@@ -371,6 +371,54 @@ def test_changed_anchor_direct_bridge_and_total_limits_are_independent() -> None
     }
 
 
+def test_changed_anchor_claim_bridge_limit_truncates_independently() -> None:
+    candidates = _candidates(
+        _relation(
+            "claim",
+            slot="claim",
+            target="C1",
+            association="explicit_reference",
+        ),
+        _relation(
+            "direct",
+            slot="changed_anchor",
+            target="E:direct",
+            association="exact_identifier",
+        ),
+        *(
+            _relation(
+                f"bridge-{index}",
+                slot="changed_anchor",
+                target=f"E:bridge:{index}",
+                association="claim_bridge",
+                bridges=("C1",),
+                ordinal=index + 1,
+            )
+            for index in range(3)
+        ),
+    )
+
+    result = converge_candidates(
+        candidates,
+        evidence_catalog=EvidenceCatalog(),
+        policy=ConvergencePolicy(
+            max_direct_anchor_identities=5,
+            max_bridged_anchor_identities=1,
+            max_anchor_identities=10,
+        ),
+    )
+
+    assert result.selected_relation_ids() == ("claim", "direct", "bridge-0")
+    changed_diagnostics = [
+        item for item in result.diagnostics if item.slot == "changed_anchor"
+    ]
+    assert [item.state for item in changed_diagnostics] == ["budget_truncated"]
+    assert changed_diagnostics[0].affected_ids == (
+        "E:bridge:1",
+        "E:bridge:2",
+    )
+
+
 def test_distinct_current_head_checks_form_one_non_competing_set() -> None:
     facts = (
         _verification("E:test", name="test"),
