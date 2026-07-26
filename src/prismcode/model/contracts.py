@@ -570,6 +570,8 @@ class ReviewAttention:
     message: str
     focus_statement_ids: tuple[str, ...] = ()
     sources: tuple[SourceRef, ...] = ()
+    scope: Literal["review", "focus"] = "focus"
+    provider: str = ""
 
 
 @dataclass(frozen=True)
@@ -625,7 +627,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v16"
+    schema_version: str = "review_brief.v17"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

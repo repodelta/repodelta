@@ -198,6 +198,11 @@ empty-state, and structural coverage facts. HTML and CLI resolve and format
 these contracts; they do not match, classify, select paths, interpret provider
 codes, or infer why a slot is empty.
 
+Attention normalization preserves diagnostic scope and provider. Aggregation
+requires the same scope, provider, slot, and state, so review-wide provider
+coverage cannot collapse into focus-level convergence coverage with a similar
+message. Synthetic review focus IDs are not exposed as R/G attention targets.
+
 ## Packet revisions
 
 `packet_revision` is a deterministic SHA-256 consistency digest over semantic

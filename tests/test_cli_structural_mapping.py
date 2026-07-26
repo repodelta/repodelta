@@ -253,4 +253,7 @@ def test_cli_verbose_prints_structural_diagnostics(
 
     stderr = capsys.readouterr().err
     assert "Structural mapping: skipped" in stderr
-    assert "  - structural path · provider unavailable:" in stderr
+    assert (
+        "  - Structural coverage · codegraph · provider unavailable:"
+        in stderr
+    )
