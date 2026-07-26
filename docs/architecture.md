@@ -107,11 +107,14 @@ The narrowest containing symbol wins. Module-level changes may map to the
 indexed file symbol, which owns Codegraph import edges. Exact changed symbols
 are the only traversal seeds.
 
-Traversal is deterministic, direction-aware, and bounded to three hops, 80
-unique nodes, and 120 paths by default. Eligible edges are `calls`, `imports`,
-`instantiates`, `references`, and `extends`; container edges are excluded.
-Each path retains direction, runtime/test/mixed classification, and head-line
-sources.
+Traversal is deterministic and direction-aware. A round-robin scheduler gives
+each exact changed-symbol seed a fair turn under explicit per-seed and
+review-level safety limits; the default review remains bounded to 80 unique
+nodes and 120 paths. The provider emits one typed complete/truncated coverage
+record per seed and distinguishes seed-level from review-level node/path
+boundaries. Eligible edges are `calls`, `imports`, `instantiates`, `references`,
+and `extends`; container edges are excluded. Each path retains direction,
+runtime/test/mixed classification, and head-line sources.
 
 Missing patches, stale or missing indexes, unindexed code, unmatched lines,
 and deletion-only hunks remain explicit diagnostics. A graph failure never

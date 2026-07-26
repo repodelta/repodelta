@@ -9,6 +9,13 @@ from prismcode.changes.hunks import ChangedHunk
 IndexState = Literal["available", "partial", "missing", "stale", "invalid", "error"]
 PathClassification = Literal["runtime", "test", "mixed"]
 TraversalDirection = Literal["outgoing", "incoming"]
+TraversalCoverageState = Literal["complete", "truncated"]
+TraversalLimit = Literal[
+    "seed_node_budget",
+    "seed_path_budget",
+    "review_node_budget",
+    "review_path_budget",
+]
 
 
 @dataclass(frozen=True)
@@ -16,8 +23,10 @@ class StructuralTraversalPolicy:
     """Deterministic safety budget for provider-owned graph expansion."""
 
     max_depth: int = 3
-    max_nodes: int = 80
-    max_paths: int = 120
+    max_nodes_per_seed: int = 80
+    max_paths_per_seed: int = 120
+    max_total_nodes: int = 80
+    max_total_paths: int = 120
     relation_allowlist: tuple[str, ...] = (
         "calls",
         "imports",
@@ -85,13 +94,26 @@ class StructuralPath:
 
 
 @dataclass(frozen=True)
+class StructuralSeedCoverage:
+    """Provider-owned traversal coverage for one exact changed-symbol seed."""
+
+    seed_symbol_id: str
+    state: TraversalCoverageState
+    node_count: int
+    path_count: int
+    limiting_dimensions: tuple[TraversalLimit, ...] = ()
+    sources: tuple[SourceRef, ...] = ()
+
+
+@dataclass(frozen=True)
 class StructuralGraphResult:
     index: StructuralGraphIndexStatus
     hunk_count: int = 0
     overlaps: tuple[HunkSymbolOverlap, ...] = ()
     paths: tuple[StructuralPath, ...] = ()
+    traversal_coverage: tuple[StructuralSeedCoverage, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
-    schema_version: str = "structural_graph_result.v2"
+    schema_version: str = "structural_graph_result.v3"
 
     @property
     def mapped_hunk_count(self) -> int:
