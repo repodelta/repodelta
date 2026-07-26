@@ -25,9 +25,13 @@ Structural paths form the bounded union rooted in selected changed anchors.
 Duplicate relations to one path target collapse, then shorter paths are retained
 first only when per-anchor or total identity safety limits are crossed.
 Runtime and test contexts form canonical identity sets reachable through the
-selected paths. A context available only behind a safety-deferred path is
-`upstream_deferred`, not unassociated. Selected relation IDs and bridge IDs are
-the reference-only subgraph; convergence does not create a second graph model.
+selected paths. After all slots converge, `StructuralSupportSet` partitions the
+selected structural path relations into displayed support and omitted
+provenance. For every reachable selected anchor/context pair it retains the
+shortest canonical selected path identities; equivalent shortest identities
+remain provenance, while longer redundant paths do not enter projection. A
+context available only behind a safety-deferred path is `upstream_deferred`, not
+unassociated.
 
 Claim bridges remain reachable only through selected claims. In the remaining
 competitive claim slot, stable source order breaks ties only within one
@@ -51,6 +55,8 @@ Distinguishes claim inspection truncation and ambiguity, upstream safety
 deferral, changed-anchor/path/context/verification set truncation, and
 conflicting outcomes for one verification identity. Multiple relevant
 anchor, path, context, or check identities never produce semantic ambiguity.
+Support omission is a deterministic presentation projection over already
+selected facts; it is not provider or convergence truncation.
 
 ## Extension points
 

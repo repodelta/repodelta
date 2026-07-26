@@ -9,6 +9,9 @@ from prismcode.model.contracts import (
     ChangedFile,
     EvidenceCatalog,
     EvidenceItem,
+    ProjectionCandidateGroup,
+    ProjectionCandidateSet,
+    ProjectionRelation,
     Requirement,
     ReviewStatement,
     ReviewSourcePacket,
@@ -137,6 +140,197 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
     assert '<span class="block-title">Structural paths</span>' not in html
     assert '<span class="block-title">Runtime context</span>' not in html
     assert '<span class="block-title">Test context</span>' not in html
+
+
+def test_projection_uses_minimal_structural_support_set() -> None:
+    def symbol(
+        fact_id: str,
+        symbol_id: str,
+        *,
+        changed: bool = False,
+        profile: str = "production",
+    ) -> EvidenceItem:
+        return EvidenceItem(
+            id=fact_id,
+            summary=symbol_id,
+            kind="symbol",
+            classification="test" if profile == "test" else "code",
+            profile=profile,
+            authority="structural_provider",
+            revision_side="head" if changed else "unchanged",
+            operation="modified" if changed else "unchanged",
+            role=(
+                "changed_anchor"
+                if changed
+                else "test_context"
+                if profile == "test"
+                else "runtime_context"
+            ),
+            changed=changed,
+            metadata={"symbol_id": symbol_id, "qualified_name": symbol_id},
+        )
+
+    def path(fact_id: str, *steps: tuple[str, str]) -> EvidenceItem:
+        return EvidenceItem(
+            id=fact_id,
+            summary=fact_id,
+            kind="structural_path",
+            classification="code",
+            profile="structural_path",
+            authority="structural_provider",
+            revision_side="unchanged",
+            operation="observed",
+            role="structural_path",
+            metadata={
+                "depth": len(steps),
+                "steps": tuple(
+                    {
+                        "source_symbol_id": source,
+                        "target_symbol_id": target,
+                        "relation": "calls",
+                        "direction": "outgoing",
+                    }
+                    for source, target in steps
+                ),
+            },
+        )
+
+    def relation(
+        relation_id: str,
+        slot: str,
+        target_id: str,
+        *,
+        bridges: tuple[str, ...] = (),
+        ordinal: int = 0,
+    ) -> ProjectionRelation:
+        return ProjectionRelation(
+            id=relation_id,
+            focus_statement_id="R1",
+            slot=slot,
+            target_type="evidence",
+            target_id=target_id,
+            association=(
+                "exact_identifier"
+                if slot == "changed_anchor"
+                else "structural_bridge"
+            ),
+            reasons=(),
+            bridge_ids=bridges,
+            source_ordinal=ordinal,
+        )
+
+    evidence = EvidenceCatalog(
+        items=(
+            symbol("E:anchor", "anchor", changed=True),
+            symbol("E:runtime", "runtime"),
+            symbol("E:test", "test", profile="test"),
+            symbol("E:detour", "detour"),
+            symbol("E:anchor-2", "anchor_2", changed=True),
+            symbol("E:runtime-2", "runtime_2"),
+            path("E:path:runtime", ("anchor", "runtime")),
+            path(
+                "E:path:runtime-long",
+                ("anchor", "detour"),
+                ("detour", "runtime"),
+            ),
+            path(
+                "E:path:test",
+                ("anchor", "runtime"),
+                ("runtime", "test"),
+            ),
+            path("E:path:independent", ("anchor_2", "runtime_2")),
+        )
+    )
+    relations = (
+        relation("A", "changed_anchor", "E:anchor"),
+        relation(
+            "P-runtime",
+            "structural_path",
+            "E:path:runtime",
+            bridges=("E:anchor",),
+        ),
+        relation(
+            "P-runtime-long",
+            "structural_path",
+            "E:path:runtime-long",
+            bridges=("E:anchor",),
+            ordinal=1,
+        ),
+        relation(
+            "P-test",
+            "structural_path",
+            "E:path:test",
+            bridges=("E:anchor",),
+            ordinal=2,
+        ),
+        relation(
+            "C-runtime",
+            "runtime_context",
+            "E:runtime",
+            bridges=("E:path:runtime",),
+        ),
+        relation(
+            "C-test",
+            "test_context",
+            "E:test",
+            bridges=("E:path:test",),
+        ),
+        relation("A-2", "changed_anchor", "E:anchor-2", ordinal=1),
+        relation(
+            "P-independent",
+            "structural_path",
+            "E:path:independent",
+            bridges=("E:anchor-2",),
+            ordinal=3,
+        ),
+        relation(
+            "C-runtime-2",
+            "runtime_context",
+            "E:runtime-2",
+            bridges=("E:path:independent",),
+            ordinal=1,
+        ),
+    )
+    candidates = ProjectionCandidateSet(
+        relations=relations,
+        groups=(
+            ProjectionCandidateGroup(
+                focus_statement_id="R1",
+                profile="generic",
+                relation_ids=tuple(item.id for item in relations),
+            ),
+        ),
+    )
+
+    convergence = converge_candidates(candidates, evidence_catalog=evidence)
+    support = convergence.groups[0].structural_support
+    assert support.path_relation_ids == (
+        "P-runtime",
+        "P-independent",
+        "P-test",
+    )
+    assert support.omitted_path_relation_ids == ("P-runtime-long",)
+
+    projection = build_review_projection(candidates, convergence, evidence)
+    subgraph = projection.slices[0].structural_subgraph
+    assert {item.evidence_id for item in subgraph.nodes} == {
+        "E:anchor",
+        "E:runtime",
+        "E:test",
+        "E:anchor-2",
+        "E:runtime-2",
+    }
+    assert len(subgraph.edges) == 3
+    assert subgraph.edges[0].path_relation_ids == ("P-runtime", "P-test")
+    assert {
+        item.evidence_id: item.path_relation_ids for item in subgraph.nodes
+    } == {
+        "E:anchor": ("P-runtime", "P-test"),
+        "E:runtime": ("P-runtime", "P-test"),
+        "E:test": ("P-test",),
+        "E:anchor-2": ("P-independent",),
+        "E:runtime-2": ("P-independent",),
+    }
 
 
 def test_every_requirement_is_routed_without_a_global_statement_budget() -> None:

@@ -50,7 +50,10 @@ def build_review_projection(
             )
         }
         subgraph = _structural_subgraph(
-            path_relations=by_slot["structural_path"],
+            path_relations=tuple(
+                relations[relation_id]
+                for relation_id in converged.structural_support.path_relation_ids
+            ),
             anchor_relations=by_slot["changed_anchor"],
             runtime_relations=by_slot["runtime_context"],
             test_relations=by_slot["test_context"],
@@ -114,6 +117,7 @@ def _structural_subgraph(
             role_by_node.setdefault(item.target_id, role)
 
     node_order: list[str] = []
+    path_ids_by_node: dict[str, list[str]] = {}
     edge_order: list[tuple[str, str, str, str]] = []
     path_ids_by_edge: dict[tuple[str, str, str, str], list[str]] = {}
     for path_relation in path_relations:
@@ -134,6 +138,9 @@ def _structural_subgraph(
             for node_id in (source_id, target_id):
                 if node_id not in node_order:
                     node_order.append(node_id)
+                path_ids_by_node.setdefault(node_id, []).append(
+                    path_relation.id
+                )
             key = (
                 source_id,
                 step["relation"],
@@ -151,6 +158,9 @@ def _structural_subgraph(
             role=role_by_node.get(node_id, "intermediate"),
             relation_ids=tuple(
                 dict.fromkeys(relation_ids_by_node.get(node_id, ()))
+            ),
+            path_relation_ids=tuple(
+                dict.fromkeys(path_ids_by_node.get(node_id, ()))
             ),
         )
         for node_id in node_order
