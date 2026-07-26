@@ -341,7 +341,7 @@ class EvidenceItem:
 class EvidenceCatalog:
     items: tuple[EvidenceItem, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
-    schema_version: str = "evidence_catalog.v5"
+    schema_version: str = "evidence_catalog.v6"
 
     def by_id(self) -> dict[str, EvidenceItem]:
         return {item.id: item for item in self.items}
@@ -619,7 +619,7 @@ class StructuralFocusOverlay:
 class ReviewSlice:
     focus_statement_id: str
     claim_relation_ids: tuple[str, ...] = ()
-    standalone_changed_anchor_relation_ids: tuple[str, ...] = ()
+    standalone_changed_fact_relation_ids: tuple[str, ...] = ()
     standalone_runtime_relation_ids: tuple[str, ...] = ()
     standalone_test_relation_ids: tuple[str, ...] = ()
     verification_relation_ids: tuple[str, ...] = ()
@@ -631,7 +631,7 @@ class ReviewSlice:
 class ReviewProjection:
     slices: tuple[ReviewSlice, ...] = ()
     review_graph: ReviewStructuralGraph = ReviewStructuralGraph()
-    schema_version: str = "review_projection.v6"
+    schema_version: str = "review_projection.v7"
 
 
 @dataclass(frozen=True)
@@ -701,7 +701,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v22"
+    schema_version: str = "review_brief.v23"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

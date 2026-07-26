@@ -99,10 +99,10 @@ def build_review_projection(
             ReviewSlice(
                 focus_statement_id=group.focus_statement_id,
                 claim_relation_ids=tuple(item.id for item in by_slot["claim"]),
-                standalone_changed_anchor_relation_ids=tuple(
+                standalone_changed_fact_relation_ids=tuple(
                     item.id
                     for item in by_slot["changed_anchor"]
-                    if item.target_id not in graph_node_ids
+                    if evidence[item.target_id].kind != "symbol"
                 ),
                 standalone_runtime_relation_ids=tuple(
                     item.id
@@ -155,9 +155,6 @@ def _structural_focus_overlay(
     tuple[StructuralGraphNode, ...],
     tuple[StructuralGraphEdge, ...],
 ]:
-    if not path_relations:
-        return StructuralFocusOverlay(), (), ()
-
     relation_ids_by_node: dict[str, list[str]] = {}
     role_by_node = {}
     for role, relations in (
@@ -174,6 +171,18 @@ def _structural_focus_overlay(
     edge_order: list[str] = []
     edge_identity: dict[str, tuple[str, str, str, str]] = {}
     path_ids_by_edge: dict[str, list[str]] = {}
+    for anchor_relation in anchor_relations:
+        anchor = evidence.get(anchor_relation.target_id)
+        if anchor is None:
+            raise ValueError(
+                "selected changed-anchor relation references missing evidence: "
+                f"{anchor_relation.id}"
+            )
+        if anchor.kind == "symbol":
+            if anchor.id not in node_order:
+                node_order.append(anchor.id)
+            path_ids_by_node.setdefault(anchor.id, [])
+
     for path_relation in path_relations:
         path = evidence.get(path_relation.target_id)
         if path is None or path.kind != "structural_path":

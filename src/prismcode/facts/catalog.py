@@ -139,6 +139,8 @@ def build_evidence_catalog(
                     extra_sources=overlap.sources,
                     head_signature=head_signature,
                     base_signature=base_signature,
+                    changed_hunk_ids=(overlap.hunk_id,),
+                    changed_lines=overlap.changed_lines,
                 ),
             )
         for path in structural_graph.paths:
@@ -412,6 +414,8 @@ def _symbol_item(
     extra_sources: tuple[SourceRef, ...] = (),
     head_signature: AssociationSignature = AssociationSignature(),
     base_signature: AssociationSignature = AssociationSignature(),
+    changed_hunk_ids: tuple[str, ...] = (),
+    changed_lines: tuple[int, ...] = (),
 ) -> EvidenceItem:
     canonical_signature = association_signature(
         symbol.qualified_name,
@@ -446,6 +450,8 @@ def _symbol_item(
             "language": symbol.language,
             "start_line": symbol.start_line,
             "end_line": symbol.end_line,
+            "changed_hunk_ids": changed_hunk_ids,
+            "changed_lines": changed_lines,
         },
     )
 
@@ -548,9 +554,35 @@ def _put(items: dict[str, EvidenceItem], candidate: EvidenceItem) -> None:
             existing.base_signature,
             candidate.base_signature,
         ),
-        metadata={**candidate.metadata, **existing.metadata},
+        metadata=_merge_metadata(existing, candidate),
         summary=candidate.summary if candidate.changed and not existing.changed else existing.summary,
     )
+
+
+def _merge_metadata(
+    existing: EvidenceItem,
+    candidate: EvidenceItem,
+) -> dict[str, object]:
+    metadata = {**candidate.metadata, **existing.metadata}
+    if candidate.kind != "symbol":
+        return metadata
+    metadata["changed_hunk_ids"] = tuple(
+        sorted(
+            {
+                *existing.metadata.get("changed_hunk_ids", ()),
+                *candidate.metadata.get("changed_hunk_ids", ()),
+            }
+        )
+    )
+    metadata["changed_lines"] = tuple(
+        sorted(
+            {
+                *existing.metadata.get("changed_lines", ()),
+                *candidate.metadata.get("changed_lines", ()),
+            }
+        )
+    )
+    return metadata
 
 
 def _unique_sources(sources: Iterable[SourceRef]) -> tuple[SourceRef, ...]:

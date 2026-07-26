@@ -30,8 +30,9 @@ The open core provides:
   availability and freshness diagnostics;
 - bounded Codegraph paths from changed symbols to unchanged runtime/test
   neighbors;
-- one canonical, deterministic evidence catalog for changed hunks, exact
-  symbols, bounded paths, file fallbacks, and CI/runtime observations;
+- one canonical, deterministic evidence catalog where mapped code changes use
+  exact symbol identities and only unmapped spans/files remain fallbacks,
+  alongside bounded paths and CI/runtime observations;
 - explainable deterministic R/G/O/S/C/B/V-to-evidence and R/G-to-claim
   candidates;
 - deterministic same-R/G, same-slot candidate convergence with typed
@@ -153,8 +154,10 @@ three-hop, node, and path limits. A high-fanout seed therefore cannot consume
 the review budget before later changed symbols are inspected, and the total
 fact set remains bounded. The provider records complete or truncated traversal
 coverage for every seed. An exact symbol replaces the corresponding
-changed-hunk fallback; unmapped hunks remain canonical evidence. File fallback
-is used only when GitHub supplies no parseable hunk.
+changed-hunk fallback and remains a structural node even when no path is
+selected. Its hunks, lines, files, and GitHub links remain provenance rather
+than parallel evidence. Unmapped hunks remain canonical evidence. File
+fallback is used only when GitHub supplies no parseable hunk.
 
 #### Structure-aware review using another checkout
 

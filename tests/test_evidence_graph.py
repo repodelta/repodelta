@@ -127,6 +127,8 @@ def test_catalog_deduplicates_facts_and_links_unchanged_path_symbols() -> None:
     assert unchanged_item.classification == "code"
     assert test_item.classification == "test"
     assert len(changed_item.structural_path_ids) == 2
+    assert changed_item.metadata["changed_hunk_ids"] == ("hunk:1", "hunk:2")
+    assert changed_item.metadata["changed_lines"] == (2, 3)
     assert len(unchanged_item.structural_path_ids) == 1
     paths = [item for item in catalog.items if item.kind == "structural_path"]
     assert {item.classification for item in paths} == {"runtime", "mixed"}
@@ -140,7 +142,7 @@ def test_catalog_deduplicates_facts_and_links_unchanged_path_symbols() -> None:
     )
     assert verification.verification_status == "completed"
     assert verification.verification_conclusion == "success"
-    assert catalog.schema_version == "evidence_catalog.v5"
+    assert catalog.schema_version == "evidence_catalog.v6"
 
     repeated = build_evidence_catalog(
         packet, parse_changed_files(packet.changed_files), structural
@@ -160,8 +162,8 @@ def test_review_brief_serializes_one_canonical_catalog() -> None:
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
     serialized = brief.to_dict()
 
-    assert brief.schema_version == "review_brief.v22"
-    assert serialized["evidence_catalog"]["schema_version"] == "evidence_catalog.v5"
+    assert brief.schema_version == "review_brief.v23"
+    assert serialized["evidence_catalog"]["schema_version"] == "evidence_catalog.v6"
     assert "structural_graph" not in serialized
     assert len(serialized["evidence_catalog"]["items"]) == 1
     assert serialized["evidence_catalog"]["items"][0]["kind"] == "changed_file"

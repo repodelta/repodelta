@@ -412,15 +412,90 @@ def test_every_requirement_is_routed_without_a_global_statement_budget() -> None
 
     assert len(candidates.groups) == 80
     assert len(projection.slices) == 80
-    assert all(
-        item.standalone_changed_anchor_relation_ids
+    assert not any(
+        item.standalone_changed_fact_relation_ids
         for item in projection.slices
     )
+    assert all(item.structural_overlay.nodes for item in projection.slices)
+    assert len(projection.review_graph.nodes) == 80
     assert not [
         item
         for item in convergence.diagnostics
         if item.state == "budget_truncated"
     ]
+
+
+def test_isolated_symbol_and_standalone_document_keep_distinct_canonical_forms() -> None:
+    requirements = (
+        Requirement(id="R1", text="Expose bounded_trace adapter"),
+        Requirement(id="R2", text="Document bounded_trace"),
+    )
+    evidence = EvidenceCatalog(
+        items=(
+            EvidenceItem(
+                id="E:symbol",
+                summary="Changed function: bounded_trace",
+                kind="symbol",
+                classification="code",
+                profile="production",
+                authority="structural_provider",
+                revision_side="head",
+                operation="modified",
+                role="changed_anchor",
+                changed=True,
+                associated_statement_ids=("R1",),
+                head_signature=association_signature("bounded_trace"),
+                metadata={
+                    "symbol_id": "S:bounded_trace",
+                    "qualified_name": "service.bounded_trace",
+                    "path": "src/service.py",
+                    "provided_for_statement_ids": ("R1",),
+                },
+            ),
+            EvidenceItem(
+                id="E:document",
+                summary="Changed span: docs/bounded_trace.md:1-2",
+                kind="changed_span",
+                classification="document",
+                profile="document",
+                authority="github_diff",
+                revision_side="head",
+                operation="modified",
+                role="changed_anchor",
+                changed=True,
+                associated_statement_ids=("R2",),
+                head_signature=association_signature("bounded_trace documentation"),
+                metadata={
+                    "path": "docs/bounded_trace.md",
+                    "provided_for_statement_ids": ("R2",),
+                },
+            ),
+        )
+    )
+    candidates = build_projection_candidates(
+        requirements=requirements,
+        claims=(),
+        evidence_catalog=evidence,
+        structural_graph=None,
+        head_sha=None,
+    )
+    convergence = converge_candidates(candidates, evidence_catalog=evidence)
+
+    projection = build_review_projection(candidates, convergence, evidence)
+    code_slice, document_slice = projection.slices
+
+    assert tuple(
+        item.evidence_id for item in code_slice.structural_overlay.nodes
+    ) == ("E:symbol",)
+    assert projection.review_graph.nodes[0].evidence_id == "E:symbol"
+    assert projection.review_graph.edges == ()
+    assert len(document_slice.standalone_changed_fact_relation_ids) == 1
+    standalone_targets = {
+        candidates.by_id()[relation_id].target_id
+        for review_slice in projection.slices
+        for relation_id in review_slice.standalone_changed_fact_relation_ids
+    }
+    assert standalone_targets == {"E:document"}
 
 
 def test_one_generic_shared_term_is_not_a_default_relation() -> None:
@@ -847,7 +922,7 @@ def test_graph_and_no_graph_use_the_same_projection_contract() -> None:
         for item in with_graph.projection_candidates.groups
     ]
     assert (
-        without_graph.projection.slices[0].standalone_changed_anchor_relation_ids
+        without_graph.projection.slices[0].standalone_changed_fact_relation_ids
     )
     assert with_graph.projection.review_graph.nodes
     assert without_graph.projection.review_graph.path_relation_ids == ()

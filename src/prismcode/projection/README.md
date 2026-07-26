@@ -20,6 +20,10 @@ edges once across all overlays. Nodes collapse by symbol evidence ID and edges
 by deterministic source/relation/direction/target identity. Focus-relative
 roles and association/path relation IDs remain in overlays. Review-wide CI,
 source coverage, empty state, and structural coverage are computed once here.
+Every selected changed `symbol` is a structural node, including symbols with no
+selected edge. Only non-symbol changed facts use the standalone changed-fact
+relation list; graph membership never chooses between two representations of
+the same mapped change.
 Diagnostic scope and provider remain canonical through attention normalization.
 
 ## Must not

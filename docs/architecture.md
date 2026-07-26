@@ -205,9 +205,13 @@ without reconstructing terminal relevance or selecting paths, then builds
 canonical symbol nodes and typed edges. `ReviewProjection` owns these identities
 once in one review-level graph; each slice references them through a focus overlay.
 Shared paths and cross-focus overlap collapse by deterministic edge identity,
-while global and per-focus path provenance remain explicit. Graph-backed
-anchors and contexts move into the overlay; only non-graph facts remain in
-standalone lists.
+while global and per-focus path provenance remain explicit. Every selected
+changed symbol uses its canonical structural node identity, even without a
+selected edge. File, hunk, span, and GitHub line locations remain provenance
+rather than parallel evidence. Documents, configuration, unsupported-language
+changes, and genuinely unmapped code changes remain standalone changed facts.
+Context facts join an overlay only when selected structural support connects
+them.
 Profiles remain canonical in `ProjectionCandidateSet`; convergence and routing
 diagnostics remain in their own canonical contracts. `ReviewOverview` owns
 review-wide CI, source, empty-state, and structural coverage facts. HTML and CLI
