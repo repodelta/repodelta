@@ -139,7 +139,7 @@ def test_convergence_isolated_by_focus_and_prefers_explicit_claim() -> None:
     ) == ("R1-explicit", "R2-phrase")
 
 
-def test_provided_and_direct_associations_dominate_inferred_bridges() -> None:
+def test_distinct_direct_and_claim_bridged_anchors_form_one_set() -> None:
     candidates = _candidates(
         _relation(
             "claim",
@@ -170,8 +170,8 @@ def test_provided_and_direct_associations_dominate_inferred_bridges() -> None:
 
     assert _selected(
         candidates,
-        policy=ConvergencePolicy(max_changed=2),
-    ) == ("claim", "provided", "exact")
+        policy=ConvergencePolicy(),
+    ) == ("claim", "provided", "exact", "bridge")
 
 
 def test_claim_bridge_requires_the_selected_claim() -> None:
@@ -243,11 +243,11 @@ def test_structural_path_requires_a_selected_changed_anchor() -> None:
 
     assert _selected(
         candidates,
-        policy=ConvergencePolicy(max_changed=1),
+        policy=ConvergencePolicy(max_direct_anchor_identities=1),
     ) == ("anchor-1", "path-1")
 
 
-def test_ambiguity_and_inspection_truncation_are_distinct() -> None:
+def test_changed_anchor_safety_truncation_is_not_ambiguity() -> None:
     candidates = _candidates(
         *(
             _relation(
@@ -264,8 +264,9 @@ def test_ambiguity_and_inspection_truncation_are_distinct() -> None:
         candidates,
         evidence_catalog=EvidenceCatalog(),
         policy=ConvergencePolicy(
-            max_changed=2,
-            max_candidates_per_slot=4,
+            max_direct_anchor_identities=3,
+            max_anchor_identities=3,
+            max_candidates_per_slot=2,
         ),
     )
 
@@ -274,7 +275,148 @@ def test_ambiguity_and_inspection_truncation_are_distinct() -> None:
         for item in result.diagnostics
         if item.slot == "changed_anchor"
     }
-    assert states == {"ambiguous", "budget_truncated"}
+    assert result.selected_relation_ids() == ("anchor-0", "anchor-1", "anchor-2")
+    assert states == {"budget_truncated"}
+
+
+def test_changed_anchor_identity_collapses_duplicate_relations() -> None:
+    candidates = _candidates(
+        _relation(
+            "phrase",
+            slot="changed_anchor",
+            target="E:same",
+            association="distinctive_phrase",
+            ordinal=0,
+        ),
+        _relation(
+            "exact",
+            slot="changed_anchor",
+            target="E:same",
+            association="exact_identifier",
+            ordinal=1,
+        ),
+        _relation(
+            "other-phrase",
+            slot="changed_anchor",
+            target="E:other",
+            association="distinctive_phrase",
+            ordinal=2,
+        ),
+    )
+
+    result = converge_candidates(
+        candidates,
+        evidence_catalog=EvidenceCatalog(),
+    )
+
+    assert result.selected_relation_ids() == ("exact", "other-phrase")
+    assert result.groups[0].deferred_relation_ids == ("phrase",)
+    assert result.diagnostics == ()
+
+
+def test_changed_anchor_direct_bridge_and_total_limits_are_independent() -> None:
+    candidates = _candidates(
+        _relation(
+            "claim",
+            slot="claim",
+            target="C1",
+            association="explicit_reference",
+        ),
+        *(
+            _relation(
+                f"direct-{index}",
+                slot="changed_anchor",
+                target=f"E:direct:{index}",
+                association="exact_identifier",
+                ordinal=index,
+            )
+            for index in range(3)
+        ),
+        *(
+            _relation(
+                f"bridge-{index}",
+                slot="changed_anchor",
+                target=f"E:bridge:{index}",
+                association="claim_bridge",
+                bridges=("C1",),
+                ordinal=10 + index,
+            )
+            for index in range(2)
+        ),
+    )
+
+    result = converge_candidates(
+        candidates,
+        evidence_catalog=EvidenceCatalog(),
+        policy=ConvergencePolicy(
+            max_direct_anchor_identities=2,
+            max_bridged_anchor_identities=2,
+            max_anchor_identities=3,
+        ),
+    )
+
+    assert result.selected_relation_ids() == (
+        "claim",
+        "direct-0",
+        "direct-1",
+        "bridge-0",
+    )
+    changed_diagnostics = [
+        item for item in result.diagnostics if item.slot == "changed_anchor"
+    ]
+    assert [item.state for item in changed_diagnostics] == ["budget_truncated"]
+    assert set(changed_diagnostics[0].affected_ids) == {
+        "E:direct:2",
+        "E:bridge:1",
+    }
+
+
+def test_changed_anchor_claim_bridge_limit_truncates_independently() -> None:
+    candidates = _candidates(
+        _relation(
+            "claim",
+            slot="claim",
+            target="C1",
+            association="explicit_reference",
+        ),
+        _relation(
+            "direct",
+            slot="changed_anchor",
+            target="E:direct",
+            association="exact_identifier",
+        ),
+        *(
+            _relation(
+                f"bridge-{index}",
+                slot="changed_anchor",
+                target=f"E:bridge:{index}",
+                association="claim_bridge",
+                bridges=("C1",),
+                ordinal=index + 1,
+            )
+            for index in range(3)
+        ),
+    )
+
+    result = converge_candidates(
+        candidates,
+        evidence_catalog=EvidenceCatalog(),
+        policy=ConvergencePolicy(
+            max_direct_anchor_identities=5,
+            max_bridged_anchor_identities=1,
+            max_anchor_identities=10,
+        ),
+    )
+
+    assert result.selected_relation_ids() == ("claim", "direct", "bridge-0")
+    changed_diagnostics = [
+        item for item in result.diagnostics if item.slot == "changed_anchor"
+    ]
+    assert [item.state for item in changed_diagnostics] == ["budget_truncated"]
+    assert changed_diagnostics[0].affected_ids == (
+        "E:bridge:1",
+        "E:bridge:2",
+    )
 
 
 def test_distinct_current_head_checks_form_one_non_competing_set() -> None:

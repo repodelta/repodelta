@@ -265,7 +265,10 @@ def test_changed_anchor_selection_uses_typed_ordinal_not_hashed_id() -> None:
     convergence = converge_candidates(
         candidates,
         evidence_catalog=evidence,
-        policy=ConvergencePolicy(max_changed=1),
+        policy=ConvergencePolicy(
+            max_direct_anchor_identities=1,
+            max_anchor_identities=1,
+        ),
     )
     selected_ids = set(convergence.selected_relation_ids())
 
@@ -352,7 +355,7 @@ def test_selection_and_rendering_are_byte_stable() -> None:
     assert "Repository facts" in html
 
 
-def test_per_slot_budget_marks_only_that_focus_and_slot() -> None:
+def test_generic_inspection_budget_does_not_truncate_changed_anchor_set() -> None:
     evidence = tuple(
         EvidenceItem(
             id=f"E:{index}",
@@ -377,7 +380,6 @@ def test_per_slot_budget_marks_only_that_focus_and_slot() -> None:
         candidates,
         evidence_catalog=EvidenceCatalog(items=evidence),
         policy=ConvergencePolicy(
-            max_changed=2,
             max_candidates_per_slot=4,
         ),
     )
@@ -394,8 +396,8 @@ def test_per_slot_budget_marks_only_that_focus_and_slot() -> None:
         if item.slot == "changed_anchor"
         and item.state == "budget_truncated"
     ]
-    assert len(selected) == 2
-    assert len(truncated) == 1
+    assert len(selected) == 8
+    assert truncated == []
 
 
 def test_verification_is_current_head_fact_not_pr_claim() -> None:

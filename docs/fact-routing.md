@@ -24,8 +24,9 @@ Every R/G is visited independently. Its candidates are separated into:
 - guardrail coverage diagnostics.
 
 PR claims, changed symbols, paths, and CI observations never compete in one
-numeric score or global candidate budget. The first five evidence-bearing slots
-are competitive selections; current-head verification is a set.
+numeric score or global candidate budget. Claims, paths, and runtime/test
+context are competitive selections. Changed anchors and current-head
+verification are typed identity sets.
 
 ## Associations
 
@@ -69,7 +70,12 @@ collapsed into one undirected string; base terms are admitted only for
 removal-oriented or guardrail focus. Repository-local `R1`/`G1` tokens are not
 treated as issue references.
 
-Convergence is ordinal inside each competitive typed slot. Typed association
+Changed-anchor convergence retains distinct canonical evidence target IDs.
+Direct associations and claim-bridged expansion have separate safety limits,
+plus a total identity limit. Crossing those limits reports coverage truncation;
+multiple relevant anchors do not produce ambiguity.
+
+Convergence is ordinal inside each remaining competitive typed slot. Typed association
 dominance is applied before stable source ordinal. Opaque evidence hashes are
 stable identifiers, not ranking signals. When an equivalent tier crosses a
 display budget, the selected prefix remains deterministic and an ambiguity
