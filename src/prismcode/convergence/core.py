@@ -21,18 +21,16 @@ class ConvergencePolicy:
     max_direct_anchor_identities: int = 20
     max_bridged_anchor_identities: int = 10
     max_anchor_identities: int = 30
-    max_runtime: int = 2
-    max_tests: int = 2
+    max_paths_per_anchor: int = 5
+    max_path_identities: int = 30
+    max_runtime_context_identities: int = 20
+    max_test_context_identities: int = 20
     max_verification_identities: int = 20
-    max_paths: int = 2
     max_candidates_per_slot: int = 12
 
     def selected_limit(self, slot: ProjectionSlot) -> int:
         return {
             "claim": self.max_claims,
-            "runtime_context": self.max_runtime,
-            "test_context": self.max_tests,
-            "structural_path": self.max_paths,
             "boundary_fact": 0,
         }[slot]
 
@@ -100,6 +98,30 @@ def converge_candidates(
                     policy=policy,
                     diagnostics=focus_diagnostics,
                 )
+            elif slot == "structural_path":
+                selected, deferred = _converge_structural_path_slot(
+                    eligible,
+                    evidence=evidence,
+                    selected_anchor_ids=selected_targets.get(
+                        "changed_anchor",
+                        set(),
+                    ),
+                    focus_id=candidate_group.focus_statement_id,
+                    policy=policy,
+                    diagnostics=focus_diagnostics,
+                )
+            elif slot in {"runtime_context", "test_context"}:
+                selected, deferred = _converge_context_slot(
+                    eligible,
+                    focus_id=candidate_group.focus_statement_id,
+                    slot=slot,
+                    identity_limit=(
+                        policy.max_runtime_context_identities
+                        if slot == "runtime_context"
+                        else policy.max_test_context_identities
+                    ),
+                    diagnostics=focus_diagnostics,
+                )
             elif slot == "verification":
                 selected, deferred = _converge_verification_slot(
                     eligible,
@@ -120,14 +142,23 @@ def converge_candidates(
             deferred_ids.extend(item.id for item in (*deferred, *unreachable))
             selected_targets[slot] = {item.target_id for item in selected}
             if raw and not eligible:
+                upstream = slot in {
+                    "structural_path",
+                    "runtime_context",
+                    "test_context",
+                }
                 focus_diagnostics.append(
                     ProjectionDiagnostic(
                         focus_statement_id=candidate_group.focus_statement_id,
                         slot=slot,
-                        state="no_association",
+                        state="upstream_deferred" if upstream else "no_association",
                         message=(
-                            f"{slot.replace('_', ' ')} candidates exist, but their "
-                            "typed bridge was not selected upstream."
+                            f"{slot.replace('_', ' ')} candidates exist, but all "
+                            "depend on canonical upstream identities deferred by "
+                            "a safety boundary."
+                            if upstream
+                            else f"{slot.replace('_', ' ')} candidates exist, but "
+                            "their typed bridge was not selected upstream."
                         ),
                         affected_ids=tuple(item.target_id for item in unreachable),
                     )
@@ -333,6 +364,118 @@ def _converge_changed_anchor_slot(
             )
         )
     return selected, deferred
+
+
+def _converge_structural_path_slot(
+    relations: tuple[ProjectionRelation, ...],
+    *,
+    evidence: dict[str, EvidenceItem],
+    selected_anchor_ids: set[str],
+    focus_id: str,
+    policy: ConvergencePolicy,
+    diagnostics: list[ProjectionDiagnostic],
+) -> tuple[tuple[ProjectionRelation, ...], tuple[ProjectionRelation, ...]]:
+    """Select a bounded union of canonical paths rooted in selected anchors."""
+
+    canonical, duplicates = _canonical_relations_by_target(relations)
+    ordered = tuple(
+        sorted(
+            canonical,
+            key=lambda item: (
+                int(evidence[item.target_id].metadata.get("depth", 0)),
+                item.source_ordinal,
+                item.target_id,
+            ),
+        )
+    )
+    sponsored: dict[str, int] = {
+        anchor_id: 0 for anchor_id in selected_anchor_ids
+    }
+    selected = []
+    omitted = []
+    for relation in ordered:
+        roots = tuple(
+            anchor_id
+            for anchor_id in relation.bridge_ids
+            if anchor_id in sponsored
+        )
+        available = tuple(
+            anchor_id
+            for anchor_id in roots
+            if sponsored[anchor_id] < policy.max_paths_per_anchor
+        )
+        if (
+            len(selected) >= policy.max_path_identities
+            or not available
+        ):
+            omitted.append(relation)
+            continue
+        selected.append(relation)
+        for anchor_id in available:
+            sponsored[anchor_id] += 1
+
+    if omitted:
+        diagnostics.append(
+            ProjectionDiagnostic(
+                focus_statement_id=focus_id,
+                slot="structural_path",
+                state="budget_truncated",
+                message=(
+                    f"{len(canonical)} canonical structural paths were reachable "
+                    f"for {focus_id}; {len(selected)} are retained within per-anchor "
+                    f"({policy.max_paths_per_anchor}) and total "
+                    f"({policy.max_path_identities}) identity safety limits."
+                ),
+                affected_ids=tuple(item.target_id for item in omitted),
+            )
+        )
+    return tuple(selected), tuple((*omitted, *duplicates))
+
+
+def _converge_context_slot(
+    relations: tuple[ProjectionRelation, ...],
+    *,
+    focus_id: str,
+    slot: ProjectionSlot,
+    identity_limit: int,
+    diagnostics: list[ProjectionDiagnostic],
+) -> tuple[tuple[ProjectionRelation, ...], tuple[ProjectionRelation, ...]]:
+    """Retain canonical runtime/test context identities on selected paths."""
+
+    canonical, duplicates = _canonical_relations_by_target(relations)
+    ordered = tuple(sorted(canonical, key=relation_key))
+    selected = ordered[:identity_limit]
+    omitted = ordered[identity_limit:]
+    if omitted:
+        diagnostics.append(
+            ProjectionDiagnostic(
+                focus_statement_id=focus_id,
+                slot=slot,
+                state="budget_truncated",
+                message=(
+                    f"{len(ordered)} canonical {slot.replace('_', ' ')} identities "
+                    f"were reachable for {focus_id}; {len(selected)} are retained "
+                    f"within the {identity_limit} identity safety limit."
+                ),
+                affected_ids=tuple(item.target_id for item in omitted),
+            )
+        )
+    return selected, tuple((*omitted, *duplicates))
+
+
+def _canonical_relations_by_target(
+    relations: tuple[ProjectionRelation, ...],
+) -> tuple[tuple[ProjectionRelation, ...], tuple[ProjectionRelation, ...]]:
+    by_target: dict[str, list[ProjectionRelation]] = {}
+    for relation in relations:
+        by_target.setdefault(relation.target_id, []).append(relation)
+    canonical = []
+    duplicates = []
+    for target_relations in by_target.values():
+        ordered = tuple(sorted(target_relations, key=relation_key))
+        canonical.append(ordered[0])
+        duplicates.extend(ordered[1:])
+    return tuple(canonical), tuple(sorted(duplicates, key=relation_key))
 
 
 def _converge_verification_slot(

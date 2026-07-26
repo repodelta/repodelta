@@ -168,24 +168,27 @@ bridge, and current-head observation. Explicit R/G references are recognized
 only across authored statement boundaries, never in arbitrary code or fixture
 text. A generic one-token overlap does not become a candidate relation.
 
-`CandidateConvergence` then applies typed dominance, bridge reachability,
-inspection budgets, and display budgets inside one R/G and one slot at a time.
-Claim, context, and structural-path slots are competitive. Changed anchors form
-a canonical evidence set: distinct direct anchors remain visible together,
-claim-bridged anchors use a separate expansion budget, and duplicate relations
-to one evidence target collapse. Verification is a set slot keyed by
-first-class provider, kind, and normalized name: distinct current-head checks
-remain visible together, equivalent duplicates collapse, and conflicting
-completed outcomes remain explicit.
+`CandidateConvergence` then applies typed dominance, bridge reachability, and
+identity safety limits inside one R/G and one slot at a time. Claims remain
+compact competitive selections. Changed anchors form a canonical evidence set:
+distinct direct anchors remain visible together, claim-bridged anchors use a
+separate expansion budget, and duplicate relations to one evidence target
+collapse. Structural paths form the bounded union rooted in selected anchors;
+runtime and test contexts form canonical sets reachable through selected paths.
+Together their selected relation IDs and bridge IDs are the reference-only
+evidence subgraph. Verification is a set slot keyed by first-class provider,
+kind, and normalized name: distinct current-head checks remain visible
+together, equivalent duplicates collapse, and conflicting completed outcomes
+remain explicit.
 Verification has a separate identity-count safety limit and different identities
 never create semantic ambiguity.
 
-Changed-anchor identity safety limits emit coverage truncation, never
-equivalent-tier ambiguity. When an equivalent semantic tier in another
-competitive slot crosses the display
-budget, stable source order is disclosed as a tie-break through an `ambiguous`
-diagnostic. There is no all-statement/all-evidence numeric score or global
-candidate budget.
+Changed-anchor, structural-path, context, and verification identity safety
+limits emit coverage truncation, never equivalent-tier ambiguity. Context
+reachable only through a safety-deferred path is `upstream_deferred`. When an
+equivalent claim tier crosses the display budget, stable source order is
+disclosed as a tie-break through an `ambiguous` diagnostic. There is no
+all-statement/all-evidence numeric score or global candidate budget.
 
 `ReviewProjection` references only relation IDs selected by
 `CandidateConvergence`. Profiles remain canonical in

@@ -337,19 +337,20 @@ No earlier statement may consume the minimum allocation of a later statement.
 Objectives, Scope, and PR-only context cannot consume R/G selection budgets.
 When a budget truncates candidates, record the affected focus and slot.
 
-Default competitive selection can remain compact, while set slots use explicit
-identity safety limits:
+Default claim selection can remain compact, while set and subgraph slots use
+explicit identity safety limits:
 
 - two PR claims;
 - up to 20 direct, 10 claim-bridged, and 30 total changed-anchor identities;
-- two runtime nodes;
-- two test nodes;
+- up to 20 runtime-context identities;
+- up to 20 test-context identities;
 - one current-head verification observation per distinct check identity;
-- two paths;
+- up to five canonical paths sponsored by each selected anchor and 30 paths
+  total;
 - a typed missing-coverage diagnostic for guardrails until a real bounded scan
   provider is implemented.
 
-Those are projection limits, not retrieval limits.
+Those are convergence safety limits, not retrieval or ordinary display limits.
 
 ## Coverage and diagnostics
 
