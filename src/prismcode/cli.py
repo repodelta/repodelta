@@ -7,6 +7,7 @@ from dataclasses import replace
 
 from prismcode.pipeline import DeterministicAnalyzer
 from prismcode.providers.codegraph import CodegraphProvider
+from prismcode.guardrails.scanning import RepositoryGuardrailScanner
 from prismcode.model.contracts import AnalysisInput
 from prismcode.evaluation.core import (
     evaluate_suite,
@@ -60,7 +61,8 @@ def build_parser() -> argparse.ArgumentParser:
         "--repo-root",
         default=".",
         help=(
-            "Target repository checkout containing .codegraph/codegraph.db "
+            "Target PR-head repository checkout used for bounded guardrail "
+            "scans and containing optional .codegraph/codegraph.db "
             "(default: current directory)"
         ),
     )
@@ -155,7 +157,14 @@ def main() -> int:
                 analysis_input,
                 structural_graph=structural_graph,
             )
-        brief = DeterministicAnalyzer().analyze(analysis_input)
+        brief = DeterministicAnalyzer(
+            guardrail_scanner=RepositoryGuardrailScanner(
+                args.repo_root,
+                expected_revision=(
+                    analysis_input.packet.head_sha if not args.fixture else None
+                ),
+            )
+        ).analyze(analysis_input)
         output = write_html(brief, args.output)
     except (GitHubApiError, OSError, ValueError) as exc:
         print(f"prismcode: error: {exc}", file=sys.stderr)

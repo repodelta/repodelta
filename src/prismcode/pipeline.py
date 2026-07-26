@@ -10,6 +10,10 @@ from prismcode.semantics.review import extract_packet_semantics
 from prismcode.changes.hunks import parse_changed_files
 from prismcode.facts.catalog import build_evidence_catalog
 from prismcode.guardrails.planning import compile_guardrail_scan_plans
+from prismcode.guardrails.scanning import (
+    GuardrailScanner,
+    unavailable_scan_results,
+)
 from prismcode.routing.candidates import build_projection_candidates
 from prismcode.convergence.core import converge_candidates
 from prismcode.projection.build import build_review_projection
@@ -23,6 +27,9 @@ class ReviewAnalyzer(Protocol):
 class DeterministicAnalyzer:
     """Build one conclusion-free requirement-to-evidence candidate graph."""
 
+    def __init__(self, *, guardrail_scanner: GuardrailScanner | None = None) -> None:
+        self.guardrail_scanner = guardrail_scanner
+
     def analyze(self, analysis_input: AnalysisInput) -> ReviewBrief:
         packet = analysis_input.packet
         packet.validate_consistency()
@@ -32,15 +39,21 @@ class DeterministicAnalyzer:
         requirements = analysis_input.requirements or semantics.obligations
         for requirement in requirements:
             requirement.validate_consistency()
+        deliverables = tuple(item for item in requirements if item.kind != "guardrail")
+        guardrails = tuple(item for item in requirements if item.kind == "guardrail")
+        guardrail_scan_plans = compile_guardrail_scan_plans(guardrails)
+        guardrail_scan_results = (
+            self.guardrail_scanner.scan(guardrail_scan_plans)
+            if self.guardrail_scanner is not None
+            else unavailable_scan_results(guardrail_scan_plans)
+        )
         evidence_catalog = build_evidence_catalog(
             packet,
             changes,
             analysis_input.structural_graph,
             supplied=analysis_input.supplied_evidence,
+            guardrail_scan_results=guardrail_scan_results,
         )
-        deliverables = tuple(item for item in requirements if item.kind != "guardrail")
-        guardrails = tuple(item for item in requirements if item.kind == "guardrail")
-        guardrail_scan_plans = compile_guardrail_scan_plans(guardrails)
         projection_candidates = build_projection_candidates(
             requirements=requirements,
             claims=semantics.claims,

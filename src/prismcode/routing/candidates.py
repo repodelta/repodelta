@@ -226,21 +226,83 @@ def build_projection_candidates(
 
         if focus.kind == "guardrail":
             plan = plans_by_guardrail.get(focus.id)
-            focus_diagnostics.append(
-                _missing(
-                    focus.id,
-                    "boundary_fact",
-                    "provider_unavailable",
-                    (
-                        f"Guardrail scan plan {plan.id} exists, but no bounded "
-                        "repository scan fact was collected; selected changed "
-                        "anchors are not absence proof."
-                        if plan is not None
-                        else "No canonical guardrail scan plan applies to this focus."
-                    ),
-                    affected_ids=(plan.id,) if plan is not None else (),
-                )
+            boundary_facts = tuple(
+                item
+                for item in evidence.values()
+                if item.role == "boundary_fact"
+                and item.associated_statement_ids == (focus.id,)
             )
+            result = (
+                boundary_facts[0].guardrail_scan_result
+                if boundary_facts
+                else None
+            )
+            for ordinal, fact in enumerate(boundary_facts):
+                focus_relations.append(
+                    _relation(
+                        focus.id,
+                        "boundary_fact",
+                        "evidence",
+                        fact.id,
+                        "provided_association",
+                        (
+                            AssociationReason(
+                                kind="provided_association",
+                                detail=(
+                                    "The bounded scan provider explicitly "
+                                    "associates this observation with the guardrail."
+                                ),
+                            ),
+                        ),
+                        source_ordinal=ordinal,
+                    )
+                )
+            if result is None:
+                diagnostic = next(
+                    (
+                        item
+                        for item in evidence_catalog.guardrail_scan_diagnostics
+                        if item.guardrail_id == focus.id
+                        or (plan is not None and item.plan_id == plan.id)
+                    ),
+                    None,
+                )
+                focus_diagnostics.append(
+                    _missing(
+                        focus.id,
+                        "boundary_fact",
+                        (
+                            "stale_source"
+                            if diagnostic
+                            and diagnostic.code == "guardrail_scan_stale_checkout"
+                            else "provider_unavailable"
+                        ),
+                        (
+                            diagnostic.message
+                            if diagnostic is not None
+                            else (
+                                f"Guardrail scan plan {plan.id} exists, but no "
+                                "bounded repository scan fact was collected."
+                                if plan is not None
+                                else "No canonical guardrail scan plan applies."
+                            )
+                        ),
+                        affected_ids=(plan.id,) if plan is not None else (),
+                    )
+                )
+            elif result.state == "partial":
+                focus_diagnostics.append(
+                    _missing(
+                        focus.id,
+                        "boundary_fact",
+                        "partial_coverage",
+                        (
+                            "A bounded guardrail scan fact was collected, but one "
+                            "or more planned surfaces have incomplete coverage."
+                        ),
+                        affected_ids=(result.id,),
+                    )
+                )
         else:
             focus_diagnostics.append(
                 _missing(

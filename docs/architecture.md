@@ -14,7 +14,12 @@ fixture or GitHub
   -> canonical guardrail scan planning
        -> one source-backed plan per G
        -> head revision + repository scope
-       -> path, file-content, and symbol-name surfaces
+       -> canonical executable selectors + supported surfaces
+  -> bounded guardrail scanning
+       -> validated clean PR-head checkout
+       -> deterministic path/content/symbol-name inspection
+       -> typed file/byte/match safety limits
+       -> typed result coverage and candidate locations
   -> one canonical DiffHunkCollection
   -> optional StructuralGraphProvider
        -> exact changed-hunk / symbol-span overlaps
@@ -67,8 +72,9 @@ becoming alternate intake, classification, routing, or presentation paths.
    It never means implemented, verified, satisfied, or in scope.
 5. Renderers project the brief and never infer or upgrade a conclusion.
 6. Structural providers return repository facts and diagnostics only.
-7. Guardrail scan plans are execution intent, never evidence that a scan ran
-   or that an absence was observed.
+7. Guardrail scan plans own execution intent and selectors. Observed scans
+   become boundary facts; neither plans nor zero-match observations prove
+   satisfaction or repository-wide absence.
 
 ## Semantic authority
 
@@ -173,7 +179,7 @@ relations without selecting or truncating them:
 - runtime and test context;
 - current-head verification;
 - structural paths;
-- guardrail coverage diagnostics (until a bounded scan provider exists).
+- guardrail boundary facts plus explicit unavailable/partial scan coverage.
 
 Eligibility is determined from canonical fact and requirement profiles.
 Typed association kinds include explicit provider association, explicit R/G

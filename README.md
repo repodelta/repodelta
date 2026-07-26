@@ -39,8 +39,9 @@ The open core provides:
   dominance, bridge reachability, canonical changed-anchor and verification
   sets, bounded structural evidence subgraphs, compact claim selection, and
   explicit coverage diagnostics;
-- source-backed typed repository scan plans for G guardrails, without treating
-  planned work as scan evidence or absence proof;
+- source-backed executable repository scan plans and bounded PR-head
+  observations for G guardrails, without treating zero matches as satisfaction
+  or repository-wide absence;
 - an R-first consistency view with claim/evidence candidates, binding basis,
   source links, and vertically aggregated coverage gaps;
 - an Actions workflow for automatic PR reports and manually targeted reviews;
@@ -179,7 +180,16 @@ prismcode review \
 This is also required when reviewing a historical or different PR while the
 current directory is checked out at another commit. `--repo-root` does not
 select or change a Git revision: the supplied checkout must already be at the
-PR's head SHA, and PrismCode verifies that before using its index.
+PR's head SHA. PrismCode verifies that revision before using either the
+Codegraph index or the bounded G guardrail scanner. Guardrail plans own their
+deterministic selectors; the scanner inspects eligible paths and text under
+explicit file, byte, and match limits and reports per-surface coverage. It
+scans only tracked head files, excluding untracked checkout content and
+symlink targets, and refuses a tracked working tree that differs from HEAD.
+Path, file-content, and lexical symbol-name coverage are recorded separately;
+truncation retains the exact boundary kind, limit, and observed count. A
+zero-match observation is never presented as guardrail satisfaction or
+repository-wide absence.
 
 Use `--verbose` for individual structural diagnostics, or
 `--no-structural-graph` to skip the probe explicitly. Missing, stale, partial,

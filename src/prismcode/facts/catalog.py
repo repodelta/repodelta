@@ -13,6 +13,9 @@ from prismcode.model.contracts import (
     EvidenceCatalog,
     EvidenceClassification,
     EvidenceItem,
+    GuardrailScanDiagnostic,
+    GuardrailScanResult,
+    GuardrailScanResultSet,
     ReviewSourcePacket,
     SourceRef,
     SuppliedEvidence,
@@ -61,6 +64,7 @@ def build_evidence_catalog(
     structural_graph: StructuralGraphResult | None = None,
     *,
     supplied: tuple[SuppliedEvidence, ...] = (),
+    guardrail_scan_results: GuardrailScanResultSet = GuardrailScanResultSet(),
 ) -> EvidenceCatalog:
     """Normalize source, structural, and supplied facts into one ID-addressed catalog."""
 
@@ -194,6 +198,9 @@ def build_evidence_catalog(
 
     for observation in packet.verification_observations:
         _put(items, verification_evidence(observation))
+    for result in guardrail_scan_results.results:
+        if result.state != "unavailable":
+            _put(items, boundary_evidence(result))
     for item in supplied:
         _put(
             items,
@@ -208,7 +215,24 @@ def build_evidence_catalog(
 
     catalog = EvidenceCatalog(
         items=tuple(sorted(items.values(), key=lambda item: item.id)),
-        diagnostics=changes.diagnostics,
+        diagnostics=(
+            *changes.diagnostics,
+            *(
+                diagnostic
+                for result in guardrail_scan_results.results
+                for diagnostic in result.diagnostics
+            ),
+        ),
+        guardrail_scan_diagnostics=tuple(
+            GuardrailScanDiagnostic(
+                code=diagnostic.code,
+                message=diagnostic.message,
+                plan_id=result.plan_id,
+                guardrail_id=result.guardrail_id,
+            )
+            for result in guardrail_scan_results.results
+            for diagnostic in result.diagnostics
+        ),
     )
     catalog.validate_consistency()
     return catalog
@@ -217,6 +241,38 @@ def build_evidence_catalog(
 def evidence_id(kind: str, identity: str) -> str:
     digest = hashlib.sha256(f"{kind}\0{identity}".encode("utf-8")).hexdigest()[:20]
     return f"E:{kind}:{digest}"
+
+
+def boundary_evidence(result: GuardrailScanResult) -> EvidenceItem:
+    """Normalize one observed bounded scan as the sole boundary-fact identity."""
+
+    match_sources = tuple(
+        SourceRef(
+            label=f"guardrail scan · {match.surface}",
+            path=match.path,
+            line_start=match.line,
+            line_end=match.line,
+        )
+        for match in result.matches
+    )
+    return EvidenceItem(
+        id=evidence_id("boundary_fact", result.id),
+        summary=(
+            f"Bounded head scan observed {len(result.matches)} candidate "
+            f"match{'es' if len(result.matches) != 1 else ''} "
+            f"with {result.state} coverage."
+        ),
+        kind="boundary_fact",
+        classification="mixed",
+        profile="unknown",
+        authority="guardrail_scan_provider",
+        revision_side="head",
+        operation="observed",
+        role="boundary_fact",
+        associated_statement_ids=(result.guardrail_id,),
+        guardrail_scan_result=result,
+        sources=match_sources,
+    )
 
 
 def provided_evidence(
