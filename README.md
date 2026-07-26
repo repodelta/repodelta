@@ -117,7 +117,7 @@ exact head checkout, or its index is unavailable or stale, the report is still
 generated from canonical changed-hunk evidence:
 
 ```text
-Structural mapping: skipped · Codegraph index not found · changed-hunk fallback used
+Structural mapping: skipped · Codegraph index not found · changed-span fallback used
 ```
 
 #### Structure-aware review from the PR checkout
@@ -141,7 +141,7 @@ PrismCode maps exact changed hunk lines to Codegraph symbols and records
 bounded structural paths:
 
 ```text
-Structural mapping: Codegraph available · 4/4 hunks mapped to 3 symbols · 12 bounded paths · unmapped hunks retained
+Structural mapping: Codegraph available · 4/4 hunks mapped to 3 symbols · 12 bounded paths · uncovered change spans retained
 ```
 
 Path expansion starts only from exact changed symbols, follows an explicit

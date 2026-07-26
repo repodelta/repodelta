@@ -1,7 +1,29 @@
 from __future__ import annotations
 
-from prismcode.model.contracts import EvidenceItem, Requirement, RequirementProfile
-from prismcode.facts.lexical import semantic_tokens
+from prismcode.model.contracts import (
+    AssociationSignature,
+    EvidenceItem,
+    Requirement,
+    RequirementProfile,
+    ReviewStatement,
+)
+from prismcode.facts.lexical import merge_signatures, semantic_tokens
+
+_REMOVAL_TERMS = {
+    "remove",
+    "removed",
+    "removal",
+    "delete",
+    "deleted",
+    "deprecate",
+    "deprecated",
+    "cleanup",
+    "clean",
+    "exclude",
+    "prevent",
+    "avoid",
+    "mustn",
+}
 
 
 def requirement_profile(focus: Requirement) -> RequirementProfile:
@@ -39,23 +61,7 @@ def eligible_changed_anchor(
     if item.role != "changed_anchor" or item.profile == "generated":
         return False
     if item.revision_side == "base" or item.operation == "removed":
-        removal_terms = {
-            "remove",
-            "removed",
-            "removal",
-            "delete",
-            "deleted",
-            "deprecate",
-            "deprecated",
-            "legacy",
-            "cleanup",
-            "clean",
-            "exclude",
-            "prevent",
-            "avoid",
-            "mustn",
-        }
-        if profile != "guardrail" and not semantic_tokens(focus.text) & removal_terms:
+        if profile != "guardrail" and not semantic_tokens(focus.text) & _REMOVAL_TERMS:
             return False
     allowed = {
         "documentation": {"document"},
@@ -95,14 +101,15 @@ def eligible_changed_anchor(
 
 
 def anchor_key(item: EvidenceItem) -> tuple[object, ...]:
-    precision = {"symbol": 0, "changed_hunk": 1, "changed_file": 2}
+    precision = {"symbol": 0, "changed_span": 1, "changed_file": 2}
     source = item.sources[0] if item.sources else None
     return (
         precision.get(item.kind, 3),
         str(item.metadata.get("path") or (source.path if source else "") or ""),
         int(
             item.metadata.get("start_line")
-            or item.metadata.get("new_start")
+            or next(iter(item.metadata.get("added_lines", ())), 0)
+            or next(iter(item.metadata.get("removed_lines", ())), 0)
             or (source.line_start if source else 0)
             or 0
         ),
@@ -111,22 +118,18 @@ def anchor_key(item: EvidenceItem) -> tuple[object, ...]:
     )
 
 
-def evidence_text(item: EvidenceItem) -> str:
-    metadata = item.metadata
-    # Current implementation association only sees the head-side change.
-    # Base-side text remains available as provenance for removal-oriented focus.
-    excerpt = (
-        metadata.get("base_excerpt")
-        if item.revision_side == "base"
-        else metadata.get("head_excerpt")
+def evidence_signature(
+    item: EvidenceItem,
+    focus: Requirement | ReviewStatement,
+) -> AssociationSignature:
+    """Select directional canonical retrieval truth for one review focus."""
+
+    use_base = (
+        item.revision_side == "base"
+        or focus.purpose == "guardrail"
+        or bool(semantic_tokens(focus.text) & _REMOVAL_TERMS)
     )
-    return "\n".join(
-        value
-        for value in (
-            item.summary,
-            str(metadata.get("path") or ""),
-            str(metadata.get("qualified_name") or ""),
-            str(excerpt or ""),
-        )
-        if value
+    return merge_signatures(
+        item.head_signature,
+        item.base_signature if use_base else AssociationSignature(),
     )

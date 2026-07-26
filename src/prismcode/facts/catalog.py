@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Iterable
 
 from prismcode.model.contracts import (
+    AssociationSignature,
     ChangedFile,
     ChangeOperation,
     EvidenceCatalog,
@@ -18,8 +19,19 @@ from prismcode.model.contracts import (
     VerificationObservation,
     VerificationIdentity,
 )
-from prismcode.changes.hunks import ChangedHunk, DiffHunkCollection
-from prismcode.providers.structural import GraphSymbol, StructuralGraphResult, StructuralPath
+from prismcode.changes.hunks import (
+    ChangedHunk,
+    ChangedLine,
+    ChangedSpan,
+    DiffHunkCollection,
+)
+from prismcode.facts.lexical import association_signature, merge_signatures
+from prismcode.providers.structural import (
+    GraphSymbol,
+    HunkSymbolOverlap,
+    StructuralGraphResult,
+    StructuralPath,
+)
 
 _DOCUMENT_SUFFIXES = {".md", ".mdx", ".rst", ".txt", ".pdf", ".doc", ".docx"}
 _WORKFLOW_PREFIXES = (".github/workflows/", ".circleci/")
@@ -56,12 +68,11 @@ def build_evidence_catalog(
     hunks_by_path: dict[str, list[ChangedHunk]] = {}
     for hunk in changes.hunks:
         hunks_by_path.setdefault(hunk.file_path, []).append(hunk)
-    mapped_hunk_ids = (
-        {overlap.hunk_id for overlap in structural_graph.overlaps}
-        if structural_graph is not None
-        else set()
-    )
     hunks_by_id = {hunk.id: hunk for hunk in changes.hunks}
+    overlaps_by_hunk: dict[str, list[HunkSymbolOverlap]] = {}
+    if structural_graph is not None:
+        for overlap in structural_graph.overlaps:
+            overlaps_by_hunk.setdefault(overlap.hunk_id, []).append(overlap)
 
     for changed_file in packet.changed_files:
         file_hunks = hunks_by_path.get(changed_file.path, ())
@@ -69,8 +80,24 @@ def build_evidence_catalog(
             _put(items, _changed_file_fallback(changed_file))
             continue
         for hunk in file_hunks:
-            if hunk.id not in mapped_hunk_ids:
-                _put(items, _changed_hunk_item(changed_file, hunk))
+            overlaps = overlaps_by_hunk.get(hunk.id, ())
+            mapped_lines = {
+                line for overlap in overlaps for line in overlap.changed_lines
+            }
+            for span in hunk.spans:
+                uncovered = tuple(
+                    line for line in span.added if line.number not in mapped_lines
+                )
+                if uncovered or not span.added:
+                    _put(
+                        items,
+                        _changed_span_item(
+                            changed_file,
+                            span,
+                            added=uncovered,
+                            include_removed=not bool(mapped_lines & set(span.added_lines)),
+                        ),
+                    )
 
     if structural_graph is not None:
         changed_symbol_ids = {
@@ -90,6 +117,10 @@ def build_evidence_catalog(
 
         for overlap in structural_graph.overlaps:
             hunk = hunks_by_id.get(overlap.hunk_id)
+            head_signature, base_signature = _overlap_signatures(
+                hunk,
+                overlap.changed_lines,
+            )
             _put(
                 items,
                 _symbol_item(
@@ -106,6 +137,8 @@ def build_evidence_catalog(
                         sorted(symbol_paths.get(overlap.symbol.id, ()))
                     ),
                     extra_sources=overlap.sources,
+                    head_signature=head_signature,
+                    base_signature=base_signature,
                 ),
             )
         for path in structural_graph.paths:
@@ -240,10 +273,11 @@ def provided_evidence(
 
 def _changed_file_fallback(changed_file: ChangedFile) -> EvidenceItem:
     path = changed_file.path
+    summary = f"{changed_file.status.title()} file: {path}"
     return EvidenceItem(
         id=evidence_id("changed_file", path),
         kind="changed_file",
-        summary=f"{changed_file.status.title()} file: {path}",
+        summary=summary,
         classification=_path_classification(path),
         profile=_fact_profile(path),
         authority="github_diff",
@@ -261,6 +295,7 @@ def _changed_file_fallback(changed_file: ChangedFile) -> EvidenceItem:
         ),
         role="changed_anchor",
         changed=True,
+        head_signature=association_signature(summary, path),
         sources=(
             SourceRef(
                 label="changed file fallback",
@@ -279,21 +314,33 @@ def _changed_file_fallback(changed_file: ChangedFile) -> EvidenceItem:
     )
 
 
-def _changed_hunk_item(changed_file: ChangedFile, hunk: ChangedHunk) -> EvidenceItem:
-    path = hunk.file_path
-    line_start = hunk.new_start
-    line_end = max(hunk.new_start, hunk.new_start + max(hunk.new_count, 1) - 1)
+def _changed_span_item(
+    changed_file: ChangedFile,
+    span: ChangedSpan,
+    *,
+    added: tuple[ChangedLine, ...],
+    include_removed: bool,
+) -> EvidenceItem:
+    path = span.file_path
+    removed = span.removed if include_removed else ()
+    head_text = "\n".join(item.text for item in added)
+    base_text = "\n".join(item.text for item in removed)
+    display_lines = added or removed
+    line_start = min((item.number for item in display_lines), default=0)
+    line_end = max((item.number for item in display_lines), default=line_start)
     operation = (
         "removed"
-        if hunk.is_deletion_only
+        if removed and not added
         else "added"
-        if hunk.added_lines and not hunk.removed_lines
+        if added and not removed
         else "modified"
     )
+    identity = f"{span.id}:{','.join(str(item.number) for item in added)}"
+    summary = f"Changed span: {path}:{line_start}-{line_end}"
     return EvidenceItem(
-        id=evidence_id("changed_hunk", hunk.id),
-        kind="changed_hunk",
-        summary=f"Changed hunk: {path}:{line_start}-{line_end}",
+        id=evidence_id("changed_span", identity),
+        kind="changed_span",
+        summary=summary,
         classification=_path_classification(path),
         profile=_fact_profile(path),
         authority="github_diff",
@@ -301,6 +348,8 @@ def _changed_hunk_item(changed_file: ChangedFile, hunk: ChangedHunk) -> Evidence
         operation=operation,
         role="changed_anchor",
         changed=True,
+        head_signature=association_signature(summary, path, head_text),
+        base_signature=association_signature(summary, path, base_text),
         sources=(
             SourceRef(
                 label="diff hunk",
@@ -311,15 +360,14 @@ def _changed_hunk_item(changed_file: ChangedFile, hunk: ChangedHunk) -> Evidence
             ),
         ),
         metadata={
-            "hunk_id": hunk.id,
+            "hunk_id": span.hunk_id,
+            "span_id": span.id,
             "path": path,
-            "old_start": hunk.old_start,
-            "old_count": hunk.old_count,
-            "new_start": hunk.new_start,
-            "new_count": hunk.new_count,
-            "head_excerpt": hunk.new_snippet[:4000],
-            "base_excerpt": hunk.old_snippet[:4000],
-            "deletion_only": hunk.is_deletion_only,
+            "added_lines": tuple(item.number for item in added),
+            "removed_lines": tuple(item.number for item in removed),
+            "head_preview": head_text[:4000],
+            "base_preview": base_text[:4000],
+            "deletion_only": bool(removed and not added),
         },
     )
 
@@ -362,7 +410,13 @@ def _symbol_item(
     operation: ChangeOperation,
     structural_path_ids: tuple[str, ...],
     extra_sources: tuple[SourceRef, ...] = (),
+    head_signature: AssociationSignature = AssociationSignature(),
+    base_signature: AssociationSignature = AssociationSignature(),
 ) -> EvidenceItem:
+    canonical_signature = association_signature(
+        symbol.qualified_name,
+        symbol.file_path,
+    )
     return EvidenceItem(
         id=evidence_id("symbol", symbol.id),
         kind="symbol",
@@ -380,6 +434,8 @@ def _symbol_item(
             else "runtime_context"
         ),
         changed=changed,
+        head_signature=merge_signatures(canonical_signature, head_signature),
+        base_signature=base_signature,
         sources=_unique_sources((*symbol.sources, *extra_sources)),
         structural_path_ids=structural_path_ids,
         metadata={
@@ -391,6 +447,27 @@ def _symbol_item(
             "start_line": symbol.start_line,
             "end_line": symbol.end_line,
         },
+    )
+
+
+def _overlap_signatures(
+    hunk: ChangedHunk | None,
+    changed_lines: tuple[int, ...],
+) -> tuple[AssociationSignature, AssociationSignature]:
+    if hunk is None:
+        return AssociationSignature(), AssociationSignature()
+    covered = set(changed_lines)
+    head_values = []
+    base_values = []
+    for span in hunk.spans:
+        selected = tuple(item.text for item in span.added if item.number in covered)
+        if not selected:
+            continue
+        head_values.extend(selected)
+        base_values.extend(item.text for item in span.removed)
+    return (
+        association_signature(*head_values),
+        association_signature(*base_values),
     )
 
 
@@ -462,6 +539,14 @@ def _put(items: dict[str, EvidenceItem], candidate: EvidenceItem) -> None:
         sources=_unique_sources((*existing.sources, *candidate.sources)),
         structural_path_ids=tuple(
             sorted({*existing.structural_path_ids, *candidate.structural_path_ids})
+        ),
+        head_signature=merge_signatures(
+            existing.head_signature,
+            candidate.head_signature,
+        ),
+        base_signature=merge_signatures(
+            existing.base_signature,
+            candidate.base_signature,
         ),
         metadata={**candidate.metadata, **existing.metadata},
         summary=candidate.summary if candidate.changed and not existing.changed else existing.summary,

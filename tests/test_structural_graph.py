@@ -119,6 +119,26 @@ def test_unified_patch_tracks_exact_new_and_old_line_numbers() -> None:
     assert hunks[0].new_snippet == "    def run(self):\n        value = 1"
 
 
+def test_unified_patch_splits_change_blocks_on_context_lines() -> None:
+    hunks = parse_unified_patch(
+        "src/service.py",
+        "@@ -1,5 +1,5 @@\n"
+        "-old_first()\n"
+        "+new_first()\n"
+        " unchanged()\n"
+        "-old_second()\n"
+        "+new_second()\n"
+        " trailing()\n",
+    )
+
+    assert len(hunks) == 1
+    assert len(hunks[0].spans) == 2
+    assert hunks[0].spans[0].old_snippet == "old_first()"
+    assert hunks[0].spans[0].new_snippet == "new_first()"
+    assert hunks[0].spans[1].old_snippet == "old_second()"
+    assert hunks[0].spans[1].new_snippet == "new_second()"
+
+
 def test_provider_protocol_and_missing_index_diagnostic(tmp_path: Path) -> None:
     provider = CodegraphProvider(tmp_path)
 
@@ -412,7 +432,7 @@ def test_analyzer_preserves_structural_facts_without_using_them_as_conclusions(
         AnalysisInput(packet=packet, structural_graph=structural)
     )
 
-    assert brief.schema_version == "review_brief.v13"
+    assert brief.schema_version == "review_brief.v14"
     assert brief.requirements == lexical_only.requirements == ()
     serialized = brief.to_dict()
     assert "structural_graph" not in serialized
