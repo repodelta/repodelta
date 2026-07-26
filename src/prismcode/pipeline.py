@@ -56,6 +56,7 @@ class DeterministicAnalyzer:
         projection = build_review_projection(
             projection_candidates,
             candidate_convergence,
+            evidence_catalog,
         )
         overview = build_review_overview(
             packet,

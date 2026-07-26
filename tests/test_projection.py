@@ -90,6 +90,53 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
         "E:symbol:9e703e599343229d97c1"
     ]
     assert set(selected_paths) <= set(anchor.structural_path_ids)
+    subgraph = brief.projection.slices[0].structural_subgraph
+    assert [item.role for item in subgraph.nodes] == [
+        "changed_anchor",
+        "runtime_context",
+        "test_context",
+    ]
+    assert len(subgraph.path_relation_ids) == 2
+    assert len(subgraph.edges) == 2
+    assert len(subgraph.edges[0].path_relation_ids) == 2
+    assert len(subgraph.edges[1].path_relation_ids) == 1
+    assert {
+        item.evidence_id: item.relation_ids for item in subgraph.nodes
+    } == {
+        "E:symbol:9e703e599343229d97c1": (
+            next(
+                item.id
+                for item in brief.projection_candidates.relations
+                if item.focus_statement_id == "R1"
+                and item.slot == "changed_anchor"
+                and item.target_id == "E:symbol:9e703e599343229d97c1"
+            ),
+        ),
+        "E:symbol:51c78d1cf2a276cc9a40": (
+            next(
+                item.id
+                for item in brief.projection_candidates.relations
+                if item.focus_statement_id == "R1"
+                and item.slot == "runtime_context"
+                and item.target_id == "E:symbol:51c78d1cf2a276cc9a40"
+            ),
+        ),
+        "E:symbol:3c8a35c2cab106b983ca": (
+            next(
+                item.id
+                for item in brief.projection_candidates.relations
+                if item.focus_statement_id == "R1"
+                and item.slot == "test_context"
+                and item.target_id == "E:symbol:3c8a35c2cab106b983ca"
+            ),
+        ),
+    }
+    html = render_html(brief)
+    assert "Structural subgraph" in html
+    assert "3 nodes · 2 edges · 2 selected paths" in html
+    assert '<span class="block-title">Structural paths</span>' not in html
+    assert '<span class="block-title">Runtime context</span>' not in html
+    assert '<span class="block-title">Test context</span>' not in html
 
 
 def test_every_requirement_is_routed_without_a_global_statement_budget() -> None:
@@ -122,11 +169,18 @@ def test_every_requirement_is_routed_without_a_global_statement_budget() -> None
         head_sha=None,
     )
     convergence = converge_candidates(candidates, evidence_catalog=EvidenceCatalog())
-    projection = build_review_projection(candidates, convergence)
+    projection = build_review_projection(
+        candidates,
+        convergence,
+        EvidenceCatalog(items=evidence),
+    )
 
     assert len(candidates.groups) == 80
     assert len(projection.slices) == 80
-    assert all(item.changed_anchor_relation_ids for item in projection.slices)
+    assert all(
+        item.standalone_changed_anchor_relation_ids
+        for item in projection.slices
+    )
     assert not [
         item
         for item in convergence.diagnostics
@@ -557,10 +611,12 @@ def test_graph_and_no_graph_use_the_same_projection_contract() -> None:
         (item.focus_statement_id, item.profile)
         for item in with_graph.projection_candidates.groups
     ]
-    assert without_graph.projection.slices[0].changed_anchor_relation_ids
-    assert with_graph.projection.slices[0].changed_anchor_relation_ids
-    assert without_graph.projection.slices[0].structural_path_relation_ids == ()
-    assert with_graph.projection.slices[0].structural_path_relation_ids
+    assert (
+        without_graph.projection.slices[0].standalone_changed_anchor_relation_ids
+    )
+    assert with_graph.projection.slices[0].structural_subgraph.nodes
+    assert without_graph.projection.slices[0].structural_subgraph.path_relation_ids == ()
+    assert with_graph.projection.slices[0].structural_subgraph.path_relation_ids
 
 
 def test_changed_span_association_scans_beyond_display_preview() -> None:

@@ -545,22 +545,53 @@ class CandidateConvergence:
                     )
 
 
+StructuralSubgraphNodeRole = Literal[
+    "changed_anchor",
+    "runtime_context",
+    "test_context",
+    "intermediate",
+]
+
+
+@dataclass(frozen=True)
+class StructuralSubgraphNode:
+    evidence_id: str
+    role: StructuralSubgraphNodeRole
+    relation_ids: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class StructuralSubgraphEdge:
+    source_evidence_id: str
+    target_evidence_id: str
+    relation: str
+    direction: Literal["outgoing", "incoming"]
+    path_relation_ids: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class StructuralSubgraph:
+    nodes: tuple[StructuralSubgraphNode, ...] = ()
+    edges: tuple[StructuralSubgraphEdge, ...] = ()
+    path_relation_ids: tuple[str, ...] = ()
+
+
 @dataclass(frozen=True)
 class ReviewSlice:
     focus_statement_id: str
     claim_relation_ids: tuple[str, ...] = ()
-    changed_anchor_relation_ids: tuple[str, ...] = ()
-    runtime_relation_ids: tuple[str, ...] = ()
-    test_relation_ids: tuple[str, ...] = ()
+    standalone_changed_anchor_relation_ids: tuple[str, ...] = ()
+    standalone_runtime_relation_ids: tuple[str, ...] = ()
+    standalone_test_relation_ids: tuple[str, ...] = ()
     verification_relation_ids: tuple[str, ...] = ()
-    structural_path_relation_ids: tuple[str, ...] = ()
+    structural_subgraph: StructuralSubgraph = StructuralSubgraph()
     diagnostic_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
 class ReviewProjection:
     slices: tuple[ReviewSlice, ...] = ()
-    schema_version: str = "review_projection.v3"
+    schema_version: str = "review_projection.v4"
 
 
 @dataclass(frozen=True)
@@ -627,7 +658,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v17"
+    schema_version: str = "review_brief.v18"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
