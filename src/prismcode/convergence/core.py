@@ -12,6 +12,7 @@ from prismcode.model.contracts import (
     ProjectionDiagnostic,
     ProjectionRelation,
     ProjectionSlot,
+    StructuralSupportSet,
 )
 
 
@@ -171,18 +172,104 @@ def converge_candidates(
         focus_diagnostics = list(
             {item.id: item for item in focus_diagnostics}.values()
         )
+        selected_relations = tuple(relations[item] for item in selected_ids)
+        structural_support = _minimal_structural_support(
+            selected_relations,
+            evidence=evidence,
+        )
         diagnostics.extend(focus_diagnostics)
         groups.append(
             ConvergenceGroup(
                 focus_statement_id=candidate_group.focus_statement_id,
                 selected_relation_ids=tuple(selected_ids),
                 deferred_relation_ids=tuple(deferred_ids),
+                structural_support=structural_support,
                 diagnostic_ids=tuple(item.id for item in focus_diagnostics),
             )
         )
     return CandidateConvergence(
         groups=tuple(groups),
         diagnostics=tuple(diagnostics),
+    )
+
+
+def _minimal_structural_support(
+    selected: tuple[ProjectionRelation, ...],
+    *,
+    evidence: dict[str, EvidenceItem],
+) -> StructuralSupportSet:
+    """Retain shortest selected paths connecting roots to selected contexts."""
+
+    anchors = {
+        item.target_id for item in selected if item.slot == "changed_anchor"
+    }
+    terminals = {
+        item.target_id
+        for item in selected
+        if item.slot in {"runtime_context", "test_context"}
+    }
+    paths = tuple(item for item in selected if item.slot == "structural_path")
+    symbol_evidence_ids = {
+        item.metadata["symbol_id"]: item.id
+        for item in evidence.values()
+        if item.kind == "symbol" and item.metadata.get("symbol_id")
+    }
+
+    connections: dict[
+        tuple[str, str],
+        list[tuple[int, int, str, tuple[object, ...], ProjectionRelation]],
+    ] = {}
+    for relation in paths:
+        path = evidence.get(relation.target_id)
+        if path is None or path.kind != "structural_path":
+            continue
+        steps = tuple(path.metadata.get("steps", ()))
+        node_ids = {
+            symbol_evidence_ids[symbol_id]
+            for step in steps
+            for symbol_id in (
+                step.get("source_symbol_id"),
+                step.get("target_symbol_id"),
+            )
+            if symbol_id in symbol_evidence_ids
+        }
+        identity = tuple(
+            (
+                step.get("source_symbol_id"),
+                step.get("relation"),
+                step.get("direction"),
+                step.get("target_symbol_id"),
+            )
+            for step in steps
+        )
+        for root_id in relation.bridge_ids:
+            if root_id not in anchors:
+                continue
+            for terminal_id in terminals & node_ids:
+                connections.setdefault((root_id, terminal_id), []).append(
+                    (
+                        len(steps),
+                        relation.source_ordinal,
+                        relation.target_id,
+                        identity,
+                        relation,
+                    )
+                )
+
+    retained_ids: set[str] = set()
+    for candidates in connections.values():
+        shortest_depth = min(item[0] for item in candidates)
+        shortest = tuple(item for item in candidates if item[0] == shortest_depth)
+        identities = {item[3] for item in shortest}
+        for identity in identities:
+            equivalent = tuple(item for item in shortest if item[3] == identity)
+            retained_ids.update(item[4].id for item in equivalent)
+
+    retained = tuple(item.id for item in paths if item.id in retained_ids)
+    omitted = tuple(item.id for item in paths if item.id not in retained_ids)
+    return StructuralSupportSet(
+        path_relation_ids=retained,
+        omitted_path_relation_ids=omitted,
     )
 
 

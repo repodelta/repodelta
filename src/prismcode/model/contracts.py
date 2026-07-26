@@ -468,10 +468,19 @@ class ProjectionCandidateSet:
 
 
 @dataclass(frozen=True)
+class StructuralSupportSet:
+    """Selected structural relations needed to support one review focus."""
+
+    path_relation_ids: tuple[str, ...] = ()
+    omitted_path_relation_ids: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
 class ConvergenceGroup:
     focus_statement_id: str
     selected_relation_ids: tuple[str, ...] = ()
     deferred_relation_ids: tuple[str, ...] = ()
+    structural_support: StructuralSupportSet = StructuralSupportSet()
     diagnostic_ids: tuple[str, ...] = ()
 
 
@@ -479,7 +488,7 @@ class ConvergenceGroup:
 class CandidateConvergence:
     groups: tuple[ConvergenceGroup, ...] = ()
     diagnostics: tuple[ProjectionDiagnostic, ...] = ()
-    schema_version: str = "candidate_convergence.v4"
+    schema_version: str = "candidate_convergence.v5"
 
     def diagnostics_by_id(self) -> dict[str, ProjectionDiagnostic]:
         return {item.id: item for item in self.diagnostics}
@@ -527,6 +536,34 @@ class CandidateConvergence:
                 raise ValueError(
                     f"{group.focus_statement_id}: convergence must partition candidates"
                 )
+            structural_selected = {
+                relation_id
+                for relation_id in group.selected_relation_ids
+                if relations[relation_id].slot == "structural_path"
+            }
+            support = group.structural_support
+            support_ids = set(support.path_relation_ids)
+            omitted_support_ids = set(support.omitted_path_relation_ids)
+            if len(support_ids) != len(support.path_relation_ids):
+                raise ValueError(
+                    f"{group.focus_statement_id}: duplicate structural support relation"
+                )
+            if len(omitted_support_ids) != len(
+                support.omitted_path_relation_ids
+            ):
+                raise ValueError(
+                    f"{group.focus_statement_id}: duplicate omitted support relation"
+                )
+            if support_ids & omitted_support_ids:
+                raise ValueError(
+                    f"{group.focus_statement_id}: structural relation is both "
+                    "displayed and omitted"
+                )
+            if support_ids | omitted_support_ids != structural_selected:
+                raise ValueError(
+                    f"{group.focus_statement_id}: structural support must partition "
+                    "selected structural paths"
+                )
             for relation_id in (*group.selected_relation_ids, *group.deferred_relation_ids):
                 relation = relations.get(relation_id)
                 if relation is None or relation.focus_statement_id != group.focus_statement_id:
@@ -558,6 +595,7 @@ class StructuralSubgraphNode:
     evidence_id: str
     role: StructuralSubgraphNodeRole
     relation_ids: tuple[str, ...] = ()
+    path_relation_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -591,7 +629,7 @@ class ReviewSlice:
 @dataclass(frozen=True)
 class ReviewProjection:
     slices: tuple[ReviewSlice, ...] = ()
-    schema_version: str = "review_projection.v4"
+    schema_version: str = "review_projection.v5"
 
 
 @dataclass(frozen=True)
@@ -658,7 +696,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v18"
+    schema_version: str = "review_brief.v19"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

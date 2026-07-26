@@ -14,11 +14,11 @@ Typed candidates, `CandidateConvergence`, and packet/provider state →
 Profiles remain canonical in the candidate set; selected relations and
 convergence diagnostics are referenced from `CandidateConvergence`. Slices
 carry relation/evidence IDs and a canonical structural subgraph projected from
-selected path metadata. Nodes collapse by symbol evidence ID; edges collapse by
-source, relation, direction, and target while retaining every supporting path
-relation ID. Review-wide CI, source coverage, empty state, and structural
-coverage are computed once here. Diagnostic scope and provider remain canonical
-through attention normalization.
+the upstream typed `StructuralSupportSet`. Nodes collapse by symbol evidence ID;
+edges collapse by source, relation, direction, and target while retaining every
+supporting path relation ID. Review-wide CI, source coverage, empty state, and
+structural coverage are computed once here. Diagnostic scope and provider
+remain canonical through attention normalization.
 
 ## Must not
 

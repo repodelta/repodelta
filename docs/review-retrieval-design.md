@@ -297,7 +297,7 @@ ReviewProjection
     verification_relation_ids[]
     structural_subgraph
       path_relation_ids[]
-      nodes[evidence_id, role, relation_ids[]]
+      nodes[evidence_id, role, relation_ids[], path_relation_ids[]]
       edges[source_evidence_id, relation, direction,
             target_evidence_id, path_relation_ids[]]
     diagnostics[]
@@ -318,8 +318,11 @@ Candidate relations contain:
 - no copied statement or evidence content.
 
 `CandidateConvergence` separately references selected and deferred relation
-IDs plus typed ambiguity and budget diagnostics. Selection truth is not copied
-onto each routed relation.
+IDs plus typed ambiguity and budget diagnostics. Each convergence group also
+owns one reference-only `StructuralSupportSet` that partitions its selected
+structural paths into minimal displayed support and omitted provenance.
+Projection does not repeat path selection. Selection truth is not copied onto
+each routed relation.
 
 This replaces the current use of one untyped `statement_evidence` relation for
 every evidence role. It does not create a second evidence store.

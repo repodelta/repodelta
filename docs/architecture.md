@@ -191,9 +191,12 @@ disclosed as a tie-break through an `ambiguous` diagnostic. There is no
 all-statement/all-evidence numeric score or global candidate budget.
 
 `ReviewProjection` references only IDs selected by `CandidateConvergence`.
-Selected structural paths are projected once into canonical symbol nodes and
-typed edges. Shared path prefixes collapse by edge identity, and each edge
-retains its supporting path relation IDs. Graph-backed anchors and contexts
+Convergence derives one typed minimal structural support set from those selected
+relations: shortest canonical paths connect each reachable selected
+anchor/context pair, while redundant longer selected paths remain explicit
+omitted provenance. Projection consumes only that support set to build canonical
+symbol nodes and typed edges. Shared path prefixes collapse by edge identity,
+and each edge retains its supporting path relation IDs. Graph-backed anchors and contexts
 move into this subgraph; only non-graph facts remain in standalone lists.
 Profiles remain canonical in `ProjectionCandidateSet`; convergence and routing
 diagnostics remain in their own canonical contracts. `ReviewOverview` owns
