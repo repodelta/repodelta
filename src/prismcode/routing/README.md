@@ -30,6 +30,8 @@ score candidates globally, construct final layout, or render diagnostics.
 ## Diagnostics
 
 Produces typed focus/slot source and association coverage diagnostics.
+For G boundary coverage it references the canonical upstream scan-plan ID and
+continues to disclose that no execution fact was collected.
 
 ## Extension points
 

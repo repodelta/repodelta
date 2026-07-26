@@ -12,7 +12,8 @@ formatting.
 ## Invariants
 
 Missing references fail visibly. Both adapters consume the same canonical
-overview and coverage facts.
+overview and coverage facts. G scan-plan copy resolves an upstream plan ID and
+does not infer execution or absence.
 
 ## Must not
 

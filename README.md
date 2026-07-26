@@ -39,6 +39,8 @@ The open core provides:
   dominance, bridge reachability, canonical changed-anchor and verification
   sets, bounded structural evidence subgraphs, compact claim selection, and
   explicit coverage diagnostics;
+- source-backed typed repository scan plans for G guardrails, without treating
+  planned work as scan evidence or absence proof;
 - an R-first consistency view with claim/evidence candidates, binding basis,
   source links, and vertically aggregated coverage gaps;
 - an Actions workflow for automatic PR reports and manually targeted reviews;

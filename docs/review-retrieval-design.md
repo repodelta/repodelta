@@ -375,8 +375,8 @@ explicit identity safety limits:
 - one current-head verification observation per distinct check identity;
 - up to five canonical paths sponsored by each selected anchor and 30 paths
   total;
-- a typed missing-coverage diagnostic for guardrails until a real bounded scan
-  provider is implemented.
+- one canonical typed scan plan per guardrail plus a plan-aware
+  missing-execution diagnostic until a bounded scan provider returns facts.
 
 Those are convergence safety limits, not retrieval or ordinary display limits.
 

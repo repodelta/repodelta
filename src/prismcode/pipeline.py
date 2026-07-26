@@ -9,6 +9,7 @@ from prismcode.model.contracts import (
 from prismcode.semantics.review import extract_packet_semantics
 from prismcode.changes.hunks import parse_changed_files
 from prismcode.facts.catalog import build_evidence_catalog
+from prismcode.guardrails.planning import compile_guardrail_scan_plans
 from prismcode.routing.candidates import build_projection_candidates
 from prismcode.convergence.core import converge_candidates
 from prismcode.projection.build import build_review_projection
@@ -39,6 +40,7 @@ class DeterministicAnalyzer:
         )
         deliverables = tuple(item for item in requirements if item.kind != "guardrail")
         guardrails = tuple(item for item in requirements if item.kind == "guardrail")
+        guardrail_scan_plans = compile_guardrail_scan_plans(guardrails)
         projection_candidates = build_projection_candidates(
             requirements=requirements,
             claims=semantics.claims,
@@ -46,6 +48,7 @@ class DeterministicAnalyzer:
             structural_graph=analysis_input.structural_graph,
             head_sha=packet.head_sha,
             claim_source_state=extracted.claim_source_state,
+            guardrail_scan_plans=guardrail_scan_plans,
         )
         projection_candidates.validate_consistency()
         candidate_convergence = converge_candidates(
@@ -57,6 +60,7 @@ class DeterministicAnalyzer:
             projection_candidates,
             candidate_convergence,
             evidence_catalog,
+            guardrail_scan_plans=guardrail_scan_plans,
         )
         overview = build_review_overview(
             packet,
@@ -76,6 +80,7 @@ class DeterministicAnalyzer:
             scope=semantics.scope,
             verification_expectations=semantics.verification_expectations,
             claims=semantics.claims,
+            guardrail_scan_plans=guardrail_scan_plans,
             evidence_catalog=evidence_catalog,
             projection_candidates=projection_candidates,
             candidate_convergence=candidate_convergence,

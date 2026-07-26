@@ -15,6 +15,7 @@ from prismcode.model.contracts import (
     CoverageState,
     EvidenceCatalog,
     EvidenceItem,
+    GuardrailScanPlanSet,
     ProjectionCandidateGroup,
     ProjectionCandidateSet,
     ProjectionDiagnostic,
@@ -43,6 +44,7 @@ def build_projection_candidates(
     claim_source_state: Literal[
         "source_absent", "extraction_missing", "available"
     ] = "available",
+    guardrail_scan_plans: GuardrailScanPlanSet = GuardrailScanPlanSet(),
 ) -> ProjectionCandidateSet:
     """Enumerate typed per-focus candidates without selecting or truncating."""
 
@@ -64,6 +66,7 @@ def build_projection_candidates(
     claim_distinctive_terms = distinctive_text_terms(
         tuple((item.id, item.text) for item in claims)
     )
+    plans_by_guardrail = guardrail_scan_plans.by_guardrail_id()
     relations: list[ProjectionRelation] = []
     groups: list[ProjectionCandidateGroup] = []
     diagnostics: list[ProjectionDiagnostic] = list(
@@ -222,15 +225,20 @@ def build_projection_candidates(
             )
 
         if focus.kind == "guardrail":
+            plan = plans_by_guardrail.get(focus.id)
             focus_diagnostics.append(
                 _missing(
                     focus.id,
                     "boundary_fact",
                     "provider_unavailable",
                     (
-                        "No bounded repository scan fact was collected for this "
-                        "guardrail; selected changed anchors are not absence proof."
+                        f"Guardrail scan plan {plan.id} exists, but no bounded "
+                        "repository scan fact was collected; selected changed "
+                        "anchors are not absence proof."
+                        if plan is not None
+                        else "No canonical guardrail scan plan applies to this focus."
                     ),
+                    affected_ids=(plan.id,) if plan is not None else (),
                 )
             )
         else:

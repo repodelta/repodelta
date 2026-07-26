@@ -11,6 +11,10 @@ fixture or GitHub
        -> objectives (O), scope context (S)
        -> implementation/boundary (C), baseline (B), verification (V) claims
        -> intent (I)
+  -> canonical guardrail scan planning
+       -> one source-backed plan per G
+       -> head revision + repository scope
+       -> path, file-content, and symbol-name surfaces
   -> one canonical DiffHunkCollection
   -> optional StructuralGraphProvider
        -> exact changed-hunk / symbol-span overlaps
@@ -40,6 +44,7 @@ code:
 - [`model`](../src/prismcode/model/README.md)
 - [`intake`](../src/prismcode/intake/README.md)
 - [`semantics`](../src/prismcode/semantics/README.md)
+- [`guardrails`](../src/prismcode/guardrails/README.md)
 - [`changes`](../src/prismcode/changes/README.md)
 - [`providers`](../src/prismcode/providers/README.md)
 - [`facts`](../src/prismcode/facts/README.md)
@@ -62,6 +67,8 @@ becoming alternate intake, classification, routing, or presentation paths.
    It never means implemented, verified, satisfied, or in scope.
 5. Renderers project the brief and never infer or upgrade a conclusion.
 6. Structural providers return repository facts and diagnostics only.
+7. Guardrail scan plans are execution intent, never evidence that a scan ran
+   or that an absence was observed.
 
 ## Semantic authority
 
