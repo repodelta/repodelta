@@ -454,7 +454,7 @@ def test_isolated_symbol_and_standalone_document_keep_distinct_canonical_forms()
             ),
             EvidenceItem(
                 id="E:document",
-                summary="Changed span: docs/bounded_trace.md:1-2",
+                summary="Replaced change: docs/bounded_trace.md:1-2",
                 kind="change_relation",
                 classification="document",
                 profile="document",

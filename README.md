@@ -125,7 +125,7 @@ exact head checkout, or its index is unavailable or stale, the report is still
 generated from canonical changed-hunk evidence:
 
 ```text
-Structural mapping: skipped · Codegraph index not found · changed-span fallback used
+Structural mapping: skipped · Codegraph index not found · change-relation fallback used
 ```
 
 #### Structure-aware review from the PR checkout

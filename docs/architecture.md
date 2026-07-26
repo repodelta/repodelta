@@ -149,7 +149,7 @@ Each changed line has exactly one canonical representation:
   previews, complete head/base association signatures, and GitHub source;
 - only an absent or unparsable patch produces a `changed_file` fallback.
 
-This line-level replacement rule prevents changed-file, changed-span, and exact
+This line-level replacement rule prevents changed-file, change-relation, and exact
 symbol records from competing as parallel truths for the same diff. A partially
 mapped span preserves only its uncovered changed lines. Documentation spans
 remain evidence with document classification; they are not forced into code
