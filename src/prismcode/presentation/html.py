@@ -336,6 +336,30 @@ def _projection_slice(
         ),
     )
     fact_groups = []
+    if review_slice.guardrail_scan_plan_id is not None:
+        plan = brief.guardrail_scan_plans.by_id().get(
+            review_slice.guardrail_scan_plan_id
+        )
+        if plan is None:
+            raise ValueError(
+                "projection references missing guardrail scan plan: "
+                f"{review_slice.guardrail_scan_plan_id}"
+            )
+        sources = " · ".join(_source(source) for source in plan.sources)
+        fact_groups.append(
+            '<div class="projection-group">'
+            '<span class="block-title">Guardrail scan plan</span>'
+            f'<span class="projection-copy">{escape(plan.scope)} '
+            f'{" / ".join(escape(item) for item in plan.surfaces)} · '
+            f'{escape(plan.revision_side)} revision</span>'
+            f'<span class="relation-reason">{escape(plan.query_text)}</span>'
+            + (
+                f'<span class="projection-source">Source: {sources}</span>'
+                if sources
+                else ""
+            )
+            + "</div>"
+        )
     for heading, relation_ids, label in groups:
         rows = "".join(
             _relation_fact(relations[relation_id], brief, label=label)

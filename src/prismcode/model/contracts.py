@@ -124,6 +124,7 @@ StructuralCoverageState = Literal[
     "invalid",
     "error",
 ]
+GuardrailScanSurface = Literal["paths", "file_content", "symbol_names"]
 
 
 @dataclass(frozen=True)
@@ -273,6 +274,75 @@ class Requirement(ReviewStatement):
             raise ValueError(
                 f"{self.id}: guardrail identity/purpose requires guardrail kind"
             )
+
+
+@dataclass(frozen=True)
+class GuardrailScanPlan:
+    """Source-backed scan intent. A plan is never evidence that a scan ran."""
+
+    id: str
+    guardrail_id: str
+    query_text: str
+    revision_side: Literal["head"] = "head"
+    scope: Literal["repository"] = "repository"
+    root_paths: tuple[str, ...] = (".",)
+    surfaces: tuple[GuardrailScanSurface, ...] = (
+        "paths",
+        "file_content",
+        "symbol_names",
+    )
+    sources: tuple[SourceRef, ...] = ()
+
+
+@dataclass(frozen=True)
+class GuardrailScanPlanSet:
+    plans: tuple[GuardrailScanPlan, ...] = ()
+    schema_version: str = "guardrail_scan_plan_set.v1"
+
+    def by_id(self) -> dict[str, GuardrailScanPlan]:
+        return {item.id: item for item in self.plans}
+
+    def by_guardrail_id(self) -> dict[str, GuardrailScanPlan]:
+        return {item.guardrail_id: item for item in self.plans}
+
+    def validate_consistency(
+        self,
+        guardrails: tuple[Requirement, ...],
+    ) -> None:
+        plan_ids = self.by_id()
+        by_guardrail = self.by_guardrail_id()
+        expected = {item.id for item in guardrails}
+        if len(plan_ids) != len(self.plans):
+            raise ValueError("guardrail scan plan set contains duplicate plan IDs")
+        if len(by_guardrail) != len(self.plans):
+            raise ValueError("guardrail scan plan set contains duplicate guardrail IDs")
+        if set(by_guardrail) != expected:
+            raise ValueError(
+                "guardrail scan plans must map one-to-one to canonical guardrails"
+            )
+        for guardrail in guardrails:
+            if (
+                guardrail.kind != "guardrail"
+                or guardrail.purpose != "guardrail"
+                or not guardrail.id.startswith("G")
+            ):
+                raise ValueError(
+                    "guardrail scan plans must map one-to-one to canonical guardrails"
+                )
+            plan = by_guardrail[guardrail.id]
+            if plan.id != f"GSP:{guardrail.id}":
+                raise ValueError(f"{plan.id}: non-canonical guardrail scan plan ID")
+            if plan.query_text != guardrail.text or plan.sources != guardrail.sources:
+                raise ValueError(
+                    f"{plan.id}: scan intent must preserve guardrail text and sources"
+                )
+            if (
+                plan.revision_side != "head"
+                or plan.scope != "repository"
+                or plan.root_paths != (".",)
+                or plan.surfaces != ("paths", "file_content", "symbol_names")
+            ):
+                raise ValueError(f"{plan.id}: unsupported scan-plan boundary")
 
 
 @dataclass(frozen=True)
@@ -623,6 +693,7 @@ class ReviewSlice:
     standalone_runtime_relation_ids: tuple[str, ...] = ()
     standalone_test_relation_ids: tuple[str, ...] = ()
     verification_relation_ids: tuple[str, ...] = ()
+    guardrail_scan_plan_id: str | None = None
     structural_overlay: StructuralFocusOverlay = StructuralFocusOverlay()
     diagnostic_ids: tuple[str, ...] = ()
 
@@ -631,7 +702,7 @@ class ReviewSlice:
 class ReviewProjection:
     slices: tuple[ReviewSlice, ...] = ()
     review_graph: ReviewStructuralGraph = ReviewStructuralGraph()
-    schema_version: str = "review_projection.v7"
+    schema_version: str = "review_projection.v8"
 
 
 @dataclass(frozen=True)
@@ -691,6 +762,7 @@ class ReviewBrief:
     scope: tuple[ReviewStatement, ...] = ()
     verification_expectations: tuple[ReviewStatement, ...] = ()
     claims: tuple[ReviewStatement, ...] = ()
+    guardrail_scan_plans: GuardrailScanPlanSet = GuardrailScanPlanSet()
     evidence_catalog: EvidenceCatalog = EvidenceCatalog()
     projection_candidates: ProjectionCandidateSet = ProjectionCandidateSet()
     candidate_convergence: CandidateConvergence = CandidateConvergence()
@@ -702,7 +774,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v24"
+    schema_version: str = "review_brief.v25"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

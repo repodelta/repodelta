@@ -21,7 +21,7 @@ Every R/G is visited independently. Its candidates are separated into:
 - test context;
 - current-head verification observations;
 - bounded structural paths;
-- guardrail coverage diagnostics.
+- guardrail scan-plan-aware coverage diagnostics.
 
 PR claims, changed symbols, paths, and CI observations never compete in one
 numeric score or global candidate budget. Claims are a compact competitive

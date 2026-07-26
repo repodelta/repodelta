@@ -6,6 +6,7 @@ from prismcode.model.contracts import (
     CandidateConvergence,
     EvidenceCatalog,
     EvidenceItem,
+    GuardrailScanPlanSet,
     ProjectionCandidateSet,
     ProjectionRelation,
     ReviewProjection,
@@ -22,6 +23,8 @@ def build_review_projection(
     candidates: ProjectionCandidateSet,
     convergence: CandidateConvergence,
     evidence_catalog: EvidenceCatalog,
+    *,
+    guardrail_scan_plans: GuardrailScanPlanSet = GuardrailScanPlanSet(),
 ) -> ReviewProjection:
     """Project converged relation IDs without performing retrieval or selection."""
 
@@ -35,6 +38,7 @@ def build_review_projection(
     convergence_groups = {
         item.focus_statement_id: item for item in convergence.groups
     }
+    plans_by_guardrail = guardrail_scan_plans.by_guardrail_id()
     slices = []
     graph_node_order: list[str] = []
     graph_path_ids_by_node: dict[str, list[str]] = {}
@@ -116,6 +120,11 @@ def build_review_projection(
                 ),
                 verification_relation_ids=tuple(
                     item.id for item in by_slot["verification"]
+                ),
+                guardrail_scan_plan_id=(
+                    plans_by_guardrail[group.focus_statement_id].id
+                    if group.focus_statement_id in plans_by_guardrail
+                    else None
                 ),
                 structural_overlay=overlay,
                 diagnostic_ids=(
