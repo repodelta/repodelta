@@ -24,9 +24,10 @@ Every R/G is visited independently. Its candidates are separated into:
 - guardrail coverage diagnostics.
 
 PR claims, changed symbols, paths, and CI observations never compete in one
-numeric score or global candidate budget. Claims, paths, and runtime/test
-context are competitive selections. Changed anchors and current-head
-verification are typed identity sets.
+numeric score or global candidate budget. Claims are a compact competitive
+selection. Changed anchors and current-head verification are typed identity
+sets; structural paths and runtime/test context are the bounded identity sets
+of a reference-only evidence subgraph.
 
 ## Associations
 
@@ -46,8 +47,11 @@ not used to compare facts from different slots.
 ## Structural routing
 
 Routing enumerates structural relations for candidate exact changed symbols.
-Convergence retains paths only when their typed seed anchor was selected, then
-retains runtime/test context only when its path was selected. Without
+Convergence takes the union of canonical paths rooted in selected anchors, then
+retains canonical runtime/test context identities reachable through those
+paths. Per-anchor and total path limits, and separate context identity limits,
+are safety boundaries rather than relevance competitions. Context found only
+through a safety-deferred path is reported as `upstream_deferred`. Without
 Codegraph, the same projection uses canonical changed-hunk or changed-file
 fallback and records typed structural diagnostics.
 
@@ -55,8 +59,8 @@ fallback and records typed structural diagnostics.
 
 Typed diagnostics distinguish source absence, non-applicability, no eligible
 fact, no deterministic association, ambiguity, provider unavailability,
-partial coverage, stale sources, per-slot truncation, and unsupported change
-types.
+partial coverage, stale sources, safety truncation, upstream deferral, and
+unsupported change types.
 
 `EvidenceCatalog` remains the only evidence store. Candidate relations,
 convergence groups, and projection slices contain canonical IDs only.
@@ -75,11 +79,12 @@ Direct associations and claim-bridged expansion have separate safety limits,
 plus a total identity limit. Crossing those limits reports coverage truncation;
 multiple relevant anchors do not produce ambiguity.
 
-Convergence is ordinal inside each remaining competitive typed slot. Typed association
-dominance is applied before stable source ordinal. Opaque evidence hashes are
-stable identifiers, not ranking signals. When an equivalent tier crosses a
-display budget, the selected prefix remains deterministic and an ambiguity
-diagnostic states that source order is only a presentation tie-break.
+Convergence is ordinal inside the remaining competitive claim slot. Typed
+association dominance is applied before stable source ordinal. Opaque evidence
+hashes are stable identifiers, not ranking signals. When an equivalent claim
+tier crosses a display budget, the selected prefix remains deterministic and
+an ambiguity diagnostic states that source order is only a presentation
+tie-break.
 
 Verification convergence uses first-class `(provider, kind, normalized name)`
 identity. Different identities are retained together. Equivalent observations

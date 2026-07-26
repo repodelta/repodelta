@@ -92,14 +92,29 @@ def _verification_relation(fact_id: str, *, ordinal: int = 0) -> ProjectionRelat
     )
 
 
+def _path(fact_id: str, *, depth: int = 1) -> EvidenceItem:
+    return EvidenceItem(
+        id=fact_id,
+        summary=f"Structural path at depth {depth}",
+        kind="structural_path",
+        classification="runtime",
+        profile="structural_path",
+        authority="structural_provider",
+        role="structural_path",
+        metadata={"depth": depth},
+        sources=(SourceRef(label=fact_id),),
+    )
+
+
 def _selected(
     candidates: ProjectionCandidateSet,
     *,
     policy: ConvergencePolicy,
+    evidence: tuple[EvidenceItem, ...] = (),
 ) -> tuple[str, ...]:
     result = converge_candidates(
         candidates,
-        evidence_catalog=EvidenceCatalog(),
+        evidence_catalog=EvidenceCatalog(items=evidence),
         policy=policy,
     )
     result.validate_consistency(candidates)
@@ -244,7 +259,258 @@ def test_structural_path_requires_a_selected_changed_anchor() -> None:
     assert _selected(
         candidates,
         policy=ConvergencePolicy(max_direct_anchor_identities=1),
+        evidence=(_path("E:path-1"), _path("E:path-2")),
     ) == ("anchor-1", "path-1")
+
+
+def test_structural_paths_form_a_non_competing_canonical_set() -> None:
+    candidates = _candidates(
+        _relation(
+            "anchor",
+            slot="changed_anchor",
+            target="E:anchor",
+            association="exact_identifier",
+        ),
+        *(
+            _relation(
+                f"path-{index}",
+                slot="structural_path",
+                target=f"E:path-{index}",
+                association="structural_bridge",
+                bridges=("E:anchor",),
+                ordinal=index,
+            )
+            for index in range(4)
+        ),
+    )
+    facts = tuple(_path(f"E:path-{index}", depth=index + 1) for index in range(4))
+
+    result = converge_candidates(
+        candidates,
+        evidence_catalog=EvidenceCatalog(items=facts),
+        policy=ConvergencePolicy(max_candidates_per_slot=1),
+    )
+
+    assert result.selected_relation_ids() == (
+        "anchor",
+        "path-0",
+        "path-1",
+        "path-2",
+        "path-3",
+    )
+    assert not [
+        item
+        for item in result.diagnostics
+        if item.slot == "structural_path"
+    ]
+
+
+def test_structural_path_identity_collapses_duplicate_relations() -> None:
+    candidates = _candidates(
+        _relation(
+            "anchor",
+            slot="changed_anchor",
+            target="E:anchor",
+            association="exact_identifier",
+        ),
+        _relation(
+            "path-first",
+            slot="structural_path",
+            target="E:path",
+            association="structural_bridge",
+            bridges=("E:anchor",),
+        ),
+        _relation(
+            "path-duplicate",
+            slot="structural_path",
+            target="E:path",
+            association="structural_bridge",
+            bridges=("E:anchor",),
+            ordinal=1,
+        ),
+    )
+
+    result = converge_candidates(
+        candidates,
+        evidence_catalog=EvidenceCatalog(items=(_path("E:path"),)),
+    )
+
+    assert result.selected_relation_ids() == ("anchor", "path-first")
+    assert result.groups[0].deferred_relation_ids == ("path-duplicate",)
+    assert result.diagnostics == ()
+
+
+def test_structural_path_safety_prefers_shorter_paths_without_ambiguity() -> None:
+    candidates = _candidates(
+        _relation(
+            "anchor",
+            slot="changed_anchor",
+            target="E:anchor",
+            association="exact_identifier",
+        ),
+        _relation(
+            "long",
+            slot="structural_path",
+            target="E:long",
+            association="structural_bridge",
+            bridges=("E:anchor",),
+        ),
+        _relation(
+            "short",
+            slot="structural_path",
+            target="E:short",
+            association="structural_bridge",
+            bridges=("E:anchor",),
+            ordinal=1,
+        ),
+    )
+
+    result = converge_candidates(
+        candidates,
+        evidence_catalog=EvidenceCatalog(
+            items=(_path("E:long", depth=3), _path("E:short", depth=1))
+        ),
+        policy=ConvergencePolicy(
+            max_paths_per_anchor=1,
+            max_path_identities=1,
+        ),
+    )
+
+    assert result.selected_relation_ids() == ("anchor", "short")
+    assert [
+        item.state
+        for item in result.diagnostics
+        if item.slot == "structural_path"
+    ] == ["budget_truncated"]
+
+
+def test_contexts_form_sets_and_deferred_paths_are_explicit() -> None:
+    candidates = _candidates(
+        _relation(
+            "anchor",
+            slot="changed_anchor",
+            target="E:anchor",
+            association="exact_identifier",
+        ),
+        _relation(
+            "selected-path",
+            slot="structural_path",
+            target="E:path:selected",
+            association="structural_bridge",
+            bridges=("E:anchor",),
+        ),
+        _relation(
+            "deferred-path",
+            slot="structural_path",
+            target="E:path:deferred",
+            association="structural_bridge",
+            bridges=("E:anchor",),
+            ordinal=1,
+        ),
+        _relation(
+            "runtime-selected",
+            slot="runtime_context",
+            target="E:runtime:selected",
+            association="structural_bridge",
+            bridges=("E:path:selected",),
+        ),
+        _relation(
+            "runtime-deferred",
+            slot="runtime_context",
+            target="E:runtime:deferred",
+            association="structural_bridge",
+            bridges=("E:path:deferred",),
+            ordinal=1,
+        ),
+        _relation(
+            "test-selected",
+            slot="test_context",
+            target="E:test:selected",
+            association="structural_bridge",
+            bridges=("E:path:selected",),
+        ),
+    )
+
+    result = converge_candidates(
+        candidates,
+        evidence_catalog=EvidenceCatalog(
+            items=(
+                _path("E:path:selected", depth=1),
+                _path("E:path:deferred", depth=2),
+            )
+        ),
+        policy=ConvergencePolicy(
+            max_paths_per_anchor=1,
+            max_path_identities=1,
+        ),
+    )
+
+    assert result.selected_relation_ids() == (
+        "anchor",
+        "selected-path",
+        "runtime-selected",
+        "test-selected",
+    )
+    runtime_diagnostics = [
+        item
+        for item in result.diagnostics
+        if item.slot == "runtime_context"
+    ]
+    assert [item.state for item in runtime_diagnostics] == []
+    assert "runtime-deferred" in result.groups[0].deferred_relation_ids
+
+
+def test_context_only_on_a_deferred_path_reports_upstream_deferred() -> None:
+    candidates = _candidates(
+        _relation(
+            "anchor",
+            slot="changed_anchor",
+            target="E:anchor",
+            association="exact_identifier",
+        ),
+        _relation(
+            "selected-path",
+            slot="structural_path",
+            target="E:path:selected",
+            association="structural_bridge",
+            bridges=("E:anchor",),
+        ),
+        _relation(
+            "deferred-path",
+            slot="structural_path",
+            target="E:path:deferred",
+            association="structural_bridge",
+            bridges=("E:anchor",),
+            ordinal=1,
+        ),
+        _relation(
+            "runtime-deferred",
+            slot="runtime_context",
+            target="E:runtime:deferred",
+            association="structural_bridge",
+            bridges=("E:path:deferred",),
+        ),
+    )
+
+    result = converge_candidates(
+        candidates,
+        evidence_catalog=EvidenceCatalog(
+            items=(
+                _path("E:path:selected", depth=1),
+                _path("E:path:deferred", depth=2),
+            )
+        ),
+        policy=ConvergencePolicy(
+            max_paths_per_anchor=1,
+            max_path_identities=1,
+        ),
+    )
+
+    assert [
+        item.state
+        for item in result.diagnostics
+        if item.slot == "runtime_context"
+    ] == ["upstream_deferred"]
 
 
 def test_changed_anchor_safety_truncation_is_not_ambiguity() -> None:

@@ -36,7 +36,8 @@ The open core provides:
   candidates;
 - deterministic same-R/G, same-slot candidate convergence with typed
   dominance, bridge reachability, canonical changed-anchor and verification
-  sets, bounded competitive selection, and explicit coverage diagnostics;
+  sets, bounded structural evidence subgraphs, compact claim selection, and
+  explicit coverage diagnostics;
 - an R-first consistency view with claim/evidence candidates, binding basis,
   source links, and vertically aggregated coverage gaps;
 - an Actions workflow for automatic PR reports and manually targeted reviews;

@@ -108,6 +108,7 @@ CoverageState = Literal[
     "partial_coverage",
     "stale_source",
     "budget_truncated",
+    "upstream_deferred",
     "unsupported_change_type",
     "conflicting_facts",
 ]
@@ -478,7 +479,7 @@ class ConvergenceGroup:
 class CandidateConvergence:
     groups: tuple[ConvergenceGroup, ...] = ()
     diagnostics: tuple[ProjectionDiagnostic, ...] = ()
-    schema_version: str = "candidate_convergence.v3"
+    schema_version: str = "candidate_convergence.v4"
 
     def diagnostics_by_id(self) -> dict[str, ProjectionDiagnostic]:
         return {item.id: item for item in self.diagnostics}
@@ -624,7 +625,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v15"
+    schema_version: str = "review_brief.v16"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
