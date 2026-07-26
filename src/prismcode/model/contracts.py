@@ -582,7 +582,7 @@ class CandidateConvergence:
                     )
 
 
-StructuralSubgraphNodeRole = Literal[
+StructuralFocusNodeRole = Literal[
     "changed_anchor",
     "runtime_context",
     "test_context",
@@ -591,15 +591,14 @@ StructuralSubgraphNodeRole = Literal[
 
 
 @dataclass(frozen=True)
-class StructuralSubgraphNode:
+class StructuralGraphNode:
     evidence_id: str
-    role: StructuralSubgraphNodeRole
-    relation_ids: tuple[str, ...] = ()
     path_relation_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
-class StructuralSubgraphEdge:
+class StructuralGraphEdge:
+    id: str
     source_evidence_id: str
     target_evidence_id: str
     relation: str
@@ -608,9 +607,24 @@ class StructuralSubgraphEdge:
 
 
 @dataclass(frozen=True)
-class StructuralSubgraph:
-    nodes: tuple[StructuralSubgraphNode, ...] = ()
-    edges: tuple[StructuralSubgraphEdge, ...] = ()
+class ReviewStructuralGraph:
+    nodes: tuple[StructuralGraphNode, ...] = ()
+    edges: tuple[StructuralGraphEdge, ...] = ()
+    path_relation_ids: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class StructuralFocusNode:
+    evidence_id: str
+    role: StructuralFocusNodeRole
+    relation_ids: tuple[str, ...] = ()
+    path_relation_ids: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class StructuralFocusOverlay:
+    nodes: tuple[StructuralFocusNode, ...] = ()
+    edge_ids: tuple[str, ...] = ()
     path_relation_ids: tuple[str, ...] = ()
 
 
@@ -622,14 +636,15 @@ class ReviewSlice:
     standalone_runtime_relation_ids: tuple[str, ...] = ()
     standalone_test_relation_ids: tuple[str, ...] = ()
     verification_relation_ids: tuple[str, ...] = ()
-    structural_subgraph: StructuralSubgraph = StructuralSubgraph()
+    structural_overlay: StructuralFocusOverlay = StructuralFocusOverlay()
     diagnostic_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
 class ReviewProjection:
     slices: tuple[ReviewSlice, ...] = ()
-    schema_version: str = "review_projection.v5"
+    review_graph: ReviewStructuralGraph = ReviewStructuralGraph()
+    schema_version: str = "review_projection.v6"
 
 
 @dataclass(frozen=True)
@@ -696,7 +711,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v19"
+    schema_version: str = "review_brief.v20"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

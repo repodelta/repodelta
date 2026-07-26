@@ -11,10 +11,11 @@ from prismcode.model.contracts import (
     ProjectionDiagnostic,
     ProjectionRelation,
     ReviewBrief,
+    ReviewProjection,
     ReviewSlice,
     ReviewStatement,
+    ReviewStructuralGraph,
     SourceRef,
-    StructuralSubgraph,
 )
 
 
@@ -175,25 +176,51 @@ def _diagnostic_rows(
     return "".join(rows)
 
 
-def _structural_subgraph(
-    subgraph: StructuralSubgraph,
+def _review_graph(
+    graph: ReviewStructuralGraph,
+    projection: ReviewProjection,
     brief: ReviewBrief,
 ) -> str:
-    if not subgraph.nodes:
+    if not graph.nodes:
         return ""
     evidence = brief.evidence_catalog.by_id()
-    nodes = {item.evidence_id: item for item in subgraph.nodes}
+    nodes = {item.evidence_id: item for item in graph.nodes}
+    edges = {item.id: item for item in graph.edges}
+    node_focus: dict[str, list[tuple[str, str]]] = {}
+    edge_focus: dict[str, list[str]] = {}
+    for review_slice in projection.slices:
+        focus_id = review_slice.focus_statement_id
+        for node in review_slice.structural_overlay.nodes:
+            if node.evidence_id not in nodes:
+                raise ValueError(
+                    f"{focus_id}: structural overlay references missing node "
+                    f"{node.evidence_id}"
+                )
+            node_focus.setdefault(node.evidence_id, []).append(
+                (focus_id, node.role)
+            )
+        for edge_id in review_slice.structural_overlay.edge_ids:
+            if edge_id not in edges:
+                raise ValueError(
+                    f"{focus_id}: structural overlay references missing edge "
+                    f"{edge_id}"
+                )
+            edge_focus.setdefault(edge_id, []).append(focus_id)
     node_rows = []
-    for node in subgraph.nodes:
+    for node in graph.nodes:
         fact = evidence.get(node.evidence_id)
         if fact is None:
             raise ValueError(
-                f"structural subgraph references missing node: {node.evidence_id}"
+                f"structural graph references missing node: {node.evidence_id}"
             )
         sources = _sources(fact, brief)
+        focus_labels = ", ".join(
+            focus_id
+            for focus_id, _role in node_focus.get(node.evidence_id, ())
+        )
         node_rows.append(
             '<div class="subgraph-node">'
-            f'<span class="node-role">{escape(node.role.replace("_", " "))}</span>'
+            f'<span class="node-focuses">{escape(focus_labels)}</span>'
             f'<span class="subgraph-node-name">{escape(_structural_name(fact))}</span>'
             + (
                 f'<span class="projection-source">Source: {sources}</span>'
@@ -204,13 +231,13 @@ def _structural_subgraph(
         )
 
     edge_rows = []
-    for edge in subgraph.edges:
+    for edge in graph.edges:
         source_node = nodes.get(edge.source_evidence_id)
         target_node = nodes.get(edge.target_evidence_id)
         source = evidence.get(edge.source_evidence_id)
         target = evidence.get(edge.target_evidence_id)
         if source_node is None or target_node is None or source is None or target is None:
-            raise ValueError("structural subgraph edge references a missing node")
+            raise ValueError("structural graph edge references a missing node")
         source_name = _structural_name(source)
         target_name = _structural_name(target)
         arrow = "→" if edge.direction == "outgoing" else "←"
@@ -219,17 +246,21 @@ def _structural_subgraph(
             f'<span>{escape(source_name)}</span>'
             f'<span class="subgraph-relation">{arrow} {escape(edge.relation)}</span>'
             f'<span>{escape(target_name)}</span>'
-            f'<span class="edge-path-count">{len(edge.path_relation_ids)} '
-            f'path{"s" if len(edge.path_relation_ids) != 1 else ""}</span>'
+            '<span class="edge-path-count">'
+            f'{escape(", ".join(edge_focus.get(edge.id, ())))} · '
+            f'{len(edge.path_relation_ids)} '
+            f'support ref{"s" if len(edge.path_relation_ids) != 1 else ""}</span>'
             "</div>"
         )
 
     return (
-        '<div class="projection-group structural-subgraph">'
-        '<span class="block-title">Structural subgraph</span>'
-        f'<div class="subgraph-summary">{len(subgraph.nodes)} nodes · '
-        f'{len(subgraph.edges)} edges · '
-        f'{len(subgraph.path_relation_ids)} selected paths</div>'
+        '<div class="review-structural-graph">'
+        '<h3>Structural evidence graph</h3>'
+        f'<div class="subgraph-summary">{len(graph.nodes)} canonical nodes · '
+        f'{len(graph.edges)} canonical edges · '
+        f'{len(graph.path_relation_ids)} focus-relative support refs · '
+        f'{sum(bool(item.structural_overlay.nodes) for item in projection.slices)} '
+        "focus overlays</div>"
         f'<div class="subgraph-nodes">{"".join(node_rows)}</div>'
         f'<div class="subgraph-edges">{"".join(edge_rows)}</div>'
         "</div>"
@@ -316,7 +347,15 @@ def _projection_slice(
                 f'<div class="projection-group"><span class="block-title">'
                 f"{escape(heading)}</span>{rows}</div>"
             )
-    graph = _structural_subgraph(review_slice.structural_subgraph, brief)
+    overlay = review_slice.structural_overlay
+    if overlay.nodes:
+        fact_groups.append(
+            '<div class="projection-group structural-overlay-summary">'
+            '<span class="block-title">Structural overlay</span>'
+            f'<span class="projection-copy">{len(overlay.nodes)} nodes · '
+            f'{len(overlay.edge_ids)} edges · '
+            f'{len(overlay.path_relation_ids)} support paths</span></div>'
+        )
 
     claim_diagnostics = _diagnostic_rows(
         diagnostics,
@@ -361,7 +400,6 @@ def _projection_slice(
         + "".join(fact_groups)
         + fact_diagnostics
         + "</div></div>"
-        + graph
     )
 
 
@@ -458,16 +496,21 @@ def render_html(brief: ReviewBrief) -> str:
         "PR claim context",
         brief.claims,
     )
+    review_graph = _review_graph(
+        brief.projection.review_graph,
+        brief.projection,
+        brief,
+    )
 
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{escape(packet.title)} · PrismCode</title>
 <style>
-:root{{color-scheme:dark;--bg:#080c0f;--panel:#10171b;--border:#26373f;--text:#edf3f0;--muted:#9eaaaf;--faint:#6f7d83;--green:#7be3ac;--amber:#e7ca7c;--shadow:0 22px 64px rgba(0,0,0,.28)}}*{{box-sizing:border-box}}body{{margin:0;color:var(--text);line-height:1.55;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 18% -8%,rgba(69,167,118,.12),transparent 31rem),var(--bg)}}code{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}}.shell{{width:min(1180px,calc(100% - 40px));margin:30px auto 84px}}.topbar{{margin-bottom:22px;font-weight:720}}.brand-mark{{display:inline-block;width:14px;height:14px;margin-right:10px;border:2px solid white;transform:rotate(45deg);border-radius:3px}}.section{{border:2px solid var(--border);border-radius:18px;background:linear-gradient(180deg,rgba(17,24,28,.97),rgba(11,17,21,.98));box-shadow:var(--shadow);padding:28px;margin-bottom:22px}}h1{{font-size:31px;margin:0 0 14px}}h2{{font-size:22px;margin:0 0 14px}}.meta{{display:flex;flex-wrap:wrap;gap:9px;color:var(--muted);font-size:13px;margin-bottom:16px}}.intent{{max-width:850px;color:#d2dade;font-size:15px}}.source-link,.file-link{{color:#b9dfff;text-decoration:none}}.source-note,.projection-source,.context-source{{display:block;color:var(--faint);font-size:10px;line-height:1.45}}.requirements{{border-top:1px solid rgba(111,128,135,.24)}}.requirement{{border-bottom:1px solid rgba(111,128,135,.24)}}.requirement summary{{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px minmax(0,1fr);gap:16px;padding:18px 0}}.requirement summary::-webkit-details-marker{{display:none}}.req-id{{color:var(--green);font:760 12px ui-monospace,SFMono-Regular,Menlo,monospace}}.req-title{{font-size:14px;font-weight:640}}.req-body{{padding:0 0 22px 68px}}.projection{{display:grid;grid-template-columns:minmax(0,.85fr) 24px minmax(0,1fr) 24px minmax(0,1.35fr);gap:10px;align-items:start}}.projection-column{{min-width:0;padding:14px;border:1px solid rgba(111,128,135,.22);border-radius:12px;background:rgba(5,10,13,.24)}}.projection-heading,.block-title{{display:block;margin-bottom:9px;color:#89979d;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.045em}}.projection-arrow{{align-self:center;color:var(--faint);text-align:center}}.profile-chip,.relation-label{{display:inline-flex;margin:0 0 8px;padding:3px 7px;border-radius:999px;background:rgba(54,118,87,.20);color:#bfeacf;font-size:8px;font-weight:720}}.projection-copy{{margin:0 0 7px;color:#d7dddf;font-size:11px}}.projection-item{{padding:9px 0;border-bottom:1px solid rgba(111,128,135,.16)}}.projection-item:last-child{{border-bottom:0}}.relation-reason{{display:block;color:var(--faint);font-size:9px;margin-bottom:6px}}.projection-group+.projection-group{{margin-top:15px}}.structural-subgraph{{margin-top:14px;padding:14px;border:1px solid rgba(111,128,135,.22);border-radius:12px;background:rgba(5,10,13,.24)}}.subgraph-summary{{margin-bottom:10px;color:var(--muted);font-size:9px}}.subgraph-nodes{{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}}.subgraph-node{{min-width:0;padding:8px;border:1px solid rgba(111,128,135,.18);border-radius:8px}}.node-role{{display:block;color:var(--green);font-size:8px;text-transform:uppercase}}.subgraph-node-name{{display:block;overflow-wrap:anywhere;font-size:10px}}.subgraph-edges{{margin-top:10px;border-top:1px solid rgba(111,128,135,.18)}}.subgraph-edge{{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto;gap:7px;padding:7px 0;border-bottom:1px solid rgba(111,128,135,.13);font-size:9px;align-items:center}}.subgraph-relation{{color:#9fcdf0}}.edge-path-count{{color:var(--faint);white-space:nowrap}}.slot-diagnostic{{margin:9px 0;padding:9px;border-radius:8px;background:rgba(106,85,30,.16);color:#e8d18e;font-size:9px}}.slot-diagnostic p{{margin:3px 0 0;color:var(--muted)}}.context{{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(111,128,135,.24)}}.context>summary{{cursor:pointer;color:var(--muted);font-size:11px}}.context-row{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px;gap:12px;padding:12px 0;border-bottom:1px solid rgba(111,128,135,.18)}}.context-id{{color:#9fcdf0;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace}}.context-copy{{font-size:12px}}.context-authority{{color:var(--muted);font-size:10px;text-align:right}}.context-source{{grid-column:2/-1}}.attention-list,.file-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:var(--amber);font-size:10px;font-weight:700;text-transform:uppercase}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px}}.empty,.empty-state{{color:var(--faint);font-size:12px}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}@media(max-width:950px){{.projection{{grid-template-columns:1fr}}.projection-arrow{{transform:rotate(90deg)}}.req-body{{padding-left:0}}.subgraph-nodes{{grid-template-columns:repeat(2,minmax(0,1fr))}}}}@media(max-width:600px){{.shell{{width:calc(100% - 18px);margin-top:16px}}.section{{padding:22px 20px}}.attention-row,.context-row,.subgraph-edge{{grid-template-columns:1fr}}.subgraph-nodes{{grid-template-columns:1fr}}}}
+:root{{color-scheme:dark;--bg:#080c0f;--panel:#10171b;--border:#26373f;--text:#edf3f0;--muted:#9eaaaf;--faint:#6f7d83;--green:#7be3ac;--amber:#e7ca7c;--shadow:0 22px 64px rgba(0,0,0,.28)}}*{{box-sizing:border-box}}body{{margin:0;color:var(--text);line-height:1.55;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 18% -8%,rgba(69,167,118,.12),transparent 31rem),var(--bg)}}code{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}}.shell{{width:min(1180px,calc(100% - 40px));margin:30px auto 84px}}.topbar{{margin-bottom:22px;font-weight:720}}.brand-mark{{display:inline-block;width:14px;height:14px;margin-right:10px;border:2px solid white;transform:rotate(45deg);border-radius:3px}}.section{{border:2px solid var(--border);border-radius:18px;background:linear-gradient(180deg,rgba(17,24,28,.97),rgba(11,17,21,.98));box-shadow:var(--shadow);padding:28px;margin-bottom:22px}}h1{{font-size:31px;margin:0 0 14px}}h2{{font-size:22px;margin:0 0 14px}}h3{{font-size:16px;margin:0 0 8px}}.meta{{display:flex;flex-wrap:wrap;gap:9px;color:var(--muted);font-size:13px;margin-bottom:16px}}.intent{{max-width:850px;color:#d2dade;font-size:15px}}.source-link,.file-link{{color:#b9dfff;text-decoration:none}}.source-note,.projection-source,.context-source{{display:block;color:var(--faint);font-size:10px;line-height:1.45}}.requirements{{border-top:1px solid rgba(111,128,135,.24)}}.requirement{{border-bottom:1px solid rgba(111,128,135,.24)}}.requirement summary{{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px minmax(0,1fr);gap:16px;padding:18px 0}}.requirement summary::-webkit-details-marker{{display:none}}.req-id{{color:var(--green);font:760 12px ui-monospace,SFMono-Regular,Menlo,monospace}}.req-title{{font-size:14px;font-weight:640}}.req-body{{padding:0 0 22px 68px}}.projection{{display:grid;grid-template-columns:minmax(0,.85fr) 24px minmax(0,1fr) 24px minmax(0,1.35fr);gap:10px;align-items:start}}.projection-column{{min-width:0;padding:14px;border:1px solid rgba(111,128,135,.22);border-radius:12px;background:rgba(5,10,13,.24)}}.projection-heading,.block-title{{display:block;margin-bottom:9px;color:#89979d;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.045em}}.projection-arrow{{align-self:center;color:var(--faint);text-align:center}}.profile-chip,.relation-label{{display:inline-flex;margin:0 0 8px;padding:3px 7px;border-radius:999px;background:rgba(54,118,87,.20);color:#bfeacf;font-size:8px;font-weight:720}}.projection-copy{{margin:0 0 7px;color:#d7dddf;font-size:11px}}.projection-item{{padding:9px 0;border-bottom:1px solid rgba(111,128,135,.16)}}.projection-item:last-child{{border-bottom:0}}.relation-reason{{display:block;color:var(--faint);font-size:9px;margin-bottom:6px}}.projection-group+.projection-group{{margin-top:15px}}.structural-overlay-summary{{padding-top:2px}}.review-structural-graph{{margin-top:24px;padding:16px;border:1px solid rgba(111,128,135,.22);border-radius:12px;background:rgba(5,10,13,.24)}}.subgraph-summary{{margin-bottom:10px;color:var(--muted);font-size:9px}}.subgraph-nodes{{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}}.subgraph-node{{min-width:0;padding:8px;border:1px solid rgba(111,128,135,.18);border-radius:8px}}.node-focuses{{display:block;margin-bottom:4px;color:var(--green);font-size:8px;line-height:1.35}}.subgraph-node-name{{display:block;overflow-wrap:anywhere;font-size:10px}}.subgraph-edges{{margin-top:10px;border-top:1px solid rgba(111,128,135,.18)}}.subgraph-edge{{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto;gap:7px;padding:7px 0;border-bottom:1px solid rgba(111,128,135,.13);font-size:9px;align-items:center}}.subgraph-relation{{color:#9fcdf0}}.edge-path-count{{color:var(--faint);white-space:nowrap}}.slot-diagnostic{{margin:9px 0;padding:9px;border-radius:8px;background:rgba(106,85,30,.16);color:#e8d18e;font-size:9px}}.slot-diagnostic p{{margin:3px 0 0;color:var(--muted)}}.context{{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(111,128,135,.24)}}.context>summary{{cursor:pointer;color:var(--muted);font-size:11px}}.context-row{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px;gap:12px;padding:12px 0;border-bottom:1px solid rgba(111,128,135,.18)}}.context-id{{color:#9fcdf0;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace}}.context-copy{{font-size:12px}}.context-authority{{color:var(--muted);font-size:10px;text-align:right}}.context-source{{grid-column:2/-1}}.attention-list,.file-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:var(--amber);font-size:10px;font-weight:700;text-transform:uppercase}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px}}.empty,.empty-state{{color:var(--faint);font-size:12px}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}@media(max-width:950px){{.projection{{grid-template-columns:1fr}}.projection-arrow{{transform:rotate(90deg)}}.req-body{{padding-left:0}}.subgraph-nodes{{grid-template-columns:repeat(2,minmax(0,1fr))}}}}@media(max-width:600px){{.shell{{width:calc(100% - 18px);margin-top:16px}}.section{{padding:22px 20px}}.attention-row,.context-row,.subgraph-edge{{grid-template-columns:1fr}}.subgraph-nodes{{grid-template-columns:1fr}}}}
 </style></head><body><main class="shell">
 <div class="topbar"><span class="brand-mark"></span>PrismCode</div>
 <section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{brief.overview.changed_file_count} changed files</span><span>·</span><span>{escape(ci_copy)}</span></div><h1>{escape(packet.title)}</h1><div class="intent">{escape(brief.intent.text)}</div><span class="source-note">Source: {source_line}</span></section>
-<section class="section"><h2>Review checks</h2>{semantic_context}<div class="requirements">{"".join(cards)}</div></section>
+<section class="section"><h2>Review checks</h2>{semantic_context}<div class="requirements">{"".join(cards)}</div>{review_graph}</section>
 <section class="section"><h2>Needs attention</h2><div class="attention-list">{_attention(brief)}</div></section>
 <section class="section"><h2>Changed areas</h2><div class="file-list">{files or '<p class="empty">Not provided.</p>'}</div></section>
 <div class="footer">PrismCode · {escape(pr_label)} · Schema {escape(brief.schema_version)} · Generated by {escape(brief.generated_by)}</div>

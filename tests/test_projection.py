@@ -93,18 +93,19 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
         "E:symbol:9e703e599343229d97c1"
     ]
     assert set(selected_paths) <= set(anchor.structural_path_ids)
-    subgraph = brief.projection.slices[0].structural_subgraph
-    assert [item.role for item in subgraph.nodes] == [
+    overlay = brief.projection.slices[0].structural_overlay
+    graph = brief.projection.review_graph
+    assert [item.role for item in overlay.nodes] == [
         "changed_anchor",
         "runtime_context",
         "test_context",
     ]
-    assert len(subgraph.path_relation_ids) == 2
-    assert len(subgraph.edges) == 2
-    assert len(subgraph.edges[0].path_relation_ids) == 2
-    assert len(subgraph.edges[1].path_relation_ids) == 1
+    assert len(overlay.path_relation_ids) == 2
+    assert len(graph.edges) == 2
+    assert len(graph.edges[0].path_relation_ids) == 2
+    assert len(graph.edges[1].path_relation_ids) == 1
     assert {
-        item.evidence_id: item.relation_ids for item in subgraph.nodes
+        item.evidence_id: item.relation_ids for item in overlay.nodes
     } == {
         "E:symbol:9e703e599343229d97c1": (
             next(
@@ -135,11 +136,51 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
         ),
     }
     html = render_html(brief)
-    assert "Structural subgraph" in html
-    assert "3 nodes · 2 edges · 2 selected paths" in html
+    assert html.count("Structural evidence graph") == 1
+    assert "3 canonical nodes · 2 canonical edges" in html
     assert '<span class="block-title">Structural paths</span>' not in html
     assert '<span class="block-title">Runtime context</span>' not in html
     assert '<span class="block-title">Test context</span>' not in html
+
+
+def test_identical_focus_graphs_share_one_review_graph() -> None:
+    suite = load_evaluation_suite(SUITE)
+    case = next(item for item in suite.cases if item.id == "bounded-y-x-z")
+    base = load_fixture(case.fixture)
+    requirement = base.requirements[0]
+    brief = DeterministicAnalyzer().analyze(
+        replace(
+            base,
+            requirements=(
+                replace(requirement, id="R1"),
+                replace(requirement, id="R2"),
+            ),
+            structural_graph=case.structural_graph,
+        )
+    )
+
+    graph = brief.projection.review_graph
+    first, second = brief.projection.slices
+    assert len(graph.nodes) == 3
+    assert len(graph.edges) == 2
+    assert tuple(item.evidence_id for item in first.structural_overlay.nodes) == tuple(
+        item.evidence_id for item in second.structural_overlay.nodes
+    )
+    assert first.structural_overlay.edge_ids == second.structural_overlay.edge_ids
+    assert (
+        first.structural_overlay.path_relation_ids
+        != second.structural_overlay.path_relation_ids
+    )
+    assert all(
+        len(edge.path_relation_ids) == 2 * expected
+        for edge, expected in zip(graph.edges, (2, 1), strict=True)
+    )
+
+    html = render_html(brief)
+    assert html.count("Structural evidence graph") == 1
+    assert html.count('<div class="subgraph-node">') == 3
+    assert html.count('<div class="subgraph-edge">') == 2
+    assert html.count("Structural overlay") == 2
 
 
 def test_projection_uses_minimal_structural_support_set() -> None:
@@ -312,18 +353,19 @@ def test_projection_uses_minimal_structural_support_set() -> None:
     assert support.omitted_path_relation_ids == ("P-runtime-long",)
 
     projection = build_review_projection(candidates, convergence, evidence)
-    subgraph = projection.slices[0].structural_subgraph
-    assert {item.evidence_id for item in subgraph.nodes} == {
+    overlay = projection.slices[0].structural_overlay
+    graph = projection.review_graph
+    assert {item.evidence_id for item in graph.nodes} == {
         "E:anchor",
         "E:runtime",
         "E:test",
         "E:anchor-2",
         "E:runtime-2",
     }
-    assert len(subgraph.edges) == 3
-    assert subgraph.edges[0].path_relation_ids == ("P-runtime", "P-test")
+    assert len(graph.edges) == 3
+    assert graph.edges[0].path_relation_ids == ("P-runtime", "P-test")
     assert {
-        item.evidence_id: item.path_relation_ids for item in subgraph.nodes
+        item.evidence_id: item.path_relation_ids for item in overlay.nodes
     } == {
         "E:anchor": ("P-runtime", "P-test"),
         "E:runtime": ("P-runtime", "P-test"),
@@ -808,9 +850,11 @@ def test_graph_and_no_graph_use_the_same_projection_contract() -> None:
     assert (
         without_graph.projection.slices[0].standalone_changed_anchor_relation_ids
     )
-    assert with_graph.projection.slices[0].structural_subgraph.nodes
-    assert without_graph.projection.slices[0].structural_subgraph.path_relation_ids == ()
-    assert with_graph.projection.slices[0].structural_subgraph.path_relation_ids
+    assert with_graph.projection.review_graph.nodes
+    assert without_graph.projection.review_graph.path_relation_ids == ()
+    assert with_graph.projection.review_graph.path_relation_ids
+    assert without_graph.projection.slices[0].structural_overlay.nodes == ()
+    assert with_graph.projection.slices[0].structural_overlay.nodes
 
 
 def test_changed_span_association_scans_beyond_display_preview() -> None:
