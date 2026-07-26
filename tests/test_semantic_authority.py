@@ -161,6 +161,121 @@ def test_code_fences_do_not_create_semantic_items() -> None:
     ]
 
 
+def test_exact_implementation_aliases_share_one_typed_claim_path() -> None:
+    parsed = parse_markdown_semantics(
+        "## Semantic atom\n"
+        "- Replace the former relation parser.\n\n"
+        "## Implementation details\n"
+        "Wire canonical relations into evidence.\n\n"
+        "## Technical approach\n"
+        "- Preserve stable source identities.\n\n"
+        "## Semantic atom rationale\n"
+        "- This unknown prose heading is not a claim.\n"
+    )
+
+    assert [
+        (item.role, item.purpose, item.section, item.text)
+        for item in parsed.items
+    ] == [
+        (
+            "claim",
+            "implementation",
+            "Semantic atom",
+            "Replace the former relation parser.",
+        ),
+        (
+            "claim",
+            "implementation",
+            "Implementation details",
+            "Wire canonical relations into evidence.",
+        ),
+        (
+            "claim",
+            "implementation",
+            "Technical approach",
+            "Preserve stable source identities.",
+        ),
+    ]
+
+
+def test_pr57_semantic_atom_is_preserved_as_typed_implementation_claims() -> None:
+    packet = _packet(
+        pr_body=(
+            "Closes #56.\n\n"
+            "## Semantic atom\n\n"
+            "This replaces the former untyped representation with one "
+            "canonical relation pipeline:\n\n"
+            "`unified patch → ChangeRelation[] → "
+            "EvidenceCatalog.change_relations → relation-referenced changed "
+            "evidence`\n\n"
+            "- the patch parser alone classifies contiguous changes as "
+            "added, removed, or replaced;\n"
+            "- exact symbols and uncovered diff facts reference stable "
+            "relation IDs instead of inferring operation from whole hunks;\n"
+            "- multiple relations may jointly support one changed symbol "
+            "without competing or overwriting its operation;\n"
+            "- the structural-path pass no longer performs a second write "
+            "of changed symbols;\n"
+            "- legacy models, IDs, metadata, routing kinds, fixtures, and "
+            "terminology are removed.\n\n"
+            "## Boundaries\n\n"
+            "This PR does not introduce a base Codegraph index, rename "
+            "inference, change-graph presentation, LLM judgment, or "
+            "acceptance conclusions.\n\n"
+            "## Verification\n\n"
+            "- 122 passed\n"
+            "- deterministic evaluation: PASS\n"
+            "- git diff --check\n"
+            "- repository audit finds no legacy production references\n"
+        )
+    )
+
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+
+    implementation = tuple(
+        item for item in brief.claims if item.purpose == "implementation"
+    )
+    assert [item.id for item in implementation] == [
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "C5",
+        "C6",
+        "C7",
+    ]
+    assert all(
+        item.sources[0].label
+        == "pull request description · Semantic atom"
+        for item in implementation
+    )
+    assert [item.sources[0].line_start for item in implementation] == [
+        5,
+        7,
+        9,
+        10,
+        11,
+        12,
+        13,
+    ]
+    assert implementation[1].text.startswith("unified patch → ChangeRelation[]")
+    assert "patch parser alone classifies" in implementation[2].text
+    assert "exact symbols and uncovered diff facts" in implementation[3].text
+    assert "multiple relations may jointly support" in implementation[4].text
+    assert "no longer performs a second write" in implementation[5].text
+    assert "legacy models" in implementation[6].text
+    assert [
+        (item.id, item.purpose)
+        for item in brief.claims[len(implementation) :]
+    ] == [
+        ("C8", "boundary"),
+        ("VC1", "verification"),
+        ("VC2", "verification"),
+        ("VC3", "verification"),
+        ("VC4", "verification"),
+    ]
+
+
 def test_pr_acceptance_criteria_are_provisional_without_linked_issue() -> None:
     packet = _packet(
         pr_body=(

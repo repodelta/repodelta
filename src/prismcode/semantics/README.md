@@ -15,7 +15,8 @@ C/B/VC PR-claim identities, and PR-claim source state.
 Issue obligations and verification expectations remain the primary contract.
 PR statements remain claims or provisional obligations according to their
 source section. Heading aliases normalize through an exact canonical vocabulary,
-never loose substring matching.
+never loose substring matching. Implementation aliases cover common summary,
+approach, solution, and semantic-atom conventions through that same vocabulary.
 
 ## Must not
 
