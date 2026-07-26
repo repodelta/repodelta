@@ -197,6 +197,14 @@ dependency, generated, or deletion-only changes. Route them through a typed
 change profile and expose explicit unsupported/partial coverage where the
 current providers cannot relate them.
 
+Phrase association uses one review-local vocabulary over unique semantic
+meanings. Two shared terms remain necessary, and at least one must occur in no
+more than half of the applicable focus corpus. Duplicate requirement text is
+one meaning rather than artificial frequency. Claim bridges also require an
+authorized term from the eligible-anchor corpus. Exact identifiers, explicit
+references, and provider associations bypass phrase distinctiveness because
+their authority is already stronger.
+
 ## Requirement profiles
 
 Profiles choose a slot template; they do not produce a conclusion.
