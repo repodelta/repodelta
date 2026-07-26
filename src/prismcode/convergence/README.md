@@ -21,17 +21,15 @@ expansion set. Duplicate relations to one target collapse to their strongest
 typed association. Direct, bridged, and total identity safety limits can
 truncate coverage but never convert multiple relevant anchors into ambiguity.
 
-Structural paths form the bounded union rooted in selected changed anchors.
-Duplicate relations to one path target collapse, then shorter paths are retained
-first only when per-anchor or total identity safety limits are crossed.
-Runtime and test contexts form canonical identity sets reachable through the
-selected paths. After all slots converge, `StructuralSupportSet` partitions the
-selected structural path relations into displayed support and omitted
-provenance. For every reachable selected anchor/context pair it retains the
-shortest canonical selected path identities; equivalent shortest identities
-remain provenance, while longer redundant paths do not enter projection. A
-context available only behind a safety-deferred path is `upstream_deferred`, not
-unassociated.
+Structural paths and structurally bridged runtime/test contexts converge as one
+terminal-aware unit. For each reachable anchor-terminal connection, shortest
+canonical path identities are eligible; distinct terminal coverage precedes
+redundant equivalent support. Per-anchor, total-path, and context-identity
+limits apply to that connection set. `StructuralSupportSet` is exactly the
+selected terminal support; all other path provenance remains canonical in the
+group's deferred relation IDs. Direct/provider context without a path bridge
+remains standalone. A terminal available only behind a safety-deferred
+connection is `upstream_deferred`, not unassociated.
 
 Claim bridges remain reachable only through selected claims. In the remaining
 competitive claim slot, stable source order breaks ties only within one

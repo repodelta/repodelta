@@ -179,10 +179,12 @@ identity safety limits inside one R/G and one slot at a time. Claims remain
 compact competitive selections. Changed anchors form a canonical evidence set:
 distinct direct anchors remain visible together, claim-bridged anchors use a
 separate expansion budget, and duplicate relations to one evidence target
-collapse. Structural paths form the bounded union rooted in selected anchors;
-runtime and test contexts form canonical sets reachable through selected paths.
-Together their selected relation IDs and bridge IDs are the reference-only
-evidence subgraph. Verification is a set slot keyed by first-class provider,
+collapse. Structural paths and structurally bridged runtime/test contexts form
+one terminal-aware convergence unit. Shortest canonical anchor-terminal
+connections cover distinct terminal identities before redundant alternatives,
+then apply per-anchor, total-path, and context limits. Together their selected
+relation IDs and bridge IDs are the reference-only evidence subgraph.
+Verification is a set slot keyed by first-class provider,
 kind, and normalized name: distinct current-head checks remain visible
 together, equivalent duplicates collapse, and conflicting completed outcomes
 remain explicit.
@@ -197,12 +199,11 @@ disclosed as a tie-break through an `ambiguous` diagnostic. There is no
 all-statement/all-evidence numeric score or global candidate budget.
 
 `ReviewProjection` references only IDs selected by `CandidateConvergence`.
-Convergence derives one typed minimal structural support set from those selected
-relations: shortest canonical paths connect each reachable selected
-anchor/context pair, while redundant longer selected paths remain explicit
-omitted provenance. Projection consumes only that support set to build canonical
-symbol nodes and typed edges. `ReviewProjection` owns these identities once in
-one review-level graph; each slice references them through a focus overlay.
+Convergence directly emits one typed terminal support set; deferred relation IDs
+are the only omitted-path provenance. Projection consumes the support set
+without reconstructing terminal relevance or selecting paths, then builds
+canonical symbol nodes and typed edges. `ReviewProjection` owns these identities
+once in one review-level graph; each slice references them through a focus overlay.
 Shared paths and cross-focus overlap collapse by deterministic edge identity,
 while global and per-focus path provenance remain explicit. Graph-backed
 anchors and contexts move into the overlay; only non-graph facts remain in
