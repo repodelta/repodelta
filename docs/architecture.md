@@ -168,7 +168,9 @@ Every `EvidenceItem` has a stable ID plus one semantic identity:
 - fact role and profile.
 
 Changed anchors retain complete normalized head- and base-side retrieval
-signatures. Their bounded previews are never used for association. Base-side
+signatures. Structural provider anchors are review-level change identities
+that reference their optional base/head symbol facts; the revision facts are
+not routed independently. Their bounded previews are never used for association. Base-side
 signatures are not eligible as current implementation unless the focus is
 explicitly about removal, deprecation, cleanup, or a guardrail. Duplicate
 symbols and paths merge by identity.

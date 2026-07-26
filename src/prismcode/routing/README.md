@@ -21,6 +21,10 @@ focus text retains the same authority. Exact identifiers, explicit references,
 and provider associations do not depend on phrase distinctiveness. Claim
 bridges require a term discriminative for both the claim and eligible-anchor
 corpora.
+Structural changed-anchor candidates come only from canonical
+`structural_change` facts; revision-specific symbols are provenance and path
+endpoints, not parallel candidates. Uncovered spans continue through the
+canonical `change_relation` fallback.
 
 ## Must not
 

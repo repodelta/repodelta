@@ -16,6 +16,7 @@ from prismcode.model.contracts import (
     ReviewStatement,
     ReviewSourcePacket,
     SourceRecord,
+    StructuralChangeIdentity,
     VerificationIdentity,
 )
 from prismcode.evaluation.core import load_evaluation_suite
@@ -87,7 +88,7 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
     brief = DeterministicAnalyzer().analyze(analysis_input)
 
     assert _selected_targets(brief, "R1", "changed_anchor") == (
-        "E:symbol:9e703e599343229d97c1",
+        "E:structural_change:5910f29667b835bd4cbe",
     )
     assert _selected_targets(brief, "R1", "runtime_context") == (
         "E:symbol:51c78d1cf2a276cc9a40",
@@ -120,7 +121,8 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
                 for item in brief.projection_candidates.relations
                 if item.focus_statement_id == "R1"
                 and item.slot == "changed_anchor"
-                and item.target_id == "E:symbol:9e703e599343229d97c1"
+                and item.target_id
+                == "E:structural_change:5910f29667b835bd4cbe"
             ),
         ),
         "E:symbol:51c78d1cf2a276cc9a40": (
@@ -386,14 +388,21 @@ def test_every_requirement_is_routed_without_a_global_statement_budget() -> None
         Requirement(id=f"R{index}", text=f"Expose capability_{index}")
         for index in range(1, 81)
     )
-    evidence = tuple(
+    changes = tuple(
         EvidenceItem(
             id=f"E:{index}",
             summary=f"Changed function: capability_{index}",
-            kind="symbol",
+            kind="structural_change",
             classification="code",
             profile="production",
+            revision_side="review",
+            operation="added",
+            role="changed_anchor",
             changed=True,
+            structural_change=StructuralChangeIdentity(
+                provider_symbol_id=f"capability_{index}",
+                head_symbol_evidence_id=f"S:{index}",
+            ),
             head_signature=association_signature(f"capability_{index}"),
             metadata={
                 "qualified_name": f"capability_{index}",
@@ -402,6 +411,26 @@ def test_every_requirement_is_routed_without_a_global_statement_budget() -> None
         )
         for index in range(1, 81)
     )
+    symbols = tuple(
+        EvidenceItem(
+            id=f"S:{index}",
+            summary=f"Changed function: capability_{index}",
+            kind="symbol",
+            classification="code",
+            profile="production",
+            authority="structural_provider",
+            revision_side="head",
+            operation="added",
+            role="revision_fact",
+            changed=True,
+            metadata={
+                "symbol_id": f"capability_{index}",
+                "qualified_name": f"capability_{index}",
+            },
+        )
+        for index in range(1, 81)
+    )
+    evidence = (*changes, *symbols)
 
     candidates = build_projection_candidates(
         requirements=requirements,
@@ -440,6 +469,30 @@ def test_isolated_symbol_and_standalone_document_keep_distinct_canonical_forms()
     evidence = EvidenceCatalog(
         items=(
             EvidenceItem(
+                id="E:structural-change",
+                summary="Changed function: bounded_trace",
+                kind="structural_change",
+                classification="code",
+                profile="production",
+                authority="structural_provider",
+                revision_side="review",
+                operation="modified",
+                role="changed_anchor",
+                changed=True,
+                structural_change=StructuralChangeIdentity(
+                    provider_symbol_id="S:bounded_trace",
+                    head_symbol_evidence_id="E:symbol",
+                ),
+                associated_statement_ids=("R1",),
+                head_signature=association_signature("bounded_trace"),
+                metadata={
+                    "symbol_id": "S:bounded_trace",
+                    "qualified_name": "service.bounded_trace",
+                    "path": "src/service.py",
+                    "provided_for_statement_ids": ("R1",),
+                },
+            ),
+            EvidenceItem(
                 id="E:symbol",
                 summary="Changed function: bounded_trace",
                 kind="symbol",
@@ -448,15 +501,12 @@ def test_isolated_symbol_and_standalone_document_keep_distinct_canonical_forms()
                 authority="structural_provider",
                 revision_side="head",
                 operation="modified",
-                role="changed_anchor",
+                role="revision_fact",
                 changed=True,
-                associated_statement_ids=("R1",),
-                head_signature=association_signature("bounded_trace"),
                 metadata={
                     "symbol_id": "S:bounded_trace",
                     "qualified_name": "service.bounded_trace",
                     "path": "src/service.py",
-                    "provided_for_statement_ids": ("R1",),
                 },
             ),
             EvidenceItem(
@@ -731,10 +781,17 @@ def test_generic_inspection_budget_does_not_truncate_changed_anchor_set() -> Non
         EvidenceItem(
             id=f"E:{index}",
             summary=f"Changed function: bounded_trace_{index}",
-            kind="symbol",
+            kind="structural_change",
             classification="code",
             profile="production",
+            revision_side="review",
+            operation="added",
+            role="changed_anchor",
             changed=True,
+            structural_change=StructuralChangeIdentity(
+                provider_symbol_id=f"bounded_trace_{index}",
+                head_symbol_evidence_id=f"S:{index}",
+            ),
             head_signature=association_signature(f"bounded_trace_{index}"),
             metadata={"qualified_name": f"bounded_trace_{index}"},
         )
