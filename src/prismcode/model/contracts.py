@@ -109,6 +109,7 @@ CoverageState = Literal[
     "stale_source",
     "budget_truncated",
     "unsupported_change_type",
+    "conflicting_facts",
 ]
 ReviewCiState = Literal["not_observed", "failure", "passing", "pending"]
 ReviewPullRequestState = Literal["merged", "draft", "open", "closed", "unknown"]
@@ -173,6 +174,14 @@ class VerificationObservation:
     conclusion: str = ""
     head_sha: str | None = None
     details_url: str | None = None
+    provider: str = "unknown"
+
+
+@dataclass(frozen=True)
+class VerificationIdentity:
+    provider: str
+    kind: Literal["check_run", "commit_status", "workflow_run", "manual"]
+    name: str
 
 
 @dataclass(frozen=True)
@@ -273,6 +282,9 @@ class EvidenceItem:
     changed: bool = False
     associated_statement_ids: tuple[str, ...] = ()
     observed_head_sha: str | None = None
+    verification_identity: VerificationIdentity | None = None
+    verification_status: str = ""
+    verification_conclusion: str = ""
     sources: tuple[SourceRef, ...] = ()
     structural_path_ids: tuple[str, ...] = ()
     metadata: dict[str, Any] = field(default_factory=dict)
@@ -291,6 +303,13 @@ class EvidenceItem:
             raise ValueError(f"{self.id}: removed fact must belong to base revision")
         if self.role == "verification" and self.profile != "verification":
             raise ValueError(f"{self.id}: verification role requires verification profile")
+        if self.role == "verification":
+            if self.verification_identity is None:
+                raise ValueError(f"{self.id}: verification fact requires an identity")
+            if not self.observed_head_sha:
+                raise ValueError(f"{self.id}: verification fact requires an observed head")
+            if not self.verification_status:
+                raise ValueError(f"{self.id}: verification fact requires a status")
         if self.role == "structural_path" and self.profile != "structural_path":
             raise ValueError(f"{self.id}: structural path role requires structural path profile")
         expected_classifications = {
@@ -311,7 +330,7 @@ class EvidenceItem:
 class EvidenceCatalog:
     items: tuple[EvidenceItem, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
-    schema_version: str = "evidence_catalog.v3"
+    schema_version: str = "evidence_catalog.v4"
 
     def by_id(self) -> dict[str, EvidenceItem]:
         return {item.id: item for item in self.items}
@@ -449,7 +468,7 @@ class ConvergenceGroup:
 class CandidateConvergence:
     groups: tuple[ConvergenceGroup, ...] = ()
     diagnostics: tuple[ProjectionDiagnostic, ...] = ()
-    schema_version: str = "candidate_convergence.v1"
+    schema_version: str = "candidate_convergence.v2"
 
     def diagnostics_by_id(self) -> dict[str, ProjectionDiagnostic]:
         return {item.id: item for item in self.diagnostics}
@@ -595,7 +614,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v12"
+    schema_version: str = "review_brief.v13"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

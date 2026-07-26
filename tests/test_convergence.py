@@ -4,9 +4,13 @@ from dataclasses import fields
 
 from prismcode.convergence.core import ConvergencePolicy, converge_candidates
 from prismcode.model.contracts import (
+    EvidenceCatalog,
+    EvidenceItem,
     ProjectionCandidateGroup,
     ProjectionCandidateSet,
     ProjectionRelation,
+    SourceRef,
+    VerificationIdentity,
 )
 
 
@@ -50,12 +54,54 @@ def _candidates(*relations: ProjectionRelation) -> ProjectionCandidateSet:
     )
 
 
+def _verification(
+    fact_id: str,
+    *,
+    name: str,
+    status: str = "completed",
+    conclusion: str = "success",
+    kind: str = "check_run",
+) -> EvidenceItem:
+    return EvidenceItem(
+        id=fact_id,
+        summary=f"{name}: {status}/{conclusion}",
+        kind=kind,
+        classification="ci",
+        profile="verification",
+        authority="verification_provider",
+        role="verification",
+        observed_head_sha="head",
+        verification_identity=VerificationIdentity(
+            provider="github",
+            kind=kind,
+            name=" ".join(name.split()).casefold(),
+        ),
+        verification_status=status,
+        verification_conclusion=conclusion,
+        sources=(SourceRef(label=name),),
+    )
+
+
+def _verification_relation(fact_id: str, *, ordinal: int = 0) -> ProjectionRelation:
+    return _relation(
+        f"relation:{fact_id}",
+        slot="verification",
+        target=fact_id,
+        association="current_head",
+        ordinal=ordinal,
+    )
+
+
 def _selected(
     candidates: ProjectionCandidateSet,
     *,
     policy: ConvergencePolicy,
 ) -> tuple[str, ...]:
-    result = converge_candidates(candidates, policy=policy)
+    result = converge_candidates(
+        candidates,
+        evidence_catalog=EvidenceCatalog(),
+        policy=policy,
+    )
     result.validate_consistency(candidates)
     return result.selected_relation_ids()
 
@@ -152,6 +198,7 @@ def test_claim_bridge_requires_the_selected_claim() -> None:
     )
     result = converge_candidates(
         candidates,
+        evidence_catalog=EvidenceCatalog(),
         policy=ConvergencePolicy(max_claims=1),
     )
 
@@ -215,6 +262,7 @@ def test_ambiguity_and_inspection_truncation_are_distinct() -> None:
     )
     result = converge_candidates(
         candidates,
+        evidence_catalog=EvidenceCatalog(),
         policy=ConvergencePolicy(
             max_changed=2,
             max_candidates_per_slot=4,
@@ -227,3 +275,110 @@ def test_ambiguity_and_inspection_truncation_are_distinct() -> None:
         if item.slot == "changed_anchor"
     }
     assert states == {"ambiguous", "budget_truncated"}
+
+
+def test_distinct_current_head_checks_form_one_non_competing_set() -> None:
+    facts = (
+        _verification("E:test", name="test"),
+        _verification("E:review", name="review"),
+    )
+    candidates = _candidates(
+        _verification_relation("E:test"),
+        _verification_relation("E:review", ordinal=1),
+    )
+
+    result = converge_candidates(
+        candidates,
+        evidence_catalog=EvidenceCatalog(items=facts),
+    )
+
+    assert result.selected_relation_ids() == (
+        "relation:E:review",
+        "relation:E:test",
+    )
+    assert not [
+        item
+        for item in result.diagnostics
+        if item.slot == "verification" and item.state == "ambiguous"
+    ]
+
+
+def test_equivalent_verification_duplicates_collapse_by_identity() -> None:
+    facts = (
+        _verification("E:first", name=" Test "),
+        _verification("E:duplicate", name="test"),
+    )
+    candidates = _candidates(
+        _verification_relation("E:first"),
+        _verification_relation("E:duplicate", ordinal=1),
+    )
+
+    result = converge_candidates(
+        candidates,
+        evidence_catalog=EvidenceCatalog(items=facts),
+    )
+
+    assert result.selected_relation_ids() == ("relation:E:first",)
+    assert result.groups[0].deferred_relation_ids == ("relation:E:duplicate",)
+    assert result.diagnostics == ()
+
+
+def test_conflicting_completed_outcomes_remain_visible_for_one_identity() -> None:
+    facts = (
+        _verification("E:success", name="test", conclusion="success"),
+        _verification("E:failure", name="test", conclusion="failure"),
+    )
+    candidates = _candidates(
+        _verification_relation("E:success"),
+        _verification_relation("E:failure", ordinal=1),
+    )
+
+    result = converge_candidates(
+        candidates,
+        evidence_catalog=EvidenceCatalog(items=facts),
+    )
+
+    assert set(result.selected_relation_ids()) == {
+        "relation:E:success",
+        "relation:E:failure",
+    }
+    assert [
+        item.state
+        for item in result.diagnostics
+        if item.slot == "verification"
+    ] == ["conflicting_facts"]
+
+
+def test_verification_safety_limit_prioritizes_failure_then_pending() -> None:
+    facts = (
+        _verification("E:success", name="success", conclusion="success"),
+        _verification(
+            "E:pending",
+            name="pending",
+            status="in_progress",
+            conclusion="",
+        ),
+        _verification("E:failure", name="failure", conclusion="failure"),
+    )
+    candidates = _candidates(
+        *(
+            _verification_relation(fact.id, ordinal=index)
+            for index, fact in enumerate(facts)
+        )
+    )
+
+    result = converge_candidates(
+        candidates,
+        evidence_catalog=EvidenceCatalog(items=facts),
+        policy=ConvergencePolicy(max_verification_identities=2),
+    )
+
+    assert result.selected_relation_ids() == (
+        "relation:E:failure",
+        "relation:E:pending",
+    )
+    assert [
+        item.state
+        for item in result.diagnostics
+        if item.slot == "verification"
+    ] == ["budget_truncated"]

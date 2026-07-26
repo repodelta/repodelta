@@ -48,7 +48,10 @@ class DeterministicAnalyzer:
             claim_source_state=extracted.claim_source_state,
         )
         projection_candidates.validate_consistency()
-        candidate_convergence = converge_candidates(projection_candidates)
+        candidate_convergence = converge_candidates(
+            projection_candidates,
+            evidence_catalog=evidence_catalog,
+        )
         candidate_convergence.validate_consistency(projection_candidates)
         projection = build_review_projection(
             projection_candidates,

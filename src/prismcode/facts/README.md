@@ -13,6 +13,9 @@ Source packet, canonical changes, and provider results → one `EvidenceCatalog`
 
 Each diff location has one canonical representation. Typed routing fields are
 first-class contract fields, not metadata conventions.
+Verification facts carry first-class provider, kind, normalized name, status,
+conclusion, and observed head SHA; downstream stages must not recover those
+fields from presentation metadata.
 
 ## Must not
 

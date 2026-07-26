@@ -342,6 +342,7 @@ class GitHubPullRequestAdapter:
                         conclusion=str(row.get("conclusion") or ""),
                         head_sha=str(row.get("head_sha") or head_sha),
                         details_url=row.get("html_url") if isinstance(row.get("html_url"), str) else None,
+                        provider="github",
                     )
                 )
         except GitHubApiError as exc:
@@ -361,6 +362,7 @@ class GitHubPullRequestAdapter:
                         conclusion=str(row.get("state") or ""),
                         head_sha=head_sha,
                         details_url=row.get("target_url") if isinstance(row.get("target_url"), str) else None,
+                        provider="github",
                     )
                 )
         except GitHubApiError as exc:
