@@ -63,8 +63,10 @@ convergence groups, and projection slices contain canonical IDs only.
 ## Semantic identity and ordering
 
 Eligibility runs before association and uses fact authority, revision side,
-change operation, role, and profile. Head- and base-side hunk text are never
-collapsed into one matching string. Repository-local `R1`/`G1` tokens are not
+change operation, role, and profile. Routing reads complete typed association
+signatures, never bounded display previews. Head and base signatures are never
+collapsed into one undirected string; base terms are admitted only for
+removal-oriented or guardrail focus. Repository-local `R1`/`G1` tokens are not
 treated as issue references.
 
 Convergence is ordinal inside each competitive typed slot. Typed association

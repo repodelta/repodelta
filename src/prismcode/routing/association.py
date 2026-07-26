@@ -2,11 +2,14 @@ from __future__ import annotations
 
 import re
 
-from prismcode.model.contracts import AssociationReason, ReviewStatement
-from prismcode.facts.lexical import semantic_tokens
+from prismcode.model.contracts import (
+    AssociationReason,
+    AssociationSignature,
+    ReviewStatement,
+)
+from prismcode.facts.lexical import identifier_keys, semantic_tokens
 
 _REFERENCE_RE = re.compile(r"\b(?:R|G|AC|REQ)[-_ ]?\d+\b", re.IGNORECASE)
-_WORD_RE = re.compile(r"[A-Za-z][A-Za-z0-9_]{2,}")
 
 
 def statement_reasons(
@@ -36,12 +39,33 @@ def statement_reasons(
 
 def evidence_reasons(
     source: ReviewStatement,
-    target_text: str,
+    target: AssociationSignature,
 ) -> tuple[AssociationReason, ...]:
     """Associate repository text without interpreting local R1/G1 tokens."""
 
-    return text_reasons(source.text, target_text)
-
+    identifiers = tuple(
+        sorted(identifier_keys(source.text) & set(target.identifiers))
+    )
+    if identifiers:
+        return (
+            AssociationReason(
+                kind="exact_identifier",
+                detail="A distinctive identifier occurs in both texts.",
+                matched_terms=identifiers,
+            ),
+        )
+    overlap = tuple(
+        sorted(semantic_tokens(source.text) & set(target.tokens))
+    )
+    if len(overlap) >= 2:
+        return (
+            AssociationReason(
+                kind="distinctive_phrase",
+                detail="At least two meaningful terms occur in both texts.",
+                matched_terms=overlap,
+            ),
+        )
+    return ()
 
 def text_reasons(
     source_text: str,
@@ -68,21 +92,3 @@ def text_reasons(
             ),
         )
     return ()
-
-
-def identifier_keys(value: str) -> frozenset[str]:
-    keys: set[str] = set()
-    for token in _WORD_RE.findall(value):
-        has_shape = "_" in token or any(char.isupper() for char in token[1:])
-        if not has_shape:
-            continue
-        raw_parts = [part.casefold() for part in token.split("_") if part]
-        parts = [part for part in raw_parts if len(part) >= 3 or part.isdigit()]
-        collapsed = "".join(parts)
-        if len(collapsed) >= 5:
-            keys.add(collapsed)
-        for index in range(1, len(parts)):
-            suffix = "".join(parts[index:])
-            if len(suffix) >= 5:
-                keys.add(suffix)
-    return frozenset(keys)

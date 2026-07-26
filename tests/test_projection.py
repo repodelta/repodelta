@@ -6,6 +6,7 @@ from pathlib import Path
 from prismcode.pipeline import DeterministicAnalyzer
 from prismcode.model.contracts import (
     AnalysisInput,
+    ChangedFile,
     EvidenceCatalog,
     EvidenceItem,
     Requirement,
@@ -15,6 +16,7 @@ from prismcode.model.contracts import (
     VerificationIdentity,
 )
 from prismcode.evaluation.core import load_evaluation_suite
+from prismcode.facts.lexical import association_signature
 from prismcode.intake.fixture import load_fixture
 from prismcode.routing.candidates import build_projection_candidates
 from prismcode.convergence.core import (
@@ -50,8 +52,8 @@ def test_direct_hunks_and_claim_route_into_independent_slots() -> None:
 
     assert _selected_targets(brief, "R1", "claim") == ("C1",)
     assert set(_selected_targets(brief, "R1", "changed_anchor")) == {
-        "E:changed_hunk:13c27ca8c4cfe45cfbcc",
-        "E:changed_hunk:5b5657b12be7abe2bf93",
+        "E:changed_span:0aa4b3f996143d495c78",
+        "E:changed_span:3214d70de26b7f9965d3",
     }
     assert _selected_targets(brief, "R2", "claim") == ()
     assert _selected_targets(brief, "R2", "changed_anchor") == ()
@@ -103,6 +105,7 @@ def test_every_requirement_is_routed_without_a_global_statement_budget() -> None
             classification="code",
             profile="production",
             changed=True,
+            head_signature=association_signature(f"capability_{index}"),
             metadata={
                 "qualified_name": f"capability_{index}",
                 "provided_for_statement_ids": (f"R{index}",),
@@ -140,7 +143,7 @@ def test_one_generic_shared_term_is_not_a_default_relation() -> None:
                 EvidenceItem(
                     id="E:unrelated",
                     summary="Changed runtime helper",
-                    kind="changed_hunk",
+                    kind="changed_span",
                     classification="code",
                     profile="production",
                     changed=True,
@@ -168,7 +171,7 @@ def test_repository_local_r1_token_is_not_an_issue_reference() -> None:
                 EvidenceItem(
                     id="E:fixture",
                     summary="Delete test fixture containing R1",
-                    kind="changed_hunk",
+                    kind="changed_span",
                     classification="test",
                     profile="test",
                     changed=True,
@@ -176,7 +179,7 @@ def test_repository_local_r1_token_is_not_an_issue_reference() -> None:
                     revision_side="base",
                     operation="removed",
                     role="changed_anchor",
-                    metadata={"base_excerpt": '{"id": "R1"}'},
+                    base_signature=association_signature('{"id": "R1"}'),
                 ),
             )
         ),
@@ -219,7 +222,7 @@ def test_changed_anchor_selection_uses_typed_ordinal_not_hashed_id() -> None:
             EvidenceItem(
                 id="E:zzz",
                 summary="Changed function: bounded_trace",
-                kind="changed_hunk",
+                kind="changed_span",
                 classification="code",
                 profile="production",
                 changed=True,
@@ -227,16 +230,16 @@ def test_changed_anchor_selection_uses_typed_ordinal_not_hashed_id() -> None:
                 revision_side="head",
                 operation="modified",
                 role="changed_anchor",
+                head_signature=association_signature("bounded_trace"),
                 metadata={
                     "path": "src/b.py",
-                    "new_start": 20,
-                    "head_excerpt": "bounded_trace()",
+                    "added_lines": (20,),
                 },
             ),
             EvidenceItem(
                 id="E:aaa",
                 summary="Changed function: bounded_trace",
-                kind="changed_hunk",
+                kind="changed_span",
                 classification="code",
                 profile="production",
                 changed=True,
@@ -244,10 +247,10 @@ def test_changed_anchor_selection_uses_typed_ordinal_not_hashed_id() -> None:
                 revision_side="head",
                 operation="modified",
                 role="changed_anchor",
+                head_signature=association_signature("bounded_trace"),
                 metadata={
                     "path": "src/a.py",
-                    "new_start": 10,
-                    "head_excerpt": "bounded_trace()",
+                    "added_lines": (10,),
                 },
             ),
         )
@@ -358,6 +361,7 @@ def test_per_slot_budget_marks_only_that_focus_and_slot() -> None:
             classification="code",
             profile="production",
             changed=True,
+            head_signature=association_signature(f"bounded_trace_{index}"),
             metadata={"qualified_name": f"bounded_trace_{index}"},
         )
         for index in range(8)
@@ -488,19 +492,23 @@ def test_document_and_workflow_facts_are_routed_by_profile() -> None:
             EvidenceItem(
                 id="E:doc",
                 summary="Changed documentation: bounded_trace behavior",
-                kind="changed_hunk",
+                kind="changed_span",
                 classification="document",
                 profile="document",
                 changed=True,
+                head_signature=association_signature(
+                    "bounded_trace documentation behavior"
+                ),
                 metadata={"path": "docs/bounded_trace.md"},
             ),
             EvidenceItem(
                 id="E:workflow",
                 summary="Changed workflow: bounded_trace tests",
-                kind="changed_hunk",
+                kind="changed_span",
                 classification="code",
                 profile="workflow",
                 changed=True,
+                head_signature=association_signature("bounded_trace tests workflow"),
                 metadata={"path": ".github/workflows/test.yml"},
             ),
         )
@@ -551,3 +559,71 @@ def test_graph_and_no_graph_use_the_same_projection_contract() -> None:
     assert with_graph.projection.slices[0].changed_anchor_relation_ids
     assert without_graph.projection.slices[0].structural_path_relation_ids == ()
     assert with_graph.projection.slices[0].structural_path_relation_ids
+
+
+def test_changed_span_association_scans_beyond_display_preview() -> None:
+    late_identifier = "late_bounded_adapter"
+    packet = ReviewSourcePacket(
+        repository="acme/widget",
+        pull_request=91,
+        title="Large change",
+        source_records=(),
+        changed_files=(
+            ChangedFile(
+                path="src/large.py",
+                patch=(
+                    "@@ -0,0 +1 @@\n"
+                    f"+{'x' * 4100} {late_identifier}()\n"
+                ),
+            ),
+        ),
+    ).with_revision()
+
+    brief = DeterministicAnalyzer().analyze(
+        AnalysisInput(
+            packet=packet,
+            requirements=(
+                Requirement(id="R1", text=f"Expose {late_identifier}"),
+            ),
+        )
+    )
+    anchor_id = _selected_targets(brief, "R1", "changed_anchor")[0]
+    anchor = brief.evidence_catalog.by_id()[anchor_id]
+
+    assert len(anchor.metadata["head_preview"]) == 4000
+    assert late_identifier not in anchor.metadata["head_preview"]
+    assert "lateboundedadapter" in anchor.head_signature.identifiers
+
+
+def test_base_signature_is_used_only_for_removal_or_guardrail_focus() -> None:
+    packet = ReviewSourcePacket(
+        repository="acme/widget",
+        pull_request=92,
+        title="Replace legacy path",
+        source_records=(),
+        changed_files=(
+            ChangedFile(
+                path="src/service.py",
+                patch=(
+                    "@@ -1 +1 @@\n"
+                    "-legacy_bounded_adapter()\n"
+                    "+modern_path()\n"
+                ),
+            ),
+        ),
+    ).with_revision()
+    requirements = (
+        Requirement(id="R1", text="Expose legacy_bounded_adapter"),
+        Requirement(
+            id="G1",
+            text="Remove legacy_bounded_adapter",
+            purpose="guardrail",
+            kind="guardrail",
+        ),
+    )
+    brief = DeterministicAnalyzer().analyze(
+        AnalysisInput(packet=packet, requirements=requirements)
+    )
+
+    assert _selected_targets(brief, "R1", "changed_anchor") == ()
+    assert _selected_targets(brief, "G1", "changed_anchor")

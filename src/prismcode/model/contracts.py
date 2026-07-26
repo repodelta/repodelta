@@ -185,6 +185,14 @@ class VerificationIdentity:
 
 
 @dataclass(frozen=True)
+class AssociationSignature:
+    """Complete normalized retrieval vocabulary for one revision side."""
+
+    identifiers: tuple[str, ...] = ()
+    tokens: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
 class ReviewSourcePacket:
     """Canonical, conclusion-free facts collected for one review."""
 
@@ -281,6 +289,8 @@ class EvidenceItem:
     role: FactRole = "changed_anchor"
     changed: bool = False
     associated_statement_ids: tuple[str, ...] = ()
+    head_signature: AssociationSignature = AssociationSignature()
+    base_signature: AssociationSignature = AssociationSignature()
     observed_head_sha: str | None = None
     verification_identity: VerificationIdentity | None = None
     verification_status: str = ""
@@ -330,7 +340,7 @@ class EvidenceItem:
 class EvidenceCatalog:
     items: tuple[EvidenceItem, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
-    schema_version: str = "evidence_catalog.v4"
+    schema_version: str = "evidence_catalog.v5"
 
     def by_id(self) -> dict[str, EvidenceItem]:
         return {item.id: item for item in self.items}
@@ -614,7 +624,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v13"
+    schema_version: str = "review_brief.v14"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

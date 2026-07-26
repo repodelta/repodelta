@@ -119,17 +119,20 @@ prevents report generation.
 
 ## Canonical evidence and fallback
 
-Each parseable changed hunk has exactly one canonical representation:
+Each parseable changed hunk is split into contiguous directional change spans.
+Each changed line has exactly one canonical representation:
 
-- when Codegraph maps it, the exact symbol represents it;
-- otherwise, a `changed_hunk` item retains its path, ranges, bounded patch
-   head/base excerpts, and GitHub source;
+- when Codegraph maps a head-side changed line, its exact symbol represents it
+  and receives the covered line's association signature;
+- otherwise, a `changed_span` item retains the uncovered lines, bounded display
+  previews, complete head/base association signatures, and GitHub source;
 - only an absent or unparsable patch produces a `changed_file` fallback.
 
-This replacement rule prevents `CHANGED FILE`, `CHANGED HUNK`, and exact symbol
-records from competing as parallel truths for the same diff. Documentation
-hunks remain evidence with document classification; they are not forced into
-code symbols.
+This line-level replacement rule prevents changed-file, changed-span, and exact
+symbol records from competing as parallel truths for the same diff. A partially
+mapped span preserves only its uncovered changed lines. Documentation spans
+remain evidence with document classification; they are not forced into code
+symbols.
 
 Every `EvidenceItem` has a stable ID plus one semantic identity:
 
@@ -140,10 +143,11 @@ Every `EvidenceItem` has a stable ID plus one semantic identity:
   `unchanged`);
 - fact role and profile.
 
-Hunks retain separate bounded head- and base-side excerpts. Base-side removal
-facts are not eligible as current implementation unless the focus is explicitly
-about removal, deprecation, cleanup, or a guardrail. Duplicate symbols and
-paths merge by identity.
+Changed anchors retain complete normalized head- and base-side retrieval
+signatures. Their bounded previews are never used for association. Base-side
+signatures are not eligible as current implementation unless the focus is
+explicitly about removal, deprecation, cleanup, or a guardrail. Duplicate
+symbols and paths merge by identity.
 
 ## Typed fact routing
 

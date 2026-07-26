@@ -22,7 +22,7 @@ from prismcode.routing.coverage import review_provider_diagnostics
 from prismcode.facts.semantics import (
     anchor_key,
     eligible_changed_anchor,
-    evidence_text,
+    evidence_signature,
     requirement_profile,
 )
 from prismcode.providers.structural import StructuralGraphResult
@@ -48,7 +48,7 @@ def build_projection_candidates(
                 item
                 for item in evidence.values()
                 if item.changed
-                and item.kind in {"symbol", "changed_hunk", "changed_file"}
+                and item.kind in {"symbol", "changed_span", "changed_file"}
             ),
             key=anchor_key,
         )
@@ -305,11 +305,14 @@ def _anchor_relations(
                 )
             )
             continue
-        direct = evidence_reasons(focus, evidence_text(anchor))
+        direct = evidence_reasons(focus, evidence_signature(anchor, focus))
         bridges = []
         for claim_id in sorted(associated_claim_ids):
             claim = claims_by_id.get(claim_id)
-            if claim is None or not evidence_reasons(claim, evidence_text(anchor)):
+            if claim is None or not evidence_reasons(
+                claim,
+                evidence_signature(anchor, claim),
+            ):
                 continue
             bridges.append(claim_id)
         if direct:

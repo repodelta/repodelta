@@ -10,8 +10,9 @@ Canonical unified-diff parsing and head/base line semantics.
 
 ## Invariants
 
-Head and base snippets remain separate. Every consumer receives the same hunk
-IDs and line ranges.
+Each hunk owns contiguous replacement/addition/deletion spans. Head and base
+lines remain separate and retain exact revision-side line numbers. Hunk
+snippets are derived from spans rather than stored as parallel truth.
 
 ## Must not
 

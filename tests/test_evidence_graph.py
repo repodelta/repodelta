@@ -14,6 +14,7 @@ from prismcode.model.contracts import (
     EvidenceCatalog,
 )
 from prismcode.facts.catalog import build_evidence_catalog
+from prismcode.facts.lexical import association_signature
 from prismcode.changes.hunks import parse_changed_files
 from prismcode.providers.structural import (
     GraphPathStep,
@@ -139,7 +140,7 @@ def test_catalog_deduplicates_facts_and_links_unchanged_path_symbols() -> None:
     )
     assert verification.verification_status == "completed"
     assert verification.verification_conclusion == "success"
-    assert catalog.schema_version == "evidence_catalog.v4"
+    assert catalog.schema_version == "evidence_catalog.v5"
 
     repeated = build_evidence_catalog(
         packet, parse_changed_files(packet.changed_files), structural
@@ -159,8 +160,8 @@ def test_review_brief_serializes_one_canonical_catalog() -> None:
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
     serialized = brief.to_dict()
 
-    assert brief.schema_version == "review_brief.v13"
-    assert serialized["evidence_catalog"]["schema_version"] == "evidence_catalog.v4"
+    assert brief.schema_version == "review_brief.v14"
+    assert serialized["evidence_catalog"]["schema_version"] == "evidence_catalog.v5"
     assert "structural_graph" not in serialized
     assert len(serialized["evidence_catalog"]["items"]) == 1
     assert serialized["evidence_catalog"]["items"][0]["kind"] == "changed_file"
@@ -172,7 +173,7 @@ def test_canonical_evidence_rejects_contradictory_identity() -> None:
             EvidenceItem(
                 id="E:bad",
                 summary="Contradictory",
-                kind="changed_hunk",
+                kind="changed_span",
                 classification="code",
                 profile="production",
                 changed=True,
@@ -187,7 +188,7 @@ def test_canonical_evidence_rejects_contradictory_identity() -> None:
         catalog.validate_consistency()
 
 
-def test_patch_hunks_are_canonical_fallback_evidence() -> None:
+def test_patch_spans_are_canonical_fallback_evidence() -> None:
     packet = ReviewSourcePacket(
         repository="acme/widget",
         pull_request=11,
@@ -203,9 +204,11 @@ def test_patch_hunks_are_canonical_fallback_evidence() -> None:
     catalog = build_evidence_catalog(
         packet, parse_changed_files(packet.changed_files)
     )
-    assert [item.kind for item in catalog.items] == ["changed_hunk"]
-    assert catalog.items[0].metadata["head_excerpt"] == "new_bounded_call()"
-    assert catalog.items[0].metadata["base_excerpt"] == "old_call()"
+    assert [item.kind for item in catalog.items] == ["changed_span"]
+    assert catalog.items[0].metadata["head_preview"] == "new_bounded_call()"
+    assert catalog.items[0].metadata["base_preview"] == "old_call()"
+    assert "newboundedcall" in catalog.items[0].head_signature.identifiers
+    assert "oldcall" in catalog.items[0].base_signature.identifiers
     assert catalog.items[0].revision_side == "head"
     assert catalog.items[0].operation == "modified"
 
@@ -241,5 +244,53 @@ def test_exact_symbol_replaces_its_mapped_hunk_evidence() -> None:
         packet, parse_changed_files(packet.changed_files), structural
     )
 
-    assert not [item for item in catalog.items if item.kind == "changed_hunk"]
+    assert not [item for item in catalog.items if item.kind == "changed_span"]
     assert [item.metadata["symbol_id"] for item in catalog.items] == ["S"]
+    assert "newcall" in catalog.items[0].head_signature.identifiers
+    assert "oldcall" in catalog.items[0].base_signature.identifiers
+
+
+def test_partial_symbol_mapping_keeps_only_uncovered_span_content() -> None:
+    symbol = _symbol("S", "src.service.first", "src/service.py")
+    packet = ReviewSourcePacket(
+        repository="acme/widget",
+        pull_request=11,
+        title="Partially map span",
+        source_records=(),
+        changed_files=(
+            ChangedFile(
+                path="src/service.py",
+                patch=(
+                    "@@ -1,0 +1,2 @@\n"
+                    "+first_mapped_call()\n"
+                    "+second_uncovered_call()\n"
+                ),
+            ),
+        ),
+    ).with_revision()
+    structural = StructuralGraphResult(
+        index=StructuralGraphIndexStatus(state="available", provider="codegraph"),
+        hunk_count=1,
+        overlaps=(
+            HunkSymbolOverlap(
+                "hunk:src/service.py:0",
+                symbol,
+                (1,),
+                sources=symbol.sources,
+            ),
+        ),
+    )
+
+    catalog = build_evidence_catalog(
+        packet,
+        parse_changed_files(packet.changed_files),
+        structural,
+    )
+
+    changed_symbol = next(item for item in catalog.items if item.kind == "symbol")
+    fallback = next(item for item in catalog.items if item.kind == "changed_span")
+    assert "firstmappedcall" in changed_symbol.head_signature.identifiers
+    assert "seconduncoveredcall" not in changed_symbol.head_signature.identifiers
+    assert "seconduncoveredcall" in fallback.head_signature.identifiers
+    assert "firstmappedcall" not in fallback.head_signature.identifiers
+    assert fallback.metadata["added_lines"] == (2,)
