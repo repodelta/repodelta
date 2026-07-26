@@ -288,6 +288,11 @@ The versioned, reference-only selected view is:
 
 ```text
 ReviewProjection
+  review_graph
+    path_relation_ids[]
+    nodes[evidence_id, path_relation_ids[]]
+    edges[id, source_evidence_id, relation, direction,
+          target_evidence_id, path_relation_ids[]]
   slices[]
     focus_statement_id
     claim_relation_ids[]
@@ -295,18 +300,18 @@ ReviewProjection
     standalone_runtime_relation_ids[]
     standalone_test_relation_ids[]
     verification_relation_ids[]
-    structural_subgraph
+    structural_overlay
       path_relation_ids[]
       nodes[evidence_id, role, relation_ids[], path_relation_ids[]]
-      edges[source_evidence_id, relation, direction,
-            target_evidence_id, path_relation_ids[]]
+      edge_ids[]
     diagnostics[]
 ```
 
 The upstream `ProjectionCandidateSet` still enumerates typed relations.
-Projection nodes and edges reference canonical evidence/relation IDs and copy
-no statement or evidence content. Shared selected path prefixes collapse to one
-edge without discarding path provenance.
+Graph and overlay entries reference canonical evidence/relation IDs and copy no
+statement or evidence content. Shared selected paths and cross-focus overlap
+collapse to one review-level node/edge identity without discarding global or
+focus-relative path provenance.
 
 Candidate relations contain:
 

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+
 from prismcode.model.contracts import (
     CandidateConvergence,
     EvidenceCatalog,
@@ -8,9 +10,11 @@ from prismcode.model.contracts import (
     ProjectionRelation,
     ReviewProjection,
     ReviewSlice,
-    StructuralSubgraph,
-    StructuralSubgraphEdge,
-    StructuralSubgraphNode,
+    ReviewStructuralGraph,
+    StructuralFocusNode,
+    StructuralFocusOverlay,
+    StructuralGraphEdge,
+    StructuralGraphNode,
 )
 
 
@@ -32,6 +36,11 @@ def build_review_projection(
         item.focus_statement_id: item for item in convergence.groups
     }
     slices = []
+    graph_node_order: list[str] = []
+    graph_path_ids_by_node: dict[str, list[str]] = {}
+    graph_edge_order: list[str] = []
+    graph_edges: dict[str, StructuralGraphEdge] = {}
+    graph_path_relation_ids: list[str] = []
     for group in candidates.groups:
         converged = convergence_groups[group.focus_statement_id]
         selected = tuple(
@@ -49,7 +58,7 @@ def build_review_projection(
                 "structural_path",
             )
         }
-        subgraph = _structural_subgraph(
+        overlay, nodes, edges = _structural_focus_overlay(
             path_relations=tuple(
                 relations[relation_id]
                 for relation_id in converged.structural_support.path_relation_ids
@@ -60,7 +69,32 @@ def build_review_projection(
             evidence=evidence,
             symbol_evidence_ids=symbol_evidence_ids,
         )
-        graph_node_ids = {item.evidence_id for item in subgraph.nodes}
+        graph_node_ids = {item.evidence_id for item in overlay.nodes}
+        for node in nodes:
+            if node.evidence_id not in graph_node_order:
+                graph_node_order.append(node.evidence_id)
+            graph_path_ids_by_node.setdefault(node.evidence_id, []).extend(
+                node.path_relation_ids
+            )
+        for edge in edges:
+            if edge.id not in graph_edges:
+                graph_edge_order.append(edge.id)
+                graph_edges[edge.id] = edge
+            else:
+                existing = graph_edges[edge.id]
+                graph_edges[edge.id] = StructuralGraphEdge(
+                    id=existing.id,
+                    source_evidence_id=existing.source_evidence_id,
+                    target_evidence_id=existing.target_evidence_id,
+                    relation=existing.relation,
+                    direction=existing.direction,
+                    path_relation_ids=tuple(
+                        dict.fromkeys(
+                            (*existing.path_relation_ids, *edge.path_relation_ids)
+                        )
+                    ),
+                )
+        graph_path_relation_ids.extend(overlay.path_relation_ids)
         slices.append(
             ReviewSlice(
                 focus_statement_id=group.focus_statement_id,
@@ -83,17 +117,32 @@ def build_review_projection(
                 verification_relation_ids=tuple(
                     item.id for item in by_slot["verification"]
                 ),
-                structural_subgraph=subgraph,
+                structural_overlay=overlay,
                 diagnostic_ids=(
                     *group.diagnostic_ids,
                     *converged.diagnostic_ids,
                 ),
             )
         )
-    return ReviewProjection(slices=tuple(slices))
+    return ReviewProjection(
+        slices=tuple(slices),
+        review_graph=ReviewStructuralGraph(
+            nodes=tuple(
+                StructuralGraphNode(
+                    evidence_id=node_id,
+                    path_relation_ids=tuple(
+                        dict.fromkeys(graph_path_ids_by_node[node_id])
+                    ),
+                )
+                for node_id in graph_node_order
+            ),
+            edges=tuple(graph_edges[edge_id] for edge_id in graph_edge_order),
+            path_relation_ids=tuple(dict.fromkeys(graph_path_relation_ids)),
+        ),
+    )
 
 
-def _structural_subgraph(
+def _structural_focus_overlay(
     *,
     path_relations: tuple[ProjectionRelation, ...],
     anchor_relations: tuple[ProjectionRelation, ...],
@@ -101,9 +150,13 @@ def _structural_subgraph(
     test_relations: tuple[ProjectionRelation, ...],
     evidence: dict[str, EvidenceItem],
     symbol_evidence_ids: dict[str, str],
-) -> StructuralSubgraph:
+) -> tuple[
+    StructuralFocusOverlay,
+    tuple[StructuralGraphNode, ...],
+    tuple[StructuralGraphEdge, ...],
+]:
     if not path_relations:
-        return StructuralSubgraph()
+        return StructuralFocusOverlay(), (), ()
 
     relation_ids_by_node: dict[str, list[str]] = {}
     role_by_node = {}
@@ -118,8 +171,9 @@ def _structural_subgraph(
 
     node_order: list[str] = []
     path_ids_by_node: dict[str, list[str]] = {}
-    edge_order: list[tuple[str, str, str, str]] = []
-    path_ids_by_edge: dict[tuple[str, str, str, str], list[str]] = {}
+    edge_order: list[str] = []
+    edge_identity: dict[str, tuple[str, str, str, str]] = {}
+    path_ids_by_edge: dict[str, list[str]] = {}
     for path_relation in path_relations:
         path = evidence.get(path_relation.target_id)
         if path is None or path.kind != "structural_path":
@@ -147,13 +201,15 @@ def _structural_subgraph(
                 step["direction"],
                 target_id,
             )
-            if key not in path_ids_by_edge:
-                edge_order.append(key)
-                path_ids_by_edge[key] = []
-            path_ids_by_edge[key].append(path_relation.id)
+            edge_id = _structural_edge_id(key)
+            if edge_id not in path_ids_by_edge:
+                edge_order.append(edge_id)
+                edge_identity[edge_id] = key
+                path_ids_by_edge[edge_id] = []
+            path_ids_by_edge[edge_id].append(path_relation.id)
 
-    nodes = tuple(
-        StructuralSubgraphNode(
+    overlay_nodes = tuple(
+        StructuralFocusNode(
             evidence_id=node_id,
             role=role_by_node.get(node_id, "intermediate"),
             relation_ids=tuple(
@@ -165,19 +221,42 @@ def _structural_subgraph(
         )
         for node_id in node_order
     )
+    graph_nodes = tuple(
+        StructuralGraphNode(
+            evidence_id=node_id,
+            path_relation_ids=tuple(
+                dict.fromkeys(path_ids_by_node.get(node_id, ()))
+            ),
+        )
+        for node_id in node_order
+    )
     edges = tuple(
-        StructuralSubgraphEdge(
+        StructuralGraphEdge(
+            id=edge_id,
             source_evidence_id=source_id,
             target_evidence_id=target_id,
             relation=relation,
             direction=direction,
-            path_relation_ids=tuple(dict.fromkeys(path_ids_by_edge[key])),
+            path_relation_ids=tuple(dict.fromkeys(path_ids_by_edge[edge_id])),
         )
-        for key in edge_order
-        for source_id, relation, direction, target_id in (key,)
+        for edge_id in edge_order
+        for source_id, relation, direction, target_id in (
+            edge_identity[edge_id],
+        )
     )
-    return StructuralSubgraph(
-        nodes=nodes,
-        edges=edges,
-        path_relation_ids=tuple(item.id for item in path_relations),
+    return (
+        StructuralFocusOverlay(
+            nodes=overlay_nodes,
+            edge_ids=tuple(edge_order),
+            path_relation_ids=tuple(item.id for item in path_relations),
+        ),
+        graph_nodes,
+        edges,
     )
+
+
+def _structural_edge_id(
+    identity: tuple[str, str, str, str],
+) -> str:
+    digest = hashlib.sha256("\0".join(identity).encode("utf-8")).hexdigest()
+    return f"SE:{digest[:20]}"

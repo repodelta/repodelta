@@ -2,7 +2,8 @@
 
 ## Owns
 
-Reference-only selected slices and canonical review-wide overview facts.
+Reference-only selected slices, one canonical review-level structural graph,
+and canonical review-wide overview facts.
 
 ## Input / output
 
@@ -12,13 +13,14 @@ Typed candidates, `CandidateConvergence`, and packet/provider state →
 ## Invariants
 
 Profiles remain canonical in the candidate set; selected relations and
-convergence diagnostics are referenced from `CandidateConvergence`. Slices
-carry relation/evidence IDs and a canonical structural subgraph projected from
-the upstream typed `StructuralSupportSet`. Nodes collapse by symbol evidence ID;
-edges collapse by source, relation, direction, and target while retaining every
-supporting path relation ID. Review-wide CI, source coverage, empty state, and
-structural coverage are computed once here. Diagnostic scope and provider
-remain canonical through attention normalization.
+convergence diagnostics are referenced from `CandidateConvergence`. Each slice
+carries a focus overlay projected from its upstream typed
+`StructuralSupportSet`; `ReviewProjection.review_graph` owns canonical nodes and
+edges once across all overlays. Nodes collapse by symbol evidence ID and edges
+by deterministic source/relation/direction/target identity. Focus-relative
+roles and association/path relation IDs remain in overlays. Review-wide CI,
+source coverage, empty state, and structural coverage are computed once here.
+Diagnostic scope and provider remain canonical through attention normalization.
 
 ## Must not
 

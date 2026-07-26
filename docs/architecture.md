@@ -195,9 +195,12 @@ Convergence derives one typed minimal structural support set from those selected
 relations: shortest canonical paths connect each reachable selected
 anchor/context pair, while redundant longer selected paths remain explicit
 omitted provenance. Projection consumes only that support set to build canonical
-symbol nodes and typed edges. Shared path prefixes collapse by edge identity,
-and each edge retains its supporting path relation IDs. Graph-backed anchors and contexts
-move into this subgraph; only non-graph facts remain in standalone lists.
+symbol nodes and typed edges. `ReviewProjection` owns these identities once in
+one review-level graph; each slice references them through a focus overlay.
+Shared paths and cross-focus overlap collapse by deterministic edge identity,
+while global and per-focus path provenance remain explicit. Graph-backed
+anchors and contexts move into the overlay; only non-graph facts remain in
+standalone lists.
 Profiles remain canonical in `ProjectionCandidateSet`; convergence and routing
 diagnostics remain in their own canonical contracts. `ReviewOverview` owns
 review-wide CI, source, empty-state, and structural coverage facts. HTML and CLI
