@@ -316,7 +316,7 @@ def _projection_slice(
     groups = (
         (
             "Changed anchors",
-            review_slice.standalone_changed_anchor_relation_ids,
+            review_slice.standalone_changed_fact_relation_ids,
             "changed fact",
         ),
         (

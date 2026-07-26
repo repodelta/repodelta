@@ -307,7 +307,7 @@ ReviewProjection
   slices[]
     focus_statement_id
     claim_relation_ids[]
-    standalone_changed_anchor_relation_ids[]
+    standalone_changed_fact_relation_ids[]
     standalone_runtime_relation_ids[]
     standalone_test_relation_ids[]
     verification_relation_ids[]
