@@ -366,7 +366,7 @@ Every empty or incomplete slot carries one of:
 | `provider_unavailable` | Required provider could not run |
 | `partial_coverage` | Provider or GitHub collection covered only part of the review |
 | `stale_source` | Fact/index does not correspond to the current head |
-| `budget_truncated` | Eligible candidates existed but a named budget stopped selection |
+| `budget_truncated` | A named collection or selection safety budget stopped complete coverage |
 | `unsupported_change_type` | A changed fact type has no current relation strategy |
 
 Diagnostics include focus ID, slot, provider, affected paths/IDs when

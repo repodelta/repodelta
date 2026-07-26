@@ -24,6 +24,16 @@ _SOURCE_COVERAGE_CODES = {
     "github_patch_unavailable",
     "github_file_limit_reached",
 }
+_FOCUS_KIND_ORDER = {
+    "R": 0,
+    "G": 1,
+    "I": 2,
+    "O": 3,
+    "S": 4,
+    "C": 5,
+    "B": 6,
+    "V": 7,
+}
 
 
 def build_review_overview(
@@ -62,6 +72,7 @@ def build_review_overview(
                     for item in source_messages
                     for source in item.sources
                 ),
+                scope="review",
             )
         )
     source_message_text = {item.message for item in source_messages}
@@ -84,6 +95,7 @@ def build_review_overview(
                     for item in change_messages
                     for source in item.sources
                 ),
+                scope="review",
             )
         )
     guardrails = tuple(item for item in requirements if item.kind == "guardrail")
@@ -124,37 +136,101 @@ def build_review_overview(
 def _projection_attention(
     diagnostics: tuple[ProjectionDiagnostic, ...],
 ) -> tuple[ReviewAttention, ...]:
-    grouped: dict[tuple[str, str], list[ProjectionDiagnostic]] = {}
+    grouped: dict[
+        tuple[str, str, str, str],
+        list[ProjectionDiagnostic],
+    ] = {}
     for diagnostic in diagnostics:
         if diagnostic.state == "not_applicable":
             continue
-        grouped.setdefault((diagnostic.slot, diagnostic.state), []).append(diagnostic)
+        key = (
+            diagnostic.scope,
+            diagnostic.provider,
+            diagnostic.slot,
+            diagnostic.state,
+        )
+        grouped.setdefault(key, []).append(diagnostic)
     result = []
-    for (slot, state), diagnostics in sorted(grouped.items()):
-        focus_ids = tuple(
-            dict.fromkeys(
-                item.focus_statement_id for item in diagnostics
+    ordered_groups = sorted(
+        grouped.items(),
+        key=lambda item: (
+            item[0][2],
+            item[0][3],
+            0 if item[0][0] == "review" else 1,
+            item[0][1],
+        ),
+    )
+    for (scope, provider, slot, state), group in ordered_groups:
+        ordered_diagnostics = tuple(
+            sorted(
+                group,
+                key=lambda item: (
+                    _focus_order(item.focus_statement_id),
+                    item.message,
+                    item.id,
+                ),
+            )
+        )
+        focus_ids = (
+            ()
+            if scope == "review"
+            else tuple(
+                dict.fromkeys(
+                    item.focus_statement_id for item in ordered_diagnostics
+                )
             )
         )
         messages = tuple(
             dict.fromkeys(
-                item.message for item in diagnostics
+                item.message for item in ordered_diagnostics
             )
         )
         label = (
             "Acceptance basis"
             if focus_ids == ("I1",) and state == "source_absent"
-            else f"{slot.replace('_', ' ')} · {state.replace('_', ' ')}"
+            else " · ".join(
+                item
+                for item in (
+                    "Structural coverage"
+                    if scope == "review" and slot == "structural_path"
+                    else slot.replace("_", " "),
+                    provider,
+                    state.replace("_", " "),
+                )
+                if item
+            )
         )
         result.append(
             ReviewAttention(
-                id=_attention_id(label, (*focus_ids, *messages)),
+                id=_attention_id(
+                    label,
+                    (scope, provider, *focus_ids, *messages),
+                ),
                 label=label,
                 message=" ".join(messages),
                 focus_statement_ids=focus_ids,
+                sources=tuple(
+                    dict.fromkeys(
+                        source
+                        for diagnostic in ordered_diagnostics
+                        for source in diagnostic.sources
+                    )
+                ),
+                scope=scope,
+                provider=provider,
             )
         )
     return tuple(result)
+
+
+def _focus_order(focus_id: str) -> tuple[object, ...]:
+    prefix = focus_id[:1]
+    suffix = focus_id[1:]
+    return (
+        _FOCUS_KIND_ORDER.get(prefix, len(_FOCUS_KIND_ORDER)),
+        int(suffix) if suffix.isdigit() else 0,
+        focus_id,
+    )
 
 
 def _ci_state(packet: ReviewSourcePacket) -> ReviewCiState:
