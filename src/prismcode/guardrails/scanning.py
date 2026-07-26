@@ -1,0 +1,364 @@
+from __future__ import annotations
+
+import hashlib
+import re
+import subprocess
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Protocol
+
+from prismcode.model.contracts import (
+    Diagnostic,
+    GuardrailScanCoverage,
+    GuardrailScanMatch,
+    GuardrailScanPlan,
+    GuardrailScanPlanSet,
+    GuardrailScanResult,
+    GuardrailScanResultSet,
+    GuardrailScanSelector,
+    GuardrailScanSurface,
+    SourceRef,
+)
+
+_IGNORED_DIRECTORIES = frozenset(
+    {
+        ".codegraph",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        ".tox",
+        ".venv",
+        "__pycache__",
+        "build",
+        "dist",
+        "node_modules",
+        "vendor",
+        "venv",
+    }
+)
+
+
+class GuardrailScanner(Protocol):
+    def scan(self, plans: GuardrailScanPlanSet) -> GuardrailScanResultSet: ...
+
+
+@dataclass(frozen=True)
+class GuardrailScanLimits:
+    max_files: int = 2_000
+    max_bytes: int = 8_000_000
+    max_matches_per_plan: int = 100
+
+
+class RepositoryGuardrailScanner:
+    """Execute typed selectors without reinterpreting guardrail prose."""
+
+    def __init__(
+        self,
+        repo_root: str | Path,
+        *,
+        expected_revision: str | None,
+        limits: GuardrailScanLimits = GuardrailScanLimits(),
+    ) -> None:
+        self.repo_root = Path(repo_root).resolve()
+        self.expected_revision = expected_revision or ""
+        self.limits = limits
+
+    def scan(self, plans: GuardrailScanPlanSet) -> GuardrailScanResultSet:
+        if not plans.plans:
+            return GuardrailScanResultSet()
+        revision = _checkout_revision(self.repo_root)
+        if not revision or (
+            self.expected_revision and revision != self.expected_revision
+        ):
+            results = tuple(
+                _unavailable(
+                    plan,
+                    self.repo_root,
+                    revision,
+                    "guardrail_scan_stale_checkout",
+                    (
+                        "Guardrail scanning requires a checkout at the reviewed "
+                        f"head {self.expected_revision or '(unknown)'}; observed "
+                        f"{revision or '(unavailable)'}."
+                    ),
+                )
+                for plan in plans.plans
+            )
+        else:
+            paths, paths_truncated = self._repository_paths()
+            results = tuple(
+                self._scan_plan(plan, revision, paths, paths_truncated)
+                for plan in plans.plans
+            )
+        result_set = GuardrailScanResultSet(results)
+        result_set.validate_consistency(plans)
+        return result_set
+
+    def _repository_paths(self) -> tuple[tuple[Path, ...], bool]:
+        result = subprocess.run(
+            ["git", "-C", str(self.repo_root), "ls-files", "-z"],
+            check=True,
+            capture_output=True,
+            timeout=10,
+        )
+        tracked = sorted(
+            item.decode("utf-8", errors="surrogateescape")
+            for item in result.stdout.split(b"\0")
+            if item
+        )
+        paths = tuple(
+            path
+            for relative in tracked
+            for path in (self.repo_root / relative,)
+            if not set(Path(relative).parts) & _IGNORED_DIRECTORIES
+            and not path.is_symlink()
+        )
+        return (
+            paths[: self.limits.max_files],
+            len(paths) > self.limits.max_files,
+        )
+
+    def _scan_plan(
+        self,
+        plan: GuardrailScanPlan,
+        revision: str,
+        paths: tuple[Path, ...],
+        paths_truncated: bool,
+    ) -> GuardrailScanResult:
+        if not plan.selectors:
+            return _unavailable(
+                plan,
+                self.repo_root,
+                revision,
+                "guardrail_scan_no_executable_selector",
+                f"{plan.id} has no conservative executable selector.",
+            )
+        matches: list[GuardrailScanMatch] = []
+        bytes_read = 0
+        inspected_files = 0
+        bytes_truncated = False
+        matches_truncated = False
+
+        for path in paths:
+            relative = path.relative_to(self.repo_root).as_posix()
+            for selector in plan.selectors:
+                if _matches(relative, selector):
+                    matches.append(
+                        _match(plan, selector, "paths", relative, None, relative)
+                    )
+                    if len(matches) >= self.limits.max_matches_per_plan:
+                        matches_truncated = True
+                        break
+            if matches_truncated:
+                break
+            try:
+                raw = path.read_bytes()
+            except OSError:
+                continue
+            if b"\0" in raw[:4_096]:
+                continue
+            if bytes_read + len(raw) > self.limits.max_bytes:
+                bytes_truncated = True
+                break
+            bytes_read += len(raw)
+            inspected_files += 1
+            text = raw.decode("utf-8", errors="replace")
+            for line_number, line in enumerate(text.splitlines(), start=1):
+                for selector in plan.selectors:
+                    if _matches(line, selector):
+                        matches.append(
+                            _match(
+                                plan,
+                                selector,
+                                "file_content",
+                                relative,
+                                line_number,
+                                line.strip()[:240],
+                            )
+                        )
+                        if len(matches) >= self.limits.max_matches_per_plan:
+                            matches_truncated = True
+                            break
+                if matches_truncated:
+                    break
+            if matches_truncated:
+                break
+
+        symbol_unavailable = "symbol_names" in plan.surfaces
+        partial = (
+            paths_truncated
+            or bytes_truncated
+            or matches_truncated
+            or symbol_unavailable
+        )
+        state = "partial" if partial else "complete"
+        budget_truncated = paths_truncated or bytes_truncated or matches_truncated
+        coverage_message = (
+            "Scan stopped at an explicit safety boundary."
+            if budget_truncated
+            else "All eligible checkout files were inspected."
+        )
+        coverages = (
+            GuardrailScanCoverage(
+                surface="paths",
+                state=(
+                    "partial"
+                    if paths_truncated or matches_truncated
+                    else "complete"
+                ),
+                inspected_count=len(paths),
+                limit=self.limits.max_files,
+                message=(
+                    "Repository file limit reached."
+                    if paths_truncated
+                    else "Match limit reached while inspecting paths."
+                    if matches_truncated
+                    else "Eligible repository paths enumerated."
+                ),
+            ),
+            GuardrailScanCoverage(
+                surface="file_content",
+                state=state,
+                inspected_count=inspected_files,
+                inspected_bytes=bytes_read,
+                limit=self.limits.max_bytes,
+                message=coverage_message,
+            ),
+            *(
+                (
+                    GuardrailScanCoverage(
+                        surface="symbol_names",
+                        state="unavailable",
+                        message=(
+                            "No repository-wide symbol-name inventory provider "
+                            "is connected to this scan."
+                        ),
+                    ),
+                )
+                if symbol_unavailable
+                else ()
+            ),
+        )
+        diagnostics = ()
+        if budget_truncated:
+            diagnostics = (
+                Diagnostic(
+                    code="guardrail_scan_budget_truncated",
+                    message=coverage_message,
+                    sources=(SourceRef(label="repository checkout", path="."),),
+                ),
+            )
+        return GuardrailScanResult(
+            id=f"GSR:{plan.guardrail_id}",
+            plan_id=plan.id,
+            guardrail_id=plan.guardrail_id,
+            revision=revision,
+            root_path=".",
+            state=state,
+            coverages=coverages,
+            matches=tuple(matches),
+            diagnostics=diagnostics,
+        )
+
+
+def unavailable_scan_results(
+    plans: GuardrailScanPlanSet,
+    *,
+    message: str = "No bounded repository scan provider was configured.",
+) -> GuardrailScanResultSet:
+    results = GuardrailScanResultSet(
+        tuple(
+            _unavailable(
+                plan,
+                Path("."),
+                "",
+                "guardrail_scan_provider_unavailable",
+                message,
+            )
+            for plan in plans.plans
+        )
+    )
+    results.validate_consistency(plans)
+    return results
+
+
+def _unavailable(
+    plan: GuardrailScanPlan,
+    root: Path,
+    revision: str,
+    code: str,
+    message: str,
+) -> GuardrailScanResult:
+    return GuardrailScanResult(
+        id=f"GSR:{plan.guardrail_id}",
+        plan_id=plan.id,
+        guardrail_id=plan.guardrail_id,
+        revision=revision,
+        root_path="." if root.name else str(root),
+        state="unavailable",
+        coverages=tuple(
+            GuardrailScanCoverage(
+                surface=surface,
+                state="unavailable",
+                message=message,
+            )
+            for surface in plan.surfaces
+        ),
+        diagnostics=(
+            Diagnostic(
+                code=code,
+                message=message,
+            ),
+        ),
+    )
+
+
+def _matches(value: str, selector: GuardrailScanSelector) -> bool:
+    if selector.kind == "phrase":
+        return selector.value.casefold() in value.casefold()
+    return bool(
+        re.search(
+            rf"(?<![A-Za-z0-9_]){re.escape(selector.value)}(?![A-Za-z0-9_])",
+            value,
+            re.IGNORECASE,
+        )
+    )
+
+
+def _match(
+    plan: GuardrailScanPlan,
+    selector: GuardrailScanSelector,
+    surface: GuardrailScanSurface,
+    path: str,
+    line: int | None,
+    excerpt: str,
+) -> GuardrailScanMatch:
+    identity = "\0".join(
+        (plan.id, selector.id, surface, path, str(line or 0))
+    )
+    digest = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:16]
+    return GuardrailScanMatch(
+        id=f"GSM:{digest}",
+        plan_id=plan.id,
+        guardrail_id=plan.guardrail_id,
+        selector_id=selector.id,
+        surface=surface,
+        path=path,
+        line=line,
+        excerpt=excerpt,
+    )
+
+
+def _checkout_revision(repo_root: Path) -> str:
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(repo_root), "rev-parse", "HEAD"],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return ""
+    return result.stdout.strip()

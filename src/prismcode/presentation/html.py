@@ -158,6 +158,40 @@ def _relation_fact(
     )
 
 
+def _boundary_fact(
+    relation: ProjectionRelation,
+    brief: ReviewBrief,
+) -> str:
+    evidence = brief.evidence_catalog.by_id().get(relation.target_id)
+    if evidence is None or evidence.guardrail_scan_result is None:
+        raise ValueError(
+            f"projection references invalid boundary fact: {relation.target_id}"
+        )
+    result = evidence.guardrail_scan_result
+    coverage = " · ".join(
+        (
+            f"{item.surface}: {item.state}"
+            f" ({item.inspected_count} inspected"
+            f"{f', {item.inspected_bytes} bytes' if item.inspected_bytes else ''})"
+        )
+        for item in result.coverages
+    )
+    sources = _sources(evidence, brief)
+    return (
+        '<div class="projection-item">'
+        '<span class="relation-label">bounded observation</span>'
+        f'<span class="projection-copy">{escape(evidence.summary)}</span>'
+        f'<span class="relation-reason">{escape(coverage)}</span>'
+        + (
+            f'<span class="projection-source">Candidate locations: {sources}</span>'
+            if sources
+            else '<span class="projection-source">No selector match observed '
+            "within the stated bounded coverage.</span>"
+        )
+        + "</div>"
+    )
+
+
 def _diagnostic_rows(
     diagnostics: tuple[ProjectionDiagnostic, ...],
     *,
@@ -354,11 +388,29 @@ def _projection_slice(
             f'{escape(plan.revision_side)} revision</span>'
             f'<span class="relation-reason">{escape(plan.query_text)}</span>'
             + (
+                '<span class="relation-reason">Selectors: '
+                + " · ".join(escape(item.value) for item in plan.selectors)
+                + "</span>"
+                if plan.selectors
+                else '<span class="relation-reason">No conservative executable '
+                "selector.</span>"
+            )
+            + (
                 f'<span class="projection-source">Source: {sources}</span>'
                 if sources
                 else ""
             )
             + "</div>"
+        )
+    boundary_rows = "".join(
+        _boundary_fact(relations[relation_id], brief)
+        for relation_id in review_slice.boundary_fact_relation_ids
+        if relation_id in relations
+    )
+    if boundary_rows:
+        fact_groups.append(
+            '<div class="projection-group"><span class="block-title">'
+            f"Boundary scan observation</span>{boundary_rows}</div>"
         )
     for heading, relation_ids, label in groups:
         rows = "".join(

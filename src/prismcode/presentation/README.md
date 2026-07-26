@@ -13,7 +13,9 @@ formatting.
 
 Missing references fail visibly. Both adapters consume the same canonical
 overview and coverage facts. G scan-plan copy resolves an upstream plan ID and
-does not infer execution or absence.
+does not infer execution or absence. Boundary observations resolve selected
+fact IDs and display their typed per-surface coverage without interpreting
+candidate matches.
 
 ## Must not
 

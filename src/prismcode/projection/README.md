@@ -21,7 +21,8 @@ by deterministic source/relation/direction/target identity. Focus-relative
 roles and association/path relation IDs remain in overlays. Review-wide CI,
 source coverage, empty state, and structural coverage are computed once here.
 Each G slice references its upstream `GuardrailScanPlan` by ID; projection does
-not reconstruct scan scope or query intent.
+not reconstruct scan scope or query intent. Selected boundary facts are
+reference-only relation IDs from convergence.
 Every selected changed `symbol` is a structural node, including symbols with no
 selected edge. Only non-symbol changed facts use the standalone changed-fact
 relation list; graph membership never chooses between two representations of
@@ -41,5 +42,4 @@ coverage never merges with focus-level convergence coverage.
 
 ## Extension points
 
-Guardrail scan facts and converged selections enter through upstream typed
-contracts.
+Additional boundary presentation consumes the same upstream plan and fact IDs.

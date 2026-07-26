@@ -50,6 +50,7 @@ FactAuthority = Literal[
     "github_diff",
     "structural_provider",
     "verification_provider",
+    "guardrail_scan_provider",
     "supplied",
 ]
 RevisionSide = Literal["head", "base", "review", "unchanged"]
@@ -67,6 +68,7 @@ FactRole = Literal[
     "test_context",
     "verification",
     "structural_path",
+    "boundary_fact",
     "provided_context",
 ]
 RequirementProfile = Literal[
@@ -125,6 +127,8 @@ StructuralCoverageState = Literal[
     "error",
 ]
 GuardrailScanSurface = Literal["paths", "file_content", "symbol_names"]
+GuardrailScanState = Literal["complete", "partial", "unavailable"]
+GuardrailSelectorKind = Literal["identifier", "phrase"]
 
 
 @dataclass(frozen=True)
@@ -289,15 +293,22 @@ class GuardrailScanPlan:
     surfaces: tuple[GuardrailScanSurface, ...] = (
         "paths",
         "file_content",
-        "symbol_names",
     )
+    selectors: tuple[GuardrailScanSelector, ...] = ()
     sources: tuple[SourceRef, ...] = ()
+
+
+@dataclass(frozen=True)
+class GuardrailScanSelector:
+    id: str
+    kind: GuardrailSelectorKind
+    value: str
 
 
 @dataclass(frozen=True)
 class GuardrailScanPlanSet:
     plans: tuple[GuardrailScanPlan, ...] = ()
-    schema_version: str = "guardrail_scan_plan_set.v1"
+    schema_version: str = "guardrail_scan_plan_set.v2"
 
     def by_id(self) -> dict[str, GuardrailScanPlan]:
         return {item.id: item for item in self.plans}
@@ -340,9 +351,92 @@ class GuardrailScanPlanSet:
                 plan.revision_side != "head"
                 or plan.scope != "repository"
                 or plan.root_paths != (".",)
-                or plan.surfaces != ("paths", "file_content", "symbol_names")
+                or not plan.surfaces
+                or tuple(
+                    item
+                    for item in ("paths", "file_content", "symbol_names")
+                    if item in plan.surfaces
+                )
+                != plan.surfaces
             ):
                 raise ValueError(f"{plan.id}: unsupported scan-plan boundary")
+            if len({item.id for item in plan.selectors}) != len(plan.selectors):
+                raise ValueError(f"{plan.id}: duplicate selector ID")
+            for index, selector in enumerate(plan.selectors, start=1):
+                if selector.id != f"{plan.id}:selector:{index}":
+                    raise ValueError(f"{selector.id}: non-canonical selector ID")
+                if not selector.value.strip():
+                    raise ValueError(f"{selector.id}: empty selector")
+
+
+@dataclass(frozen=True)
+class GuardrailScanMatch:
+    id: str
+    plan_id: str
+    guardrail_id: str
+    selector_id: str
+    surface: GuardrailScanSurface
+    path: str
+    line: int | None = None
+    excerpt: str = ""
+
+
+@dataclass(frozen=True)
+class GuardrailScanCoverage:
+    surface: GuardrailScanSurface
+    state: GuardrailScanState
+    inspected_count: int = 0
+    inspected_bytes: int = 0
+    limit: int = 0
+    message: str = ""
+
+
+@dataclass(frozen=True)
+class GuardrailScanResult:
+    id: str
+    plan_id: str
+    guardrail_id: str
+    revision: str
+    root_path: str
+    state: GuardrailScanState
+    coverages: tuple[GuardrailScanCoverage, ...] = ()
+    matches: tuple[GuardrailScanMatch, ...] = ()
+    diagnostics: tuple[Diagnostic, ...] = ()
+
+
+@dataclass(frozen=True)
+class GuardrailScanResultSet:
+    results: tuple[GuardrailScanResult, ...] = ()
+    schema_version: str = "guardrail_scan_result_set.v1"
+
+    def by_guardrail_id(self) -> dict[str, GuardrailScanResult]:
+        return {item.guardrail_id: item for item in self.results}
+
+    def validate_consistency(self, plans: GuardrailScanPlanSet) -> None:
+        plan_by_id = plans.by_id()
+        if len(self.by_guardrail_id()) != len(self.results):
+            raise ValueError("guardrail scan results contain duplicate guardrail IDs")
+        if {item.plan_id for item in self.results} != set(plan_by_id):
+            raise ValueError("guardrail scan results must map one-to-one to plans")
+        for result in self.results:
+            plan = plan_by_id[result.plan_id]
+            if result.id != f"GSR:{result.guardrail_id}":
+                raise ValueError(f"{result.id}: non-canonical scan-result ID")
+            if result.guardrail_id != plan.guardrail_id:
+                raise ValueError(f"{result.id}: result guardrail conflicts with plan")
+            selector_ids = {item.id for item in plan.selectors}
+            if any(item.selector_id not in selector_ids for item in result.matches):
+                raise ValueError(f"{result.id}: match references unknown selector")
+            if result.state != "unavailable" and not result.revision:
+                raise ValueError(f"{result.id}: observed scan requires a revision")
+
+
+@dataclass(frozen=True)
+class GuardrailScanDiagnostic:
+    code: str
+    message: str
+    plan_id: str
+    guardrail_id: str
 
 
 @dataclass(frozen=True)
@@ -366,6 +460,7 @@ class EvidenceItem:
     verification_identity: VerificationIdentity | None = None
     verification_status: str = ""
     verification_conclusion: str = ""
+    guardrail_scan_result: GuardrailScanResult | None = None
     sources: tuple[SourceRef, ...] = ()
     structural_path_ids: tuple[str, ...] = ()
     metadata: dict[str, Any] = field(default_factory=dict)
@@ -393,6 +488,27 @@ class EvidenceItem:
                 raise ValueError(f"{self.id}: verification fact requires a status")
         if self.role == "structural_path" and self.profile != "structural_path":
             raise ValueError(f"{self.id}: structural path role requires structural path profile")
+        if self.role == "boundary_fact":
+            if self.authority != "guardrail_scan_provider":
+                raise ValueError(
+                    f"{self.id}: boundary fact requires guardrail scan authority"
+                )
+            if self.guardrail_scan_result is None:
+                raise ValueError(f"{self.id}: boundary fact requires a scan result")
+            if self.revision_side != "head" or self.operation != "observed":
+                raise ValueError(
+                    f"{self.id}: boundary fact must be an observed head fact"
+                )
+            if self.associated_statement_ids != (
+                self.guardrail_scan_result.guardrail_id,
+            ):
+                raise ValueError(
+                    f"{self.id}: boundary fact must own its G association"
+                )
+        elif self.guardrail_scan_result is not None:
+            raise ValueError(
+                f"{self.id}: only boundary facts may carry a scan result"
+            )
         expected_classifications = {
             "test": {"test"},
             "document": {"document"},
@@ -411,7 +527,8 @@ class EvidenceItem:
 class EvidenceCatalog:
     items: tuple[EvidenceItem, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
-    schema_version: str = "evidence_catalog.v6"
+    guardrail_scan_diagnostics: tuple[GuardrailScanDiagnostic, ...] = ()
+    schema_version: str = "evidence_catalog.v7"
 
     def by_id(self) -> dict[str, EvidenceItem]:
         return {item.id: item for item in self.items}
@@ -693,6 +810,7 @@ class ReviewSlice:
     standalone_runtime_relation_ids: tuple[str, ...] = ()
     standalone_test_relation_ids: tuple[str, ...] = ()
     verification_relation_ids: tuple[str, ...] = ()
+    boundary_fact_relation_ids: tuple[str, ...] = ()
     guardrail_scan_plan_id: str | None = None
     structural_overlay: StructuralFocusOverlay = StructuralFocusOverlay()
     diagnostic_ids: tuple[str, ...] = ()
@@ -702,7 +820,7 @@ class ReviewSlice:
 class ReviewProjection:
     slices: tuple[ReviewSlice, ...] = ()
     review_graph: ReviewStructuralGraph = ReviewStructuralGraph()
-    schema_version: str = "review_projection.v8"
+    schema_version: str = "review_projection.v9"
 
 
 @dataclass(frozen=True)
@@ -774,7 +892,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v25"
+    schema_version: str = "review_brief.v26"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

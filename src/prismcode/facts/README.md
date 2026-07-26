@@ -19,6 +19,9 @@ only the changed lines they cover; uncovered lines remain canonical span facts.
 Verification facts carry first-class provider, kind, normalized name, status,
 conclusion, and observed head SHA; downstream stages must not recover those
 fields from presentation metadata.
+Observed guardrail scans normalize once as `boundary_fact` items carrying their
+typed scan result and explicit G association. Unavailable scans never become
+evidence.
 
 ## Must not
 
@@ -26,7 +29,8 @@ Extract statements, associate R/G, select candidates, or render output.
 
 ## Diagnostics
 
-Preserves change-normalization diagnostics as catalog provenance.
+Preserves change-normalization and guardrail-provider diagnostics as catalog
+provenance.
 
 ## Extension points
 

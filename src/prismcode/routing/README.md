@@ -7,7 +7,7 @@ complete per-R/G typed candidate enumeration.
 
 ## Input / output
 
-Canonical statements and `EvidenceCatalog` → unselected
+Canonical statements, scan results, and `EvidenceCatalog` → unselected
 `ProjectionCandidateSet`.
 
 ## Invariants
@@ -30,8 +30,9 @@ score candidates globally, construct final layout, or render diagnostics.
 ## Diagnostics
 
 Produces typed focus/slot source and association coverage diagnostics.
-For G boundary coverage it references the canonical upstream scan-plan ID and
-continues to disclose that no execution fact was collected.
+For G boundary coverage it routes only canonical `boundary_fact` evidence by
+its provider-owned G association and preserves unavailable/partial coverage.
+Non-G focuses receive no boundary candidates.
 
 ## Extension points
 

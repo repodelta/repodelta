@@ -60,6 +60,7 @@ def build_review_projection(
                 "test_context",
                 "verification",
                 "structural_path",
+                "boundary_fact",
             )
         }
         overlay, nodes, edges = _structural_focus_overlay(
@@ -120,6 +121,9 @@ def build_review_projection(
                 ),
                 verification_relation_ids=tuple(
                     item.id for item in by_slot["verification"]
+                ),
+                boundary_fact_relation_ids=tuple(
+                    item.id for item in by_slot["boundary_fact"]
                 ),
                 guardrail_scan_plan_id=(
                     plans_by_guardrail[group.focus_statement_id].id

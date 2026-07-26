@@ -46,10 +46,14 @@ def test_guardrail_plans_are_one_to_one_stable_and_conclusion_free() -> None:
     assert all(item.revision_side == "head" for item in first.plans)
     assert all(item.scope == "repository" for item in first.plans)
     assert all(item.root_paths == (".",) for item in first.plans)
-    assert all(
-        item.surfaces == ("paths", "file_content", "symbol_names")
-        for item in first.plans
-    )
+    assert all(item.surfaces == ("paths", "file_content") for item in first.plans)
+    assert [item.value for item in first.plans[0].selectors] == [
+        "compatibility modules"
+    ]
+    assert [item.value for item in first.plans[1].selectors] == [
+        "feature flags",
+        "dual writes",
+    ]
     assert [item.query_text for item in first.plans] == [
         item.text for item in guardrails
     ]
@@ -91,7 +95,7 @@ def test_pipeline_projects_plan_only_for_g_and_keeps_absence_unproven() -> None:
         AnalysisInput(packet=packet, requirements=requirements)
     )
 
-    assert brief.guardrail_scan_plans.schema_version == "guardrail_scan_plan_set.v1"
+    assert brief.guardrail_scan_plans.schema_version == "guardrail_scan_plan_set.v2"
     assert len(brief.guardrail_scan_plans.plans) == 2
     slices = {
         item.focus_statement_id: item for item in brief.projection.slices
@@ -106,8 +110,9 @@ def test_pipeline_projects_plan_only_for_g_and_keeps_absence_unproven() -> None:
     ]
     assert boundary[0].state == "provider_unavailable"
     assert boundary[0].affected_ids == ("GSP:G1",)
-    assert "plan GSP:G1 exists" in boundary[0].message
-    assert "no bounded repository scan fact was collected" in boundary[0].message
+    assert "No bounded repository scan provider was configured." in (
+        boundary[0].message
+    )
 
     serialized = brief.to_dict()
     assert serialized["guardrail_scan_plans"]["plans"][0]["id"] == "GSP:G1"
@@ -115,7 +120,7 @@ def test_pipeline_projects_plan_only_for_g_and_keeps_absence_unproven() -> None:
     assert html.count(
         '<span class="block-title">Guardrail scan plan</span>'
     ) == 2
-    assert "repository paths / file_content / symbol_names · head revision" in html
-    assert "selected changed anchors are not absence proof" in html
+    assert "repository paths / file_content · head revision" in html
+    assert "No bounded repository scan provider was configured." in html
     assert "No compatibility modules remain." in html
     assert "guardrail satisfied" not in html.casefold()
