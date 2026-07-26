@@ -142,7 +142,7 @@ def test_cli_runs_available_codegraph_mapping(
     assert "uncovered change spans retained" in captured.err
 
 
-def test_cli_missing_index_uses_changed_span_fallback(
+def test_cli_missing_index_uses_change_relation_fallback(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -155,7 +155,7 @@ def test_cli_missing_index_uses_changed_span_fallback(
 
     assert (
         "Structural mapping: skipped · Codegraph index not found · "
-        "changed-span fallback used"
+        "change-relation fallback used"
     ) in capsys.readouterr().err
 
 
@@ -174,7 +174,7 @@ def test_cli_stale_index_is_skipped(
 
     assert (
         "Structural mapping: skipped · Codegraph index is stale · "
-        "changed-span fallback used"
+        "change-relation fallback used"
     ) in capsys.readouterr().err
 
 
@@ -212,7 +212,7 @@ def test_cli_partial_index_reports_coverage(
 
     assert (
         "Structural mapping: partial · 1/2 changed files indexed · "
-        "changed-span fallback used for uncovered changes"
+        "change-relation fallback used for uncovered changes"
     ) in capsys.readouterr().err
 
 
@@ -232,7 +232,7 @@ def test_cli_can_explicitly_disable_structural_mapping(
     ) == 0
 
     assert (
-        "Structural mapping: disabled · changed-span fallback used"
+        "Structural mapping: disabled · change-relation fallback used"
     ) in capsys.readouterr().err
 
 

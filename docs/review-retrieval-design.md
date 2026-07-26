@@ -49,7 +49,7 @@ conclusions.
 | Kind | Classification | Changed | Meaning |
 |---|---|---:|---|
 | `symbol` | code/test/document by path | yes/no | Exact Codegraph symbol |
-| `changed_span` | code/test/document by path | yes | Uncovered contiguous diff span not represented by an exact symbol |
+| `change_relation` | code/test/document by path | yes | Uncovered portion of a canonical typed base-to-head diff relation |
 | `changed_file` | code/test/document by path | yes | Fallback when patch/hunk is unavailable |
 | `structural_path` | runtime/test/mixed | no | Bounded directed Codegraph path |
 | `check_run` | ci | no | GitHub current-head check observation |
@@ -154,7 +154,7 @@ accepts only eligible fact or relation types.
 | Slot | Question | Eligible inputs | Never accepts |
 |---|---|---|---|
 | `claim` | What does the PR author say about this R/G? | PR C/B/V/boundary statements linked to the focus | Issue Goal/Scope as if they were PR claims; repository facts |
-| `changed_anchor` | What relevant repository location actually changed? | exact changed symbol, changed span, changed-file fallback | unchanged symbols, CI, free structural neighbors |
+| `changed_anchor` | What relevant repository location actually changed? | exact changed symbol, change relation, changed-file fallback | unchanged symbols, CI, free structural neighbors |
 | `runtime_context` | How can a selected changed anchor enter or affect runtime code? | unchanged code symbol on an eligible selected path | lexically similar but disconnected symbols |
 | `test_context` | What tests structurally exercise or reach the selected anchor/context? | changed test anchors and unchanged test symbols on eligible paths | arbitrary test files sharing generic terms |
 | `verification` | What ran for the current head? | current-head CI/status/manual observations | PR verification prose |

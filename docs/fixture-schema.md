@@ -22,7 +22,7 @@ implementation/boundary/baseline/verification claims, and intent remain typed
 and separate; a PR title never becomes a requirement.
 
 `evidence` contains supplied facts that are normalized into the same canonical
-`EvidenceCatalog` as canonical exact symbols, unmapped changed spans/file
+`EvidenceCatalog` as canonical exact symbols, unmapped change relations/file
 fallbacks, structural paths, and execution observations. An item may list
 `statement_ids` to record an explicit
 provided association. That association affects retrieval ordering only; it

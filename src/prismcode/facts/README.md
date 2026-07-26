@@ -11,11 +11,14 @@ Source packet, canonical changes, and provider results → one `EvidenceCatalog`
 
 ## Invariants
 
-Each diff location has one canonical representation. Typed routing fields are
-first-class contract fields, not metadata conventions.
+Each diff location has one canonical representation. The catalog serializes
+the parser-owned `ChangeRelation` collection once; changed evidence references
+relation IDs and never re-infers operation from surviving lines. Typed routing
+fields are first-class contract fields, not metadata conventions.
 Changed anchors carry complete, directional association signatures. Bounded
 previews are presentation data and never retrieval input. Exact symbols own
-only the changed lines they cover; uncovered lines remain canonical span facts.
+only the changed lines they cover; uncovered lines remain canonical
+`change_relation` facts.
 Verification facts carry first-class provider, kind, normalized name, status,
 conclusion, and observed head SHA; downstream stages must not recover those
 fields from presentation metadata.

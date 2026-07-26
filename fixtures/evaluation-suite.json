@@ -19,12 +19,12 @@
         {
           "slot": "changed_anchor",
           "focus_statement_id": "R1",
-          "target_id": "E:changed_span:0aa4b3f996143d495c78"
+          "target_id": "E:change_relation:0e16ce839a33fc1c55dd"
         },
         {
           "slot": "changed_anchor",
           "focus_statement_id": "R1",
-          "target_id": "E:changed_span:3214d70de26b7f9965d3"
+          "target_id": "E:change_relation:b41461fdd711f642d363"
         },
         {
           "slot": "claim",
@@ -40,12 +40,12 @@
       ],
       "expected_evidence": [
         {
-          "evidence_id": "E:changed_span:0aa4b3f996143d495c78",
+          "evidence_id": "E:change_relation:0e16ce839a33fc1c55dd",
           "classification": "code",
           "profile": "production"
         },
         {
-          "evidence_id": "E:changed_span:3214d70de26b7f9965d3",
+          "evidence_id": "E:change_relation:b41461fdd711f642d363",
           "classification": "test",
           "profile": "test"
         }
@@ -209,42 +209,42 @@
         {
           "slot": "changed_anchor",
           "focus_statement_id": "R1",
-          "target_id": "E:changed_span:1a48ef3c93879691ceec"
+          "target_id": "E:change_relation:98f8f22ec8b0faa7dd38"
         },
         {
           "slot": "changed_anchor",
           "focus_statement_id": "R1",
-          "target_id": "E:changed_span:a0d11f479aac29e0c3a1"
+          "target_id": "E:change_relation:5b69359d5776cddb1a69"
         },
         {
           "slot": "changed_anchor",
           "focus_statement_id": "R1",
-          "target_id": "E:changed_span:8e6741b5de9e296ea1e7"
+          "target_id": "E:change_relation:f6f385dafc8c59109181"
         },
         {
           "slot": "changed_anchor",
           "focus_statement_id": "R1",
-          "target_id": "E:changed_span:ee49cbfdceb22fdd68e8"
+          "target_id": "E:change_relation:dd0c954b5fd8d6d5be1b"
         }
       ],
       "expected_evidence": [
         {
-          "evidence_id": "E:changed_span:1a48ef3c93879691ceec",
+          "evidence_id": "E:change_relation:98f8f22ec8b0faa7dd38",
           "classification": "code",
           "profile": "production"
         },
         {
-          "evidence_id": "E:changed_span:a0d11f479aac29e0c3a1",
+          "evidence_id": "E:change_relation:5b69359d5776cddb1a69",
           "classification": "code",
           "profile": "production"
         },
         {
-          "evidence_id": "E:changed_span:8e6741b5de9e296ea1e7",
+          "evidence_id": "E:change_relation:f6f385dafc8c59109181",
           "classification": "code",
           "profile": "production"
         },
         {
-          "evidence_id": "E:changed_span:ee49cbfdceb22fdd68e8",
+          "evidence_id": "E:change_relation:dd0c954b5fd8d6d5be1b",
           "classification": "code",
           "profile": "production"
         }

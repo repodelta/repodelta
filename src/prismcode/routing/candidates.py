@@ -55,7 +55,7 @@ def build_projection_candidates(
                 item
                 for item in evidence.values()
                 if item.changed
-                and item.kind in {"symbol", "changed_span", "changed_file"}
+                and item.kind in {"symbol", "change_relation", "changed_file"}
             ),
             key=anchor_key,
         )

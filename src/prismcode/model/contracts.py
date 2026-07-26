@@ -57,6 +57,7 @@ RevisionSide = Literal["head", "base", "review", "unchanged"]
 ChangeOperation = Literal[
     "added",
     "modified",
+    "replaced",
     "removed",
     "renamed",
     "observed",
@@ -130,6 +131,7 @@ GuardrailScanSurface = Literal["paths", "file_content", "symbol_names"]
 GuardrailScanState = Literal["complete", "partial", "unavailable"]
 GuardrailSelectorKind = Literal["identifier", "phrase"]
 GuardrailScanBoundaryKind = Literal["file_limit", "byte_limit", "match_limit"]
+ChangeRelationKind = Literal["added", "removed", "replaced"]
 
 
 @dataclass(frozen=True)
@@ -139,6 +141,55 @@ class SourceRef:
     path: str | None = None
     line_start: int | None = None
     line_end: int | None = None
+
+
+@dataclass(frozen=True)
+class ChangedLine:
+    number: int
+    text: str
+
+
+@dataclass(frozen=True)
+class ChangeRelation:
+    id: str
+    hunk_id: str
+    file_path: str
+    kind: ChangeRelationKind
+    added: tuple[ChangedLine, ...] = ()
+    removed: tuple[ChangedLine, ...] = ()
+
+    def __post_init__(self) -> None:
+        expected: ChangeRelationKind
+        if self.added and self.removed:
+            expected = "replaced"
+        elif self.added:
+            expected = "added"
+        elif self.removed:
+            expected = "removed"
+        else:
+            raise ValueError(
+                f"{self.id}: change relation must own base or head lines"
+            )
+        if self.kind != expected:
+            raise ValueError(
+                f"{self.id}: {self.kind} conflicts with base/head relation shape"
+            )
+
+    @property
+    def added_lines(self) -> tuple[int, ...]:
+        return tuple(item.number for item in self.added)
+
+    @property
+    def removed_lines(self) -> tuple[int, ...]:
+        return tuple(item.number for item in self.removed)
+
+    @property
+    def new_snippet(self) -> str:
+        return "\n".join(item.text for item in self.added)
+
+    @property
+    def old_snippet(self) -> str:
+        return "\n".join(item.text for item in self.removed)
 
 
 @dataclass(frozen=True)
@@ -505,6 +556,7 @@ class EvidenceItem:
     verification_conclusion: str = ""
     guardrail_scan_result: GuardrailScanResult | None = None
     sources: tuple[SourceRef, ...] = ()
+    change_relation_ids: tuple[str, ...] = ()
     structural_path_ids: tuple[str, ...] = ()
     metadata: dict[str, Any] = field(default_factory=dict)
 
@@ -514,7 +566,13 @@ class EvidenceItem:
                 raise ValueError(f"{self.id}: changed fact must own changed_anchor role")
             if self.revision_side not in {"head", "base"}:
                 raise ValueError(f"{self.id}: changed fact must identify head or base")
-            if self.operation not in {"added", "modified", "removed", "renamed"}:
+            if self.operation not in {
+                "added",
+                "modified",
+                "replaced",
+                "removed",
+                "renamed",
+            }:
                 raise ValueError(f"{self.id}: changed fact has invalid operation")
         elif self.role == "changed_anchor":
             raise ValueError(f"{self.id}: changed_anchor role requires changed=True")
@@ -569,16 +627,36 @@ class EvidenceItem:
 @dataclass(frozen=True)
 class EvidenceCatalog:
     items: tuple[EvidenceItem, ...] = ()
+    change_relations: tuple[ChangeRelation, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
     guardrail_scan_diagnostics: tuple[GuardrailScanDiagnostic, ...] = ()
-    schema_version: str = "evidence_catalog.v7"
+    schema_version: str = "evidence_catalog.v8"
 
     def by_id(self) -> dict[str, EvidenceItem]:
         return {item.id: item for item in self.items}
 
     def validate_consistency(self) -> None:
+        if len({item.id for item in self.change_relations}) != len(
+            self.change_relations
+        ):
+            raise ValueError("evidence catalog contains duplicate change relations")
+        relation_ids = {item.id for item in self.change_relations}
         for item in self.items:
             item.validate_consistency()
+            unknown = set(item.change_relation_ids) - relation_ids
+            if unknown:
+                raise ValueError(
+                    f"{item.id}: unknown change relation IDs: {sorted(unknown)}"
+                )
+            if (
+                relation_ids
+                and item.changed
+                and item.kind in {"symbol", "change_relation"}
+                and not item.change_relation_ids
+            ):
+                raise ValueError(
+                    f"{item.id}: canonical changed evidence requires relation IDs"
+                )
 
 
 @dataclass(frozen=True)
@@ -935,7 +1013,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v26"
+    schema_version: str = "review_brief.v27"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

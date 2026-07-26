@@ -7,9 +7,9 @@ def format_structural_coverage(coverage: StructuralCoverage) -> str:
     """Format canonical coverage without inspecting provider diagnostics."""
 
     if coverage.state == "disabled":
-        return "Structural mapping: disabled · changed-span fallback used"
+        return "Structural mapping: disabled · change-relation fallback used"
     if coverage.state == "unavailable":
-        return "Structural mapping: unavailable · changed-span fallback used"
+        return "Structural mapping: unavailable · change-relation fallback used"
     if coverage.state == "available":
         traversal = (
             f"{coverage.complete_seed_count}/{coverage.seed_count} seeds complete"
@@ -30,7 +30,7 @@ def format_structural_coverage(coverage: StructuralCoverage) -> str:
         return (
             "Structural mapping: partial · "
             f"{coverage.indexed_files}/{coverage.requested_files} changed files indexed · "
-            "changed-span fallback used for uncovered changes"
+            "change-relation fallback used for uncovered changes"
         )
     reason = {
         "stale": "Codegraph index is stale",
@@ -42,4 +42,4 @@ def format_structural_coverage(coverage: StructuralCoverage) -> str:
             else "no changed files are present in the Codegraph index"
         ),
     }[coverage.state]
-    return f"Structural mapping: skipped · {reason} · changed-span fallback used"
+    return f"Structural mapping: skipped · {reason} · change-relation fallback used"
