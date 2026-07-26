@@ -49,7 +49,7 @@ conclusions.
 | Kind | Classification | Changed | Meaning |
 |---|---|---:|---|
 | `symbol` | code/test/document by path | yes/no | Exact Codegraph symbol |
-| `changed_span` | code/test/document by path | yes | Uncovered contiguous diff span not represented by an exact symbol |
+| `change_relation` | code/test/document by path | yes | Uncovered portion of a canonical typed base-to-head diff relation |
 | `changed_file` | code/test/document by path | yes | Fallback when patch/hunk is unavailable |
 | `structural_path` | runtime/test/mixed | no | Bounded directed Codegraph path |
 | `check_run` | ci | no | GitHub current-head check observation |

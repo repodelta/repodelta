@@ -144,7 +144,8 @@ Each changed line has exactly one canonical representation:
 
 - when Codegraph maps a head-side changed line, its exact symbol represents it
   and receives the covered line's association signature;
-- otherwise, a `changed_span` item retains the uncovered lines, bounded display
+- otherwise, a `change_relation` item retains the uncovered lines, typed
+  base-to-head operation, bounded display
   previews, complete head/base association signatures, and GitHub source;
 - only an absent or unparsable patch produces a `changed_file` fallback.
 

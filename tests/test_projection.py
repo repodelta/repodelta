@@ -55,8 +55,8 @@ def test_direct_hunks_and_claim_route_into_independent_slots() -> None:
 
     assert _selected_targets(brief, "R1", "claim") == ("C1",)
     assert set(_selected_targets(brief, "R1", "changed_anchor")) == {
-        "E:changed_span:0aa4b3f996143d495c78",
-        "E:changed_span:3214d70de26b7f9965d3",
+        "E:change_relation:0e16ce839a33fc1c55dd",
+        "E:change_relation:b41461fdd711f642d363",
     }
     assert _selected_targets(brief, "R2", "claim") == ()
     assert _selected_targets(brief, "R2", "changed_anchor") == ()
@@ -455,7 +455,7 @@ def test_isolated_symbol_and_standalone_document_keep_distinct_canonical_forms()
             EvidenceItem(
                 id="E:document",
                 summary="Changed span: docs/bounded_trace.md:1-2",
-                kind="changed_span",
+                kind="change_relation",
                 classification="document",
                 profile="document",
                 authority="github_diff",
@@ -507,7 +507,7 @@ def test_one_generic_shared_term_is_not_a_default_relation() -> None:
                 EvidenceItem(
                     id="E:unrelated",
                     summary="Changed runtime helper",
-                    kind="changed_span",
+                    kind="change_relation",
                     classification="code",
                     profile="production",
                     changed=True,
@@ -535,7 +535,7 @@ def test_repository_local_r1_token_is_not_an_issue_reference() -> None:
                 EvidenceItem(
                     id="E:fixture",
                     summary="Delete test fixture containing R1",
-                    kind="changed_span",
+                    kind="change_relation",
                     classification="test",
                     profile="test",
                     changed=True,
@@ -586,7 +586,7 @@ def test_changed_anchor_selection_uses_typed_ordinal_not_hashed_id() -> None:
             EvidenceItem(
                 id="E:zzz",
                 summary="Changed function: bounded_trace",
-                kind="changed_span",
+                kind="change_relation",
                 classification="code",
                 profile="production",
                 changed=True,
@@ -603,7 +603,7 @@ def test_changed_anchor_selection_uses_typed_ordinal_not_hashed_id() -> None:
             EvidenceItem(
                 id="E:aaa",
                 summary="Changed function: bounded_trace",
-                kind="changed_span",
+                kind="change_relation",
                 classification="code",
                 profile="production",
                 changed=True,
@@ -858,7 +858,7 @@ def test_document_and_workflow_facts_are_routed_by_profile() -> None:
             EvidenceItem(
                 id="E:doc",
                 summary="Changed documentation: bounded_trace behavior",
-                kind="changed_span",
+                kind="change_relation",
                 classification="document",
                 profile="document",
                 changed=True,
@@ -870,7 +870,7 @@ def test_document_and_workflow_facts_are_routed_by_profile() -> None:
             EvidenceItem(
                 id="E:workflow",
                 summary="Changed workflow: bounded_trace tests",
-                kind="changed_span",
+                kind="change_relation",
                 classification="code",
                 profile="workflow",
                 changed=True,
@@ -931,7 +931,7 @@ def test_graph_and_no_graph_use_the_same_projection_contract() -> None:
     assert with_graph.projection.slices[0].structural_overlay.nodes
 
 
-def test_changed_span_association_scans_beyond_display_preview() -> None:
+def test_change_relation_association_scans_beyond_display_preview() -> None:
     late_identifier = "late_bounded_adapter"
     packet = ReviewSourcePacket(
         repository="acme/widget",

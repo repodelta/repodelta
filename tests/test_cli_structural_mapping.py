@@ -142,7 +142,7 @@ def test_cli_runs_available_codegraph_mapping(
     assert "uncovered change spans retained" in captured.err
 
 
-def test_cli_missing_index_uses_changed_span_fallback(
+def test_cli_missing_index_uses_change_relation_fallback(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],

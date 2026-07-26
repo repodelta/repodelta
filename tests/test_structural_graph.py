@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import sqlite3
+import pytest
 from contextlib import nullcontext
 from pathlib import Path
 from types import SimpleNamespace
@@ -10,7 +11,9 @@ from prismcode.pipeline import DeterministicAnalyzer
 from prismcode.providers.codegraph import CodegraphProvider
 from prismcode.model.contracts import (
     AnalysisInput,
+    ChangeRelation,
     ChangedFile,
+    ChangedLine,
     ReviewSourcePacket,
     SourceRef,
 )
@@ -132,6 +135,8 @@ def test_unified_patch_tracks_exact_new_and_old_line_numbers() -> None:
     assert hunks[0].removed_lines == (2,)
     assert hunks[0].old_snippet == "    def old(self):"
     assert hunks[0].new_snippet == "    def run(self):\n        value = 1"
+    assert hunks[0].relations[0].id == "hunk:src/service.py:0:change:0"
+    assert hunks[0].relations[0].kind == "replaced"
 
 
 def test_unified_patch_splits_change_blocks_on_context_lines() -> None:
@@ -147,11 +152,36 @@ def test_unified_patch_splits_change_blocks_on_context_lines() -> None:
     )
 
     assert len(hunks) == 1
-    assert len(hunks[0].spans) == 2
-    assert hunks[0].spans[0].old_snippet == "old_first()"
-    assert hunks[0].spans[0].new_snippet == "new_first()"
-    assert hunks[0].spans[1].old_snippet == "old_second()"
-    assert hunks[0].spans[1].new_snippet == "new_second()"
+    assert len(hunks[0].relations) == 2
+    assert hunks[0].relations[0].old_snippet == "old_first()"
+    assert hunks[0].relations[0].new_snippet == "new_first()"
+    assert hunks[0].relations[1].old_snippet == "old_second()"
+    assert hunks[0].relations[1].new_snippet == "new_second()"
+    assert [item.kind for item in hunks[0].relations] == [
+        "replaced",
+        "replaced",
+    ]
+
+
+def test_change_relation_model_rejects_invalid_revision_shape() -> None:
+    with pytest.raises(ValueError, match="conflicts"):
+        ChangeRelation(
+            id="change:1",
+            hunk_id="hunk:1",
+            file_path="src/a.py",
+            kind="added",
+            removed=(ChangedLine(1, "old"),),
+        )
+
+
+def test_parser_owns_added_and_removed_relation_kinds() -> None:
+    added = parse_unified_patch("src/a.py", "@@ -0,0 +1 @@\n+new()\n")
+    removed = parse_unified_patch("src/a.py", "@@ -1 +0,0 @@\n-old()\n")
+
+    assert added[0].relations[0].kind == "added"
+    assert added[0].relations[0].removed == ()
+    assert removed[0].relations[0].kind == "removed"
+    assert removed[0].relations[0].added == ()
 
 
 def test_provider_protocol_and_missing_index_diagnostic(tmp_path: Path) -> None:
@@ -447,7 +477,7 @@ def test_analyzer_preserves_structural_facts_without_using_them_as_conclusions(
         AnalysisInput(packet=packet, structural_graph=structural)
     )
 
-    assert brief.schema_version == "review_brief.v26"
+    assert brief.schema_version == "review_brief.v27"
     assert brief.requirements == lexical_only.requirements == ()
     serialized = brief.to_dict()
     assert "structural_graph" not in serialized

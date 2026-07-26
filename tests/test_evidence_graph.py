@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import asdict
+
 import pytest
 
 from prismcode.pipeline import DeterministicAnalyzer
@@ -142,7 +144,7 @@ def test_catalog_deduplicates_facts_and_links_unchanged_path_symbols() -> None:
     )
     assert verification.verification_status == "completed"
     assert verification.verification_conclusion == "success"
-    assert catalog.schema_version == "evidence_catalog.v7"
+    assert catalog.schema_version == "evidence_catalog.v8"
 
     repeated = build_evidence_catalog(
         packet, parse_changed_files(packet.changed_files), structural
@@ -162,8 +164,8 @@ def test_review_brief_serializes_one_canonical_catalog() -> None:
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
     serialized = brief.to_dict()
 
-    assert brief.schema_version == "review_brief.v26"
-    assert serialized["evidence_catalog"]["schema_version"] == "evidence_catalog.v7"
+    assert brief.schema_version == "review_brief.v27"
+    assert serialized["evidence_catalog"]["schema_version"] == "evidence_catalog.v8"
     assert "structural_graph" not in serialized
     assert len(serialized["evidence_catalog"]["items"]) == 1
     assert serialized["evidence_catalog"]["items"][0]["kind"] == "changed_file"
@@ -175,7 +177,7 @@ def test_canonical_evidence_rejects_contradictory_identity() -> None:
             EvidenceItem(
                 id="E:bad",
                 summary="Contradictory",
-                kind="changed_span",
+                kind="change_relation",
                 classification="code",
                 profile="production",
                 changed=True,
@@ -190,7 +192,7 @@ def test_canonical_evidence_rejects_contradictory_identity() -> None:
         catalog.validate_consistency()
 
 
-def test_patch_spans_are_canonical_fallback_evidence() -> None:
+def test_change_relations_are_canonical_fallback_evidence() -> None:
     packet = ReviewSourcePacket(
         repository="acme/widget",
         pull_request=11,
@@ -206,13 +208,29 @@ def test_patch_spans_are_canonical_fallback_evidence() -> None:
     catalog = build_evidence_catalog(
         packet, parse_changed_files(packet.changed_files)
     )
-    assert [item.kind for item in catalog.items] == ["changed_span"]
+    assert [item.kind for item in catalog.items] == ["change_relation"]
     assert catalog.items[0].metadata["head_preview"] == "new_bounded_call()"
     assert catalog.items[0].metadata["base_preview"] == "old_call()"
     assert "newboundedcall" in catalog.items[0].head_signature.identifiers
     assert "oldcall" in catalog.items[0].base_signature.identifiers
     assert catalog.items[0].revision_side == "head"
-    assert catalog.items[0].operation == "modified"
+    assert catalog.items[0].operation == "replaced"
+    relation = catalog.change_relations[0]
+    assert relation.kind == "replaced"
+    assert relation.added_lines == (1,)
+    assert relation.removed_lines == (1,)
+    assert catalog.items[0].change_relation_ids == (relation.id,)
+    serialized = asdict(catalog)
+    assert serialized["change_relations"] == (
+        {
+            "id": relation.id,
+            "hunk_id": relation.hunk_id,
+            "file_path": "src/service.py",
+            "kind": "replaced",
+            "added": ({"number": 1, "text": "new_bounded_call()"},),
+            "removed": ({"number": 1, "text": "old_call()"},),
+        },
+    )
 
 
 def test_exact_symbol_replaces_its_mapped_hunk_evidence() -> None:
@@ -246,10 +264,14 @@ def test_exact_symbol_replaces_its_mapped_hunk_evidence() -> None:
         packet, parse_changed_files(packet.changed_files), structural
     )
 
-    assert not [item for item in catalog.items if item.kind == "changed_span"]
+    assert not [item for item in catalog.items if item.kind == "change_relation"]
     assert [item.metadata["symbol_id"] for item in catalog.items] == ["S"]
     assert "newcall" in catalog.items[0].head_signature.identifiers
     assert "oldcall" in catalog.items[0].base_signature.identifiers
+    assert catalog.items[0].operation == "replaced"
+    assert catalog.items[0].change_relation_ids == (
+        catalog.change_relations[0].id,
+    )
 
 
 def test_partial_symbol_mapping_keeps_only_uncovered_span_content() -> None:
@@ -290,9 +312,61 @@ def test_partial_symbol_mapping_keeps_only_uncovered_span_content() -> None:
     )
 
     changed_symbol = next(item for item in catalog.items if item.kind == "symbol")
-    fallback = next(item for item in catalog.items if item.kind == "changed_span")
+    fallback = next(
+        item for item in catalog.items if item.kind == "change_relation"
+    )
     assert "firstmappedcall" in changed_symbol.head_signature.identifiers
     assert "seconduncoveredcall" not in changed_symbol.head_signature.identifiers
     assert "seconduncoveredcall" in fallback.head_signature.identifiers
     assert "firstmappedcall" not in fallback.head_signature.identifiers
     assert fallback.metadata["added_lines"] == (2,)
+    relation_id = catalog.change_relations[0].id
+    assert changed_symbol.change_relation_ids == (relation_id,)
+    assert fallback.change_relation_ids == (relation_id,)
+    assert changed_symbol.operation == "added"
+    assert fallback.operation == "added"
+
+
+def test_symbol_merges_multiple_change_relations_without_hunk_inference() -> None:
+    symbol = _symbol("M", "src.module.changed", "src/module.py")
+    packet = ReviewSourcePacket(
+        repository="acme/widget",
+        pull_request=12,
+        title="Merge canonical relations",
+        source_records=(),
+        changed_files=(
+            ChangedFile(
+                path="src/module.py",
+                patch=(
+                    "@@ -1,2 +1,3 @@\n"
+                    "+first_added()\n"
+                    " unchanged()\n"
+                    "-old_call()\n"
+                    "+new_call()\n"
+                ),
+            ),
+        ),
+        source_url="https://github.com/acme/widget/pull/12",
+        head_sha="head123",
+    ).with_revision()
+    changes = parse_changed_files(packet.changed_files)
+    structural = StructuralGraphResult(
+        index=StructuralGraphIndexStatus(state="available", provider="codegraph"),
+        hunk_count=1,
+        overlaps=(
+            HunkSymbolOverlap(changes.hunks[0].id, symbol, (1,), sources=symbol.sources),
+            HunkSymbolOverlap(changes.hunks[0].id, symbol, (3,), sources=symbol.sources),
+        ),
+    )
+
+    catalog = build_evidence_catalog(packet, changes, structural)
+
+    changed_symbol = next(item for item in catalog.items if item.kind == "symbol")
+    assert [relation.kind for relation in catalog.change_relations] == [
+        "added",
+        "replaced",
+    ]
+    assert changed_symbol.change_relation_ids == tuple(
+        relation.id for relation in catalog.change_relations
+    )
+    assert changed_symbol.operation == "replaced"

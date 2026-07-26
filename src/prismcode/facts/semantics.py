@@ -101,7 +101,7 @@ def eligible_changed_anchor(
 
 
 def anchor_key(item: EvidenceItem) -> tuple[object, ...]:
-    precision = {"symbol": 0, "changed_span": 1, "changed_file": 2}
+    precision = {"symbol": 0, "change_relation": 1, "changed_file": 2}
     source = item.sources[0] if item.sources else None
     return (
         precision.get(item.kind, 3),

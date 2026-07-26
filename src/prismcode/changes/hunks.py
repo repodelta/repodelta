@@ -4,7 +4,13 @@ import re
 from dataclasses import dataclass
 from typing import TypedDict
 
-from prismcode.model.contracts import ChangedFile, Diagnostic, SourceRef
+from prismcode.model.contracts import (
+    ChangeRelation,
+    ChangedFile,
+    ChangedLine,
+    Diagnostic,
+    SourceRef,
+)
 
 _HUNK_HEADER = re.compile(
     r"^@@\s+-(?P<old_start>\d+)(?:,(?P<old_count>\d+))?"
@@ -12,13 +18,7 @@ _HUNK_HEADER = re.compile(
 )
 
 
-@dataclass(frozen=True)
-class ChangedLine:
-    number: int
-    text: str
-
-
-class _MutableSpan(TypedDict):
+class _MutableRelation(TypedDict):
     added: list[ChangedLine]
     removed: list[ChangedLine]
 
@@ -28,37 +28,8 @@ class _MutableHunk(TypedDict):
     old_count: int
     new_start: int
     new_count: int
-    spans: list[_MutableSpan]
-    current_span: _MutableSpan | None
-
-
-@dataclass(frozen=True)
-class ChangedSpan:
-    id: str
-    hunk_id: str
-    file_path: str
-    added: tuple[ChangedLine, ...] = ()
-    removed: tuple[ChangedLine, ...] = ()
-
-    @property
-    def added_lines(self) -> tuple[int, ...]:
-        return tuple(item.number for item in self.added)
-
-    @property
-    def removed_lines(self) -> tuple[int, ...]:
-        return tuple(item.number for item in self.removed)
-
-    @property
-    def new_snippet(self) -> str:
-        return "\n".join(item.text for item in self.added)
-
-    @property
-    def old_snippet(self) -> str:
-        return "\n".join(item.text for item in self.removed)
-
-    @property
-    def is_deletion_only(self) -> bool:
-        return bool(self.removed) and not self.added
+    relations: list[_MutableRelation]
+    current_relation: _MutableRelation | None
 
 
 @dataclass(frozen=True)
@@ -69,23 +40,35 @@ class ChangedHunk:
     old_count: int
     new_start: int
     new_count: int
-    spans: tuple[ChangedSpan, ...] = ()
+    relations: tuple[ChangeRelation, ...] = ()
 
     @property
     def added_lines(self) -> tuple[int, ...]:
-        return tuple(line for span in self.spans for line in span.added_lines)
+        return tuple(
+            line for relation in self.relations for line in relation.added_lines
+        )
 
     @property
     def removed_lines(self) -> tuple[int, ...]:
-        return tuple(line for span in self.spans for line in span.removed_lines)
+        return tuple(
+            line for relation in self.relations for line in relation.removed_lines
+        )
 
     @property
     def old_snippet(self) -> str:
-        return "\n".join(span.old_snippet for span in self.spans if span.old_snippet)
+        return "\n".join(
+            relation.old_snippet
+            for relation in self.relations
+            if relation.old_snippet
+        )
 
     @property
     def new_snippet(self) -> str:
-        return "\n".join(span.new_snippet for span in self.spans if span.new_snippet)
+        return "\n".join(
+            relation.new_snippet
+            for relation in self.relations
+            if relation.new_snippet
+        )
 
     @property
     def is_deletion_only(self) -> bool:
@@ -130,28 +113,28 @@ def parse_unified_patch(file_path: str, patch: str) -> tuple[ChangedHunk, ...]:
     old_line = 0
     new_line = 0
 
-    def finish_span() -> None:
+    def finish_relation() -> None:
         if current is None:
             return
-        span = current["current_span"]
-        if span is None:
+        relation = current["current_relation"]
+        if relation is None:
             return
-        current["spans"].append(span)
-        current["current_span"] = None
+        current["relations"].append(relation)
+        current["current_relation"] = None
 
-    def active_span() -> _MutableSpan:
+    def active_relation() -> _MutableRelation:
         assert current is not None
-        span = current["current_span"]
-        if span is None:
-            span = {"added": [], "removed": []}
-            current["current_span"] = span
-        return span
+        relation = current["current_relation"]
+        if relation is None:
+            relation = {"added": [], "removed": []}
+            current["current_relation"] = relation
+        return relation
 
     def finish() -> None:
         nonlocal current
         if current is None:
             return
-        finish_span()
+        finish_relation()
         index = len(parsed)
         hunk_id = f"hunk:{file_path}:{index}"
         parsed.append(
@@ -162,15 +145,24 @@ def parse_unified_patch(file_path: str, patch: str) -> tuple[ChangedHunk, ...]:
                 old_count=int(current["old_count"]),
                 new_start=int(current["new_start"]),
                 new_count=int(current["new_count"]),
-                spans=tuple(
-                    ChangedSpan(
-                        id=f"{hunk_id}:span:{span_index}",
+                relations=tuple(
+                    ChangeRelation(
+                        id=f"{hunk_id}:change:{relation_index}",
                         hunk_id=hunk_id,
                         file_path=file_path,
-                        added=tuple(span["added"]),
-                        removed=tuple(span["removed"]),
+                        kind=(
+                            "replaced"
+                            if relation["added"] and relation["removed"]
+                            else "added"
+                            if relation["added"]
+                            else "removed"
+                        ),
+                        added=tuple(relation["added"]),
+                        removed=tuple(relation["removed"]),
                     )
-                    for span_index, span in enumerate(current["spans"])
+                    for relation_index, relation in enumerate(
+                        current["relations"]
+                    )
                 ),
             )
         )
@@ -187,20 +179,24 @@ def parse_unified_patch(file_path: str, patch: str) -> tuple[ChangedHunk, ...]:
                 "old_count": int(header.group("old_count") or 1),
                 "new_start": new_line,
                 "new_count": int(header.group("new_count") or 1),
-                "spans": [],
-                "current_span": None,
+                "relations": [],
+                "current_relation": None,
             }
             continue
         if current is None or raw_line == r"\ No newline at end of file":
             continue
         if raw_line.startswith("+") and not raw_line.startswith("+++"):
-            active_span()["added"].append(ChangedLine(new_line, raw_line[1:]))
+            active_relation()["added"].append(
+                ChangedLine(new_line, raw_line[1:])
+            )
             new_line += 1
         elif raw_line.startswith("-") and not raw_line.startswith("---"):
-            active_span()["removed"].append(ChangedLine(old_line, raw_line[1:]))
+            active_relation()["removed"].append(
+                ChangedLine(old_line, raw_line[1:])
+            )
             old_line += 1
         else:
-            finish_span()
+            finish_relation()
             old_line += 1
             new_line += 1
 

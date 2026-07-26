@@ -106,7 +106,7 @@ def test_claim_bridge_requires_claim_and_anchor_distinctiveness() -> None:
         return EvidenceItem(
             id=identifier,
             summary=text,
-            kind="changed_span",
+            kind="change_relation",
             classification="code",
             profile="production",
             authority="github_diff",

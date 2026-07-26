@@ -11,6 +11,8 @@ No transformation. Other stages exchange only the contracts defined here.
 ## Invariants
 
 - statement role, purpose, kind, and display identity agree;
+- each canonical diff relation owns one valid added/removed/replaced shape and
+  changed evidence references its relation IDs;
 - guardrail scan plans map one-to-one to canonical G statements and preserve
   their query text, executable selectors, and provenance;
 - boundary scan observations identify plan, G, revision, coverage, and

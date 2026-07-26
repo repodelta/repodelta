@@ -8,7 +8,9 @@ from typing import Iterable
 
 from prismcode.model.contracts import (
     AssociationSignature,
+    ChangeRelation,
     ChangedFile,
+    ChangedLine,
     ChangeOperation,
     EvidenceCatalog,
     EvidenceClassification,
@@ -24,8 +26,6 @@ from prismcode.model.contracts import (
 )
 from prismcode.changes.hunks import (
     ChangedHunk,
-    ChangedLine,
-    ChangedSpan,
     DiffHunkCollection,
 )
 from prismcode.facts.lexical import association_signature, merge_signatures
@@ -73,6 +73,9 @@ def build_evidence_catalog(
     for hunk in changes.hunks:
         hunks_by_path.setdefault(hunk.file_path, []).append(hunk)
     hunks_by_id = {hunk.id: hunk for hunk in changes.hunks}
+    change_relations = tuple(
+        relation for hunk in changes.hunks for relation in hunk.relations
+    )
     overlaps_by_hunk: dict[str, list[HunkSymbolOverlap]] = {}
     if structural_graph is not None:
         for overlap in structural_graph.overlaps:
@@ -88,18 +91,19 @@ def build_evidence_catalog(
             mapped_lines = {
                 line for overlap in overlaps for line in overlap.changed_lines
             }
-            for span in hunk.spans:
+            for relation in hunk.relations:
                 uncovered = tuple(
-                    line for line in span.added if line.number not in mapped_lines
+                    line
+                    for line in relation.added
+                    if line.number not in mapped_lines
                 )
-                if uncovered or not span.added:
+                if uncovered or not relation.added:
                     _put(
                         items,
-                        _changed_span_item(
+                        _change_relation_item(
                             changed_file,
-                            span,
+                            relation,
                             added=uncovered,
-                            include_removed=not bool(mapped_lines & set(span.added_lines)),
                         ),
                     )
 
@@ -121,22 +125,19 @@ def build_evidence_catalog(
 
         for overlap in structural_graph.overlaps:
             hunk = hunks_by_id.get(overlap.hunk_id)
-            head_signature, base_signature = _overlap_signatures(
-                hunk,
-                overlap.changed_lines,
+            relation_ids, operation, head_signature, base_signature = (
+                _overlap_change(
+                    hunk,
+                    overlap.changed_lines,
+                )
             )
             _put(
                 items,
                 _symbol_item(
                     overlap.symbol,
                     changed=True,
-                    operation=(
-                        "added"
-                        if hunk is not None
-                        and hunk.added_lines
-                        and not hunk.removed_lines
-                        else "modified"
-                    ),
+                    operation=operation,
+                    change_relation_ids=relation_ids,
                     structural_path_ids=tuple(
                         sorted(symbol_paths.get(overlap.symbol.id, ()))
                     ),
@@ -150,16 +151,14 @@ def build_evidence_catalog(
         for path in structural_graph.paths:
             for step in path.steps:
                 for symbol in (step.source, step.target):
+                    if symbol.id in changed_symbol_ids:
+                        continue
                     _put(
                         items,
                         _symbol_item(
                             symbol,
-                            changed=symbol.id in changed_symbol_ids,
-                            operation=(
-                                "modified"
-                                if symbol.id in changed_symbol_ids
-                                else "unchanged"
-                            ),
+                            changed=False,
+                            operation="unchanged",
                             structural_path_ids=tuple(
                                 sorted(symbol_paths.get(symbol.id, ()))
                             ),
@@ -215,6 +214,7 @@ def build_evidence_catalog(
 
     catalog = EvidenceCatalog(
         items=tuple(sorted(items.values(), key=lambda item: item.id)),
+        change_relations=change_relations,
         diagnostics=(
             *changes.diagnostics,
             *(
@@ -372,42 +372,39 @@ def _changed_file_fallback(changed_file: ChangedFile) -> EvidenceItem:
     )
 
 
-def _changed_span_item(
+def _change_relation_item(
     changed_file: ChangedFile,
-    span: ChangedSpan,
+    relation: ChangeRelation,
     *,
     added: tuple[ChangedLine, ...],
-    include_removed: bool,
 ) -> EvidenceItem:
-    path = span.file_path
-    removed = span.removed if include_removed else ()
+    path = relation.file_path
+    removed = relation.removed
     head_text = "\n".join(item.text for item in added)
     base_text = "\n".join(item.text for item in removed)
     display_lines = added or removed
     line_start = min((item.number for item in display_lines), default=0)
     line_end = max((item.number for item in display_lines), default=line_start)
-    operation = (
-        "removed"
-        if removed and not added
-        else "added"
-        if added and not removed
-        else "modified"
+    identity = (
+        f"{relation.id}:{','.join(str(item.number) for item in added)}"
     )
-    identity = f"{span.id}:{','.join(str(item.number) for item in added)}"
-    summary = f"Changed span: {path}:{line_start}-{line_end}"
+    summary = (
+        f"{relation.kind.title()} change: {path}:{line_start}-{line_end}"
+    )
     return EvidenceItem(
-        id=evidence_id("changed_span", identity),
-        kind="changed_span",
+        id=evidence_id("change_relation", identity),
+        kind="change_relation",
         summary=summary,
         classification=_path_classification(path),
         profile=_fact_profile(path),
         authority="github_diff",
-        revision_side="base" if operation == "removed" else "head",
-        operation=operation,
+        revision_side="base" if relation.kind == "removed" else "head",
+        operation=relation.kind,
         role="changed_anchor",
         changed=True,
         head_signature=association_signature(summary, path, head_text),
         base_signature=association_signature(summary, path, base_text),
+        change_relation_ids=(relation.id,),
         sources=(
             SourceRef(
                 label="diff hunk",
@@ -418,14 +415,12 @@ def _changed_span_item(
             ),
         ),
         metadata={
-            "hunk_id": span.hunk_id,
-            "span_id": span.id,
+            "hunk_id": relation.hunk_id,
             "path": path,
             "added_lines": tuple(item.number for item in added),
             "removed_lines": tuple(item.number for item in removed),
             "head_preview": head_text[:4000],
             "base_preview": base_text[:4000],
-            "deletion_only": bool(removed and not added),
         },
     )
 
@@ -470,6 +465,7 @@ def _symbol_item(
     extra_sources: tuple[SourceRef, ...] = (),
     head_signature: AssociationSignature = AssociationSignature(),
     base_signature: AssociationSignature = AssociationSignature(),
+    change_relation_ids: tuple[str, ...] = (),
     changed_hunk_ids: tuple[str, ...] = (),
     changed_lines: tuple[int, ...] = (),
 ) -> EvidenceItem:
@@ -497,6 +493,7 @@ def _symbol_item(
         head_signature=merge_signatures(canonical_signature, head_signature),
         base_signature=base_signature,
         sources=_unique_sources((*symbol.sources, *extra_sources)),
+        change_relation_ids=change_relation_ids,
         structural_path_ids=structural_path_ids,
         metadata={
             "symbol_id": symbol.id,
@@ -512,22 +509,46 @@ def _symbol_item(
     )
 
 
-def _overlap_signatures(
+def _overlap_change(
     hunk: ChangedHunk | None,
     changed_lines: tuple[int, ...],
-) -> tuple[AssociationSignature, AssociationSignature]:
+) -> tuple[
+    tuple[str, ...],
+    ChangeOperation,
+    AssociationSignature,
+    AssociationSignature,
+]:
     if hunk is None:
-        return AssociationSignature(), AssociationSignature()
+        return (
+            (),
+            "modified",
+            AssociationSignature(),
+            AssociationSignature(),
+        )
     covered = set(changed_lines)
+    selected_relations = tuple(
+        relation
+        for relation in hunk.relations
+        if covered & set(relation.added_lines)
+    )
     head_values = []
     base_values = []
-    for span in hunk.spans:
-        selected = tuple(item.text for item in span.added if item.number in covered)
+    for relation in selected_relations:
+        selected = tuple(
+            item.text for item in relation.added if item.number in covered
+        )
         if not selected:
             continue
         head_values.extend(selected)
-        base_values.extend(item.text for item in span.removed)
+        base_values.extend(item.text for item in relation.removed)
     return (
+        tuple(item.id for item in selected_relations),
+        (
+            "added"
+            if selected_relations
+            and all(item.kind == "added" for item in selected_relations)
+            else "replaced"
+        ),
         association_signature(*head_values),
         association_signature(*base_values),
     )
@@ -598,7 +619,16 @@ def _put(items: dict[str, EvidenceItem], candidate: EvidenceItem) -> None:
     items[candidate.id] = replace(
         existing,
         changed=existing.changed or candidate.changed,
+        operation=_merged_change_operation(existing, candidate),
         sources=_unique_sources((*existing.sources, *candidate.sources)),
+        change_relation_ids=tuple(
+            sorted(
+                {
+                    *existing.change_relation_ids,
+                    *candidate.change_relation_ids,
+                }
+            )
+        ),
         structural_path_ids=tuple(
             sorted({*existing.structural_path_ids, *candidate.structural_path_ids})
         ),
@@ -612,6 +642,21 @@ def _put(items: dict[str, EvidenceItem], candidate: EvidenceItem) -> None:
         ),
         metadata=_merge_metadata(existing, candidate),
         summary=candidate.summary if candidate.changed and not existing.changed else existing.summary,
+    )
+
+
+def _merged_change_operation(
+    existing: EvidenceItem,
+    candidate: EvidenceItem,
+) -> ChangeOperation:
+    if not candidate.changed:
+        return existing.operation
+    if not existing.changed:
+        return candidate.operation
+    return (
+        "added"
+        if existing.operation == candidate.operation == "added"
+        else "replaced"
     )
 
 
