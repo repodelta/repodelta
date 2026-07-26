@@ -166,7 +166,10 @@ Typed association kinds include explicit provider association, explicit R/G
 reference, exact identifier, distinctive phrase, claim bridge, structural
 bridge, and current-head observation. Explicit R/G references are recognized
 only across authored statement boundaries, never in arbitrary code or fixture
-text. A generic one-token overlap does not become a candidate relation.
+text. Phrase relations require two shared terms plus a term discriminative
+among the review's unique focus meanings. Claim bridges additionally require
+that term to be discriminative among eligible anchors. This is deterministic
+boolean eligibility, not a relevance score or top-k selector.
 
 `CandidateConvergence` then applies typed dominance, bridge reachability, and
 identity safety limits inside one R/G and one slot at a time. Claims remain

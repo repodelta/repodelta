@@ -14,12 +14,18 @@ Canonical statements and `EvidenceCatalog` → unselected
 
 Eligibility precedes association. Every explicit R/G is visited. Relations
 reference canonical IDs, retain typed association reasons, and carry no
-selection state.
+selection state. Phrase association requires two shared meaningful terms and at
+least one term authorized by the review-local discriminative vocabulary.
+Document frequency is computed over unique semantic meanings, so duplicate
+focus text retains the same authority. Exact identifiers, explicit references,
+and provider associations do not depend on phrase distinctiveness. Claim
+bridges require a term discriminative for both the claim and eligible-anchor
+corpora.
 
 ## Must not
 
 Collect providers, parse patches, order/truncate/select same-slot candidates,
-construct final layout, or render diagnostics.
+score candidates globally, construct final layout, or render diagnostics.
 
 ## Diagnostics
 

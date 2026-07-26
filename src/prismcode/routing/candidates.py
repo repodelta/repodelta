@@ -3,7 +3,12 @@ from __future__ import annotations
 import hashlib
 from typing import Iterable, Literal
 
-from prismcode.routing.association import evidence_reasons, statement_reasons
+from prismcode.routing.association import (
+    distinctive_signature_terms,
+    distinctive_text_terms,
+    evidence_reasons,
+    statement_reasons,
+)
 from prismcode.model.contracts import (
     AssociationKind,
     AssociationReason,
@@ -53,6 +58,12 @@ def build_projection_candidates(
             key=anchor_key,
         )
     )
+    focus_distinctive_terms = distinctive_text_terms(
+        tuple((item.id, item.text) for item in requirements)
+    )
+    claim_distinctive_terms = distinctive_text_terms(
+        tuple((item.id, item.text) for item in claims)
+    )
     relations: list[ProjectionRelation] = []
     groups: list[ProjectionCandidateGroup] = []
     diagnostics: list[ProjectionDiagnostic] = list(
@@ -76,7 +87,14 @@ def build_projection_candidates(
         focus_relations: list[ProjectionRelation] = []
         focus_diagnostics: list[ProjectionDiagnostic] = []
 
-        claim_relations = _claim_relations(focus, claims)
+        claim_relations = _claim_relations(
+            focus,
+            claims,
+            focus_distinctive_terms=focus_distinctive_terms.get(
+                focus.id,
+                frozenset(),
+            ),
+        )
         focus_relations.extend(claim_relations)
         associated_claims = {relation.target_id for relation in claim_relations}
         if not claim_relations:
@@ -114,6 +132,11 @@ def build_projection_candidates(
             associated_claims,
             claims,
             eligible_anchors,
+            focus_distinctive_terms=focus_distinctive_terms.get(
+                focus.id,
+                frozenset(),
+            ),
+            claim_distinctive_terms=claim_distinctive_terms,
         )
         focus_relations.extend(anchor_relations)
         candidate_anchor_ids = tuple(
@@ -256,10 +279,16 @@ def build_projection_candidates(
 def _claim_relations(
     focus: Requirement,
     claims: tuple[ReviewStatement, ...],
+    *,
+    focus_distinctive_terms: frozenset[str],
 ) -> tuple[ProjectionRelation, ...]:
     result = []
     for ordinal, claim in enumerate(claims):
-        reasons = statement_reasons(focus, claim)
+        reasons = statement_reasons(
+            focus,
+            claim,
+            distinctive_terms=focus_distinctive_terms,
+        )
         if not reasons:
             continue
         result.append(
@@ -281,8 +310,22 @@ def _anchor_relations(
     associated_claim_ids: set[str],
     claims: tuple[ReviewStatement, ...],
     anchors: tuple[EvidenceItem, ...],
+    *,
+    focus_distinctive_terms: frozenset[str],
+    claim_distinctive_terms: dict[str, frozenset[str]],
 ) -> tuple[ProjectionRelation, ...]:
     claims_by_id = {item.id: item for item in claims}
+    anchor_terms_by_claim = {
+        claim_id: distinctive_signature_terms(
+            tuple(
+                (anchor.id, evidence_signature(anchor, claim))
+                for anchor in anchors
+            )
+        )
+        for claim_id in associated_claim_ids
+        for claim in (claims_by_id.get(claim_id),)
+        if claim is not None
+    }
     result = []
     for ordinal, anchor in enumerate(anchors):
         provided = anchor.associated_statement_ids
@@ -305,16 +348,33 @@ def _anchor_relations(
                 )
             )
             continue
-        direct = evidence_reasons(focus, evidence_signature(anchor, focus))
+        direct = evidence_reasons(
+            focus,
+            evidence_signature(anchor, focus),
+            distinctive_terms=focus_distinctive_terms,
+        )
         bridges = []
+        bridge_matched_terms: set[str] = set()
         for claim_id in sorted(associated_claim_ids):
             claim = claims_by_id.get(claim_id)
-            if claim is None or not evidence_reasons(
+            if claim is None:
+                continue
+            bridge_terms = (
+                claim_distinctive_terms.get(claim_id, frozenset())
+                & anchor_terms_by_claim.get(claim_id, {}).get(
+                    anchor.id,
+                    frozenset(),
+                )
+            )
+            bridge_reasons = evidence_reasons(
                 claim,
                 evidence_signature(anchor, claim),
-            ):
+                distinctive_terms=bridge_terms,
+            )
+            if not bridge_reasons:
                 continue
             bridges.append(claim_id)
+            bridge_matched_terms.update(bridge_reasons[0].matched_terms)
         if direct:
             result.append(
                 _relation(
@@ -340,8 +400,10 @@ def _anchor_relations(
                             kind="claim_bridge",
                             detail=(
                                 "An associated PR claim has a deterministic "
-                                "identifier or phrase relation to this changed anchor."
+                                "identifier or discriminative phrase relation "
+                                "to this changed anchor."
                             ),
+                            matched_terms=tuple(sorted(bridge_matched_terms)),
                         ),
                     ),
                     bridge_ids=tuple(bridges),
