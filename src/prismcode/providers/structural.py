@@ -7,6 +7,7 @@ from prismcode.model.contracts import Diagnostic, SourceRef
 from prismcode.changes.hunks import ChangedHunk
 
 IndexState = Literal["available", "partial", "missing", "stale", "invalid", "error"]
+StructuralRevision = Literal["head", "base"]
 PathClassification = Literal["runtime", "test", "mixed"]
 TraversalDirection = Literal["outgoing", "incoming"]
 TraversalCoverageState = Literal["complete", "truncated"]
@@ -40,12 +41,13 @@ class StructuralTraversalPolicy:
 class StructuralGraphIndexStatus:
     state: IndexState
     provider: str
+    revision_side: StructuralRevision = "head"
     revision: str = ""
     database_path: str = ""
     indexed_files: int = 0
     requested_files: int = 0
     diagnostics: tuple[Diagnostic, ...] = ()
-    schema_version: str = "structural_graph_index_status.v1"
+    schema_version: str = "structural_graph_index_status.v2"
 
     @property
     def usable(self) -> bool:
@@ -108,16 +110,46 @@ class StructuralSeedCoverage:
 @dataclass(frozen=True)
 class StructuralGraphResult:
     index: StructuralGraphIndexStatus
+    revision_side: StructuralRevision = "head"
     hunk_count: int = 0
     overlaps: tuple[HunkSymbolOverlap, ...] = ()
     paths: tuple[StructuralPath, ...] = ()
     traversal_coverage: tuple[StructuralSeedCoverage, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
-    schema_version: str = "structural_graph_result.v3"
+    schema_version: str = "structural_graph_result.v4"
 
     @property
     def mapped_hunk_count(self) -> int:
         return len({overlap.hunk_id for overlap in self.overlaps})
+
+
+@dataclass(frozen=True)
+class StructuralGraphCollection:
+    revisions: tuple[StructuralGraphResult, ...] = ()
+    diagnostics: tuple[Diagnostic, ...] = ()
+    schema_version: str = "structural_graph_collection.v1"
+
+    def for_revision(
+        self, revision_side: StructuralRevision
+    ) -> StructuralGraphResult | None:
+        return next(
+            (
+                result
+                for result in self.revisions
+                if result.revision_side == revision_side
+            ),
+            None,
+        )
+
+    def validate_consistency(self) -> None:
+        sides = tuple(item.revision_side for item in self.revisions)
+        if len(set(sides)) != len(sides):
+            raise ValueError("structural graph contains duplicate revision results")
+        for result in self.revisions:
+            if result.index.revision_side != result.revision_side:
+                raise ValueError(
+                    "structural revision result and index side must agree"
+                )
 
 
 @runtime_checkable

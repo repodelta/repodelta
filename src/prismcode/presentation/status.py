@@ -24,12 +24,13 @@ def format_structural_coverage(coverage: StructuralCoverage) -> str:
             f"{coverage.mapped_hunk_count}/{coverage.hunk_count} hunks mapped to "
             f"{coverage.symbol_count} symbols · {coverage.path_count} bounded paths · "
             f"{traversal} · "
-            "uncovered change spans retained"
+            f"{_base_coverage(coverage)} · uncovered change relations retained"
         )
     if coverage.state == "partial":
         return (
             "Structural mapping: partial · "
             f"{coverage.indexed_files}/{coverage.requested_files} changed files indexed · "
+            f"{_base_coverage(coverage)} · "
             "change-relation fallback used for uncovered changes"
         )
     reason = {
@@ -43,3 +44,13 @@ def format_structural_coverage(coverage: StructuralCoverage) -> str:
         ),
     }[coverage.state]
     return f"Structural mapping: skipped · {reason} · change-relation fallback used"
+
+
+def _base_coverage(coverage: StructuralCoverage) -> str:
+    if coverage.base_state in {"available", "partial"}:
+        return (
+            f"base {coverage.base_mapped_hunk_count}/"
+            f"{coverage.base_hunk_count} hunks mapped to "
+            f"{coverage.base_symbol_count} symbols"
+        )
+    return f"base {coverage.base_state}"

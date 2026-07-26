@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 if TYPE_CHECKING:
     from prismcode.changes.hunks import DiffHunkCollection
-    from prismcode.providers.structural import StructuralGraphResult
+    from prismcode.providers.structural import StructuralGraphCollection
 
 DiagnosticSeverity = Literal["info", "warning", "error"]
 RequirementKind = Literal["deliverable", "guardrail", "manual_acceptance"]
@@ -630,12 +630,13 @@ class EvidenceCatalog:
     change_relations: tuple[ChangeRelation, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
     guardrail_scan_diagnostics: tuple[GuardrailScanDiagnostic, ...] = ()
-    schema_version: str = "evidence_catalog.v8"
+    schema_version: str = "evidence_catalog.v10"
 
     def by_id(self) -> dict[str, EvidenceItem]:
         return {item.id: item for item in self.items}
 
     def validate_consistency(self) -> None:
+        items_by_id = self.by_id()
         if len({item.id for item in self.change_relations}) != len(
             self.change_relations
         ):
@@ -657,6 +658,14 @@ class EvidenceCatalog:
                 raise ValueError(
                     f"{item.id}: canonical changed evidence requires relation IDs"
                 )
+            if item.kind == "structural_path":
+                for step in item.metadata.get("steps", ()):
+                    for field in ("source_evidence_id", "target_evidence_id"):
+                        symbol = items_by_id.get(step.get(field))
+                        if symbol is None or symbol.kind != "symbol":
+                            raise ValueError(
+                                f"{item.id}: {field} must reference symbol evidence"
+                            )
 
 
 @dataclass(frozen=True)
@@ -979,6 +988,10 @@ class StructuralCoverage:
     requested_files: int = 0
     indexed_files: int = 0
     missing_reason: Literal["index_absent", "files_unindexed", ""] = ""
+    base_state: StructuralCoverageState = "unavailable"
+    base_mapped_hunk_count: int = 0
+    base_hunk_count: int = 0
+    base_symbol_count: int = 0
 
 
 @dataclass(frozen=True)
@@ -986,7 +999,7 @@ class AnalysisInput:
     packet: ReviewSourcePacket
     requirements: tuple[Requirement, ...] = ()
     changes: DiffHunkCollection | None = None
-    structural_graph: StructuralGraphResult | None = None
+    structural_graph: StructuralGraphCollection | None = None
     structural_graph_disabled: bool = False
     supplied_evidence: tuple[SuppliedEvidence, ...] = ()
 
@@ -1013,7 +1026,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v27"
+    schema_version: str = "review_brief.v28"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

@@ -20,6 +20,7 @@ from prismcode.providers.structural import (
     GraphPathStep,
     GraphSymbol,
     HunkSymbolOverlap,
+    StructuralGraphCollection,
     StructuralGraphIndexStatus,
     StructuralGraphResult,
     StructuralPath,
@@ -62,7 +63,7 @@ class EvaluationCase:
     expected_no_selections: tuple[ExpectedNoSelection, ...] = ()
     expected_evidence: tuple[ExpectedEvidence, ...] = ()
     expected_statements: tuple[ExpectedStatement, ...] = ()
-    structural_graph: StructuralGraphResult | None = None
+    structural_graph: StructuralGraphCollection | None = None
 
 
 @dataclass(frozen=True)
@@ -678,12 +679,22 @@ def _symbol(raw: dict[str, Any]) -> GraphSymbol:
     )
 
 
-def _structural_graph(raw: dict[str, Any]) -> StructuralGraphResult:
+def _structural_graph(raw: dict[str, Any]) -> StructuralGraphCollection:
+    results = tuple(
+        _structural_revision(item) for item in raw.get("revisions", ())
+    )
+    graph = StructuralGraphCollection(revisions=results)
+    graph.validate_consistency()
+    return graph
+
+
+def _structural_revision(raw: dict[str, Any]) -> StructuralGraphResult:
     symbols = {
         symbol["id"]: _symbol(symbol)
         for symbol in raw.get("symbols", ())
     }
     return StructuralGraphResult(
+        revision_side=raw["revision_side"],
         index=StructuralGraphIndexStatus(**raw["index"]),
         hunk_count=int(raw.get("hunk_count", 0)),
         overlaps=tuple(

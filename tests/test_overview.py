@@ -5,11 +5,18 @@ from dataclasses import asdict
 from prismcode.model.contracts import ProjectionDiagnostic, SourceRef
 from prismcode.projection.overview import _projection_attention
 from prismcode.providers.structural import (
+    StructuralGraphCollection,
     StructuralGraphIndexStatus,
     StructuralGraphResult,
     StructuralSeedCoverage,
 )
 from prismcode.routing.coverage import review_provider_diagnostics
+
+
+def _head_graph(**values) -> StructuralGraphCollection:
+    return StructuralGraphCollection(
+        revisions=(StructuralGraphResult(**values),)
+    )
 
 
 def _diagnostic(
@@ -61,7 +68,7 @@ def test_attention_separates_provider_and_convergence_truncation() -> None:
 
 
 def test_provider_traversal_coverage_is_review_level_and_seed_specific() -> None:
-    graph = StructuralGraphResult(
+    graph = _head_graph(
         index=StructuralGraphIndexStatus(
             state="available",
             provider="codegraph",
@@ -90,7 +97,7 @@ def test_provider_traversal_coverage_is_review_level_and_seed_specific() -> None
     assert diagnostics[0].focus_statement_id == "review"
     assert diagnostics[0].affected_ids == ("symbol:A",)
     assert diagnostics[0].message == (
-        "Structural traversal completed for 1/2 changed-symbol seeds; "
+        "Head structural traversal completed for 1/2 changed-symbol seeds; "
         "1 reached the provider seed node budget safety boundary."
     )
 
