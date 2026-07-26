@@ -2,8 +2,9 @@
 
 ## Owns
 
-One-pass Markdown section parsing, statement taxonomy, source authority, stable
-R/G/O/S/C/B/V identities, and PR-claim source state.
+One-pass Markdown section parsing, canonical heading normalization, statement
+taxonomy, source authority, stable O/S/R/G/V contract identities, distinct
+C/B/VC PR-claim identities, and PR-claim source state.
 
 ## Input / output
 
@@ -11,8 +12,10 @@ R/G/O/S/C/B/V identities, and PR-claim source state.
 
 ## Invariants
 
-Issue obligations remain the primary contract. PR statements remain claims or
-provisional obligations according to their source section.
+Issue obligations and verification expectations remain the primary contract.
+PR statements remain claims or provisional obligations according to their
+source section. Heading aliases normalize through an exact canonical vocabulary,
+never loose substring matching.
 
 ## Must not
 

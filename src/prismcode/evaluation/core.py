@@ -280,6 +280,7 @@ def evaluate_suite(
                 *brief.guardrails,
                 *brief.objectives,
                 *brief.scope,
+                *brief.verification_expectations,
                 *brief.claims,
                 brief.intent,
             )

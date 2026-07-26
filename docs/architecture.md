@@ -72,22 +72,26 @@ Each Issue or PR Markdown body is parsed once into canonical
    Done, or Success Criteria are authoritative obligations.
 2. Only when no Issue obligation exists may the corresponding explicit
    PR-description sections become provisional obligations.
-3. Goals and Objectives are objective retrieval context.
-4. Scope and In scope are context, never obligations.
+3. Common Goal, Objective, Aim, Purpose, Motivation, and Outcome heading
+   variants normalize to objective retrieval context.
+4. Common Scope, In Scope, Included Work, and Covered Area heading variants
+   normalize to scope context, never obligations.
 5. Out of scope and Boundary from a linked Issue are authoritative
    guardrails. The same headings in a PR are boundary claims, because the
    author cannot redefine the Issue contract by describing the implementation.
-6. Summary, Implementation, Changes, What Changed, and Approach are
-   implementation claims. Baseline/Results and Verification/Testing are typed
-   baseline and verification claims.
-7. The PR introduction and title are intent only.
+6. Issue Verification/Validation/Testing variants are authored verification
+   expectations. The same headings in a PR are typed verification claims, never
+   observed execution.
+7. Summary, Implementation, Changes, What Changed, and Approach are
+   implementation claims. Baseline/Results are typed baseline claims.
+8. The PR introduction and title are intent only.
 
 Deliverables use stable IDs (`R1`, `R2`, ...), negative scope constraints use
-`G1`, objectives use `O1`, scope uses `S1`, implementation and PR boundary
-claims use `C1`, baselines use `B1`, and verification claims use `V1`. Role,
-purpose, and authority are separate fields: for example, both `C1` and `V1`
-are claims, but their purposes differ. If no explicit obligation exists, the
-renderer reports the missing acceptance basis.
+`G1`, objectives use `O1`, scope uses `S1`, and Issue verification expectations
+use `V1`. Implementation and PR boundary claims use `C1`, baselines use `B1`,
+and PR verification claims use `VC1`. Role, purpose, and authority remain
+separate fields. If no explicit obligation exists, the renderer reports the
+missing acceptance basis.
 
 The linked-Issue relation comes from GitHub GraphQL
 `PullRequest.closingIssuesReferences`; PR prose is not parsed to invent Issue

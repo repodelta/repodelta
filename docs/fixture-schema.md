@@ -17,9 +17,9 @@ An offline fixture is an envelope around the same conclusion-free
 `authority` (default `provided`). When the array is empty, the analyzer applies
 the normal semantic authority hierarchy: linked-Issue criteria first, then
 explicit PR Acceptance Criteria, Requirements, Definition of Done, or Success
-Criteria. Goals, scope, implementation/boundary claims, baseline claims,
-verification claims, and intent remain typed and separate; a PR title never
-becomes a requirement.
+Criteria. Goals, scope, Issue verification expectations, PR
+implementation/boundary/baseline/verification claims, and intent remain typed
+and separate; a PR title never becomes a requirement.
 
 `evidence` contains supplied facts that are normalized into the same canonical
 `EvidenceCatalog` as canonical exact symbols, unmapped changed spans/file
