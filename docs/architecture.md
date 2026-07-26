@@ -16,8 +16,9 @@ fixture or GitHub
        -> head revision + repository scope
        -> canonical executable selectors + supported surfaces
   -> bounded guardrail scanning
-       -> validated PR-head checkout
-       -> deterministic path/content inspection under explicit safety limits
+       -> validated clean PR-head checkout
+       -> deterministic path/content/symbol-name inspection
+       -> typed file/byte/match safety limits
        -> typed result coverage and candidate locations
   -> one canonical DiffHunkCollection
   -> optional StructuralGraphProvider

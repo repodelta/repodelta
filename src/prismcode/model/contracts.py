@@ -129,6 +129,7 @@ StructuralCoverageState = Literal[
 GuardrailScanSurface = Literal["paths", "file_content", "symbol_names"]
 GuardrailScanState = Literal["complete", "partial", "unavailable"]
 GuardrailSelectorKind = Literal["identifier", "phrase"]
+GuardrailScanBoundaryKind = Literal["file_limit", "byte_limit", "match_limit"]
 
 
 @dataclass(frozen=True)
@@ -351,13 +352,8 @@ class GuardrailScanPlanSet:
                 plan.revision_side != "head"
                 or plan.scope != "repository"
                 or plan.root_paths != (".",)
-                or not plan.surfaces
-                or tuple(
-                    item
-                    for item in ("paths", "file_content", "symbol_names")
-                    if item in plan.surfaces
-                )
-                != plan.surfaces
+                or plan.surfaces
+                != ("paths", "file_content", "symbol_names")
             ):
                 raise ValueError(f"{plan.id}: unsupported scan-plan boundary")
             if len({item.id for item in plan.selectors}) != len(plan.selectors):
@@ -387,8 +383,15 @@ class GuardrailScanCoverage:
     state: GuardrailScanState
     inspected_count: int = 0
     inspected_bytes: int = 0
-    limit: int = 0
     message: str = ""
+
+
+@dataclass(frozen=True)
+class GuardrailScanTruncation:
+    kind: GuardrailScanBoundaryKind
+    surface: GuardrailScanSurface
+    limit: int
+    observed: int
 
 
 @dataclass(frozen=True)
@@ -400,6 +403,7 @@ class GuardrailScanResult:
     root_path: str
     state: GuardrailScanState
     coverages: tuple[GuardrailScanCoverage, ...] = ()
+    truncations: tuple[GuardrailScanTruncation, ...] = ()
     matches: tuple[GuardrailScanMatch, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
 
@@ -427,6 +431,45 @@ class GuardrailScanResultSet:
             selector_ids = {item.id for item in plan.selectors}
             if any(item.selector_id not in selector_ids for item in result.matches):
                 raise ValueError(f"{result.id}: match references unknown selector")
+            if any(item.surface not in plan.surfaces for item in result.matches):
+                raise ValueError(f"{result.id}: match references unplanned surface")
+            if tuple(item.surface for item in result.coverages) != plan.surfaces:
+                raise ValueError(
+                    f"{result.id}: result coverage must preserve plan surfaces"
+                )
+            if any(
+                item.surface not in plan.surfaces
+                or item.limit <= 0
+                or item.observed < item.limit
+                for item in result.truncations
+            ):
+                raise ValueError(f"{result.id}: invalid scan truncation")
+            if result.state == "complete" and result.truncations:
+                raise ValueError(
+                    f"{result.id}: complete result cannot carry truncation"
+                )
+            if result.state == "complete" and any(
+                item.state != "complete" for item in result.coverages
+            ):
+                raise ValueError(
+                    f"{result.id}: complete result requires complete surfaces"
+                )
+            if result.state == "partial" and not result.truncations:
+                raise ValueError(
+                    f"{result.id}: partial result requires typed truncation"
+                )
+            if result.state == "partial" and all(
+                item.state == "complete" for item in result.coverages
+            ):
+                raise ValueError(
+                    f"{result.id}: partial result requires partial surface"
+                )
+            if result.state == "unavailable" and any(
+                item.state != "unavailable" for item in result.coverages
+            ):
+                raise ValueError(
+                    f"{result.id}: unavailable result requires unavailable surfaces"
+                )
             if result.state != "unavailable" and not result.revision:
                 raise ValueError(f"{result.id}: observed scan requires a revision")
 

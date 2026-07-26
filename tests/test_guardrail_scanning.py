@@ -85,6 +85,7 @@ def test_bounded_scan_matches_typed_phrase_and_ignores_vendor_tree(
     ]
     assert result.coverages[0].surface == "paths"
     assert result.coverages[1].surface == "file_content"
+    assert result.coverages[2].surface == "symbol_names"
 
 
 def test_complete_zero_match_is_an_observation_not_absence(
@@ -158,6 +159,24 @@ def test_no_selector_and_stale_checkout_do_not_create_boundary_facts(
     assert stale_result.diagnostics[0].code == "guardrail_scan_stale_checkout"
 
 
+def test_dirty_tracked_checkout_is_not_reported_as_pr_head(
+    tmp_path: Path,
+) -> None:
+    root, revision = _repository(tmp_path, {"src/service.py": "VALUE = 1\n"})
+    (root / "src/service.py").write_text("VALUE = 2\n", encoding="utf-8")
+    plans = compile_guardrail_scan_plans(
+        (_guardrail("No compatibility modules remain."),)
+    )
+
+    result = RepositoryGuardrailScanner(
+        root,
+        expected_revision=revision,
+    ).scan(plans).results[0]
+
+    assert result.state == "unavailable"
+    assert result.diagnostics[0].code == "guardrail_scan_dirty_checkout"
+
+
 def test_explicit_safety_limit_produces_partial_coverage(tmp_path: Path) -> None:
     root, revision = _repository(
         tmp_path,
@@ -178,4 +197,62 @@ def test_explicit_safety_limit_produces_partial_coverage(tmp_path: Path) -> None
 
     assert result.state == "partial"
     assert result.coverages[0].state == "partial"
+    assert len(result.truncations) == 1
+    assert result.truncations[0].kind == "file_limit"
+    assert result.truncations[0].surface == "paths"
+    assert result.truncations[0].limit == 1
+    assert result.truncations[0].observed == 2
     assert result.diagnostics[0].code == "guardrail_scan_budget_truncated"
+    assert "file limit on paths (limit 1, observed 2)" in (
+        result.diagnostics[0].message
+    )
+
+
+def test_byte_and_match_limits_retain_exact_typed_boundaries(
+    tmp_path: Path,
+) -> None:
+    root, revision = _repository(
+        tmp_path,
+        {"a.txt": "compatibility modules\ncompatibility modules\n"},
+    )
+    plans = compile_guardrail_scan_plans(
+        (_guardrail("No compatibility modules remain."),)
+    )
+
+    byte_result = RepositoryGuardrailScanner(
+        root,
+        expected_revision=revision,
+        limits=GuardrailScanLimits(max_bytes=1),
+    ).scan(plans).results[0]
+    match_result = RepositoryGuardrailScanner(
+        root,
+        expected_revision=revision,
+        limits=GuardrailScanLimits(max_matches_per_plan=1),
+    ).scan(plans).results[0]
+
+    assert byte_result.truncations[0].kind == "byte_limit"
+    assert byte_result.truncations[0].surface == "file_content"
+    assert byte_result.truncations[0].limit == 1
+    assert match_result.truncations[0].kind == "match_limit"
+    assert match_result.truncations[0].surface == "file_content"
+    assert match_result.truncations[0].limit == 1
+
+
+def test_identifier_selector_scans_symbol_name_surface(tmp_path: Path) -> None:
+    root, revision = _repository(
+        tmp_path,
+        {"src/service.py": "legacy_mode = False\n"},
+    )
+    plans = compile_guardrail_scan_plans(
+        (_guardrail("No `legacy_mode` remains."),)
+    )
+
+    result = RepositoryGuardrailScanner(
+        root,
+        expected_revision=revision,
+    ).scan(plans).results[0]
+
+    assert result.state == "complete"
+    assert any(item.surface == "symbol_names" for item in result.matches)
+    assert result.coverages[2].state == "complete"
+    assert result.coverages[2].inspected_count > 0

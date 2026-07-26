@@ -17,6 +17,7 @@ from prismcode.model.contracts import (
     GuardrailScanResultSet,
     GuardrailScanSelector,
     GuardrailScanSurface,
+    GuardrailScanTruncation,
     SourceRef,
 )
 
@@ -37,6 +38,7 @@ _IGNORED_DIRECTORIES = frozenset(
         "venv",
     }
 )
+_SYMBOL_NAME = re.compile(r"(?<![A-Za-z0-9_])[A-Za-z_][A-Za-z0-9_]*(?![A-Za-z0-9_])")
 
 
 class GuardrailScanner(Protocol):
@@ -85,17 +87,33 @@ class RepositoryGuardrailScanner:
                 )
                 for plan in plans.plans
             )
-        else:
-            paths, paths_truncated = self._repository_paths()
+        elif not _tracked_checkout_clean(self.repo_root):
             results = tuple(
-                self._scan_plan(plan, revision, paths, paths_truncated)
+                _unavailable(
+                    plan,
+                    self.repo_root,
+                    revision,
+                    "guardrail_scan_dirty_checkout",
+                    (
+                        "Guardrail scanning requires tracked checkout content "
+                        "to match the reviewed head exactly."
+                    ),
+                )
+                for plan in plans.plans
+            )
+        else:
+            paths, path_truncation = self._repository_paths()
+            results = tuple(
+                self._scan_plan(plan, revision, paths, path_truncation)
                 for plan in plans.plans
             )
         result_set = GuardrailScanResultSet(results)
         result_set.validate_consistency(plans)
         return result_set
 
-    def _repository_paths(self) -> tuple[tuple[Path, ...], bool]:
+    def _repository_paths(
+        self,
+    ) -> tuple[tuple[Path, ...], GuardrailScanTruncation | None]:
         result = subprocess.run(
             ["git", "-C", str(self.repo_root), "ls-files", "-z"],
             check=True,
@@ -114,17 +132,24 @@ class RepositoryGuardrailScanner:
             if not set(Path(relative).parts) & _IGNORED_DIRECTORIES
             and not path.is_symlink()
         )
-        return (
-            paths[: self.limits.max_files],
-            len(paths) > self.limits.max_files,
+        truncation = (
+            GuardrailScanTruncation(
+                kind="file_limit",
+                surface="paths",
+                limit=self.limits.max_files,
+                observed=len(paths),
+            )
+            if len(paths) > self.limits.max_files
+            else None
         )
+        return paths[: self.limits.max_files], truncation
 
     def _scan_plan(
         self,
         plan: GuardrailScanPlan,
         revision: str,
         paths: tuple[Path, ...],
-        paths_truncated: bool,
+        path_truncation: GuardrailScanTruncation | None,
     ) -> GuardrailScanResult:
         if not plan.selectors:
             return _unavailable(
@@ -136,11 +161,16 @@ class RepositoryGuardrailScanner:
             )
         matches: list[GuardrailScanMatch] = []
         bytes_read = 0
+        inspected_paths = 0
         inspected_files = 0
-        bytes_truncated = False
-        matches_truncated = False
+        inspected_symbol_names = 0
+        truncations: list[GuardrailScanTruncation] = []
+        if path_truncation is not None:
+            truncations.append(path_truncation)
+        stopped = False
 
         for path in paths:
+            inspected_paths += 1
             relative = path.relative_to(self.repo_root).as_posix()
             for selector in plan.selectors:
                 if _matches(relative, selector):
@@ -148,10 +178,21 @@ class RepositoryGuardrailScanner:
                         _match(plan, selector, "paths", relative, None, relative)
                     )
                     if len(matches) >= self.limits.max_matches_per_plan:
-                        matches_truncated = True
+                        truncations.append(
+                            GuardrailScanTruncation(
+                                kind="match_limit",
+                                surface="paths",
+                                limit=self.limits.max_matches_per_plan,
+                                observed=len(matches),
+                            )
+                        )
+                        stopped = True
                         break
-            if matches_truncated:
+            if stopped:
                 break
+
+        for path in (() if stopped else paths):
+            relative = path.relative_to(self.repo_root).as_posix()
             try:
                 raw = path.read_bytes()
             except OSError:
@@ -159,7 +200,14 @@ class RepositoryGuardrailScanner:
             if b"\0" in raw[:4_096]:
                 continue
             if bytes_read + len(raw) > self.limits.max_bytes:
-                bytes_truncated = True
+                truncations.append(
+                    GuardrailScanTruncation(
+                        kind="byte_limit",
+                        surface="file_content",
+                        limit=self.limits.max_bytes,
+                        observed=bytes_read + len(raw),
+                    )
+                )
                 break
             bytes_read += len(raw)
             inspected_files += 1
@@ -178,42 +226,72 @@ class RepositoryGuardrailScanner:
                             )
                         )
                         if len(matches) >= self.limits.max_matches_per_plan:
-                            matches_truncated = True
+                            truncations.append(
+                                GuardrailScanTruncation(
+                                    kind="match_limit",
+                                    surface="file_content",
+                                    limit=self.limits.max_matches_per_plan,
+                                    observed=len(matches),
+                                )
+                            )
+                            stopped = True
                             break
-                if matches_truncated:
+                if stopped:
                     break
-            if matches_truncated:
+                for symbol_name in _SYMBOL_NAME.findall(line):
+                    inspected_symbol_names += 1
+                    for selector in plan.selectors:
+                        if (
+                            selector.kind == "identifier"
+                            and symbol_name.casefold() == selector.value.casefold()
+                        ):
+                            matches.append(
+                                _match(
+                                    plan,
+                                    selector,
+                                    "symbol_names",
+                                    relative,
+                                    line_number,
+                                    symbol_name,
+                                )
+                            )
+                            if len(matches) >= self.limits.max_matches_per_plan:
+                                truncations.append(
+                                    GuardrailScanTruncation(
+                                        kind="match_limit",
+                                        surface="symbol_names",
+                                        limit=self.limits.max_matches_per_plan,
+                                        observed=len(matches),
+                                    )
+                                )
+                                stopped = True
+                                break
+                    if stopped:
+                        break
+                if stopped:
+                    break
+            if stopped:
                 break
 
-        symbol_unavailable = "symbol_names" in plan.surfaces
-        partial = (
-            paths_truncated
-            or bytes_truncated
-            or matches_truncated
-            or symbol_unavailable
-        )
+        partial = bool(truncations)
         state = "partial" if partial else "complete"
-        budget_truncated = paths_truncated or bytes_truncated or matches_truncated
         coverage_message = (
-            "Scan stopped at an explicit safety boundary."
-            if budget_truncated
-            else "All eligible checkout files were inspected."
+            _truncation_message(tuple(truncations))
+            if truncations
+            else "All eligible tracked checkout files were inspected."
+        )
+        paths_partial = any(
+            item.kind == "file_limit" or item.surface == "paths"
+            for item in truncations
         )
         coverages = (
             GuardrailScanCoverage(
                 surface="paths",
-                state=(
-                    "partial"
-                    if paths_truncated or matches_truncated
-                    else "complete"
-                ),
-                inspected_count=len(paths),
-                limit=self.limits.max_files,
+                state="partial" if paths_partial else "complete",
+                inspected_count=inspected_paths,
                 message=(
-                    "Repository file limit reached."
-                    if paths_truncated
-                    else "Match limit reached while inspecting paths."
-                    if matches_truncated
+                    coverage_message
+                    if paths_partial
                     else "Eligible repository paths enumerated."
                 ),
             ),
@@ -222,26 +300,18 @@ class RepositoryGuardrailScanner:
                 state=state,
                 inspected_count=inspected_files,
                 inspected_bytes=bytes_read,
-                limit=self.limits.max_bytes,
                 message=coverage_message,
             ),
-            *(
-                (
-                    GuardrailScanCoverage(
-                        surface="symbol_names",
-                        state="unavailable",
-                        message=(
-                            "No repository-wide symbol-name inventory provider "
-                            "is connected to this scan."
-                        ),
-                    ),
-                )
-                if symbol_unavailable
-                else ()
+            GuardrailScanCoverage(
+                surface="symbol_names",
+                state=state,
+                inspected_count=inspected_symbol_names,
+                inspected_bytes=bytes_read,
+                message=coverage_message,
             ),
         )
         diagnostics = ()
-        if budget_truncated:
+        if truncations:
             diagnostics = (
                 Diagnostic(
                     code="guardrail_scan_budget_truncated",
@@ -257,6 +327,7 @@ class RepositoryGuardrailScanner:
             root_path=".",
             state=state,
             coverages=coverages,
+            truncations=tuple(truncations),
             matches=tuple(matches),
             diagnostics=diagnostics,
         )
@@ -362,3 +433,36 @@ def _checkout_revision(repo_root: Path) -> str:
     except (OSError, subprocess.SubprocessError):
         return ""
     return result.stdout.strip()
+
+
+def _tracked_checkout_clean(repo_root: Path) -> bool:
+    try:
+        result = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(repo_root),
+                "status",
+                "--porcelain",
+                "--untracked-files=no",
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return not result.stdout.strip()
+
+
+def _truncation_message(
+    truncations: tuple[GuardrailScanTruncation, ...],
+) -> str:
+    return "Scan stopped at " + ", ".join(
+        (
+            f"{item.kind.replace('_', ' ')} on {item.surface} "
+            f"(limit {item.limit}, observed {item.observed})"
+        )
+        for item in truncations
+    ) + "."

@@ -46,7 +46,10 @@ def test_guardrail_plans_are_one_to_one_stable_and_conclusion_free() -> None:
     assert all(item.revision_side == "head" for item in first.plans)
     assert all(item.scope == "repository" for item in first.plans)
     assert all(item.root_paths == (".",) for item in first.plans)
-    assert all(item.surfaces == ("paths", "file_content") for item in first.plans)
+    assert all(
+        item.surfaces == ("paths", "file_content", "symbol_names")
+        for item in first.plans
+    )
     assert [item.value for item in first.plans[0].selectors] == [
         "compatibility modules"
     ]
@@ -120,7 +123,10 @@ def test_pipeline_projects_plan_only_for_g_and_keeps_absence_unproven() -> None:
     assert html.count(
         '<span class="block-title">Guardrail scan plan</span>'
     ) == 2
-    assert "repository paths / file_content · head revision" in html
+    assert (
+        "repository paths / file_content / symbol_names · head revision"
+        in html
+    )
     assert "No bounded repository scan provider was configured." in html
     assert "No compatibility modules remain." in html
     assert "guardrail satisfied" not in html.casefold()

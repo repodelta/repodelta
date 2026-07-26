@@ -18,7 +18,9 @@ owns the only executable selector representation. The scanner consumes those
 selectors without reinterpreting prose. Results identify revision, root,
 per-surface coverage, safety limits, and candidate locations. File enumeration
 uses the tracked head inventory and never inspects untracked checkout files or
-symlink targets.
+symlink targets. A matching HEAD pointer is insufficient: tracked working-tree
+content must also be clean before scanning begins. Path, file-content, and
+lexical symbol-name surfaces are always present in result coverage.
 
 ## Must not
 
@@ -28,8 +30,8 @@ acceptance.
 
 ## Diagnostics
 
-Reports missing executable selectors, stale checkouts, unsupported scan
-surfaces, and exact file/byte/match safety boundaries.
+Reports missing executable selectors, stale or dirty checkouts, and exact
+typed file/byte/match safety boundaries with limits and observed counts.
 
 ## Extension points
 

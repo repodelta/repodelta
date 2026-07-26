@@ -176,12 +176,25 @@ def _boundary_fact(
         )
         for item in result.coverages
     )
+    truncation = " · ".join(
+        (
+            f"{item.kind.replace('_', ' ')} on {item.surface}: "
+            f"limit {item.limit}, observed {item.observed}"
+        )
+        for item in result.truncations
+    )
     sources = _sources(evidence, brief)
     return (
         '<div class="projection-item">'
         '<span class="relation-label">bounded observation</span>'
         f'<span class="projection-copy">{escape(evidence.summary)}</span>'
         f'<span class="relation-reason">{escape(coverage)}</span>'
+        + (
+            f'<span class="relation-reason">Safety boundary: '
+            f"{escape(truncation)}</span>"
+            if truncation
+            else ""
+        )
         + (
             f'<span class="projection-source">Candidate locations: {sources}</span>'
             if sources

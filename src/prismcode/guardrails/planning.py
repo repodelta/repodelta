@@ -97,11 +97,7 @@ def _plan(guardrail: Requirement) -> GuardrailScanPlan:
         surfaces=(
             "paths",
             "file_content",
-            *(
-                ("symbol_names",)
-                if any(item.kind == "identifier" for item in selectors)
-                else ()
-            ),
+            "symbol_names",
         ),
         selectors=selectors,
         sources=guardrail.sources,

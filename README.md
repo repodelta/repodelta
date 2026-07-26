@@ -185,7 +185,9 @@ Codegraph index or the bounded G guardrail scanner. Guardrail plans own their
 deterministic selectors; the scanner inspects eligible paths and text under
 explicit file, byte, and match limits and reports per-surface coverage. It
 scans only tracked head files, excluding untracked checkout content and
-symlink targets. A
+symlink targets, and refuses a tracked working tree that differs from HEAD.
+Path, file-content, and lexical symbol-name coverage are recorded separately;
+truncation retains the exact boundary kind, limit, and observed count. A
 zero-match observation is never presented as guardrail satisfaction or
 repository-wide absence.
 
