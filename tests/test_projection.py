@@ -233,8 +233,8 @@ def test_projection_uses_terminal_aware_structural_support_set() -> None:
                 "depth": len(steps),
                 "steps": tuple(
                     {
-                        "source_symbol_id": source,
-                        "target_symbol_id": target,
+                        "source_evidence_id": f"E:{source}",
+                        "target_evidence_id": f"E:{target}",
                         "relation": "calls",
                         "direction": "outgoing",
                     }
@@ -273,8 +273,8 @@ def test_projection_uses_terminal_aware_structural_support_set() -> None:
             symbol("E:runtime", "runtime"),
             symbol("E:test", "test", profile="test"),
             symbol("E:detour", "detour"),
-            symbol("E:anchor-2", "anchor_2", changed=True),
-            symbol("E:runtime-2", "runtime_2"),
+            symbol("E:anchor_2", "anchor_2", changed=True),
+            symbol("E:runtime_2", "runtime_2"),
             path("E:path:runtime", ("anchor", "runtime")),
             path(
                 "E:path:runtime-long",
@@ -323,18 +323,18 @@ def test_projection_uses_terminal_aware_structural_support_set() -> None:
             "E:test",
             bridges=("E:path:test",),
         ),
-        relation("A-2", "changed_anchor", "E:anchor-2", ordinal=1),
+        relation("A-2", "changed_anchor", "E:anchor_2", ordinal=1),
         relation(
             "P-independent",
             "structural_path",
             "E:path:independent",
-            bridges=("E:anchor-2",),
+            bridges=("E:anchor_2",),
             ordinal=3,
         ),
         relation(
             "C-runtime-2",
             "runtime_context",
-            "E:runtime-2",
+            "E:runtime_2",
             bridges=("E:path:independent",),
             ordinal=1,
         ),
@@ -365,8 +365,8 @@ def test_projection_uses_terminal_aware_structural_support_set() -> None:
         "E:anchor",
         "E:runtime",
         "E:test",
-        "E:anchor-2",
-        "E:runtime-2",
+        "E:anchor_2",
+        "E:runtime_2",
     }
     assert len(graph.edges) == 3
     assert graph.edges[0].path_relation_ids == ("P-runtime", "P-test")
@@ -376,8 +376,8 @@ def test_projection_uses_terminal_aware_structural_support_set() -> None:
         "E:anchor": ("P-runtime", "P-test"),
         "E:runtime": ("P-runtime", "P-test"),
         "E:test": ("P-test",),
-        "E:anchor-2": ("P-independent",),
-        "E:runtime-2": ("P-independent",),
+        "E:anchor_2": ("P-independent",),
+        "E:runtime_2": ("P-independent",),
     }
 
 

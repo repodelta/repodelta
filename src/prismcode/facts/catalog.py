@@ -253,8 +253,14 @@ def _put_structural_revision(
                         "depth": path.depth,
                         "steps": tuple(
                             {
-                                "source_symbol_id": step.source.id,
-                                "target_symbol_id": step.target.id,
+                                "source_evidence_id": _symbol_evidence_id(
+                                    step.source.id,
+                                    revision_side,
+                                ),
+                                "target_evidence_id": _symbol_evidence_id(
+                                    step.target.id,
+                                    revision_side,
+                                ),
                                 "relation": step.relation,
                                 "direction": step.direction,
                             }
@@ -500,12 +506,7 @@ def _symbol_item(
         symbol.file_path,
     )
     return EvidenceItem(
-        id=evidence_id(
-            "symbol",
-            symbol.id
-            if revision_side == "head"
-            else f"base:{symbol.id}",
-        ),
+        id=_symbol_evidence_id(symbol.id, revision_side),
         kind="symbol",
         summary=f"{'Changed' if changed else 'Unchanged'} {symbol.kind}: {symbol.qualified_name}",
         classification=_path_classification(symbol.file_path),
@@ -624,6 +625,14 @@ def _path_key(path: StructuralPath, revision_side: StructuralRevision) -> str:
     )
     identity = f"{path.seed_symbol_id}|{steps}"
     return identity if revision_side == "head" else f"base|{identity}"
+
+
+def _symbol_evidence_id(
+    symbol_id: str,
+    revision_side: StructuralRevision,
+) -> str:
+    identity = symbol_id if revision_side == "head" else f"base:{symbol_id}"
+    return evidence_id("symbol", identity)
 
 
 def _path_summary(path: StructuralPath) -> str:

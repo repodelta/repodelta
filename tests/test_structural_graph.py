@@ -34,6 +34,7 @@ def _create_index(
     root: Path,
     *,
     source: str = "class Service:\n    def run(self):\n        return 1\n",
+    connect_symbols: bool = False,
 ) -> Path:
     source_path = root / "src" / "service.py"
     source_path.parent.mkdir(parents=True)
@@ -98,6 +99,11 @@ def _create_index(
             "INSERT INTO files (path, content_hash) VALUES (?, ?)",
             ("src/service.py", hashlib.sha256(source.encode()).hexdigest()),
         )
+        if connect_symbols:
+            connection.execute(
+                "INSERT INTO edges VALUES (?, ?, ?)",
+                ("class:Service", "method:Service.run", "calls"),
+            )
     return database
 
 
@@ -239,10 +245,12 @@ def test_replacement_collects_distinct_head_and_base_symbol_facts(
     _create_index(
         head_root,
         source="class Service:\n    def run(self):\n        return 2\n",
+        connect_symbols=True,
     )
     _create_index(
         base_root,
         source="class Service:\n    def run(self):\n        return 1\n",
+        connect_symbols=True,
     )
     packet = _packet(
         "@@ -3 +3 @@\n-        return 1\n+        return 2\n"
@@ -285,6 +293,15 @@ def test_replacement_collects_distinct_head_and_base_symbol_facts(
     assert symbols[0].metadata["symbol_id"] == symbols[1].metadata["symbol_id"]
     assert "/blob/base123/" in symbols[0].sources[0].url
     assert "/blob/head123/" in symbols[1].sources[0].url
+    paths = tuple(
+        item for item in brief.evidence_catalog.items if item.kind == "structural_path"
+    )
+    assert {item.revision_side for item in paths} == {"base", "head"}
+    evidence = brief.evidence_catalog.by_id()
+    for path in paths:
+        for step in path.metadata["steps"]:
+            assert evidence[step["source_evidence_id"]].revision_side == path.revision_side
+            assert evidence[step["target_evidence_id"]].revision_side == path.revision_side
 
 
 def test_removed_relation_maps_exact_base_symbol(tmp_path: Path) -> None:

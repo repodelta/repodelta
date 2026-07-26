@@ -30,11 +30,6 @@ def build_review_projection(
 
     relations = candidates.by_id()
     evidence = evidence_catalog.by_id()
-    symbol_evidence_ids = {
-        item.metadata["symbol_id"]: item.id
-        for item in evidence_catalog.items
-        if item.kind == "symbol" and item.metadata.get("symbol_id")
-    }
     convergence_groups = {
         item.focus_statement_id: item for item in convergence.groups
     }
@@ -72,7 +67,6 @@ def build_review_projection(
             runtime_relations=by_slot["runtime_context"],
             test_relations=by_slot["test_context"],
             evidence=evidence,
-            symbol_evidence_ids=symbol_evidence_ids,
         )
         graph_node_ids = {item.evidence_id for item in overlay.nodes}
         for node in nodes:
@@ -162,7 +156,6 @@ def _structural_focus_overlay(
     runtime_relations: tuple[ProjectionRelation, ...],
     test_relations: tuple[ProjectionRelation, ...],
     evidence: dict[str, EvidenceItem],
-    symbol_evidence_ids: dict[str, str],
 ) -> tuple[
     StructuralFocusOverlay,
     tuple[StructuralGraphNode, ...],
@@ -204,9 +197,9 @@ def _structural_focus_overlay(
                 f"{path_relation.id}"
             )
         for step in path.metadata.get("steps", ()):
-            source_id = symbol_evidence_ids.get(step.get("source_symbol_id"))
-            target_id = symbol_evidence_ids.get(step.get("target_symbol_id"))
-            if source_id is None or target_id is None:
+            source_id = step.get("source_evidence_id")
+            target_id = step.get("target_evidence_id")
+            if source_id not in evidence or target_id not in evidence:
                 raise ValueError(
                     "selected structural path references a missing symbol fact: "
                     f"{path_relation.id}"

@@ -630,12 +630,13 @@ class EvidenceCatalog:
     change_relations: tuple[ChangeRelation, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
     guardrail_scan_diagnostics: tuple[GuardrailScanDiagnostic, ...] = ()
-    schema_version: str = "evidence_catalog.v9"
+    schema_version: str = "evidence_catalog.v10"
 
     def by_id(self) -> dict[str, EvidenceItem]:
         return {item.id: item for item in self.items}
 
     def validate_consistency(self) -> None:
+        items_by_id = self.by_id()
         if len({item.id for item in self.change_relations}) != len(
             self.change_relations
         ):
@@ -657,6 +658,14 @@ class EvidenceCatalog:
                 raise ValueError(
                     f"{item.id}: canonical changed evidence requires relation IDs"
                 )
+            if item.kind == "structural_path":
+                for step in item.metadata.get("steps", ()):
+                    for field in ("source_evidence_id", "target_evidence_id"):
+                        symbol = items_by_id.get(step.get(field))
+                        if symbol is None or symbol.kind != "symbol":
+                            raise ValueError(
+                                f"{item.id}: {field} must reference symbol evidence"
+                            )
 
 
 @dataclass(frozen=True)
