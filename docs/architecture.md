@@ -190,13 +190,16 @@ equivalent claim tier crosses the display budget, stable source order is
 disclosed as a tie-break through an `ambiguous` diagnostic. There is no
 all-statement/all-evidence numeric score or global candidate budget.
 
-`ReviewProjection` references only relation IDs selected by
-`CandidateConvergence`. Profiles remain canonical in
-`ProjectionCandidateSet`; convergence and routing diagnostics remain in their
-own canonical contracts. `ReviewOverview` owns review-wide CI, source,
-empty-state, and structural coverage facts. HTML and CLI resolve and format
-these contracts; they do not match, classify, select paths, interpret provider
-codes, or infer why a slot is empty.
+`ReviewProjection` references only IDs selected by `CandidateConvergence`.
+Selected structural paths are projected once into canonical symbol nodes and
+typed edges. Shared path prefixes collapse by edge identity, and each edge
+retains its supporting path relation IDs. Graph-backed anchors and contexts
+move into this subgraph; only non-graph facts remain in standalone lists.
+Profiles remain canonical in `ProjectionCandidateSet`; convergence and routing
+diagnostics remain in their own canonical contracts. `ReviewOverview` owns
+review-wide CI, source, empty-state, and structural coverage facts. HTML and CLI
+resolve and format these contracts; they do not match, classify, join or select
+paths, interpret provider codes, or infer why a slot is empty.
 
 Attention normalization preserves diagnostic scope and provider. Aggregation
 requires the same scope, provider, slot, and state, so review-wide provider

@@ -282,24 +282,33 @@ Use an ordered rule set:
 These strengths are ordinal. A number may break ties within one relation kind,
 but no universal additive score is required.
 
-### Candidate containers
+### Projection containers
 
-Introduce a versioned, reference-only intermediate view:
+The versioned, reference-only selected view is:
 
 ```text
-ProjectionCandidateSet
-  focus_candidates[]
+ReviewProjection
+  slices[]
     focus_statement_id
     claim_relation_ids[]
-    changed_anchor_relation_ids[]
-    runtime_relation_ids[]
-    test_relation_ids[]
+    standalone_changed_anchor_relation_ids[]
+    standalone_runtime_relation_ids[]
+    standalone_test_relation_ids[]
     verification_relation_ids[]
-    structural_path_relation_ids[]
+    structural_subgraph
+      path_relation_ids[]
+      nodes[evidence_id, role, relation_ids[]]
+      edges[source_evidence_id, relation, direction,
+            target_evidence_id, path_relation_ids[]]
     diagnostics[]
 ```
 
-Relations reference canonical statement and evidence IDs and contain:
+The upstream `ProjectionCandidateSet` still enumerates typed relations.
+Projection nodes and edges reference canonical evidence/relation IDs and copy
+no statement or evidence content. Shared selected path prefixes collapse to one
+edge without discarding path provenance.
+
+Candidate relations contain:
 
 - slot;
 - association kind;
