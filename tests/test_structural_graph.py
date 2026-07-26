@@ -2,13 +2,28 @@ from __future__ import annotations
 
 import hashlib
 import sqlite3
+from contextlib import nullcontext
 from pathlib import Path
+from types import SimpleNamespace
 
 from prismcode.pipeline import DeterministicAnalyzer
 from prismcode.providers.codegraph import CodegraphProvider
-from prismcode.model.contracts import AnalysisInput, ChangedFile, ReviewSourcePacket
+from prismcode.model.contracts import (
+    AnalysisInput,
+    ChangedFile,
+    ReviewSourcePacket,
+    SourceRef,
+)
 from prismcode.changes.hunks import parse_changed_files, parse_unified_patch
-from prismcode.providers.structural import StructuralGraphProvider
+from prismcode.providers.structural import (
+    GraphPathStep,
+    GraphSymbol,
+    HunkSymbolOverlap,
+    StructuralGraphIndexStatus,
+    StructuralGraphProvider,
+    StructuralGraphResult,
+    StructuralTraversalPolicy,
+)
 from prismcode.providers.mapping import map_packet_changed_symbols
 
 
@@ -432,7 +447,7 @@ def test_analyzer_preserves_structural_facts_without_using_them_as_conclusions(
         AnalysisInput(packet=packet, structural_graph=structural)
     )
 
-    assert brief.schema_version == "review_brief.v20"
+    assert brief.schema_version == "review_brief.v21"
     assert brief.requirements == lexical_only.requirements == ()
     serialized = brief.to_dict()
     assert "structural_graph" not in serialized
@@ -565,3 +580,235 @@ def test_bounded_paths_load_unchanged_y_to_x_to_z_neighbors(tmp_path: Path) -> N
     assert all(step.target.id != "V" for path in result.paths for step in path.steps)
     assert max(path.depth for path in result.paths) == 3
     assert all(step.relation != "contains" for path in result.paths for step in path.steps)
+
+
+def test_traversal_budgets_are_fair_and_reported_per_seed(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    def symbol(identifier: str) -> GraphSymbol:
+        return GraphSymbol(
+            id=identifier,
+            kind="function",
+            name=identifier,
+            qualified_name=identifier,
+            file_path=f"src/{identifier}.py",
+            language="python",
+            start_line=1,
+            end_line=2,
+            sources=(SourceRef(label=identifier),),
+        )
+
+    symbols = {
+        identifier: symbol(identifier)
+        for identifier in ("A", "A1", "A2", "A3", "B", "B1")
+    }
+    adjacency = {
+        "A": ("A1", "A2", "A3"),
+        "B": ("B1",),
+    }
+    provider = CodegraphProvider(tmp_path)
+    monkeypatch.setattr(
+        provider,
+        "_connect",
+        lambda: nullcontext(SimpleNamespace(row_factory=None)),
+    )
+    monkeypatch.setattr(
+        provider,
+        "_neighbor_steps",
+        lambda _connection, current, _relations: tuple(
+            GraphPathStep(
+                source=current,
+                target=symbols[target],
+                relation="calls",
+                direction="outgoing",
+            )
+            for target in adjacency.get(current.id, ())
+        ),
+    )
+    initial = StructuralGraphResult(
+        index=StructuralGraphIndexStatus(state="available", provider="codegraph"),
+        hunk_count=2,
+        overlaps=(
+            HunkSymbolOverlap(hunk_id="H:A", symbol=symbols["A"], changed_lines=(1,)),
+            HunkSymbolOverlap(hunk_id="H:B", symbol=symbols["B"], changed_lines=(1,)),
+        ),
+    )
+
+    result = provider.expand_paths(
+        initial,
+        policy=StructuralTraversalPolicy(
+            max_depth=1,
+            max_nodes_per_seed=10,
+            max_paths_per_seed=2,
+            max_total_nodes=20,
+            max_total_paths=10,
+        ),
+    )
+
+    assert [(item.seed_symbol_id, item.state) for item in result.traversal_coverage] == [
+        ("A", "truncated"),
+        ("B", "complete"),
+    ]
+    assert result.traversal_coverage[0].limiting_dimensions == (
+        "seed_path_budget",
+    )
+    assert result.traversal_coverage[0].path_count == 2
+    assert result.traversal_coverage[1].path_count == 1
+    assert any(item.seed_symbol_id == "B" for item in result.paths)
+    assert [item.code for item in result.diagnostics] == [
+        "structural_graph_seed_traversal_truncated"
+    ]
+
+
+def test_review_path_budget_is_global_and_round_robin_fair(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    def symbol(identifier: str) -> GraphSymbol:
+        return GraphSymbol(
+            id=identifier,
+            kind="function",
+            name=identifier,
+            qualified_name=identifier,
+            file_path=f"src/{identifier}.py",
+            language="python",
+            start_line=1,
+            end_line=2,
+        )
+
+    symbols = {
+        identifier: symbol(identifier)
+        for identifier in ("A", "A1", "A2", "B", "B1", "B2")
+    }
+    adjacency = {"A": ("A1", "A2"), "B": ("B1", "B2")}
+    provider = CodegraphProvider(tmp_path)
+    monkeypatch.setattr(
+        provider,
+        "_connect",
+        lambda: nullcontext(SimpleNamespace(row_factory=None)),
+    )
+    monkeypatch.setattr(
+        provider,
+        "_neighbor_steps",
+        lambda _connection, current, _relations: tuple(
+            GraphPathStep(
+                source=current,
+                target=symbols[target],
+                relation="calls",
+                direction="outgoing",
+            )
+            for target in adjacency.get(current.id, ())
+        ),
+    )
+
+    result = provider.expand_paths(
+        StructuralGraphResult(
+            index=StructuralGraphIndexStatus(state="available", provider="codegraph"),
+            hunk_count=2,
+            overlaps=(
+                HunkSymbolOverlap(
+                    hunk_id="H:A",
+                    symbol=symbols["A"],
+                    changed_lines=(1,),
+                ),
+                HunkSymbolOverlap(
+                    hunk_id="H:B",
+                    symbol=symbols["B"],
+                    changed_lines=(1,),
+                ),
+            ),
+        ),
+        policy=StructuralTraversalPolicy(
+            max_depth=1,
+            max_nodes_per_seed=10,
+            max_paths_per_seed=10,
+            max_total_nodes=20,
+            max_total_paths=2,
+        ),
+    )
+
+    assert [item.seed_symbol_id for item in result.paths] == ["A", "B"]
+    assert len(result.paths) == 2
+    assert {
+        item.limiting_dimensions for item in result.traversal_coverage
+    } == {("review_path_budget",)}
+
+
+def test_per_seed_node_budget_reports_its_limiting_dimension(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    seed = GraphSymbol(
+        id="seed",
+        kind="function",
+        name="seed",
+        qualified_name="seed",
+        file_path="src/seed.py",
+        language="python",
+        start_line=1,
+        end_line=2,
+    )
+    neighbors = tuple(
+        GraphSymbol(
+            id=f"neighbor-{index}",
+            kind="function",
+            name=f"neighbor-{index}",
+            qualified_name=f"neighbor-{index}",
+            file_path=f"src/neighbor_{index}.py",
+            language="python",
+            start_line=1,
+            end_line=2,
+        )
+        for index in range(2)
+    )
+    provider = CodegraphProvider(tmp_path)
+    monkeypatch.setattr(
+        provider,
+        "_connect",
+        lambda: nullcontext(SimpleNamespace(row_factory=None)),
+    )
+    monkeypatch.setattr(
+        provider,
+        "_neighbor_steps",
+        lambda _connection, current, _relations: (
+            tuple(
+                GraphPathStep(
+                    source=current,
+                    target=target,
+                    relation="calls",
+                    direction="outgoing",
+                )
+                for target in neighbors
+            )
+            if current.id == seed.id
+            else ()
+        ),
+    )
+
+    result = provider.expand_paths(
+        StructuralGraphResult(
+            index=StructuralGraphIndexStatus(state="available", provider="codegraph"),
+            hunk_count=1,
+            overlaps=(
+                HunkSymbolOverlap(
+                    hunk_id="H:seed",
+                    symbol=seed,
+                    changed_lines=(1,),
+                ),
+            ),
+        ),
+        policy=StructuralTraversalPolicy(
+            max_depth=1,
+            max_nodes_per_seed=2,
+            max_paths_per_seed=10,
+            max_total_nodes=10,
+            max_total_paths=10,
+        ),
+    )
+
+    assert result.traversal_coverage[0].state == "truncated"
+    assert result.traversal_coverage[0].node_count == 2
+    assert result.traversal_coverage[0].limiting_dimensions == (
+        "seed_node_budget",
+    )

@@ -676,6 +676,9 @@ class StructuralCoverage:
     mapped_hunk_count: int = 0
     symbol_count: int = 0
     path_count: int = 0
+    seed_count: int = 0
+    complete_seed_count: int = 0
+    truncated_seed_count: int = 0
     requested_files: int = 0
     indexed_files: int = 0
     missing_reason: Literal["index_absent", "files_unindexed", ""] = ""
@@ -711,7 +714,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v20"
+    schema_version: str = "review_brief.v21"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

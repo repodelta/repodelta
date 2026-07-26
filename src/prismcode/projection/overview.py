@@ -291,6 +291,13 @@ def _structural_coverage(
         mapped_hunk_count=result.mapped_hunk_count,
         symbol_count=len(result.overlaps),
         path_count=len(result.paths),
+        seed_count=len(result.traversal_coverage),
+        complete_seed_count=sum(
+            item.state == "complete" for item in result.traversal_coverage
+        ),
+        truncated_seed_count=sum(
+            item.state == "truncated" for item in result.traversal_coverage
+        ),
         requested_files=result.index.requested_files,
         indexed_files=result.index.indexed_files,
         missing_reason=missing_reason,

@@ -146,11 +146,15 @@ bounded structural paths:
 Structural mapping: Codegraph available · 4/4 hunks mapped to 3 symbols · 12 bounded paths · uncovered change spans retained
 ```
 
-Path expansion starts only from exact changed symbols, follows an explicit
-relation allowlist in both directions, and stops at deterministic three-hop,
-node, and path budgets. An exact symbol replaces the corresponding changed-hunk
-fallback; unmapped hunks remain canonical evidence. File fallback is used only
-when GitHub supplies no parseable hunk.
+Path expansion starts only from exact changed symbols and follows an explicit
+relation allowlist in both directions. A deterministic round-robin scheduler
+shares review-level node/path limits fairly while enforcing each seed's own
+three-hop, node, and path limits. A high-fanout seed therefore cannot consume
+the review budget before later changed symbols are inspected, and the total
+fact set remains bounded. The provider records complete or truncated traversal
+coverage for every seed. An exact symbol replaces the corresponding
+changed-hunk fallback; unmapped hunks remain canonical evidence. File fallback
+is used only when GitHub supplies no parseable hunk.
 
 #### Structure-aware review using another checkout
 

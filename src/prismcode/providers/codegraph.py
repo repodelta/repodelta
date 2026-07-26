@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import sqlite3
 import subprocess
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from prismcode.model.contracts import Diagnostic, SourceRef
@@ -14,7 +15,9 @@ from prismcode.providers.structural import (
     StructuralGraphIndexStatus,
     StructuralGraphResult,
     StructuralPath,
+    StructuralSeedCoverage,
     StructuralTraversalPolicy,
+    TraversalLimit,
 )
 
 _PROVIDER = "codegraph"
@@ -50,6 +53,24 @@ _REQUIRED_COLUMNS = {
     "edges": {"source", "target", "kind"},
     "files": {"path", "content_hash"},
 }
+
+
+@dataclass
+class _SeedTraversal:
+    seed: GraphSymbol
+    queue: list[
+        tuple[GraphSymbol, tuple[GraphPathStep, ...], frozenset[str]]
+    ]
+    discovered: set[str]
+    paths: list[StructuralPath] = field(default_factory=list)
+    limiting_dimensions: set[TraversalLimit] = field(default_factory=set)
+    cursor: int = 0
+    current: (
+        tuple[GraphSymbol, tuple[GraphPathStep, ...], frozenset[str]] | None
+    ) = None
+    neighbors: tuple[GraphPathStep, ...] = ()
+    neighbor_cursor: int = 0
+    exhausted: bool = False
 
 
 class CodegraphProvider:
@@ -315,77 +336,66 @@ class CodegraphProvider:
 
         if not result.index.usable or not result.overlaps:
             return result
-        if policy.max_depth < 1 or policy.max_nodes < 1 or policy.max_paths < 1:
+        if any(
+            value < 1
+            for value in (
+                policy.max_depth,
+                policy.max_nodes_per_seed,
+                policy.max_paths_per_seed,
+                policy.max_total_nodes,
+                policy.max_total_paths,
+            )
+        ):
             return result
 
         seed_symbols = {
             overlap.symbol.id: overlap.symbol for overlap in result.overlaps
         }
         paths: list[StructuralPath] = []
-        discovered = set(seed_symbols)
-        truncated = False
+        ordered_seeds = tuple(
+            sorted(seed_symbols.values(), key=lambda item: item.qualified_name)
+        )
+        traversals = [
+            _SeedTraversal(
+                seed=seed,
+                queue=[(seed, (), frozenset({seed.id}))],
+                discovered={seed.id},
+            )
+            for seed in ordered_seeds
+        ]
+        global_discovered = set(seed_symbols)
         try:
             with self._connect() as connection:
                 connection.row_factory = sqlite3.Row
-                for seed in sorted(
-                    seed_symbols.values(), key=lambda item: item.qualified_name
-                ):
-                    queue: list[tuple[GraphSymbol, tuple[GraphPathStep, ...], frozenset[str]]] = [
-                        (seed, (), frozenset({seed.id}))
-                    ]
-                    cursor = 0
-                    while cursor < len(queue):
-                        current, steps, visited = queue[cursor]
-                        cursor += 1
-                        if len(steps) >= policy.max_depth:
-                            continue
-                        for step in self._neighbor_steps(
-                            connection,
-                            current,
-                            policy.relation_allowlist,
-                        ):
-                            if step.target.id in visited:
-                                continue
-                            if len(paths) >= policy.max_paths:
-                                truncated = True
-                                break
-                            if (
-                                step.target.id not in discovered
-                                and len(discovered) >= policy.max_nodes
-                            ):
-                                truncated = True
-                                continue
-                            discovered.add(step.target.id)
-                            next_steps = (*steps, step)
-                            path_symbols = (seed, *(item.target for item in next_steps))
-                            paths.append(
-                                StructuralPath(
-                                    seed_symbol_id=seed.id,
-                                    steps=next_steps,
-                                    classification=_classify_path(path_symbols),
-                                    sources=tuple(
-                                        source
-                                        for symbol in path_symbols
-                                        for source in symbol.sources
-                                    ),
+                while any(not item.exhausted for item in traversals):
+                    if len(paths) >= policy.max_total_paths:
+                        for traversal in traversals:
+                            if not traversal.exhausted:
+                                traversal.limiting_dimensions.add(
+                                    "review_path_budget"
                                 )
-                            )
-                            queue.append(
-                                (
-                                    step.target,
-                                    next_steps,
-                                    visited | {step.target.id},
-                                )
-                            )
-                        if len(paths) >= policy.max_paths:
-                            break
-                    if len(paths) >= policy.max_paths:
+                                traversal.exhausted = True
                         break
+                    for traversal in traversals:
+                        if traversal.exhausted:
+                            continue
+                        path = self._advance_seed(
+                            connection,
+                            traversal,
+                            policy=policy,
+                            global_discovered=global_discovered,
+                        )
+                        if path is not None:
+                            paths.append(path)
+                        if len(paths) >= policy.max_total_paths:
+                            break
         except sqlite3.Error as exc:
             return StructuralGraphResult(
                 index=result.index,
                 hunk_count=result.hunk_count,
                 overlaps=result.overlaps,
+                paths=tuple(paths),
+                traversal_coverage=_seed_coverage(traversals),
                 diagnostics=(
                     *result.diagnostics,
                     Diagnostic(
@@ -396,17 +406,24 @@ class CodegraphProvider:
                 ),
             )
 
+        coverage = _seed_coverage(traversals)
         diagnostics = list(result.diagnostics)
-        if truncated:
+        for item in coverage:
+            if item.state != "truncated":
+                continue
             diagnostics.append(
                 Diagnostic(
-                    code="structural_graph_traversal_budget_reached",
+                    code="structural_graph_seed_traversal_truncated",
                     message=(
-                        "Structural path expansion stopped at its deterministic "
-                        f"budget ({policy.max_depth} hops, {policy.max_nodes} nodes, "
-                        f"{policy.max_paths} paths)."
+                        f"Structural traversal for seed {item.seed_symbol_id} "
+                        "reached its deterministic "
+                        f"{' and '.join(value.replace('_', ' ') for value in item.limiting_dimensions)} "
+                        "boundary "
+                        f"({item.node_count} nodes, {item.path_count} paths, "
+                        f"{policy.max_depth} hops)."
                     ),
                     severity="info",
+                    sources=item.sources,
                 )
             )
         return StructuralGraphResult(
@@ -414,8 +431,89 @@ class CodegraphProvider:
             hunk_count=result.hunk_count,
             overlaps=result.overlaps,
             paths=tuple(paths),
+            traversal_coverage=tuple(coverage),
             diagnostics=tuple(diagnostics),
         )
+
+    def _advance_seed(
+        self,
+        connection: sqlite3.Connection,
+        traversal: _SeedTraversal,
+        *,
+        policy: StructuralTraversalPolicy,
+        global_discovered: set[str],
+    ) -> StructuralPath | None:
+        """Advance one seed until it emits one path or exhausts its frontier."""
+
+        while not traversal.exhausted:
+            if traversal.current is None:
+                if traversal.cursor >= len(traversal.queue):
+                    traversal.exhausted = True
+                    return None
+                traversal.current = traversal.queue[traversal.cursor]
+                traversal.cursor += 1
+                current, steps, _visited = traversal.current
+                if len(steps) >= policy.max_depth:
+                    traversal.current = None
+                    continue
+                traversal.neighbors = self._neighbor_steps(
+                    connection,
+                    current,
+                    policy.relation_allowlist,
+                )
+                traversal.neighbor_cursor = 0
+
+            current, steps, visited = traversal.current
+            if traversal.neighbor_cursor >= len(traversal.neighbors):
+                traversal.current = None
+                continue
+            step = traversal.neighbors[traversal.neighbor_cursor]
+            traversal.neighbor_cursor += 1
+            if step.target.id in visited:
+                continue
+            if len(traversal.paths) >= policy.max_paths_per_seed:
+                traversal.limiting_dimensions.add("seed_path_budget")
+                traversal.exhausted = True
+                return None
+            if (
+                step.target.id not in traversal.discovered
+                and len(traversal.discovered) >= policy.max_nodes_per_seed
+            ):
+                traversal.limiting_dimensions.add("seed_node_budget")
+                continue
+            if (
+                step.target.id not in global_discovered
+                and len(global_discovered) >= policy.max_total_nodes
+            ):
+                traversal.limiting_dimensions.add("review_node_budget")
+                continue
+            traversal.discovered.add(step.target.id)
+            global_discovered.add(step.target.id)
+            next_steps = (*steps, step)
+            path_symbols = (
+                traversal.seed,
+                *(item.target for item in next_steps),
+            )
+            path = StructuralPath(
+                seed_symbol_id=traversal.seed.id,
+                steps=next_steps,
+                classification=_classify_path(path_symbols),
+                sources=tuple(
+                    source
+                    for symbol in path_symbols
+                    for source in symbol.sources
+                ),
+            )
+            traversal.paths.append(path)
+            traversal.queue.append(
+                (
+                    step.target,
+                    next_steps,
+                    visited | {step.target.id},
+                )
+            )
+            return path
+        return None
 
     def _neighbor_steps(
         self,
@@ -575,6 +673,30 @@ def _classify_path(symbols: tuple[GraphSymbol, ...]) -> str:
     if kinds == {False}:
         return "runtime"
     return "mixed"
+
+
+def _seed_coverage(
+    traversals: list[_SeedTraversal],
+) -> tuple[StructuralSeedCoverage, ...]:
+    order: tuple[TraversalLimit, ...] = (
+        "seed_node_budget",
+        "seed_path_budget",
+        "review_node_budget",
+        "review_path_budget",
+    )
+    return tuple(
+        StructuralSeedCoverage(
+            seed_symbol_id=item.seed.id,
+            state="truncated" if item.limiting_dimensions else "complete",
+            node_count=len(item.discovered),
+            path_count=len(item.paths),
+            limiting_dimensions=tuple(
+                limit for limit in order if limit in item.limiting_dimensions
+            ),
+            sources=item.seed.sources,
+        )
+        for item in traversals
+    )
 
 
 def _schema_error(connection: sqlite3.Connection) -> str:

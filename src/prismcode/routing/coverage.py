@@ -56,10 +56,17 @@ def review_provider_diagnostics(
                 scope="review",
             )
         )
-    if any(
-        item.code == "structural_graph_traversal_budget_reached"
-        for item in graph.diagnostics
-    ):
+    truncated = tuple(
+        item for item in graph.traversal_coverage if item.state == "truncated"
+    )
+    if truncated:
+        limiting_dimensions = tuple(
+            dict.fromkeys(
+                dimension
+                for item in truncated
+                for dimension in item.limiting_dimensions
+            )
+        )
         result.append(
             ProjectionDiagnostic(
                 focus_statement_id="review",
@@ -67,11 +74,20 @@ def review_provider_diagnostics(
                 state="budget_truncated",
                 provider=graph.index.provider,
                 message=(
-                    "Structural path collection reached the provider traversal "
-                    "budget before projection selection."
+                    f"Structural traversal completed for "
+                    f"{len(graph.traversal_coverage) - len(truncated)}/"
+                    f"{len(graph.traversal_coverage)} changed-symbol seeds; "
+                    f"{len(truncated)} reached the provider "
+                    f"{' and '.join(item.replace('_', ' ') for item in limiting_dimensions)} "
+                    "safety boundary."
                 ),
-                affected_ids=affected,
+                affected_ids=tuple(item.seed_symbol_id for item in truncated),
                 scope="review",
+                sources=tuple(
+                    dict.fromkeys(
+                        source for item in truncated for source in item.sources
+                    )
+                ),
             )
         )
     return tuple(result)

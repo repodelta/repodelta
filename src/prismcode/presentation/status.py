@@ -11,10 +11,19 @@ def format_structural_coverage(coverage: StructuralCoverage) -> str:
     if coverage.state == "unavailable":
         return "Structural mapping: unavailable · changed-span fallback used"
     if coverage.state == "available":
+        traversal = (
+            f"{coverage.complete_seed_count}/{coverage.seed_count} seeds complete"
+            + (
+                f", {coverage.truncated_seed_count} truncated"
+                if coverage.truncated_seed_count
+                else ""
+            )
+        )
         return (
             "Structural mapping: Codegraph available · "
             f"{coverage.mapped_hunk_count}/{coverage.hunk_count} hunks mapped to "
             f"{coverage.symbol_count} symbols · {coverage.path_count} bounded paths · "
+            f"{traversal} · "
             "uncovered change spans retained"
         )
     if coverage.state == "partial":
