@@ -47,13 +47,15 @@ not used to compare facts from different slots.
 ## Structural routing
 
 Routing enumerates structural relations for candidate exact changed symbols.
-Convergence takes the union of canonical paths rooted in selected anchors, then
-retains canonical runtime/test context identities reachable through those
-paths. Per-anchor and total path limits, and separate context identity limits,
-are safety boundaries rather than relevance competitions. Context found only
-through a safety-deferred path is reported as `upstream_deferred`. Without
-Codegraph, the same projection uses canonical changed-hunk or changed-file
-fallback and records typed structural diagnostics.
+Convergence derives canonical anchor-terminal connections from those paths and
+typed runtime/test contexts, retains shortest support for distinct terminals
+first, and selects paths and contexts atomically. Per-anchor and total path
+limits, and separate context identity limits, are safety boundaries rather than
+relevance competitions. Context found only through a safety-deferred connection
+is reported as `upstream_deferred`. Direct/provider context without a structural
+bridge remains standalone. Without Codegraph, the same projection uses
+canonical changed-hunk or changed-file fallback and records typed structural
+diagnostics.
 
 ## Coverage
 

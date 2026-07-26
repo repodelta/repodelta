@@ -183,7 +183,7 @@ def test_identical_focus_graphs_share_one_review_graph() -> None:
     assert html.count("Structural overlay") == 2
 
 
-def test_projection_uses_minimal_structural_support_set() -> None:
+def test_projection_uses_terminal_aware_structural_support_set() -> None:
     def symbol(
         fact_id: str,
         symbol_id: str,
@@ -347,10 +347,9 @@ def test_projection_uses_minimal_structural_support_set() -> None:
     support = convergence.groups[0].structural_support
     assert support.path_relation_ids == (
         "P-runtime",
-        "P-independent",
         "P-test",
+        "P-independent",
     )
-    assert support.omitted_path_relation_ids == ("P-runtime-long",)
 
     projection = build_review_projection(candidates, convergence, evidence)
     overlay = projection.slices[0].structural_overlay

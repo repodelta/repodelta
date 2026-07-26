@@ -472,7 +472,6 @@ class StructuralSupportSet:
     """Selected structural relations needed to support one review focus."""
 
     path_relation_ids: tuple[str, ...] = ()
-    omitted_path_relation_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -488,7 +487,7 @@ class ConvergenceGroup:
 class CandidateConvergence:
     groups: tuple[ConvergenceGroup, ...] = ()
     diagnostics: tuple[ProjectionDiagnostic, ...] = ()
-    schema_version: str = "candidate_convergence.v5"
+    schema_version: str = "candidate_convergence.v6"
 
     def diagnostics_by_id(self) -> dict[str, ProjectionDiagnostic]:
         return {item.id: item for item in self.diagnostics}
@@ -543,25 +542,13 @@ class CandidateConvergence:
             }
             support = group.structural_support
             support_ids = set(support.path_relation_ids)
-            omitted_support_ids = set(support.omitted_path_relation_ids)
             if len(support_ids) != len(support.path_relation_ids):
                 raise ValueError(
                     f"{group.focus_statement_id}: duplicate structural support relation"
                 )
-            if len(omitted_support_ids) != len(
-                support.omitted_path_relation_ids
-            ):
+            if support_ids != structural_selected:
                 raise ValueError(
-                    f"{group.focus_statement_id}: duplicate omitted support relation"
-                )
-            if support_ids & omitted_support_ids:
-                raise ValueError(
-                    f"{group.focus_statement_id}: structural relation is both "
-                    "displayed and omitted"
-                )
-            if support_ids | omitted_support_ids != structural_selected:
-                raise ValueError(
-                    f"{group.focus_statement_id}: structural support must partition "
+                    f"{group.focus_statement_id}: structural support must equal "
                     "selected structural paths"
                 )
             for relation_id in (*group.selected_relation_ids, *group.deferred_relation_ids):
@@ -714,7 +701,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v21"
+    schema_version: str = "review_brief.v22"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

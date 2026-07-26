@@ -36,6 +36,13 @@ class ConvergencePolicy:
         }[slot]
 
 
+@dataclass(frozen=True)
+class _StructuralSelection:
+    selected: tuple[ProjectionRelation, ...]
+    deferred: tuple[ProjectionRelation, ...]
+    support: StructuralSupportSet
+
+
 _SLOT_ORDER: tuple[ProjectionSlot, ...] = (
     "claim",
     "changed_anchor",
@@ -83,8 +90,11 @@ def converge_candidates(
         deferred_ids: list[str] = []
         focus_diagnostics: list[ProjectionDiagnostic] = []
         selected_targets: dict[ProjectionSlot, set[str]] = {}
+        structural_support = StructuralSupportSet()
 
         for slot in _SLOT_ORDER:
+            if slot in {"runtime_context", "test_context"}:
+                continue
             raw = tuple(item for item in focus_relations if item.slot == slot)
             eligible = tuple(
                 item
@@ -100,8 +110,19 @@ def converge_candidates(
                     diagnostics=focus_diagnostics,
                 )
             elif slot == "structural_path":
-                selected, deferred = _converge_structural_path_slot(
-                    eligible,
+                runtime = tuple(
+                    item for item in focus_relations
+                    if item.slot == "runtime_context"
+                )
+                tests = tuple(
+                    item for item in focus_relations
+                    if item.slot == "test_context"
+                )
+                structural = _converge_structural_context(
+                    paths=eligible,
+                    unreachable_paths=unreachable,
+                    runtime=runtime,
+                    tests=tests,
                     evidence=evidence,
                     selected_anchor_ids=selected_targets.get(
                         "changed_anchor",
@@ -111,18 +132,16 @@ def converge_candidates(
                     policy=policy,
                     diagnostics=focus_diagnostics,
                 )
-            elif slot in {"runtime_context", "test_context"}:
-                selected, deferred = _converge_context_slot(
-                    eligible,
-                    focus_id=candidate_group.focus_statement_id,
-                    slot=slot,
-                    identity_limit=(
-                        policy.max_runtime_context_identities
-                        if slot == "runtime_context"
-                        else policy.max_test_context_identities
-                    ),
-                    diagnostics=focus_diagnostics,
-                )
+                selected = structural.selected
+                deferred = structural.deferred
+                structural_support = structural.support
+                for context_slot in ("runtime_context", "test_context"):
+                    selected_targets[context_slot] = {
+                        item.target_id
+                        for item in selected
+                        if item.slot == context_slot
+                    }
+                unreachable = ()
             elif slot == "verification":
                 selected, deferred = _converge_verification_slot(
                     eligible,
@@ -172,11 +191,6 @@ def converge_candidates(
         focus_diagnostics = list(
             {item.id: item for item in focus_diagnostics}.values()
         )
-        selected_relations = tuple(relations[item] for item in selected_ids)
-        structural_support = _minimal_structural_support(
-            selected_relations,
-            evidence=evidence,
-        )
         diagnostics.extend(focus_diagnostics)
         groups.append(
             ConvergenceGroup(
@@ -190,86 +204,6 @@ def converge_candidates(
     return CandidateConvergence(
         groups=tuple(groups),
         diagnostics=tuple(diagnostics),
-    )
-
-
-def _minimal_structural_support(
-    selected: tuple[ProjectionRelation, ...],
-    *,
-    evidence: dict[str, EvidenceItem],
-) -> StructuralSupportSet:
-    """Retain shortest selected paths connecting roots to selected contexts."""
-
-    anchors = {
-        item.target_id for item in selected if item.slot == "changed_anchor"
-    }
-    terminals = {
-        item.target_id
-        for item in selected
-        if item.slot in {"runtime_context", "test_context"}
-    }
-    paths = tuple(item for item in selected if item.slot == "structural_path")
-    symbol_evidence_ids = {
-        item.metadata["symbol_id"]: item.id
-        for item in evidence.values()
-        if item.kind == "symbol" and item.metadata.get("symbol_id")
-    }
-
-    connections: dict[
-        tuple[str, str],
-        list[tuple[int, int, str, tuple[object, ...], ProjectionRelation]],
-    ] = {}
-    for relation in paths:
-        path = evidence.get(relation.target_id)
-        if path is None or path.kind != "structural_path":
-            continue
-        steps = tuple(path.metadata.get("steps", ()))
-        node_ids = {
-            symbol_evidence_ids[symbol_id]
-            for step in steps
-            for symbol_id in (
-                step.get("source_symbol_id"),
-                step.get("target_symbol_id"),
-            )
-            if symbol_id in symbol_evidence_ids
-        }
-        identity = tuple(
-            (
-                step.get("source_symbol_id"),
-                step.get("relation"),
-                step.get("direction"),
-                step.get("target_symbol_id"),
-            )
-            for step in steps
-        )
-        for root_id in relation.bridge_ids:
-            if root_id not in anchors:
-                continue
-            for terminal_id in terminals & node_ids:
-                connections.setdefault((root_id, terminal_id), []).append(
-                    (
-                        len(steps),
-                        relation.source_ordinal,
-                        relation.target_id,
-                        identity,
-                        relation,
-                    )
-                )
-
-    retained_ids: set[str] = set()
-    for candidates in connections.values():
-        shortest_depth = min(item[0] for item in candidates)
-        shortest = tuple(item for item in candidates if item[0] == shortest_depth)
-        identities = {item[3] for item in shortest}
-        for identity in identities:
-            equivalent = tuple(item for item in shortest if item[3] == identity)
-            retained_ids.update(item[4].id for item in equivalent)
-
-    retained = tuple(item.id for item in paths if item.id in retained_ids)
-    omitted = tuple(item.id for item in paths if item.id not in retained_ids)
-    return StructuralSupportSet(
-        path_relation_ids=retained,
-        omitted_path_relation_ids=omitted,
     )
 
 
@@ -453,101 +387,264 @@ def _converge_changed_anchor_slot(
     return selected, deferred
 
 
-def _converge_structural_path_slot(
-    relations: tuple[ProjectionRelation, ...],
+def _converge_structural_context(
     *,
+    paths: tuple[ProjectionRelation, ...],
+    unreachable_paths: tuple[ProjectionRelation, ...],
+    runtime: tuple[ProjectionRelation, ...],
+    tests: tuple[ProjectionRelation, ...],
     evidence: dict[str, EvidenceItem],
     selected_anchor_ids: set[str],
     focus_id: str,
     policy: ConvergencePolicy,
     diagnostics: list[ProjectionDiagnostic],
-) -> tuple[tuple[ProjectionRelation, ...], tuple[ProjectionRelation, ...]]:
-    """Select a bounded union of canonical paths rooted in selected anchors."""
+) -> _StructuralSelection:
+    """Converge terminal coverage and its shortest structural support atomically."""
 
-    canonical, duplicates = _canonical_relations_by_target(relations)
-    ordered = tuple(
+    canonical_paths, duplicate_paths = _canonical_relations_by_target(paths)
+    runtime_contexts, duplicate_runtime = _canonical_relations_by_target(runtime)
+    test_contexts, duplicate_tests = _canonical_relations_by_target(tests)
+    contexts = (*runtime_contexts, *test_contexts)
+    direct_contexts = tuple(
         sorted(
-            canonical,
+            (item for item in contexts if not item.bridge_ids),
+            key=relation_key,
+        )
+    )
+    terminals = tuple(
+        sorted(
+            (item for item in contexts if item.bridge_ids),
             key=lambda item: (
-                int(evidence[item.target_id].metadata.get("depth", 0)),
                 item.source_ordinal,
+                0 if item.slot == "runtime_context" else 1,
                 item.target_id,
             ),
         )
     )
-    sponsored: dict[str, int] = {
-        anchor_id: 0 for anchor_id in selected_anchor_ids
-    }
-    selected = []
-    omitted = []
-    for relation in ordered:
-        roots = tuple(
-            anchor_id
-            for anchor_id in relation.bridge_ids
-            if anchor_id in sponsored
+    paths_by_target = {item.target_id: item for item in canonical_paths}
+    options_by_connection: dict[
+        tuple[str, str],
+        tuple[ProjectionRelation, ...],
+    ] = {}
+    terminal_connections: dict[
+        str,
+        tuple[tuple[str, ProjectionRelation], ...],
+    ] = {}
+    for terminal in terminals:
+        connections: list[tuple[str, ProjectionRelation]] = []
+        for path_id in terminal.bridge_ids:
+            path = paths_by_target.get(path_id)
+            if path is None:
+                continue
+            for anchor_id in path.bridge_ids:
+                if anchor_id not in selected_anchor_ids:
+                    continue
+                connections.append((anchor_id, path))
+        by_anchor: dict[str, list[ProjectionRelation]] = {}
+        for anchor_id, path in connections:
+            by_anchor.setdefault(anchor_id, []).append(path)
+        shortest_connections = []
+        for anchor_id, candidates in by_anchor.items():
+            shortest_depth = min(_path_depth(item, evidence) for item in candidates)
+            shortest = tuple(
+                sorted(
+                    (
+                        item
+                        for item in candidates
+                        if _path_depth(item, evidence) == shortest_depth
+                    ),
+                    key=_path_key,
+                )
+            )
+            options_by_connection[(anchor_id, terminal.target_id)] = shortest
+            shortest_connections.extend((anchor_id, item) for item in shortest)
+        terminal_connections[terminal.target_id] = tuple(
+            sorted(
+                shortest_connections,
+                key=lambda item: (
+                    _path_depth(item[1], evidence),
+                    item[1].source_ordinal,
+                    item[0],
+                    item[1].target_id,
+                ),
+            )
         )
-        available = tuple(
-            anchor_id
-            for anchor_id in roots
-            if sponsored[anchor_id] < policy.max_paths_per_anchor
-        )
-        if (
-            len(selected) >= policy.max_path_identities
-            or not available
-        ):
-            omitted.append(relation)
-            continue
-        selected.append(relation)
-        for anchor_id in available:
-            sponsored[anchor_id] += 1
 
-    if omitted:
+    selected_paths: dict[str, ProjectionRelation] = {}
+    selected_contexts: dict[str, ProjectionRelation] = {}
+    selected_anchor_paths: set[tuple[str, str]] = set()
+    sponsored = {anchor_id: 0 for anchor_id in selected_anchor_ids}
+    context_counts = {"runtime_context": 0, "test_context": 0}
+    context_limits = {
+        "runtime_context": policy.max_runtime_context_identities,
+        "test_context": policy.max_test_context_identities,
+    }
+    context_limit_omitted: dict[str, list[ProjectionRelation]] = {
+        "runtime_context": [],
+        "test_context": [],
+    }
+
+    # Provider/direct context authority remains standalone and does not invent
+    # a structural path requirement.
+    for context in direct_contexts:
+        if context_counts[context.slot] >= context_limits[context.slot]:
+            context_limit_omitted[context.slot].append(context)
+            continue
+        selected_contexts[context.target_id] = context
+        context_counts[context.slot] += 1
+
+    def select_path(anchor_id: str, path: ProjectionRelation) -> bool:
+        anchor_path = (anchor_id, path.target_id)
+        if anchor_path in selected_anchor_paths:
+            return True
+        if sponsored[anchor_id] >= policy.max_paths_per_anchor:
+            return False
+        if (
+            path.target_id not in selected_paths
+            and len(selected_paths) >= policy.max_path_identities
+        ):
+            return False
+        selected_paths.setdefault(path.target_id, path)
+        selected_anchor_paths.add(anchor_path)
+        sponsored[anchor_id] += 1
+        return True
+
+    # First cover distinct terminals before retaining equivalent support.
+    for terminal in terminals:
+        if context_counts[terminal.slot] >= context_limits[terminal.slot]:
+            context_limit_omitted[terminal.slot].append(terminal)
+            continue
+        for anchor_id, path in terminal_connections[terminal.target_id]:
+            if select_path(anchor_id, path):
+                selected_contexts[terminal.target_id] = terminal
+                context_counts[terminal.slot] += 1
+                break
+
+    # Then preserve other shortest canonical anchor-terminal connections.
+    for terminal in terminals:
+        if terminal.target_id not in selected_contexts:
+            continue
+        for anchor_id, path in terminal_connections[terminal.target_id]:
+            select_path(anchor_id, path)
+
+    support_path_ids = {
+        path.target_id
+        for candidates in options_by_connection.values()
+        for path in candidates
+    }
+    safety_omitted_paths = tuple(
+        item
+        for item in canonical_paths
+        if item.target_id in support_path_ids
+        and item.target_id not in selected_paths
+    )
+    if safety_omitted_paths:
         diagnostics.append(
             ProjectionDiagnostic(
                 focus_statement_id=focus_id,
                 slot="structural_path",
                 state="budget_truncated",
                 message=(
-                    f"{len(canonical)} canonical structural paths were reachable "
-                    f"for {focus_id}; {len(selected)} are retained within per-anchor "
-                    f"({policy.max_paths_per_anchor}) and total "
+                    f"{len(support_path_ids)} shortest terminal-support paths were "
+                    f"reachable for {focus_id}; {len(selected_paths)} are retained "
+                    f"within per-anchor ({policy.max_paths_per_anchor}) and total "
                     f"({policy.max_path_identities}) identity safety limits."
                 ),
-                affected_ids=tuple(item.target_id for item in omitted),
-            )
-        )
-    return tuple(selected), tuple((*omitted, *duplicates))
-
-
-def _converge_context_slot(
-    relations: tuple[ProjectionRelation, ...],
-    *,
-    focus_id: str,
-    slot: ProjectionSlot,
-    identity_limit: int,
-    diagnostics: list[ProjectionDiagnostic],
-) -> tuple[tuple[ProjectionRelation, ...], tuple[ProjectionRelation, ...]]:
-    """Retain canonical runtime/test context identities on selected paths."""
-
-    canonical, duplicates = _canonical_relations_by_target(relations)
-    ordered = tuple(sorted(canonical, key=relation_key))
-    selected = ordered[:identity_limit]
-    omitted = ordered[identity_limit:]
-    if omitted:
-        diagnostics.append(
-            ProjectionDiagnostic(
-                focus_statement_id=focus_id,
-                slot=slot,
-                state="budget_truncated",
-                message=(
-                    f"{len(ordered)} canonical {slot.replace('_', ' ')} identities "
-                    f"were reachable for {focus_id}; {len(selected)} are retained "
-                    f"within the {identity_limit} identity safety limit."
+                affected_ids=tuple(
+                    item.target_id for item in safety_omitted_paths
                 ),
-                affected_ids=tuple(item.target_id for item in omitted),
             )
         )
-    return selected, tuple((*omitted, *duplicates))
+    for slot in ("runtime_context", "test_context"):
+        omitted = context_limit_omitted[slot]
+        if omitted:
+            diagnostics.append(
+                ProjectionDiagnostic(
+                    focus_statement_id=focus_id,
+                    slot=slot,
+                    state="budget_truncated",
+                    message=(
+                        f"{sum(item.slot == slot for item in contexts)} canonical "
+                        f"{slot.replace('_', ' ')} identities were reachable for "
+                        f"{focus_id}; {context_counts[slot]} are retained within "
+                        f"the {context_limits[slot]} identity safety limit."
+                    ),
+                    affected_ids=tuple(item.target_id for item in omitted),
+                )
+            )
+
+    raw_path_targets = {
+        item.target_id for item in (*paths, *unreachable_paths)
+    }
+    for slot, slot_contexts in (
+        ("runtime_context", runtime_contexts),
+        ("test_context", test_contexts),
+    ):
+        safety_deferred = tuple(
+            item
+            for item in slot_contexts
+            if item.target_id not in selected_contexts
+            and item not in context_limit_omitted[slot]
+            and any(path_id in raw_path_targets for path_id in item.bridge_ids)
+        )
+        if safety_deferred:
+            diagnostics.append(
+                ProjectionDiagnostic(
+                    focus_statement_id=focus_id,
+                    slot=slot,
+                    state="upstream_deferred",
+                    message=(
+                        f"{len(safety_deferred)} canonical "
+                        f"{slot.replace('_', ' ')} identities depend only on "
+                        "terminal-support connections deferred by an upstream "
+                        "safety boundary."
+                    ),
+                    affected_ids=tuple(
+                        item.target_id for item in safety_deferred
+                    ),
+                )
+            )
+
+    selected = tuple(
+        (
+            *sorted(selected_paths.values(), key=relation_key),
+            *(item for item in contexts if item.target_id in selected_contexts),
+        )
+    )
+    selected_ids = {item.id for item in selected}
+    deferred = tuple(
+        item
+        for item in (
+            *canonical_paths,
+            *duplicate_paths,
+            *unreachable_paths,
+            *runtime_contexts,
+            *duplicate_runtime,
+            *test_contexts,
+            *duplicate_tests,
+        )
+        if item.id not in selected_ids
+    )
+    return _StructuralSelection(
+        selected=selected,
+        deferred=deferred,
+        support=StructuralSupportSet(
+            path_relation_ids=tuple(
+                item.id for item in selected_paths.values()
+            ),
+        ),
+    )
+
+
+def _path_depth(
+    relation: ProjectionRelation,
+    evidence: dict[str, EvidenceItem],
+) -> int:
+    return int(evidence[relation.target_id].metadata.get("depth", 0))
+
+
+def _path_key(item: ProjectionRelation) -> tuple[object, ...]:
+    return (item.source_ordinal, item.target_id)
 
 
 def _canonical_relations_by_target(
