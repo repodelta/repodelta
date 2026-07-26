@@ -192,7 +192,8 @@ def test_pr_acceptance_criteria_are_provisional_without_linked_issue() -> None:
     assert "pr description" in html
     assert "obligation · acceptance" in html
     assert "Review checks" in html
-    assert "Objective context · 1 statement" in html
+    assert "Goals · 1 statement" in html
+    assert html.index("Goals · 1 statement") < html.index("Review checks")
     assert "Preserve deterministic review behavior." in html
     assert "Introduces a read-only provider boundary." in html
 
@@ -352,12 +353,93 @@ def test_scope_boundary_baseline_and_verification_preserve_authority() -> None:
         ("C2", "boundary", "pr_description"),
         ("C3", "boundary", "pr_description"),
         ("B1", "baseline", "pr_description"),
-        ("V1", "verification", "pr_description"),
+        ("VC1", "verification", "pr_description"),
     ]
     assert all(item.sources[0].line_start for item in (*brief.scope, *brief.claims))
     html = render_html(brief)
-    assert "Scope context · 2 statements" in html
+    assert "Scope · 2 statements" in html
+    assert "Objective context" not in html
+    assert "Scope context" not in html
     assert "Scope guardrails" in html
+
+
+def test_review_contract_aliases_preserve_source_and_verification_identity() -> None:
+    packet = _packet(
+        issue_body=(
+            "## 1. 🎯 Desired outcomes (why):\n"
+            "- Make review intent visible.\n\n"
+            "## Scope of work\n"
+            "- Present the authored contract.\n\n"
+            "## ✅ How to verify:\n"
+            "- Confirm the contract appears before review checks.\n\n"
+            "## Verification notes for maintainers\n"
+            "- This prose heading is not a contract section.\n"
+        ),
+        pr_body=(
+            "## What we want to achieve\n"
+            "- Keep the renderer concise.\n\n"
+            "## Pipeline boundary\n"
+            "- Move contract context into the brief.\n\n"
+            "## Quality checks\n"
+            "- The semantic tests pass.\n\n"
+            "## Project motivation details\n"
+            "- This prose heading is not an objective section.\n"
+        ),
+    )
+
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+
+    assert [
+        (item.id, item.authority, item.text)
+        for item in brief.objectives
+    ] == [
+        ("O1", "issue", "Make review intent visible."),
+        ("O2", "pr_description", "Keep the renderer concise."),
+    ]
+    assert [
+        (item.id, item.authority, item.text)
+        for item in brief.scope
+    ] == [
+        ("S1", "issue", "Present the authored contract."),
+        ("S2", "pr_description", "Move contract context into the brief."),
+    ]
+    assert [
+        (item.id, item.role, item.authority, item.text)
+        for item in brief.verification_expectations
+    ] == [
+        (
+            "V1",
+            "context",
+            "issue",
+            "Confirm the contract appears before review checks.",
+        ),
+    ]
+    assert [
+        (item.id, item.role, item.authority, item.text)
+        for item in brief.claims
+    ] == [
+        (
+            "VC1",
+            "claim",
+            "pr_description",
+            "The semantic tests pass.",
+        ),
+    ]
+    serialized = brief.to_dict()
+    assert serialized["verification_expectations"][0]["id"] == "V1"
+    assert brief.overview.ci_state == "not_observed"
+    assert not [
+        item
+        for item in brief.evidence_catalog.items
+        if item.role == "verification"
+    ]
+    html = render_html(brief)
+    assert html.count("Verification expectations · 1 statement") == 1
+    assert html.index("Verification expectations · 1 statement") < html.index(
+        "Review checks"
+    )
+    assert "Verification notes for maintainers" not in html
+    assert "Project motivation details" not in html
 
 
 def test_pr_scope_never_becomes_provisional_acceptance() -> None:
@@ -378,7 +460,7 @@ def test_pr_scope_never_becomes_provisional_acceptance() -> None:
     assert [item.id for item in brief.scope] == ["S1"]
     assert [(item.id, item.purpose) for item in brief.claims] == [
         ("B1", "baseline"),
-        ("V1", "verification"),
+        ("VC1", "verification"),
     ]
 
 
@@ -410,5 +492,5 @@ def test_context_and_typed_claims_use_the_canonical_binding_path() -> None:
 
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
     assert [item.id for item in brief.scope] == ["S1"]
-    assert [item.id for item in brief.claims] == ["C1", "B1", "V1"]
+    assert [item.id for item in brief.claims] == ["C1", "B1", "VC1"]
     assert brief.projection.slices == ()

@@ -689,6 +689,7 @@ class ReviewBrief:
     guardrails: tuple[Requirement, ...] = ()
     objectives: tuple[ReviewStatement, ...] = ()
     scope: tuple[ReviewStatement, ...] = ()
+    verification_expectations: tuple[ReviewStatement, ...] = ()
     claims: tuple[ReviewStatement, ...] = ()
     evidence_catalog: EvidenceCatalog = EvidenceCatalog()
     projection_candidates: ProjectionCandidateSet = ProjectionCandidateSet()
@@ -701,7 +702,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v23"
+    schema_version: str = "review_brief.v24"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

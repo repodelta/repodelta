@@ -304,7 +304,7 @@
           "authority": "pr_description"
         },
         {
-          "statement_id": "V1",
+          "statement_id": "VC1",
           "role": "claim",
           "purpose": "verification",
           "authority": "pr_description"

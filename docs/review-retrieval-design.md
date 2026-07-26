@@ -37,7 +37,7 @@ conclusions.
 | GitHub PR REST | PR title/body, head/base SHA, changed files and patches | Source facts | Keep |
 | GitHub GraphQL | Development-linked Issues | Contract authority | Keep; do not infer links from PR prose |
 | GitHub checks/status APIs | Current-head check runs and commit statuses | Execution observations | Keep |
-| Markdown semantic parser | R/G/O/S/C/B/V/I statements with authority and purpose | Review contract and authored claims | Keep; add an explicit requirement profile later |
+| Markdown semantic parser | O/S/R/G/V contract and C/B/VC/I authored statements with authority and purpose | Review contract and authored claims | Keep; add an explicit requirement profile later |
 | Unified-diff parser | Added/removed line ranges and bounded snippets | Changed facts | Keep |
 | `CodegraphProvider` | Index status, hunk/symbol overlaps, symbols, directed paths and diagnostics | Structural facts | Keep behind `StructuralGraphProvider` |
 | Supplied fixture/provider evidence | Stable externally supplied evidence IDs | Test/provider extension | Keep, but require an explicit evidence role |

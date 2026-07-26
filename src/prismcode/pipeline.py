@@ -74,6 +74,7 @@ class DeterministicAnalyzer:
             guardrails=guardrails,
             objectives=semantics.objectives,
             scope=semantics.scope,
+            verification_expectations=semantics.verification_expectations,
             claims=semantics.claims,
             evidence_catalog=evidence_catalog,
             projection_candidates=projection_candidates,

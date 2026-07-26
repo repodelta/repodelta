@@ -21,10 +21,28 @@ _OBLIGATION_HEADINGS = {
     "success criteria",
 }
 _OBJECTIVE_HEADINGS = {
+    "aim",
+    "aims",
+    "change intent",
+    "desired outcome",
+    "desired outcomes",
+    "expected outcome",
+    "expected outcomes",
     "goal",
     "goals",
+    "intended outcome",
+    "intended outcomes",
+    "motivation",
     "objective",
     "objectives",
+    "purpose",
+    "rationale",
+    "what this change aims to achieve",
+    "what this change is trying to achieve",
+    "what we aim to achieve",
+    "what we want to achieve",
+    "why",
+    "why this change",
 }
 _IMPLEMENTATION_HEADINGS = {
     "summary",
@@ -34,7 +52,31 @@ _IMPLEMENTATION_HEADINGS = {
     "what changed",
     "approach",
 }
-_SCOPE_HEADINGS = {"scope", "in scope"}
+_SCOPE_HEADINGS = {
+    "areas in scope",
+    "components in scope",
+    "covered areas",
+    "covered components",
+    "change scope",
+    "change boundary",
+    "included",
+    "included changes",
+    "included work",
+    "implementation boundary",
+    "in scope",
+    "scope",
+    "scope of change",
+    "scope of this change",
+    "scope of work",
+    "pipeline boundary",
+    "review boundary",
+    "system boundary",
+    "work scope",
+    "what is covered",
+    "what is included",
+    "what this change covers",
+    "what this change includes",
+}
 _BOUNDARY_HEADINGS = {
     "out of scope",
     "non-goals",
@@ -44,11 +86,33 @@ _BOUNDARY_HEADINGS = {
 }
 _BASELINE_HEADINGS = {"baseline", "baselines", "result", "results"}
 _VERIFICATION_HEADINGS = {
+    "acceptance tests",
+    "automated tests",
+    "checks",
+    "how to test",
+    "how it was tested",
+    "how this was tested",
+    "how to validate",
+    "how to verify",
+    "manual testing",
+    "quality checks",
+    "test cases",
+    "test coverage",
     "verification",
+    "verification criteria",
+    "verification expectations",
+    "verification plan",
+    "verification steps",
+    "validation criteria",
+    "validation plan",
     "testing",
     "tests",
     "test plan",
+    "test strategy",
+    "testing performed",
     "validation",
+    "validation strategy",
+    "verification approach",
 }
 _SEMANTICS_BY_HEADING: dict[str, tuple[StatementRole, StatementPurpose]] = {
     **{heading: ("obligation", "acceptance") for heading in _OBLIGATION_HEADINGS},
@@ -70,6 +134,7 @@ _LIST_ITEM_RE = re.compile(
 _INLINE_NUMBER_RE = re.compile(r"(?:(?<=^)|(?<=[;\uff1b]))\s*(?:\d+[.)]|\(\d+\))\s*")
 _HEADING_RE = re.compile(r"^\s{0,3}#{1,6}\s+(.+?)\s*#*\s*$")
 _FENCE_RE = re.compile(r"^\s*(```+|~~~+)")
+_HEADING_DECORATION_RE = re.compile(r"^[^a-z0-9]+|[^a-z0-9]+$")
 
 
 @dataclass(frozen=True)
@@ -106,6 +171,7 @@ class ReviewSemantics:
     obligations: tuple[Requirement, ...] = ()
     objectives: tuple[ReviewStatement, ...] = ()
     scope: tuple[ReviewStatement, ...] = ()
+    verification_expectations: tuple[ReviewStatement, ...] = ()
     claims: tuple[ReviewStatement, ...] = ()
 
 
@@ -115,6 +181,17 @@ def _clean_markdown_text(value: str) -> str:
     value = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", value)
     value = re.sub(r"[*~]+", "", value)
     return " ".join(value.strip().split())
+
+
+def _normalize_heading(value: str) -> str:
+    normalized = _clean_markdown_text(value).casefold()
+    normalized = normalized.rstrip(" :–—-")
+    normalized = re.sub(r"\s*\([^)]*\)\s*$", "", normalized)
+    normalized = re.sub(r"^\d+[.)]\s*", "", normalized)
+    normalized = normalized.replace("&", " and ")
+    normalized = re.sub(r"[/|]+", " ", normalized)
+    normalized = re.sub(r"[\s:–—-]+", " ", normalized).strip()
+    return _HEADING_DECORATION_RE.sub("", normalized).strip()
 
 
 def _indent_width(value: str) -> int:
@@ -225,7 +302,9 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
             finish_list()
             heading_seen = True
             current_section = _clean_markdown_text(heading_match.group(1))
-            semantics = _SEMANTICS_BY_HEADING.get(current_section.casefold())
+            semantics = _SEMANTICS_BY_HEADING.get(
+                _normalize_heading(current_section)
+            )
             current_role = semantics[0] if semantics is not None else None
             current_purpose = semantics[1] if semantics is not None else None
             continue
@@ -355,6 +434,15 @@ def extract_review_semantics(
         prefix="S",
         role="context",
     )
+    verification_expectations = _number_statements(
+        tuple(
+            (item, issue_source, "issue")
+            for item in issue.items
+            if item.purpose == "verification" and issue_source is not None
+        ),
+        prefix="V",
+        role="context",
+    )
     claims = _number_claims(
         tuple(item for item in pr.items if item.role == "claim"),
         source=pr_source,
@@ -388,6 +476,7 @@ def extract_review_semantics(
         obligations=requirements,
         objectives=objectives,
         scope=scope,
+        verification_expectations=verification_expectations,
         claims=claims,
     )
 
@@ -496,7 +585,7 @@ def _number_claims(
         "implementation": "C",
         "boundary": "C",
         "baseline": "B",
-        "verification": "V",
+        "verification": "VC",
     }
     statements = []
     claim_index = 0

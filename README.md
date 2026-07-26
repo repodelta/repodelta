@@ -33,8 +33,8 @@ The open core provides:
 - one canonical, deterministic evidence catalog where mapped code changes use
   exact symbol identities and only unmapped spans/files remain fallbacks,
   alongside bounded paths and CI/runtime observations;
-- explainable deterministic R/G/O/S/C/B/V-to-evidence and R/G-to-claim
-  candidates;
+- explainable deterministic O/S/R/G/V review contracts, typed C/B/VC PR
+  claims, and evidence candidates;
 - deterministic same-R/G, same-slot candidate convergence with typed
   dominance, bridge reachability, canonical changed-anchor and verification
   sets, bounded structural evidence subgraphs, compact claim selection, and
@@ -57,11 +57,13 @@ into PR prose. The analyzer applies one authority policy:
 - Goals/Objectives become `O1`, `O2`, ... retrieval context;
 - Scope/In scope become `S1`, `S2`, ... retrieval context and never acceptance
   criteria;
+- linked-Issue Verification/Validation/Testing sections become `V1`, `V2`, ...
+  authored verification expectations;
 - linked-Issue Out of scope/Boundary statements become authoritative
   `G1`, `G2`, ... guardrails;
 - PR Summary/Implementation/Changes and Boundary statements become
   `C1`, `C2`, ... PR-authored claims;
-- PR Baseline/Results and Verification/Testing become `B1` and `V1` claims;
+- PR Baseline/Results and Verification/Testing become `B1` and `VC1` claims;
 - the PR introduction or title is intent only and is never promoted to `R1`.
 
 When no explicit acceptance criteria are present, the report says so instead
