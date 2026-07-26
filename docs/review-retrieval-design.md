@@ -151,7 +151,7 @@ accepts only eligible fact or relation types.
 | Slot | Question | Eligible inputs | Never accepts |
 |---|---|---|---|
 | `claim` | What does the PR author say about this R/G? | PR C/B/V/boundary statements linked to the focus | Issue Goal/Scope as if they were PR claims; repository facts |
-| `changed_anchor` | What relevant repository location actually changed? | exact changed symbol, changed hunk, changed-file fallback | unchanged symbols, CI, free structural neighbors |
+| `changed_anchor` | What relevant repository location actually changed? | exact changed symbol, changed span, changed-file fallback | unchanged symbols, CI, free structural neighbors |
 | `runtime_context` | How can a selected changed anchor enter or affect runtime code? | unchanged code symbol on an eligible selected path | lexically similar but disconnected symbols |
 | `test_context` | What tests structurally exercise or reach the selected anchor/context? | changed test anchors and unchanged test symbols on eligible paths | arbitrary test files sharing generic terms |
 | `verification` | What ran for the current head? | current-head CI/status/manual observations | PR verification prose |
@@ -337,10 +337,11 @@ No earlier statement may consume the minimum allocation of a later statement.
 Objectives, Scope, and PR-only context cannot consume R/G selection budgets.
 When a budget truncates candidates, record the affected focus and slot.
 
-Default selection can remain compact:
+Default competitive selection can remain compact, while set slots use explicit
+identity safety limits:
 
 - two PR claims;
-- two changed anchors;
+- up to 20 direct, 10 claim-bridged, and 30 total changed-anchor identities;
 - two runtime nodes;
 - two test nodes;
 - one current-head verification observation per distinct check identity;

@@ -18,7 +18,9 @@ from prismcode.model.contracts import (
 @dataclass(frozen=True)
 class ConvergencePolicy:
     max_claims: int = 2
-    max_changed: int = 2
+    max_direct_anchor_identities: int = 20
+    max_bridged_anchor_identities: int = 10
+    max_anchor_identities: int = 30
     max_runtime: int = 2
     max_tests: int = 2
     max_verification_identities: int = 20
@@ -28,7 +30,6 @@ class ConvergencePolicy:
     def selected_limit(self, slot: ProjectionSlot) -> int:
         return {
             "claim": self.max_claims,
-            "changed_anchor": self.max_changed,
             "runtime_context": self.max_runtime,
             "test_context": self.max_tests,
             "structural_path": self.max_paths,
@@ -53,6 +54,14 @@ _ASSOCIATION_ORDER: dict[AssociationKind, int] = {
     "structural_bridge": 5,
     "current_head": 6,
 }
+_DIRECT_ANCHOR_ASSOCIATIONS: frozenset[AssociationKind] = frozenset(
+    {
+        "provided_association",
+        "explicit_reference",
+        "exact_identifier",
+        "distinctive_phrase",
+    }
+)
 
 
 def converge_candidates(
@@ -84,7 +93,14 @@ def converge_candidates(
                 if _bridge_is_reachable(item, selected_targets)
             )
             unreachable = tuple(item for item in raw if item not in eligible)
-            if slot == "verification":
+            if slot == "changed_anchor":
+                selected, deferred = _converge_changed_anchor_slot(
+                    eligible,
+                    focus_id=candidate_group.focus_statement_id,
+                    policy=policy,
+                    diagnostics=focus_diagnostics,
+                )
+            elif slot == "verification":
                 selected, deferred = _converge_verification_slot(
                     eligible,
                     evidence=evidence,
@@ -227,6 +243,96 @@ def _converge_competitive_slot(
                 )
             )
     return selected, tuple(deferred)
+
+
+def _converge_changed_anchor_slot(
+    relations: tuple[ProjectionRelation, ...],
+    *,
+    focus_id: str,
+    policy: ConvergencePolicy,
+    diagnostics: list[ProjectionDiagnostic],
+) -> tuple[tuple[ProjectionRelation, ...], tuple[ProjectionRelation, ...]]:
+    """Retain a bounded set of canonical changed anchors; anchors do not compete."""
+
+    by_target: dict[str, list[ProjectionRelation]] = {}
+    for relation in relations:
+        by_target.setdefault(relation.target_id, []).append(relation)
+
+    canonical = []
+    duplicates = []
+    for target_relations in by_target.values():
+        ordered = tuple(sorted(target_relations, key=relation_key))
+        canonical.append(ordered[0])
+        duplicates.extend(ordered[1:])
+
+    direct = tuple(
+        sorted(
+            (
+                item
+                for item in canonical
+                if item.association in _DIRECT_ANCHOR_ASSOCIATIONS
+            ),
+            key=relation_key,
+        )
+    )
+    bridged = tuple(
+        sorted(
+            (item for item in canonical if item.association == "claim_bridge"),
+            key=relation_key,
+        )
+    )
+    unsupported = tuple(
+        sorted(
+            (
+                item
+                for item in canonical
+                if item.association not in _DIRECT_ANCHOR_ASSOCIATIONS
+                and item.association != "claim_bridge"
+            ),
+            key=relation_key,
+        )
+    )
+    if unsupported:
+        raise ValueError(
+            "changed-anchor convergence received unsupported associations: "
+            + ", ".join(sorted({item.association for item in unsupported}))
+        )
+
+    within_class_limits = (
+        *direct[: policy.max_direct_anchor_identities],
+        *bridged[: policy.max_bridged_anchor_identities],
+    )
+    selected = tuple(within_class_limits[: policy.max_anchor_identities])
+    selected_ids = {item.id for item in selected}
+    deferred = tuple(
+        item
+        for item in (
+            *direct,
+            *bridged,
+            *sorted(duplicates, key=relation_key),
+        )
+        if item.id not in selected_ids
+    )
+    omitted_canonical = tuple(
+        item for item in (*direct, *bridged) if item.id not in selected_ids
+    )
+    if omitted_canonical:
+        diagnostics.append(
+            ProjectionDiagnostic(
+                focus_statement_id=focus_id,
+                slot="changed_anchor",
+                state="budget_truncated",
+                message=(
+                    f"{len(canonical)} canonical changed anchors were associated "
+                    f"with {focus_id}; {len(selected)} are retained within direct "
+                    f"({policy.max_direct_anchor_identities}), claim-bridged "
+                    f"({policy.max_bridged_anchor_identities}), and total "
+                    f"({policy.max_anchor_identities}) identity safety limits."
+                ),
+                affected_ids=tuple(item.target_id for item in omitted_canonical),
+            )
+        )
+    return selected, deferred
 
 
 def _converge_verification_slot(

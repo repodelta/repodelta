@@ -170,14 +170,19 @@ text. A generic one-token overlap does not become a candidate relation.
 
 `CandidateConvergence` then applies typed dominance, bridge reachability,
 inspection budgets, and display budgets inside one R/G and one slot at a time.
-Claim, changed-anchor, context, and structural-path slots are competitive.
-Verification is a set slot keyed by first-class provider, kind, and normalized
-name: distinct current-head checks remain visible together, equivalent
-duplicates collapse, and conflicting completed outcomes remain explicit.
+Claim, context, and structural-path slots are competitive. Changed anchors form
+a canonical evidence set: distinct direct anchors remain visible together,
+claim-bridged anchors use a separate expansion budget, and duplicate relations
+to one evidence target collapse. Verification is a set slot keyed by
+first-class provider, kind, and normalized name: distinct current-head checks
+remain visible together, equivalent duplicates collapse, and conflicting
+completed outcomes remain explicit.
 Verification has a separate identity-count safety limit and different identities
 never create semantic ambiguity.
 
-When an equivalent semantic tier in a competitive slot crosses the display
+Changed-anchor identity safety limits emit coverage truncation, never
+equivalent-tier ambiguity. When an equivalent semantic tier in another
+competitive slot crosses the display
 budget, stable source order is disclosed as a tie-break through an `ambiguous`
 diagnostic. There is no all-statement/all-evidence numeric score or global
 candidate budget.
