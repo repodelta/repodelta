@@ -101,7 +101,8 @@ def build_review_projection(
                 standalone_changed_fact_relation_ids=tuple(
                     item.id
                     for item in by_slot["changed_anchor"]
-                    if evidence[item.target_id].kind != "symbol"
+                    if evidence[item.target_id].kind
+                    not in {"symbol", "structural_change"}
                 ),
                 standalone_runtime_relation_ids=tuple(
                     item.id
@@ -164,7 +165,6 @@ def _structural_focus_overlay(
     relation_ids_by_node: dict[str, list[str]] = {}
     role_by_node = {}
     for role, relations in (
-        ("changed_anchor", anchor_relations),
         ("runtime_context", runtime_relations),
         ("test_context", test_relations),
     ):
@@ -184,10 +184,32 @@ def _structural_focus_overlay(
                 "selected changed-anchor relation references missing evidence: "
                 f"{anchor_relation.id}"
             )
-        if anchor.kind == "symbol":
-            if anchor.id not in node_order:
-                node_order.append(anchor.id)
-            path_ids_by_node.setdefault(anchor.id, [])
+        anchor_node_ids = (
+            (anchor.id,)
+            if anchor.kind == "symbol"
+            else tuple(
+                value
+                for value in (
+                    anchor.structural_change.base_symbol_evidence_id,
+                    anchor.structural_change.head_symbol_evidence_id,
+                )
+                if value is not None
+            )
+            if anchor.kind == "structural_change"
+            and anchor.structural_change is not None
+            else ()
+        )
+        for node_id in anchor_node_ids:
+            if node_id not in evidence or evidence[node_id].kind != "symbol":
+                raise ValueError(
+                    "selected structural change references missing symbol evidence: "
+                    f"{anchor_relation.id}"
+                )
+            if node_id not in node_order:
+                node_order.append(node_id)
+            path_ids_by_node.setdefault(node_id, [])
+            relation_ids_by_node.setdefault(node_id, []).append(anchor_relation.id)
+            role_by_node.setdefault(node_id, "changed_anchor")
 
     for path_relation in path_relations:
         path = evidence.get(path_relation.target_id)

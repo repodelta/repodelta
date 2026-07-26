@@ -55,7 +55,8 @@ def build_projection_candidates(
                 item
                 for item in evidence.values()
                 if item.changed
-                and item.kind in {"symbol", "change_relation", "changed_file"}
+                and item.kind
+                in {"structural_change", "change_relation", "changed_file"}
             ),
             key=anchor_key,
         )
@@ -492,7 +493,7 @@ def _structural_relations(
         dict.fromkeys(
             path_id
             for anchor_id in candidate_anchor_ids
-            if anchor_id in evidence and evidence[anchor_id].kind == "symbol"
+            if anchor_id in evidence
             for path_id in evidence[anchor_id].structural_path_ids
         )
     )

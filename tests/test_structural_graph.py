@@ -302,6 +302,49 @@ def test_replacement_collects_distinct_head_and_base_symbol_facts(
         for step in path.metadata["steps"]:
             assert evidence[step["source_evidence_id"]].revision_side == path.revision_side
             assert evidence[step["target_evidence_id"]].revision_side == path.revision_side
+    changes = tuple(
+        item
+        for item in brief.evidence_catalog.items
+        if item.kind == "structural_change"
+    )
+    assert len(changes) == 1
+    assert changes[0].operation == "modified"
+    assert changes[0].structural_change is not None
+    assert {
+        changes[0].structural_change.base_symbol_evidence_id,
+        changes[0].structural_change.head_symbol_evidence_id,
+    } == {item.id for item in symbols}
+
+
+def test_added_relation_produces_one_head_only_structural_change(
+    tmp_path: Path,
+) -> None:
+    _create_index(tmp_path)
+    packet = _packet(
+        "@@ -0,0 +1,3 @@\n"
+        "+class Service:\n"
+        "+    def run(self):\n"
+        "+        return 1\n"
+    )
+    changes = parse_changed_files(packet.changed_files)
+    graph = map_packet_changed_symbols(
+        packet,
+        changes,
+        CodegraphProvider(tmp_path, revision_side="head"),
+    )
+    brief = DeterministicAnalyzer().analyze(
+        AnalysisInput(packet=packet, changes=changes, structural_graph=graph)
+    )
+
+    structural_change = next(
+        item
+        for item in brief.evidence_catalog.items
+        if item.kind == "structural_change"
+    )
+    assert structural_change.operation == "added"
+    assert structural_change.structural_change is not None
+    assert structural_change.structural_change.base_symbol_evidence_id is None
+    assert structural_change.structural_change.head_symbol_evidence_id is not None
 
 
 def test_removed_relation_maps_exact_base_symbol(tmp_path: Path) -> None:
@@ -343,6 +386,15 @@ def test_removed_relation_maps_exact_base_symbol(tmp_path: Path) -> None:
     assert removed[0].change_relation_ids == (
         changes.hunks[0].relations[0].id,
     )
+    structural_change = next(
+        item
+        for item in brief.evidence_catalog.items
+        if item.kind == "structural_change"
+    )
+    assert structural_change.operation == "removed"
+    assert structural_change.structural_change is not None
+    assert structural_change.structural_change.base_symbol_evidence_id == removed[0].id
+    assert structural_change.structural_change.head_symbol_evidence_id is None
 
 
 def test_one_hunk_can_map_changes_in_two_sibling_symbols(tmp_path: Path) -> None:
@@ -402,6 +454,19 @@ def test_one_hunk_can_map_changes_in_two_sibling_symbols(tmp_path: Path) -> None
         ("first", (2,)),
         ("second", (5,)),
     ]
+    brief = DeterministicAnalyzer().analyze(
+        AnalysisInput(
+            packet=packet,
+            changes=parse_changed_files(packet.changed_files),
+            structural_graph=graph,
+        )
+    )
+    assert {
+        item.structural_change.provider_symbol_id
+        for item in brief.evidence_catalog.items
+        if item.kind == "structural_change"
+        and item.structural_change is not None
+    } == {"first", "second"}
 
 
 def test_module_level_change_falls_back_to_file_symbol(tmp_path: Path) -> None:

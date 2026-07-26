@@ -65,6 +65,7 @@ ChangeOperation = Literal[
 ]
 FactRole = Literal[
     "changed_anchor",
+    "revision_fact",
     "runtime_context",
     "test_context",
     "verification",
@@ -534,6 +535,14 @@ class GuardrailScanDiagnostic:
 
 
 @dataclass(frozen=True)
+class StructuralChangeIdentity:
+    provider_symbol_id: str
+    base_symbol_evidence_id: str | None = None
+    head_symbol_evidence_id: str | None = None
+    schema_version: str = "structural_change_identity.v1"
+
+
+@dataclass(frozen=True)
 class EvidenceItem:
     """Canonical evidence fact. All downstream relationships reference its ID."""
 
@@ -558,14 +567,33 @@ class EvidenceItem:
     sources: tuple[SourceRef, ...] = ()
     change_relation_ids: tuple[str, ...] = ()
     structural_path_ids: tuple[str, ...] = ()
+    structural_change: StructuralChangeIdentity | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def validate_consistency(self) -> None:
         if self.changed:
-            if self.role != "changed_anchor":
+            if self.kind == "structural_change":
+                if self.role != "changed_anchor" or self.revision_side != "review":
+                    raise ValueError(
+                        f"{self.id}: structural change must be a review-level anchor"
+                    )
+                if self.structural_change is None:
+                    raise ValueError(
+                        f"{self.id}: structural change requires typed identity"
+                    )
+            elif self.kind == "symbol" and self.role != "revision_fact":
+                raise ValueError(
+                    f"{self.id}: changed symbol must be revision provenance"
+                )
+            elif self.kind != "symbol" and self.role != "changed_anchor":
                 raise ValueError(f"{self.id}: changed fact must own changed_anchor role")
-            if self.revision_side not in {"head", "base"}:
-                raise ValueError(f"{self.id}: changed fact must identify head or base")
+            if self.kind != "structural_change" and self.revision_side not in {
+                "head",
+                "base",
+            }:
+                raise ValueError(
+                    f"{self.id}: changed revision fact must identify head or base"
+                )
             if self.operation not in {
                 "added",
                 "modified",
@@ -576,8 +604,16 @@ class EvidenceItem:
                 raise ValueError(f"{self.id}: changed fact has invalid operation")
         elif self.role == "changed_anchor":
             raise ValueError(f"{self.id}: changed_anchor role requires changed=True")
-        if self.operation == "removed" and self.revision_side != "base":
+        if (
+            self.operation == "removed"
+            and self.revision_side != "base"
+            and self.kind != "structural_change"
+        ):
             raise ValueError(f"{self.id}: removed fact must belong to base revision")
+        if self.kind != "structural_change" and self.structural_change is not None:
+            raise ValueError(
+                f"{self.id}: only structural changes may carry typed identity"
+            )
         if self.role == "verification" and self.profile != "verification":
             raise ValueError(f"{self.id}: verification role requires verification profile")
         if self.role == "verification":
@@ -630,7 +666,7 @@ class EvidenceCatalog:
     change_relations: tuple[ChangeRelation, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
     guardrail_scan_diagnostics: tuple[GuardrailScanDiagnostic, ...] = ()
-    schema_version: str = "evidence_catalog.v10"
+    schema_version: str = "evidence_catalog.v11"
 
     def by_id(self) -> dict[str, EvidenceItem]:
         return {item.id: item for item in self.items}
@@ -652,7 +688,7 @@ class EvidenceCatalog:
             if (
                 relation_ids
                 and item.changed
-                and item.kind in {"symbol", "change_relation"}
+                and item.kind in {"symbol", "change_relation", "structural_change"}
                 and not item.change_relation_ids
             ):
                 raise ValueError(
@@ -666,6 +702,25 @@ class EvidenceCatalog:
                             raise ValueError(
                                 f"{item.id}: {field} must reference symbol evidence"
                             )
+            if item.kind == "structural_change":
+                identity = item.structural_change
+                assert identity is not None
+                symbol_ids = tuple(
+                    value
+                    for value in (
+                        identity.base_symbol_evidence_id,
+                        identity.head_symbol_evidence_id,
+                    )
+                    if value is not None
+                )
+                if not symbol_ids or any(
+                    value not in items_by_id
+                    or items_by_id[value].kind != "symbol"
+                    for value in symbol_ids
+                ):
+                    raise ValueError(
+                        f"{item.id}: structural change must reference symbol evidence"
+                    )
 
 
 @dataclass(frozen=True)

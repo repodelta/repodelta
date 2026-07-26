@@ -151,7 +151,7 @@ def test_catalog_deduplicates_facts_and_links_unchanged_path_symbols() -> None:
     )
     assert verification.verification_status == "completed"
     assert verification.verification_conclusion == "success"
-    assert catalog.schema_version == "evidence_catalog.v10"
+    assert catalog.schema_version == "evidence_catalog.v11"
 
     repeated = build_evidence_catalog(
         packet, parse_changed_files(packet.changed_files), structural
@@ -172,7 +172,7 @@ def test_review_brief_serializes_one_canonical_catalog() -> None:
     serialized = brief.to_dict()
 
     assert brief.schema_version == "review_brief.v28"
-    assert serialized["evidence_catalog"]["schema_version"] == "evidence_catalog.v10"
+    assert serialized["evidence_catalog"]["schema_version"] == "evidence_catalog.v11"
     assert "structural_graph" not in serialized
     assert len(serialized["evidence_catalog"]["items"]) == 1
     assert serialized["evidence_catalog"]["items"][0]["kind"] == "changed_file"
@@ -272,10 +272,14 @@ def test_exact_symbol_replaces_its_mapped_hunk_evidence() -> None:
     )
 
     assert not [item for item in catalog.items if item.kind == "change_relation"]
-    assert [item.metadata["symbol_id"] for item in catalog.items] == ["S"]
+    assert [
+        item.metadata["symbol_id"]
+        for item in catalog.items
+        if item.kind == "symbol"
+    ] == ["S"]
     assert "newcall" in catalog.items[0].head_signature.identifiers
     assert "oldcall" in catalog.items[0].base_signature.identifiers
-    assert catalog.items[0].operation == "replaced"
+    assert catalog.items[0].operation == "modified"
     assert catalog.items[0].change_relation_ids == (
         catalog.change_relations[0].id,
     )

@@ -20,6 +20,7 @@ from prismcode.model.contracts import (
     GuardrailScanResultSet,
     ReviewSourcePacket,
     SourceRef,
+    StructuralChangeIdentity,
     SuppliedEvidence,
     VerificationObservation,
     VerificationIdentity,
@@ -31,7 +32,6 @@ from prismcode.changes.hunks import (
 from prismcode.facts.lexical import association_signature, merge_signatures
 from prismcode.providers.structural import (
     GraphSymbol,
-    HunkSymbolOverlap,
     StructuralGraphCollection,
     StructuralGraphResult,
     StructuralPath,
@@ -78,15 +78,18 @@ def build_evidence_catalog(
     change_relations = tuple(
         relation for hunk in changes.hunks for relation in hunk.relations
     )
-    overlaps_by_hunk: dict[str, list[HunkSymbolOverlap]] = {}
-    head_graph = (
-        structural_graph.for_revision("head")
-        if structural_graph is not None
-        else None
+    mapped_lines: dict[tuple[StructuralRevision, str], set[int]] = {}
+    has_base_graph = (
+        structural_graph is not None
+        and structural_graph.for_revision("base") is not None
     )
-    if head_graph is not None:
-        for overlap in head_graph.overlaps:
-            overlaps_by_hunk.setdefault(overlap.hunk_id, []).append(overlap)
+    if structural_graph is not None:
+        for revision_graph in structural_graph.revisions:
+            for overlap in revision_graph.overlaps:
+                mapped_lines.setdefault(
+                    (revision_graph.revision_side, overlap.hunk_id),
+                    set(),
+                ).update(overlap.changed_lines)
 
     for changed_file in packet.changed_files:
         file_hunks = hunks_by_path.get(changed_file.path, ())
@@ -94,23 +97,34 @@ def build_evidence_catalog(
             _put(items, _changed_file_fallback(changed_file))
             continue
         for hunk in file_hunks:
-            overlaps = overlaps_by_hunk.get(hunk.id, ())
-            mapped_lines = {
-                line for overlap in overlaps for line in overlap.changed_lines
-            }
             for relation in hunk.relations:
-                uncovered = tuple(
+                uncovered_added = tuple(
                     line
                     for line in relation.added
-                    if line.number not in mapped_lines
+                    if line.number not in mapped_lines.get(("head", hunk.id), set())
                 )
-                if uncovered or not relation.added:
+                uncovered_removed = (
+                    tuple(
+                        line
+                        for line in relation.removed
+                        if line.number
+                        not in mapped_lines.get(("base", hunk.id), set())
+                    )
+                    if has_base_graph or relation.kind == "removed"
+                    else ()
+                )
+                if uncovered_added or uncovered_removed:
                     _put(
                         items,
                         _change_relation_item(
                             changed_file,
                             relation,
-                            added=uncovered,
+                            added=uncovered_added,
+                            removed=(
+                                uncovered_removed
+                                if has_base_graph
+                                else relation.removed
+                            ),
                         ),
                     )
 
@@ -121,6 +135,7 @@ def build_evidence_catalog(
                 revision_graph,
                 hunks_by_id=hunks_by_id,
             )
+        _put_structural_changes(items)
 
     for observation in packet.verification_observations:
         _put(items, verification_evidence(observation))
@@ -269,6 +284,98 @@ def _put_structural_revision(
                     },
                 ),
             )
+
+
+def _put_structural_changes(items: dict[str, EvidenceItem]) -> None:
+    symbols_by_provider: dict[str, dict[str, EvidenceItem]] = {}
+    for item in items.values():
+        if item.kind != "symbol" or not item.changed:
+            continue
+        provider_symbol_id = str(item.metadata["symbol_id"])
+        symbols_by_provider.setdefault(provider_symbol_id, {})[
+            item.revision_side
+        ] = item
+
+    for provider_symbol_id, revisions in symbols_by_provider.items():
+        base = revisions.get("base")
+        head = revisions.get("head")
+        operation: ChangeOperation = (
+            "added"
+            if head is not None and head.operation == "added"
+            else "removed"
+            if base is not None and base.operation == "removed" and head is None
+            else "modified"
+        )
+        exemplar = head or base
+        assert exemplar is not None
+        _put(
+            items,
+            EvidenceItem(
+                id=evidence_id("structural_change", provider_symbol_id),
+                summary=(
+                    f"{operation.title()} {exemplar.metadata['symbol_kind']}: "
+                    f"{exemplar.metadata['qualified_name']}"
+                ),
+                kind="structural_change",
+                classification=exemplar.classification,
+                profile=exemplar.profile,
+                authority="structural_provider",
+                revision_side="review",
+                operation=operation,
+                role="changed_anchor",
+                changed=True,
+                head_signature=merge_signatures(
+                    *(
+                        item.head_signature
+                        for item in (base, head)
+                        if item is not None
+                    )
+                ),
+                base_signature=merge_signatures(
+                    *(
+                        item.base_signature
+                        for item in (base, head)
+                        if item is not None
+                    )
+                ),
+                sources=_unique_sources(
+                    (
+                        *(base.sources if base is not None else ()),
+                        *(head.sources if head is not None else ()),
+                    )
+                ),
+                change_relation_ids=tuple(
+                    sorted(
+                        {
+                            *(base.change_relation_ids if base is not None else ()),
+                            *(head.change_relation_ids if head is not None else ()),
+                        }
+                    )
+                ),
+                structural_path_ids=tuple(
+                    sorted(
+                        {
+                            *(base.structural_path_ids if base is not None else ()),
+                            *(head.structural_path_ids if head is not None else ()),
+                        }
+                    )
+                ),
+                structural_change=StructuralChangeIdentity(
+                    provider_symbol_id=provider_symbol_id,
+                    base_symbol_evidence_id=base.id if base is not None else None,
+                    head_symbol_evidence_id=head.id if head is not None else None,
+                ),
+                metadata={
+                    "provider_symbol_id": provider_symbol_id,
+                    "qualified_name": exemplar.metadata["qualified_name"],
+                    "path": exemplar.metadata["path"],
+                    "symbol_kind": exemplar.metadata["symbol_kind"],
+                    "start_line": exemplar.metadata["start_line"],
+                },
+            ),
+        )
+
+
 def evidence_id(kind: str, identity: str) -> str:
     digest = hashlib.sha256(f"{kind}\0{identity}".encode("utf-8")).hexdigest()[:20]
     return f"E:{kind}:{digest}"
@@ -408,17 +515,15 @@ def _change_relation_item(
     relation: ChangeRelation,
     *,
     added: tuple[ChangedLine, ...],
+    removed: tuple[ChangedLine, ...],
 ) -> EvidenceItem:
     path = relation.file_path
-    removed = relation.removed
     head_text = "\n".join(item.text for item in added)
     base_text = "\n".join(item.text for item in removed)
     display_lines = added or removed
     line_start = min((item.number for item in display_lines), default=0)
     line_end = max((item.number for item in display_lines), default=line_start)
-    identity = (
-        f"{relation.id}:{','.join(str(item.number) for item in added)}"
-    )
+    identity = f"{relation.id}:{','.join(str(item.number) for item in added)}"
     summary = (
         f"{relation.kind.title()} change: {path}:{line_start}-{line_end}"
     )
@@ -515,7 +620,7 @@ def _symbol_item(
         revision_side=revision_side,
         operation=operation,
         role=(
-            "changed_anchor"
+            "revision_fact"
             if changed
             else "test_context"
             if _fact_profile(symbol.file_path) == "test"
