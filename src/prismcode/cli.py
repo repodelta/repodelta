@@ -3,7 +3,9 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+from contextlib import nullcontext
 from dataclasses import replace
+from pathlib import Path
 
 from prismcode.pipeline import DeterministicAnalyzer
 from prismcode.providers.codegraph import CodegraphProvider
@@ -20,6 +22,10 @@ from prismcode.intake.github import GitHubApiError, GitHubClient, GitHubPullRequ
 from prismcode.presentation.html import write_html
 from prismcode.providers.mapping import (
     map_packet_changed_symbols,
+)
+from prismcode.providers.workspace import (
+    PreparedCodegraphRoots,
+    prepared_codegraph_roots,
 )
 from prismcode.presentation.status import format_structural_coverage
 from prismcode.changes.hunks import parse_changed_files
@@ -79,6 +85,14 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     review.add_argument(
+        "--prepare-codegraph",
+        action="store_true",
+        help=(
+            "Initialize or sync the exact head index and prepare a temporary "
+            "base worktree/index when --base-repo-root is omitted"
+        ),
+    )
+    review.add_argument(
         "--verbose",
         action="store_true",
         help="Print individual collection and structural diagnostics",
@@ -121,6 +135,12 @@ def main() -> int:
         return 0 if result.passed else 1
     if args.command != "review":
         return 2
+    if args.prepare_codegraph and args.fixture:
+        parser.error("--prepare-codegraph requires a live --repo review")
+    if args.prepare_codegraph and args.no_structural_graph:
+        parser.error(
+            "--prepare-codegraph cannot be combined with --no-structural-graph"
+        )
 
     try:
         if args.fixture:
@@ -138,55 +158,75 @@ def main() -> int:
             )
             packet = GitHubPullRequestAdapter(client=client, max_files=args.max_files).load(args.repo, args.pr)
             analysis_input = AnalysisInput(packet=packet)
-        structural_graph = None
-        changes = analysis_input.changes or parse_changed_files(
-            analysis_input.packet.changed_files
-        )
-        analysis_input = replace(
-            analysis_input,
-            changes=changes,
-            structural_graph_disabled=args.no_structural_graph,
-        )
-        if not args.no_structural_graph:
-            structural_graph = map_packet_changed_symbols(
-                analysis_input.packet,
-                changes,
-                CodegraphProvider(
-                    args.repo_root,
-                    expected_revision=(
-                        analysis_input.packet.head_sha
-                        if not args.fixture
+        workspace = (
+            prepared_codegraph_roots(
+                repo_root=args.repo_root,
+                head_revision=analysis_input.packet.head_sha or "",
+                base_revision=analysis_input.packet.base_sha or "",
+                base_repo_root=args.base_repo_root,
+            )
+            if args.prepare_codegraph
+            else nullcontext(
+                PreparedCodegraphRoots(
+                    head=Path(args.repo_root),
+                    base=(
+                        Path(args.base_repo_root)
+                        if args.base_repo_root
                         else None
                     ),
-                    revision_side="head",
-                ),
-                base_provider=(
-                    CodegraphProvider(
-                        args.base_repo_root,
-                        expected_revision=(
-                            analysis_input.packet.base_sha
-                            if not args.fixture
-                            else None
-                        ),
-                        revision_side="base",
-                    )
-                    if args.base_repo_root
-                    else None
-                ),
+                )
+            )
+        )
+        with workspace as roots:
+            structural_graph = None
+            changes = analysis_input.changes or parse_changed_files(
+                analysis_input.packet.changed_files
             )
             analysis_input = replace(
                 analysis_input,
-                structural_graph=structural_graph,
+                changes=changes,
+                structural_graph_disabled=args.no_structural_graph,
             )
-        brief = DeterministicAnalyzer(
-            guardrail_scanner=RepositoryGuardrailScanner(
-                args.repo_root,
-                expected_revision=(
-                    analysis_input.packet.head_sha if not args.fixture else None
-                ),
-            )
-        ).analyze(analysis_input)
-        output = write_html(brief, args.output)
+            if not args.no_structural_graph:
+                structural_graph = map_packet_changed_symbols(
+                    analysis_input.packet,
+                    changes,
+                    CodegraphProvider(
+                        roots.head,
+                        expected_revision=(
+                            analysis_input.packet.head_sha
+                            if not args.fixture
+                            else None
+                        ),
+                        revision_side="head",
+                    ),
+                    base_provider=(
+                        CodegraphProvider(
+                            roots.base,
+                            expected_revision=(
+                                analysis_input.packet.base_sha
+                                if not args.fixture
+                                else None
+                            ),
+                            revision_side="base",
+                        )
+                        if roots.base
+                        else None
+                    ),
+                )
+                analysis_input = replace(
+                    analysis_input,
+                    structural_graph=structural_graph,
+                )
+            brief = DeterministicAnalyzer(
+                guardrail_scanner=RepositoryGuardrailScanner(
+                    roots.head,
+                    expected_revision=(
+                        analysis_input.packet.head_sha if not args.fixture else None
+                    ),
+                )
+            ).analyze(analysis_input)
+            output = write_html(brief, args.output)
     except (GitHubApiError, OSError, ValueError) as exc:
         print(f"prismcode: error: {exc}", file=sys.stderr)
         return 2
