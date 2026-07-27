@@ -112,12 +112,114 @@ def test_same_directed_relation_on_both_revisions_is_retained() -> None:
     assert changes[0].operation == "retained"
     identity = changes[0].structural_relation_change
     assert identity is not None
-    assert (identity.source_provider_symbol_id, identity.target_provider_symbol_id) == (
-        "A",
-        "B",
+    symbols = {
+        item.metadata["symbol_id"]: item.metadata["review_symbol_id"]
+        for item in catalog.items
+        if item.kind == "symbol"
+    }
+    assert (identity.source_review_symbol_id, identity.target_review_symbol_id) == (
+        symbols["A"],
+        symbols["B"],
     )
     assert len(identity.base_path_evidence_ids) == 1
     assert len(identity.head_path_evidence_ids) == 1
+
+
+def test_revision_local_relation_ids_converge_by_exact_logical_symbols() -> None:
+    def path(revision_prefix: str) -> StructuralPath:
+        source = GraphSymbol(
+            id=f"{revision_prefix}:source",
+            kind="function",
+            name="source",
+            qualified_name="service.source",
+            file_path="src/service.py",
+            language="python",
+            start_line=1,
+            end_line=2,
+        )
+        target = GraphSymbol(
+            id=f"{revision_prefix}:target",
+            kind="function",
+            name="target",
+            qualified_name="service.target",
+            file_path="src/service.py",
+            language="python",
+            start_line=4,
+            end_line=5,
+        )
+        return StructuralPath(
+            seed_symbol_id=source.id,
+            steps=(
+                GraphPathStep(
+                    source=source,
+                    target=target,
+                    relation="calls",
+                    direction="outgoing",
+                ),
+            ),
+            classification="runtime",
+        )
+
+    catalog = _catalog(
+        _result("base", path("base"), complete_seed="base:source"),
+        _result("head", path("head"), complete_seed="head:source"),
+    )
+
+    changes = _relation_changes(catalog)
+    assert len(changes) == 1
+    assert changes[0].operation == "retained"
+    identity = changes[0].structural_relation_change
+    assert identity is not None
+    assert identity.base_path_evidence_ids
+    assert identity.head_path_evidence_ids
+
+
+def test_same_revision_logical_collision_remains_distinct() -> None:
+    left = GraphSymbol(
+        id="overload:1",
+        kind="function",
+        name="execute",
+        qualified_name="service.execute",
+        file_path="src/service.py",
+        language="python",
+        start_line=1,
+        end_line=2,
+    )
+    right = GraphSymbol(
+        id="overload:2",
+        kind="function",
+        name="execute",
+        qualified_name="service.execute",
+        file_path="src/service.py",
+        language="python",
+        start_line=4,
+        end_line=5,
+    )
+    catalog = _catalog(
+        _result(
+            "head",
+            StructuralPath(
+                seed_symbol_id=left.id,
+                steps=(
+                    GraphPathStep(
+                        source=left,
+                        target=right,
+                        relation="calls",
+                        direction="outgoing",
+                    ),
+                ),
+                classification="runtime",
+            ),
+            complete_seed=left.id,
+        )
+    )
+
+    review_ids = {
+        item.metadata["review_symbol_id"]
+        for item in catalog.items
+        if item.kind == "symbol"
+    }
+    assert len(review_ids) == 2
 
 
 def test_complete_opposite_revision_proves_added_and_removed_relations() -> None:
@@ -164,14 +266,24 @@ def test_duplicate_path_observations_converge_to_one_relation_change() -> None:
             item
             for item in changes
             if item.structural_relation_change is not None
-            and item.structural_relation_change.target_provider_symbol_id == "B"
+            and item.structural_relation_change.target_review_symbol_id
+            == next(
+                symbol.metadata["review_symbol_id"]
+                for symbol in catalog.items
+                if symbol.kind == "symbol" and symbol.metadata["symbol_id"] == "B"
+            )
         )
     ) == 1
     first_edge = next(
         item
         for item in changes
         if item.structural_relation_change is not None
-        and item.structural_relation_change.target_provider_symbol_id == "B"
+        and item.structural_relation_change.target_review_symbol_id
+        == next(
+            symbol.metadata["review_symbol_id"]
+            for symbol in catalog.items
+            if symbol.kind == "symbol" and symbol.metadata["symbol_id"] == "B"
+        )
     )
     assert len(first_edge.structural_relation_change.head_path_evidence_ids) == 2
 

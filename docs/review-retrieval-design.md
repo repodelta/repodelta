@@ -311,7 +311,7 @@ The versioned, reference-only selected view is:
 ReviewProjection
   review_graph
     path_relation_ids[]
-    nodes[id, provider_symbol_id, operation,
+    nodes[id, review_symbol_id, operation,
           evidence_ids[], path_relation_ids[]]
     edges[id, source_node_id, relation, operation,
           target_node_id, relation_change_evidence_id,
@@ -334,8 +334,10 @@ ReviewProjection
 ```
 
 The upstream `ProjectionCandidateSet` still enumerates typed relations.
-Graph nodes collapse by provider-symbol identity and retain revision evidence
-provenance. Graph edges reference canonical structural relation-change facts;
+Graph nodes collapse by the facts-owned exact logical identity over path,
+qualified name, and symbol kind, and retain revision-local provider evidence
+as provenance. Same-revision collisions remain distinct; rename/move is not
+inferred. Graph edges reference canonical structural relation-change facts;
 raw provider path steps never become a second edge truth. An overlay includes
 an edge only when its selected support paths intersect that edge's base/head
 path provenance. Shared selected paths and cross-focus overlap collapse to one

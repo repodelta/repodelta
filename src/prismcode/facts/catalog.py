@@ -141,6 +141,7 @@ def build_evidence_catalog(
                 revision_graph,
                 hunks_by_id=hunks_by_id,
             )
+        _assign_review_symbol_ids(items)
         _put_structural_changes(items)
         ownership_diagnostics = _put_structural_ownership_changes(
             items,
@@ -357,16 +358,16 @@ def _put_structural_revision(
 
 
 def _put_structural_changes(items: dict[str, EvidenceItem]) -> None:
-    symbols_by_provider: dict[str, dict[str, EvidenceItem]] = {}
+    symbols_by_review_id: dict[str, dict[str, EvidenceItem]] = {}
     for item in items.values():
         if item.kind != "symbol" or not item.changed:
             continue
-        provider_symbol_id = str(item.metadata["symbol_id"])
-        symbols_by_provider.setdefault(provider_symbol_id, {})[
+        review_symbol_id = str(item.metadata["review_symbol_id"])
+        symbols_by_review_id.setdefault(review_symbol_id, {})[
             item.revision_side
         ] = item
 
-    for provider_symbol_id, revisions in symbols_by_provider.items():
+    for review_symbol_id, revisions in symbols_by_review_id.items():
         base = revisions.get("base")
         head = revisions.get("head")
         operation: ChangeOperation = (
@@ -381,7 +382,7 @@ def _put_structural_changes(items: dict[str, EvidenceItem]) -> None:
         _put(
             items,
             EvidenceItem(
-                id=evidence_id("structural_change", provider_symbol_id),
+                id=evidence_id("structural_change", review_symbol_id),
                 summary=(
                     f"{operation.title()} {exemplar.metadata['symbol_kind']}: "
                     f"{exemplar.metadata['qualified_name']}"
@@ -431,12 +432,12 @@ def _put_structural_changes(items: dict[str, EvidenceItem]) -> None:
                     )
                 ),
                 structural_change=StructuralChangeIdentity(
-                    provider_symbol_id=provider_symbol_id,
+                    review_symbol_id=review_symbol_id,
                     base_symbol_evidence_id=base.id if base is not None else None,
                     head_symbol_evidence_id=head.id if head is not None else None,
                 ),
                 metadata={
-                    "provider_symbol_id": provider_symbol_id,
+                    "review_symbol_id": review_symbol_id,
                     "qualified_name": exemplar.metadata["qualified_name"],
                     "path": exemplar.metadata["path"],
                     "symbol_kind": exemplar.metadata["symbol_kind"],
@@ -444,6 +445,47 @@ def _put_structural_changes(items: dict[str, EvidenceItem]) -> None:
                 },
             ),
         )
+
+
+def _assign_review_symbol_ids(items: dict[str, EvidenceItem]) -> None:
+    """Replace candidate keys with exact, collision-safe review identities."""
+
+    symbols_by_candidate: dict[str, list[EvidenceItem]] = {}
+    for item in items.values():
+        if item.kind == "symbol":
+            symbols_by_candidate.setdefault(
+                str(item.metadata["review_symbol_id"]),
+                [],
+            ).append(item)
+
+    for candidate, symbols in symbols_by_candidate.items():
+        revision_counts = {
+            revision: sum(item.revision_side == revision for item in symbols)
+            for revision in ("base", "head")
+        }
+        ambiguous = any(count > 1 for count in revision_counts.values())
+        for item in symbols:
+            review_symbol_id = (
+                evidence_id(
+                    "review_symbol",
+                    "\0".join(
+                        (
+                            candidate,
+                            item.revision_side,
+                            str(item.metadata["symbol_id"]),
+                        )
+                    ),
+                )
+                if ambiguous
+                else candidate
+            )
+            items[item.id] = replace(
+                item,
+                metadata={
+                    **item.metadata,
+                    "review_symbol_id": review_symbol_id,
+                },
+            )
 
 
 def _put_structural_ownership_changes(
@@ -461,16 +503,18 @@ def _put_structural_ownership_changes(
             continue
         identity = item.structural_ownership
         assert identity is not None
+        parent = items[identity.parent_symbol_evidence_id]
+        child = items[identity.child_symbol_evidence_id]
         observed.setdefault(
             (
-                identity.parent_provider_symbol_id,
-                identity.child_provider_symbol_id,
+                str(parent.metadata["review_symbol_id"]),
+                str(child.metadata["review_symbol_id"]),
             ),
             {},
         )[item.revision_side] = item.id
 
     changed_operations = {
-        item.structural_change.provider_symbol_id: item.operation
+        item.structural_change.review_symbol_id: item.operation
         for item in items.values()
         if item.kind == "structural_change"
         and item.structural_change is not None
@@ -494,11 +538,13 @@ def _put_structural_ownership_changes(
             ),
             base_proves_absence=_opposite_ownership_proves_absence(
                 structural_graph,
+                items,
                 "base",
                 key[1],
             ),
             head_proves_absence=_opposite_ownership_proves_absence(
                 structural_graph,
+                items,
                 "head",
                 key[1],
             ),
@@ -543,8 +589,8 @@ def _put_structural_ownership_changes(
                     )
                 ),
                 structural_ownership_change=StructuralOwnershipChangeIdentity(
-                    parent_provider_symbol_id=key[0],
-                    child_provider_symbol_id=key[1],
+                    parent_review_symbol_id=key[0],
+                    child_review_symbol_id=key[1],
                     base_ownership_evidence_id=base_id,
                     head_ownership_evidence_id=head_id,
                 ),
@@ -579,17 +625,24 @@ def _ownership_endpoint_changed(
 
 def _opposite_ownership_proves_absence(
     structural_graph: StructuralGraphCollection,
+    items: dict[str, EvidenceItem],
     revision: StructuralRevision,
-    child_provider_symbol_id: str,
+    child_review_symbol_id: str,
 ) -> bool:
     result = structural_graph.for_revision(revision)
     coverage = result.ownership_coverage if result is not None else None
+    provider_symbol_ids = {
+        str(item.metadata["symbol_id"])
+        for item in items.values()
+        if item.kind == "symbol"
+        and item.metadata.get("review_symbol_id") == child_review_symbol_id
+    }
     return (
         result is not None
         and result.index.state == "available"
         and coverage is not None
         and coverage.state == "complete"
-        and child_provider_symbol_id in coverage.observed_symbol_ids
+        and bool(provider_symbol_ids & set(coverage.observed_symbol_ids))
     )
 
 
@@ -634,22 +687,22 @@ def _put_structural_relation_changes(
         for step in item.metadata.get("steps", ()):
             source = items[step["source_evidence_id"]]
             target = items[step["target_evidence_id"]]
-            source_provider_id = str(source.metadata["symbol_id"])
-            target_provider_id = str(target.metadata["symbol_id"])
+            source_review_id = str(source.metadata["review_symbol_id"])
+            target_review_id = str(target.metadata["review_symbol_id"])
             if step["direction"] == "incoming":
-                source_provider_id, target_provider_id = (
-                    target_provider_id,
-                    source_provider_id,
+                source_review_id, target_review_id = (
+                    target_review_id,
+                    source_review_id,
                 )
             key = (
-                source_provider_id,
-                target_provider_id,
+                source_review_id,
+                target_review_id,
                 step["relation"],
             )
             observed.setdefault(key, {}).setdefault(revision, set()).add(item.id)
 
     changed_operations = {
-        item.structural_change.provider_symbol_id: item.operation
+        item.structural_change.review_symbol_id: item.operation
         for item in items.values()
         if item.kind == "structural_change"
         and item.structural_change is not None
@@ -721,8 +774,8 @@ def _put_structural_relation_changes(
                 ),
                 structural_path_ids=tuple(sorted(set(exemplar_paths))),
                 structural_relation_change=StructuralRelationChangeIdentity(
-                    source_provider_symbol_id=key[0],
-                    target_provider_symbol_id=key[1],
+                    source_review_symbol_id=key[0],
+                    target_review_symbol_id=key[1],
                     relation=key[2],
                     base_path_evidence_ids=base_path_ids,
                     head_path_evidence_ids=head_path_ids,
@@ -1038,6 +1091,11 @@ def _symbol_item(
         structural_path_ids=structural_path_ids,
         metadata={
             "symbol_id": symbol.id,
+            "review_symbol_id": _review_symbol_id(
+                symbol.file_path,
+                symbol.qualified_name,
+                symbol.kind,
+            ),
             "symbol_kind": symbol.kind,
             "qualified_name": symbol.qualified_name,
             "path": symbol.file_path,
@@ -1047,6 +1105,15 @@ def _symbol_item(
             "changed_hunk_ids": changed_hunk_ids,
             "changed_lines": changed_lines,
         },
+    )
+
+
+def _review_symbol_id(path: str, qualified_name: str, kind: str) -> str:
+    """Return the exact logical identity candidate shared across revisions."""
+
+    return evidence_id(
+        "review_symbol",
+        "\0".join((path, qualified_name, kind)),
     )
 
 

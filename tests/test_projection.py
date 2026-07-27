@@ -106,7 +106,7 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
     brief = DeterministicAnalyzer().analyze(analysis_input)
 
     assert _selected_targets(brief, "R1", "changed_anchor") == (
-        "E:structural_change:5910f29667b835bd4cbe",
+        "E:structural_change:e3a262c5dc2f418b1bf4",
     )
     assert _selected_targets(brief, "R1", "runtime_context") == (
         "E:symbol:51c78d1cf2a276cc9a40",
@@ -124,9 +124,9 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
     assert [item.role for item in overlay.nodes] == ["changed_anchor"]
     assert overlay.path_relation_ids == ()
     assert graph.edges == ()
-    assert graph.nodes[0].provider_symbol_id == "Y"
+    assert graph.nodes[0].review_symbol_id == "E:review_symbol:739129a16c60a7fa48f8"
     assert graph.nodes[0].evidence_ids == (
-        "E:structural_change:5910f29667b835bd4cbe",
+        "E:structural_change:e3a262c5dc2f418b1bf4",
         "E:symbol:9e703e599343229d97c1",
     )
     html = render_html(brief)
@@ -199,6 +199,7 @@ def test_canonical_ownership_projects_recursive_shared_focus_hierarchy() -> None
             role="runtime_context",
             metadata={
                 "symbol_id": provider_id,
+                "review_symbol_id": provider_id,
                 "qualified_name": provider_id,
                 "symbol_kind": "class",
             },
@@ -216,7 +217,7 @@ def test_canonical_ownership_projects_recursive_shared_focus_hierarchy() -> None
         role="changed_anchor",
         changed=True,
         structural_change=StructuralChangeIdentity(
-            provider_symbol_id="child",
+            review_symbol_id="child",
             head_symbol_evidence_id="E:symbol:child",
         ),
     )
@@ -237,8 +238,8 @@ def test_canonical_ownership_projects_recursive_shared_focus_hierarchy() -> None
             operation="retained",
             role="structural_ownership",
             structural_ownership_change=StructuralOwnershipChangeIdentity(
-                parent_provider_symbol_id=parent_id,
-                child_provider_symbol_id=child_id,
+                parent_review_symbol_id=parent_id,
+                child_review_symbol_id=child_id,
                 base_ownership_evidence_id=f"E:base:{fact_id}",
                 head_ownership_evidence_id=f"E:head:{fact_id}",
             ),
@@ -298,7 +299,7 @@ def test_canonical_ownership_projects_recursive_shared_focus_hierarchy() -> None
     projection = build_review_projection(candidates, convergence, evidence)
 
     assert {
-        node.provider_symbol_id for node in projection.review_graph.nodes
+        node.review_symbol_id for node in projection.review_graph.nodes
     } == {"child", "parent", "file"}
     assert projection.review_graph.edges == ()
     assert [
@@ -378,6 +379,7 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
             changed=changed,
             metadata={
                 "symbol_id": symbol_id,
+                "review_symbol_id": symbol_id,
                 "qualified_name": symbol_id,
                 "symbol_kind": kind,
             },
@@ -466,8 +468,8 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
                 role="structural_relation",
                 changed=False,
                 structural_relation_change=StructuralRelationChangeIdentity(
-                    source_provider_symbol_id="anchor",
-                    target_provider_symbol_id="runtime",
+                source_review_symbol_id="anchor",
+                target_review_symbol_id="runtime",
                     relation="calls",
                     head_path_evidence_ids=("E:path:runtime",),
                 ),
@@ -484,8 +486,8 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
                 role="structural_relation",
                 changed=True,
                 structural_relation_change=StructuralRelationChangeIdentity(
-                    source_provider_symbol_id="runtime",
-                    target_provider_symbol_id="test",
+                    source_review_symbol_id="runtime",
+                    target_review_symbol_id="test",
                     relation="calls",
                     base_path_evidence_ids=("E:path:test",),
                 ),
@@ -502,8 +504,8 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
                 role="structural_relation",
                 changed=True,
                 structural_relation_change=StructuralRelationChangeIdentity(
-                    source_provider_symbol_id="anchor_2",
-                    target_provider_symbol_id="runtime_2",
+                    source_review_symbol_id="anchor_2",
+                    target_review_symbol_id="runtime_2",
                     relation="calls",
                     head_path_evidence_ids=("E:path:independent",),
                 ),
@@ -520,8 +522,8 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
                 role="structural_relation",
                 changed=True,
                 structural_relation_change=StructuralRelationChangeIdentity(
-                    source_provider_symbol_id="anchor",
-                    target_provider_symbol_id="anchor_2",
+                    source_review_symbol_id="anchor",
+                    target_review_symbol_id="anchor_2",
                     relation="calls",
                     head_path_evidence_ids=("E:path:anchor-link",),
                 ),
@@ -538,8 +540,8 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
                 role="structural_relation",
                 changed=False,
                 structural_relation_change=StructuralRelationChangeIdentity(
-                    source_provider_symbol_id="detour",
-                    target_provider_symbol_id="peripheral",
+                    source_review_symbol_id="detour",
+                    target_review_symbol_id="peripheral",
                     relation="calls",
                     head_path_evidence_ids=("E:path:runtime-long",),
                 ),
@@ -643,7 +645,7 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
     overlay = projection.slices[0].structural_overlay
     second_overlay = projection.slices[1].structural_overlay
     graph = projection.review_graph
-    assert {item.provider_symbol_id for item in graph.nodes} == {
+    assert {item.review_symbol_id for item in graph.nodes} == {
         "anchor",
         "runtime",
         "test",
@@ -669,7 +671,7 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
         item.node_id for item in second_overlay.nodes
     )
     assert {
-        graph_node.provider_symbol_id: item.path_relation_ids
+        graph_node.review_symbol_id: item.path_relation_ids
         for item in overlay.nodes
         for graph_node in graph.nodes
         if graph_node.id == item.node_id
@@ -712,6 +714,7 @@ def test_review_graph_renders_complete_focus_union() -> None:
             changed=True,
             metadata={
                 "symbol_id": symbol_id,
+                "review_symbol_id": symbol_id,
                 "qualified_name": symbol_id,
                 "symbol_kind": "function",
             },
@@ -735,8 +738,8 @@ def test_review_graph_renders_complete_focus_union() -> None:
             role="structural_relation",
             changed=operation != "retained",
             structural_relation_change=StructuralRelationChangeIdentity(
-                source_provider_symbol_id=source_id,
-                target_provider_symbol_id=target_id,
+                source_review_symbol_id=source_id,
+                target_review_symbol_id=target_id,
                 relation="calls",
                 base_path_evidence_ids=(
                     (f"E:path:{fact_id}:base",)
@@ -763,7 +766,7 @@ def test_review_graph_renders_complete_focus_union() -> None:
     nodes = tuple(
         StructuralGraphNode(
             id=f"N:{node_id}",
-            provider_symbol_id=node_id,
+            review_symbol_id=node_id,
             operation="modified",
             evidence_ids=(f"E:{node_id}",),
         )
@@ -870,7 +873,7 @@ def test_every_requirement_is_routed_without_a_global_statement_budget() -> None
             role="changed_anchor",
             changed=True,
             structural_change=StructuralChangeIdentity(
-                provider_symbol_id=f"capability_{index}",
+                review_symbol_id=f"capability_{index}",
                 head_symbol_evidence_id=f"S:{index}",
             ),
             head_signature=association_signature(f"capability_{index}"),
@@ -895,6 +898,7 @@ def test_every_requirement_is_routed_without_a_global_statement_budget() -> None
             changed=True,
             metadata={
                 "symbol_id": f"capability_{index}",
+                "review_symbol_id": f"capability_{index}",
                 "qualified_name": f"capability_{index}",
             },
         )
@@ -950,13 +954,14 @@ def test_isolated_symbol_and_standalone_document_keep_distinct_canonical_forms()
                 role="changed_anchor",
                 changed=True,
                 structural_change=StructuralChangeIdentity(
-                    provider_symbol_id="S:bounded_trace",
+                    review_symbol_id="S:bounded_trace",
                     head_symbol_evidence_id="E:symbol",
                 ),
                 associated_statement_ids=("R1",),
                 head_signature=association_signature("bounded_trace"),
                 metadata={
                     "symbol_id": "S:bounded_trace",
+                    "review_symbol_id": "S:bounded_trace",
                     "qualified_name": "service.bounded_trace",
                     "path": "src/service.py",
                     "provided_for_statement_ids": ("R1",),
@@ -975,6 +980,7 @@ def test_isolated_symbol_and_standalone_document_keep_distinct_canonical_forms()
                 changed=True,
                 metadata={
                     "symbol_id": "S:bounded_trace",
+                    "review_symbol_id": "S:bounded_trace",
                     "qualified_name": "service.bounded_trace",
                     "path": "src/service.py",
                 },
@@ -1012,7 +1018,7 @@ def test_isolated_symbol_and_standalone_document_keep_distinct_canonical_forms()
     code_slice, document_slice = projection.slices
 
     assert len(code_slice.structural_overlay.nodes) == 1
-    assert projection.review_graph.nodes[0].provider_symbol_id == "S:bounded_trace"
+    assert projection.review_graph.nodes[0].review_symbol_id == "S:bounded_trace"
     assert projection.review_graph.nodes[0].evidence_ids == (
         "E:structural-change",
         "E:symbol",
@@ -1261,7 +1267,7 @@ def test_generic_inspection_budget_does_not_truncate_changed_anchor_set() -> Non
             role="changed_anchor",
             changed=True,
             structural_change=StructuralChangeIdentity(
-                provider_symbol_id=f"bounded_trace_{index}",
+                review_symbol_id=f"bounded_trace_{index}",
                 head_symbol_evidence_id=f"S:{index}",
             ),
             head_signature=association_signature(f"bounded_trace_{index}"),

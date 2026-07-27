@@ -190,9 +190,9 @@ def _structural_focus_overlay(
         relation.target_id: relation for relation in path_relations
     }
     selected_path_ids = set(path_relation_by_evidence_id)
-    symbols_by_provider_id = _symbols_by_provider_id(evidence)
-    relation_ids_by_provider: dict[str, list[str]] = {}
-    role_by_provider: dict[str, str] = {}
+    symbols_by_review_id = _symbols_by_review_id(evidence)
+    relation_ids_by_review_id: dict[str, list[str]] = {}
+    role_by_review_id: dict[str, str] = {}
     anchor_nodes: dict[str, StructuralGraphNode] = {}
 
     for role, selected_relations in (
@@ -207,27 +207,27 @@ def _structural_focus_overlay(
                     f"selected {relation.slot} relation references missing evidence: "
                     f"{relation.id}"
                 )
-            provider_id = _provider_symbol_id(fact)
-            if provider_id is None:
+            review_id = _review_symbol_id(fact)
+            if review_id is None:
                 continue
-            relation_ids_by_provider.setdefault(provider_id, []).append(relation.id)
-            previous_role = role_by_provider.get(provider_id, "intermediate")
-            role_by_provider[provider_id] = min(
+            relation_ids_by_review_id.setdefault(review_id, []).append(relation.id)
+            previous_role = role_by_review_id.get(review_id, "intermediate")
+            role_by_review_id[review_id] = min(
                 (previous_role, role),
                 key=_ROLE_ORDER.__getitem__,
             )
             if role == "changed_anchor":
-                anchor_nodes[provider_id] = _node_for_provider(
-                    provider_id,
+                anchor_nodes[review_id] = _node_for_review_symbol(
+                    review_id,
                     evidence=evidence,
-                    symbols_by_provider_id=symbols_by_provider_id,
+                    symbols_by_review_id=symbols_by_review_id,
                     anchor=fact,
                 )
 
     edges = []
-    nodes_by_provider = dict(anchor_nodes)
+    nodes_by_review_id = dict(anchor_nodes)
     node_path_ids: dict[str, list[str]] = {
-        provider_id: [] for provider_id in anchor_nodes
+        review_id: [] for review_id in anchor_nodes
     }
     edge_ids = []
     overlay_path_relation_ids = []
@@ -254,27 +254,27 @@ def _structural_focus_overlay(
             for path_id, relation in path_relation_by_evidence_id.items()
             if path_id in supporting_path_ids
         )
-        for provider_id in (
-            identity.source_provider_symbol_id,
-            identity.target_provider_symbol_id,
+        for review_id in (
+            identity.source_review_symbol_id,
+            identity.target_review_symbol_id,
         ):
-            if provider_id not in nodes_by_provider:
-                nodes_by_provider[provider_id] = _node_for_provider(
-                    provider_id,
+            if review_id not in nodes_by_review_id:
+                nodes_by_review_id[review_id] = _node_for_review_symbol(
+                    review_id,
                     evidence=evidence,
-                    symbols_by_provider_id=symbols_by_provider_id,
+                    symbols_by_review_id=symbols_by_review_id,
                 )
-            node_path_ids.setdefault(provider_id, []).extend(support_relation_ids)
+            node_path_ids.setdefault(review_id, []).extend(support_relation_ids)
         edge_ids.append(relation_change.id)
         overlay_path_relation_ids.extend(support_relation_ids)
         edges.append(
             StructuralGraphEdge(
                 id=relation_change.id,
                 source_node_id=_structural_node_id(
-                    identity.source_provider_symbol_id
+                    identity.source_review_symbol_id
                 ),
                 target_node_id=_structural_node_id(
-                    identity.target_provider_symbol_id
+                    identity.target_review_symbol_id
                 ),
                 relation=identity.relation,
                 operation=relation_change.operation,
@@ -286,31 +286,31 @@ def _structural_focus_overlay(
     ownership_edges = []
     ownership_edge_ids = []
     ownership_by_child = _ownership_changes_by_child(evidence)
-    frontier = list(nodes_by_provider)
+    frontier = list(nodes_by_review_id)
     expanded: set[str] = set()
     while frontier:
-        child_provider_id = frontier.pop(0)
-        if child_provider_id in expanded:
+        child_review_id = frontier.pop(0)
+        if child_review_id in expanded:
             continue
-        expanded.add(child_provider_id)
-        for ownership_change in ownership_by_child.get(child_provider_id, ()):
+        expanded.add(child_review_id)
+        for ownership_change in ownership_by_child.get(child_review_id, ()):
             identity = ownership_change.structural_ownership_change
             assert identity is not None
-            parent_provider_id = identity.parent_provider_symbol_id
-            if parent_provider_id not in nodes_by_provider:
-                nodes_by_provider[parent_provider_id] = _node_for_provider(
-                    parent_provider_id,
+            parent_review_id = identity.parent_review_symbol_id
+            if parent_review_id not in nodes_by_review_id:
+                nodes_by_review_id[parent_review_id] = _node_for_review_symbol(
+                    parent_review_id,
                     evidence=evidence,
-                    symbols_by_provider_id=symbols_by_provider_id,
+                    symbols_by_review_id=symbols_by_review_id,
                 )
-                node_path_ids.setdefault(parent_provider_id, [])
-                frontier.append(parent_provider_id)
+                node_path_ids.setdefault(parent_review_id, [])
+                frontier.append(parent_review_id)
             ownership_edge_ids.append(ownership_change.id)
             ownership_edges.append(
                 StructuralGraphOwnershipEdge(
                     id=ownership_change.id,
-                    parent_node_id=_structural_node_id(parent_provider_id),
-                    child_node_id=_structural_node_id(child_provider_id),
+                    parent_node_id=_structural_node_id(parent_review_id),
+                    child_node_id=_structural_node_id(child_review_id),
                     operation=ownership_change.operation,
                     ownership_change_evidence_id=ownership_change.id,
                 )
@@ -321,26 +321,26 @@ def _structural_focus_overlay(
             node,
             StructuralGraphNode(
                 id=node.id,
-                provider_symbol_id=node.provider_symbol_id,
+                review_symbol_id=node.review_symbol_id,
                 operation=node.operation,
                 evidence_ids=node.evidence_ids,
                 path_relation_ids=tuple(
-                    dict.fromkeys(node_path_ids.get(provider_id, ()))
+                    dict.fromkeys(node_path_ids.get(review_id, ()))
                 ),
             ),
         )
-        for provider_id, node in nodes_by_provider.items()
+        for review_id, node in nodes_by_review_id.items()
     )
     overlay_nodes = tuple(
         StructuralFocusNode(
             node_id=node.id,
-            role=role_by_provider.get(provider_id, "intermediate"),
+            role=role_by_review_id.get(review_id, "intermediate"),
             relation_ids=tuple(
-                dict.fromkeys(relation_ids_by_provider.get(provider_id, ()))
+                dict.fromkeys(relation_ids_by_review_id.get(review_id, ()))
             ),
             path_relation_ids=node.path_relation_ids,
         )
-        for provider_id, node in zip(nodes_by_provider, graph_nodes, strict=True)
+        for review_id, node in zip(nodes_by_review_id, graph_nodes, strict=True)
     )
     return (
         StructuralFocusOverlay(
@@ -363,32 +363,32 @@ def _ownership_changes_by_child(
         identity = item.structural_ownership_change
         if item.kind != "structural_ownership_change" or identity is None:
             continue
-        grouped.setdefault(identity.child_provider_symbol_id, []).append(item)
+        grouped.setdefault(identity.child_review_symbol_id, []).append(item)
     return {
         child_id: tuple(sorted(items, key=lambda item: item.id))
         for child_id, items in grouped.items()
     }
 
 
-def _provider_symbol_id(item: EvidenceItem) -> str | None:
+def _review_symbol_id(item: EvidenceItem) -> str | None:
     if item.kind == "structural_change" and item.structural_change is not None:
-        return item.structural_change.provider_symbol_id
+        return item.structural_change.review_symbol_id
     if item.kind == "symbol":
-        value = item.metadata.get("symbol_id")
+        value = item.metadata.get("review_symbol_id")
         return str(value) if value else None
     return None
 
 
-def _symbols_by_provider_id(
+def _symbols_by_review_id(
     evidence: dict[str, EvidenceItem],
 ) -> dict[str, tuple[EvidenceItem, ...]]:
     grouped: dict[str, list[EvidenceItem]] = {}
     for item in evidence.values():
-        provider_id = _provider_symbol_id(item)
-        if item.kind == "symbol" and provider_id is not None:
-            grouped.setdefault(provider_id, []).append(item)
+        review_id = _review_symbol_id(item)
+        if item.kind == "symbol" and review_id is not None:
+            grouped.setdefault(review_id, []).append(item)
     return {
-        provider_id: tuple(
+        review_id: tuple(
             sorted(
                 items,
                 key=lambda item: (
@@ -397,18 +397,18 @@ def _symbols_by_provider_id(
                 ),
             )
         )
-        for provider_id, items in grouped.items()
+        for review_id, items in grouped.items()
     }
 
 
-def _node_for_provider(
-    provider_id: str,
+def _node_for_review_symbol(
+    review_id: str,
     *,
     evidence: dict[str, EvidenceItem],
-    symbols_by_provider_id: dict[str, tuple[EvidenceItem, ...]],
+    symbols_by_review_id: dict[str, tuple[EvidenceItem, ...]],
     anchor: EvidenceItem | None = None,
 ) -> StructuralGraphNode:
-    symbol_items = symbols_by_provider_id.get(provider_id, ())
+    symbol_items = symbols_by_review_id.get(review_id, ())
     if anchor is None:
         anchor = next(
             (
@@ -416,7 +416,7 @@ def _node_for_provider(
                 for item in evidence.values()
                 if item.kind == "structural_change"
                 and item.structural_change is not None
-                and item.structural_change.provider_symbol_id == provider_id
+                and item.structural_change.review_symbol_id == review_id
             ),
             None,
         )
@@ -430,7 +430,7 @@ def _node_for_provider(
     )
     if not evidence_ids:
         raise ValueError(
-            f"structural graph references missing symbol fact: {provider_id}"
+            f"structural graph references missing symbol fact: {review_id}"
         )
     operation = (
         _node_operation(anchor.operation)
@@ -438,8 +438,8 @@ def _node_for_provider(
         else "context"
     )
     return StructuralGraphNode(
-        id=_structural_node_id(provider_id),
-        provider_symbol_id=provider_id,
+        id=_structural_node_id(review_id),
+        review_symbol_id=review_id,
         operation=operation,
         evidence_ids=evidence_ids,
     )
@@ -455,11 +455,11 @@ def _merge_node(
     left: StructuralGraphNode,
     right: StructuralGraphNode,
 ) -> StructuralGraphNode:
-    if left.id != right.id or left.provider_symbol_id != right.provider_symbol_id:
+    if left.id != right.id or left.review_symbol_id != right.review_symbol_id:
         raise ValueError("cannot merge different structural graph nodes")
     return StructuralGraphNode(
         id=left.id,
-        provider_symbol_id=left.provider_symbol_id,
+        review_symbol_id=left.review_symbol_id,
         operation=min(
             (left.operation, right.operation),
             key=_OPERATION_ORDER.__getitem__,
@@ -504,6 +504,6 @@ def _merge_edge(
     )
 
 
-def _structural_node_id(provider_symbol_id: str) -> str:
-    digest = hashlib.sha256(provider_symbol_id.encode("utf-8")).hexdigest()
+def _structural_node_id(review_symbol_id: str) -> str:
+    digest = hashlib.sha256(review_symbol_id.encode("utf-8")).hexdigest()
     return f"SN:{digest[:20]}"

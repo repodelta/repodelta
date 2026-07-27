@@ -36,6 +36,7 @@ def _create_index(
     *,
     source: str = "class Service:\n    def run(self):\n        return 1\n",
     connect_symbols: bool = False,
+    method_id: str = "method:Service.run",
 ) -> Path:
     source_path = root / "src" / "service.py"
     source_path.parent.mkdir(parents=True)
@@ -85,7 +86,7 @@ def _create_index(
                     3,
                 ),
                 (
-                    "method:Service.run",
+                    method_id,
                     "method",
                     "run",
                     "src.service.Service.run",
@@ -103,7 +104,7 @@ def _create_index(
         if connect_symbols:
             connection.execute(
                 "INSERT INTO edges VALUES (?, ?, ?)",
-                ("class:Service", "method:Service.run", "calls"),
+                ("class:Service", method_id, "calls"),
             )
     return database
 
@@ -247,11 +248,13 @@ def test_replacement_collects_distinct_head_and_base_symbol_facts(
         head_root,
         source="class Service:\n    def run(self):\n        return 2\n",
         connect_symbols=True,
+        method_id="head:method:Service.run:2-3",
     )
     _create_index(
         base_root,
         source="class Service:\n    def run(self):\n        return 1\n",
         connect_symbols=True,
+        method_id="base:method:Service.run:2-3",
     )
     packet = _packet(
         "@@ -3 +3 @@\n-        return 1\n+        return 2\n"
@@ -291,7 +294,11 @@ def test_replacement_collects_distinct_head_and_base_symbol_facts(
         ("head", "replaced"),
     ]
     assert len({item.id for item in symbols}) == 2
-    assert symbols[0].metadata["symbol_id"] == symbols[1].metadata["symbol_id"]
+    assert symbols[0].metadata["symbol_id"] != symbols[1].metadata["symbol_id"]
+    assert (
+        symbols[0].metadata["review_symbol_id"]
+        == symbols[1].metadata["review_symbol_id"]
+    )
     assert "/blob/base123/" in symbols[0].sources[0].url
     assert "/blob/head123/" in symbols[1].sources[0].url
     paths = tuple(
@@ -463,11 +470,14 @@ def test_one_hunk_can_map_changes_in_two_sibling_symbols(tmp_path: Path) -> None
         )
     )
     assert {
-        item.structural_change.provider_symbol_id
+        item.structural_change.review_symbol_id
         for item in brief.evidence_catalog.items
         if item.kind == "structural_change"
         and item.structural_change is not None
-    } == {"first", "second"}
+        } == {
+            "E:review_symbol:8568070b59da412edbf2",
+            "E:review_symbol:08ad1eed70311d4303da",
+        }
 
 
 def test_module_level_change_falls_back_to_file_symbol(tmp_path: Path) -> None:

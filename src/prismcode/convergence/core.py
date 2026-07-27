@@ -626,30 +626,30 @@ def _converge_structural_context(
         )
         if item.id not in selected_ids
     )
-    relevant_provider_ids = {
-        provider_id
+    relevant_review_ids = {
+        review_id
         for target_id in (
             *selected_anchor_ids,
             *selected_contexts,
         )
-        if (provider_id := _provider_symbol_id(evidence.get(target_id)))
+        if (review_id := _review_symbol_id(evidence.get(target_id)))
         is not None
     }
     for path in selected_paths.values():
         for step in evidence[path.target_id].metadata.get("steps", ()):
             for endpoint in ("source_evidence_id", "target_evidence_id"):
                 endpoint_id = step.get(endpoint)
-                provider_id = _provider_symbol_id(evidence.get(endpoint_id))
-                if provider_id is not None:
-                    relevant_provider_ids.add(provider_id)
+                review_id = _review_symbol_id(evidence.get(endpoint_id))
+                if review_id is not None:
+                    relevant_review_ids.add(review_id)
     relation_change_evidence_ids = tuple(
         item.id
         for item in evidence.values()
         if item.structural_relation_change is not None
-        and item.structural_relation_change.source_provider_symbol_id
-        in relevant_provider_ids
-        and item.structural_relation_change.target_provider_symbol_id
-        in relevant_provider_ids
+        and item.structural_relation_change.source_review_symbol_id
+        in relevant_review_ids
+        and item.structural_relation_change.target_review_symbol_id
+        in relevant_review_ids
     )
     return _StructuralSelection(
         selected=selected,
@@ -663,13 +663,13 @@ def _converge_structural_context(
     )
 
 
-def _provider_symbol_id(item: EvidenceItem | None) -> str | None:
+def _review_symbol_id(item: EvidenceItem | None) -> str | None:
     if item is None:
         return None
     if item.kind == "structural_change" and item.structural_change is not None:
-        return item.structural_change.provider_symbol_id
+        return item.structural_change.review_symbol_id
     if item.kind == "symbol":
-        value = item.metadata.get("symbol_id")
+        value = item.metadata.get("review_symbol_id")
         return str(value) if value else None
     return None
 
