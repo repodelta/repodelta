@@ -21,8 +21,11 @@ provider-symbol identity and carry review operation plus base/head evidence
 provenance. Edges reference only the closure's canonical
 `StructuralRelationChangeIdentity` fact IDs; projection never searches all
 evidence for relevance or rebuilds edge truth from provider path steps. Selected
-structural-change anchors remain isolated nodes when no safe relation delta
-exists. Focus-relative roles and association/path relation IDs remain in
+structural-change anchors follow canonical `StructuralOwnershipChangeIdentity`
+facts to their ancestor nodes through a separate ownership-edge collection.
+Revision provenance and deferred ownership never enter the graph. A selected
+anchor is structurally isolated only when neither executable nor ownership
+edges are available. Focus-relative roles and association/path relation IDs remain in
 overlays. Review-wide CI,
 source coverage, empty state, and structural coverage are computed once here.
 Each G slice references its upstream `GuardrailScanPlan` by ID; projection does

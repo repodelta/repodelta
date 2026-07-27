@@ -16,6 +16,7 @@ from prismcode.model.contracts import (
     StructuralFocusOverlay,
     StructuralGraphEdge,
     StructuralGraphNode,
+    StructuralGraphOwnershipEdge,
 )
 
 
@@ -53,6 +54,8 @@ def build_review_projection(
     graph_nodes: dict[str, StructuralGraphNode] = {}
     graph_edge_order: list[str] = []
     graph_edges: dict[str, StructuralGraphEdge] = {}
+    graph_ownership_edge_order: list[str] = []
+    graph_ownership_edges: dict[str, StructuralGraphOwnershipEdge] = {}
     graph_path_relation_ids: list[str] = []
 
     for group in candidates.groups:
@@ -73,7 +76,7 @@ def build_review_projection(
                 "boundary_fact",
             )
         }
-        overlay, nodes, edges = _structural_focus_overlay(
+        overlay, nodes, edges, ownership_edges = _structural_focus_overlay(
             path_relations=tuple(
                 relations[relation_id]
                 for relation_id in converged.structural_closure.path_relation_ids
@@ -103,6 +106,14 @@ def build_review_projection(
                 graph_edges[edge.id] = edge
             else:
                 graph_edges[edge.id] = _merge_edge(graph_edges[edge.id], edge)
+        for edge in ownership_edges:
+            if edge.id not in graph_ownership_edges:
+                graph_ownership_edge_order.append(edge.id)
+                graph_ownership_edges[edge.id] = edge
+            elif graph_ownership_edges[edge.id] != edge:
+                raise ValueError(
+                    "canonical structural ownership edge identity is inconsistent"
+                )
         graph_path_relation_ids.extend(overlay.path_relation_ids)
         slices.append(
             ReviewSlice(
@@ -143,14 +154,20 @@ def build_review_projection(
             )
         )
 
-    return ReviewProjection(
+    projection = ReviewProjection(
         slices=tuple(slices),
         review_graph=ReviewStructuralGraph(
             nodes=tuple(graph_nodes[node_id] for node_id in graph_node_order),
             edges=tuple(graph_edges[edge_id] for edge_id in graph_edge_order),
+            ownership_edges=tuple(
+                graph_ownership_edges[edge_id]
+                for edge_id in graph_ownership_edge_order
+            ),
             path_relation_ids=tuple(dict.fromkeys(graph_path_relation_ids)),
         ),
     )
+    projection.validate_consistency(evidence_catalog)
+    return projection
 
 
 def _structural_focus_overlay(
@@ -165,6 +182,7 @@ def _structural_focus_overlay(
     StructuralFocusOverlay,
     tuple[StructuralGraphNode, ...],
     tuple[StructuralGraphEdge, ...],
+    tuple[StructuralGraphOwnershipEdge, ...],
 ]:
     """Build one focus overlay from canonical change and relation-change facts."""
 
@@ -265,6 +283,39 @@ def _structural_focus_overlay(
             )
         )
 
+    ownership_edges = []
+    ownership_edge_ids = []
+    ownership_by_child = _ownership_changes_by_child(evidence)
+    frontier = list(nodes_by_provider)
+    expanded: set[str] = set()
+    while frontier:
+        child_provider_id = frontier.pop(0)
+        if child_provider_id in expanded:
+            continue
+        expanded.add(child_provider_id)
+        for ownership_change in ownership_by_child.get(child_provider_id, ()):
+            identity = ownership_change.structural_ownership_change
+            assert identity is not None
+            parent_provider_id = identity.parent_provider_symbol_id
+            if parent_provider_id not in nodes_by_provider:
+                nodes_by_provider[parent_provider_id] = _node_for_provider(
+                    parent_provider_id,
+                    evidence=evidence,
+                    symbols_by_provider_id=symbols_by_provider_id,
+                )
+                node_path_ids.setdefault(parent_provider_id, [])
+                frontier.append(parent_provider_id)
+            ownership_edge_ids.append(ownership_change.id)
+            ownership_edges.append(
+                StructuralGraphOwnershipEdge(
+                    id=ownership_change.id,
+                    parent_node_id=_structural_node_id(parent_provider_id),
+                    child_node_id=_structural_node_id(child_provider_id),
+                    operation=ownership_change.operation,
+                    ownership_change_evidence_id=ownership_change.id,
+                )
+            )
+
     graph_nodes = tuple(
         _merge_node(
             node,
@@ -295,11 +346,28 @@ def _structural_focus_overlay(
         StructuralFocusOverlay(
             nodes=overlay_nodes,
             edge_ids=tuple(edge_ids),
+            ownership_edge_ids=tuple(dict.fromkeys(ownership_edge_ids)),
             path_relation_ids=tuple(dict.fromkeys(overlay_path_relation_ids)),
         ),
         graph_nodes,
         tuple(edges),
+        tuple(ownership_edges),
     )
+
+
+def _ownership_changes_by_child(
+    evidence: dict[str, EvidenceItem],
+) -> dict[str, tuple[EvidenceItem, ...]]:
+    grouped: dict[str, list[EvidenceItem]] = {}
+    for item in evidence.values():
+        identity = item.structural_ownership_change
+        if item.kind != "structural_ownership_change" or identity is None:
+            continue
+        grouped.setdefault(identity.child_provider_symbol_id, []).append(item)
+    return {
+        child_id: tuple(sorted(items, key=lambda item: item.id))
+        for child_id, items in grouped.items()
+    }
 
 
 def _provider_symbol_id(item: EvidenceItem) -> str | None:
@@ -362,7 +430,7 @@ def _node_for_provider(
     )
     if not evidence_ids:
         raise ValueError(
-            f"structural relation change references missing symbol fact: {provider_id}"
+            f"structural graph references missing symbol fact: {provider_id}"
         )
     operation = (
         _node_operation(anchor.operation)

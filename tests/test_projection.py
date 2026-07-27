@@ -4,10 +4,14 @@ from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 from prismcode.pipeline import DeterministicAnalyzer
 from prismcode.model.contracts import (
     AnalysisInput,
+    CandidateConvergence,
     ChangedFile,
+    ConvergenceGroup,
     EvidenceCatalog,
     EvidenceItem,
     ProjectionCandidateGroup,
@@ -25,6 +29,7 @@ from prismcode.model.contracts import (
     StructuralFocusOverlay,
     StructuralGraphEdge,
     StructuralGraphNode,
+    StructuralOwnershipChangeIdentity,
     StructuralRelationChangeIdentity,
     VerificationIdentity,
 )
@@ -175,6 +180,156 @@ def test_identical_focus_graphs_share_one_review_graph() -> None:
     assert 'data-focus-target="R1"' in html
     assert 'data-focus-target="R2"' in html
     assert "Structural overlay" not in html
+
+
+def test_canonical_ownership_projects_recursive_shared_focus_hierarchy() -> None:
+    def symbol(fact_id: str, provider_id: str) -> EvidenceItem:
+        return EvidenceItem(
+            id=fact_id,
+            summary=f"Unchanged symbol: {provider_id}",
+            kind="symbol",
+            classification="code",
+            profile="production",
+            authority="structural_provider",
+            revision_side="head",
+            operation="unchanged",
+            role="runtime_context",
+            metadata={
+                "symbol_id": provider_id,
+                "qualified_name": provider_id,
+                "symbol_kind": "class",
+            },
+        )
+
+    anchor = EvidenceItem(
+        id="E:change:child",
+        summary="Modified method: child",
+        kind="structural_change",
+        classification="code",
+        profile="production",
+        authority="structural_provider",
+        revision_side="review",
+        operation="modified",
+        role="changed_anchor",
+        changed=True,
+        structural_change=StructuralChangeIdentity(
+            provider_symbol_id="child",
+            head_symbol_evidence_id="E:symbol:child",
+        ),
+    )
+
+    def ownership(
+        fact_id: str,
+        parent_id: str,
+        child_id: str,
+    ) -> EvidenceItem:
+        return EvidenceItem(
+            id=fact_id,
+            summary=f"Retained ownership: {parent_id} contains {child_id}",
+            kind="structural_ownership_change",
+            classification="code",
+            profile="unknown",
+            authority="structural_provider",
+            revision_side="review",
+            operation="retained",
+            role="structural_ownership",
+            structural_ownership_change=StructuralOwnershipChangeIdentity(
+                parent_provider_symbol_id=parent_id,
+                child_provider_symbol_id=child_id,
+                base_ownership_evidence_id=f"E:base:{fact_id}",
+                head_ownership_evidence_id=f"E:head:{fact_id}",
+            ),
+        )
+
+    evidence = EvidenceCatalog(
+        items=(
+            anchor,
+            symbol("E:symbol:child", "child"),
+            symbol("E:symbol:parent", "parent"),
+            symbol("E:symbol:file", "file"),
+            ownership("E:ownership:parent-child", "parent", "child"),
+            ownership("E:ownership:file-parent", "file", "parent"),
+        )
+    )
+    relations = tuple(
+        ProjectionRelation(
+            id=f"P:{focus_id}",
+            focus_statement_id=focus_id,
+            slot="changed_anchor",
+            target_type="evidence",
+            target_id=anchor.id,
+            association="exact_identifier",
+            reasons=(),
+        )
+        for focus_id in ("R1", "R2")
+    )
+    candidates = ProjectionCandidateSet(
+        relations=relations,
+        groups=tuple(
+            ProjectionCandidateGroup(
+                focus_statement_id=focus_id,
+                profile="generic",
+                relation_ids=(relation.id,),
+            )
+            for focus_id, relation in zip(
+                ("R1", "R2"),
+                relations,
+                strict=True,
+            )
+        ),
+    )
+    convergence = CandidateConvergence(
+        groups=tuple(
+            ConvergenceGroup(
+                focus_statement_id=focus_id,
+                selected_relation_ids=(relation.id,),
+            )
+            for focus_id, relation in zip(
+                ("R1", "R2"),
+                relations,
+                strict=True,
+            )
+        )
+    )
+
+    projection = build_review_projection(candidates, convergence, evidence)
+
+    assert {
+        node.provider_symbol_id for node in projection.review_graph.nodes
+    } == {"child", "parent", "file"}
+    assert projection.review_graph.edges == ()
+    assert [
+        (
+            edge.ownership_change_evidence_id,
+            edge.operation,
+        )
+        for edge in projection.review_graph.ownership_edges
+    ] == [
+        ("E:ownership:parent-child", "retained"),
+        ("E:ownership:file-parent", "retained"),
+    ]
+    assert (
+        projection.slices[0].structural_overlay.ownership_edge_ids
+        == projection.slices[1].structural_overlay.ownership_edge_ids
+        == (
+            "E:ownership:parent-child",
+            "E:ownership:file-parent",
+        )
+    )
+    assert len(projection.review_graph.ownership_edges) == 2
+
+    cyclic_evidence = replace(
+        evidence,
+        items=(
+            *evidence.items,
+            ownership("E:ownership:child-file", "child", "file"),
+        ),
+    )
+    with pytest.raises(
+        ValueError,
+        match="review structural ownership contains a cycle",
+    ):
+        build_review_projection(candidates, convergence, cyclic_evidence)
 
 
 def test_projection_uses_review_relevant_structural_closure() -> None:

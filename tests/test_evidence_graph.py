@@ -176,7 +176,7 @@ def test_review_brief_serializes_one_canonical_catalog() -> None:
     assert serialized["candidate_convergence"]["schema_version"] == (
         "candidate_convergence.v7"
     )
-    assert serialized["projection"]["schema_version"] == "review_projection.v11"
+    assert serialized["projection"]["schema_version"] == "review_projection.v12"
     assert "structural_graph" not in serialized
     assert len(serialized["evidence_catalog"]["items"]) == 1
     assert serialized["evidence_catalog"]["items"][0]["kind"] == "changed_file"
