@@ -564,6 +564,141 @@ def test_document_hunks_do_not_reduce_codegraph_coverage(tmp_path: Path) -> None
     }
 
 
+def test_added_only_file_is_not_applicable_to_base_coverage(
+    tmp_path: Path,
+) -> None:
+    added = parse_unified_patch(
+        "src/new_service.py",
+        "@@ -0,0 +1 @@\n+def created(): pass\n",
+    )
+
+    result = CodegraphProvider(
+        tmp_path,
+        revision_side="base",
+    ).symbols_overlapping(added)
+
+    assert result.index.state == "available"
+    assert result.index.requested_files == 0
+    assert result.index.indexed_files == 0
+    assert result.hunk_count == 0
+    assert "codegraph_file_not_indexed" not in {
+        diagnostic.code for diagnostic in result.diagnostics
+    }
+    assert "structural_graph_revision_not_applicable" in {
+        diagnostic.code for diagnostic in result.diagnostics
+    }
+
+
+def test_removed_only_file_is_not_applicable_to_head_coverage(
+    tmp_path: Path,
+) -> None:
+    removed = parse_unified_patch(
+        "src/old_service.py",
+        "@@ -1 +0,0 @@\n-def removed(): pass\n",
+    )
+
+    result = CodegraphProvider(
+        tmp_path,
+        revision_side="head",
+    ).symbols_overlapping(removed)
+
+    assert result.index.state == "available"
+    assert result.index.requested_files == 0
+    assert result.hunk_count == 0
+    assert "codegraph_file_not_indexed" not in {
+        diagnostic.code for diagnostic in result.diagnostics
+    }
+    assert "structural_graph_revision_not_applicable" in {
+        diagnostic.code for diagnostic in result.diagnostics
+    }
+
+
+def test_mixed_added_and_replaced_files_keep_base_coverage_available(
+    tmp_path: Path,
+) -> None:
+    _create_index(tmp_path)
+    added = parse_unified_patch(
+        "src/new_service.py",
+        "@@ -0,0 +1 @@\n+def created(): pass\n",
+    )
+    replaced = parse_unified_patch(
+        "src/service.py",
+        "@@ -3 +3 @@\n-        return 0\n+        return 1\n",
+    )
+
+    result = CodegraphProvider(
+        tmp_path,
+        revision_side="base",
+    ).symbols_overlapping((*added, *replaced))
+
+    assert result.index.state == "available"
+    assert result.index.requested_files == 1
+    assert result.index.indexed_files == 1
+    assert result.hunk_count == 1
+    assert result.mapped_hunk_count == 1
+    assert {
+        diagnostic.code for diagnostic in result.diagnostics
+    } >= {"structural_graph_revision_not_applicable"}
+    assert "codegraph_file_not_indexed" not in {
+        diagnostic.code for diagnostic in result.diagnostics
+    }
+
+
+def test_replacement_hunk_remains_applicable_to_both_revisions(
+    tmp_path: Path,
+) -> None:
+    _create_index(tmp_path)
+    replaced = parse_unified_patch(
+        "src/service.py",
+        "@@ -3 +3 @@\n-        return 0\n+        return 1\n",
+    )
+
+    head = CodegraphProvider(
+        tmp_path,
+        revision_side="head",
+    ).symbols_overlapping(replaced)
+    base = CodegraphProvider(
+        tmp_path,
+        revision_side="base",
+    ).symbols_overlapping(replaced)
+
+    assert (head.index.requested_files, head.hunk_count) == (1, 1)
+    assert (base.index.requested_files, base.hunk_count) == (1, 1)
+    assert head.mapped_hunk_count == base.mapped_hunk_count == 1
+    assert "structural_graph_revision_not_applicable" not in {
+        diagnostic.code
+        for result in (head, base)
+        for diagnostic in result.diagnostics
+    }
+
+
+def test_file_with_one_applicable_hunk_is_not_labeled_inapplicable(
+    tmp_path: Path,
+) -> None:
+    _create_index(tmp_path)
+    hunks = parse_unified_patch(
+        "src/service.py",
+        "@@ -1 +1,0 @@\n-class Service:\n"
+        "@@ -2,0 +2 @@\n+class RenamedService:\n",
+    )
+
+    base = CodegraphProvider(
+        tmp_path,
+        revision_side="base",
+    ).symbols_overlapping(hunks)
+    head = CodegraphProvider(
+        tmp_path,
+        revision_side="head",
+    ).symbols_overlapping(hunks)
+
+    assert base.hunk_count == head.hunk_count == 1
+    assert "structural_graph_revision_not_applicable" not in {
+        diagnostic.code
+        for result in (head, base)
+        for diagnostic in result.diagnostics
+    }
+
+
 def test_stale_index_is_not_used(tmp_path: Path) -> None:
     _create_index(tmp_path)
     (tmp_path / "src" / "service.py").write_text(

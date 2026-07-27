@@ -207,38 +207,79 @@ class CodegraphProvider:
     def symbols_overlapping(
         self, hunks: tuple[ChangedHunk, ...]
     ) -> StructuralGraphResult:
-        eligible_hunks = tuple(
+        structural_hunks = tuple(
             hunk for hunk in hunks if _is_structural_candidate(hunk.file_path)
         )
-        skipped_files = tuple(
+        applicable_hunks = tuple(
+            hunk for hunk in structural_hunks if self._changed_lines(hunk)
+        )
+        applicable_files = frozenset(
+            hunk.file_path for hunk in applicable_hunks
+        )
+        non_structural_files = tuple(
             dict.fromkeys(
                 hunk.file_path
                 for hunk in hunks
                 if not _is_structural_candidate(hunk.file_path)
             )
         )
-        requested_files = tuple(
-            dict.fromkeys(hunk.file_path for hunk in eligible_hunks)
-        )
-        index = self.inspect_index(requested_files=requested_files)
-        diagnostics = list(index.diagnostics)
-        diagnostics.extend(
-            Diagnostic(
-                code="structural_graph_file_not_applicable",
-                message=(
-                    f"{path} is not a code-structure input and was excluded "
-                    "from Codegraph coverage."
-                ),
-                severity="info",
-                sources=(SourceRef(label="changed file", path=path),),
+        revision_inapplicable_files = tuple(
+            dict.fromkeys(
+                hunk.file_path
+                for hunk in structural_hunks
+                if hunk.file_path not in applicable_files
             )
-            for path in skipped_files
         )
+        requested_files = tuple(
+            dict.fromkeys(hunk.file_path for hunk in applicable_hunks)
+        )
+        provenance_diagnostics = (
+            *(
+                Diagnostic(
+                    code="structural_graph_file_not_applicable",
+                    message=(
+                        f"{path} is not a code-structure input and was excluded "
+                        "from Codegraph coverage."
+                    ),
+                    severity="info",
+                    sources=(SourceRef(label="changed file", path=path),),
+                )
+                for path in non_structural_files
+            ),
+            *(
+                Diagnostic(
+                    code="structural_graph_revision_not_applicable",
+                    message=(
+                        f"{path} has no {self.revision_side}-revision changed "
+                        "lines and was excluded from that revision's Codegraph "
+                        "coverage."
+                    ),
+                    severity="info",
+                    sources=(SourceRef(label="changed file", path=path),),
+                )
+                for path in revision_inapplicable_files
+            ),
+        )
+        if not applicable_hunks:
+            return StructuralGraphResult(
+                revision_side=self.revision_side,
+                index=StructuralGraphIndexStatus(
+                    state="available",
+                    provider=_PROVIDER,
+                    revision_side=self.revision_side,
+                    revision=_checkout_revision(self.repo_root),
+                    database_path=str(self.database_path),
+                ),
+                diagnostics=provenance_diagnostics,
+            )
+
+        index = self.inspect_index(requested_files=requested_files)
+        diagnostics = [*index.diagnostics, *provenance_diagnostics]
         if not index.usable:
             return StructuralGraphResult(
                 revision_side=self.revision_side,
                 index=index,
-                hunk_count=len(eligible_hunks),
+                hunk_count=len(applicable_hunks),
                 diagnostics=tuple(diagnostics),
             )
 
@@ -251,30 +292,14 @@ class CodegraphProvider:
         }
         queryable = tuple(
             hunk
-            for hunk in eligible_hunks
-            if self._changed_lines(hunk)
-            and hunk.file_path not in unindexed_files
+            for hunk in applicable_hunks
+            if hunk.file_path not in unindexed_files
         )
-        for hunk in eligible_hunks:
-            if (
-                hunk.file_path not in unindexed_files
-                and not self._changed_lines(hunk)
-            ):
-                diagnostics.append(
-                    Diagnostic(
-                        code="structural_graph_hunk_has_no_changed_lines",
-                        message=(
-                            f"{hunk.id} has no {self.revision_side}-revision "
-                            "changed lines to map."
-                        ),
-                        sources=(SourceRef(label="diff hunk", path=hunk.file_path),),
-                    )
-                )
         if not queryable:
             return StructuralGraphResult(
                 revision_side=self.revision_side,
                 index=index,
-                hunk_count=len(eligible_hunks),
+                hunk_count=len(applicable_hunks),
                 diagnostics=tuple(diagnostics),
             )
 
@@ -330,7 +355,7 @@ class CodegraphProvider:
         return StructuralGraphResult(
             revision_side=self.revision_side,
             index=index,
-            hunk_count=len(eligible_hunks),
+            hunk_count=len(applicable_hunks),
             overlaps=tuple(overlaps),
             diagnostics=tuple(diagnostics),
         )

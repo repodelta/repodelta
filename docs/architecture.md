@@ -131,6 +131,10 @@ structural provider or a semantic fallback.
 
 Only exact changed lines from unified-diff hunks are joined to symbol spans:
 head providers map added lines and base providers map removed lines.
+The same directional lines define revision-applicable coverage: head requests
+only files with added structural lines and base requests only files with
+removed structural lines. Added-only and removed-only files are not missing
+from the opposite revision; they are explicitly not applicable there.
 The narrowest containing symbol wins. Module-level changes may map to the
 indexed file symbol, which owns Codegraph import edges. Exact changed symbols
 are the only traversal seeds.
