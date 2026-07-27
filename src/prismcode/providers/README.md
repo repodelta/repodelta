@@ -28,6 +28,12 @@ traversal limits. Structural expansion is depth-phased across the review and
 round-robin fair between seeds within a depth. Head maps added lines; base maps
 removed lines through the same provider implementation.
 
+Codegraph `contains` edges are emitted through the separate
+`StructuralOwnershipRelation` contract for exact and bounded-path symbols.
+Ownership ancestry has its own depth and relation-count safety boundary,
+deduplicates parent/child identities, rejects cycles, and never becomes a
+runtime/test path or consumes traversal path budgets.
+
 Coverage is revision-applicable: the head index is requested only for
 structural hunks with added lines, while the base index is requested only for
 structural hunks with removed lines. Added-only files cannot make base partial,

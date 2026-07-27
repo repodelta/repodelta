@@ -25,6 +25,7 @@ from prismcode.providers.structural import (
     StructuralGraphIndexStatus,
     StructuralGraphProvider,
     StructuralGraphResult,
+    StructuralOwnershipPolicy,
     StructuralTraversalPolicy,
 )
 from prismcode.providers.mapping import map_packet_changed_symbols
@@ -926,6 +927,14 @@ def test_bounded_paths_load_unchanged_y_to_x_to_z_neighbors(tmp_path: Path) -> N
                     "F", "file", "adapter.py", "src/adapter.py",
                     "src/adapter.py", "python", 1, 2,
                 ),
+                (
+                    "C", "class", "Adapter", "src.adapter.Adapter",
+                    "src/adapter.py", "python", 1, 2,
+                ),
+                (
+                    "FX", "file", "core.py", "src/core.py",
+                    "src/core.py", "python", 1, 2,
+                ),
             ),
         )
         connection.executemany(
@@ -936,7 +945,9 @@ def test_bounded_paths_load_unchanged_y_to_x_to_z_neighbors(tmp_path: Path) -> N
                 ("Z", "W", "calls"),
                 ("W", "V", "calls"),
                 ("T", "Y", "calls"),
-                ("F", "Y", "contains"),
+                ("F", "C", "contains"),
+                ("C", "Y", "contains"),
+                ("FX", "X", "contains"),
             ),
         )
         connection.executemany(
@@ -987,6 +998,13 @@ def test_bounded_paths_load_unchanged_y_to_x_to_z_neighbors(tmp_path: Path) -> N
     assert all(step.target.id != "V" for path in result.paths for step in path.steps)
     assert max(path.depth for path in result.paths) == 3
     assert all(step.relation != "contains" for path in result.paths for step in path.steps)
+    assert [
+        (relation.parent.id, relation.child.id)
+        for relation in result.ownership_relations
+    ] == [("C", "Y"), ("F", "C"), ("FX", "X")]
+    assert result.ownership_relations[0].parent.sources[0].url == (
+        "https://github.com/acme/widget/blob/head123/src/adapter.py#L1-L2"
+    )
 
 
 def test_traversal_budgets_are_fair_and_reported_per_seed(
@@ -1033,6 +1051,7 @@ def test_traversal_budgets_are_fair_and_reported_per_seed(
             for target in adjacency.get(current.id, ())
         ),
     )
+    monkeypatch.setattr(provider, "_ownership_parents", lambda *_args: ())
     initial = StructuralGraphResult(
         index=StructuralGraphIndexStatus(state="available", provider="codegraph"),
         hunk_count=2,
@@ -1042,7 +1061,7 @@ def test_traversal_budgets_are_fair_and_reported_per_seed(
         ),
     )
 
-    result = provider.expand_paths(
+    result = provider.expand_structure(
         initial,
         policy=StructuralTraversalPolicy(
             max_depth=1,
@@ -1108,8 +1127,9 @@ def test_review_path_budget_is_global_and_round_robin_fair(
             for target in adjacency.get(current.id, ())
         ),
     )
+    monkeypatch.setattr(provider, "_ownership_parents", lambda *_args: ())
 
-    result = provider.expand_paths(
+    result = provider.expand_structure(
         StructuralGraphResult(
             index=StructuralGraphIndexStatus(state="available", provider="codegraph"),
             hunk_count=2,
@@ -1186,8 +1206,9 @@ def test_review_budget_retains_direct_paths_before_deeper_paths(
             for target in adjacency.get(current.id, ())
         ),
     )
+    monkeypatch.setattr(provider, "_ownership_parents", lambda *_args: ())
 
-    result = provider.expand_paths(
+    result = provider.expand_structure(
         StructuralGraphResult(
             index=StructuralGraphIndexStatus(state="available", provider="codegraph"),
             hunk_count=2,
@@ -1274,8 +1295,9 @@ def test_per_seed_node_budget_reports_its_limiting_dimension(
             else ()
         ),
     )
+    monkeypatch.setattr(provider, "_ownership_parents", lambda *_args: ())
 
-    result = provider.expand_paths(
+    result = provider.expand_structure(
         StructuralGraphResult(
             index=StructuralGraphIndexStatus(state="available", provider="codegraph"),
             hunk_count=1,
@@ -1301,3 +1323,78 @@ def test_per_seed_node_budget_reports_its_limiting_dimension(
     assert result.traversal_coverage[0].limiting_dimensions == (
         "seed_node_budget",
     )
+
+
+def test_ownership_ancestry_is_bounded_and_cycle_safe(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    def symbol(identifier: str) -> GraphSymbol:
+        return GraphSymbol(
+            id=identifier,
+            kind="class" if identifier != "C" else "method",
+            name=identifier,
+            qualified_name=identifier,
+            file_path="src/service.py",
+            language="python",
+            start_line=1,
+            end_line=4,
+        )
+
+    symbols = {identifier: symbol(identifier) for identifier in ("C", "P1", "P2", "P3")}
+    parents = {
+        "C": ((symbols["P1"], symbols["C"]),),
+        "P1": ((symbols["P2"], symbols["P1"]),),
+        "P2": ((symbols["P3"], symbols["P2"]),),
+        "P3": ((symbols["C"], symbols["P3"]),),
+    }
+    provider = CodegraphProvider(tmp_path)
+    monkeypatch.setattr(
+        provider,
+        "_connect",
+        lambda: nullcontext(SimpleNamespace(row_factory=None)),
+    )
+    monkeypatch.setattr(provider, "_neighbor_steps", lambda *_args: ())
+    monkeypatch.setattr(
+        provider,
+        "_ownership_parents",
+        lambda _connection, child_ids: tuple(
+            relation
+            for child_id in child_ids
+            for relation in parents.get(child_id, ())
+        ),
+    )
+
+    result = provider.expand_structure(
+        StructuralGraphResult(
+            index=StructuralGraphIndexStatus(state="available", provider="codegraph"),
+            hunk_count=1,
+            overlaps=(
+                HunkSymbolOverlap(
+                    hunk_id="H:C",
+                    symbol=symbols["C"],
+                    changed_lines=(1,),
+                ),
+            ),
+        ),
+        ownership_policy=StructuralOwnershipPolicy(max_depth=2),
+    )
+
+    assert [
+        (relation.parent.id, relation.child.id)
+        for relation in result.ownership_relations
+    ] == [("P1", "C"), ("P2", "P1")]
+    assert [item.code for item in result.diagnostics] == [
+        "structural_graph_ownership_truncated"
+    ]
+
+    cycle_relations, truncated = provider._collect_ownership_relations(
+        SimpleNamespace(),
+        (symbols["C"],),
+        policy=StructuralOwnershipPolicy(max_depth=8),
+    )
+    assert [
+        (relation.parent.id, relation.child.id)
+        for relation in cycle_relations
+    ] == [("P1", "C"), ("P2", "P1"), ("P3", "P2")]
+    assert truncated is False

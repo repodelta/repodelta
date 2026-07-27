@@ -38,6 +38,14 @@ class StructuralTraversalPolicy:
 
 
 @dataclass(frozen=True)
+class StructuralOwnershipPolicy:
+    """Deterministic ancestry boundary for non-executable ownership facts."""
+
+    max_depth: int = 8
+    max_relations: int = 240
+
+
+@dataclass(frozen=True)
 class StructuralGraphIndexStatus:
     state: IndexState
     provider: str
@@ -96,6 +104,15 @@ class StructuralPath:
 
 
 @dataclass(frozen=True)
+class StructuralOwnershipRelation:
+    """One provider-owned parent-to-child `contains` relation."""
+
+    parent: GraphSymbol
+    child: GraphSymbol
+    sources: tuple[SourceRef, ...] = ()
+
+
+@dataclass(frozen=True)
 class StructuralSeedCoverage:
     """Provider-owned traversal coverage for one exact changed-symbol seed."""
 
@@ -114,9 +131,10 @@ class StructuralGraphResult:
     hunk_count: int = 0
     overlaps: tuple[HunkSymbolOverlap, ...] = ()
     paths: tuple[StructuralPath, ...] = ()
+    ownership_relations: tuple[StructuralOwnershipRelation, ...] = ()
     traversal_coverage: tuple[StructuralSeedCoverage, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
-    schema_version: str = "structural_graph_result.v4"
+    schema_version: str = "structural_graph_result.v5"
 
     @property
     def mapped_hunk_count(self) -> int:
@@ -150,6 +168,16 @@ class StructuralGraphCollection:
                 raise ValueError(
                     "structural revision result and index side must agree"
                 )
+            ownership_ids = tuple(
+                (relation.parent.id, relation.child.id)
+                for relation in result.ownership_relations
+            )
+            if len(set(ownership_ids)) != len(ownership_ids):
+                raise ValueError(
+                    "structural graph contains duplicate ownership relations"
+                )
+            if any(parent_id == child_id for parent_id, child_id in ownership_ids):
+                raise ValueError("structural ownership relation cannot contain itself")
 
 
 @runtime_checkable
@@ -164,9 +192,10 @@ class StructuralGraphProvider(Protocol):
         self, hunks: tuple[ChangedHunk, ...]
     ) -> StructuralGraphResult: ...
 
-    def expand_paths(
+    def expand_structure(
         self,
         result: StructuralGraphResult,
         *,
         policy: StructuralTraversalPolicy = StructuralTraversalPolicy(),
+        ownership_policy: StructuralOwnershipPolicy = StructuralOwnershipPolicy(),
     ) -> StructuralGraphResult: ...

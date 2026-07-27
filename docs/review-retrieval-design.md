@@ -254,7 +254,12 @@ one they remain hunk anchors with an explicit structural limitation.
 | `references` | named consumers when a stronger relation is unavailable |
 
 Container/ownership edges remain excluded from runtime paths unless a future
-provider gives them a distinct non-execution role.
+provider gives them a distinct non-execution role. The Codegraph provider now
+exposes that role through typed `StructuralOwnershipRelation` facts. These
+facts retain bounded file/class/function/method ancestry for observed
+structural symbols, but remain outside executable path selection. A later
+semantic atom may converge head/base ownership and project it into the shared
+review graph.
 
 ### Path rules
 

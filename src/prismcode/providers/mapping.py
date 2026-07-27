@@ -55,7 +55,7 @@ def _map_revision(
     result = provider.symbols_overlapping(changes.hunks)
     if result.revision_side != revision_side:
         raise ValueError("structural provider returned the wrong revision side")
-    result = provider.expand_paths(result)
+    result = provider.expand_structure(result)
     return _attach_github_line_sources(packet, result)
 
 
@@ -111,7 +111,24 @@ def _attach_github_line_sources(
         )
         for path in result.paths
     )
-    return replace(result, overlaps=overlaps, paths=paths)
+    ownership_relations = tuple(
+        replace(
+            relation,
+            parent=enrich_symbol(relation.parent),
+            child=enrich_symbol(relation.child),
+            sources=tuple(
+                _line_source(packet, parsed, source, revision)
+                for source in relation.sources
+            ),
+        )
+        for relation in result.ownership_relations
+    )
+    return replace(
+        result,
+        overlaps=overlaps,
+        paths=paths,
+        ownership_relations=ownership_relations,
+    )
 
 
 def _line_source(

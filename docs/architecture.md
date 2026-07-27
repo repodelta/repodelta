@@ -149,6 +149,15 @@ boundaries. Eligible edges are `calls`, `imports`, `instantiates`, `references`,
 and `extends`; container edges are excluded. Each path retains direction,
 runtime/test/mixed classification, and head-line sources.
 
+Codegraph `contains` edges have a separate, non-executable contract:
+`StructuralOwnershipRelation`. For exact changed symbols and symbols retained
+by bounded traversal, the provider collects deterministic parent ancestry up
+to explicit depth and relation-count safety limits. It removes duplicates,
+rejects cycles, and preserves revision-line provenance. Ownership relations do
+not enter `StructuralPath`, path classification, or runtime traversal budgets.
+Head/base ownership convergence and review-graph hierarchy remain downstream
+responsibilities.
+
 Missing patches, stale or missing indexes, unindexed code, unmatched lines,
 and unavailable base input remain explicit diagnostics. A graph failure never
 prevents report generation.
