@@ -329,6 +329,14 @@ an edge only when its selected support paths intersect that edge's base/head
 path provenance. Shared selected paths and cross-focus overlap collapse to one
 review-level node/edge identity without discarding focus-relative provenance.
 
+The standalone HTML presents that contract as one shared structural delta
+graph. Edge-connected nodes form the primary SVG canvas; selected changed
+anchors without a canonical relation delta remain in a compact disclosure.
+Added, removed, and retained operations have distinct visual treatments.
+R/G controls only highlight the canonical IDs already listed by each focus
+overlay. Layout and highlighting do not create another graph or selection
+truth.
+
 Candidate relations contain:
 
 - slot;

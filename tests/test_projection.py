@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 from pathlib import Path
+from types import SimpleNamespace
 
 from prismcode.pipeline import DeterministicAnalyzer
 from prismcode.model.contracts import (
@@ -13,10 +14,17 @@ from prismcode.model.contracts import (
     ProjectionCandidateSet,
     ProjectionRelation,
     Requirement,
-    ReviewStatement,
+    ReviewProjection,
+    ReviewSlice,
     ReviewSourcePacket,
+    ReviewStatement,
+    ReviewStructuralGraph,
     SourceRecord,
     StructuralChangeIdentity,
+    StructuralFocusNode,
+    StructuralFocusOverlay,
+    StructuralGraphEdge,
+    StructuralGraphNode,
     StructuralRelationChangeIdentity,
     VerificationIdentity,
 )
@@ -29,7 +37,11 @@ from prismcode.convergence.core import (
     converge_candidates,
 )
 from prismcode.projection.build import build_review_projection
-from prismcode.presentation.html import render_html
+from prismcode.presentation.html import (
+    _review_graph,
+    _structural_edge_path,
+    render_html,
+)
 from prismcode.providers.structural import (
     StructuralGraphCollection,
     StructuralGraphIndexStatus,
@@ -113,11 +125,22 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
         "E:symbol:9e703e599343229d97c1",
     )
     html = render_html(brief)
-    assert html.count("Structural change-support graph") == 1
-    assert "1 canonical nodes · 0 canonical edges" in html
+    assert html.count("Structural delta graph") == 1
+    assert html.index("Structural delta graph") < html.index(
+        '<div class="requirements">'
+    )
+    assert "0 connected nodes · 0 canonical edges · 1 isolated changed anchor" in html
+    assert 'data-focus-target="R1"' in html
+    assert 'class="requirement" data-focus-id="R1" open' in html
+    assert 'requirement.querySelector("summary").addEventListener("click"' in html
+    assert "activateFocus(requirement.dataset.focusId)" in html
+    assert 'class="delta-canvas"' not in html
+    assert '<details class="isolated-anchors">' in html
+    assert "No safe canonical relation delta is available." in html
     assert '<span class="block-title">Structural paths</span>' not in html
     assert '<span class="block-title">Runtime context</span>' in html
     assert '<span class="block-title">Test context</span>' in html
+    assert '<span class="block-title">Structural overlay</span>' not in html
 
 
 def test_identical_focus_graphs_share_one_review_graph() -> None:
@@ -147,10 +170,11 @@ def test_identical_focus_graphs_share_one_review_graph() -> None:
     assert first.structural_overlay.path_relation_ids == ()
     assert second.structural_overlay.path_relation_ids == ()
     html = render_html(brief)
-    assert html.count("Structural change-support graph") == 1
-    assert html.count('<div class="subgraph-node">') == 1
-    assert html.count('<div class="subgraph-edge">') == 0
-    assert html.count("Structural overlay") == 2
+    assert html.count("Structural delta graph") == 1
+    assert html.count('<div class="isolated-anchor operation-modified"') == 1
+    assert 'data-focus-target="R1"' in html
+    assert 'data-focus-target="R2"' in html
+    assert "Structural overlay" not in html
 
 
 def test_projection_uses_terminal_aware_structural_support_set() -> None:
@@ -160,6 +184,7 @@ def test_projection_uses_terminal_aware_structural_support_set() -> None:
         *,
         changed: bool = False,
         profile: str = "production",
+        kind: str = "function",
     ) -> EvidenceItem:
         return EvidenceItem(
             id=fact_id,
@@ -178,7 +203,11 @@ def test_projection_uses_terminal_aware_structural_support_set() -> None:
                 else "runtime_context"
             ),
             changed=changed,
-            metadata={"symbol_id": symbol_id, "qualified_name": symbol_id},
+            metadata={
+                "symbol_id": symbol_id,
+                "qualified_name": symbol_id,
+                "symbol_kind": kind,
+            },
         )
 
     def path(fact_id: str, *steps: tuple[str, str]) -> EvidenceItem:
@@ -233,8 +262,8 @@ def test_projection_uses_terminal_aware_structural_support_set() -> None:
     evidence = EvidenceCatalog(
         items=(
             symbol("E:anchor", "anchor", changed=True),
-            symbol("E:runtime", "runtime"),
-            symbol("E:test", "test", profile="test"),
+            symbol("E:runtime", "runtime", kind="class"),
+            symbol("E:test", "test", profile="test", kind="variable"),
             symbol("E:detour", "detour"),
             symbol("E:anchor_2", "anchor_2", changed=True),
             symbol("E:runtime_2", "runtime_2"),
@@ -418,6 +447,174 @@ def test_projection_uses_terminal_aware_structural_support_set() -> None:
         "anchor_2": ("P-independent",),
         "runtime_2": ("P-independent",),
     }
+    html = _review_graph(
+        graph,
+        projection,
+        SimpleNamespace(evidence_catalog=evidence),
+    )
+    assert html.count('class="delta-canvas"') == 1
+    assert html.count('class="delta-edge operation-') == 3
+    assert "calls · retained" in html
+    assert "calls · removed" in html
+    assert "calls · added" in html
+    assert "function · modified" in html
+    assert "class · context" in html
+    assert "variable · context" in html
+    assert 'data-focus-target="R1"' in html
+    assert 'data-focus-target="R2"' in html
+
+
+def test_review_graph_renders_complete_focus_union() -> None:
+    def symbol(fact_id: str, symbol_id: str) -> EvidenceItem:
+        return EvidenceItem(
+            id=fact_id,
+            summary=f"Changed function: {symbol_id}",
+            kind="symbol",
+            classification="code",
+            profile="production",
+            authority="structural_provider",
+            revision_side="head",
+            operation="modified",
+            role="changed_anchor",
+            changed=True,
+            metadata={
+                "symbol_id": symbol_id,
+                "qualified_name": symbol_id,
+                "symbol_kind": "function",
+            },
+        )
+
+    def relation_change(
+        fact_id: str,
+        source_id: str,
+        target_id: str,
+        operation: str,
+    ) -> EvidenceItem:
+        return EvidenceItem(
+            id=fact_id,
+            summary=f"{operation.title()} structural relation",
+            kind="structural_relation_change",
+            classification="code",
+            profile="structural_path",
+            authority="structural_provider",
+            revision_side="review",
+            operation=operation,
+            role="structural_relation",
+            changed=operation != "retained",
+            structural_relation_change=StructuralRelationChangeIdentity(
+                source_provider_symbol_id=source_id,
+                target_provider_symbol_id=target_id,
+                relation="calls",
+                base_path_evidence_ids=(
+                    (f"E:path:{fact_id}:base",)
+                    if operation == "removed"
+                    else ()
+                ),
+                head_path_evidence_ids=(
+                    (f"E:path:{fact_id}:head",)
+                    if operation != "removed"
+                    else ()
+                ),
+            ),
+        )
+
+    node_ids = ("r1_only", "shared", "r2_only", "g_only", "isolated")
+    evidence = EvidenceCatalog(
+        items=(
+            *(symbol(f"E:{node_id}", node_id) for node_id in node_ids),
+            relation_change("E:edge:r1", "r1_only", "shared", "added"),
+            relation_change("E:edge:r2", "shared", "r2_only", "retained"),
+            relation_change("E:edge:g1", "g_only", "shared", "removed"),
+        )
+    )
+    nodes = tuple(
+        StructuralGraphNode(
+            id=f"N:{node_id}",
+            provider_symbol_id=node_id,
+            operation="modified",
+            evidence_ids=(f"E:{node_id}",),
+        )
+        for node_id in node_ids
+    )
+    edges = tuple(
+        StructuralGraphEdge(
+            id=f"D:{focus_id}",
+            source_node_id=f"N:{source_id}",
+            target_node_id=f"N:{target_id}",
+            relation="calls",
+            operation=operation,
+            relation_change_evidence_id=f"E:edge:{focus_id.casefold()}",
+        )
+        for focus_id, source_id, target_id, operation in (
+            ("R1", "r1_only", "shared", "added"),
+            ("R2", "shared", "r2_only", "retained"),
+            ("G1", "g_only", "shared", "removed"),
+        )
+    )
+
+    def overlay(focus_id: str, *focus_node_ids: str) -> ReviewSlice:
+        edge_ids = () if focus_id == "R3" else (f"D:{focus_id}",)
+        return ReviewSlice(
+            focus_statement_id=focus_id,
+            structural_overlay=StructuralFocusOverlay(
+                nodes=tuple(
+                    StructuralFocusNode(
+                        node_id=f"N:{node_id}",
+                        role="changed_anchor",
+                    )
+                    for node_id in focus_node_ids
+                ),
+                edge_ids=edge_ids,
+            ),
+        )
+
+    projection = ReviewProjection(
+        slices=(
+            overlay("R1", "r1_only", "shared"),
+            overlay("R2", "shared", "r2_only"),
+            overlay("G1", "g_only", "shared"),
+            overlay("R3", "isolated"),
+        ),
+        review_graph=ReviewStructuralGraph(nodes=nodes, edges=edges),
+    )
+    html = _review_graph(
+        projection.review_graph,
+        projection,
+        SimpleNamespace(evidence_catalog=evidence),
+    )
+
+    assert "4 connected nodes · 3 canonical edges · 1 isolated changed anchor" in html
+    assert html.count('class="delta-node operation-') == 4
+    assert html.count('class="isolated-anchor operation-') == 1
+    assert html.count('class="delta-edge operation-') == 3
+    assert 'data-focuses="R1 R2 G1"' in html
+    for focus_id in ("R1", "R2", "R3", "G1"):
+        assert f'data-focus-target="{focus_id}"' in html
+
+    occupied: list[tuple[int, int, int, int]] = []
+    first = _structural_edge_path(
+        30,
+        35,
+        390,
+        35,
+        "instantiates · added",
+        occupied,
+    )
+    second = _structural_edge_path(
+        30,
+        35,
+        390,
+        35,
+        "imports · retained",
+        occupied,
+    )
+
+    assert first[1] == second[1] == 315
+    assert first[2] != second[2]
+    assert len(occupied) == 2
+    assert occupied[0][2] <= occupied[1][0] or occupied[1][3] <= occupied[0][1]
+    for left, _top, right, _bottom in occupied:
+        assert 240 <= left < right <= 390
 
 
 def test_every_requirement_is_routed_without_a_global_statement_budget() -> None:
