@@ -163,14 +163,20 @@ Every `EvidenceItem` has a stable ID plus one semantic identity:
 - authority (`github_diff`, structural provider, verification provider, or
   supplied);
 - revision side (`head`, `base`, `review`, or `unchanged`);
-- change operation (`added`, `modified`, `removed`, `renamed`, `observed`, or
-  `unchanged`);
+- change operation (`added`, `modified`, `removed`, `renamed`, `retained`,
+  `observed`, or `unchanged`);
 - fact role and profile.
 
 Changed anchors retain complete normalized head- and base-side retrieval
 signatures. Structural provider anchors are review-level change identities
 that reference their optional base/head symbol facts; the revision facts are
-not routed independently. Their bounded previews are never used for association. Base-side
+not routed independently. Revision-specific path steps also converge once into
+review-level directed relation identities with retained, added, or removed
+operation and base/head path provenance. Added and removed relations require
+an added/removed endpoint or complete opposite-revision traversal; incomplete
+coverage remains diagnostic rather than evidence of absence. Relation changes
+are facts for a later change-support projection and are not independently
+routed in the current R/G pipeline. Their bounded previews are never used for association. Base-side
 signatures are not eligible as current implementation unless the focus is
 explicitly about removal, deprecation, cleanup, or a guardrail. Duplicate
 symbols and paths merge by identity.

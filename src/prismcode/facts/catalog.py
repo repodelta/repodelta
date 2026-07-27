@@ -12,6 +12,7 @@ from prismcode.model.contracts import (
     ChangedFile,
     ChangedLine,
     ChangeOperation,
+    Diagnostic,
     EvidenceCatalog,
     EvidenceClassification,
     EvidenceItem,
@@ -21,6 +22,7 @@ from prismcode.model.contracts import (
     ReviewSourcePacket,
     SourceRef,
     StructuralChangeIdentity,
+    StructuralRelationChangeIdentity,
     SuppliedEvidence,
     VerificationObservation,
     VerificationIdentity,
@@ -83,6 +85,7 @@ def build_evidence_catalog(
         structural_graph is not None
         and structural_graph.for_revision("base") is not None
     )
+    structural_relation_diagnostics: tuple[Diagnostic, ...] = ()
     if structural_graph is not None:
         for revision_graph in structural_graph.revisions:
             for overlap in revision_graph.overlaps:
@@ -136,6 +139,10 @@ def build_evidence_catalog(
                 hunks_by_id=hunks_by_id,
             )
         _put_structural_changes(items)
+        structural_relation_diagnostics = _put_structural_relation_changes(
+            items,
+            structural_graph,
+        )
 
     for observation in packet.verification_observations:
         _put(items, verification_evidence(observation))
@@ -159,6 +166,7 @@ def build_evidence_catalog(
         change_relations=change_relations,
         diagnostics=(
             *changes.diagnostics,
+            *structural_relation_diagnostics,
             *(
                 diagnostic
                 for result in guardrail_scan_results.results
@@ -374,6 +382,161 @@ def _put_structural_changes(items: dict[str, EvidenceItem]) -> None:
                 },
             ),
         )
+
+
+def _put_structural_relation_changes(
+    items: dict[str, EvidenceItem],
+    structural_graph: StructuralGraphCollection,
+) -> tuple[Diagnostic, ...]:
+    """Converge revision paths into one canonical directed-relation truth."""
+
+    observed: dict[
+        tuple[str, str, str],
+        dict[StructuralRevision, set[str]],
+    ] = {}
+    path_seed_ids: dict[str, str] = {}
+    for item in tuple(items.values()):
+        if item.kind != "structural_path":
+            continue
+        revision = item.revision_side
+        if revision not in {"base", "head"}:
+            continue
+        path_seed_ids[item.id] = str(item.metadata["seed_symbol_id"])
+        for step in item.metadata.get("steps", ()):
+            source = items[step["source_evidence_id"]]
+            target = items[step["target_evidence_id"]]
+            source_provider_id = str(source.metadata["symbol_id"])
+            target_provider_id = str(target.metadata["symbol_id"])
+            if step["direction"] == "incoming":
+                source_provider_id, target_provider_id = (
+                    target_provider_id,
+                    source_provider_id,
+                )
+            key = (
+                source_provider_id,
+                target_provider_id,
+                step["relation"],
+            )
+            observed.setdefault(key, {}).setdefault(revision, set()).add(item.id)
+
+    changed_operations = {
+        item.structural_change.provider_symbol_id: item.operation
+        for item in items.values()
+        if item.kind == "structural_change"
+        and item.structural_change is not None
+    }
+    deferred = {"added": 0, "removed": 0}
+    for key, revisions in sorted(observed.items()):
+        base_path_ids = tuple(sorted(revisions.get("base", ())))
+        head_path_ids = tuple(sorted(revisions.get("head", ())))
+        if base_path_ids and head_path_ids:
+            operation: ChangeOperation = "retained"
+        elif head_path_ids and (
+            _relation_endpoint_changed(key, changed_operations, "added")
+            or _opposite_revision_proves_absence(
+                structural_graph,
+                "base",
+                head_path_ids,
+                path_seed_ids,
+            )
+        ):
+            operation = "added"
+        elif base_path_ids and (
+            _relation_endpoint_changed(key, changed_operations, "removed")
+            or _opposite_revision_proves_absence(
+                structural_graph,
+                "head",
+                base_path_ids,
+                path_seed_ids,
+            )
+        ):
+            operation = "removed"
+        else:
+            deferred["added" if head_path_ids else "removed"] += 1
+            continue
+
+        exemplar_paths = (*head_path_ids, *base_path_ids)
+        path_items = tuple(items[path_id] for path_id in exemplar_paths)
+        classifications = {item.classification for item in path_items}
+        identity = "\0".join(key)
+        _put(
+            items,
+            EvidenceItem(
+                id=evidence_id("structural_relation_change", identity),
+                summary=(
+                    f"{operation.title()} structural relation: "
+                    f"{key[0]} -[{key[2]}]-> {key[1]}"
+                ),
+                kind="structural_relation_change",
+                classification=(
+                    next(iter(classifications))
+                    if len(classifications) == 1
+                    else "mixed"
+                ),
+                profile="structural_path",
+                authority="structural_provider",
+                revision_side="review",
+                operation=operation,
+                role="structural_relation",
+                changed=operation != "retained",
+                sources=_unique_sources(
+                    tuple(
+                        source
+                        for path in path_items
+                        for source in path.sources
+                    )
+                ),
+                structural_path_ids=tuple(sorted(set(exemplar_paths))),
+                structural_relation_change=StructuralRelationChangeIdentity(
+                    source_provider_symbol_id=key[0],
+                    target_provider_symbol_id=key[1],
+                    relation=key[2],
+                    base_path_evidence_ids=base_path_ids,
+                    head_path_evidence_ids=head_path_ids,
+                ),
+            ),
+        )
+
+    diagnostics = []
+    for operation, count in deferred.items():
+        if count:
+            diagnostics.append(
+                Diagnostic(
+                    code="structural_relation_delta_partial_coverage",
+                    message=(
+                        f"{count} observed {operation} structural relation "
+                        f"candidate{'s were' if count != 1 else ' was'} retained "
+                        "as revision provenance because opposite-revision "
+                        "traversal did not prove absence."
+                    ),
+                    severity="info",
+                )
+            )
+    return tuple(diagnostics)
+
+
+def _relation_endpoint_changed(
+    key: tuple[str, str, str],
+    changed_operations: dict[str, ChangeOperation],
+    operation: ChangeOperation,
+) -> bool:
+    return any(changed_operations.get(symbol_id) == operation for symbol_id in key[:2])
+
+
+def _opposite_revision_proves_absence(
+    structural_graph: StructuralGraphCollection,
+    revision: StructuralRevision,
+    observed_path_ids: tuple[str, ...],
+    path_seed_ids: dict[str, str],
+) -> bool:
+    result = structural_graph.for_revision(revision)
+    if result is None or result.index.state != "available":
+        return False
+    coverage = {item.seed_symbol_id: item.state for item in result.traversal_coverage}
+    return any(
+        coverage.get(path_seed_ids[path_id]) == "complete"
+        for path_id in observed_path_ids
+    )
 
 
 def evidence_id(kind: str, identity: str) -> str:
