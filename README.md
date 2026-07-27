@@ -130,12 +130,31 @@ Structural mapping: skipped · Codegraph index not found · change-relation fall
 
 #### Structure-aware review from the PR checkout
 
-Run the same command from a checkout whose `HEAD` is the PR head. The
-repository-local Codegraph index must be synchronized with that checkout:
+The recommended one-command mode manages Codegraph preparation around an exact,
+clean PR-head checkout:
+
+```bash
+prismcode review \
+  --repo owner/repository \
+  --pr 123 \
+  --repo-root /path/to/repository-at-pr-head \
+  --prepare-codegraph \
+  --output build/pr-123.html
+```
+
+This initializes or synchronizes the caller-owned head index. When
+`--base-repo-root` is omitted, PrismCode creates a detached temporary worktree
+at the exact PR base SHA, initializes Codegraph there, uses it for base-side
+mapping, and removes the temporary checkout and index after success or failure.
+The command never switches or resets the caller's branch. It requires either a
+`codegraph` executable or `npx` on `PATH`.
+
+Without `--prepare-codegraph`, index lifecycle remains manual. Run the same
+command from a checkout whose `HEAD` is the PR head after synchronizing its
+repository-local index:
 
 ```bash
 cd /path/to/repository-at-pr-head
-# First index only: npx @colbymchenry/codegraph init -i
 npx @colbymchenry/codegraph sync
 
 prismcode review \
@@ -184,8 +203,9 @@ select or change a Git revision: the supplied checkout must already be at the
 PR's head SHA. PrismCode verifies that revision before using either the
 Codegraph index or the bounded G guardrail scanner. The optional
 `--base-repo-root` must independently match the PR base SHA and contain its
-own synchronized Codegraph index; it supplies exact base symbols for removed
-and replaced relations. Guardrail plans own their
+own synchronized Codegraph index unless `--prepare-codegraph` is present. An
+explicit base root is caller-owned and is never removed. It supplies exact base
+symbols for removed and replaced relations. Guardrail plans own their
 deterministic selectors; the scanner inspects eligible paths and text under
 explicit file, byte, and match limits and reports per-surface coverage. It
 scans only tracked head files, excluding untracked checkout content and

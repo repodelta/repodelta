@@ -121,6 +121,14 @@ corresponding PR revision. `--repo-root` supplies head; the optional
 `--base-repo-root` supplies a separate base checkout and index. Both feed one
 revision-aware `StructuralGraphCollection`.
 
+`--prepare-codegraph` is an explicit lifecycle wrapper around that same
+provider path. It validates the caller-owned head checkout, initializes or
+synchronizes its index, and either prepares an explicit caller-owned base or
+creates an exact detached temporary base worktree. Only the automatically
+created base is deleted, through a `finally` boundary covering collection,
+analysis, and rendering. Workspace preparation never becomes a second
+structural provider or a semantic fallback.
+
 Only exact changed lines from unified-diff hunks are joined to symbol spans:
 head providers map added lines and base providers map removed lines.
 The narrowest containing symbol wins. Module-level changes may map to the
