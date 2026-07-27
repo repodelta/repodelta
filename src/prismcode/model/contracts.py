@@ -60,6 +60,7 @@ ChangeOperation = Literal[
     "replaced",
     "removed",
     "renamed",
+    "retained",
     "observed",
     "unchanged",
 ]
@@ -70,6 +71,7 @@ FactRole = Literal[
     "test_context",
     "verification",
     "structural_path",
+    "structural_relation",
     "boundary_fact",
     "provided_context",
 ]
@@ -543,6 +545,28 @@ class StructuralChangeIdentity:
 
 
 @dataclass(frozen=True)
+class StructuralRelationChangeIdentity:
+    """One revision-independent directed provider relation."""
+
+    source_provider_symbol_id: str
+    target_provider_symbol_id: str
+    relation: str
+    base_path_evidence_ids: tuple[str, ...] = ()
+    head_path_evidence_ids: tuple[str, ...] = ()
+    schema_version: str = "structural_relation_change_identity.v1"
+
+    def __post_init__(self) -> None:
+        if (
+            not self.source_provider_symbol_id
+            or not self.target_provider_symbol_id
+            or not self.relation
+        ):
+            raise ValueError("structural relation identity fields must be non-empty")
+        if not self.base_path_evidence_ids and not self.head_path_evidence_ids:
+            raise ValueError("structural relation identity requires path provenance")
+
+
+@dataclass(frozen=True)
 class EvidenceItem:
     """Canonical evidence fact. All downstream relationships reference its ID."""
 
@@ -568,10 +592,23 @@ class EvidenceItem:
     change_relation_ids: tuple[str, ...] = ()
     structural_path_ids: tuple[str, ...] = ()
     structural_change: StructuralChangeIdentity | None = None
+    structural_relation_change: StructuralRelationChangeIdentity | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def validate_consistency(self) -> None:
-        if self.changed:
+        if self.kind == "structural_relation_change":
+            if (
+                self.role != "structural_relation"
+                or self.revision_side != "review"
+                or self.profile != "structural_path"
+                or self.structural_relation_change is None
+                or self.operation not in {"added", "removed", "retained"}
+                or self.changed != (self.operation != "retained")
+            ):
+                raise ValueError(
+                    f"{self.id}: invalid structural relation change"
+                )
+        elif self.changed:
             if self.kind == "structural_change":
                 if self.role != "changed_anchor" or self.revision_side != "review":
                     raise ValueError(
@@ -607,12 +644,20 @@ class EvidenceItem:
         if (
             self.operation == "removed"
             and self.revision_side != "base"
-            and self.kind != "structural_change"
+            and self.kind
+            not in {"structural_change", "structural_relation_change"}
         ):
             raise ValueError(f"{self.id}: removed fact must belong to base revision")
         if self.kind != "structural_change" and self.structural_change is not None:
             raise ValueError(
                 f"{self.id}: only structural changes may carry typed identity"
+            )
+        if (
+            self.kind != "structural_relation_change"
+            and self.structural_relation_change is not None
+        ):
+            raise ValueError(
+                f"{self.id}: only structural relation changes may carry typed identity"
             )
         if self.role == "verification" and self.profile != "verification":
             raise ValueError(f"{self.id}: verification role requires verification profile")
@@ -666,7 +711,7 @@ class EvidenceCatalog:
     change_relations: tuple[ChangeRelation, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
     guardrail_scan_diagnostics: tuple[GuardrailScanDiagnostic, ...] = ()
-    schema_version: str = "evidence_catalog.v11"
+    schema_version: str = "evidence_catalog.v12"
 
     def by_id(self) -> dict[str, EvidenceItem]:
         return {item.id: item for item in self.items}
@@ -720,6 +765,55 @@ class EvidenceCatalog:
                 ):
                     raise ValueError(
                         f"{item.id}: structural change must reference symbol evidence"
+                    )
+            if item.kind == "structural_relation_change":
+                identity = item.structural_relation_change
+                assert identity is not None
+                path_ids = (
+                    *identity.base_path_evidence_ids,
+                    *identity.head_path_evidence_ids,
+                )
+                if not path_ids or any(
+                    value not in items_by_id
+                    or items_by_id[value].kind != "structural_path"
+                    for value in path_ids
+                ):
+                    raise ValueError(
+                        f"{item.id}: structural relation change must reference "
+                        "structural path evidence"
+                    )
+                if any(
+                    items_by_id[value].revision_side != expected_revision
+                    for expected_revision, values in (
+                        ("base", identity.base_path_evidence_ids),
+                        ("head", identity.head_path_evidence_ids),
+                    )
+                    for value in values
+                ):
+                    raise ValueError(
+                        f"{item.id}: structural relation path revision mismatch"
+                    )
+                expected_shape = {
+                    "retained": (
+                        bool(identity.base_path_evidence_ids)
+                        and bool(identity.head_path_evidence_ids)
+                    ),
+                    "added": (
+                        not identity.base_path_evidence_ids
+                        and bool(identity.head_path_evidence_ids)
+                    ),
+                    "removed": (
+                        bool(identity.base_path_evidence_ids)
+                        and not identity.head_path_evidence_ids
+                    ),
+                }
+                if not expected_shape[item.operation]:
+                    raise ValueError(
+                        f"{item.id}: operation conflicts with revision provenance"
+                    )
+                if set(item.structural_path_ids) != set(path_ids):
+                    raise ValueError(
+                        f"{item.id}: structural path references conflict with identity"
                     )
 
 

@@ -15,8 +15,14 @@ Each diff location has one canonical representation. Revision-specific changed
 symbols remain provenance facts; one typed `StructuralChangeIdentity` pairs
 their optional base/head evidence IDs and is the only structural changed
 anchor. Added, removed, and modified identities retain the union of their
-change-relation IDs, paths, signatures, and revision links. The catalog serializes
-the parser-owned `ChangeRelation` collection once; changed evidence references
+change-relation IDs, paths, signatures, and revision links. Revision path
+steps converge into one canonical `StructuralRelationChangeIdentity` per
+directed provider edge. Its base/head path IDs are provenance only. Retained
+edges require observations on both revisions; added or removed edges require
+an added/removed endpoint or complete opposite-revision traversal. Incomplete
+coverage remains an explicit diagnostic and never becomes an absence claim.
+The catalog serializes the parser-owned `ChangeRelation` collection once;
+changed evidence references
 relation IDs and never re-infers operation from surviving lines. Typed routing
 fields are first-class contract fields, not metadata conventions.
 Changed anchors carry complete, directional association signatures. Bounded
