@@ -257,9 +257,12 @@ Container/ownership edges remain excluded from runtime paths unless a future
 provider gives them a distinct non-execution role. The Codegraph provider now
 exposes that role through typed `StructuralOwnershipRelation` facts. These
 facts retain bounded file/class/function/method ancestry for observed
-structural symbols, but remain outside executable path selection. A later
-semantic atom may converge head/base ownership and project it into the shared
-review graph.
+structural symbols, but remain outside executable path selection. Typed
+ownership coverage identifies which observed symbols have complete ancestry.
+Revision observations converge once into a review-level ownership identity;
+absence is inferred only from an added/removed endpoint or complete,
+applicable opposite-revision coverage. Projecting that canonical hierarchy
+into the shared review graph remains a later semantic atom.
 
 ### Path rules
 

@@ -155,8 +155,14 @@ by bounded traversal, the provider collects deterministic parent ancestry up
 to explicit depth and relation-count safety limits. It removes duplicates,
 rejects cycles, and preserves revision-line provenance. Ownership relations do
 not enter `StructuralPath`, path classification, or runtime traversal budgets.
-Head/base ownership convergence and review-graph hierarchy remain downstream
-responsibilities.
+`StructuralOwnershipCoverage` records the exact observed-symbol applicability
+set plus complete/truncated/unavailable state and limiting dimensions. Facts
+normalizes each revision relation as provenance, then emits at most one
+review-level `StructuralOwnershipChangeIdentity` per provider parent/child
+pair. Added/removed ownership requires an added/removed endpoint or complete,
+applicable opposite-revision coverage; otherwise the observation remains
+provenance with a partial-coverage diagnostic. Review-graph hierarchy remains
+a downstream responsibility.
 
 Missing patches, stale or missing indexes, unindexed code, unmatched lines,
 and unavailable base input remain explicit diagnostics. A graph failure never

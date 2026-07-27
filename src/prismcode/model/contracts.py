@@ -72,6 +72,7 @@ FactRole = Literal[
     "verification",
     "structural_path",
     "structural_relation",
+    "structural_ownership",
     "boundary_fact",
     "provided_context",
 ]
@@ -567,6 +568,37 @@ class StructuralRelationChangeIdentity:
 
 
 @dataclass(frozen=True)
+class StructuralOwnershipIdentity:
+    """One revision-local parent-to-child ownership observation."""
+
+    parent_provider_symbol_id: str
+    child_provider_symbol_id: str
+    parent_symbol_evidence_id: str
+    child_symbol_evidence_id: str
+    schema_version: str = "structural_ownership_identity.v1"
+
+
+@dataclass(frozen=True)
+class StructuralOwnershipChangeIdentity:
+    """One revision-independent parent-to-child ownership truth."""
+
+    parent_provider_symbol_id: str
+    child_provider_symbol_id: str
+    base_ownership_evidence_id: str | None = None
+    head_ownership_evidence_id: str | None = None
+    schema_version: str = "structural_ownership_change_identity.v1"
+
+    def __post_init__(self) -> None:
+        if not self.parent_provider_symbol_id or not self.child_provider_symbol_id:
+            raise ValueError("structural ownership identity fields must be non-empty")
+        if (
+            self.base_ownership_evidence_id is None
+            and self.head_ownership_evidence_id is None
+        ):
+            raise ValueError("structural ownership change requires provenance")
+
+
+@dataclass(frozen=True)
 class EvidenceItem:
     """Canonical evidence fact. All downstream relationships reference its ID."""
 
@@ -593,6 +625,8 @@ class EvidenceItem:
     structural_path_ids: tuple[str, ...] = ()
     structural_change: StructuralChangeIdentity | None = None
     structural_relation_change: StructuralRelationChangeIdentity | None = None
+    structural_ownership: StructuralOwnershipIdentity | None = None
+    structural_ownership_change: StructuralOwnershipChangeIdentity | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def validate_consistency(self) -> None:
@@ -608,6 +642,24 @@ class EvidenceItem:
                 raise ValueError(
                     f"{self.id}: invalid structural relation change"
                 )
+        elif self.kind == "structural_ownership":
+            if (
+                self.role != "structural_ownership"
+                or self.revision_side not in {"base", "head"}
+                or self.operation != "observed"
+                or self.changed
+                or self.structural_ownership is None
+            ):
+                raise ValueError(f"{self.id}: invalid structural ownership provenance")
+        elif self.kind == "structural_ownership_change":
+            if (
+                self.role != "structural_ownership"
+                or self.revision_side != "review"
+                or self.operation not in {"added", "removed", "retained"}
+                or self.changed != (self.operation != "retained")
+                or self.structural_ownership_change is None
+            ):
+                raise ValueError(f"{self.id}: invalid structural ownership change")
         elif self.changed:
             if self.kind == "structural_change":
                 if self.role != "changed_anchor" or self.revision_side != "review":
@@ -645,7 +697,11 @@ class EvidenceItem:
             self.operation == "removed"
             and self.revision_side != "base"
             and self.kind
-            not in {"structural_change", "structural_relation_change"}
+            not in {
+                "structural_change",
+                "structural_relation_change",
+                "structural_ownership_change",
+            }
         ):
             raise ValueError(f"{self.id}: removed fact must belong to base revision")
         if self.kind != "structural_change" and self.structural_change is not None:
@@ -658,6 +714,17 @@ class EvidenceItem:
         ):
             raise ValueError(
                 f"{self.id}: only structural relation changes may carry typed identity"
+            )
+        if self.kind != "structural_ownership" and self.structural_ownership is not None:
+            raise ValueError(
+                f"{self.id}: only structural ownership provenance may carry identity"
+            )
+        if (
+            self.kind != "structural_ownership_change"
+            and self.structural_ownership_change is not None
+        ):
+            raise ValueError(
+                f"{self.id}: only structural ownership changes may carry identity"
             )
         if self.role == "verification" and self.profile != "verification":
             raise ValueError(f"{self.id}: verification role requires verification profile")
@@ -711,7 +778,7 @@ class EvidenceCatalog:
     change_relations: tuple[ChangeRelation, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
     guardrail_scan_diagnostics: tuple[GuardrailScanDiagnostic, ...] = ()
-    schema_version: str = "evidence_catalog.v12"
+    schema_version: str = "evidence_catalog.v13"
 
     def by_id(self) -> dict[str, EvidenceItem]:
         return {item.id: item for item in self.items}
@@ -815,6 +882,113 @@ class EvidenceCatalog:
                     raise ValueError(
                         f"{item.id}: structural path references conflict with identity"
                     )
+            if item.kind == "structural_ownership":
+                identity = item.structural_ownership
+                assert identity is not None
+                symbol_ids = (
+                    identity.parent_symbol_evidence_id,
+                    identity.child_symbol_evidence_id,
+                )
+                if any(
+                    value not in items_by_id
+                    or items_by_id[value].kind != "symbol"
+                    or items_by_id[value].revision_side != item.revision_side
+                    for value in symbol_ids
+                ):
+                    raise ValueError(
+                        f"{item.id}: ownership must reference same-revision symbols"
+                    )
+                if (
+                    items_by_id[identity.parent_symbol_evidence_id].metadata.get(
+                        "symbol_id"
+                    )
+                    != identity.parent_provider_symbol_id
+                    or items_by_id[identity.child_symbol_evidence_id].metadata.get(
+                        "symbol_id"
+                    )
+                    != identity.child_provider_symbol_id
+                ):
+                    raise ValueError(
+                        f"{item.id}: ownership endpoint identity mismatch"
+                    )
+            if item.kind == "structural_ownership_change":
+                identity = item.structural_ownership_change
+                assert identity is not None
+                revision_ids = (
+                    identity.base_ownership_evidence_id,
+                    identity.head_ownership_evidence_id,
+                )
+                provenance = tuple(
+                    value for value in revision_ids if value is not None
+                )
+                if any(
+                    value not in items_by_id
+                    or items_by_id[value].kind != "structural_ownership"
+                    for value in provenance
+                ):
+                    raise ValueError(
+                        f"{item.id}: ownership change must reference ownership provenance"
+                    )
+                if any(
+                    items_by_id[value].structural_ownership is None
+                    or (
+                        items_by_id[
+                            value
+                        ].structural_ownership.parent_provider_symbol_id,
+                        items_by_id[
+                            value
+                        ].structural_ownership.child_provider_symbol_id,
+                    )
+                    != (
+                        identity.parent_provider_symbol_id,
+                        identity.child_provider_symbol_id,
+                    )
+                    for value in provenance
+                ):
+                    raise ValueError(
+                        f"{item.id}: ownership change endpoint identity mismatch"
+                    )
+                if any(
+                    evidence_id is not None
+                    and items_by_id[evidence_id].revision_side != revision
+                    for revision, evidence_id in zip(
+                        ("base", "head"),
+                        revision_ids,
+                        strict=True,
+                    )
+                ):
+                    raise ValueError(
+                        f"{item.id}: ownership provenance revision mismatch"
+                    )
+                expected_shape = {
+                    "retained": all(revision_ids),
+                    "added": (
+                        identity.base_ownership_evidence_id is None
+                        and identity.head_ownership_evidence_id is not None
+                    ),
+                    "removed": (
+                        identity.base_ownership_evidence_id is not None
+                        and identity.head_ownership_evidence_id is None
+                    ),
+                }
+                if not expected_shape[item.operation]:
+                    raise ValueError(
+                        f"{item.id}: ownership operation conflicts with provenance"
+                    )
+
+        ownership_change_ids = tuple(
+            (
+                item.structural_ownership_change.parent_provider_symbol_id,
+                item.structural_ownership_change.child_provider_symbol_id,
+            )
+            for item in self.items
+            if item.kind == "structural_ownership_change"
+            and item.structural_ownership_change is not None
+        )
+        if len(set(ownership_change_ids)) != len(ownership_change_ids):
+            raise ValueError(
+                "evidence catalog contains duplicate structural ownership identities"
+            )
 
 
 @dataclass(frozen=True)

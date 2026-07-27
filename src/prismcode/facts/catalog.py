@@ -22,6 +22,8 @@ from prismcode.model.contracts import (
     ReviewSourcePacket,
     SourceRef,
     StructuralChangeIdentity,
+    StructuralOwnershipChangeIdentity,
+    StructuralOwnershipIdentity,
     StructuralRelationChangeIdentity,
     SuppliedEvidence,
     VerificationObservation,
@@ -85,6 +87,7 @@ def build_evidence_catalog(
         structural_graph is not None
         and structural_graph.for_revision("base") is not None
     )
+    ownership_diagnostics: tuple[Diagnostic, ...] = ()
     structural_relation_diagnostics: tuple[Diagnostic, ...] = ()
     if structural_graph is not None:
         for revision_graph in structural_graph.revisions:
@@ -139,6 +142,10 @@ def build_evidence_catalog(
                 hunks_by_id=hunks_by_id,
             )
         _put_structural_changes(items)
+        ownership_diagnostics = _put_structural_ownership_changes(
+            items,
+            structural_graph,
+        )
         structural_relation_diagnostics = _put_structural_relation_changes(
             items,
             structural_graph,
@@ -166,6 +173,7 @@ def build_evidence_catalog(
         change_relations=change_relations,
         diagnostics=(
             *changes.diagnostics,
+            *ownership_diagnostics,
             *structural_relation_diagnostics,
             *(
                 diagnostic
@@ -212,6 +220,23 @@ def _put_structural_revision(
                 symbol_paths.setdefault(step.source.id, set()).add(path_id)
                 symbol_paths.setdefault(step.target.id, set()).add(path_id)
 
+        for relation in structural_graph.ownership_relations:
+            for symbol in (relation.parent, relation.child):
+                if symbol.id in changed_symbol_ids:
+                    continue
+                _put(
+                    items,
+                    _symbol_item(
+                        symbol,
+                        changed=False,
+                        operation="unchanged",
+                        revision_side=revision_side,
+                        structural_path_ids=tuple(
+                            sorted(symbol_paths.get(symbol.id, ()))
+                        ),
+                    ),
+                )
+
         for overlap in structural_graph.overlaps:
             hunk = hunks_by_id.get(overlap.hunk_id)
             relation_ids, operation, head_signature, base_signature = (
@@ -237,6 +262,43 @@ def _put_structural_revision(
                     base_signature=base_signature,
                     changed_hunk_ids=(overlap.hunk_id,),
                     changed_lines=overlap.changed_lines,
+                ),
+            )
+
+        for relation in structural_graph.ownership_relations:
+            ownership_id = _ownership_evidence_id(
+                relation.parent.id,
+                relation.child.id,
+                revision_side,
+            )
+            _put(
+                items,
+                EvidenceItem(
+                    id=ownership_id,
+                    kind="structural_ownership",
+                    summary=(
+                        f"Observed ownership: {relation.parent.qualified_name} "
+                        f"contains {relation.child.qualified_name}"
+                    ),
+                    classification=_path_classification(relation.child.file_path),
+                    profile="unknown",
+                    authority="structural_provider",
+                    revision_side=revision_side,
+                    operation="observed",
+                    role="structural_ownership",
+                    sources=relation.sources,
+                    structural_ownership=StructuralOwnershipIdentity(
+                        parent_provider_symbol_id=relation.parent.id,
+                        child_provider_symbol_id=relation.child.id,
+                        parent_symbol_evidence_id=_symbol_evidence_id(
+                            relation.parent.id,
+                            revision_side,
+                        ),
+                        child_symbol_evidence_id=_symbol_evidence_id(
+                            relation.child.id,
+                            revision_side,
+                        ),
+                    ),
                 ),
             )
         for path in structural_graph.paths:
@@ -384,6 +446,173 @@ def _put_structural_changes(items: dict[str, EvidenceItem]) -> None:
         )
 
 
+def _put_structural_ownership_changes(
+    items: dict[str, EvidenceItem],
+    structural_graph: StructuralGraphCollection,
+) -> tuple[Diagnostic, ...]:
+    """Converge revision ancestry into one canonical ownership truth."""
+
+    observed: dict[
+        tuple[str, str],
+        dict[StructuralRevision, str],
+    ] = {}
+    for item in tuple(items.values()):
+        if item.kind != "structural_ownership":
+            continue
+        identity = item.structural_ownership
+        assert identity is not None
+        observed.setdefault(
+            (
+                identity.parent_provider_symbol_id,
+                identity.child_provider_symbol_id,
+            ),
+            {},
+        )[item.revision_side] = item.id
+
+    changed_operations = {
+        item.structural_change.provider_symbol_id: item.operation
+        for item in items.values()
+        if item.kind == "structural_change"
+        and item.structural_change is not None
+    }
+    deferred = {"added": 0, "removed": 0}
+    for key, revisions in sorted(observed.items()):
+        base_id = revisions.get("base")
+        head_id = revisions.get("head")
+        operation = _revision_relation_operation(
+            base_present=base_id is not None,
+            head_present=head_id is not None,
+            added_endpoint=_ownership_endpoint_changed(
+                key,
+                changed_operations,
+                "added",
+            ),
+            removed_endpoint=_ownership_endpoint_changed(
+                key,
+                changed_operations,
+                "removed",
+            ),
+            base_proves_absence=_opposite_ownership_proves_absence(
+                structural_graph,
+                "base",
+                key[1],
+            ),
+            head_proves_absence=_opposite_ownership_proves_absence(
+                structural_graph,
+                "head",
+                key[1],
+            ),
+        )
+        if operation is None:
+            deferred["added" if head_id is not None else "removed"] += 1
+            continue
+
+        provenance_ids = tuple(
+            value for value in (head_id, base_id) if value is not None
+        )
+        provenance = tuple(items[value] for value in provenance_ids)
+        classifications = {item.classification for item in provenance}
+        _put(
+            items,
+            EvidenceItem(
+                id=evidence_id(
+                    "structural_ownership_change",
+                    "\0".join(key),
+                ),
+                summary=(
+                    f"{operation.title()} structural ownership: "
+                    f"{key[0]} contains {key[1]}"
+                ),
+                kind="structural_ownership_change",
+                classification=(
+                    next(iter(classifications))
+                    if len(classifications) == 1
+                    else "mixed"
+                ),
+                profile="unknown",
+                authority="structural_provider",
+                revision_side="review",
+                operation=operation,
+                role="structural_ownership",
+                changed=operation != "retained",
+                sources=_unique_sources(
+                    tuple(
+                        source
+                        for item in provenance
+                        for source in item.sources
+                    )
+                ),
+                structural_ownership_change=StructuralOwnershipChangeIdentity(
+                    parent_provider_symbol_id=key[0],
+                    child_provider_symbol_id=key[1],
+                    base_ownership_evidence_id=base_id,
+                    head_ownership_evidence_id=head_id,
+                ),
+            ),
+        )
+
+    diagnostics = []
+    for operation, count in deferred.items():
+        if count:
+            diagnostics.append(
+                Diagnostic(
+                    code="structural_ownership_delta_partial_coverage",
+                    message=(
+                        f"{count} observed {operation} ownership "
+                        f"candidate{'s were' if count != 1 else ' was'} retained "
+                        "as revision provenance because opposite-revision "
+                        "ownership coverage did not prove absence."
+                    ),
+                    severity="info",
+                )
+            )
+    return tuple(diagnostics)
+
+
+def _ownership_endpoint_changed(
+    key: tuple[str, str],
+    changed_operations: dict[str, ChangeOperation],
+    operation: ChangeOperation,
+) -> bool:
+    return any(changed_operations.get(symbol_id) == operation for symbol_id in key)
+
+
+def _opposite_ownership_proves_absence(
+    structural_graph: StructuralGraphCollection,
+    revision: StructuralRevision,
+    child_provider_symbol_id: str,
+) -> bool:
+    result = structural_graph.for_revision(revision)
+    coverage = result.ownership_coverage if result is not None else None
+    return (
+        result is not None
+        and result.index.state == "available"
+        and coverage is not None
+        and coverage.state == "complete"
+        and child_provider_symbol_id in coverage.observed_symbol_ids
+    )
+
+
+def _revision_relation_operation(
+    *,
+    base_present: bool,
+    head_present: bool,
+    added_endpoint: bool,
+    removed_endpoint: bool,
+    base_proves_absence: bool,
+    head_proves_absence: bool,
+) -> ChangeOperation | None:
+    """Return the sole review operation for a revision-aware relation."""
+
+    if base_present and head_present:
+        return "retained"
+    if head_present and (added_endpoint or base_proves_absence):
+        return "added"
+    if base_present and (removed_endpoint or head_proves_absence):
+        return "removed"
+    return None
+
+
 def _put_structural_relation_changes(
     items: dict[str, EvidenceItem],
     structural_graph: StructuralGraphCollection,
@@ -429,29 +658,33 @@ def _put_structural_relation_changes(
     for key, revisions in sorted(observed.items()):
         base_path_ids = tuple(sorted(revisions.get("base", ())))
         head_path_ids = tuple(sorted(revisions.get("head", ())))
-        if base_path_ids and head_path_ids:
-            operation: ChangeOperation = "retained"
-        elif head_path_ids and (
-            _relation_endpoint_changed(key, changed_operations, "added")
-            or _opposite_revision_proves_absence(
+        operation = _revision_relation_operation(
+            base_present=bool(base_path_ids),
+            head_present=bool(head_path_ids),
+            added_endpoint=_relation_endpoint_changed(
+                key,
+                changed_operations,
+                "added",
+            ),
+            removed_endpoint=_relation_endpoint_changed(
+                key,
+                changed_operations,
+                "removed",
+            ),
+            base_proves_absence=_opposite_revision_proves_absence(
                 structural_graph,
                 "base",
                 head_path_ids,
                 path_seed_ids,
-            )
-        ):
-            operation = "added"
-        elif base_path_ids and (
-            _relation_endpoint_changed(key, changed_operations, "removed")
-            or _opposite_revision_proves_absence(
+            ),
+            head_proves_absence=_opposite_revision_proves_absence(
                 structural_graph,
                 "head",
                 base_path_ids,
                 path_seed_ids,
-            )
-        ):
-            operation = "removed"
-        else:
+            ),
+        )
+        if operation is None:
             deferred["added" if head_path_ids else "removed"] += 1
             continue
 
@@ -901,6 +1134,17 @@ def _symbol_evidence_id(
 ) -> str:
     identity = symbol_id if revision_side == "head" else f"base:{symbol_id}"
     return evidence_id("symbol", identity)
+
+
+def _ownership_evidence_id(
+    parent_symbol_id: str,
+    child_symbol_id: str,
+    revision_side: StructuralRevision,
+) -> str:
+    identity = f"{parent_symbol_id}\0{child_symbol_id}"
+    if revision_side == "base":
+        identity = f"base\0{identity}"
+    return evidence_id("structural_ownership", identity)
 
 
 def _path_summary(path: StructuralPath) -> str:

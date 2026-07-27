@@ -11,6 +11,8 @@ StructuralRevision = Literal["head", "base"]
 PathClassification = Literal["runtime", "test", "mixed"]
 TraversalDirection = Literal["outgoing", "incoming"]
 TraversalCoverageState = Literal["complete", "truncated"]
+OwnershipCoverageState = Literal["complete", "truncated", "unavailable"]
+OwnershipLimit = Literal["depth_budget", "relation_budget"]
 TraversalLimit = Literal[
     "seed_node_budget",
     "seed_path_budget",
@@ -113,6 +115,24 @@ class StructuralOwnershipRelation:
 
 
 @dataclass(frozen=True)
+class StructuralOwnershipCoverage:
+    """Provider coverage for ancestry rooted at observed structural symbols."""
+
+    state: OwnershipCoverageState
+    observed_symbol_ids: tuple[str, ...]
+    relation_count: int
+    limiting_dimensions: tuple[OwnershipLimit, ...] = ()
+
+    def __post_init__(self) -> None:
+        if self.state == "complete" and self.limiting_dimensions:
+            raise ValueError("complete ownership coverage cannot carry limits")
+        if self.state == "truncated" and not self.limiting_dimensions:
+            raise ValueError("truncated ownership coverage requires a limit")
+        if self.state == "unavailable" and self.relation_count:
+            raise ValueError("unavailable ownership coverage cannot contain relations")
+
+
+@dataclass(frozen=True)
 class StructuralSeedCoverage:
     """Provider-owned traversal coverage for one exact changed-symbol seed."""
 
@@ -132,9 +152,10 @@ class StructuralGraphResult:
     overlaps: tuple[HunkSymbolOverlap, ...] = ()
     paths: tuple[StructuralPath, ...] = ()
     ownership_relations: tuple[StructuralOwnershipRelation, ...] = ()
+    ownership_coverage: StructuralOwnershipCoverage | None = None
     traversal_coverage: tuple[StructuralSeedCoverage, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
-    schema_version: str = "structural_graph_result.v5"
+    schema_version: str = "structural_graph_result.v6"
 
     @property
     def mapped_hunk_count(self) -> int:
@@ -178,6 +199,22 @@ class StructuralGraphCollection:
                 )
             if any(parent_id == child_id for parent_id, child_id in ownership_ids):
                 raise ValueError("structural ownership relation cannot contain itself")
+            coverage = result.ownership_coverage
+            if result.ownership_relations and coverage is None:
+                raise ValueError(
+                    "structural ownership relations require typed coverage"
+                )
+            if coverage is not None:
+                if len(set(coverage.observed_symbol_ids)) != len(
+                    coverage.observed_symbol_ids
+                ):
+                    raise ValueError(
+                        "structural ownership coverage contains duplicate symbols"
+                    )
+                if coverage.relation_count != len(result.ownership_relations):
+                    raise ValueError(
+                        "structural ownership coverage relation count mismatch"
+                    )
 
 
 @runtime_checkable
