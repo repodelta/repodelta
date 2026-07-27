@@ -401,8 +401,30 @@ class CodegraphProvider:
         try:
             with self._connect() as connection:
                 connection.row_factory = sqlite3.Row
-                while any(not item.exhausted for item in traversals):
-                    if len(paths) >= policy.max_total_paths:
+                review_budget_reached = False
+                for depth in range(1, policy.max_depth + 1):
+                    phase_active = True
+                    while phase_active:
+                        phase_active = False
+                        for traversal in traversals:
+                            if traversal.exhausted:
+                                continue
+                            if len(paths) >= policy.max_total_paths:
+                                review_budget_reached = True
+                                break
+                            path = self._advance_seed(
+                                connection,
+                                traversal,
+                                target_depth=depth,
+                                policy=policy,
+                                global_discovered=global_discovered,
+                            )
+                            if path is not None:
+                                paths.append(path)
+                                phase_active = True
+                        if review_budget_reached:
+                            break
+                    if review_budget_reached:
                         for traversal in traversals:
                             if not traversal.exhausted:
                                 traversal.limiting_dimensions.add(
@@ -410,19 +432,6 @@ class CodegraphProvider:
                                 )
                                 traversal.exhausted = True
                         break
-                    for traversal in traversals:
-                        if traversal.exhausted:
-                            continue
-                        path = self._advance_seed(
-                            connection,
-                            traversal,
-                            policy=policy,
-                            global_discovered=global_discovered,
-                        )
-                        if path is not None:
-                            paths.append(path)
-                        if len(paths) >= policy.max_total_paths:
-                            break
         except sqlite3.Error as exc:
             return StructuralGraphResult(
                 revision_side=self.revision_side,
@@ -476,22 +485,24 @@ class CodegraphProvider:
         connection: sqlite3.Connection,
         traversal: _SeedTraversal,
         *,
+        target_depth: int,
         policy: StructuralTraversalPolicy,
         global_discovered: set[str],
     ) -> StructuralPath | None:
-        """Advance one seed until it emits one path or exhausts its frontier."""
+        """Emit one path at the requested depth or finish that depth phase."""
 
         while not traversal.exhausted:
             if traversal.current is None:
                 if traversal.cursor >= len(traversal.queue):
                     traversal.exhausted = True
                     return None
-                traversal.current = traversal.queue[traversal.cursor]
+                candidate = traversal.queue[traversal.cursor]
+                _current, candidate_steps, _visited = candidate
+                if len(candidate_steps) >= target_depth:
+                    return None
+                traversal.current = candidate
                 traversal.cursor += 1
                 current, steps, _visited = traversal.current
-                if len(steps) >= policy.max_depth:
-                    traversal.current = None
-                    continue
                 traversal.neighbors = self._neighbor_steps(
                     connection,
                     current,
