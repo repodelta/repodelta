@@ -16,6 +16,8 @@ from prismcode.model.contracts import (
     ReviewStatement,
     ReviewStructuralGraph,
     SourceRef,
+    StructuralGraphEdge,
+    StructuralGraphNode,
 )
 
 
@@ -253,35 +255,21 @@ def _review_graph(
                     f"{edge_id}"
                 )
             edge_focus.setdefault(edge_id, []).append(focus_id)
-    node_rows = []
-    for node in graph.nodes:
-        fact = next(
-            (evidence.get(evidence_id) for evidence_id in node.evidence_ids),
-            None,
-        )
-        if fact is None:
-            raise ValueError(
-                f"structural graph references missing node evidence: {node.id}"
-            )
-        sources = _sources(fact, brief)
-        focus_labels = ", ".join(
-            focus_id
-            for focus_id, _role in node_focus.get(node.id, ())
-        )
-        node_rows.append(
-            '<div class="subgraph-node">'
-            f'<span class="node-focuses">{escape(focus_labels)}</span>'
-            f'<span class="node-operation">{escape(node.operation)}</span>'
-            f'<span class="subgraph-node-name">{escape(_structural_name(fact))}</span>'
-            + (
-                f'<span class="projection-source">Source: {sources}</span>'
-                if sources
-                else ""
-            )
-            + "</div>"
-        )
+    connected_node_ids = {
+        node_id
+        for edge in graph.edges
+        for node_id in (edge.source_node_id, edge.target_node_id)
+    }
+    connected_nodes = tuple(
+        node for node in graph.nodes if node.id in connected_node_ids
+    )
+    positions, canvas_width, canvas_height = _structural_layout(
+        connected_nodes,
+        graph.edges,
+    )
 
-    edge_rows = []
+    edge_shapes = []
+    occupied_label_boxes: list[tuple[int, int, int, int]] = []
     for edge in graph.edges:
         source_node = nodes.get(edge.source_node_id)
         target_node = nodes.get(edge.target_node_id)
@@ -314,33 +302,273 @@ def _review_graph(
             raise ValueError(
                 "structural graph edge references a missing relation-change fact"
             )
-        source_name = _structural_name(source)
-        target_name = _structural_name(target)
-        edge_rows.append(
-            '<div class="subgraph-edge">'
-            f'<span>{escape(source_name)}</span>'
-            f'<span class="subgraph-relation">→ {escape(edge.relation)} · '
-            f'{escape(edge.operation)}</span>'
-            f'<span>{escape(target_name)}</span>'
-            '<span class="edge-path-count">'
-            f'{escape(", ".join(edge_focus.get(edge.id, ())))} · '
-            f'{len(edge.path_relation_ids)} '
-            f'support ref{"s" if len(edge.path_relation_ids) != 1 else ""}</span>'
-            "</div>"
+        source_x, source_y = positions[edge.source_node_id]
+        target_x, target_y = positions[edge.target_node_id]
+        label = f"{edge.relation} · {edge.operation}"
+        path, label_x, label_y, label_width = _structural_edge_path(
+            source_x,
+            source_y,
+            target_x,
+            target_y,
+            label,
+            occupied_label_boxes,
+        )
+        edge_shapes.append(
+            f'<g class="delta-edge operation-{escape(edge.operation)}" '
+            f'data-focuses="{escape(" ".join(edge_focus.get(edge.id, ())), quote=True)}">'
+            f'<path d="{path}" marker-end="url(#arrow-{escape(edge.operation)})"/>'
+            f'<rect class="delta-edge-label-bg" x="{label_x - label_width // 2}" '
+            f'y="{label_y - 11}" width="{label_width}" height="16" rx="4"/>'
+            f'<text class="delta-edge-label" x="{label_x}" y="{label_y}">'
+            f"{escape(label)}</text>"
+            f"<title>{escape(source.summary)} → {escape(target.summary)} · "
+            f'{len(edge.path_relation_ids)} support refs</title></g>'
         )
 
+    node_shapes = []
+    for node in connected_nodes:
+        fact = _structural_node_fact(node.evidence_ids, evidence)
+        x, y = positions[node.id]
+        full_name = _structural_name(fact)
+        path_label, name_label = _structural_label_parts(full_name)
+        kind = str(fact.metadata.get("symbol_kind", "symbol")).replace("_", " ")
+        focuses = " ".join(
+            focus_id for focus_id, _role in node_focus.get(node.id, ())
+        )
+        content = (
+            f'<g class="delta-node operation-{escape(node.operation)}" '
+            f'data-focuses="{escape(focuses, quote=True)}" '
+            f'transform="translate({x} {y})">'
+            '<rect width="210" height="72" rx="10"/>'
+            f'<text class="delta-node-kind" x="12" y="17">'
+            f'{escape(kind)} · {escape(node.operation)}</text>'
+            f'<text class="delta-node-name" x="12" y="39">'
+            f'{escape(name_label)}</text>'
+            f'<text class="delta-node-path" x="12" y="57">'
+            f'{escape(path_label)}</text>'
+            f"<title>{escape(full_name)}</title></g>"
+        )
+        href = _structural_href(fact, brief)
+        node_shapes.append(
+            f'<a href="{escape(href, quote=True)}" target="_blank" '
+            f'rel="noopener">{content}</a>'
+            if href
+            else content
+        )
+
+    isolated_rows = []
+    for node in graph.nodes:
+        if node.id in connected_node_ids or node.operation == "context":
+            continue
+        fact = _structural_node_fact(node.evidence_ids, evidence)
+        sources = _sources(fact, brief)
+        focuses = ", ".join(
+            focus_id for focus_id, _role in node_focus.get(node.id, ())
+        )
+        kind = str(fact.metadata.get("symbol_kind", "symbol")).replace("_", " ")
+        isolated_rows.append(
+            f'<div class="isolated-anchor operation-{escape(node.operation)}" '
+            f'data-focuses="{escape(" ".join(item[0] for item in node_focus.get(node.id, ())), quote=True)}">'
+            f'<span class="isolated-anchor-focus">{escape(focuses)}</span>'
+            f'<span class="isolated-anchor-operation">{escape(node.operation)}</span>'
+            f'<span class="isolated-anchor-name">{escape(_structural_name(fact))}</span>'
+            f'<span class="isolated-anchor-kind">{escape(kind)}</span>'
+            + (
+                f'<span class="projection-source">Source: {sources}</span>'
+                if sources
+                else ""
+            )
+            + "</div>"
+        )
+
+    focus_ids = tuple(
+        review_slice.focus_statement_id
+        for review_slice in projection.slices
+        if review_slice.structural_overlay.nodes
+    )
+    controls = (
+        '<div class="delta-focus-controls" role="group" '
+        'aria-label="Structural graph focus">'
+        '<button class="delta-focus active" type="button" '
+        'data-focus-target="all">All</button>'
+        + "".join(
+            f'<button class="delta-focus" type="button" '
+            f'data-focus-target="{escape(focus_id, quote=True)}">'
+            f"{escape(focus_id)}</button>"
+            for focus_id in focus_ids
+        )
+        + "</div>"
+    )
+    canvas = (
+        '<div class="delta-canvas-scroll"><svg class="delta-canvas" '
+        f'viewBox="0 0 {canvas_width} {canvas_height}" '
+        f'aria-label="Structural delta graph" role="img">'
+        "<defs>"
+        '<marker id="arrow-added" markerWidth="8" markerHeight="8" refX="7" '
+        'refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z"/></marker>'
+        '<marker id="arrow-removed" markerWidth="8" markerHeight="8" refX="7" '
+        'refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z"/></marker>'
+        '<marker id="arrow-retained" markerWidth="8" markerHeight="8" refX="7" '
+        'refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z"/></marker>'
+        "</defs>"
+        + "".join(edge_shapes)
+        + "".join(node_shapes)
+        + "</svg></div>"
+        if connected_nodes
+        else '<p class="delta-empty">No safe canonical relation delta is available.</p>'
+    )
+    isolated = (
+        '<details class="isolated-anchors"><summary>'
+        f'{len(isolated_rows)} isolated changed anchor'
+        f'{"s" if len(isolated_rows) != 1 else ""}</summary>'
+        f'<div class="isolated-anchor-list">{"".join(isolated_rows)}</div></details>'
+        if isolated_rows
+        else ""
+    )
     return (
         '<div class="review-structural-graph">'
-        '<h3>Structural change-support graph</h3>'
-        f'<div class="subgraph-summary">{len(graph.nodes)} canonical nodes · '
+        '<div class="delta-graph-heading"><div>'
+        '<h3>Structural delta graph</h3>'
+        f'<div class="subgraph-summary">{len(connected_nodes)} connected nodes · '
         f'{len(graph.edges)} canonical edges · '
-        f'{len(graph.path_relation_ids)} focus-relative support refs · '
-        f'{sum(bool(item.structural_overlay.nodes) for item in projection.slices)} '
-        "focus overlays</div>"
-        f'<div class="subgraph-nodes">{"".join(node_rows)}</div>'
-        f'<div class="subgraph-edges">{"".join(edge_rows)}</div>'
+        f'{len(isolated_rows)} isolated changed anchors · '
+        f'{len(graph.path_relation_ids)} support refs</div></div>'
+        f"{controls}</div>{canvas}{isolated}"
         "</div>"
     )
+
+
+def _structural_node_fact(
+    evidence_ids: tuple[str, ...],
+    evidence: dict[str, EvidenceItem],
+) -> EvidenceItem:
+    fact = next((evidence.get(evidence_id) for evidence_id in evidence_ids), None)
+    if fact is None:
+        raise ValueError("structural graph references missing node evidence")
+    return fact
+
+
+def _structural_label_parts(value: str) -> tuple[str, str]:
+    path, separator, name = value.partition(" · ")
+    if not separator:
+        return "", _truncate_label(path, 30)
+    return _truncate_label(path, 34), _truncate_label(name, 30)
+
+
+def _truncate_label(value: str, limit: int) -> str:
+    return value if len(value) <= limit else value[: limit - 1] + "…"
+
+
+def _structural_href(item: EvidenceItem, brief: ReviewBrief) -> str | None:
+    for source in item.sources:
+        href = _safe_href(source.url)
+        if href:
+            return href
+        if source.path and brief.packet.head_sha:
+            line = f"#L{source.line_start}" if source.line_start else ""
+            return (
+                f"https://github.com/{brief.packet.repository}/blob/"
+                f"{brief.packet.head_sha}/{quote(source.path, safe='/')}{line}"
+            )
+    return None
+
+
+def _structural_layout(
+    nodes: tuple[StructuralGraphNode, ...],
+    edges: tuple[StructuralGraphEdge, ...],
+) -> tuple[dict[str, tuple[int, int]], int, int]:
+    node_ids = tuple(node.id for node in nodes)
+    predecessors = {node_id: set() for node_id in node_ids}
+    successors = {node_id: set() for node_id in node_ids}
+    for edge in edges:
+        if edge.source_node_id in successors and edge.target_node_id in predecessors:
+            successors[edge.source_node_id].add(edge.target_node_id)
+            predecessors[edge.target_node_id].add(edge.source_node_id)
+    levels = {node_id: 0 for node_id in node_ids}
+    remaining = set(node_ids)
+    ready = [node_id for node_id in node_ids if not predecessors[node_id]]
+    while ready:
+        node_id = ready.pop(0)
+        if node_id not in remaining:
+            continue
+        remaining.remove(node_id)
+        for target_id in node_ids:
+            if target_id not in successors[node_id]:
+                continue
+            levels[target_id] = max(levels[target_id], levels[node_id] + 1)
+            if predecessors[target_id].isdisjoint(remaining):
+                ready.append(target_id)
+    for node_id in node_ids:
+        if node_id in remaining:
+            connected_levels = [
+                levels[source_id] + 1
+                for source_id in predecessors[node_id]
+                if source_id not in remaining
+            ]
+            levels[node_id] = max(connected_levels, default=0)
+    by_level: dict[int, list[str]] = {}
+    for node_id in node_ids:
+        by_level.setdefault(levels[node_id], []).append(node_id)
+    positions = {
+        node_id: (30 + level * 360, 35 + row * 120)
+        for level, level_nodes in by_level.items()
+        for row, node_id in enumerate(level_nodes)
+    }
+    column_count = max(by_level, default=0) + 1
+    row_count = max((len(items) for items in by_level.values()), default=1)
+    return positions, max(620, 60 + column_count * 360), 70 + row_count * 120
+
+
+def _structural_edge_path(
+    source_x: int,
+    source_y: int,
+    target_x: int,
+    target_y: int,
+    label: str,
+    occupied_label_boxes: list[tuple[int, int, int, int]],
+) -> tuple[str, int, int, int]:
+    start_x, start_y = source_x + 210, source_y + 36
+    end_x, end_y = target_x, target_y + 36
+    if end_x > start_x:
+        control = max(36, (end_x - start_x) // 2)
+        path = (
+            f"M {start_x} {start_y} C {start_x + control} {start_y}, "
+            f"{end_x - control} {end_y}, {end_x} {end_y}"
+        )
+    else:
+        bend_y = max(source_y + 90, target_y + 90)
+        path = (
+            f"M {start_x} {start_y} C {start_x + 35} {bend_y}, "
+            f"{end_x - 35} {bend_y}, {end_x} {end_y}"
+        )
+    right_x, right_y = (
+        (target_x, target_y)
+        if target_x >= source_x
+        else (source_x, source_y)
+    )
+    label_x = right_x - 75
+    label_width = max(52, min(140, len(label) * 5 + 12))
+    for offset in (0, -18, 18, -36, 36, -54, 54):
+        label_y = right_y + 36 + offset
+        candidate = (
+            label_x - label_width // 2,
+            label_y - 12,
+            label_x + label_width // 2,
+            label_y + 6,
+        )
+        if not any(
+            not (
+                candidate[2] <= occupied[0]
+                or occupied[2] <= candidate[0]
+                or candidate[3] <= occupied[1]
+                or occupied[3] <= candidate[1]
+            )
+            for occupied in occupied_label_boxes
+        ):
+            occupied_label_boxes.append(candidate)
+            return path, label_x, label_y, label_width
+    occupied_label_boxes.append(candidate)
+    return path, label_x, label_y, label_width
 
 
 def _structural_name(item: EvidenceItem) -> str:
@@ -465,16 +693,6 @@ def _projection_slice(
                 f'<div class="projection-group"><span class="block-title">'
                 f"{escape(heading)}</span>{rows}</div>"
             )
-    overlay = review_slice.structural_overlay
-    if overlay.nodes:
-        fact_groups.append(
-            '<div class="projection-group structural-overlay-summary">'
-            '<span class="block-title">Structural overlay</span>'
-            f'<span class="projection-copy">{len(overlay.nodes)} nodes · '
-            f'{len(overlay.edge_ids)} edges · '
-            f'{len(overlay.path_relation_ids)} support paths</span></div>'
-        )
-
     claim_diagnostics = _diagnostic_rows(
         diagnostics,
         slots={"claim"},
@@ -564,8 +782,14 @@ def render_html(brief: ReviewBrief) -> str:
             raise ValueError(
                 f"projection references missing diagnostic: {review_slice.focus_statement_id}"
             )
+        focus_attribute = (
+            f' data-focus-id="{escape(statement.id, quote=True)}"'
+            if review_slice.structural_overlay.nodes
+            else ""
+        )
         cards.append(
-            f'<details class="requirement"{" open" if index == 0 else ""}>'
+            f'<details class="requirement"{focus_attribute}'
+            f'{" open" if index == 0 else ""}>'
             '<summary>'
             f'<span class="req-id">{escape(statement.id)}</span>'
             f'<span class="req-title">{escape(statement.text)}</span>'
@@ -634,15 +858,40 @@ def render_html(brief: ReviewBrief) -> str:
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{escape(packet.title)} · PrismCode</title>
 <style>
-:root{{color-scheme:dark;--bg:#080c0f;--panel:#10171b;--border:#26373f;--text:#edf3f0;--muted:#9eaaaf;--faint:#6f7d83;--green:#7be3ac;--amber:#e7ca7c;--shadow:0 22px 64px rgba(0,0,0,.28)}}*{{box-sizing:border-box}}body{{margin:0;color:var(--text);line-height:1.55;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 18% -8%,rgba(69,167,118,.12),transparent 31rem),var(--bg)}}code{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}}.shell{{width:min(1180px,calc(100% - 40px));margin:30px auto 84px}}.topbar{{margin-bottom:22px;font-weight:720}}.brand-mark{{display:inline-block;width:14px;height:14px;margin-right:10px;border:2px solid white;transform:rotate(45deg);border-radius:3px}}.section{{border:2px solid var(--border);border-radius:18px;background:linear-gradient(180deg,rgba(17,24,28,.97),rgba(11,17,21,.98));box-shadow:var(--shadow);padding:28px;margin-bottom:22px}}h1{{font-size:31px;margin:0 0 14px}}h2{{font-size:22px;margin:0 0 14px}}h3{{font-size:16px;margin:0 0 8px}}.meta{{display:flex;flex-wrap:wrap;gap:9px;color:var(--muted);font-size:13px;margin-bottom:16px}}.intent{{max-width:850px;color:#d2dade;font-size:15px}}.source-link,.file-link{{color:#b9dfff;text-decoration:none}}.source-note,.projection-source,.context-source{{display:block;color:var(--faint);font-size:10px;line-height:1.45}}.requirements{{border-top:1px solid rgba(111,128,135,.24)}}.requirement{{border-bottom:1px solid rgba(111,128,135,.24)}}.requirement summary{{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px minmax(0,1fr);gap:16px;padding:18px 0}}.requirement summary::-webkit-details-marker{{display:none}}.req-id{{color:var(--green);font:760 12px ui-monospace,SFMono-Regular,Menlo,monospace}}.req-title{{font-size:14px;font-weight:640}}.req-body{{padding:0 0 22px 68px}}.projection{{display:grid;grid-template-columns:minmax(0,.85fr) 24px minmax(0,1fr) 24px minmax(0,1.35fr);gap:10px;align-items:start}}.projection-column{{min-width:0;padding:14px;border:1px solid rgba(111,128,135,.22);border-radius:12px;background:rgba(5,10,13,.24)}}.projection-heading,.block-title{{display:block;margin-bottom:9px;color:#89979d;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.045em}}.projection-arrow{{align-self:center;color:var(--faint);text-align:center}}.profile-chip,.relation-label{{display:inline-flex;margin:0 0 8px;padding:3px 7px;border-radius:999px;background:rgba(54,118,87,.20);color:#bfeacf;font-size:8px;font-weight:720}}.projection-copy{{margin:0 0 7px;color:#d7dddf;font-size:11px}}.projection-item{{padding:9px 0;border-bottom:1px solid rgba(111,128,135,.16)}}.projection-item:last-child{{border-bottom:0}}.relation-reason{{display:block;color:var(--faint);font-size:9px;margin-bottom:6px}}.projection-group+.projection-group{{margin-top:15px}}.structural-overlay-summary{{padding-top:2px}}.review-structural-graph{{margin-top:24px;padding:16px;border:1px solid rgba(111,128,135,.22);border-radius:12px;background:rgba(5,10,13,.24)}}.subgraph-summary{{margin-bottom:10px;color:var(--muted);font-size:9px}}.subgraph-nodes{{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}}.subgraph-node{{min-width:0;padding:8px;border:1px solid rgba(111,128,135,.18);border-radius:8px}}.node-focuses{{display:block;margin-bottom:4px;color:var(--green);font-size:8px;line-height:1.35}}.subgraph-node-name{{display:block;overflow-wrap:anywhere;font-size:10px}}.subgraph-edges{{margin-top:10px;border-top:1px solid rgba(111,128,135,.18)}}.subgraph-edge{{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto;gap:7px;padding:7px 0;border-bottom:1px solid rgba(111,128,135,.13);font-size:9px;align-items:center}}.subgraph-relation{{color:#9fcdf0}}.edge-path-count{{color:var(--faint);white-space:nowrap}}.slot-diagnostic{{margin:9px 0;padding:9px;border-radius:8px;background:rgba(106,85,30,.16);color:#e8d18e;font-size:9px}}.slot-diagnostic p{{margin:3px 0 0;color:var(--muted)}}.context{{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(111,128,135,.24)}}.context>summary{{cursor:pointer;color:var(--muted);font-size:11px}}.context-row{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px;gap:12px;padding:12px 0;border-bottom:1px solid rgba(111,128,135,.18)}}.context-id{{color:#9fcdf0;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace}}.context-copy{{font-size:12px}}.context-authority{{color:var(--muted);font-size:10px;text-align:right}}.context-source{{grid-column:2/-1}}.attention-list,.file-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:var(--amber);font-size:10px;font-weight:700;text-transform:uppercase}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px}}.empty,.empty-state{{color:var(--faint);font-size:12px}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}@media(max-width:950px){{.projection{{grid-template-columns:1fr}}.projection-arrow{{transform:rotate(90deg)}}.req-body{{padding-left:0}}.subgraph-nodes{{grid-template-columns:repeat(2,minmax(0,1fr))}}}}@media(max-width:600px){{.shell{{width:calc(100% - 18px);margin-top:16px}}.section{{padding:22px 20px}}.attention-row,.context-row,.subgraph-edge{{grid-template-columns:1fr}}.subgraph-nodes{{grid-template-columns:1fr}}}}
+:root{{color-scheme:dark;--bg:#080c0f;--panel:#10171b;--border:#26373f;--text:#edf3f0;--muted:#9eaaaf;--faint:#6f7d83;--green:#7be3ac;--amber:#e7ca7c;--red:#ef8f91;--blue:#9fcdf0;--shadow:0 22px 64px rgba(0,0,0,.28)}}*{{box-sizing:border-box}}body{{margin:0;color:var(--text);line-height:1.55;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 18% -8%,rgba(69,167,118,.12),transparent 31rem),var(--bg)}}code{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}}.shell{{width:min(1180px,calc(100% - 40px));margin:30px auto 84px}}.topbar{{margin-bottom:22px;font-weight:720}}.brand-mark{{display:inline-block;width:14px;height:14px;margin-right:10px;border:2px solid white;transform:rotate(45deg);border-radius:3px}}.section{{border:2px solid var(--border);border-radius:18px;background:linear-gradient(180deg,rgba(17,24,28,.97),rgba(11,17,21,.98));box-shadow:var(--shadow);padding:28px;margin-bottom:22px}}h1{{font-size:31px;margin:0 0 14px}}h2{{font-size:22px;margin:0 0 14px}}h3{{font-size:16px;margin:0 0 8px}}.meta{{display:flex;flex-wrap:wrap;gap:9px;color:var(--muted);font-size:13px;margin-bottom:16px}}.intent{{max-width:850px;color:#d2dade;font-size:15px}}.source-link,.file-link{{color:#b9dfff;text-decoration:none}}.source-note,.projection-source,.context-source{{display:block;color:var(--faint);font-size:10px;line-height:1.45}}.requirements{{border-top:1px solid rgba(111,128,135,.24)}}.requirement{{border-bottom:1px solid rgba(111,128,135,.24)}}.requirement summary{{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px minmax(0,1fr);gap:16px;padding:18px 0}}.requirement summary::-webkit-details-marker{{display:none}}.req-id{{color:var(--green);font:760 12px ui-monospace,SFMono-Regular,Menlo,monospace}}.req-title{{font-size:14px;font-weight:640}}.req-body{{padding:0 0 22px 68px}}.projection{{display:grid;grid-template-columns:minmax(0,.85fr) 24px minmax(0,1fr) 24px minmax(0,1.35fr);gap:10px;align-items:start}}.projection-column{{min-width:0;padding:14px;border:1px solid rgba(111,128,135,.22);border-radius:12px;background:rgba(5,10,13,.24)}}.projection-heading,.block-title{{display:block;margin-bottom:9px;color:#89979d;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.045em}}.projection-arrow{{align-self:center;color:var(--faint);text-align:center}}.profile-chip,.relation-label{{display:inline-flex;margin:0 0 8px;padding:3px 7px;border-radius:999px;background:rgba(54,118,87,.20);color:#bfeacf;font-size:8px;font-weight:720}}.projection-copy{{margin:0 0 7px;color:#d7dddf;font-size:11px}}.projection-item{{padding:9px 0;border-bottom:1px solid rgba(111,128,135,.16)}}.projection-item:last-child{{border-bottom:0}}.relation-reason{{display:block;color:var(--faint);font-size:9px;margin-bottom:6px}}.projection-group+.projection-group{{margin-top:15px}}.review-structural-graph{{margin-top:24px;padding:18px;border:1px solid rgba(111,128,135,.22);border-radius:12px;background:rgba(5,10,13,.24)}}.delta-graph-heading{{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}}.subgraph-summary{{color:var(--muted);font-size:9px}}.delta-focus-controls{{display:flex;flex:1 1 560px;min-width:0;max-width:720px;flex-wrap:wrap;justify-content:flex-end;gap:5px}}.delta-focus{{border:1px solid rgba(111,128,135,.35);border-radius:999px;padding:4px 9px;background:transparent;color:var(--muted);font:700 9px inherit;cursor:pointer}}.delta-focus:hover,.delta-focus.active{{border-color:var(--green);background:rgba(54,118,87,.20);color:#c9efd6}}.delta-canvas-scroll{{margin-top:14px;overflow-x:auto;border:1px solid rgba(111,128,135,.16);border-radius:10px;background:rgba(3,7,9,.34)}}.delta-canvas{{display:block;min-width:100%;height:auto;max-height:720px}}.delta-edge,.delta-node,.isolated-anchor{{transition:opacity .16s ease,filter .16s ease}}.delta-edge path{{fill:none;stroke-width:1.8}}.delta-edge-label-bg{{fill:rgba(3,7,9,.92);stroke:rgba(111,128,135,.24);stroke-width:.7}}.delta-edge-label{{font-size:8px;text-anchor:middle;paint-order:stroke;stroke:var(--bg);stroke-width:2px;stroke-linejoin:round}}.delta-edge.operation-added path{{stroke:var(--green)}}.delta-edge.operation-added text{{fill:var(--green)}}.delta-edge.operation-removed path{{stroke:var(--red);stroke-dasharray:6 5}}.delta-edge.operation-removed text{{fill:var(--red)}}.delta-edge.operation-retained path{{stroke:#73848c}}.delta-edge.operation-retained text{{fill:#94a2a8}}#arrow-added path{{fill:var(--green)}}#arrow-removed path{{fill:var(--red)}}#arrow-retained path{{fill:#73848c}}.delta-node rect{{fill:#111a1f;stroke:#53656e;stroke-width:1.2}}.delta-node.operation-added rect{{stroke:var(--green);fill:rgba(54,118,87,.14)}}.delta-node.operation-modified rect{{stroke:var(--amber);fill:rgba(106,85,30,.13)}}.delta-node.operation-removed rect{{stroke:var(--red);stroke-dasharray:6 4;fill:rgba(112,43,48,.12)}}.delta-node-kind{{fill:var(--muted);font-size:8px;text-transform:uppercase}}.delta-node-name{{fill:var(--text);font-size:10px;font-weight:700}}.delta-node-path{{fill:var(--faint);font-size:8px}}.focus-muted{{opacity:.13}}.focus-active{{opacity:1;filter:drop-shadow(0 0 5px rgba(123,227,172,.35))}}.delta-empty{{margin:14px 0 0;padding:18px;border:1px dashed rgba(111,128,135,.26);border-radius:10px;color:var(--faint);font-size:11px}}.isolated-anchors{{margin-top:12px;border-top:1px solid rgba(111,128,135,.18);padding-top:10px}}.isolated-anchors>summary{{cursor:pointer;color:var(--muted);font-size:10px}}.isolated-anchor-list{{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:9px}}.isolated-anchor{{display:grid;grid-template-columns:auto 1fr auto;gap:4px 7px;min-width:0;padding:8px;border:1px solid rgba(111,128,135,.16);border-left:2px solid var(--amber);border-radius:7px}}.isolated-anchor.operation-added{{border-left-color:var(--green)}}.isolated-anchor.operation-removed{{border-left-color:var(--red);border-style:dashed}}.isolated-anchor-focus,.isolated-anchor-operation,.isolated-anchor-kind{{color:var(--faint);font-size:8px}}.isolated-anchor-operation{{text-transform:uppercase}}.isolated-anchor-kind{{text-align:right}}.isolated-anchor-name{{grid-column:1/-1;overflow-wrap:anywhere;font-size:9px}}.isolated-anchor .projection-source{{grid-column:1/-1}}.slot-diagnostic{{margin:9px 0;padding:9px;border-radius:8px;background:rgba(106,85,30,.16);color:#e8d18e;font-size:9px}}.slot-diagnostic p{{margin:3px 0 0;color:var(--muted)}}.context{{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(111,128,135,.24)}}.context>summary{{cursor:pointer;color:var(--muted);font-size:11px}}.context-row{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px;gap:12px;padding:12px 0;border-bottom:1px solid rgba(111,128,135,.18)}}.context-id{{color:#9fcdf0;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace}}.context-copy{{font-size:12px}}.context-authority{{color:var(--muted);font-size:10px;text-align:right}}.context-source{{grid-column:2/-1}}.attention-list,.file-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:var(--amber);font-size:10px;font-weight:700;text-transform:uppercase}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px}}.empty,.empty-state{{color:var(--faint);font-size:12px}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}@media(max-width:950px){{.projection{{grid-template-columns:1fr}}.projection-arrow{{transform:rotate(90deg)}}.req-body{{padding-left:0}}.isolated-anchor-list{{grid-template-columns:repeat(2,minmax(0,1fr))}}}}@media(max-width:600px){{.shell{{width:calc(100% - 18px);margin-top:16px}}.section{{padding:22px 20px}}.attention-row,.context-row{{grid-template-columns:1fr}}.delta-graph-heading{{display:block}}.delta-focus-controls{{max-width:none;justify-content:flex-start;margin-top:10px}}.isolated-anchor-list{{grid-template-columns:1fr}}}}@media print{{:root{{color-scheme:light;--bg:#fff;--panel:#fff;--text:#111;--muted:#444;--faint:#666;--border:#bbb}}body{{background:#fff}}.section{{box-shadow:none;break-inside:avoid}}.delta-focus-controls{{display:none}}.delta-canvas-scroll{{overflow:visible}}.delta-canvas{{max-height:none}}}}
 </style></head><body><main class="shell">
 <div class="topbar"><span class="brand-mark"></span>PrismCode</div>
 <section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{brief.overview.changed_file_count} changed files</span><span>·</span><span>{escape(ci_copy)}</span></div><h1>{escape(packet.title)}</h1><div class="intent">{escape(brief.intent.text)}</div><span class="source-note">Source: {source_line}</span>{review_contract}</section>
-<section class="section"><h2>Review checks</h2>{semantic_context}<div class="requirements">{"".join(cards)}</div>{review_graph}</section>
+<section class="section"><h2>Review checks</h2>{semantic_context}{review_graph}<div class="requirements">{"".join(cards)}</div></section>
 <section class="section"><h2>Needs attention</h2><div class="attention-list">{_attention(brief)}</div></section>
 <section class="section"><h2>Changed areas</h2><div class="file-list">{files or '<p class="empty">Not provided.</p>'}</div></section>
 <div class="footer">PrismCode · {escape(pr_label)} · Schema {escape(brief.schema_version)} · Generated by {escape(brief.generated_by)}</div>
-</main></body></html>"""
+</main><script>
+document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
+  const section = graph.closest(".section");
+  const requirements = section
+    ? section.querySelectorAll(".requirement[data-focus-id]")
+    : [];
+  const activateFocus = (focus) => {{
+    graph.querySelectorAll(".delta-focus").forEach((item) =>
+      item.classList.toggle("active", item.dataset.focusTarget === focus));
+    graph.querySelectorAll("[data-focuses]").forEach((item) => {{
+      const active = focus === "all" ||
+        item.dataset.focuses.split(/\\s+/).includes(focus);
+      item.classList.toggle("focus-muted", !active);
+      item.classList.toggle("focus-active", focus !== "all" && active);
+    }});
+  }};
+  graph.querySelectorAll(".delta-focus").forEach((button) => {{
+    button.addEventListener("click", () =>
+      activateFocus(button.dataset.focusTarget));
+  }});
+  requirements.forEach((requirement) => {{
+    requirement.querySelector("summary").addEventListener("click", () =>
+      activateFocus(requirement.dataset.focusId));
+  }});
+}});
+</script></body></html>"""
 
 
 def write_html(brief: ReviewBrief, output: str | Path) -> Path:
