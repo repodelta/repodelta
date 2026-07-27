@@ -231,19 +231,19 @@ def _review_graph(
     if not graph.nodes:
         return ""
     evidence = brief.evidence_catalog.by_id()
-    nodes = {item.evidence_id: item for item in graph.nodes}
+    nodes = {item.id: item for item in graph.nodes}
     edges = {item.id: item for item in graph.edges}
     node_focus: dict[str, list[tuple[str, str]]] = {}
     edge_focus: dict[str, list[str]] = {}
     for review_slice in projection.slices:
         focus_id = review_slice.focus_statement_id
         for node in review_slice.structural_overlay.nodes:
-            if node.evidence_id not in nodes:
+            if node.node_id not in nodes:
                 raise ValueError(
                     f"{focus_id}: structural overlay references missing node "
-                    f"{node.evidence_id}"
+                    f"{node.node_id}"
                 )
-            node_focus.setdefault(node.evidence_id, []).append(
+            node_focus.setdefault(node.node_id, []).append(
                 (focus_id, node.role)
             )
         for edge_id in review_slice.structural_overlay.edge_ids:
@@ -255,19 +255,23 @@ def _review_graph(
             edge_focus.setdefault(edge_id, []).append(focus_id)
     node_rows = []
     for node in graph.nodes:
-        fact = evidence.get(node.evidence_id)
+        fact = next(
+            (evidence.get(evidence_id) for evidence_id in node.evidence_ids),
+            None,
+        )
         if fact is None:
             raise ValueError(
-                f"structural graph references missing node: {node.evidence_id}"
+                f"structural graph references missing node evidence: {node.id}"
             )
         sources = _sources(fact, brief)
         focus_labels = ", ".join(
             focus_id
-            for focus_id, _role in node_focus.get(node.evidence_id, ())
+            for focus_id, _role in node_focus.get(node.id, ())
         )
         node_rows.append(
             '<div class="subgraph-node">'
             f'<span class="node-focuses">{escape(focus_labels)}</span>'
+            f'<span class="node-operation">{escape(node.operation)}</span>'
             f'<span class="subgraph-node-name">{escape(_structural_name(fact))}</span>'
             + (
                 f'<span class="projection-source">Source: {sources}</span>'
@@ -279,19 +283,44 @@ def _review_graph(
 
     edge_rows = []
     for edge in graph.edges:
-        source_node = nodes.get(edge.source_evidence_id)
-        target_node = nodes.get(edge.target_evidence_id)
-        source = evidence.get(edge.source_evidence_id)
-        target = evidence.get(edge.target_evidence_id)
+        source_node = nodes.get(edge.source_node_id)
+        target_node = nodes.get(edge.target_node_id)
+        relation_change = evidence.get(edge.relation_change_evidence_id)
+        source = (
+            next(
+                (
+                    evidence.get(evidence_id)
+                    for evidence_id in source_node.evidence_ids
+                ),
+                None,
+            )
+            if source_node is not None
+            else None
+        )
+        target = (
+            next(
+                (
+                    evidence.get(evidence_id)
+                    for evidence_id in target_node.evidence_ids
+                ),
+                None,
+            )
+            if target_node is not None
+            else None
+        )
         if source_node is None or target_node is None or source is None or target is None:
             raise ValueError("structural graph edge references a missing node")
+        if relation_change is None or relation_change.kind != "structural_relation_change":
+            raise ValueError(
+                "structural graph edge references a missing relation-change fact"
+            )
         source_name = _structural_name(source)
         target_name = _structural_name(target)
-        arrow = "→" if edge.direction == "outgoing" else "←"
         edge_rows.append(
             '<div class="subgraph-edge">'
             f'<span>{escape(source_name)}</span>'
-            f'<span class="subgraph-relation">{arrow} {escape(edge.relation)}</span>'
+            f'<span class="subgraph-relation">→ {escape(edge.relation)} · '
+            f'{escape(edge.operation)}</span>'
             f'<span>{escape(target_name)}</span>'
             '<span class="edge-path-count">'
             f'{escape(", ".join(edge_focus.get(edge.id, ())))} · '
@@ -302,7 +331,7 @@ def _review_graph(
 
     return (
         '<div class="review-structural-graph">'
-        '<h3>Structural evidence graph</h3>'
+        '<h3>Structural change-support graph</h3>'
         f'<div class="subgraph-summary">{len(graph.nodes)} canonical nodes · '
         f'{len(graph.edges)} canonical edges · '
         f'{len(graph.path_relation_ids)} focus-relative support refs · '
