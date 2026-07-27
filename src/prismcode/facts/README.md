@@ -19,7 +19,15 @@ as the same symbol. One typed `StructuralChangeIdentity` pairs optional
 base/head evidence IDs under that review identity and is the only structural
 changed anchor. Added, removed, and modified identities retain the union of
 their change-relation IDs, paths, signatures, and revision links. Revision path
-steps converge into one canonical `StructuralRelationChangeIdentity` per
+Structural change operations come from canonical base/head presence when every
+associated replacement relation has complete opposite-revision directional
+line mapping. Mapping another relation in the same hunk is never absence proof.
+A file symbol follows the GitHub changed-file status, so a module-level overlap
+cannot turn a modified file into an added file. Without applicable
+opposite-revision mapping, directional hunk provenance provides the bounded
+fallback operation; downstream stages never reconstruct it.
+Revision path steps converge into one canonical
+`StructuralRelationChangeIdentity` per
 directed review-symbol edge. Its base/head path IDs and provider endpoints are
 provenance only. Retained
 edges require observations on both revisions; added or removed edges require

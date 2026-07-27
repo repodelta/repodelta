@@ -14,6 +14,7 @@ from prismcode.model.contracts import (
     ChangeRelation,
     ChangedFile,
     ChangedLine,
+    Requirement,
     ReviewSourcePacket,
     SourceRef,
 )
@@ -22,6 +23,7 @@ from prismcode.providers.structural import (
     GraphPathStep,
     GraphSymbol,
     HunkSymbolOverlap,
+    StructuralGraphCollection,
     StructuralGraphIndexStatus,
     StructuralGraphProvider,
     StructuralGraphResult,
@@ -29,6 +31,7 @@ from prismcode.providers.structural import (
     StructuralTraversalPolicy,
 )
 from prismcode.providers.mapping import map_packet_changed_symbols
+from prismcode.presentation.html import render_html
 
 
 def _create_index(
@@ -126,6 +129,51 @@ def _packet(patch: str | None) -> ReviewSourcePacket:
             ),
         ),
     ).with_revision()
+
+
+def _symbol(
+    identifier: str,
+    qualified_name: str,
+    *,
+    kind: str = "function",
+    start_line: int = 1,
+    end_line: int = 1,
+) -> GraphSymbol:
+    return GraphSymbol(
+        id=identifier,
+        kind=kind,
+        name=qualified_name.rsplit(".", 1)[-1],
+        qualified_name=qualified_name,
+        file_path="src/service.py",
+        language="python",
+        start_line=start_line,
+        end_line=end_line,
+    )
+
+
+def _revision_result(
+    revision_side: str,
+    hunk_id: str,
+    *symbols: GraphSymbol,
+    state: str = "available",
+) -> StructuralGraphResult:
+    return StructuralGraphResult(
+        index=StructuralGraphIndexStatus(
+            state=state,
+            provider="test",
+            revision_side=revision_side,
+        ),
+        revision_side=revision_side,
+        hunk_count=1,
+        overlaps=tuple(
+            HunkSymbolOverlap(
+                hunk_id=hunk_id,
+                symbol=symbol,
+                changed_lines=(symbol.start_line,),
+            )
+            for symbol in symbols
+        ),
+    )
 
 
 def test_unified_patch_tracks_exact_new_and_old_line_numbers() -> None:
@@ -403,6 +451,183 @@ def test_removed_relation_maps_exact_base_symbol(tmp_path: Path) -> None:
     assert structural_change.structural_change is not None
     assert structural_change.structural_change.base_symbol_evidence_id == removed[0].id
     assert structural_change.structural_change.head_symbol_evidence_id is None
+
+
+def test_replacement_hunk_uses_presence_for_distinct_symbol_identities() -> None:
+    packet = _packet(
+        "@@ -1 +1 @@\n"
+        "-def old_anchor(): pass\n"
+        "+def focus_relevant_anchor(): pass\n"
+    )
+    changes = parse_changed_files(packet.changed_files)
+    hunk_id = changes.hunks[0].id
+    graph = StructuralGraphCollection(
+        revisions=(
+            _revision_result(
+                "head",
+                hunk_id,
+                _symbol("head:new", "focus_relevant_anchor"),
+            ),
+            _revision_result(
+                "base",
+                hunk_id,
+                _symbol("base:old", "old_anchor"),
+            ),
+        )
+    )
+
+    brief = DeterministicAnalyzer().analyze(
+        AnalysisInput(
+            packet=packet,
+            changes=changes,
+            structural_graph=graph,
+            requirements=(
+                Requirement(
+                    id="R1",
+                    text="Expose focus_relevant_anchor",
+                ),
+                Requirement(
+                    id="G1",
+                    text="Remove old_anchor",
+                    purpose="guardrail",
+                    kind="guardrail",
+                ),
+            ),
+        )
+    )
+    operations = {
+        item.metadata["qualified_name"]: item.operation
+        for item in brief.evidence_catalog.items
+        if item.kind == "structural_change"
+    }
+
+    assert operations == {
+        "focus_relevant_anchor": "added",
+        "old_anchor": "removed",
+    }
+    html = render_html(brief)
+    assert 'class="isolated-anchor operation-added"' in html
+    assert 'class="isolated-anchor operation-removed"' in html
+    assert "focus_relevant_anchor" in html
+    assert "old_anchor" in html
+
+
+def test_head_only_file_symbol_retains_modified_file_status() -> None:
+    packet = _packet(
+        "@@ -1 +1 @@\n"
+        "-from package import old_dependency\n"
+        "+from package import new_dependency\n"
+    )
+    changes = parse_changed_files(packet.changed_files)
+    hunk_id = changes.hunks[0].id
+    graph = StructuralGraphCollection(
+        revisions=(
+            _revision_result(
+                "head",
+                hunk_id,
+                _symbol("head:file", "src/service.py", kind="file"),
+            ),
+            _revision_result("base", hunk_id),
+        )
+    )
+
+    brief = DeterministicAnalyzer().analyze(
+        AnalysisInput(
+            packet=packet,
+            changes=changes,
+            structural_graph=graph,
+        )
+    )
+    structural_change = next(
+        item
+        for item in brief.evidence_catalog.items
+        if item.kind == "structural_change"
+    )
+
+    assert structural_change.metadata["symbol_kind"] == "file"
+    assert structural_change.operation == "modified"
+
+
+def test_unmapped_opposite_revision_does_not_prove_symbol_addition() -> None:
+    packet = _packet(
+        "@@ -2 +2 @@\n"
+        "-    return old_value\n"
+        "+    return new_value\n"
+    )
+    changes = parse_changed_files(packet.changed_files)
+    hunk_id = changes.hunks[0].id
+    graph = StructuralGraphCollection(
+        revisions=(
+            _revision_result(
+                "head",
+                hunk_id,
+                _symbol("head:run", "run", start_line=2, end_line=2),
+            ),
+            _revision_result("base", hunk_id, state="partial"),
+        )
+    )
+
+    brief = DeterministicAnalyzer().analyze(
+        AnalysisInput(
+            packet=packet,
+            changes=changes,
+            structural_graph=graph,
+        )
+    )
+    structural_change = next(
+        item
+        for item in brief.evidence_catalog.items
+        if item.kind == "structural_change"
+    )
+
+    assert structural_change.operation == "modified"
+
+
+def test_mapping_another_relation_in_the_hunk_does_not_prove_absence() -> None:
+    packet = _packet(
+        "@@ -1,5 +1,5 @@\n"
+        " def first():\n"
+        "-    return old_first\n"
+        "+    return new_first\n"
+        " def second():\n"
+        "-    return old_second\n"
+        "+    return new_second\n"
+    )
+    changes = parse_changed_files(packet.changed_files)
+    hunk_id = changes.hunks[0].id
+    graph = StructuralGraphCollection(
+        revisions=(
+            _revision_result(
+                "head",
+                hunk_id,
+                _symbol("head:first", "first", start_line=2),
+            ),
+            _revision_result(
+                "base",
+                hunk_id,
+                _symbol("base:second", "second", start_line=4),
+                state="partial",
+            ),
+        )
+    )
+
+    brief = DeterministicAnalyzer().analyze(
+        AnalysisInput(
+            packet=packet,
+            changes=changes,
+            structural_graph=graph,
+        )
+    )
+    operations = {
+        item.metadata["qualified_name"]: item.operation
+        for item in brief.evidence_catalog.items
+        if item.kind == "structural_change"
+    }
+
+    assert operations == {
+        "first": "modified",
+        "second": "modified",
+    }
 
 
 def test_one_hunk_can_map_changes_in_two_sibling_symbols(tmp_path: Path) -> None:

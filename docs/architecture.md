@@ -205,8 +205,16 @@ Every `EvidenceItem` has a stable ID plus one semantic identity:
 Changed anchors retain complete normalized head- and base-side retrieval
 signatures. Structural provider anchors are review-level change identities
 that reference their optional base/head symbol facts; the revision facts are
-not routed independently. Revision-specific path steps also converge once into
-review-level directed relation identities with retained, added, or removed
+not routed independently. With complete opposite-revision directional line
+mapping for every associated replacement relation, exact symbol presence is the
+structural change operation authority: head-only is added, base-only is removed,
+and presence on both sides is modified. Mapping an unrelated relation in the
+same hunk is never absence proof. File symbols retain GitHub changed-file status
+so module-level overlap does not relabel a modified file as added. Without
+applicable opposite mapping, directional hunk provenance supplies the bounded
+operation.
+Revision-specific path steps converge once into review-level directed relation
+identities with retained, added, or removed
 operation and base/head path provenance. Added and removed relations require
 an added/removed endpoint or complete opposite-revision traversal; incomplete
 coverage remains diagnostic rather than evidence of absence. Relation changes
