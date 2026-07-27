@@ -32,7 +32,10 @@ Codegraph `contains` edges are emitted through the separate
 `StructuralOwnershipRelation` contract for exact and bounded-path symbols.
 Ownership ancestry has its own depth and relation-count safety boundary,
 deduplicates parent/child identities, rejects cycles, and never becomes a
-runtime/test path or consumes traversal path budgets.
+runtime/test path or consumes traversal path budgets. The result carries typed
+ownership coverage with its observed-symbol applicability set, relation count,
+state, and limiting dimensions so downstream convergence never treats an
+unobserved opposite revision as absence.
 
 Coverage is revision-applicable: the head index is requested only for
 structural hunks with added lines, while the base index is requested only for

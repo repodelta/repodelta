@@ -151,7 +151,7 @@ def test_catalog_deduplicates_facts_and_links_unchanged_path_symbols() -> None:
     )
     assert verification.verification_status == "completed"
     assert verification.verification_conclusion == "success"
-    assert catalog.schema_version == "evidence_catalog.v12"
+    assert catalog.schema_version == "evidence_catalog.v13"
 
     repeated = build_evidence_catalog(
         packet, parse_changed_files(packet.changed_files), structural
@@ -172,7 +172,7 @@ def test_review_brief_serializes_one_canonical_catalog() -> None:
     serialized = brief.to_dict()
 
     assert brief.schema_version == "review_brief.v29"
-    assert serialized["evidence_catalog"]["schema_version"] == "evidence_catalog.v12"
+    assert serialized["evidence_catalog"]["schema_version"] == "evidence_catalog.v13"
     assert serialized["candidate_convergence"]["schema_version"] == (
         "candidate_convergence.v7"
     )

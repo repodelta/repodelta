@@ -21,6 +21,14 @@ directed provider edge. Its base/head path IDs are provenance only. Retained
 edges require observations on both revisions; added or removed edges require
 an added/removed endpoint or complete opposite-revision traversal. Incomplete
 coverage remains an explicit diagnostic and never becomes an absence claim.
+Revision-local structural ownership observations reference their parent and
+child symbol provenance. They converge once into one canonical
+`StructuralOwnershipChangeIdentity` per provider parent/child pair. Retained
+ownership requires both revisions; added/removed ownership requires a changed
+endpoint or complete ownership coverage applicable to the same child on the
+opposite revision. Deferred ownership remains revision provenance and one
+aggregated partial-coverage diagnostic. Ownership identities stay distinct
+from executable `StructuralRelationChangeIdentity` edges.
 The catalog serializes the parser-owned `ChangeRelation` collection once;
 changed evidence references
 relation IDs and never re-infers operation from surviving lines. Typed routing

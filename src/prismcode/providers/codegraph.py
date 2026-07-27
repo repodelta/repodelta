@@ -12,8 +12,10 @@ from prismcode.providers.structural import (
     GraphPathStep,
     GraphSymbol,
     HunkSymbolOverlap,
+    OwnershipLimit,
     StructuralGraphIndexStatus,
     StructuralGraphResult,
+    StructuralOwnershipCoverage,
     StructuralOwnershipPolicy,
     StructuralOwnershipRelation,
     StructuralRevision,
@@ -390,7 +392,7 @@ class CodegraphProvider:
         }
         paths: list[StructuralPath] = []
         ownership_relations: tuple[StructuralOwnershipRelation, ...] = ()
-        ownership_truncated = False
+        ownership_coverage: StructuralOwnershipCoverage | None = None
         ordered_seeds = tuple(
             sorted(seed_symbols.values(), key=lambda item: item.qualified_name)
         )
@@ -448,14 +450,26 @@ class CodegraphProvider:
                 }
                 observed_symbols.update(seed_symbols)
                 query_phase = "ownership"
-                ownership_relations, ownership_truncated = (
+                ownership_relations, ownership_limits = (
                     self._collect_ownership_relations(
                         connection,
                         tuple(observed_symbols.values()),
                         policy=ownership_policy,
                     )
                 )
+                ownership_coverage = StructuralOwnershipCoverage(
+                    state="truncated" if ownership_limits else "complete",
+                    observed_symbol_ids=tuple(sorted(observed_symbols)),
+                    relation_count=len(ownership_relations),
+                    limiting_dimensions=ownership_limits,
+                )
         except sqlite3.Error as exc:
+            if query_phase == "ownership":
+                ownership_coverage = StructuralOwnershipCoverage(
+                    state="unavailable",
+                    observed_symbol_ids=tuple(sorted(seed_symbols)),
+                    relation_count=0,
+                )
             return StructuralGraphResult(
                 revision_side=self.revision_side,
                 index=result.index,
@@ -463,6 +477,7 @@ class CodegraphProvider:
                 overlaps=result.overlaps,
                 paths=tuple(paths),
                 ownership_relations=ownership_relations,
+                ownership_coverage=ownership_coverage,
                 traversal_coverage=_seed_coverage(traversals),
                 diagnostics=(
                     *result.diagnostics,
@@ -483,7 +498,10 @@ class CodegraphProvider:
 
         coverage = _seed_coverage(traversals)
         diagnostics = list(result.diagnostics)
-        if ownership_truncated:
+        if (
+            ownership_coverage is not None
+            and ownership_coverage.state == "truncated"
+        ):
             diagnostics.append(
                 Diagnostic(
                     code="structural_graph_ownership_truncated",
@@ -491,7 +509,8 @@ class CodegraphProvider:
                         "Structural ownership ancestry reached its deterministic "
                         "safety boundary "
                         f"({ownership_policy.max_depth} levels, "
-                        f"{ownership_policy.max_relations} relations)."
+                        f"{ownership_policy.max_relations} relations; "
+                        f"limited by {' and '.join(ownership_coverage.limiting_dimensions)})."
                     ),
                     severity="info",
                 )
@@ -521,6 +540,7 @@ class CodegraphProvider:
             overlaps=result.overlaps,
             paths=tuple(paths),
             ownership_relations=ownership_relations,
+            ownership_coverage=ownership_coverage,
             traversal_coverage=tuple(coverage),
             diagnostics=tuple(diagnostics),
         )
@@ -531,11 +551,14 @@ class CodegraphProvider:
         symbols: tuple[GraphSymbol, ...],
         *,
         policy: StructuralOwnershipPolicy,
-    ) -> tuple[tuple[StructuralOwnershipRelation, ...], bool]:
+    ) -> tuple[
+        tuple[StructuralOwnershipRelation, ...],
+        tuple[OwnershipLimit, ...],
+    ]:
         """Collect bounded `contains` ancestry without creating runtime paths."""
 
         if policy.max_depth < 1 or policy.max_relations < 1 or not symbols:
-            return (), False
+            return (), ()
         known = {symbol.id: symbol for symbol in symbols}
         frontier = set(known)
         visited = set(frontier)
@@ -556,7 +579,10 @@ class CodegraphProvider:
                     (parent.id, child.id) not in relations
                     and len(relations) >= policy.max_relations
                 ):
-                    return _ordered_ownership_relations(relations), True
+                    return (
+                        _ordered_ownership_relations(relations),
+                        ("relation_budget",),
+                    )
                 relations[(parent.id, child.id)] = StructuralOwnershipRelation(
                     parent=parent,
                     child=child,
@@ -566,7 +592,7 @@ class CodegraphProvider:
                     visited.add(parent.id)
                     next_frontier.add(parent.id)
             if not next_frontier:
-                return _ordered_ownership_relations(relations), False
+                return _ordered_ownership_relations(relations), ()
             frontier = next_frontier
         has_unseen_parent = any(
             parent.id not in known
@@ -575,7 +601,10 @@ class CodegraphProvider:
                 tuple(sorted(frontier)),
             )
         )
-        return _ordered_ownership_relations(relations), has_unseen_parent
+        return (
+            _ordered_ownership_relations(relations),
+            ("depth_budget",) if has_unseen_parent else (),
+        )
 
     def _ownership_parents(
         self,

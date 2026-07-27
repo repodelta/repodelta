@@ -187,8 +187,11 @@ fallback is used only when GitHub supplies no parseable hunk.
 Codegraph `contains` edges are collected separately as bounded structural
 ownership facts for observed symbols. They preserve canonical ancestry such as
 file → class → method without becoming runtime/test paths or consuming path
-budgets. Ownership facts are provider output only at this stage; the current
-review graph does not yet render hierarchy or semantic zoom.
+budgets. The catalog normalizes revision provenance and converges it into one
+review-level retained/added/removed ownership identity when opposite-revision
+coverage makes that conclusion safe. Incomplete coverage remains provenance
+plus a diagnostic. The current review graph does not yet render hierarchy or
+semantic zoom.
 
 #### Structure-aware review using another checkout
 

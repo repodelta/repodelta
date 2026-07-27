@@ -1387,8 +1387,13 @@ def test_ownership_ancestry_is_bounded_and_cycle_safe(
     assert [item.code for item in result.diagnostics] == [
         "structural_graph_ownership_truncated"
     ]
+    assert result.ownership_coverage is not None
+    assert result.ownership_coverage.state == "truncated"
+    assert result.ownership_coverage.observed_symbol_ids == ("C",)
+    assert result.ownership_coverage.relation_count == 2
+    assert result.ownership_coverage.limiting_dimensions == ("depth_budget",)
 
-    cycle_relations, truncated = provider._collect_ownership_relations(
+    cycle_relations, limiting_dimensions = provider._collect_ownership_relations(
         SimpleNamespace(),
         (symbols["C"],),
         policy=StructuralOwnershipPolicy(max_depth=8),
@@ -1397,4 +1402,4 @@ def test_ownership_ancestry_is_bounded_and_cycle_safe(
         (relation.parent.id, relation.child.id)
         for relation in cycle_relations
     ] == [("P1", "C"), ("P2", "P1"), ("P3", "P2")]
-    assert truncated is False
+    assert limiting_dimensions == ()
