@@ -316,6 +316,8 @@ ReviewProjection
     edges[id, source_node_id, relation, operation,
           target_node_id, relation_change_evidence_id,
           path_relation_ids[]]
+    ownership_edges[id, parent_node_id, child_node_id, operation,
+                    ownership_change_evidence_id]
   slices[]
     focus_statement_id
     claim_relation_ids[]
@@ -327,6 +329,7 @@ ReviewProjection
       path_relation_ids[]
       nodes[node_id, role, relation_ids[], path_relation_ids[]]
       edge_ids[]
+      ownership_edge_ids[]
     diagnostics[]
 ```
 
@@ -337,13 +340,21 @@ raw provider path steps never become a second edge truth. An overlay includes
 an edge only when its selected support paths intersect that edge's base/head
 path provenance. Shared selected paths and cross-focus overlap collapse to one
 review-level node/edge identity without discarding focus-relative provenance.
+Ownership edges are a separate canonical collection referencing only
+`StructuralOwnershipChangeIdentity` facts. Starting from the focus's selected
+structural nodes, projection follows child-to-parent ownership recursively and
+adds the necessary ancestors. Shared hierarchy is stored once; overlays carry
+only ownership edge IDs. Revision-local or coverage-deferred ownership
+provenance never enters the graph.
 
 The standalone HTML presents that contract as one shared structural delta
 graph. Edge-connected nodes form the primary SVG canvas; selected changed
 anchors without a canonical relation delta remain in a compact disclosure.
 Added, removed, and retained operations have distinct visual treatments.
 R/G controls only highlight the canonical IDs already listed by each focus
-overlay. Layout and highlighting do not create another graph or selection
+overlay. Ownership hierarchy is present in the projection contract but remains
+outside the current SVG layout until the dedicated hierarchy renderer atom.
+Layout and highlighting do not create another graph or selection
 truth.
 
 Candidate relations contain:

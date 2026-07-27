@@ -1264,9 +1264,19 @@ class StructuralGraphEdge:
 
 
 @dataclass(frozen=True)
+class StructuralGraphOwnershipEdge:
+    id: str
+    parent_node_id: str
+    child_node_id: str
+    operation: Literal["added", "removed", "retained"]
+    ownership_change_evidence_id: str
+
+
+@dataclass(frozen=True)
 class ReviewStructuralGraph:
     nodes: tuple[StructuralGraphNode, ...] = ()
     edges: tuple[StructuralGraphEdge, ...] = ()
+    ownership_edges: tuple[StructuralGraphOwnershipEdge, ...] = ()
     path_relation_ids: tuple[str, ...] = ()
 
 
@@ -1282,6 +1292,7 @@ class StructuralFocusNode:
 class StructuralFocusOverlay:
     nodes: tuple[StructuralFocusNode, ...] = ()
     edge_ids: tuple[str, ...] = ()
+    ownership_edge_ids: tuple[str, ...] = ()
     path_relation_ids: tuple[str, ...] = ()
 
 
@@ -1303,7 +1314,117 @@ class ReviewSlice:
 class ReviewProjection:
     slices: tuple[ReviewSlice, ...] = ()
     review_graph: ReviewStructuralGraph = ReviewStructuralGraph()
-    schema_version: str = "review_projection.v11"
+    schema_version: str = "review_projection.v12"
+
+    def validate_consistency(self, evidence_catalog: EvidenceCatalog) -> None:
+        evidence = evidence_catalog.by_id()
+        nodes = {item.id: item for item in self.review_graph.nodes}
+        edges = {item.id: item for item in self.review_graph.edges}
+        ownership_edges = {
+            item.id: item for item in self.review_graph.ownership_edges
+        }
+        if len(nodes) != len(self.review_graph.nodes):
+            raise ValueError("review structural graph contains duplicate nodes")
+        if len(edges) != len(self.review_graph.edges):
+            raise ValueError("review structural graph contains duplicate edges")
+        if len(ownership_edges) != len(self.review_graph.ownership_edges):
+            raise ValueError(
+                "review structural graph contains duplicate ownership edges"
+            )
+        for edge in self.review_graph.edges:
+            if edge.source_node_id not in nodes or edge.target_node_id not in nodes:
+                raise ValueError("review structural edge references a missing node")
+            fact = evidence.get(edge.relation_change_evidence_id)
+            if fact is None or fact.kind != "structural_relation_change":
+                raise ValueError(
+                    "review structural edge references invalid relation evidence"
+                )
+        ownership_pairs: set[tuple[str, str]] = set()
+        ownership_children: dict[str, set[str]] = {}
+        for edge in self.review_graph.ownership_edges:
+            if edge.parent_node_id not in nodes or edge.child_node_id not in nodes:
+                raise ValueError("review ownership edge references a missing node")
+            fact = evidence.get(edge.ownership_change_evidence_id)
+            identity = (
+                fact.structural_ownership_change if fact is not None else None
+            )
+            if (
+                fact is None
+                or fact.kind != "structural_ownership_change"
+                or identity is None
+                or fact.operation != edge.operation
+                or nodes[edge.parent_node_id].provider_symbol_id
+                != identity.parent_provider_symbol_id
+                or nodes[edge.child_node_id].provider_symbol_id
+                != identity.child_provider_symbol_id
+            ):
+                raise ValueError(
+                    "review ownership edge references invalid ownership evidence"
+                )
+            pair = (edge.parent_node_id, edge.child_node_id)
+            if pair in ownership_pairs:
+                raise ValueError(
+                    "review structural graph contains duplicate ownership identity"
+                )
+            ownership_pairs.add(pair)
+            ownership_children.setdefault(edge.parent_node_id, set()).add(
+                edge.child_node_id
+            )
+        for start in ownership_children:
+            frontier = list(ownership_children[start])
+            visited: set[str] = set()
+            while frontier:
+                current = frontier.pop()
+                if current == start:
+                    raise ValueError("review structural ownership contains a cycle")
+                if current in visited:
+                    continue
+                visited.add(current)
+                frontier.extend(ownership_children.get(current, ()))
+        for review_slice in self.slices:
+            overlay = review_slice.structural_overlay
+            overlay_node_ids = {item.node_id for item in overlay.nodes}
+            if len(overlay_node_ids) != len(overlay.nodes):
+                raise ValueError(
+                    f"{review_slice.focus_statement_id}: overlay contains "
+                    "duplicate structural nodes"
+                )
+            if any(node_id not in nodes for node_id in overlay_node_ids):
+                raise ValueError(
+                    f"{review_slice.focus_statement_id}: overlay references "
+                    "a missing structural node"
+                )
+            if any(edge_id not in edges for edge_id in overlay.edge_ids):
+                raise ValueError(
+                    f"{review_slice.focus_statement_id}: overlay references "
+                    "a missing structural edge"
+                )
+            if any(
+                edge_id not in ownership_edges
+                for edge_id in overlay.ownership_edge_ids
+            ):
+                raise ValueError(
+                    f"{review_slice.focus_statement_id}: overlay references "
+                    "a missing ownership edge"
+                )
+            if any(
+                edges[edge_id].source_node_id not in overlay_node_ids
+                or edges[edge_id].target_node_id not in overlay_node_ids
+                for edge_id in overlay.edge_ids
+            ):
+                raise ValueError(
+                    f"{review_slice.focus_statement_id}: structural edge "
+                    "endpoints must belong to the overlay"
+                )
+            if any(
+                ownership_edges[edge_id].parent_node_id not in overlay_node_ids
+                or ownership_edges[edge_id].child_node_id not in overlay_node_ids
+                for edge_id in overlay.ownership_edge_ids
+            ):
+                raise ValueError(
+                    f"{review_slice.focus_statement_id}: ownership edge "
+                    "endpoints must belong to the overlay"
+                )
 
 
 @dataclass(frozen=True)

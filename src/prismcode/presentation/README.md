@@ -22,6 +22,10 @@ disclosure, and client-side focus highlighting are presentation only. Focus
 controls toggle existing node/edge memberships and never recalculate an
 association or relation.
 
+Canonical ownership edges are currently contract input but are not yet laid
+out as SVG hierarchy. The hierarchy renderer atom will consume those IDs
+directly; presentation must not recover parentage from symbol names or paths.
+
 ## Must not
 
 Infer CI status, acceptance-source absence, diagnostic taxonomy, statement

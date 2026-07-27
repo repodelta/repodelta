@@ -270,6 +270,12 @@ changed symbol uses its canonical structural node identity, even without a
 selected edge. File, hunk, span, and GitHub line locations remain provenance
 rather than parallel evidence. Documents, configuration, unsupported-language
 changes, and genuinely unmapped code changes remain standalone changed facts.
+
+Canonical ownership identities form a separate parent/child edge collection.
+Projection follows only typed review-level ownership from each selected
+structural node to its ancestors, stores shared hierarchy once, and exposes
+focus-specific ownership edge IDs. It does not query Codegraph, re-run
+head/base convergence, or infer hierarchy from names and paths.
 Context facts join an overlay only when selected structural support connects
 them.
 Profiles remain canonical in `ProjectionCandidateSet`; convergence and routing
