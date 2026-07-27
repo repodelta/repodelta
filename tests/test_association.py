@@ -149,3 +149,136 @@ def test_claim_bridge_requires_claim_and_anchor_distinctiveness() -> None:
         ("R1", "E:nodes"): ("nodes",),
         ("R2", "E:edges"): ("edges",),
     }
+
+
+def test_phrase_relevance_must_discriminate_the_changed_anchor_corpus() -> None:
+    focus = _focus("R1", "Render canonical structural graph nodes")
+
+    def anchor(identifier: str, text: str) -> EvidenceItem:
+        return EvidenceItem(
+            id=identifier,
+            summary=text,
+            kind="change_relation",
+            classification="code",
+            profile="production",
+            authority="github_diff",
+            revision_side="head",
+            operation="modified",
+            role="changed_anchor",
+            changed=True,
+            head_signature=association_signature(text),
+        )
+
+    candidates = build_projection_candidates(
+        requirements=(focus,),
+        claims=(),
+        evidence_catalog=EvidenceCatalog(
+            items=(
+                anchor("E:nodes", "Render canonical structural graph nodes"),
+                anchor("E:edges", "Render canonical structural graph edges"),
+                anchor("E:overlay", "Render canonical structural graph overlay"),
+            )
+        ),
+        structural_graph=None,
+        head_sha=None,
+    )
+
+    anchors = tuple(
+        (item.target_id, item.association, item.reasons[0].matched_terms)
+        for item in candidates.relations
+        if item.slot == "changed_anchor"
+    )
+
+    assert anchors == (("E:nodes", "distinctive_phrase", ("nodes",)),)
+
+
+def test_multiple_identical_relevant_anchor_meanings_remain_a_set() -> None:
+    focus = _focus("R1", "Render canonical structural graph nodes")
+    anchors = tuple(
+        EvidenceItem(
+            id=f"E:nodes:{index}",
+            summary=f"Render canonical structural graph nodes in layer {index}",
+            kind="change_relation",
+            classification="code",
+            profile="production",
+            authority="github_diff",
+            revision_side="head",
+            operation="modified",
+            role="changed_anchor",
+            changed=True,
+            head_signature=association_signature(
+                "Render canonical structural graph nodes"
+            ),
+        )
+        for index in range(2)
+    )
+
+    candidates = build_projection_candidates(
+        requirements=(focus,),
+        claims=(),
+        evidence_catalog=EvidenceCatalog(items=anchors),
+        structural_graph=None,
+        head_sha=None,
+    )
+
+    assert {
+        item.target_id
+        for item in candidates.relations
+        if item.slot == "changed_anchor"
+    } == {"E:nodes:0", "E:nodes:1"}
+
+
+def test_phrase_cohorts_do_not_suppress_other_fact_profiles() -> None:
+    focus = _focus("R1", "Render canonical structural graph nodes")
+
+    def anchor(
+        identifier: str,
+        text: str,
+        *,
+        profile: str,
+    ) -> EvidenceItem:
+        return EvidenceItem(
+            id=identifier,
+            summary=text,
+            kind="change_relation",
+            classification="document" if profile == "document" else "code",
+            profile=profile,
+            authority="github_diff",
+            revision_side="head",
+            operation="modified",
+            role="changed_anchor",
+            changed=True,
+            head_signature=association_signature(text),
+        )
+
+    candidates = build_projection_candidates(
+        requirements=(focus,),
+        claims=(),
+        evidence_catalog=EvidenceCatalog(
+            items=(
+                anchor(
+                    "E:production",
+                    "Render canonical structural graph",
+                    profile="production",
+                ),
+                anchor(
+                    "E:document:nodes",
+                    "Render canonical structural graph nodes",
+                    profile="document",
+                ),
+                anchor(
+                    "E:document:edges",
+                    "Render canonical structural graph edges",
+                    profile="document",
+                ),
+            )
+        ),
+        structural_graph=None,
+        head_sha=None,
+    )
+
+    assert {
+        item.target_id
+        for item in candidates.relations
+        if item.slot == "changed_anchor"
+    } == {"E:production", "E:document:nodes"}

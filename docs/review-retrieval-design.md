@@ -292,7 +292,10 @@ Use an ordered rule set:
 1. `explicit_reference`: R/AC identifier explicitly referenced by a PR claim;
 2. `exact_identifier`: distinctive code/config/workflow identifier occurs in
    the focus or an aligned claim and the candidate;
-3. `distinctive_phrase`: normalized multi-token phrase overlap;
+3. `distinctive_phrase`: normalized multi-token phrase overlap; a
+   changed-anchor-discriminative cohort dominates generic phrase fan-out within
+   one fact-profile lane, while a shared implementation meaning remains a set
+   when no stronger cohort exists;
 4. `claim_bridge`: R/G to PR claim, then claim to an eligible changed anchor;
 5. `structural_bridge`: selected changed anchor to eligible runtime/test node;
 6. `path_or_module_context`: matching path/module ownership after a stronger
