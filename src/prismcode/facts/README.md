@@ -11,19 +11,23 @@ Source packet, canonical changes, and provider results → one `EvidenceCatalog`
 
 ## Invariants
 
-Each diff location has one canonical representation. Revision-specific changed
-symbols remain provenance facts; one typed `StructuralChangeIdentity` pairs
-their optional base/head evidence IDs and is the only structural changed
-anchor. Added, removed, and modified identities retain the union of their
-change-relation IDs, paths, signatures, and revision links. Revision path
+Each diff location has one canonical representation. Revision-specific symbols
+retain their provider IDs as provenance, while an exact logical identity over
+repository-relative path, qualified name, and symbol kind is canonical across
+base/head. A same-revision collision stays distinct rather than being inferred
+as the same symbol. One typed `StructuralChangeIdentity` pairs optional
+base/head evidence IDs under that review identity and is the only structural
+changed anchor. Added, removed, and modified identities retain the union of
+their change-relation IDs, paths, signatures, and revision links. Revision path
 steps converge into one canonical `StructuralRelationChangeIdentity` per
-directed provider edge. Its base/head path IDs are provenance only. Retained
+directed review-symbol edge. Its base/head path IDs and provider endpoints are
+provenance only. Retained
 edges require observations on both revisions; added or removed edges require
 an added/removed endpoint or complete opposite-revision traversal. Incomplete
 coverage remains an explicit diagnostic and never becomes an absence claim.
 Revision-local structural ownership observations reference their parent and
 child symbol provenance. They converge once into one canonical
-`StructuralOwnershipChangeIdentity` per provider parent/child pair. Retained
+`StructuralOwnershipChangeIdentity` per review-symbol parent/child pair. Retained
 ownership requires both revisions; added/removed ownership requires a changed
 endpoint or complete ownership coverage applicable to the same child on the
 opposite revision. Deferred ownership remains revision provenance and one

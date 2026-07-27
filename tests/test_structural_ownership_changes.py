@@ -13,12 +13,18 @@ from prismcode.providers.structural import (
 )
 
 
-def _symbol(identifier: str, *, kind: str = "class") -> GraphSymbol:
+def _symbol(
+    identifier: str,
+    *,
+    kind: str = "class",
+    logical_name: str | None = None,
+) -> GraphSymbol:
+    name = logical_name or identifier
     return GraphSymbol(
         id=identifier,
         kind=kind,
-        name=identifier,
-        qualified_name=f"service.{identifier}",
+        name=name,
+        qualified_name=f"service.{name}",
         file_path="src/service.py",
         language="python",
         start_line=1,
@@ -99,9 +105,55 @@ def test_same_ownership_on_both_revisions_is_retained_once() -> None:
     identity = changes[0].structural_ownership_change
     assert identity is not None
     assert (
-        identity.parent_provider_symbol_id,
-        identity.child_provider_symbol_id,
-    ) == ("P", "C")
+        identity.parent_review_symbol_id,
+        identity.child_review_symbol_id,
+    ) == (
+        next(
+            item.metadata["review_symbol_id"]
+            for item in catalog.items
+            if item.kind == "symbol" and item.metadata["symbol_id"] == "P"
+        ),
+        next(
+            item.metadata["review_symbol_id"]
+            for item in catalog.items
+            if item.kind == "symbol" and item.metadata["symbol_id"] == "C"
+        ),
+    )
+    assert identity.base_ownership_evidence_id is not None
+    assert identity.head_ownership_evidence_id is not None
+
+
+def test_revision_local_ownership_ids_converge_by_exact_logical_symbols() -> None:
+    catalog = _catalog(
+        _result(
+            "base",
+            StructuralOwnershipRelation(
+                parent=_symbol("base-parent", logical_name="Container"),
+                child=_symbol(
+                    "base-child",
+                    kind="method",
+                    logical_name="execute",
+                ),
+            ),
+        ),
+        _result(
+            "head",
+            StructuralOwnershipRelation(
+                parent=_symbol("head-parent", logical_name="Container"),
+                child=_symbol(
+                    "head-child",
+                    kind="method",
+                    logical_name="execute",
+                ),
+            ),
+        ),
+    )
+
+    changes = _changes(catalog)
+    assert len(changes) == 1
+    assert changes[0].operation == "retained"
+    identity = changes[0].structural_ownership_change
+    assert identity is not None
     assert identity.base_ownership_evidence_id is not None
     assert identity.head_ownership_evidence_id is not None
 

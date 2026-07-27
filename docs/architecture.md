@@ -149,6 +149,12 @@ boundaries. Eligible edges are `calls`, `imports`, `instantiates`, `references`,
 and `extends`; container edges are excluded. Each path retains direction,
 runtime/test/mixed classification, and head-line sources.
 
+Codegraph symbols first normalize to an exact review identity over
+repository-relative path, qualified name, and symbol kind. Base/head provider
+IDs and spans remain provenance. Same-revision collisions, renames, and moves
+are not merged. Changed anchors, executable relation changes, ownership
+changes, and projected nodes all reference this one review identity.
+
 Codegraph `contains` edges have a separate, non-executable contract:
 `StructuralOwnershipRelation`. For exact changed symbols and symbols retained
 by bounded traversal, the provider collects deterministic parent ancestry up

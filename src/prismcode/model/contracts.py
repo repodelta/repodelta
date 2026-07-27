@@ -539,27 +539,27 @@ class GuardrailScanDiagnostic:
 
 @dataclass(frozen=True)
 class StructuralChangeIdentity:
-    provider_symbol_id: str
+    review_symbol_id: str
     base_symbol_evidence_id: str | None = None
     head_symbol_evidence_id: str | None = None
-    schema_version: str = "structural_change_identity.v1"
+    schema_version: str = "structural_change_identity.v2"
 
 
 @dataclass(frozen=True)
 class StructuralRelationChangeIdentity:
-    """One revision-independent directed provider relation."""
+    """One revision-independent directed logical-symbol relation."""
 
-    source_provider_symbol_id: str
-    target_provider_symbol_id: str
+    source_review_symbol_id: str
+    target_review_symbol_id: str
     relation: str
     base_path_evidence_ids: tuple[str, ...] = ()
     head_path_evidence_ids: tuple[str, ...] = ()
-    schema_version: str = "structural_relation_change_identity.v1"
+    schema_version: str = "structural_relation_change_identity.v2"
 
     def __post_init__(self) -> None:
         if (
-            not self.source_provider_symbol_id
-            or not self.target_provider_symbol_id
+            not self.source_review_symbol_id
+            or not self.target_review_symbol_id
             or not self.relation
         ):
             raise ValueError("structural relation identity fields must be non-empty")
@@ -580,16 +580,16 @@ class StructuralOwnershipIdentity:
 
 @dataclass(frozen=True)
 class StructuralOwnershipChangeIdentity:
-    """One revision-independent parent-to-child ownership truth."""
+    """One revision-independent logical parent-to-child ownership truth."""
 
-    parent_provider_symbol_id: str
-    child_provider_symbol_id: str
+    parent_review_symbol_id: str
+    child_review_symbol_id: str
     base_ownership_evidence_id: str | None = None
     head_ownership_evidence_id: str | None = None
-    schema_version: str = "structural_ownership_change_identity.v1"
+    schema_version: str = "structural_ownership_change_identity.v2"
 
     def __post_init__(self) -> None:
-        if not self.parent_provider_symbol_id or not self.child_provider_symbol_id:
+        if not self.parent_review_symbol_id or not self.child_review_symbol_id:
             raise ValueError("structural ownership identity fields must be non-empty")
         if (
             self.base_ownership_evidence_id is None
@@ -833,6 +833,29 @@ class EvidenceCatalog:
                     raise ValueError(
                         f"{item.id}: structural change must reference symbol evidence"
                     )
+                if any(
+                    items_by_id[value].metadata.get("review_symbol_id")
+                    != identity.review_symbol_id
+                    for value in symbol_ids
+                ):
+                    raise ValueError(
+                        f"{item.id}: structural change review identity mismatch"
+                    )
+                if any(
+                    evidence_id is not None
+                    and items_by_id[evidence_id].revision_side != revision
+                    for revision, evidence_id in zip(
+                        ("base", "head"),
+                        (
+                            identity.base_symbol_evidence_id,
+                            identity.head_symbol_evidence_id,
+                        ),
+                        strict=True,
+                    )
+                ):
+                    raise ValueError(
+                        f"{item.id}: structural symbol revision mismatch"
+                    )
             if item.kind == "structural_relation_change":
                 identity = item.structural_relation_change
                 assert identity is not None
@@ -933,15 +956,19 @@ class EvidenceCatalog:
                     items_by_id[value].structural_ownership is None
                     or (
                         items_by_id[
-                            value
-                        ].structural_ownership.parent_provider_symbol_id,
+                            items_by_id[
+                                value
+                            ].structural_ownership.parent_symbol_evidence_id
+                        ].metadata.get("review_symbol_id"),
                         items_by_id[
-                            value
-                        ].structural_ownership.child_provider_symbol_id,
+                            items_by_id[
+                                value
+                            ].structural_ownership.child_symbol_evidence_id
+                        ].metadata.get("review_symbol_id"),
                     )
                     != (
-                        identity.parent_provider_symbol_id,
-                        identity.child_provider_symbol_id,
+                        identity.parent_review_symbol_id,
+                        identity.child_review_symbol_id,
                     )
                     for value in provenance
                 ):
@@ -978,8 +1005,8 @@ class EvidenceCatalog:
 
         ownership_change_ids = tuple(
             (
-                item.structural_ownership_change.parent_provider_symbol_id,
-                item.structural_ownership_change.child_provider_symbol_id,
+                item.structural_ownership_change.parent_review_symbol_id,
+                item.structural_ownership_change.child_review_symbol_id,
             )
             for item in self.items
             if item.kind == "structural_ownership_change"
@@ -1246,7 +1273,7 @@ StructuralGraphNodeOperation = Literal["added", "modified", "removed", "context"
 @dataclass(frozen=True)
 class StructuralGraphNode:
     id: str
-    provider_symbol_id: str
+    review_symbol_id: str
     operation: StructuralGraphNodeOperation
     evidence_ids: tuple[str, ...]
     path_relation_ids: tuple[str, ...] = ()
@@ -1353,10 +1380,10 @@ class ReviewProjection:
                 or fact.kind != "structural_ownership_change"
                 or identity is None
                 or fact.operation != edge.operation
-                or nodes[edge.parent_node_id].provider_symbol_id
-                != identity.parent_provider_symbol_id
-                or nodes[edge.child_node_id].provider_symbol_id
-                != identity.child_provider_symbol_id
+                or nodes[edge.parent_node_id].review_symbol_id
+                != identity.parent_review_symbol_id
+                or nodes[edge.child_node_id].review_symbol_id
+                != identity.child_review_symbol_id
             ):
                 raise ValueError(
                     "review ownership edge references invalid ownership evidence"

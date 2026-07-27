@@ -16,9 +16,9 @@ Profiles remain canonical in the candidate set; selected relations and
 convergence diagnostics are referenced from `CandidateConvergence`. Each slice
 carries a focus overlay projected from its upstream typed
 `ReviewRelevantStructuralClosure`; `ReviewProjection.review_graph` owns
-canonical nodes and edges once across all overlays. Nodes collapse by
-provider-symbol identity and carry review operation plus base/head evidence
-provenance. Edges reference only the closure's canonical
+canonical nodes and edges once across all overlays. Nodes use the facts-owned
+exact logical review-symbol identity and carry review operation plus base/head
+provider evidence provenance. Edges reference only the closure's canonical
 `StructuralRelationChangeIdentity` fact IDs; projection never searches all
 evidence for relevance or rebuilds edge truth from provider path steps. Selected
 structural-change anchors follow canonical `StructuralOwnershipChangeIdentity`
