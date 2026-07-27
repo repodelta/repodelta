@@ -25,10 +25,14 @@ Structural paths and structurally bridged runtime/test contexts converge as one
 terminal-aware unit. For each reachable anchor-terminal connection, shortest
 canonical path identities are eligible; distinct terminal coverage precedes
 redundant equivalent support. Per-anchor, total-path, and context-identity
-limits apply to that connection set. `StructuralSupportSet` is exactly the
-selected terminal support; all other path provenance remains canonical in the
-group's deferred relation IDs. Direct/provider context without a path bridge
-remains standalone. A terminal available only behind a safety-deferred
+limits apply only to that peripheral connection set. One
+`ReviewRelevantStructuralClosure` replaces terminal-only support: it references
+the selected path relations plus every already-collected canonical
+relation-change fact whose endpoints are selected anchors, selected terminals,
+or nodes on retained connecting paths. Direct review-relevant edges do not
+compete with terminal path budgets. All other path provenance remains canonical
+in the group's deferred relation IDs. Direct/provider context without a path
+bridge remains standalone. A terminal available only behind a safety-deferred
 connection is `upstream_deferred`, not unassociated.
 
 Claim bridges remain reachable only through selected claims. In the remaining

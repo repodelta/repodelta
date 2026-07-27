@@ -177,7 +177,7 @@ def test_identical_focus_graphs_share_one_review_graph() -> None:
     assert "Structural overlay" not in html
 
 
-def test_projection_uses_terminal_aware_structural_support_set() -> None:
+def test_projection_uses_review_relevant_structural_closure() -> None:
     def symbol(
         fact_id: str,
         symbol_id: str,
@@ -267,6 +267,7 @@ def test_projection_uses_terminal_aware_structural_support_set() -> None:
             symbol("E:detour", "detour"),
             symbol("E:anchor_2", "anchor_2", changed=True),
             symbol("E:runtime_2", "runtime_2"),
+            symbol("E:peripheral", "peripheral"),
             path("E:path:runtime", ("anchor", "runtime")),
             path(
                 "E:path:runtime-long",
@@ -279,6 +280,7 @@ def test_projection_uses_terminal_aware_structural_support_set() -> None:
                 ("runtime", "test"),
             ),
             path("E:path:independent", ("anchor_2", "runtime_2")),
+            path("E:path:anchor-link", ("anchor", "anchor_2")),
             EvidenceItem(
                 id="E:relation:anchor-runtime",
                 summary="Retained structural relation: anchor calls runtime",
@@ -333,6 +335,42 @@ def test_projection_uses_terminal_aware_structural_support_set() -> None:
                     head_path_evidence_ids=("E:path:independent",),
                 ),
             ),
+            EvidenceItem(
+                id="E:relation:anchor-anchor2",
+                summary="Added structural relation: anchor calls anchor_2",
+                kind="structural_relation_change",
+                classification="code",
+                profile="structural_path",
+                authority="structural_provider",
+                revision_side="review",
+                operation="added",
+                role="structural_relation",
+                changed=True,
+                structural_relation_change=StructuralRelationChangeIdentity(
+                    source_provider_symbol_id="anchor",
+                    target_provider_symbol_id="anchor_2",
+                    relation="calls",
+                    head_path_evidence_ids=("E:path:anchor-link",),
+                ),
+            ),
+            EvidenceItem(
+                id="E:relation:peripheral",
+                summary="Retained structural relation: detour calls peripheral",
+                kind="structural_relation_change",
+                classification="code",
+                profile="structural_path",
+                authority="structural_provider",
+                revision_side="review",
+                operation="retained",
+                role="structural_relation",
+                changed=False,
+                structural_relation_change=StructuralRelationChangeIdentity(
+                    source_provider_symbol_id="detour",
+                    target_provider_symbol_id="peripheral",
+                    relation="calls",
+                    head_path_evidence_ids=("E:path:runtime-long",),
+                ),
+            ),
         )
     )
     relations = (
@@ -384,6 +422,13 @@ def test_projection_uses_terminal_aware_structural_support_set() -> None:
             bridges=("E:path:independent",),
             ordinal=1,
         ),
+        relation(
+            "P-anchor-link",
+            "structural_path",
+            "E:path:anchor-link",
+            bridges=("E:anchor",),
+            ordinal=4,
+        ),
     )
     second_relations = tuple(
         replace(item, id=f"R2-{item.id}", focus_statement_id="R2")
@@ -406,12 +451,20 @@ def test_projection_uses_terminal_aware_structural_support_set() -> None:
     )
 
     convergence = converge_candidates(candidates, evidence_catalog=evidence)
-    support = convergence.groups[0].structural_support
-    assert support.path_relation_ids == (
+    closure = convergence.groups[0].structural_closure
+    assert closure.path_relation_ids == (
         "P-runtime",
         "P-test",
         "P-independent",
     )
+    assert closure.relation_change_evidence_ids == (
+        "E:relation:anchor-runtime",
+        "E:relation:runtime-test",
+        "E:relation:anchor2-runtime2",
+        "E:relation:anchor-anchor2",
+    )
+    assert "E:relation:peripheral" not in closure.relation_change_evidence_ids
+    assert "P-anchor-link" in convergence.groups[0].deferred_relation_ids
 
     projection = build_review_projection(candidates, convergence, evidence)
     overlay = projection.slices[0].structural_overlay
@@ -424,14 +477,21 @@ def test_projection_uses_terminal_aware_structural_support_set() -> None:
         "anchor_2",
         "runtime_2",
     }
-    assert len(graph.edges) == 3
+    assert len(graph.edges) == 4
     assert tuple(item.operation for item in graph.edges) == (
         "retained",
         "removed",
         "added",
+        "added",
     )
     assert graph.edges[0].path_relation_ids == ("P-runtime", "R2-P-runtime")
     assert overlay.edge_ids == second_overlay.edge_ids
+    direct_edge = next(
+        item
+        for item in graph.edges
+        if item.relation_change_evidence_id == "E:relation:anchor-anchor2"
+    )
+    assert direct_edge.path_relation_ids == ()
     assert tuple(item.node_id for item in overlay.nodes) == tuple(
         item.node_id for item in second_overlay.nodes
     )
@@ -453,7 +513,7 @@ def test_projection_uses_terminal_aware_structural_support_set() -> None:
         SimpleNamespace(evidence_catalog=evidence),
     )
     assert html.count('class="delta-canvas"') == 1
-    assert html.count('class="delta-edge operation-') == 3
+    assert html.count('class="delta-edge operation-') == 4
     assert "calls · retained" in html
     assert "calls · removed" in html
     assert "calls · added" in html

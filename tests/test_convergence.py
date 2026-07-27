@@ -4,6 +4,7 @@ from dataclasses import fields
 
 from prismcode.convergence.core import ConvergencePolicy, converge_candidates
 from prismcode.model.contracts import (
+    ConvergenceGroup,
     EvidenceCatalog,
     EvidenceItem,
     ProjectionCandidateGroup,
@@ -112,17 +113,21 @@ def _selected(
     policy: ConvergencePolicy,
     evidence: tuple[EvidenceItem, ...] = (),
 ) -> tuple[str, ...]:
+    catalog = EvidenceCatalog(items=evidence)
     result = converge_candidates(
         candidates,
-        evidence_catalog=EvidenceCatalog(items=evidence),
+        evidence_catalog=catalog,
         policy=policy,
     )
-    result.validate_consistency(candidates)
+    result.validate_consistency(candidates, catalog)
     return result.selected_relation_ids()
 
 
 def test_routing_relation_has_no_embedded_selection_truth() -> None:
     assert "state" not in {item.name for item in fields(ProjectionRelation)}
+    group_fields = {item.name for item in fields(ConvergenceGroup)}
+    assert "structural_closure" in group_fields
+    assert "structural_support" not in group_fields
 
 
 def test_convergence_isolated_by_focus_and_prefers_explicit_claim() -> None:
@@ -576,7 +581,7 @@ def test_equivalent_shortest_terminal_paths_remain_canonical_support() -> None:
         "path-b",
         "runtime",
     )
-    assert result.groups[0].structural_support.path_relation_ids == (
+    assert result.groups[0].structural_closure.path_relation_ids == (
         "path-a",
         "path-b",
     )

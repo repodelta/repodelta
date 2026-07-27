@@ -934,10 +934,11 @@ class ProjectionCandidateSet:
 
 
 @dataclass(frozen=True)
-class StructuralSupportSet:
-    """Selected structural relations needed to support one review focus."""
+class ReviewRelevantStructuralClosure:
+    """Canonical structural facts retained for one review focus."""
 
     path_relation_ids: tuple[str, ...] = ()
+    relation_change_evidence_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -945,7 +946,9 @@ class ConvergenceGroup:
     focus_statement_id: str
     selected_relation_ids: tuple[str, ...] = ()
     deferred_relation_ids: tuple[str, ...] = ()
-    structural_support: StructuralSupportSet = StructuralSupportSet()
+    structural_closure: ReviewRelevantStructuralClosure = (
+        ReviewRelevantStructuralClosure()
+    )
     diagnostic_ids: tuple[str, ...] = ()
 
 
@@ -953,7 +956,7 @@ class ConvergenceGroup:
 class CandidateConvergence:
     groups: tuple[ConvergenceGroup, ...] = ()
     diagnostics: tuple[ProjectionDiagnostic, ...] = ()
-    schema_version: str = "candidate_convergence.v6"
+    schema_version: str = "candidate_convergence.v7"
 
     def diagnostics_by_id(self) -> dict[str, ProjectionDiagnostic]:
         return {item.id: item for item in self.diagnostics}
@@ -965,8 +968,13 @@ class CandidateConvergence:
             for relation_id in group.selected_relation_ids
         )
 
-    def validate_consistency(self, candidates: ProjectionCandidateSet) -> None:
+    def validate_consistency(
+        self,
+        candidates: ProjectionCandidateSet,
+        evidence_catalog: EvidenceCatalog,
+    ) -> None:
         relations = candidates.by_id()
+        evidence = evidence_catalog.by_id()
         candidate_groups = {
             item.focus_statement_id: item for item in candidates.groups
         }
@@ -1006,16 +1014,32 @@ class CandidateConvergence:
                 for relation_id in group.selected_relation_ids
                 if relations[relation_id].slot == "structural_path"
             }
-            support = group.structural_support
-            support_ids = set(support.path_relation_ids)
-            if len(support_ids) != len(support.path_relation_ids):
+            closure = group.structural_closure
+            support_ids = set(closure.path_relation_ids)
+            if len(support_ids) != len(closure.path_relation_ids):
                 raise ValueError(
-                    f"{group.focus_statement_id}: duplicate structural support relation"
+                    f"{group.focus_statement_id}: duplicate structural closure path"
                 )
             if support_ids != structural_selected:
                 raise ValueError(
-                    f"{group.focus_statement_id}: structural support must equal "
+                    f"{group.focus_statement_id}: structural closure paths must equal "
                     "selected structural paths"
+                )
+            relation_change_ids = set(closure.relation_change_evidence_ids)
+            if len(relation_change_ids) != len(
+                closure.relation_change_evidence_ids
+            ):
+                raise ValueError(
+                    f"{group.focus_statement_id}: duplicate structural closure edge"
+                )
+            if any(
+                evidence.get(evidence_id) is None
+                or evidence[evidence_id].kind != "structural_relation_change"
+                for evidence_id in relation_change_ids
+            ):
+                raise ValueError(
+                    f"{group.focus_statement_id}: structural closure references "
+                    "invalid relation-change evidence"
                 )
             for relation_id in (*group.selected_relation_ids, *group.deferred_relation_ids):
                 relation = relations.get(relation_id)
@@ -1105,7 +1129,7 @@ class ReviewSlice:
 class ReviewProjection:
     slices: tuple[ReviewSlice, ...] = ()
     review_graph: ReviewStructuralGraph = ReviewStructuralGraph()
-    schema_version: str = "review_projection.v10"
+    schema_version: str = "review_projection.v11"
 
 
 @dataclass(frozen=True)
@@ -1181,7 +1205,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v28"
+    schema_version: str = "review_brief.v29"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

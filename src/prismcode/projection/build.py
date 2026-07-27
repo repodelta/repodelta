@@ -76,7 +76,10 @@ def build_review_projection(
         overlay, nodes, edges = _structural_focus_overlay(
             path_relations=tuple(
                 relations[relation_id]
-                for relation_id in converged.structural_support.path_relation_ids
+                for relation_id in converged.structural_closure.path_relation_ids
+            ),
+            relation_change_evidence_ids=(
+                converged.structural_closure.relation_change_evidence_ids
             ),
             anchor_relations=by_slot["changed_anchor"],
             runtime_relations=by_slot["runtime_context"],
@@ -153,6 +156,7 @@ def build_review_projection(
 def _structural_focus_overlay(
     *,
     path_relations: tuple[ProjectionRelation, ...],
+    relation_change_evidence_ids: tuple[str, ...],
     anchor_relations: tuple[ProjectionRelation, ...],
     runtime_relations: tuple[ProjectionRelation, ...],
     test_relations: tuple[ProjectionRelation, ...],
@@ -209,17 +213,24 @@ def _structural_focus_overlay(
     }
     edge_ids = []
     overlay_path_relation_ids = []
-    for relation_change in evidence.values():
+    for relation_change_id in relation_change_evidence_ids:
+        relation_change = evidence.get(relation_change_id)
+        if relation_change is None:
+            raise ValueError(
+                "structural closure references missing relation-change evidence: "
+                f"{relation_change_id}"
+            )
         identity = relation_change.structural_relation_change
         if relation_change.kind != "structural_relation_change" or identity is None:
-            continue
+            raise ValueError(
+                "structural closure references invalid relation-change evidence: "
+                f"{relation_change_id}"
+            )
         provenance_path_ids = {
             *identity.base_path_evidence_ids,
             *identity.head_path_evidence_ids,
         }
         supporting_path_ids = selected_path_ids & provenance_path_ids
-        if not supporting_path_ids:
-            continue
         support_relation_ids = tuple(
             relation.id
             for path_id, relation in path_relation_by_evidence_id.items()
