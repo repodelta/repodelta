@@ -81,10 +81,11 @@ The retained sources and metadata continue to provide provenance.
   diagnostics.
 
 The provider expands all exact changed-symbol seeds before a
-requirement-specific need is known. A round-robin scheduler combines per-seed
-limits with one review-level node/path ceiling, so an earlier high-fanout seed
-cannot starve later changed symbols and the total provider fact set remains
-bounded. Every seed has an explicit complete/truncated coverage record that
+requirement-specific need is known. A depth-phased, per-seed round-robin
+scheduler combines per-seed limits with one review-level node/path ceiling.
+It retains eligible direct relations before deeper paths, prevents an earlier
+high-fanout seed from starving later changed symbols, and keeps the total
+provider fact set bounded. Every seed has an explicit complete/truncated coverage record that
 distinguishes its own limit from the shared review boundary. Provider coverage
 remains review-level; projection routing selects from the resulting canonical
 facts without attributing collection limits to an R/G focus.

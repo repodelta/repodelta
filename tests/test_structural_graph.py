@@ -1142,6 +1142,88 @@ def test_review_path_budget_is_global_and_round_robin_fair(
     } == {("review_path_budget",)}
 
 
+def test_review_budget_retains_direct_paths_before_deeper_paths(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    def symbol(identifier: str) -> GraphSymbol:
+        return GraphSymbol(
+            id=identifier,
+            kind="function",
+            name=identifier,
+            qualified_name=identifier,
+            file_path=f"src/{identifier}.py",
+            language="python",
+            start_line=1,
+            end_line=2,
+        )
+
+    symbols = {
+        identifier: symbol(identifier)
+        for identifier in ("A", "A1", "A2", "B", "B1", "B2", "B3")
+    }
+    adjacency = {
+        "A": ("A1",),
+        "A1": ("A2",),
+        "B": ("B1", "B2", "B3"),
+    }
+    provider = CodegraphProvider(tmp_path)
+    monkeypatch.setattr(
+        provider,
+        "_connect",
+        lambda: nullcontext(SimpleNamespace(row_factory=None)),
+    )
+    monkeypatch.setattr(
+        provider,
+        "_neighbor_steps",
+        lambda _connection, current, _relations: tuple(
+            GraphPathStep(
+                source=current,
+                target=symbols[target],
+                relation="calls",
+                direction="outgoing",
+            )
+            for target in adjacency.get(current.id, ())
+        ),
+    )
+
+    result = provider.expand_paths(
+        StructuralGraphResult(
+            index=StructuralGraphIndexStatus(state="available", provider="codegraph"),
+            hunk_count=2,
+            overlaps=(
+                HunkSymbolOverlap(
+                    hunk_id="H:A",
+                    symbol=symbols["A"],
+                    changed_lines=(1,),
+                ),
+                HunkSymbolOverlap(
+                    hunk_id="H:B",
+                    symbol=symbols["B"],
+                    changed_lines=(1,),
+                ),
+            ),
+        ),
+        policy=StructuralTraversalPolicy(
+            max_depth=2,
+            max_nodes_per_seed=10,
+            max_paths_per_seed=10,
+            max_total_nodes=20,
+            max_total_paths=3,
+        ),
+    )
+
+    assert [
+        (path.seed_symbol_id, path.depth, path.steps[-1].target.id)
+        for path in result.paths
+    ] == [
+        ("A", 1, "A1"),
+        ("B", 1, "B1"),
+        ("B", 1, "B2"),
+    ]
+    assert all(path.depth == 1 for path in result.paths)
+
+
 def test_per_seed_node_budget_reports_its_limiting_dimension(
     tmp_path: Path,
     monkeypatch,

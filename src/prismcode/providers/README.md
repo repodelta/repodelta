@@ -24,8 +24,9 @@ and HTML copy.
 ## Diagnostics
 
 Reports provider availability, revision side, checkout revision, coverage, and
-traversal limits. Head maps added lines; base maps removed lines through the
-same provider implementation.
+traversal limits. Structural expansion is depth-phased across the review and
+round-robin fair between seeds within a depth. Head maps added lines; base maps
+removed lines through the same provider implementation.
 
 Coverage is revision-applicable: the head index is requested only for
 structural hunks with added lines, while the base index is requested only for

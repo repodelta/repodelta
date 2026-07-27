@@ -139,8 +139,9 @@ The narrowest containing symbol wins. Module-level changes may map to the
 indexed file symbol, which owns Codegraph import edges. Exact changed symbols
 are the only traversal seeds.
 
-Traversal is deterministic and direction-aware. A round-robin scheduler gives
-each exact changed-symbol seed a fair turn under explicit per-seed and
+Traversal is deterministic and direction-aware. A depth-phased scheduler
+finishes direct relations before deeper expansion and gives each exact
+changed-symbol seed a fair turn within a depth under explicit per-seed and
 review-level safety limits; the default review remains bounded to 80 unique
 nodes and 120 paths. The provider emits one typed complete/truncated coverage
 record per seed and distinguishes seed-level from review-level node/path

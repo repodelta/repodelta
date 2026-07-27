@@ -172,11 +172,12 @@ Structural mapping: Codegraph available · 4/4 hunks mapped to 3 symbols · 12 b
 ```
 
 Path expansion starts only from exact changed symbols and follows an explicit
-relation allowlist in both directions. A deterministic round-robin scheduler
-shares review-level node/path limits fairly while enforcing each seed's own
-three-hop, node, and path limits. A high-fanout seed therefore cannot consume
-the review budget before later changed symbols are inspected, and the total
-fact set remains bounded. The provider records complete or truncated traversal
+relation allowlist in both directions. A deterministic depth-phased scheduler
+completes shallower relations before deeper expansion and shares each depth
+fairly between seeds while enforcing per-seed and review-level node/path
+limits. A high-fanout seed therefore cannot consume the review budget before
+later changed symbols are inspected, and deeper paths cannot displace eligible
+direct relations. The provider records complete or truncated traversal
 coverage for every seed. An exact symbol replaces the corresponding
 changed-hunk fallback and remains a structural node even when no path is
 selected. Its hunks, lines, files, and GitHub links remain provenance rather
