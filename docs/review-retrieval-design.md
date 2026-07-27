@@ -302,9 +302,11 @@ The versioned, reference-only selected view is:
 ReviewProjection
   review_graph
     path_relation_ids[]
-    nodes[evidence_id, path_relation_ids[]]
-    edges[id, source_evidence_id, relation, direction,
-          target_evidence_id, path_relation_ids[]]
+    nodes[id, provider_symbol_id, operation,
+          evidence_ids[], path_relation_ids[]]
+    edges[id, source_node_id, relation, operation,
+          target_node_id, relation_change_evidence_id,
+          path_relation_ids[]]
   slices[]
     focus_statement_id
     claim_relation_ids[]
@@ -314,16 +316,18 @@ ReviewProjection
     verification_relation_ids[]
     structural_overlay
       path_relation_ids[]
-      nodes[evidence_id, role, relation_ids[], path_relation_ids[]]
+      nodes[node_id, role, relation_ids[], path_relation_ids[]]
       edge_ids[]
     diagnostics[]
 ```
 
 The upstream `ProjectionCandidateSet` still enumerates typed relations.
-Graph and overlay entries reference canonical evidence/relation IDs and copy no
-statement or evidence content. Shared selected paths and cross-focus overlap
-collapse to one review-level node/edge identity without discarding global or
-focus-relative path provenance.
+Graph nodes collapse by provider-symbol identity and retain revision evidence
+provenance. Graph edges reference canonical structural relation-change facts;
+raw provider path steps never become a second edge truth. An overlay includes
+an edge only when its selected support paths intersect that edge's base/head
+path provenance. Shared selected paths and cross-focus overlap collapse to one
+review-level node/edge identity without discarding focus-relative provenance.
 
 Candidate relations contain:
 

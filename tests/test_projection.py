@@ -17,6 +17,7 @@ from prismcode.model.contracts import (
     ReviewSourcePacket,
     SourceRecord,
     StructuralChangeIdentity,
+    StructuralRelationChangeIdentity,
     VerificationIdentity,
 )
 from prismcode.evaluation.core import load_evaluation_suite
@@ -103,53 +104,20 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
     assert set(selected_paths) <= set(anchor.structural_path_ids)
     overlay = brief.projection.slices[0].structural_overlay
     graph = brief.projection.review_graph
-    assert [item.role for item in overlay.nodes] == [
-        "changed_anchor",
-        "runtime_context",
-        "test_context",
-    ]
-    assert len(overlay.path_relation_ids) == 2
-    assert len(graph.edges) == 2
-    assert len(graph.edges[0].path_relation_ids) == 2
-    assert len(graph.edges[1].path_relation_ids) == 1
-    assert {
-        item.evidence_id: item.relation_ids for item in overlay.nodes
-    } == {
-        "E:symbol:9e703e599343229d97c1": (
-            next(
-                item.id
-                for item in brief.projection_candidates.relations
-                if item.focus_statement_id == "R1"
-                and item.slot == "changed_anchor"
-                and item.target_id
-                == "E:structural_change:5910f29667b835bd4cbe"
-            ),
-        ),
-        "E:symbol:51c78d1cf2a276cc9a40": (
-            next(
-                item.id
-                for item in brief.projection_candidates.relations
-                if item.focus_statement_id == "R1"
-                and item.slot == "runtime_context"
-                and item.target_id == "E:symbol:51c78d1cf2a276cc9a40"
-            ),
-        ),
-        "E:symbol:3c8a35c2cab106b983ca": (
-            next(
-                item.id
-                for item in brief.projection_candidates.relations
-                if item.focus_statement_id == "R1"
-                and item.slot == "test_context"
-                and item.target_id == "E:symbol:3c8a35c2cab106b983ca"
-            ),
-        ),
-    }
+    assert [item.role for item in overlay.nodes] == ["changed_anchor"]
+    assert overlay.path_relation_ids == ()
+    assert graph.edges == ()
+    assert graph.nodes[0].provider_symbol_id == "Y"
+    assert graph.nodes[0].evidence_ids == (
+        "E:structural_change:5910f29667b835bd4cbe",
+        "E:symbol:9e703e599343229d97c1",
+    )
     html = render_html(brief)
-    assert html.count("Structural evidence graph") == 1
-    assert "3 canonical nodes · 2 canonical edges" in html
+    assert html.count("Structural change-support graph") == 1
+    assert "1 canonical nodes · 0 canonical edges" in html
     assert '<span class="block-title">Structural paths</span>' not in html
-    assert '<span class="block-title">Runtime context</span>' not in html
-    assert '<span class="block-title">Test context</span>' not in html
+    assert '<span class="block-title">Runtime context</span>' in html
+    assert '<span class="block-title">Test context</span>' in html
 
 
 def test_identical_focus_graphs_share_one_review_graph() -> None:
@@ -170,25 +138,18 @@ def test_identical_focus_graphs_share_one_review_graph() -> None:
 
     graph = brief.projection.review_graph
     first, second = brief.projection.slices
-    assert len(graph.nodes) == 3
-    assert len(graph.edges) == 2
-    assert tuple(item.evidence_id for item in first.structural_overlay.nodes) == tuple(
-        item.evidence_id for item in second.structural_overlay.nodes
+    assert len(graph.nodes) == 1
+    assert len(graph.edges) == 0
+    assert tuple(item.node_id for item in first.structural_overlay.nodes) == tuple(
+        item.node_id for item in second.structural_overlay.nodes
     )
     assert first.structural_overlay.edge_ids == second.structural_overlay.edge_ids
-    assert (
-        first.structural_overlay.path_relation_ids
-        != second.structural_overlay.path_relation_ids
-    )
-    assert all(
-        len(edge.path_relation_ids) == 2 * expected
-        for edge, expected in zip(graph.edges, (2, 1), strict=True)
-    )
-
+    assert first.structural_overlay.path_relation_ids == ()
+    assert second.structural_overlay.path_relation_ids == ()
     html = render_html(brief)
-    assert html.count("Structural evidence graph") == 1
-    assert html.count('<div class="subgraph-node">') == 3
-    assert html.count('<div class="subgraph-edge">') == 2
+    assert html.count("Structural change-support graph") == 1
+    assert html.count('<div class="subgraph-node">') == 1
+    assert html.count('<div class="subgraph-edge">') == 0
     assert html.count("Structural overlay") == 2
 
 
@@ -289,6 +250,60 @@ def test_projection_uses_terminal_aware_structural_support_set() -> None:
                 ("runtime", "test"),
             ),
             path("E:path:independent", ("anchor_2", "runtime_2")),
+            EvidenceItem(
+                id="E:relation:anchor-runtime",
+                summary="Retained structural relation: anchor calls runtime",
+                kind="structural_relation_change",
+                classification="code",
+                profile="structural_path",
+                authority="structural_provider",
+                revision_side="review",
+                operation="retained",
+                role="structural_relation",
+                changed=False,
+                structural_relation_change=StructuralRelationChangeIdentity(
+                    source_provider_symbol_id="anchor",
+                    target_provider_symbol_id="runtime",
+                    relation="calls",
+                    head_path_evidence_ids=("E:path:runtime",),
+                ),
+            ),
+            EvidenceItem(
+                id="E:relation:runtime-test",
+                summary="Removed structural relation: runtime calls test",
+                kind="structural_relation_change",
+                classification="test",
+                profile="structural_path",
+                authority="structural_provider",
+                revision_side="review",
+                operation="removed",
+                role="structural_relation",
+                changed=True,
+                structural_relation_change=StructuralRelationChangeIdentity(
+                    source_provider_symbol_id="runtime",
+                    target_provider_symbol_id="test",
+                    relation="calls",
+                    base_path_evidence_ids=("E:path:test",),
+                ),
+            ),
+            EvidenceItem(
+                id="E:relation:anchor2-runtime2",
+                summary="Added structural relation: anchor_2 calls runtime_2",
+                kind="structural_relation_change",
+                classification="code",
+                profile="structural_path",
+                authority="structural_provider",
+                revision_side="review",
+                operation="added",
+                role="structural_relation",
+                changed=True,
+                structural_relation_change=StructuralRelationChangeIdentity(
+                    source_provider_symbol_id="anchor_2",
+                    target_provider_symbol_id="runtime_2",
+                    relation="calls",
+                    head_path_evidence_ids=("E:path:independent",),
+                ),
+            ),
         )
     )
     relations = (
@@ -341,13 +356,22 @@ def test_projection_uses_terminal_aware_structural_support_set() -> None:
             ordinal=1,
         ),
     )
+    second_relations = tuple(
+        replace(item, id=f"R2-{item.id}", focus_statement_id="R2")
+        for item in relations
+    )
     candidates = ProjectionCandidateSet(
-        relations=relations,
+        relations=(*relations, *second_relations),
         groups=(
             ProjectionCandidateGroup(
                 focus_statement_id="R1",
                 profile="generic",
                 relation_ids=tuple(item.id for item in relations),
+            ),
+            ProjectionCandidateGroup(
+                focus_statement_id="R2",
+                profile="generic",
+                relation_ids=tuple(item.id for item in second_relations),
             ),
         ),
     )
@@ -362,24 +386,37 @@ def test_projection_uses_terminal_aware_structural_support_set() -> None:
 
     projection = build_review_projection(candidates, convergence, evidence)
     overlay = projection.slices[0].structural_overlay
+    second_overlay = projection.slices[1].structural_overlay
     graph = projection.review_graph
-    assert {item.evidence_id for item in graph.nodes} == {
-        "E:anchor",
-        "E:runtime",
-        "E:test",
-        "E:anchor_2",
-        "E:runtime_2",
+    assert {item.provider_symbol_id for item in graph.nodes} == {
+        "anchor",
+        "runtime",
+        "test",
+        "anchor_2",
+        "runtime_2",
     }
     assert len(graph.edges) == 3
-    assert graph.edges[0].path_relation_ids == ("P-runtime", "P-test")
+    assert tuple(item.operation for item in graph.edges) == (
+        "retained",
+        "removed",
+        "added",
+    )
+    assert graph.edges[0].path_relation_ids == ("P-runtime", "R2-P-runtime")
+    assert overlay.edge_ids == second_overlay.edge_ids
+    assert tuple(item.node_id for item in overlay.nodes) == tuple(
+        item.node_id for item in second_overlay.nodes
+    )
     assert {
-        item.evidence_id: item.path_relation_ids for item in overlay.nodes
+        graph_node.provider_symbol_id: item.path_relation_ids
+        for item in overlay.nodes
+        for graph_node in graph.nodes
+        if graph_node.id == item.node_id
     } == {
-        "E:anchor": ("P-runtime", "P-test"),
-        "E:runtime": ("P-runtime", "P-test"),
-        "E:test": ("P-test",),
-        "E:anchor_2": ("P-independent",),
-        "E:runtime_2": ("P-independent",),
+        "anchor": ("P-runtime",),
+        "runtime": ("P-runtime", "P-test"),
+        "test": ("P-test",),
+        "anchor_2": ("P-independent",),
+        "runtime_2": ("P-independent",),
     }
 
 
@@ -541,10 +578,12 @@ def test_isolated_symbol_and_standalone_document_keep_distinct_canonical_forms()
     projection = build_review_projection(candidates, convergence, evidence)
     code_slice, document_slice = projection.slices
 
-    assert tuple(
-        item.evidence_id for item in code_slice.structural_overlay.nodes
-    ) == ("E:symbol",)
-    assert projection.review_graph.nodes[0].evidence_id == "E:symbol"
+    assert len(code_slice.structural_overlay.nodes) == 1
+    assert projection.review_graph.nodes[0].provider_symbol_id == "S:bounded_trace"
+    assert projection.review_graph.nodes[0].evidence_ids == (
+        "E:structural-change",
+        "E:symbol",
+    )
     assert projection.review_graph.edges == ()
     assert len(document_slice.standalone_changed_fact_relation_ids) == 1
     standalone_targets = {
@@ -990,7 +1029,7 @@ def test_graph_and_no_graph_use_the_same_projection_contract() -> None:
     )
     assert with_graph.projection.review_graph.nodes
     assert without_graph.projection.review_graph.path_relation_ids == ()
-    assert with_graph.projection.review_graph.path_relation_ids
+    assert with_graph.projection.review_graph.path_relation_ids == ()
     assert without_graph.projection.slices[0].structural_overlay.nodes == ()
     assert with_graph.projection.slices[0].structural_overlay.nodes
 

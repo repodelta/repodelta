@@ -1042,20 +1042,26 @@ StructuralFocusNodeRole = Literal[
     "intermediate",
 ]
 
+StructuralGraphNodeOperation = Literal["added", "modified", "removed", "context"]
+
 
 @dataclass(frozen=True)
 class StructuralGraphNode:
-    evidence_id: str
+    id: str
+    provider_symbol_id: str
+    operation: StructuralGraphNodeOperation
+    evidence_ids: tuple[str, ...]
     path_relation_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
 class StructuralGraphEdge:
     id: str
-    source_evidence_id: str
-    target_evidence_id: str
+    source_node_id: str
+    target_node_id: str
     relation: str
-    direction: Literal["outgoing", "incoming"]
+    operation: Literal["added", "removed", "retained"]
+    relation_change_evidence_id: str
     path_relation_ids: tuple[str, ...] = ()
 
 
@@ -1068,7 +1074,7 @@ class ReviewStructuralGraph:
 
 @dataclass(frozen=True)
 class StructuralFocusNode:
-    evidence_id: str
+    node_id: str
     role: StructuralFocusNodeRole
     relation_ids: tuple[str, ...] = ()
     path_relation_ids: tuple[str, ...] = ()
@@ -1099,7 +1105,7 @@ class ReviewSlice:
 class ReviewProjection:
     slices: tuple[ReviewSlice, ...] = ()
     review_graph: ReviewStructuralGraph = ReviewStructuralGraph()
-    schema_version: str = "review_projection.v9"
+    schema_version: str = "review_projection.v10"
 
 
 @dataclass(frozen=True)

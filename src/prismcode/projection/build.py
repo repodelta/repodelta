@@ -19,6 +19,20 @@ from prismcode.model.contracts import (
 )
 
 
+_ROLE_ORDER = {
+    "changed_anchor": 0,
+    "runtime_context": 1,
+    "test_context": 2,
+    "intermediate": 3,
+}
+_OPERATION_ORDER = {
+    "added": 0,
+    "modified": 1,
+    "removed": 2,
+    "context": 3,
+}
+
+
 def build_review_projection(
     candidates: ProjectionCandidateSet,
     convergence: CandidateConvergence,
@@ -26,7 +40,7 @@ def build_review_projection(
     *,
     guardrail_scan_plans: GuardrailScanPlanSet = GuardrailScanPlanSet(),
 ) -> ReviewProjection:
-    """Project converged relation IDs without performing retrieval or selection."""
+    """Project converged canonical facts without performing retrieval or selection."""
 
     relations = candidates.by_id()
     evidence = evidence_catalog.by_id()
@@ -36,10 +50,11 @@ def build_review_projection(
     plans_by_guardrail = guardrail_scan_plans.by_guardrail_id()
     slices = []
     graph_node_order: list[str] = []
-    graph_path_ids_by_node: dict[str, list[str]] = {}
+    graph_nodes: dict[str, StructuralGraphNode] = {}
     graph_edge_order: list[str] = []
     graph_edges: dict[str, StructuralGraphEdge] = {}
     graph_path_relation_ids: list[str] = []
+
     for group in candidates.groups:
         converged = convergence_groups[group.focus_statement_id]
         selected = tuple(
@@ -68,31 +83,23 @@ def build_review_projection(
             test_relations=by_slot["test_context"],
             evidence=evidence,
         )
-        graph_node_ids = {item.evidence_id for item in overlay.nodes}
+        represented_relation_ids = {
+            relation_id
+            for node in overlay.nodes
+            for relation_id in node.relation_ids
+        }
         for node in nodes:
-            if node.evidence_id not in graph_node_order:
-                graph_node_order.append(node.evidence_id)
-            graph_path_ids_by_node.setdefault(node.evidence_id, []).extend(
-                node.path_relation_ids
-            )
+            if node.id not in graph_nodes:
+                graph_node_order.append(node.id)
+                graph_nodes[node.id] = node
+            else:
+                graph_nodes[node.id] = _merge_node(graph_nodes[node.id], node)
         for edge in edges:
             if edge.id not in graph_edges:
                 graph_edge_order.append(edge.id)
                 graph_edges[edge.id] = edge
             else:
-                existing = graph_edges[edge.id]
-                graph_edges[edge.id] = StructuralGraphEdge(
-                    id=existing.id,
-                    source_evidence_id=existing.source_evidence_id,
-                    target_evidence_id=existing.target_evidence_id,
-                    relation=existing.relation,
-                    direction=existing.direction,
-                    path_relation_ids=tuple(
-                        dict.fromkeys(
-                            (*existing.path_relation_ids, *edge.path_relation_ids)
-                        )
-                    ),
-                )
+                graph_edges[edge.id] = _merge_edge(graph_edges[edge.id], edge)
         graph_path_relation_ids.extend(overlay.path_relation_ids)
         slices.append(
             ReviewSlice(
@@ -107,12 +114,12 @@ def build_review_projection(
                 standalone_runtime_relation_ids=tuple(
                     item.id
                     for item in by_slot["runtime_context"]
-                    if item.target_id not in graph_node_ids
+                    if item.id not in represented_relation_ids
                 ),
                 standalone_test_relation_ids=tuple(
                     item.id
                     for item in by_slot["test_context"]
-                    if item.target_id not in graph_node_ids
+                    if item.id not in represented_relation_ids
                 ),
                 verification_relation_ids=tuple(
                     item.id for item in by_slot["verification"]
@@ -132,18 +139,11 @@ def build_review_projection(
                 ),
             )
         )
+
     return ReviewProjection(
         slices=tuple(slices),
         review_graph=ReviewStructuralGraph(
-            nodes=tuple(
-                StructuralGraphNode(
-                    evidence_id=node_id,
-                    path_relation_ids=tuple(
-                        dict.fromkeys(graph_path_ids_by_node[node_id])
-                    ),
-                )
-                for node_id in graph_node_order
-            ),
+            nodes=tuple(graph_nodes[node_id] for node_id in graph_node_order),
             edges=tuple(graph_edges[edge_id] for edge_id in graph_edge_order),
             path_relation_ids=tuple(dict.fromkeys(graph_path_relation_ids)),
         ),
@@ -162,138 +162,269 @@ def _structural_focus_overlay(
     tuple[StructuralGraphNode, ...],
     tuple[StructuralGraphEdge, ...],
 ]:
-    relation_ids_by_node: dict[str, list[str]] = {}
-    role_by_node = {}
-    for role, relations in (
+    """Build one focus overlay from canonical change and relation-change facts."""
+
+    path_relation_by_evidence_id = {
+        relation.target_id: relation for relation in path_relations
+    }
+    selected_path_ids = set(path_relation_by_evidence_id)
+    symbols_by_provider_id = _symbols_by_provider_id(evidence)
+    relation_ids_by_provider: dict[str, list[str]] = {}
+    role_by_provider: dict[str, str] = {}
+    anchor_nodes: dict[str, StructuralGraphNode] = {}
+
+    for role, selected_relations in (
+        ("changed_anchor", anchor_relations),
         ("runtime_context", runtime_relations),
         ("test_context", test_relations),
     ):
-        for item in relations:
-            relation_ids_by_node.setdefault(item.target_id, []).append(item.id)
-            role_by_node.setdefault(item.target_id, role)
-
-    node_order: list[str] = []
-    path_ids_by_node: dict[str, list[str]] = {}
-    edge_order: list[str] = []
-    edge_identity: dict[str, tuple[str, str, str, str]] = {}
-    path_ids_by_edge: dict[str, list[str]] = {}
-    for anchor_relation in anchor_relations:
-        anchor = evidence.get(anchor_relation.target_id)
-        if anchor is None:
-            raise ValueError(
-                "selected changed-anchor relation references missing evidence: "
-                f"{anchor_relation.id}"
-            )
-        anchor_node_ids = (
-            (anchor.id,)
-            if anchor.kind == "symbol"
-            else tuple(
-                value
-                for value in (
-                    anchor.structural_change.base_symbol_evidence_id,
-                    anchor.structural_change.head_symbol_evidence_id,
+        for relation in selected_relations:
+            fact = evidence.get(relation.target_id)
+            if fact is None:
+                raise ValueError(
+                    f"selected {relation.slot} relation references missing evidence: "
+                    f"{relation.id}"
                 )
-                if value is not None
+            provider_id = _provider_symbol_id(fact)
+            if provider_id is None:
+                continue
+            relation_ids_by_provider.setdefault(provider_id, []).append(relation.id)
+            previous_role = role_by_provider.get(provider_id, "intermediate")
+            role_by_provider[provider_id] = min(
+                (previous_role, role),
+                key=_ROLE_ORDER.__getitem__,
             )
-            if anchor.kind == "structural_change"
-            and anchor.structural_change is not None
-            else ()
+            if role == "changed_anchor":
+                anchor_nodes[provider_id] = _node_for_provider(
+                    provider_id,
+                    evidence=evidence,
+                    symbols_by_provider_id=symbols_by_provider_id,
+                    anchor=fact,
+                )
+
+    edges = []
+    nodes_by_provider = dict(anchor_nodes)
+    node_path_ids: dict[str, list[str]] = {
+        provider_id: [] for provider_id in anchor_nodes
+    }
+    edge_ids = []
+    overlay_path_relation_ids = []
+    for relation_change in evidence.values():
+        identity = relation_change.structural_relation_change
+        if relation_change.kind != "structural_relation_change" or identity is None:
+            continue
+        provenance_path_ids = {
+            *identity.base_path_evidence_ids,
+            *identity.head_path_evidence_ids,
+        }
+        supporting_path_ids = selected_path_ids & provenance_path_ids
+        if not supporting_path_ids:
+            continue
+        support_relation_ids = tuple(
+            relation.id
+            for path_id, relation in path_relation_by_evidence_id.items()
+            if path_id in supporting_path_ids
         )
-        for node_id in anchor_node_ids:
-            if node_id not in evidence or evidence[node_id].kind != "symbol":
-                raise ValueError(
-                    "selected structural change references missing symbol evidence: "
-                    f"{anchor_relation.id}"
+        for provider_id in (
+            identity.source_provider_symbol_id,
+            identity.target_provider_symbol_id,
+        ):
+            if provider_id not in nodes_by_provider:
+                nodes_by_provider[provider_id] = _node_for_provider(
+                    provider_id,
+                    evidence=evidence,
+                    symbols_by_provider_id=symbols_by_provider_id,
                 )
-            if node_id not in node_order:
-                node_order.append(node_id)
-            path_ids_by_node.setdefault(node_id, [])
-            relation_ids_by_node.setdefault(node_id, []).append(anchor_relation.id)
-            role_by_node.setdefault(node_id, "changed_anchor")
-
-    for path_relation in path_relations:
-        path = evidence.get(path_relation.target_id)
-        if path is None or path.kind != "structural_path":
-            raise ValueError(
-                "selected structural path relation references invalid evidence: "
-                f"{path_relation.id}"
+            node_path_ids.setdefault(provider_id, []).extend(support_relation_ids)
+        edge_ids.append(relation_change.id)
+        overlay_path_relation_ids.extend(support_relation_ids)
+        edges.append(
+            StructuralGraphEdge(
+                id=relation_change.id,
+                source_node_id=_structural_node_id(
+                    identity.source_provider_symbol_id
+                ),
+                target_node_id=_structural_node_id(
+                    identity.target_provider_symbol_id
+                ),
+                relation=identity.relation,
+                operation=relation_change.operation,
+                relation_change_evidence_id=relation_change.id,
+                path_relation_ids=support_relation_ids,
             )
-        for step in path.metadata.get("steps", ()):
-            source_id = step.get("source_evidence_id")
-            target_id = step.get("target_evidence_id")
-            if source_id not in evidence or target_id not in evidence:
-                raise ValueError(
-                    "selected structural path references a missing symbol fact: "
-                    f"{path_relation.id}"
-                )
-            for node_id in (source_id, target_id):
-                if node_id not in node_order:
-                    node_order.append(node_id)
-                path_ids_by_node.setdefault(node_id, []).append(
-                    path_relation.id
-                )
-            key = (
-                source_id,
-                step["relation"],
-                step["direction"],
-                target_id,
-            )
-            edge_id = _structural_edge_id(key)
-            if edge_id not in path_ids_by_edge:
-                edge_order.append(edge_id)
-                edge_identity[edge_id] = key
-                path_ids_by_edge[edge_id] = []
-            path_ids_by_edge[edge_id].append(path_relation.id)
+        )
 
+    graph_nodes = tuple(
+        _merge_node(
+            node,
+            StructuralGraphNode(
+                id=node.id,
+                provider_symbol_id=node.provider_symbol_id,
+                operation=node.operation,
+                evidence_ids=node.evidence_ids,
+                path_relation_ids=tuple(
+                    dict.fromkeys(node_path_ids.get(provider_id, ()))
+                ),
+            ),
+        )
+        for provider_id, node in nodes_by_provider.items()
+    )
     overlay_nodes = tuple(
         StructuralFocusNode(
-            evidence_id=node_id,
-            role=role_by_node.get(node_id, "intermediate"),
+            node_id=node.id,
+            role=role_by_provider.get(provider_id, "intermediate"),
             relation_ids=tuple(
-                dict.fromkeys(relation_ids_by_node.get(node_id, ()))
+                dict.fromkeys(relation_ids_by_provider.get(provider_id, ()))
             ),
-            path_relation_ids=tuple(
-                dict.fromkeys(path_ids_by_node.get(node_id, ()))
-            ),
+            path_relation_ids=node.path_relation_ids,
         )
-        for node_id in node_order
-    )
-    graph_nodes = tuple(
-        StructuralGraphNode(
-            evidence_id=node_id,
-            path_relation_ids=tuple(
-                dict.fromkeys(path_ids_by_node.get(node_id, ()))
-            ),
-        )
-        for node_id in node_order
-    )
-    edges = tuple(
-        StructuralGraphEdge(
-            id=edge_id,
-            source_evidence_id=source_id,
-            target_evidence_id=target_id,
-            relation=relation,
-            direction=direction,
-            path_relation_ids=tuple(dict.fromkeys(path_ids_by_edge[edge_id])),
-        )
-        for edge_id in edge_order
-        for source_id, relation, direction, target_id in (
-            edge_identity[edge_id],
-        )
+        for provider_id, node in zip(nodes_by_provider, graph_nodes, strict=True)
     )
     return (
         StructuralFocusOverlay(
             nodes=overlay_nodes,
-            edge_ids=tuple(edge_order),
-            path_relation_ids=tuple(item.id for item in path_relations),
+            edge_ids=tuple(edge_ids),
+            path_relation_ids=tuple(dict.fromkeys(overlay_path_relation_ids)),
         ),
         graph_nodes,
-        edges,
+        tuple(edges),
     )
 
 
-def _structural_edge_id(
-    identity: tuple[str, str, str, str],
-) -> str:
-    digest = hashlib.sha256("\0".join(identity).encode("utf-8")).hexdigest()
-    return f"SE:{digest[:20]}"
+def _provider_symbol_id(item: EvidenceItem) -> str | None:
+    if item.kind == "structural_change" and item.structural_change is not None:
+        return item.structural_change.provider_symbol_id
+    if item.kind == "symbol":
+        value = item.metadata.get("symbol_id")
+        return str(value) if value else None
+    return None
+
+
+def _symbols_by_provider_id(
+    evidence: dict[str, EvidenceItem],
+) -> dict[str, tuple[EvidenceItem, ...]]:
+    grouped: dict[str, list[EvidenceItem]] = {}
+    for item in evidence.values():
+        provider_id = _provider_symbol_id(item)
+        if item.kind == "symbol" and provider_id is not None:
+            grouped.setdefault(provider_id, []).append(item)
+    return {
+        provider_id: tuple(
+            sorted(
+                items,
+                key=lambda item: (
+                    {"head": 0, "base": 1}.get(item.revision_side, 2),
+                    item.id,
+                ),
+            )
+        )
+        for provider_id, items in grouped.items()
+    }
+
+
+def _node_for_provider(
+    provider_id: str,
+    *,
+    evidence: dict[str, EvidenceItem],
+    symbols_by_provider_id: dict[str, tuple[EvidenceItem, ...]],
+    anchor: EvidenceItem | None = None,
+) -> StructuralGraphNode:
+    symbol_items = symbols_by_provider_id.get(provider_id, ())
+    if anchor is None:
+        anchor = next(
+            (
+                item
+                for item in evidence.values()
+                if item.kind == "structural_change"
+                and item.structural_change is not None
+                and item.structural_change.provider_symbol_id == provider_id
+            ),
+            None,
+        )
+    evidence_ids = tuple(
+        dict.fromkeys(
+            (
+                *((anchor.id,) if anchor is not None else ()),
+                *(item.id for item in symbol_items),
+            )
+        )
+    )
+    if not evidence_ids:
+        raise ValueError(
+            f"structural relation change references missing symbol fact: {provider_id}"
+        )
+    operation = (
+        _node_operation(anchor.operation)
+        if anchor is not None and anchor.changed
+        else "context"
+    )
+    return StructuralGraphNode(
+        id=_structural_node_id(provider_id),
+        provider_symbol_id=provider_id,
+        operation=operation,
+        evidence_ids=evidence_ids,
+    )
+
+
+def _node_operation(operation: str) -> str:
+    if operation in {"added", "removed"}:
+        return operation
+    return "modified"
+
+
+def _merge_node(
+    left: StructuralGraphNode,
+    right: StructuralGraphNode,
+) -> StructuralGraphNode:
+    if left.id != right.id or left.provider_symbol_id != right.provider_symbol_id:
+        raise ValueError("cannot merge different structural graph nodes")
+    return StructuralGraphNode(
+        id=left.id,
+        provider_symbol_id=left.provider_symbol_id,
+        operation=min(
+            (left.operation, right.operation),
+            key=_OPERATION_ORDER.__getitem__,
+        ),
+        evidence_ids=tuple(dict.fromkeys((*left.evidence_ids, *right.evidence_ids))),
+        path_relation_ids=tuple(
+            dict.fromkeys((*left.path_relation_ids, *right.path_relation_ids))
+        ),
+    )
+
+
+def _merge_edge(
+    left: StructuralGraphEdge,
+    right: StructuralGraphEdge,
+) -> StructuralGraphEdge:
+    if left != right and (
+        left.id,
+        left.source_node_id,
+        left.target_node_id,
+        left.relation,
+        left.operation,
+        left.relation_change_evidence_id,
+    ) != (
+        right.id,
+        right.source_node_id,
+        right.target_node_id,
+        right.relation,
+        right.operation,
+        right.relation_change_evidence_id,
+    ):
+        raise ValueError("canonical structural edge identity is inconsistent")
+    return StructuralGraphEdge(
+        id=left.id,
+        source_node_id=left.source_node_id,
+        target_node_id=left.target_node_id,
+        relation=left.relation,
+        operation=left.operation,
+        relation_change_evidence_id=left.relation_change_evidence_id,
+        path_relation_ids=tuple(
+            dict.fromkeys((*left.path_relation_ids, *right.path_relation_ids))
+        ),
+    )
+
+
+def _structural_node_id(provider_symbol_id: str) -> str:
+    digest = hashlib.sha256(provider_symbol_id.encode("utf-8")).hexdigest()
+    return f"SN:{digest[:20]}"

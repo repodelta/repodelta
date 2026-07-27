@@ -187,8 +187,11 @@ review-level directed relation identities with retained, added, or removed
 operation and base/head path provenance. Added and removed relations require
 an added/removed endpoint or complete opposite-revision traversal; incomplete
 coverage remains diagnostic rather than evidence of absence. Relation changes
-are facts for a later change-support projection and are not independently
-routed in the current R/G pipeline. Their bounded previews are never used for association. Base-side
+are the sole edge truth for the review-level change-support graph and are not
+independently routed in the R/G pipeline. Projection includes one only when its
+path provenance intersects a focus's selected structural support; it never
+reconstructs edges from path-step metadata. Their bounded previews are never
+used for association. Base-side
 signatures are not eligible as current implementation unless the focus is
 explicitly about removal, deprecation, cleanup, or a guardrail. Duplicate
 symbols and paths merge by identity.
