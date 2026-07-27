@@ -14,6 +14,8 @@ from prismcode.providers.structural import (
     HunkSymbolOverlap,
     StructuralGraphIndexStatus,
     StructuralGraphResult,
+    StructuralOwnershipPolicy,
+    StructuralOwnershipRelation,
     StructuralRevision,
     StructuralPath,
     StructuralSeedCoverage,
@@ -360,13 +362,14 @@ class CodegraphProvider:
             diagnostics=tuple(diagnostics),
         )
 
-    def expand_paths(
+    def expand_structure(
         self,
         result: StructuralGraphResult,
         *,
         policy: StructuralTraversalPolicy = StructuralTraversalPolicy(),
+        ownership_policy: StructuralOwnershipPolicy = StructuralOwnershipPolicy(),
     ) -> StructuralGraphResult:
-        """Expand exact changed-symbol seeds with a bounded, direction-aware BFS."""
+        """Expand executable paths and collect separate structural ownership."""
 
         if not result.index.usable or not result.overlaps:
             return result
@@ -386,6 +389,8 @@ class CodegraphProvider:
             overlap.symbol.id: overlap.symbol for overlap in result.overlaps
         }
         paths: list[StructuralPath] = []
+        ownership_relations: tuple[StructuralOwnershipRelation, ...] = ()
+        ownership_truncated = False
         ordered_seeds = tuple(
             sorted(seed_symbols.values(), key=lambda item: item.qualified_name)
         )
@@ -398,6 +403,7 @@ class CodegraphProvider:
             for seed in ordered_seeds
         ]
         global_discovered = set(seed_symbols)
+        query_phase = "path"
         try:
             with self._connect() as connection:
                 connection.row_factory = sqlite3.Row
@@ -432,6 +438,23 @@ class CodegraphProvider:
                                 )
                                 traversal.exhausted = True
                         break
+                observed_symbols = {
+                    symbol.id: symbol
+                    for path in paths
+                    for symbol in (
+                        seed_symbols[path.seed_symbol_id],
+                        *(step.target for step in path.steps),
+                    )
+                }
+                observed_symbols.update(seed_symbols)
+                query_phase = "ownership"
+                ownership_relations, ownership_truncated = (
+                    self._collect_ownership_relations(
+                        connection,
+                        tuple(observed_symbols.values()),
+                        policy=ownership_policy,
+                    )
+                )
         except sqlite3.Error as exc:
             return StructuralGraphResult(
                 revision_side=self.revision_side,
@@ -439,12 +462,20 @@ class CodegraphProvider:
                 hunk_count=result.hunk_count,
                 overlaps=result.overlaps,
                 paths=tuple(paths),
+                ownership_relations=ownership_relations,
                 traversal_coverage=_seed_coverage(traversals),
                 diagnostics=(
                     *result.diagnostics,
                     Diagnostic(
-                        code="codegraph_path_query_failed",
-                        message=f"Codegraph path query failed: {type(exc).__name__}.",
+                        code=(
+                            "codegraph_ownership_query_failed"
+                            if query_phase == "ownership"
+                            else "codegraph_path_query_failed"
+                        ),
+                        message=(
+                            f"Codegraph {query_phase} query failed: "
+                            f"{type(exc).__name__}."
+                        ),
                         severity="error",
                     ),
                 ),
@@ -452,6 +483,19 @@ class CodegraphProvider:
 
         coverage = _seed_coverage(traversals)
         diagnostics = list(result.diagnostics)
+        if ownership_truncated:
+            diagnostics.append(
+                Diagnostic(
+                    code="structural_graph_ownership_truncated",
+                    message=(
+                        "Structural ownership ancestry reached its deterministic "
+                        "safety boundary "
+                        f"({ownership_policy.max_depth} levels, "
+                        f"{ownership_policy.max_relations} relations)."
+                    ),
+                    severity="info",
+                )
+            )
         for item in coverage:
             if item.state != "truncated":
                 continue
@@ -476,8 +520,96 @@ class CodegraphProvider:
             hunk_count=result.hunk_count,
             overlaps=result.overlaps,
             paths=tuple(paths),
+            ownership_relations=ownership_relations,
             traversal_coverage=tuple(coverage),
             diagnostics=tuple(diagnostics),
+        )
+
+    def _collect_ownership_relations(
+        self,
+        connection: sqlite3.Connection,
+        symbols: tuple[GraphSymbol, ...],
+        *,
+        policy: StructuralOwnershipPolicy,
+    ) -> tuple[tuple[StructuralOwnershipRelation, ...], bool]:
+        """Collect bounded `contains` ancestry without creating runtime paths."""
+
+        if policy.max_depth < 1 or policy.max_relations < 1 or not symbols:
+            return (), False
+        known = {symbol.id: symbol for symbol in symbols}
+        frontier = set(known)
+        visited = set(frontier)
+        relations: dict[tuple[str, str], StructuralOwnershipRelation] = {}
+        for _depth in range(policy.max_depth):
+            level = self._ownership_parents(connection, tuple(sorted(frontier)))
+            next_frontier: set[str] = set()
+            for parent, child in level:
+                known[parent.id] = parent
+                known[child.id] = child
+                if _creates_ownership_cycle(
+                    relations,
+                    parent_id=parent.id,
+                    child_id=child.id,
+                ):
+                    continue
+                if (
+                    (parent.id, child.id) not in relations
+                    and len(relations) >= policy.max_relations
+                ):
+                    return _ordered_ownership_relations(relations), True
+                relations[(parent.id, child.id)] = StructuralOwnershipRelation(
+                    parent=parent,
+                    child=child,
+                    sources=(*parent.sources, *child.sources),
+                )
+                if parent.id not in visited:
+                    visited.add(parent.id)
+                    next_frontier.add(parent.id)
+            if not next_frontier:
+                return _ordered_ownership_relations(relations), False
+            frontier = next_frontier
+        has_unseen_parent = any(
+            parent.id not in known
+            for parent, _child in self._ownership_parents(
+                connection,
+                tuple(sorted(frontier)),
+            )
+        )
+        return _ordered_ownership_relations(relations), has_unseen_parent
+
+    def _ownership_parents(
+        self,
+        connection: sqlite3.Connection,
+        child_ids: tuple[str, ...],
+    ) -> tuple[tuple[GraphSymbol, GraphSymbol], ...]:
+        if not child_ids:
+            return ()
+        placeholders = ",".join("?" for _ in child_ids)
+        rows = connection.execute(
+            f"""
+            SELECT
+                p.id AS parent_id, p.kind AS parent_kind, p.name AS parent_name,
+                p.qualified_name AS parent_qualified_name,
+                p.file_path AS parent_file_path, p.language AS parent_language,
+                p.start_line AS parent_start_line, p.end_line AS parent_end_line,
+                c.id AS child_id, c.kind AS child_kind, c.name AS child_name,
+                c.qualified_name AS child_qualified_name,
+                c.file_path AS child_file_path, c.language AS child_language,
+                c.start_line AS child_start_line, c.end_line AS child_end_line
+            FROM edges e
+            JOIN nodes p ON p.id = e.source
+            JOIN nodes c ON c.id = e.target
+            WHERE e.kind = 'contains' AND e.target IN ({placeholders})
+            ORDER BY p.qualified_name, c.qualified_name
+            """,
+            child_ids,
+        ).fetchall()
+        return tuple(
+            (
+                _prefixed_symbol(row, "parent"),
+                _prefixed_symbol(row, "child"),
+            )
+            for row in rows
         )
 
     def _advance_seed(
@@ -754,6 +886,46 @@ def _seed_coverage(
         )
         for item in traversals
     )
+
+
+def _ordered_ownership_relations(
+    relations: dict[tuple[str, str], StructuralOwnershipRelation],
+) -> tuple[StructuralOwnershipRelation, ...]:
+    return tuple(
+        sorted(
+            relations.values(),
+            key=lambda item: (
+                item.parent.qualified_name,
+                item.child.qualified_name,
+                item.parent.id,
+                item.child.id,
+            ),
+        )
+    )
+
+
+def _creates_ownership_cycle(
+    relations: dict[tuple[str, str], StructuralOwnershipRelation],
+    *,
+    parent_id: str,
+    child_id: str,
+) -> bool:
+    if parent_id == child_id:
+        return True
+    descendants: dict[str, set[str]] = {}
+    for source_id, target_id in relations:
+        descendants.setdefault(source_id, set()).add(target_id)
+    frontier = [child_id]
+    visited: set[str] = set()
+    while frontier:
+        current = frontier.pop()
+        if current == parent_id:
+            return True
+        if current in visited:
+            continue
+        visited.add(current)
+        frontier.extend(descendants.get(current, ()))
+    return False
 
 
 def _schema_error(connection: sqlite3.Connection) -> str:
