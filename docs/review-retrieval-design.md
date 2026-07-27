@@ -348,14 +348,14 @@ only ownership edge IDs. Revision-local or coverage-deferred ownership
 provenance never enters the graph.
 
 The standalone HTML presents that contract as one shared structural delta
-graph. Edge-connected nodes form the primary SVG canvas; selected changed
-anchors without a canonical relation delta remain in a compact disclosure.
-Added, removed, and retained operations have distinct visual treatments.
-R/G controls only highlight the canonical IDs already listed by each focus
-overlay. Ownership hierarchy is present in the projection contract but remains
-outside the current SVG layout until the dedicated hierarchy renderer atom.
-Layout and highlighting do not create another graph or selection
-truth.
+graph. Nodes connected by executable or ownership edges form the primary SVG
+canvas; selected changed anchors without either canonical relation remain in a
+compact disclosure. Executable and ownership edges stay visually distinct,
+and added, removed, and retained operations retain their own treatments. R/G
+controls only highlight canonical IDs already listed by each focus overlay.
+The Structure control changes visibility of the projected ownership hierarchy;
+it does not infer or recalculate parentage. Layout and highlighting do not
+create another graph or selection truth.
 
 Candidate relations contain:
 

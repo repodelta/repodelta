@@ -190,8 +190,10 @@ file → class → method without becoming runtime/test paths or consuming path
 budgets. The catalog normalizes revision provenance and converges it into one
 review-level retained/added/removed ownership identity when opposite-revision
 coverage makes that conclusion safe. Incomplete coverage remains provenance
-plus a diagnostic. The current review graph does not yet render hierarchy or
-semantic zoom.
+plus a diagnostic. The shared review graph renders that canonical hierarchy
+beside executable relations and lets reviewers hide its ownership-only context
+without changing graph membership. Nested containers and semantic zoom remain
+future presentation work.
 
 #### Structure-aware review using another checkout
 

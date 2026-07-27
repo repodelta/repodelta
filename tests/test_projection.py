@@ -134,7 +134,10 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
     assert html.index("Structural delta graph") < html.index(
         '<div class="requirements">'
     )
-    assert "0 connected nodes · 0 canonical edges · 1 isolated changed anchor" in html
+    assert (
+        "0 connected nodes · 0 executable edges · 0 ownership edges · "
+        "1 isolated changed anchor"
+    ) in html
     assert 'data-focus-target="R1"' in html
     assert 'class="requirement" data-focus-id="R1" open' in html
     assert 'requirement.querySelector("summary").addEventListener("click"' in html
@@ -317,6 +320,21 @@ def test_canonical_ownership_projects_recursive_shared_focus_hierarchy() -> None
         )
     )
     assert len(projection.review_graph.ownership_edges) == 2
+    html = _review_graph(
+        projection.review_graph,
+        projection,
+        SimpleNamespace(evidence_catalog=evidence),
+    )
+    assert (
+        "3 connected nodes · 0 executable edges · 2 ownership edges · "
+        "0 isolated changed anchors"
+    ) in html
+    assert html.count('class="ownership-edge operation-retained"') == 2
+    assert html.count('data-focuses="R1 R2"') >= 2
+    assert html.count("contains · retained") == 2
+    assert 'class="hierarchy-toggle active"' in html
+    assert 'aria-pressed="true"' in html
+    assert 'class="delta-node operation-context ownership-only"' in html
 
     cyclic_evidence = replace(
         evidence,
@@ -798,7 +816,10 @@ def test_review_graph_renders_complete_focus_union() -> None:
         SimpleNamespace(evidence_catalog=evidence),
     )
 
-    assert "4 connected nodes · 3 canonical edges · 1 isolated changed anchor" in html
+    assert (
+        "4 connected nodes · 3 executable edges · 0 ownership edges · "
+        "1 isolated changed anchor"
+    ) in html
     assert html.count('class="delta-node operation-') == 4
     assert html.count('class="isolated-anchor operation-') == 1
     assert html.count('class="delta-edge operation-') == 3

@@ -161,8 +161,9 @@ normalizes each revision relation as provenance, then emits at most one
 review-level `StructuralOwnershipChangeIdentity` per provider parent/child
 pair. Added/removed ownership requires an added/removed endpoint or complete,
 applicable opposite-revision coverage; otherwise the observation remains
-provenance with a partial-coverage diagnostic. Review-graph hierarchy remains
-a downstream responsibility.
+provenance with a partial-coverage diagnostic. Projection owns the canonical
+review hierarchy; presentation consumes its IDs without recovering ownership
+from paths, names, or symbol kinds.
 
 Missing patches, stale or missing indexes, unindexed code, unmatched lines,
 and unavailable base input remain explicit diagnostics. A graph failure never
@@ -276,6 +277,9 @@ Projection follows only typed review-level ownership from each selected
 structural node to its ancestors, stores shared hierarchy once, and exposes
 focus-specific ownership edge IDs. It does not query Codegraph, re-run
 head/base convergence, or infer hierarchy from names and paths.
+The single structural SVG lays out executable and ownership edges together.
+Its focus and Structure controls only change emphasis or visibility of those
+canonical IDs; they do not create a second graph truth.
 Context facts join an overlay only when selected structural support connects
 them.
 Profiles remain canonical in `ProjectionCandidateSet`; convergence and routing

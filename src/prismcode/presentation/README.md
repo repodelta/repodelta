@@ -17,14 +17,13 @@ does not infer execution or absence. Boundary observations resolve selected
 fact IDs and display their typed per-surface coverage without interpreting
 candidate matches.
 The structural delta view resolves the shared canonical graph and focus-overlay
-IDs. Its deterministic SVG layout, operation styling, isolated-anchor
-disclosure, and client-side focus highlighting are presentation only. Focus
-controls toggle existing node/edge memberships and never recalculate an
-association or relation.
-
-Canonical ownership edges are currently contract input but are not yet laid
-out as SVG hierarchy. The hierarchy renderer atom will consume those IDs
-directly; presentation must not recover parentage from symbol names or paths.
+IDs. Its deterministic SVG layout includes executable edges and the separate
+canonical ownership hierarchy. Operation styling, isolated-anchor disclosure,
+and client-side focus highlighting are presentation only. Focus controls
+toggle existing node/edge memberships, while the Structure control only hides
+or shows ownership edges and ownership-only context nodes. Neither control
+recalculates an association, relation, or parentage. Presentation must not
+recover parentage from symbol names, paths, or node kinds.
 
 ## Must not
 
