@@ -15,7 +15,12 @@ Canonical statements, scan results, and `EvidenceCatalog` → unselected
 Eligibility precedes association. Every explicit R/G is visited. Relations
 reference canonical IDs, retain typed association reasons, and carry no
 selection state. Phrase association requires two shared meaningful terms and at
-least one term authorized by the review-local discriminative vocabulary.
+least one review-focus discriminative term. Within each fact-profile lane, a
+more discriminative changed-anchor phrase cohort replaces generic phrase
+fan-out; otherwise anchors sharing one legitimate implementation meaning remain
+a set. Documentation, production, and test facts never suppress one another.
+This focus-relevant anchor relation set is the only authority that may seed
+structural path, runtime, or test expansion.
 Document frequency is computed over unique semantic meanings, so duplicate
 focus text retains the same authority. Exact identifiers, explicit references,
 and provider associations do not depend on phrase distinctiveness. Claim

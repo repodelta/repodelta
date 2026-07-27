@@ -131,7 +131,7 @@ def build_projection_candidates(
         eligible_anchors = tuple(
             item for item in changed if eligible_changed_anchor(item, profile, focus)
         )
-        anchor_relations = _anchor_relations(
+        anchor_relations = _focus_relevant_anchor_relations(
             focus,
             associated_claims,
             claims,
@@ -376,7 +376,7 @@ def _claim_relations(
     return tuple(sorted(result, key=_candidate_key))
 
 
-def _anchor_relations(
+def _focus_relevant_anchor_relations(
     focus: Requirement,
     associated_claim_ids: set[str],
     claims: tuple[ReviewStatement, ...],
@@ -385,7 +385,15 @@ def _anchor_relations(
     focus_distinctive_terms: frozenset[str],
     claim_distinctive_terms: dict[str, frozenset[str]],
 ) -> tuple[ProjectionRelation, ...]:
+    """Return the sole changed-anchor authority for one review focus."""
+
     claims_by_id = {item.id: item for item in claims}
+    direct_anchor_terms = distinctive_signature_terms(
+        tuple(
+            (anchor.id, evidence_signature(anchor, focus))
+            for anchor in anchors
+        )
+    )
     anchor_terms_by_claim = {
         claim_id: distinctive_signature_terms(
             tuple(
@@ -396,6 +404,33 @@ def _anchor_relations(
         for claim_id in associated_claim_ids
         for claim in (claims_by_id.get(claim_id),)
         if claim is not None
+    }
+    direct_reasons_by_anchor = {
+        anchor.id: evidence_reasons(
+            focus,
+            evidence_signature(anchor, focus),
+            distinctive_terms=focus_distinctive_terms,
+        )
+        for anchor in anchors
+    }
+    discriminative_direct_reasons_by_anchor = {
+        anchor.id: evidence_reasons(
+            focus,
+            evidence_signature(anchor, focus),
+            distinctive_terms=(
+                focus_distinctive_terms
+                & direct_anchor_terms.get(anchor.id, frozenset())
+            ),
+        )
+        for anchor in anchors
+    }
+    discriminative_phrase_profiles = {
+        anchor.profile
+        for anchor in anchors
+        if (
+            reasons := discriminative_direct_reasons_by_anchor[anchor.id]
+        )
+        and reasons[0].kind == "distinctive_phrase"
     }
     result = []
     for ordinal, anchor in enumerate(anchors):
@@ -419,10 +454,12 @@ def _anchor_relations(
                 )
             )
             continue
-        direct = evidence_reasons(
-            focus,
-            evidence_signature(anchor, focus),
-            distinctive_terms=focus_distinctive_terms,
+        direct = _converged_direct_reasons(
+            direct_reasons_by_anchor[anchor.id],
+            discriminative_direct_reasons_by_anchor[anchor.id],
+            has_discriminative_phrase_cohort=(
+                anchor.profile in discriminative_phrase_profiles
+            ),
         )
         bridges = []
         bridge_matched_terms: set[str] = set()
@@ -482,6 +519,23 @@ def _anchor_relations(
                 )
             )
     return tuple(sorted(result, key=_candidate_key))
+
+
+def _converged_direct_reasons(
+    direct: tuple[AssociationReason, ...],
+    discriminative: tuple[AssociationReason, ...],
+    *,
+    has_discriminative_phrase_cohort: bool,
+) -> tuple[AssociationReason, ...]:
+    if not direct:
+        return ()
+    if direct[0].kind == "exact_identifier":
+        return direct
+    if discriminative:
+        return discriminative
+    if has_discriminative_phrase_cohort:
+        return ()
+    return direct
 
 
 def _structural_relations(

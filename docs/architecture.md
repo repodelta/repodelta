@@ -237,9 +237,16 @@ reference, exact identifier, distinctive phrase, claim bridge, structural
 bridge, and current-head observation. Explicit R/G references are recognized
 only across authored statement boundaries, never in arbitrary code or fixture
 text. Phrase relations require two shared terms plus a term discriminative
-among the review's unique focus meanings. Claim bridges additionally require
-that term to be discriminative among eligible anchors. This is deterministic
-boolean eligibility, not a relevance score or top-k selector.
+among the review's unique focus meanings. If the eligible changed-anchor corpus
+offers a more discriminative phrase cohort within the same fact-profile lane,
+it replaces generic phrase fan-out in that lane. Otherwise anchors sharing one
+legitimate implementation meaning remain a set. Production, test,
+documentation, and other typed lanes do not suppress one another. Claim
+bridges require a term discriminative for the selected authored claim and its
+eligible anchors. The resulting typed changed-anchor relation set is the only
+authority that may sponsor focus-level structural paths or runtime/test
+context. This is deterministic set convergence, not a relevance score or
+top-k selector.
 
 `CandidateConvergence` then applies typed dominance, bridge reachability, and
 identity safety limits inside one R/G and one slot at a time. Claims remain
