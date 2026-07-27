@@ -12,7 +12,7 @@ from prismcode.model.contracts import (
     ProjectionDiagnostic,
     ProjectionRelation,
     ProjectionSlot,
-    StructuralSupportSet,
+    ReviewRelevantStructuralClosure,
 )
 
 
@@ -40,7 +40,7 @@ class ConvergencePolicy:
 class _StructuralSelection:
     selected: tuple[ProjectionRelation, ...]
     deferred: tuple[ProjectionRelation, ...]
-    support: StructuralSupportSet
+    closure: ReviewRelevantStructuralClosure
 
 
 _SLOT_ORDER: tuple[ProjectionSlot, ...] = (
@@ -91,7 +91,7 @@ def converge_candidates(
         deferred_ids: list[str] = []
         focus_diagnostics: list[ProjectionDiagnostic] = []
         selected_targets: dict[ProjectionSlot, set[str]] = {}
-        structural_support = StructuralSupportSet()
+        structural_closure = ReviewRelevantStructuralClosure()
 
         for slot in _SLOT_ORDER:
             if slot in {"runtime_context", "test_context"}:
@@ -135,7 +135,7 @@ def converge_candidates(
                 )
                 selected = structural.selected
                 deferred = structural.deferred
-                structural_support = structural.support
+                structural_closure = structural.closure
                 for context_slot in ("runtime_context", "test_context"):
                     selected_targets[context_slot] = {
                         item.target_id
@@ -198,7 +198,7 @@ def converge_candidates(
                 focus_statement_id=candidate_group.focus_statement_id,
                 selected_relation_ids=tuple(selected_ids),
                 deferred_relation_ids=tuple(deferred_ids),
-                structural_support=structural_support,
+                structural_closure=structural_closure,
                 diagnostic_ids=tuple(item.id for item in focus_diagnostics),
             )
         )
@@ -626,15 +626,52 @@ def _converge_structural_context(
         )
         if item.id not in selected_ids
     )
+    relevant_provider_ids = {
+        provider_id
+        for target_id in (
+            *selected_anchor_ids,
+            *selected_contexts,
+        )
+        if (provider_id := _provider_symbol_id(evidence.get(target_id)))
+        is not None
+    }
+    for path in selected_paths.values():
+        for step in evidence[path.target_id].metadata.get("steps", ()):
+            for endpoint in ("source_evidence_id", "target_evidence_id"):
+                endpoint_id = step.get(endpoint)
+                provider_id = _provider_symbol_id(evidence.get(endpoint_id))
+                if provider_id is not None:
+                    relevant_provider_ids.add(provider_id)
+    relation_change_evidence_ids = tuple(
+        item.id
+        for item in evidence.values()
+        if item.structural_relation_change is not None
+        and item.structural_relation_change.source_provider_symbol_id
+        in relevant_provider_ids
+        and item.structural_relation_change.target_provider_symbol_id
+        in relevant_provider_ids
+    )
     return _StructuralSelection(
         selected=selected,
         deferred=deferred,
-        support=StructuralSupportSet(
+        closure=ReviewRelevantStructuralClosure(
             path_relation_ids=tuple(
                 item.id for item in selected_paths.values()
             ),
+            relation_change_evidence_ids=relation_change_evidence_ids,
         ),
     )
+
+
+def _provider_symbol_id(item: EvidenceItem | None) -> str | None:
+    if item is None:
+        return None
+    if item.kind == "structural_change" and item.structural_change is not None:
+        return item.structural_change.provider_symbol_id
+    if item.kind == "symbol":
+        value = item.metadata.get("symbol_id")
+        return str(value) if value else None
+    return None
 
 
 def _path_depth(

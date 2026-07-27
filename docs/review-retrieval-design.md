@@ -348,10 +348,11 @@ Candidate relations contain:
 
 `CandidateConvergence` separately references selected and deferred relation
 IDs plus typed ambiguity and budget diagnostics. Each convergence group also
-owns one reference-only `StructuralSupportSet` containing exactly the selected
-shortest terminal support. Deferred relation IDs are the sole provenance for
-unselected paths. Projection does not repeat path/terminal selection. Selection
-truth is not copied onto each routed relation.
+owns one reference-only `ReviewRelevantStructuralClosure` containing selected
+shortest terminal paths and already-collected relation-change fact IDs whose
+endpoints are review-relevant. Deferred relation IDs are the sole provenance
+for unselected paths. Projection does not repeat path, terminal, or edge
+relevance selection. Selection truth is not copied onto each routed relation.
 
 This replaces the current use of one untyped `statement_evidence` relation for
 every evidence role. It does not create a second evidence store.

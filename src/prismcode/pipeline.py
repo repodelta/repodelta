@@ -68,7 +68,10 @@ class DeterministicAnalyzer:
             projection_candidates,
             evidence_catalog=evidence_catalog,
         )
-        candidate_convergence.validate_consistency(projection_candidates)
+        candidate_convergence.validate_consistency(
+            projection_candidates,
+            evidence_catalog,
+        )
         projection = build_review_projection(
             projection_candidates,
             candidate_convergence,
