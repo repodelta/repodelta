@@ -128,6 +128,8 @@ one Codegraph index in each, runs structural mapping and head guardrail scans,
 then removes both worktrees and indexes after success or failure. The source
 repository must already contain both commit objects. This mode requires either
 a `codegraph` executable or `npx` on `PATH`.
+The bundled review workflow checks out full history so both GitHub PR revision
+objects are available; other CI integrations must provision the same input.
 
 Use `--no-structural-graph` for the explicit dependency-free path. PrismCode
 still creates and removes an exact temporary head worktree for bounded

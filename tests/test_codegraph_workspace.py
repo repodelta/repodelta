@@ -220,3 +220,9 @@ def test_required_revision_is_validated_before_worktree_creation(
             raise AssertionError("missing revision must prevent review")
 
     assert runner.commands == []
+
+
+def test_live_review_workflow_provisions_pr_revision_objects() -> None:
+    workflow = Path(".github/workflows/review.yml").read_text(encoding="utf-8")
+
+    assert "uses: actions/checkout@v4\n        with:\n          fetch-depth: 0" in workflow
