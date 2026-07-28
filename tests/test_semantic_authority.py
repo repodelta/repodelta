@@ -145,6 +145,36 @@ def test_nested_lists_flatten_leaves_with_parent_context() -> None:
     ]
 
 
+def test_authored_statement_labels_do_not_enter_canonical_text() -> None:
+    parsed = parse_markdown_semantics(
+        "## Goals\n"
+        "- O4: Preserve source authority.\n\n"
+        "## Scope\n"
+        "- S2: Normalize only explicit labels.\n\n"
+        "## Acceptance criteria\n"
+        "- R7: Assign canonical requirement identities.\n\n"
+        "## Scope guardrails\n"
+        "- G3: Do not infer labels from prose.\n\n"
+        "## Verification\n"
+        "- VC9: Semantic tests pass.\n"
+    )
+
+    assert [item.text for item in parsed.items] == [
+        "Preserve source authority.",
+        "Normalize only explicit labels.",
+        "Assign canonical requirement identities.",
+        "Do not infer labels from prose.",
+        "Semantic tests pass.",
+    ]
+    claims = parse_markdown_semantics(
+        "## Summary\n"
+        "- R1: Connect the canonical parser.\n"
+    )
+    assert [item.text for item in claims.items] == [
+        "R1: Connect the canonical parser."
+    ]
+
+
 def test_code_fences_do_not_create_semantic_items() -> None:
     parsed = parse_markdown_semantics(
         "## Implementation\n"
@@ -311,6 +341,95 @@ def test_pr_acceptance_criteria_are_provisional_without_linked_issue() -> None:
     assert html.index("Goals · 1 statement") < html.index("Review checks")
     assert "Preserve deterministic review behavior." in html
     assert "Introduces a read-only provider boundary." in html
+
+
+def test_guardrail_and_verification_aliases_preserve_source_authority() -> None:
+    packet = _packet(
+        issue_body=(
+            "## Scope guardrails\n"
+            "- G1: No parallel semantic parser.\n\n"
+            "## Constraints\n"
+            "- G2: Do not infer acceptance.\n\n"
+            "## Regression coverage\n"
+            "- V1: Cover source-aware guardrail extraction.\n\n"
+            "## Validation results\n"
+            "- V2: Confirm every statement retains its source line.\n\n"
+            "## Guardrail discussion for maintainers\n"
+            "- This near-match prose heading is not a guardrail.\n"
+        ),
+        pr_body=(
+            "## Safety boundaries\n"
+            "- No renderer fallback is introduced.\n\n"
+            "## Test evidence\n"
+            "- Semantic authority tests pass.\n\n"
+            "## Regression coverage notes for maintainers\n"
+            "- This near-match prose heading is not verification evidence.\n"
+        ),
+    )
+
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+
+    assert [
+        (item.id, item.authority, item.text, item.sources[0].label)
+        for item in brief.guardrails
+    ] == [
+        (
+            "G1",
+            "issue",
+            "No parallel semantic parser.",
+            "linked issue · Scope guardrails",
+        ),
+        (
+            "G2",
+            "issue",
+            "Do not infer acceptance.",
+            "linked issue · Constraints",
+        ),
+    ]
+    assert [
+        (item.id, item.authority, item.text, item.sources[0].label)
+        for item in brief.verification_expectations
+    ] == [
+        (
+            "V1",
+            "issue",
+            "Cover source-aware guardrail extraction.",
+            "linked issue · Regression coverage",
+        ),
+        (
+            "V2",
+            "issue",
+            "Confirm every statement retains its source line.",
+            "linked issue · Validation results",
+        ),
+    ]
+    assert [
+        (item.id, item.purpose, item.authority, item.text, item.sources[0].label)
+        for item in brief.claims
+    ] == [
+        (
+            "C1",
+            "boundary",
+            "pr_description",
+            "No renderer fallback is introduced.",
+            "pull request description · Safety boundaries",
+        ),
+        (
+            "VC1",
+            "verification",
+            "pr_description",
+            "Semantic authority tests pass.",
+            "pull request description · Test evidence",
+        ),
+    ]
+    assert all(
+        item.sources[0].line_start is not None
+        for item in (
+            *brief.guardrails,
+            *brief.verification_expectations,
+            *brief.claims,
+        )
+    )
 
 
 def test_issue_acceptance_is_primary_but_pr_claims_remain_context() -> None:

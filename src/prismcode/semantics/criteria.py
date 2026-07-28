@@ -90,11 +90,20 @@ _SCOPE_HEADINGS = {
     "what this change includes",
 }
 _BOUNDARY_HEADINGS = {
-    "out of scope",
-    "non-goals",
-    "non goals",
     "boundary",
     "boundaries",
+    "change constraints",
+    "constraints",
+    "guardrail",
+    "guardrails",
+    "implementation constraints",
+    "non goals",
+    "non-goals",
+    "out of scope",
+    "safety boundaries",
+    "safety boundary",
+    "scope guardrail",
+    "scope guardrails",
 }
 _BASELINE_HEADINGS = {"baseline", "baselines", "result", "results"}
 _VERIFICATION_HEADINGS = {
@@ -108,8 +117,13 @@ _VERIFICATION_HEADINGS = {
     "how to verify",
     "manual testing",
     "quality checks",
+    "regression coverage",
+    "regression testing",
+    "regression tests",
     "test cases",
     "test coverage",
+    "test evidence",
+    "test results",
     "verification",
     "verification criteria",
     "verification expectations",
@@ -123,6 +137,8 @@ _VERIFICATION_HEADINGS = {
     "test strategy",
     "testing performed",
     "validation",
+    "validation evidence",
+    "validation results",
     "validation strategy",
     "verification approach",
 }
@@ -144,6 +160,20 @@ _LIST_ITEM_RE = re.compile(
     re.IGNORECASE,
 )
 _INLINE_NUMBER_RE = re.compile(r"(?:(?<=^)|(?<=[;\uff1b]))\s*(?:\d+[.)]|\(\d+\))\s*")
+_STATEMENT_LABEL_RE = re.compile(
+    r"^(?P<prefix>R|G|V|O|S|C|B|VC|AC|REQ)[-_ ]?\d+"
+    r"\s*[:.\u3001]\s*",
+    re.IGNORECASE,
+)
+_LABEL_PREFIXES_BY_PURPOSE: dict[StatementPurpose, frozenset[str]] = {
+    "acceptance": frozenset({"R", "AC", "REQ"}),
+    "baseline": frozenset({"B"}),
+    "boundary": frozenset({"G"}),
+    "goal": frozenset({"O"}),
+    "implementation": frozenset({"C"}),
+    "scope": frozenset({"S"}),
+    "verification": frozenset({"V", "VC"}),
+}
 _HEADING_RE = re.compile(r"^\s{0,3}#{1,6}\s+(.+?)\s*#*\s*$")
 _FENCE_RE = re.compile(r"^\s*(```+|~~~+)")
 _HEADING_DECORATION_RE = re.compile(r"^[^a-z0-9]+|[^a-z0-9]+$")
@@ -224,6 +254,23 @@ def _split_explicit_inline_items(value: str) -> tuple[str, ...]:
             parts.append(part)
     parts = [part for part in parts if part]
     return tuple(parts) if len(parts) >= 2 else (value,)
+
+
+def _strip_explicit_statement_label(
+    value: str,
+    *,
+    purpose: StatementPurpose,
+) -> str:
+    """Discard authored display IDs before assigning canonical typed IDs."""
+
+    match = _STATEMENT_LABEL_RE.match(value)
+    if (
+        match is not None
+        and match.group("prefix").upper()
+        in _LABEL_PREFIXES_BY_PURPOSE.get(purpose, ())
+    ):
+        return value[match.end() :]
+    return value
 
 
 def parse_markdown_semantics(body: str | None) -> ParsedBody:
@@ -333,7 +380,10 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
                     list_items[parent].has_children = True
                 list_items.append(
                     _ListItem(
-                        text=list_match.group("text"),
+                        text=_strip_explicit_statement_label(
+                            list_match.group("text"),
+                            purpose=current_purpose,
+                        ),
                         role=current_role,
                         purpose=current_purpose,
                         section=current_section,
