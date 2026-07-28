@@ -23,6 +23,7 @@ from prismcode.model.contracts import (
     ReviewSourcePacket,
     SourceRef,
     StructuralChangeIdentity,
+    StructuralReplacementCandidate,
     StructuralOwnershipChangeIdentity,
     StructuralOwnershipIdentity,
     StructuralRelationChangeIdentity,
@@ -93,6 +94,7 @@ def build_evidence_catalog(
     )
     ownership_diagnostics: tuple[Diagnostic, ...] = ()
     structural_relation_diagnostics: tuple[Diagnostic, ...] = ()
+    replacement_candidates: tuple[StructuralReplacementCandidate, ...] = ()
     if structural_graph is not None:
         for revision_graph in structural_graph.revisions:
             for overlap in revision_graph.overlaps:
@@ -155,6 +157,10 @@ def build_evidence_catalog(
             change_relations=change_relations,
             changed_files=packet.changed_files,
         )
+        replacement_candidates = _structural_replacement_candidates(
+            items,
+            change_relations,
+        )
         ownership_diagnostics = _put_structural_ownership_changes(
             items,
             structural_graph,
@@ -184,6 +190,7 @@ def build_evidence_catalog(
     catalog = EvidenceCatalog(
         items=tuple(sorted(items.values(), key=lambda item: item.id)),
         change_relations=change_relations,
+        structural_replacement_candidates=replacement_candidates,
         diagnostics=(
             *changes.diagnostics,
             *ownership_diagnostics,
@@ -207,6 +214,50 @@ def build_evidence_catalog(
     )
     catalog.validate_consistency()
     return catalog
+
+
+def _structural_replacement_candidates(
+    items: dict[str, EvidenceItem],
+    change_relations: tuple[ChangeRelation, ...],
+) -> tuple[StructuralReplacementCandidate, ...]:
+    """Pair exact removed/added deltas without changing their authority."""
+
+    replaced_relation_ids = {
+        relation.id for relation in change_relations if relation.kind == "replaced"
+    }
+    removed = tuple(
+        item
+        for item in items.values()
+        if item.kind == "structural_change" and item.operation == "removed"
+    )
+    added = tuple(
+        item
+        for item in items.values()
+        if item.kind == "structural_change" and item.operation == "added"
+    )
+    candidates: dict[str, StructuralReplacementCandidate] = {}
+    for old in removed:
+        for new in added:
+            if old.metadata.get("symbol_kind") != new.metadata.get("symbol_kind"):
+                continue
+            shared_relation_ids = tuple(
+                sorted(
+                    set(old.change_relation_ids)
+                    & set(new.change_relation_ids)
+                    & replaced_relation_ids
+                )
+            )
+            if not shared_relation_ids:
+                continue
+            identity = f"{old.id}\0{new.id}"
+            candidate = StructuralReplacementCandidate(
+                id=evidence_id("structural_replacement_candidate", identity),
+                removed_change_evidence_id=old.id,
+                added_change_evidence_id=new.id,
+                change_relation_ids=shared_relation_ids,
+            )
+            candidates[candidate.id] = candidate
+    return tuple(sorted(candidates.values(), key=lambda item: item.id))
 
 
 def _put_structural_revision(
