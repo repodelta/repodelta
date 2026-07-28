@@ -20,6 +20,7 @@ from prismcode.model.contracts import (
     StructuralGraphEdge,
     StructuralGraphNode,
     StructuralGraphOwnershipEdge,
+    StructuralGraphPlacement,
 )
 
 
@@ -60,6 +61,8 @@ def build_review_projection(
     graph_edges: dict[str, StructuralGraphEdge] = {}
     graph_ownership_edge_order: list[str] = []
     graph_ownership_edges: dict[str, StructuralGraphOwnershipEdge] = {}
+    graph_placement_order: list[str] = []
+    graph_placements: dict[str, StructuralGraphPlacement] = {}
     graph_path_relation_ids: list[str] = []
     backbone_seed_node_ids: list[str] = []
 
@@ -81,7 +84,7 @@ def build_review_projection(
                 "boundary_fact",
             )
         }
-        overlay, nodes, edges, ownership_edges = _structural_focus_overlay(
+        overlay, nodes, edges, ownership_edges, placements = _structural_focus_overlay(
             path_relations=tuple(
                 relations[relation_id]
                 for relation_id in converged.structural_closure.path_relation_ids
@@ -163,6 +166,14 @@ def build_review_projection(
                 raise ValueError(
                     "canonical structural ownership edge identity is inconsistent"
                 )
+        for placement in placements:
+            if placement.id not in graph_placements:
+                graph_placement_order.append(placement.id)
+                graph_placements[placement.id] = placement
+            elif graph_placements[placement.id] != placement:
+                raise ValueError(
+                    "canonical structural placement identity is inconsistent"
+                )
         graph_path_relation_ids.extend(overlay.path_relation_ids)
         slices.append(
             ReviewSlice(
@@ -229,6 +240,10 @@ def build_review_projection(
         graph_ownership_edges[edge_id]
         for edge_id in graph_ownership_edge_order
     )
+    complete_placements = tuple(
+        graph_placements[placement_id]
+        for placement_id in graph_placement_order
+    )
     (
         backbone_node_ids,
         backbone_edge_ids,
@@ -237,6 +252,7 @@ def build_review_projection(
         nodes=complete_nodes,
         edges=complete_edges,
         ownership_edges=complete_ownership_edges,
+        placements=complete_placements,
         seed_node_ids=tuple(dict.fromkeys(backbone_seed_node_ids)),
     )
     projection = ReviewProjection(
@@ -245,6 +261,7 @@ def build_review_projection(
             nodes=complete_nodes,
             edges=complete_edges,
             ownership_edges=complete_ownership_edges,
+            placements=complete_placements,
             backbone_node_ids=backbone_node_ids,
             backbone_edge_ids=backbone_edge_ids,
             backbone_ownership_edge_ids=backbone_ownership_edge_ids,
@@ -305,6 +322,7 @@ def _change_backbone(
     nodes: tuple[StructuralGraphNode, ...],
     edges: tuple[StructuralGraphEdge, ...],
     ownership_edges: tuple[StructuralGraphOwnershipEdge, ...],
+    placements: tuple[StructuralGraphPlacement, ...] = (),
     seed_node_ids: tuple[str, ...],
 ) -> tuple[tuple[str, ...], tuple[str, ...], tuple[str, ...]]:
     """Project the default change backbone without deleting complete support."""
@@ -350,6 +368,25 @@ def _change_backbone(
                 backbone_nodes.add(edge.parent_node_id)
                 frontier.append(edge.parent_node_id)
 
+    placement_parents_by_child: dict[str, list[str]] = {}
+    for placement in placements:
+        placement_parents_by_child.setdefault(
+            placement.child_node_id, []
+        ).append(placement.parent_node_id)
+    frontier = list(backbone_nodes)
+    expanded.clear()
+    while frontier:
+        child_node_id = frontier.pop(0)
+        if child_node_id in expanded:
+            continue
+        expanded.add(child_node_id)
+        for parent_node_id in placement_parents_by_child.get(
+            child_node_id, ()
+        ):
+            if parent_node_id not in backbone_nodes:
+                backbone_nodes.add(parent_node_id)
+                frontier.append(parent_node_id)
+
     return (
         tuple(item.id for item in nodes if item.id in backbone_nodes),
         tuple(item.id for item in edges if item.id in backbone_edges),
@@ -375,6 +412,7 @@ def _structural_focus_overlay(
     tuple[StructuralGraphNode, ...],
     tuple[StructuralGraphEdge, ...],
     tuple[StructuralGraphOwnershipEdge, ...],
+    tuple[StructuralGraphPlacement, ...],
 ]:
     """Build one focus overlay from canonical change and relation-change facts."""
 
@@ -477,11 +515,35 @@ def _structural_focus_overlay(
             )
         )
 
+    placements = []
+    placement_ids = []
+    placements_by_child, nodes_by_placement_id = _placements_by_child(evidence)
+    frontier = list(nodes_by_review_id)
+    expanded: set[str] = set()
+    while frontier:
+        child_review_id = frontier.pop(0)
+        if child_review_id in expanded:
+            continue
+        expanded.add(child_review_id)
+        for placement in placements_by_child.get(child_review_id, ()):
+            parent_review_id = nodes_by_placement_id[placement.id]
+            if parent_review_id not in nodes_by_review_id:
+                nodes_by_review_id[parent_review_id] = _node_for_review_symbol(
+                    parent_review_id,
+                    evidence=evidence,
+                    symbols_by_review_id=symbols_by_review_id,
+                    changed_files=changed_files,
+                )
+                node_path_ids.setdefault(parent_review_id, [])
+                frontier.append(parent_review_id)
+            placement_ids.append(placement.id)
+            placements.append(placement)
+
     ownership_edges = []
     ownership_edge_ids = []
     ownership_by_child = _ownership_changes_by_child(evidence)
     frontier = list(nodes_by_review_id)
-    expanded: set[str] = set()
+    expanded.clear()
     while frontier:
         child_review_id = frontier.pop(0)
         if child_review_id in expanded:
@@ -519,6 +581,7 @@ def _structural_focus_overlay(
                 review_symbol_id=node.review_symbol_id,
                 delta=node.delta,
                 evidence_ids=node.evidence_ids,
+                display_evidence_id=node.display_evidence_id,
                 path_relation_ids=tuple(
                     dict.fromkeys(node_path_ids.get(review_id, ()))
                 ),
@@ -542,11 +605,13 @@ def _structural_focus_overlay(
             nodes=overlay_nodes,
             edge_ids=tuple(edge_ids),
             ownership_edge_ids=tuple(dict.fromkeys(ownership_edge_ids)),
+            placement_ids=tuple(dict.fromkeys(placement_ids)),
             path_relation_ids=tuple(dict.fromkeys(overlay_path_relation_ids)),
         ),
         graph_nodes,
         tuple(edges),
         tuple(ownership_edges),
+        tuple(placements),
     )
 
 
@@ -563,6 +628,56 @@ def _ownership_changes_by_child(
         child_id: tuple(sorted(items, key=lambda item: item.id))
         for child_id, items in grouped.items()
     }
+
+
+def _placements_by_child(
+    evidence: dict[str, EvidenceItem],
+) -> tuple[
+    dict[str, tuple[StructuralGraphPlacement, ...]],
+    dict[str, str],
+]:
+    grouped: dict[tuple[str, str], dict[str, list[str]]] = {}
+    for item in evidence.values():
+        identity = item.structural_ownership
+        if item.kind != "structural_ownership" or identity is None:
+            continue
+        parent = evidence.get(identity.parent_symbol_evidence_id)
+        child = evidence.get(identity.child_symbol_evidence_id)
+        parent_review_id = _review_symbol_id(parent) if parent is not None else None
+        child_review_id = _review_symbol_id(child) if child is not None else None
+        if parent_review_id is None or child_review_id is None:
+            raise ValueError(
+                f"{item.id}: structural ownership references symbols without "
+                "review identities"
+            )
+        by_revision = grouped.setdefault(
+            (parent_review_id, child_review_id),
+            {"base": [], "head": []},
+        )
+        by_revision[item.revision_side].append(item.id)
+    by_child: dict[str, list[StructuralGraphPlacement]] = {}
+    parent_by_placement_id: dict[str, str] = {}
+    for (parent_review_id, child_review_id), by_revision in sorted(grouped.items()):
+        placement_id = _structural_placement_id(
+            parent_review_id,
+            child_review_id,
+        )
+        placement = StructuralGraphPlacement(
+            id=placement_id,
+            parent_node_id=_structural_node_id(parent_review_id),
+            child_node_id=_structural_node_id(child_review_id),
+            base_ownership_evidence_ids=tuple(sorted(by_revision["base"])),
+            head_ownership_evidence_ids=tuple(sorted(by_revision["head"])),
+        )
+        by_child.setdefault(child_review_id, []).append(placement)
+        parent_by_placement_id[placement_id] = parent_review_id
+    return (
+        {
+            child_review_id: tuple(items)
+            for child_review_id, items in by_child.items()
+        },
+        parent_by_placement_id,
+    )
 
 
 def _review_symbol_id(item: EvidenceItem) -> str | None:
@@ -633,12 +748,47 @@ def _node_for_review_symbol(
         if anchor is not None and anchor.changed
         else _support_node_delta(symbol_items, changed_files)
     )
+    display_evidence_id = _display_evidence_id(
+        delta,
+        evidence_ids,
+        evidence,
+    )
     return StructuralGraphNode(
         id=_structural_node_id(review_id),
         review_symbol_id=review_id,
         delta=delta,
         evidence_ids=evidence_ids,
+        display_evidence_id=display_evidence_id,
     )
+
+
+def _display_evidence_id(
+    delta: str,
+    evidence_ids: tuple[str, ...],
+    evidence: dict[str, EvidenceItem],
+) -> str:
+    """Choose one revision-aware source fact for canonical graph presentation."""
+
+    desired_revision = "base" if delta == "removed" else "head"
+    available = tuple(
+        evidence[evidence_id]
+        for evidence_id in evidence_ids
+        if evidence_id in evidence
+    )
+    desired = tuple(
+        item for item in available if item.revision_side == desired_revision
+    )
+    candidates = desired or available
+    if not candidates:
+        raise ValueError("structural graph node has no display evidence")
+    return min(
+        candidates,
+        key=lambda item: (
+            0 if item.kind == "structural_change" else 1,
+            0 if item.kind == "symbol" else 1,
+            item.id,
+        ),
+    ).id
 
 
 def _node_delta(operation: str) -> str:
@@ -657,6 +807,15 @@ def _support_node_delta(
     symbol_items: tuple[EvidenceItem, ...],
     changed_files: tuple[ChangedFile, ...],
 ) -> str:
+    changed_operations = {
+        item.operation
+        for item in symbol_items
+        if item.changed
+        and item.operation
+        in {"added", "modified", "renamed", "removed"}
+    }
+    if len(changed_operations) == 1:
+        return next(iter(changed_operations))
     if any(item.metadata.get("symbol_kind") == "file" for item in symbol_items):
         symbol_paths = {
             str(item.metadata["path"])
@@ -688,11 +847,17 @@ def _merge_node(
             "canonical structural graph node delta is inconsistent: "
             f"{left.review_symbol_id} ({left.delta} != {right.delta})"
         )
+    if left.display_evidence_id != right.display_evidence_id:
+        raise ValueError(
+            "canonical structural graph node display evidence is inconsistent: "
+            f"{left.review_symbol_id}"
+        )
     return StructuralGraphNode(
         id=left.id,
         review_symbol_id=left.review_symbol_id,
         delta=left.delta,
         evidence_ids=tuple(dict.fromkeys((*left.evidence_ids, *right.evidence_ids))),
+        display_evidence_id=left.display_evidence_id,
         path_relation_ids=tuple(
             dict.fromkeys((*left.path_relation_ids, *right.path_relation_ids))
         ),
@@ -735,3 +900,12 @@ def _merge_edge(
 def _structural_node_id(review_symbol_id: str) -> str:
     digest = hashlib.sha256(review_symbol_id.encode("utf-8")).hexdigest()
     return f"SN:{digest[:20]}"
+
+
+def _structural_placement_id(
+    parent_review_symbol_id: str,
+    child_review_symbol_id: str,
+) -> str:
+    identity = f"{parent_review_symbol_id}\0{child_review_symbol_id}"
+    digest = hashlib.sha256(identity.encode("utf-8")).hexdigest()
+    return f"SP:{digest[:20]}"

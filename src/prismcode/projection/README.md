@@ -34,11 +34,17 @@ Conflicting deltas for one canonical node identity are rejected rather than
 priority-merged. Edges reference only the closure's canonical
 `StructuralRelationChangeIdentity` fact IDs; projection never searches all
 evidence for relevance or rebuilds edge truth from provider path steps. Selected
-structural-change anchors follow canonical `StructuralOwnershipChangeIdentity`
-facts to their ancestor nodes through a separate ownership-edge collection.
-Revision provenance and deferred ownership never enter the graph. A selected
-anchor is structurally isolated only when neither executable nor ownership
-edges are available. Focus-relative roles and association/path relation IDs remain in
+structural-change anchors follow revision-local structural ownership provenance
+to canonical placements and proven `StructuralOwnershipChangeIdentity` facts
+to ownership deltas. Placements converge observed Base/Head containment for one
+logical parent/child pair without converting a missing opposite-revision
+observation into absence. A selected anchor is structurally isolated only when
+neither executable nor placement/ownership evidence is available.
+Each structural node also owns one canonical display-evidence reference:
+Head for added, modified, renamed, retained, and unresolved nodes when Head
+provenance exists; Base for removed nodes when Base provenance exists.
+Presentation never selects a revision from evidence order.
+Focus-relative roles and association/path relation IDs remain in
 overlays. Review-wide CI,
 source coverage, empty state, and structural coverage are computed once here.
 Each G slice references its upstream `GuardrailScanPlan` by ID; projection does
