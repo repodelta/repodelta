@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import re
+
 from prismcode.model.contracts import (
     AssociationSignature,
     EvidenceItem,
+    FocusEvidenceRole,
     Requirement,
     RequirementProfile,
     ReviewStatement,
@@ -24,24 +27,51 @@ _REMOVAL_TERMS = {
     "avoid",
     "mustn",
 }
+_DOCUMENTATION_INTENT_RE = re.compile(
+    r"^(?:"
+    r"document\b|"
+    r"(?:documentation|docs|readme)\s+"
+    r"(?:covers?|describes?|documents?|explains?|includes?|is|matches?|must|reflects?|should)\b|"
+    r"(?:add|publish|update|write)\s+(?:the\s+)?"
+    r"(?:documentation|docs|readme)\b"
+    r")",
+    re.IGNORECASE,
+)
+_TEST_INTENT_RE = re.compile(
+    r"^(?:"
+    r"(?:test|validate|verify)\b|"
+    r"(?:tests|testing|validation|verification)\s+"
+    r"(?:covers?|is|must|pass|passes|should|verify|verifies|validate|validates)\b|"
+    r"(?:add|extend|run)\s+(?:the\s+)?(?:regression|tests?|testing)\b"
+    r")",
+    re.IGNORECASE,
+)
 
 
 def requirement_profile(focus: Requirement) -> RequirementProfile:
     if focus.kind == "guardrail":
         return "guardrail"
+    normalized = focus.text.casefold().strip()
     tokens = semantic_tokens(focus.text)
-    if tokens & {"documentation", "document", "readme", "docs"}:
+    if _DOCUMENTATION_INTENT_RE.match(normalized):
         return "documentation"
-    if tokens & {"workflow", "configuration", "config", "action", "actions", "pipeline"}:
+    if _TEST_INTENT_RE.match(normalized):
+        return "test_verification"
+    if tokens & {"render", "renderer", "html", "component", "display"}:
+        return "ui"
+    if tokens & {
+        "workflow",
+        "configuration",
+        "config",
+        "action",
+        "actions",
+        "pipeline",
+    }:
         return "workflow_configuration"
     if tokens & {"schema", "migration", "database"}:
         return "schema_migration"
-    if tokens & {"test", "tests", "testing", "verification", "verified"}:
-        return "test_verification"
     if tokens & {"api", "contract", "interface", "schema", "versioned"}:
         return "api_contract"
-    if tokens & {"render", "renderer", "html", "component", "display"}:
-        return "ui"
     if tokens & {"runtime", "behavior", "execute", "execution", "call"}:
         return "behavior"
     return "generic"
@@ -98,6 +128,19 @@ def eligible_changed_anchor(
         },
     }
     return item.profile in allowed[profile]
+
+
+def focus_evidence_role(
+    profile: RequirementProfile,
+    fact_profile: str,
+) -> FocusEvidenceRole:
+    """Classify one eligible fact relative to the review focus."""
+
+    if fact_profile == "document" and profile != "documentation":
+        return "document_support"
+    if fact_profile == "test" and profile != "test_verification":
+        return "test_support"
+    return "primary"
 
 
 def anchor_key(item: EvidenceItem) -> tuple[object, ...]:

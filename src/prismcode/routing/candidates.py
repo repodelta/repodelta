@@ -15,6 +15,7 @@ from prismcode.model.contracts import (
     CoverageState,
     EvidenceCatalog,
     EvidenceItem,
+    FocusEvidenceRole,
     GuardrailScanPlanSet,
     ProjectionCandidateGroup,
     ProjectionCandidateSet,
@@ -22,13 +23,15 @@ from prismcode.model.contracts import (
     ProjectionRelation,
     ProjectionSlot,
     Requirement,
+    RequirementProfile,
     ReviewStatement,
 )
 from prismcode.routing.coverage import review_provider_diagnostics
-from prismcode.facts.semantics import (
+from prismcode.routing.semantics import (
     anchor_key,
     eligible_changed_anchor,
     evidence_signature,
+    focus_evidence_role,
     requirement_profile,
 )
 from prismcode.providers.structural import StructuralGraphCollection
@@ -141,6 +144,7 @@ def build_projection_candidates(
                 frozenset(),
             ),
             claim_distinctive_terms=claim_distinctive_terms,
+            profile=profile,
         )
         focus_relations.extend(anchor_relations)
         candidate_anchor_ids = tuple(
@@ -384,6 +388,7 @@ def _focus_relevant_anchor_relations(
     *,
     focus_distinctive_terms: frozenset[str],
     claim_distinctive_terms: dict[str, frozenset[str]],
+    profile: RequirementProfile,
 ) -> tuple[ProjectionRelation, ...]:
     """Return the sole changed-anchor authority for one review focus."""
 
@@ -434,6 +439,10 @@ def _focus_relevant_anchor_relations(
     }
     result = []
     for ordinal, anchor in enumerate(anchors):
+        evidence_role = focus_evidence_role(
+            profile,
+            anchor.profile,
+        )
         provided = anchor.associated_statement_ids
         if focus.id in provided:
             reasons = (
@@ -450,6 +459,7 @@ def _focus_relevant_anchor_relations(
                     anchor.id,
                     "provided_association",
                     reasons,
+                    evidence_role=evidence_role,
                     source_ordinal=ordinal,
                 )
             )
@@ -492,6 +502,7 @@ def _focus_relevant_anchor_relations(
                     anchor.id,
                     direct[0].kind,
                     direct,
+                    evidence_role=evidence_role,
                     source_ordinal=ordinal,
                 )
             )
@@ -514,6 +525,7 @@ def _focus_relevant_anchor_relations(
                             matched_terms=tuple(sorted(bridge_matched_terms)),
                         ),
                     ),
+                    evidence_role=evidence_role,
                     bridge_ids=tuple(bridges),
                     source_ordinal=ordinal,
                 )
@@ -736,10 +748,14 @@ def _relation(
     association: AssociationKind,
     reasons: tuple[AssociationReason, ...],
     *,
+    evidence_role: FocusEvidenceRole = "primary",
     bridge_ids: tuple[str, ...] = (),
     source_ordinal: int = 0,
 ) -> ProjectionRelation:
-    identity = f"{focus_id}\0{slot}\0{target_type}\0{target_id}\0{association}"
+    identity = (
+        f"{focus_id}\0{slot}\0{target_type}\0{target_id}\0"
+        f"{association}\0{evidence_role}"
+    )
     digest = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:20]
     return ProjectionRelation(
         id=f"PR:{digest}",
@@ -749,6 +765,7 @@ def _relation(
         target_id=target_id,
         association=association,
         reasons=reasons,
+        evidence_role=evidence_role,
         bridge_ids=bridge_ids,
         source_ordinal=source_ordinal,
     )

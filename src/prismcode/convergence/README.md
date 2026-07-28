@@ -20,6 +20,9 @@ anchors are retained together; claim-bridged anchors form a separately bounded
 expansion set. Duplicate relations to one target collapse to their strongest
 typed association. Direct, bridged, and total identity safety limits can
 truncate coverage but never convert multiple relevant anchors into ambiguity.
+Within those safety boundaries, the routing-owned focus-evidence role retains
+primary anchors before test and document support. Convergence never derives the
+role or suppresses a support lane semantically.
 
 Structural paths and structurally bridged runtime/test contexts converge as one
 terminal-aware unit. For each reachable anchor-terminal connection, shortest

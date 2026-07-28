@@ -35,6 +35,9 @@ Every selected structural change is a structural node, including anchors with no
 selected edge. Only non-symbol changed facts use the standalone changed-fact
 relation list; graph membership never chooses between two representations of
 the same mapped change.
+Standalone changed facts preserve routing-owned primary, test-support, and
+document-support relation groups. Projection partitions those references but
+does not infer their roles.
 Diagnostic scope and provider remain canonical through attention normalization.
 
 ## Must not
