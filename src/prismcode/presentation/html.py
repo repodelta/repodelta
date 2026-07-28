@@ -21,6 +21,8 @@ from prismcode.model.contracts import (
     StructuralGraphOwnershipEdge,
 )
 
+_DEFERRED_STRUCTURAL_PREVIEW_LIMIT = 5
+
 
 def _safe_href(value: str | None) -> str | None:
     if not value:
@@ -497,17 +499,26 @@ def _review_graph(
     focus_ids = tuple(
         review_slice.focus_statement_id for review_slice in projection.slices
     )
+    slices_by_focus = {
+        review_slice.focus_statement_id: review_slice
+        for review_slice in projection.slices
+    }
     controls = (
         '<div class="delta-focus-controls" role="group" '
         'aria-label="Structural graph focus">'
         '<button class="delta-focus active" type="button" '
         'data-focus-target="all">All</button>'
         + "".join(
+            (
             f'<button class="delta-focus'
-            f'{" no-visible-backbone" if focus_id not in visible_focus_ids else ""}" '
+            f'{" no-visible-backbone" if focus_id not in visible_focus_ids else ""}'
+            f' disposition-{escape(slices_by_focus[focus_id].structural_disposition.state)}" '
             f'type="button" '
-            f'data-focus-target="{escape(focus_id, quote=True)}">'
+            f'data-focus-target="{escape(focus_id, quote=True)}" '
+            f'data-empty-copy="{escape(_structural_focus_empty_copy(slices_by_focus[focus_id]), quote=True)}" '
+            f'title="{escape(_structural_disposition_label(slices_by_focus[focus_id]), quote=True)}">'
             f"{escape(focus_id)}</button>"
+            )
             for focus_id in focus_ids
         )
         + (
@@ -561,9 +572,50 @@ def _review_graph(
         f'{len(backbone_ownership_edges)} backbone ownership edges · '
         f'{len(isolated_rows)} isolated changed anchors · '
         f'{len(graph.path_relation_ids)} support refs</div></div>'
-        f"{controls}</div>{canvas}{isolated}"
+        f'{controls}</div><p class="delta-focus-empty" hidden></p>{canvas}{isolated}'
         "</div>"
     )
+
+
+def _structural_disposition_label(review_slice: ReviewSlice) -> str:
+    state = review_slice.structural_disposition.state
+    return {
+        "projected": "Structural evidence projected",
+        "non_structural_only": "Review evidence only; no structural projection",
+        "deferred": "Structural candidates deferred",
+        "unassociated": "No deterministic structural association",
+        "unavailable": "Structural evidence unavailable or not applicable",
+        "no_structural_evidence": "No structural evidence",
+    }[state]
+
+
+def _structural_focus_empty_copy(review_slice: ReviewSlice) -> str:
+    focus_id = review_slice.focus_statement_id
+    state = review_slice.structural_disposition.state
+    if state == "projected":
+        return (
+            f"{focus_id} has projected structural evidence outside the default "
+            "change backbone."
+        )
+    return {
+        "non_structural_only": (
+            f"{focus_id} has review evidence, but no deterministically associated "
+            "structural node or edge."
+        ),
+        "deferred": (
+            f"{focus_id} has structural candidates, but they were deferred by an "
+            "upstream safety boundary."
+        ),
+        "unassociated": (
+            f"{focus_id} has no deterministic structural association."
+        ),
+        "unavailable": (
+            f"{focus_id} structural evidence is unavailable or not applicable."
+        ),
+        "no_structural_evidence": (
+            f"{focus_id} has no eligible structural evidence."
+        ),
+    }[state]
 
 
 def _structural_node_fact(
@@ -783,6 +835,13 @@ def _projection_slice(
         ),
     )
     fact_groups = []
+    disposition = _structural_disposition(
+        review_slice,
+        brief,
+        relations=relations,
+    )
+    if disposition:
+        fact_groups.append(disposition)
     if review_slice.guardrail_scan_plan_id is not None:
         plan = brief.guardrail_scan_plans.by_id().get(
             review_slice.guardrail_scan_plan_id
@@ -879,6 +938,66 @@ def _projection_slice(
         + "".join(fact_groups)
         + fact_diagnostics
         + "</div></div>"
+    )
+
+
+def _structural_disposition(
+    review_slice: ReviewSlice,
+    brief: ReviewBrief,
+    *,
+    relations: dict[str, ProjectionRelation],
+) -> str:
+    disposition = review_slice.structural_disposition
+    if (
+        disposition.state == "projected"
+        and not disposition.deferred_structural_relation_ids
+    ):
+        return ""
+    deferred_relation_ids = disposition.deferred_structural_relation_ids
+    displayed_deferred_ids = deferred_relation_ids[
+        :_DEFERRED_STRUCTURAL_PREVIEW_LIMIT
+    ]
+    deferred_rows = "".join(
+        _relation_fact(
+            relations[relation_id],
+            brief,
+            label="deferred structural candidate",
+        )
+        for relation_id in displayed_deferred_ids
+        if relation_id in relations
+    )
+    return (
+        '<div class="projection-group structural-disposition">'
+        '<span class="block-title">Structural disposition</span>'
+        f'<span class="projection-copy">{escape(_structural_disposition_label(review_slice))}</span>'
+        + (
+            '<span class="relation-reason">'
+            f'{len(disposition.non_structural_relation_ids)} selected '
+            "non-structural evidence "
+            f'item{"s" if len(disposition.non_structural_relation_ids) != 1 else ""}.'
+            "</span>"
+            if disposition.non_structural_relation_ids
+            else ""
+        )
+        + (
+            '<details class="deferred-structural"><summary>'
+            f'{len(displayed_deferred_ids)} of {len(deferred_relation_ids)} deferred '
+            "structural candidate"
+            f'{"s" if len(deferred_relation_ids) != 1 else ""}'
+            f"</summary>{deferred_rows}"
+            + (
+                '<span class="relation-reason">'
+                f'{len(deferred_relation_ids) - len(displayed_deferred_ids)} '
+                "additional canonical relations omitted from display."
+                "</span>"
+                if len(deferred_relation_ids) > len(displayed_deferred_ids)
+                else ""
+            )
+            + "</details>"
+            if deferred_rows
+            else ""
+        )
+        + "</div>"
     )
 
 
@@ -1004,6 +1123,7 @@ def render_html(brief: ReviewBrief) -> str:
 .delta-node.operation-renamed rect{{stroke:var(--blue);stroke-dasharray:8 3;fill:rgba(48,83,110,.14)}}.isolated-anchor.operation-renamed{{border-left-color:var(--blue);border-style:dashed}}
 .delta-node.operation-retained rect{{stroke:#53656e;fill:#111a1f}}.delta-node.operation-unresolved rect{{stroke:var(--faint);stroke-dasharray:3 3;fill:rgba(111,125,131,.08)}}.isolated-anchor.operation-unresolved{{border-left-color:var(--faint);border-style:dashed}}
 .delta-focus.no-visible-backbone{{border-style:dashed;color:var(--faint)}}
+.delta-focus-empty{{margin:12px 0 0;padding:9px 11px;border:1px dashed rgba(111,128,135,.3);border-radius:8px;color:var(--muted);font-size:10px}}.deferred-structural>summary{{cursor:pointer;color:var(--muted);font-size:9px}}
 </style></head><body><main class="shell">
 <div class="topbar"><span class="brand-mark"></span>PrismCode</div>
 <section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{brief.overview.changed_file_count} changed files</span><span>·</span><span>{escape(ci_copy)}</span></div><h1>{escape(packet.title)}</h1><div class="intent">{escape(brief.intent.text)}</div><span class="source-note">Source: {source_line}</span>{review_contract}</section>
@@ -1018,14 +1138,25 @@ document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
     ? section.querySelectorAll(".requirement[data-focus-id]")
     : [];
   const activateFocus = (focus) => {{
-    graph.querySelectorAll(".delta-focus").forEach((item) =>
-      item.classList.toggle("active", item.dataset.focusTarget === focus));
+    let activeButton = null;
+    graph.querySelectorAll(".delta-focus").forEach((item) => {{
+      const active = item.dataset.focusTarget === focus;
+      item.classList.toggle("active", active);
+      if (active) activeButton = item;
+    }});
     graph.querySelectorAll("[data-focuses]").forEach((item) => {{
       const active = focus === "all" ||
         item.dataset.focuses.split(/\\s+/).includes(focus);
       item.classList.toggle("focus-muted", !active);
       item.classList.toggle("focus-active", focus !== "all" && active);
     }});
+    const empty = graph.querySelector(".delta-focus-empty");
+    if (empty) {{
+      const show = focus !== "all" &&
+        activeButton?.classList.contains("no-visible-backbone");
+      empty.hidden = !show;
+      empty.textContent = show ? activeButton.dataset.emptyCopy : "";
+    }}
   }};
   graph.querySelectorAll(".delta-focus").forEach((button) => {{
     button.addEventListener("click", () =>

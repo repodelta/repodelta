@@ -1332,6 +1332,24 @@ StructuralFocusNodeRole = Literal[
     "intermediate",
 ]
 
+StructuralFocusDispositionState = Literal[
+    "projected",
+    "non_structural_only",
+    "deferred",
+    "unassociated",
+    "unavailable",
+    "no_structural_evidence",
+]
+
+
+@dataclass(frozen=True)
+class StructuralFocusDisposition:
+    state: StructuralFocusDispositionState = "no_structural_evidence"
+    non_structural_relation_ids: tuple[str, ...] = ()
+    deferred_structural_relation_ids: tuple[str, ...] = ()
+    diagnostic_ids: tuple[str, ...] = ()
+
+
 StructuralGraphNodeDelta = Literal[
     "added",
     "modified",
@@ -1411,6 +1429,9 @@ class ReviewSlice:
     boundary_fact_relation_ids: tuple[str, ...] = ()
     guardrail_scan_plan_id: str | None = None
     structural_overlay: StructuralFocusOverlay = StructuralFocusOverlay()
+    structural_disposition: StructuralFocusDisposition = (
+        StructuralFocusDisposition()
+    )
     diagnostic_ids: tuple[str, ...] = ()
 
 
@@ -1418,10 +1439,23 @@ class ReviewSlice:
 class ReviewProjection:
     slices: tuple[ReviewSlice, ...] = ()
     review_graph: ReviewStructuralGraph = ReviewStructuralGraph()
-    schema_version: str = "review_projection.v15"
+    schema_version: str = "review_projection.v16"
 
-    def validate_consistency(self, evidence_catalog: EvidenceCatalog) -> None:
+    def validate_consistency(
+        self,
+        evidence_catalog: EvidenceCatalog,
+        candidates: ProjectionCandidateSet,
+        convergence: CandidateConvergence,
+    ) -> None:
         evidence = evidence_catalog.by_id()
+        relations = candidates.by_id()
+        convergence_by_focus = {
+            item.focus_statement_id: item for item in convergence.groups
+        }
+        diagnostic_ids = {
+            *(item.id for item in candidates.diagnostics),
+            *(item.id for item in convergence.diagnostics),
+        }
         nodes = {item.id: item for item in self.review_graph.nodes}
         edges = {item.id: item for item in self.review_graph.edges}
         ownership_edges = {
@@ -1527,6 +1561,51 @@ class ReviewProjection:
                 frontier.extend(ownership_children.get(current, ()))
         for review_slice in self.slices:
             overlay = review_slice.structural_overlay
+            disposition = review_slice.structural_disposition
+            converged = convergence_by_focus.get(review_slice.focus_statement_id)
+            if converged is None:
+                raise ValueError(
+                    f"{review_slice.focus_statement_id}: structural disposition "
+                    "has no convergence group"
+                )
+            selected_ids = set(converged.selected_relation_ids)
+            deferred_ids = set(converged.deferred_relation_ids)
+            if any(
+                relation_id not in relations
+                or relations[relation_id].focus_statement_id
+                != review_slice.focus_statement_id
+                for relation_id in (
+                    *disposition.non_structural_relation_ids,
+                    *disposition.deferred_structural_relation_ids,
+                )
+            ):
+                raise ValueError(
+                    f"{review_slice.focus_statement_id}: structural disposition "
+                    "references an invalid relation"
+                )
+            if not set(disposition.non_structural_relation_ids) <= selected_ids:
+                raise ValueError(
+                    f"{review_slice.focus_statement_id}: non-structural disposition "
+                    "must reference selected relations"
+                )
+            if not set(disposition.deferred_structural_relation_ids) <= deferred_ids:
+                raise ValueError(
+                    f"{review_slice.focus_statement_id}: deferred structural "
+                    "disposition must reference deferred relations"
+                )
+            if any(
+                item not in diagnostic_ids
+                for item in disposition.diagnostic_ids
+            ):
+                raise ValueError(
+                    f"{review_slice.focus_statement_id}: structural disposition "
+                    "references an invalid diagnostic"
+                )
+            if (disposition.state == "projected") != bool(overlay.nodes):
+                raise ValueError(
+                    f"{review_slice.focus_statement_id}: projected disposition "
+                    "must agree with the structural overlay"
+                )
             overlay_node_ids = {item.node_id for item in overlay.nodes}
             if len(overlay_node_ids) != len(overlay.nodes):
                 raise ValueError(

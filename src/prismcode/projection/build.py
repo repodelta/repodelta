@@ -15,6 +15,7 @@ from prismcode.model.contracts import (
     ReviewSlice,
     ReviewStructuralGraph,
     StructuralFocusNode,
+    StructuralFocusDisposition,
     StructuralFocusOverlay,
     StructuralGraphEdge,
     StructuralGraphNode,
@@ -46,6 +47,12 @@ def build_review_projection(
     }
     plans_by_guardrail = guardrail_scan_plans.by_guardrail_id()
     diagnostic_ids_by_focus = diagnostic_presentation.ids_by_focus()
+    structural_diagnostics = {
+        item.id: item
+        for item in (*candidates.diagnostics, *convergence.diagnostics)
+        if item.slot
+        in {"changed_anchor", "runtime_context", "test_context", "structural_path"}
+    }
     slices = []
     graph_node_order: list[str] = []
     graph_nodes: dict[str, StructuralGraphNode] = {}
@@ -93,6 +100,40 @@ def build_review_projection(
             for node in overlay.nodes
             for relation_id in node.relation_ids
         }
+        deferred_structural_relation_ids = tuple(
+            relation_id
+            for relation_id in converged.deferred_relation_ids
+            if _is_structural_relation(relations[relation_id], evidence)
+        )
+        non_structural_relation_ids = tuple(
+            relation_id
+            for relation_id in converged.selected_relation_ids
+            if relations[relation_id].target_type == "evidence"
+            if relation_id not in represented_relation_ids
+            if not _is_structural_relation(relations[relation_id], evidence)
+        )
+        structural_diagnostic_ids = tuple(
+            diagnostic_id
+            for diagnostic_id in diagnostic_ids_by_focus.get(
+                group.focus_statement_id,
+                (),
+            )
+            if diagnostic_id in structural_diagnostics
+        )
+        structural_disposition = StructuralFocusDisposition(
+            state=_structural_disposition_state(
+                projected=bool(overlay.nodes),
+                non_structural_relation_ids=non_structural_relation_ids,
+                deferred_structural_relation_ids=deferred_structural_relation_ids,
+                diagnostic_states=tuple(
+                    structural_diagnostics[item].state
+                    for item in structural_diagnostic_ids
+                ),
+            ),
+            non_structural_relation_ids=non_structural_relation_ids,
+            deferred_structural_relation_ids=deferred_structural_relation_ids,
+            diagnostic_ids=structural_diagnostic_ids,
+        )
         backbone_seed_node_ids.extend(
             node.node_id
             for node in overlay.nodes
@@ -170,6 +211,7 @@ def build_review_projection(
                     else None
                 ),
                 structural_overlay=overlay,
+                structural_disposition=structural_disposition,
                 diagnostic_ids=diagnostic_ids_by_focus.get(
                     group.focus_statement_id,
                     (),
@@ -209,8 +251,53 @@ def build_review_projection(
             path_relation_ids=tuple(dict.fromkeys(graph_path_relation_ids)),
         ),
     )
-    projection.validate_consistency(evidence_catalog)
+    projection.validate_consistency(
+        evidence_catalog,
+        candidates,
+        convergence,
+    )
     return projection
+
+
+def _is_structural_relation(
+    relation: ProjectionRelation,
+    evidence: dict[str, EvidenceItem],
+) -> bool:
+    if relation.slot == "structural_path":
+        return True
+    target = evidence.get(relation.target_id)
+    return (
+        relation.slot in {"changed_anchor", "runtime_context", "test_context"}
+        and target is not None
+        and target.kind in {"symbol", "structural_change"}
+    )
+
+
+def _structural_disposition_state(
+    *,
+    projected: bool,
+    non_structural_relation_ids: tuple[str, ...],
+    deferred_structural_relation_ids: tuple[str, ...],
+    diagnostic_states: tuple[str, ...],
+) -> str:
+    if projected:
+        return "projected"
+    if deferred_structural_relation_ids:
+        return "deferred"
+    if non_structural_relation_ids:
+        return "non_structural_only"
+    states = set(diagnostic_states)
+    if states & {"no_association", "no_eligible_fact"}:
+        return "unassociated"
+    if states & {
+        "provider_unavailable",
+        "not_applicable",
+        "source_absent",
+        "stale_source",
+        "partial_coverage",
+    }:
+        return "unavailable"
+    return "no_structural_evidence"
 
 
 def _change_backbone(
