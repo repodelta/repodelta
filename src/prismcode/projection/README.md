@@ -45,6 +45,12 @@ Standalone changed facts preserve routing-owned primary, test-support, and
 document-support relation groups. Projection partitions those references but
 does not infer their roles.
 Diagnostic scope and provider remain canonical through attention normalization.
+One diagnostic-presentation projection assigns every typed diagnostic exactly
+once: review-scoped, unattached, and equivalent cross-focus diagnostics become
+review attention; single-focus diagnostics remain on that slice; and
+not-applicable diagnostics are explicitly suppressed. `ReviewProjection` and
+`ReviewOverview` consume this same disposition rather than independently
+deciding where a diagnostic belongs.
 
 ## Must not
 
@@ -56,7 +62,8 @@ not part of the default backbone.
 
 Normalizes review-wide attention facts from typed stage diagnostics. Attention
 groups require matching scope, provider, slot, and state; review-level provider
-coverage never merges with focus-level convergence coverage.
+coverage never merges with focus-level convergence coverage. The renderer does
+not regroup, promote, or suppress diagnostics.
 
 ## Extension points
 

@@ -1413,7 +1413,7 @@ class ReviewSlice:
 class ReviewProjection:
     slices: tuple[ReviewSlice, ...] = ()
     review_graph: ReviewStructuralGraph = ReviewStructuralGraph()
-    schema_version: str = "review_projection.v14"
+    schema_version: str = "review_projection.v15"
 
     def validate_consistency(self, evidence_catalog: EvidenceCatalog) -> None:
         evidence = evidence_catalog.by_id()
@@ -1578,6 +1578,27 @@ class ReviewAttention:
 
 
 @dataclass(frozen=True)
+class FocusDiagnosticPresentation:
+    focus_statement_id: str
+    diagnostic_ids: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class DiagnosticPresentation:
+    """Canonical display disposition for typed projection diagnostics."""
+
+    focus: tuple[FocusDiagnosticPresentation, ...] = ()
+    attention: tuple[ReviewAttention, ...] = ()
+    suppressed_diagnostic_ids: tuple[str, ...] = ()
+
+    def ids_by_focus(self) -> dict[str, tuple[str, ...]]:
+        return {
+            item.focus_statement_id: item.diagnostic_ids
+            for item in self.focus
+        }
+
+
+@dataclass(frozen=True)
 class ReviewOverview:
     pull_request_state: ReviewPullRequestState
     ci_state: ReviewCiState
@@ -1639,7 +1660,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v31"
+    schema_version: str = "review_brief.v32"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
