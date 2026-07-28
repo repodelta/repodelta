@@ -778,7 +778,7 @@ class EvidenceCatalog:
     change_relations: tuple[ChangeRelation, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
     guardrail_scan_diagnostics: tuple[GuardrailScanDiagnostic, ...] = ()
-    schema_version: str = "evidence_catalog.v13"
+    schema_version: str = "evidence_catalog.v14"
 
     def by_id(self) -> dict[str, EvidenceItem]:
         return {item.id: item for item in self.items}

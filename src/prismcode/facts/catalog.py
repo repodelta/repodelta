@@ -142,7 +142,11 @@ def build_evidence_catalog(
                 hunks_by_id=hunks_by_id,
             )
         _assign_review_symbol_ids(items)
-        _put_structural_changes(items)
+        _put_structural_changes(
+            items,
+            change_relations=change_relations,
+            changed_files=packet.changed_files,
+        )
         ownership_diagnostics = _put_structural_ownership_changes(
             items,
             structural_graph,
@@ -357,7 +361,35 @@ def _put_structural_revision(
             )
 
 
-def _put_structural_changes(items: dict[str, EvidenceItem]) -> None:
+def _put_structural_changes(
+    items: dict[str, EvidenceItem],
+    *,
+    change_relations: tuple[ChangeRelation, ...],
+    changed_files: tuple[ChangedFile, ...],
+) -> None:
+    """Converge revision symbols into one canonical operation truth."""
+
+    relations_by_id = {item.id: item for item in change_relations}
+    mapped_relation_lines: dict[
+        tuple[StructuralRevision, str],
+        set[int],
+    ] = {}
+    for item in items.values():
+        if item.kind != "symbol" or not item.changed:
+            continue
+        changed_lines = set(item.metadata.get("changed_lines", ()))
+        for relation_id in item.change_relation_ids:
+            relation = relations_by_id[relation_id]
+            directional_lines = set(
+                relation.added_lines
+                if item.revision_side == "head"
+                else relation.removed_lines
+            )
+            mapped_relation_lines.setdefault(
+                (item.revision_side, relation_id),
+                set(),
+            ).update(changed_lines & directional_lines)
+    file_statuses = {item.path: item.status.casefold() for item in changed_files}
     symbols_by_review_id: dict[str, dict[str, EvidenceItem]] = {}
     for item in items.values():
         if item.kind != "symbol" or not item.changed:
@@ -370,12 +402,12 @@ def _put_structural_changes(items: dict[str, EvidenceItem]) -> None:
     for review_symbol_id, revisions in symbols_by_review_id.items():
         base = revisions.get("base")
         head = revisions.get("head")
-        operation: ChangeOperation = (
-            "added"
-            if head is not None and head.operation == "added"
-            else "removed"
-            if base is not None and base.operation == "removed" and head is None
-            else "modified"
+        operation = _structural_change_operation(
+            base=base,
+            head=head,
+            relations_by_id=relations_by_id,
+            mapped_relation_lines=mapped_relation_lines,
+            file_statuses=file_statuses,
         )
         exemplar = head or base
         assert exemplar is not None
@@ -445,6 +477,69 @@ def _put_structural_changes(items: dict[str, EvidenceItem]) -> None:
                 },
             ),
         )
+
+
+def _structural_change_operation(
+    *,
+    base: EvidenceItem | None,
+    head: EvidenceItem | None,
+    relations_by_id: dict[str, ChangeRelation],
+    mapped_relation_lines: dict[tuple[StructuralRevision, str], set[int]],
+    file_statuses: dict[str, str],
+) -> ChangeOperation:
+    if base is not None and head is not None:
+        return "modified"
+
+    exemplar = head or base
+    assert exemplar is not None
+    if exemplar.metadata["symbol_kind"] == "file":
+        status = file_statuses.get(str(exemplar.metadata["path"]), "modified")
+        if status == "added" and head is not None:
+            return "added"
+        if status == "removed" and base is not None:
+            return "removed"
+        return "modified"
+
+    relation_ids = exemplar.change_relation_ids
+    relations = tuple(relations_by_id[item] for item in relation_ids)
+    if head is not None and relations and all(
+        relation.kind == "added" for relation in relations
+    ):
+        return "added"
+    if base is not None and relations and all(
+        relation.kind == "removed" for relation in relations
+    ):
+        return "removed"
+    opposite_revision: StructuralRevision = "base" if head is not None else "head"
+    if relation_ids and all(
+        _opposite_relation_is_fully_mapped(
+            relations_by_id[relation_id],
+            relation_id=relation_id,
+            opposite_revision=opposite_revision,
+            mapped_relation_lines=mapped_relation_lines,
+        )
+        for relation_id in relation_ids
+    ):
+        return "added" if head is not None else "removed"
+    return "modified"
+
+
+def _opposite_relation_is_fully_mapped(
+    relation: ChangeRelation,
+    *,
+    relation_id: str,
+    opposite_revision: StructuralRevision,
+    mapped_relation_lines: dict[tuple[StructuralRevision, str], set[int]],
+) -> bool:
+    opposite_lines = set(
+        relation.removed_lines
+        if opposite_revision == "base"
+        else relation.added_lines
+    )
+    return bool(opposite_lines) and opposite_lines <= mapped_relation_lines.get(
+        (opposite_revision, relation_id),
+        set(),
+    )
 
 
 def _assign_review_symbol_ids(items: dict[str, EvidenceItem]) -> None:
