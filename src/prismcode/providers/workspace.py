@@ -14,7 +14,7 @@ CommandRunner = Callable[[Command, int], subprocess.CompletedProcess[str]]
 
 
 @dataclass(frozen=True)
-class PreparedCodegraphRoots:
+class ReviewRevisionRoots:
     """Exact revision roots prepared for one review invocation."""
 
     head: Path
@@ -59,151 +59,127 @@ def _codegraph_command() -> Command:
     if npx:
         return (npx, "--yes", "@colbymchenry/codegraph")
     raise ValueError(
-        "--prepare-codegraph requires `codegraph` or `npx` on PATH"
+        "structure-aware review requires `codegraph` or `npx` on PATH; "
+        "use --no-structural-graph to disable structural mapping"
     )
 
 
-def _validate_checkout(
-    root: Path,
-    expected_revision: str,
-    *,
-    runner: CommandRunner,
-) -> None:
-    actual = _checked(
-        runner,
-        ("git", "-C", str(root), "rev-parse", "HEAD"),
-        timeout=10,
-        action=f"Reading checkout revision for {root}",
-    )
-    if not expected_revision or actual != expected_revision:
-        raise ValueError(
-            f"{root} is at {actual or 'an unknown revision'}, expected "
-            f"{expected_revision or 'a GitHub revision'}"
-        )
-    tracked_changes = _checked(
-        runner,
-        (
-            "git",
-            "-C",
-            str(root),
-            "status",
-            "--porcelain",
-            "--untracked-files=no",
-        ),
-        timeout=10,
-        action=f"Checking tracked changes for {root}",
-    )
-    if tracked_changes:
-        raise ValueError(
-            f"{root} has tracked working-tree changes; Codegraph preparation "
-            "requires a clean exact revision"
-        )
-
-
-def _prepare_index(
+def _initialize_index(
     root: Path,
     *,
     runner: CommandRunner,
     codegraph_command: Command,
 ) -> None:
-    action = "sync" if (root / ".codegraph" / "codegraph.db").is_file() else "init"
     _checked(
         runner,
-        (*codegraph_command, action, str(root)),
+        (*codegraph_command, "init", str(root)),
         timeout=300,
-        action=f"Codegraph {action} for {root}",
+        action=f"Codegraph init for {root}",
     )
 
 
 @contextmanager
-def prepared_codegraph_roots(
+def isolated_review_roots(
     *,
     repo_root: str | Path,
     head_revision: str,
     base_revision: str,
-    base_repo_root: str | Path | None = None,
+    structural_graph_enabled: bool,
     runner: CommandRunner = _run,
     codegraph_command: Command | None = None,
-) -> Iterator[PreparedCodegraphRoots]:
-    """Prepare exact head/base indexes and clean only the base worktree we own."""
+) -> Iterator[ReviewRevisionRoots]:
+    """Create exact private revision roots and remove every artifact we own."""
 
-    head = Path(repo_root).resolve()
-    command = codegraph_command or _codegraph_command()
-    _validate_checkout(head, head_revision, runner=runner)
-    _prepare_index(head, runner=runner, codegraph_command=command)
-
-    if base_repo_root is not None:
-        base = Path(base_repo_root).resolve()
-        _validate_checkout(base, base_revision, runner=runner)
-        _prepare_index(base, runner=runner, codegraph_command=command)
-        yield PreparedCodegraphRoots(head=head, base=base)
-        return
-
-    if not base_revision:
+    source = Path(repo_root).resolve()
+    if not head_revision:
+        raise ValueError("live review requires the pull request head SHA")
+    if structural_graph_enabled and not base_revision:
         raise ValueError(
-            "--prepare-codegraph requires the pull request base SHA"
+            "structure-aware review requires the pull request base SHA"
         )
-
     temporary_parent = Path(
-        tempfile.mkdtemp(prefix="prismcode-review-base-")
+        tempfile.mkdtemp(prefix="prismcode-review-")
     ).resolve()
-    base = temporary_parent / "checkout"
-    worktree_added = False
+    head = temporary_parent / "head"
+    base = temporary_parent / "base"
+    managed_roots: list[Path] = []
+    command = (
+        codegraph_command or _codegraph_command()
+        if structural_graph_enabled
+        else None
+    )
     try:
-        _checked(
-            runner,
-            (
-                "git",
-                "-C",
-                str(head),
-                "worktree",
-                "add",
-                "--detach",
-                str(base),
-                base_revision,
-            ),
-            timeout=60,
-            action=f"Creating temporary base worktree at {base_revision}",
+        revision_roots = [(head, head_revision)]
+        if structural_graph_enabled:
+            revision_roots.append((base, base_revision))
+        for root, revision in revision_roots:
+            _checked(
+                runner,
+                (
+                    "git",
+                    "-C",
+                    str(source),
+                    "worktree",
+                    "add",
+                    "--detach",
+                    str(root),
+                    revision,
+                ),
+                timeout=60,
+                action=f"Creating temporary worktree at {revision}",
+            )
+            managed_roots.append(root)
+            if command is not None:
+                _initialize_index(
+                    root,
+                    runner=runner,
+                    codegraph_command=command,
+                )
+        yield ReviewRevisionRoots(
+            head=head,
+            base=base if structural_graph_enabled else None,
         )
-        worktree_added = True
-        _prepare_index(base, runner=runner, codegraph_command=command)
-        yield PreparedCodegraphRoots(head=head, base=base)
     finally:
         active_error = sys.exc_info()[0] is not None
-        cleanup_error = ""
+        cleanup_errors = []
         try:
-            if worktree_added:
+            for root in reversed(managed_roots):
                 try:
                     cleanup = runner(
                         (
                             "git",
                             "-C",
-                            str(head),
+                            str(source),
                             "worktree",
                             "remove",
                             "--force",
-                            str(base),
+                            str(root),
                         ),
                         60,
                     )
                     if cleanup.returncode:
-                        cleanup_error = (
+                        cleanup_errors.append(
                             cleanup.stderr or cleanup.stdout
-                        ).strip() or "git worktree remove returned non-zero"
-                except ValueError as exc:
-                    cleanup_error = str(exc)
-                if cleanup_error:
-                    try:
-                        runner(
-                            ("git", "-C", str(head), "worktree", "prune"),
-                            30,
                         )
-                    except ValueError:
-                        pass
+                except ValueError as exc:
+                    cleanup_errors.append(str(exc))
+            if cleanup_errors:
+                try:
+                    runner(
+                        ("git", "-C", str(source), "worktree", "prune"),
+                        30,
+                    )
+                except ValueError:
+                    pass
         finally:
             shutil.rmtree(temporary_parent, ignore_errors=True)
-        if cleanup_error and not active_error:
+        if cleanup_errors and not active_error:
+            detail = " ".join(
+                item.strip()
+                for item in cleanup_errors
+                if item.strip()
+            )
             raise ValueError(
-                "Temporary base worktree cleanup failed after its directory "
-                f"was removed: {cleanup_error}"
+                "Temporary review worktree cleanup failed after its private "
+                f"directory was removed: {detail or 'git worktree remove failed'}"
             )

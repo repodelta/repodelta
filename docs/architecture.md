@@ -117,18 +117,17 @@ GitHub REST endpoints.
 `StructuralGraphProvider` is the read-only structure port.
 `CodegraphProvider` reads a repository-local `.codegraph/codegraph.db` in
 SQLite read-only mode. It validates the schema, compares indexed file hashes
-with its checkout, and for live reviews verifies that checkout against the
-corresponding PR revision. `--repo-root` supplies head; the optional
-`--base-repo-root` supplies a separate base checkout and index. Both feed one
-revision-aware `StructuralGraphCollection`.
+with its checkout, and verifies that checkout against the corresponding PR
+revision. For live reviews, `--repo-root` is only a Git object/worktree source.
+The workspace boundary creates exact private head and base worktrees, initializes
+Codegraph inside each, and feeds both providers into one revision-aware
+`StructuralGraphCollection`.
 
-`--prepare-codegraph` is an explicit lifecycle wrapper around that same
-provider path. It validates the caller-owned head checkout, initializes or
-synchronizes its index, and either prepares an explicit caller-owned base or
-creates an exact detached temporary base worktree. Only the automatically
-created base is deleted, through a `finally` boundary covering collection,
-analysis, and rendering. Workspace preparation never becomes a second
-structural provider or a semantic fallback.
+The same `finally` boundary covers collection, analysis, rendering, and removal
+of both temporary revision roots. Caller-owned indexes never enter the live
+provider path. Workspace preparation never becomes a second structural
+provider or a semantic fallback. `--no-structural-graph` uses the same isolated
+head lifecycle without initializing Codegraph or creating a base root.
 
 Only exact changed lines from unified-diff hunks are joined to symbol spans:
 head providers map added lines and base providers map removed lines.

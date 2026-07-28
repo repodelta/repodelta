@@ -143,29 +143,6 @@ def test_cli_runs_available_codegraph_mapping(
     assert "base unavailable · uncovered change relations retained" in captured.err
 
 
-def test_cli_maps_optional_base_checkout(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-    capsys: pytest.CaptureFixture[str],
-) -> None:
-    fixture = _write_fixture(tmp_path)
-    head_root = tmp_path / "head"
-    base_root = tmp_path / "base"
-    _write_index(head_root)
-    _write_index(base_root, source="def run():\n    return 1\n")
-
-    assert _run_cli(
-        monkeypatch,
-        fixture,
-        head_root,
-        tmp_path / "review.html",
-        "--base-repo-root",
-        str(base_root),
-    ) == 0
-
-    assert "base 1/1 hunks mapped to 1 symbols" in capsys.readouterr().err
-
-
 def test_cli_missing_index_uses_change_relation_fallback(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

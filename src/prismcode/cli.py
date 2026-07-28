@@ -24,8 +24,8 @@ from prismcode.providers.mapping import (
     map_packet_changed_symbols,
 )
 from prismcode.providers.workspace import (
-    PreparedCodegraphRoots,
-    prepared_codegraph_roots,
+    ReviewRevisionRoots,
+    isolated_review_roots,
 )
 from prismcode.presentation.status import format_structural_coverage
 from prismcode.changes.hunks import parse_changed_files
@@ -67,30 +67,14 @@ def build_parser() -> argparse.ArgumentParser:
         "--repo-root",
         default=".",
         help=(
-            "Target PR-head repository checkout used for bounded guardrail "
-            "scans and containing optional .codegraph/codegraph.db "
-            "(default: current directory)"
+            "Local Git repository used to create exact temporary PR revision "
+            "worktrees (default: current directory)"
         ),
     )
     review.add_argument(
         "--no-structural-graph",
         action="store_true",
         help="Skip repository-local structural mapping and use changed-hunk/file anchors",
-    )
-    review.add_argument(
-        "--base-repo-root",
-        help=(
-            "Optional PR-base repository checkout at the GitHub base SHA, "
-            "containing its own .codegraph/codegraph.db"
-        ),
-    )
-    review.add_argument(
-        "--prepare-codegraph",
-        action="store_true",
-        help=(
-            "Initialize or sync the exact head index and prepare a temporary "
-            "base worktree/index when --base-repo-root is omitted"
-        ),
     )
     review.add_argument(
         "--verbose",
@@ -135,13 +119,6 @@ def main() -> int:
         return 0 if result.passed else 1
     if args.command != "review":
         return 2
-    if args.prepare_codegraph and args.fixture:
-        parser.error("--prepare-codegraph requires a live --repo review")
-    if args.prepare_codegraph and args.no_structural_graph:
-        parser.error(
-            "--prepare-codegraph cannot be combined with --no-structural-graph"
-        )
-
     try:
         if args.fixture:
             if args.pr is not None:
@@ -159,22 +136,17 @@ def main() -> int:
             packet = GitHubPullRequestAdapter(client=client, max_files=args.max_files).load(args.repo, args.pr)
             analysis_input = AnalysisInput(packet=packet)
         workspace = (
-            prepared_codegraph_roots(
+            nullcontext(
+                ReviewRevisionRoots(
+                    head=Path(args.repo_root),
+                )
+            )
+            if args.fixture
+            else isolated_review_roots(
                 repo_root=args.repo_root,
                 head_revision=analysis_input.packet.head_sha or "",
                 base_revision=analysis_input.packet.base_sha or "",
-                base_repo_root=args.base_repo_root,
-            )
-            if args.prepare_codegraph
-            else nullcontext(
-                PreparedCodegraphRoots(
-                    head=Path(args.repo_root),
-                    base=(
-                        Path(args.base_repo_root)
-                        if args.base_repo_root
-                        else None
-                    ),
-                )
+                structural_graph_enabled=not args.no_structural_graph,
             )
         )
         with workspace as roots:
