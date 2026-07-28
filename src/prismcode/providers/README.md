@@ -63,12 +63,14 @@ normalization.
 
 ## Managed review workspace
 
-`--prepare-codegraph` wraps the existing provider boundary in one explicit
-lifecycle. The caller-owned exact head checkout is validated and its index is
-initialized or synchronized. Without an explicit base root, PrismCode creates
-a detached temporary worktree at the PR base revision, initializes its index,
-and removes both through `finally` after success or failure. Explicit
-`--base-repo-root` inputs remain caller-owned and are never deleted.
+Every live review has one isolated lifecycle. The caller root is only a local
+Git object/worktree source. PrismCode creates detached private head and base
+worktrees at the GitHub PR SHAs, initializes Codegraph only inside them, and
+removes both through one `finally` boundary after success or failure. The
+source checkout and any caller-owned `.codegraph` data are never read as review
+facts, synchronized, or deleted. With `--no-structural-graph`, the same manager
+creates only the exact temporary head used by bounded guardrail scans.
 
 The workspace manager never switches branches, resets tracked content, invokes
-a shell, or turns preparation failure into structural evidence.
+a shell, fetches missing objects, or turns preparation failure into structural
+evidence.

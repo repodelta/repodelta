@@ -116,50 +116,32 @@ export GITHUB_TOKEN=...
 prismcode review \
   --repo owner/repository \
   --pr 123 \
+  --repo-root /path/to/local/repository \
   --output build/pr-123.html
 ```
 
-PrismCode also probes the current directory (`.`) for
-`.codegraph/codegraph.db`. If the current directory is not the analyzed PR's
-exact head checkout, or its index is unavailable or stale, the report is still
-generated from canonical changed-hunk evidence:
+For every live structure-aware review, `--repo-root` is only a local Git object
+and worktree source. It does not need to be checked out at either PR revision
+and its `.codegraph` directory is never read or modified. PrismCode creates
+private detached worktrees at the exact GitHub head and base SHAs, initializes
+one Codegraph index in each, runs structural mapping and head guardrail scans,
+then removes both worktrees and indexes after success or failure. The source
+repository must already contain both commit objects. This mode requires either
+a `codegraph` executable or `npx` on `PATH`.
+The bundled review workflow checks out full history so both GitHub PR revision
+objects are available; other CI integrations must provision the same input.
 
-```text
-Structural mapping: skipped · Codegraph index not found · change-relation fallback used
-```
-
-#### Structure-aware review from the PR checkout
-
-The recommended one-command mode manages Codegraph preparation around an exact,
-clean PR-head checkout:
+Use `--no-structural-graph` for the explicit dependency-free path. PrismCode
+still creates and removes an exact temporary head worktree for bounded
+guardrail scans, but it does not initialize Codegraph or create a base
+worktree:
 
 ```bash
 prismcode review \
   --repo owner/repository \
   --pr 123 \
-  --repo-root /path/to/repository-at-pr-head \
-  --prepare-codegraph \
-  --output build/pr-123.html
-```
-
-This initializes or synchronizes the caller-owned head index. When
-`--base-repo-root` is omitted, PrismCode creates a detached temporary worktree
-at the exact PR base SHA, initializes Codegraph there, uses it for base-side
-mapping, and removes the temporary checkout and index after success or failure.
-The command never switches or resets the caller's branch. It requires either a
-`codegraph` executable or `npx` on `PATH`.
-
-Without `--prepare-codegraph`, index lifecycle remains manual. Run the same
-command from a checkout whose `HEAD` is the PR head after synchronizing its
-repository-local index:
-
-```bash
-cd /path/to/repository-at-pr-head
-npx @colbymchenry/codegraph sync
-
-prismcode review \
-  --repo owner/repository \
-  --pr 123 \
+  --repo-root /path/to/local/repository \
+  --no-structural-graph \
   --output build/pr-123.html
 ```
 
@@ -195,29 +177,9 @@ beside executable relations and lets reviewers hide its ownership-only context
 without changing graph membership. Nested containers and semantic zoom remain
 future presentation work.
 
-#### Structure-aware review using another checkout
-
-The CLI may run from anywhere. Use `--repo-root` to point it at the checkout
-and index belonging to the analyzed PR:
-
-```bash
-prismcode review \
-  --repo owner/repository \
-  --pr 123 \
-  --repo-root /path/to/repository-at-pr-head \
-  --base-repo-root /path/to/repository-at-pr-base \
-  --output build/pr-123.html
-```
-
-This is also required when reviewing a historical or different PR while the
-current directory is checked out at another commit. `--repo-root` does not
-select or change a Git revision: the supplied checkout must already be at the
-PR's head SHA. PrismCode verifies that revision before using either the
-Codegraph index or the bounded G guardrail scanner. The optional
-`--base-repo-root` must independently match the PR base SHA and contain its
-own synchronized Codegraph index unless `--prepare-codegraph` is present. An
-explicit base root is caller-owned and is never removed. It supplies exact base
-symbols for removed and replaced relations. Guardrail plans own their
+The CLI may run from anywhere. The supplied local repository may be on another
+branch or have uncommitted work because analysis never reads that working tree;
+all review facts come from the private exact-revision roots. Guardrail plans own their
 deterministic selectors; the scanner inspects eligible paths and text under
 explicit file, byte, and match limits and reports per-surface coverage. It
 scans only tracked head files, excluding untracked checkout content and
