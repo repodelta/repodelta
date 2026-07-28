@@ -44,6 +44,12 @@ source coverage, empty state, and structural coverage are computed once here.
 Each G slice references its upstream `GuardrailScanPlan` by ID; projection does
 not reconstruct scan scope or query intent. Selected boundary facts are
 reference-only relation IDs from convergence.
+Each slice also owns one `StructuralFocusDisposition`. It partitions selected
+non-structural evidence references, deferred structural relation references,
+and structural diagnostic references without rerunning routing or convergence.
+Its state distinguishes projected, non-structural-only, deferred,
+unassociated, unavailable, and empty structural outcomes. The focus overlay
+remains the only source of projected node/edge membership.
 Every selected structural change is a structural node, including anchors with no
 selected edge. Only non-symbol changed facts use the standalone changed-fact
 relation list; graph membership never chooses between two representations of
@@ -62,8 +68,9 @@ deciding where a diagnostic belongs.
 ## Must not
 
 Retrieve or reclassify evidence, select paths, inspect arbitrary provider
-metadata, format HTML/CLI copy, or delete complete support merely because it is
-not part of the default backbone.
+metadata, invent identities for no-association diagnostics, format HTML/CLI
+copy, or delete complete support merely because it is not part of the default
+backbone.
 
 ## Diagnostics
 

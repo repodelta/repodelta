@@ -26,6 +26,7 @@ from prismcode.model.contracts import (
     SourceRecord,
     StructuralChangeIdentity,
     StructuralFocusNode,
+    StructuralFocusDisposition,
     StructuralFocusOverlay,
     StructuralGraphEdge,
     StructuralGraphNode,
@@ -55,6 +56,7 @@ from prismcode.projection.build import (
 from prismcode.projection.overview import project_diagnostic_presentation
 from prismcode.presentation.html import (
     _review_graph,
+    _structural_disposition,
     _structural_edge_path,
     render_html,
 )
@@ -712,6 +714,21 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
     assert "P-anchor-link" in convergence.groups[0].deferred_relation_ids
 
     projection = _build_projection(candidates, convergence, evidence)
+    assert projection.slices[0].structural_disposition.state == "projected"
+    assert (
+        "P-anchor-link"
+        in projection.slices[0]
+        .structural_disposition
+        .deferred_structural_relation_ids
+    )
+    disposition_html = _structural_disposition(
+        projection.slices[0],
+        SimpleNamespace(evidence_catalog=evidence),
+        relations=candidates.by_id(),
+    )
+    assert '<details class="deferred-structural">' in disposition_html
+    assert "of 2 deferred structural candidates" in disposition_html
+    assert "E:path:anchor-link" in disposition_html
     overlay = projection.slices[0].structural_overlay
     second_overlay = projection.slices[1].structural_overlay
     graph = projection.review_graph
@@ -869,6 +886,9 @@ def test_review_graph_renders_complete_focus_union() -> None:
         edge_ids = () if focus_id == "R3" else (f"D:{focus_id}",)
         return ReviewSlice(
             focus_statement_id=focus_id,
+            structural_disposition=StructuralFocusDisposition(
+                state="projected"
+            ),
             structural_overlay=StructuralFocusOverlay(
                 nodes=tuple(
                     StructuralFocusNode(
@@ -914,7 +934,8 @@ def test_review_graph_renders_complete_focus_union() -> None:
     for focus_id in ("R1", "R2", "R3", "G1", "G2"):
         assert f'data-focus-target="{focus_id}"' in html
     assert (
-        'class="delta-focus no-visible-backbone" type="button" '
+        'class="delta-focus no-visible-backbone disposition-no_structural_evidence" '
+        'type="button" '
         'data-focus-target="G2"'
     ) in html
 
@@ -1308,6 +1329,22 @@ def test_isolated_symbol_and_standalone_document_keep_distinct_canonical_forms()
     )
     assert projection.review_graph.edges == ()
     assert len(document_slice.standalone_changed_fact_relation_ids) == 1
+    assert code_slice.structural_disposition.state == "projected"
+    assert document_slice.structural_disposition.state == "non_structural_only"
+    assert (
+        document_slice.structural_disposition.non_structural_relation_ids
+        == document_slice.standalone_changed_fact_relation_ids
+    )
+    graph_html = _review_graph(
+        projection.review_graph,
+        projection,
+        SimpleNamespace(evidence_catalog=evidence),
+    )
+    assert "disposition-non_structural_only" in graph_html
+    assert (
+        "R2 has review evidence, but no deterministically associated "
+        "structural node or edge."
+    ) in graph_html
     standalone_targets = {
         candidates.by_id()[relation_id].target_id
         for review_slice in projection.slices

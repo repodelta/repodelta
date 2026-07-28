@@ -22,10 +22,13 @@ change backbone, including its executable edges and separate canonical
 ownership hierarchy. The complete support graph remains available to overlays
 without being independently reselected here. Operation styling,
 isolated-anchor disclosure, and client-side focus highlighting are presentation only. Focus controls
-toggle existing node/edge memberships, while the Structure control only hides
-or shows ownership edges and ownership-only context nodes. Neither control
-recalculates an association, relation, or parentage. Presentation must not
-recover parentage from symbol names, paths, or node kinds.
+toggle existing node/edge memberships and display the projection-owned
+`StructuralFocusDisposition` when a focus has no visible backbone. Deferred
+structural rows resolve the disposition's canonical relation IDs. The
+Structure control only hides or shows ownership edges and ownership-only
+context nodes. Neither control recalculates an association, disposition,
+relation, or parentage. Presentation must not recover parentage from symbol
+names, paths, or node kinds.
 Standalone changed facts are grouped by the projection's primary, test-support,
 and document-support references; presentation never reclassifies a fact from
 its path, content, or label.
