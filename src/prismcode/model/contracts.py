@@ -1328,7 +1328,13 @@ StructuralFocusNodeRole = Literal[
     "intermediate",
 ]
 
-StructuralGraphNodeOperation = Literal["added", "modified", "removed", "context"]
+StructuralGraphNodeOperation = Literal[
+    "added",
+    "modified",
+    "renamed",
+    "removed",
+    "context",
+]
 
 
 @dataclass(frozen=True)
@@ -1365,6 +1371,9 @@ class ReviewStructuralGraph:
     nodes: tuple[StructuralGraphNode, ...] = ()
     edges: tuple[StructuralGraphEdge, ...] = ()
     ownership_edges: tuple[StructuralGraphOwnershipEdge, ...] = ()
+    backbone_node_ids: tuple[str, ...] = ()
+    backbone_edge_ids: tuple[str, ...] = ()
+    backbone_ownership_edge_ids: tuple[str, ...] = ()
     path_relation_ids: tuple[str, ...] = ()
 
 
@@ -1404,7 +1413,7 @@ class ReviewSlice:
 class ReviewProjection:
     slices: tuple[ReviewSlice, ...] = ()
     review_graph: ReviewStructuralGraph = ReviewStructuralGraph()
-    schema_version: str = "review_projection.v13"
+    schema_version: str = "review_projection.v14"
 
     def validate_consistency(self, evidence_catalog: EvidenceCatalog) -> None:
         evidence = evidence_catalog.by_id()
@@ -1420,6 +1429,46 @@ class ReviewProjection:
         if len(ownership_edges) != len(self.review_graph.ownership_edges):
             raise ValueError(
                 "review structural graph contains duplicate ownership edges"
+            )
+        backbone_node_ids = set(self.review_graph.backbone_node_ids)
+        backbone_edge_ids = set(self.review_graph.backbone_edge_ids)
+        backbone_ownership_edge_ids = set(
+            self.review_graph.backbone_ownership_edge_ids
+        )
+        if len(backbone_node_ids) != len(self.review_graph.backbone_node_ids):
+            raise ValueError("review structural backbone contains duplicate nodes")
+        if len(backbone_edge_ids) != len(self.review_graph.backbone_edge_ids):
+            raise ValueError("review structural backbone contains duplicate edges")
+        if len(backbone_ownership_edge_ids) != len(
+            self.review_graph.backbone_ownership_edge_ids
+        ):
+            raise ValueError(
+                "review structural backbone contains duplicate ownership edges"
+            )
+        if (
+            not backbone_node_ids <= set(nodes)
+            or not backbone_edge_ids <= set(edges)
+            or not backbone_ownership_edge_ids <= set(ownership_edges)
+        ):
+            raise ValueError(
+                "review structural backbone references members outside the graph"
+            )
+        if any(
+            edges[edge_id].source_node_id not in backbone_node_ids
+            or edges[edge_id].target_node_id not in backbone_node_ids
+            for edge_id in backbone_edge_ids
+        ):
+            raise ValueError(
+                "review structural backbone edge endpoints must be backbone nodes"
+            )
+        if any(
+            ownership_edges[edge_id].parent_node_id not in backbone_node_ids
+            or ownership_edges[edge_id].child_node_id not in backbone_node_ids
+            for edge_id in backbone_ownership_edge_ids
+        ):
+            raise ValueError(
+                "review structural backbone ownership endpoints must be "
+                "backbone nodes"
             )
         for edge in self.review_graph.edges:
             if edge.source_node_id not in nodes or edge.target_node_id not in nodes:
@@ -1590,7 +1639,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v30"
+    schema_version: str = "review_brief.v31"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

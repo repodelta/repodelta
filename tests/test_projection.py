@@ -45,7 +45,11 @@ from prismcode.convergence.core import (
     ConvergencePolicy,
     converge_candidates,
 )
-from prismcode.projection.build import build_review_projection
+from prismcode.projection.build import (
+    _change_backbone,
+    _structural_node_id,
+    build_review_projection,
+)
 from prismcode.presentation.html import (
     _review_graph,
     _structural_edge_path,
@@ -178,7 +182,8 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
         '<div class="requirements">'
     )
     assert (
-        "0 connected nodes · 0 executable edges · 0 ownership edges · "
+        "1 backbone nodes · 0 support nodes · "
+        "0 backbone executable edges · 0 backbone ownership edges · "
         "1 isolated changed anchor"
     ) in html
     assert 'data-focus-target="R1"' in html
@@ -370,7 +375,8 @@ def test_canonical_ownership_projects_recursive_shared_focus_hierarchy() -> None
         SimpleNamespace(evidence_catalog=evidence),
     )
     assert (
-        "3 connected nodes · 0 executable edges · 2 ownership edges · "
+        "3 backbone nodes · 0 support nodes · "
+        "0 backbone executable edges · 2 backbone ownership edges · "
         "0 isolated changed anchors"
     ) in html
     assert html.count('class="ownership-edge operation-retained"') == 2
@@ -731,13 +737,20 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
         SimpleNamespace(evidence_catalog=evidence),
     )
     assert html.count('class="delta-canvas"') == 1
-    assert html.count('class="delta-edge operation-') == 4
-    assert "calls · retained" in html
-    assert "calls · removed" in html
+    assert graph.backbone_node_ids == (
+        _structural_node_id("anchor"),
+        _structural_node_id("anchor_2"),
+        _structural_node_id("runtime_2"),
+    )
+    assert graph.backbone_edge_ids == (
+        "E:relation:anchor2-runtime2",
+        "E:relation:anchor-anchor2",
+    )
+    assert html.count('class="delta-edge operation-') == 2
     assert "calls · added" in html
     assert "function · modified" in html
-    assert "class · context" in html
-    assert "variable · context" in html
+    assert "class · context" not in html
+    assert "variable · context" not in html
     assert 'data-focus-target="R1"' in html
     assert 'data-focus-target="R2"' in html
 
@@ -854,7 +867,12 @@ def test_review_graph_renders_complete_focus_union() -> None:
             overlay("G1", "g_only", "shared"),
             overlay("R3", "isolated"),
         ),
-        review_graph=ReviewStructuralGraph(nodes=nodes, edges=edges),
+        review_graph=ReviewStructuralGraph(
+            nodes=nodes,
+            edges=edges,
+            backbone_node_ids=tuple(item.id for item in nodes),
+            backbone_edge_ids=tuple(item.id for item in edges),
+        ),
     )
     html = _review_graph(
         projection.review_graph,
@@ -863,7 +881,8 @@ def test_review_graph_renders_complete_focus_union() -> None:
     )
 
     assert (
-        "4 connected nodes · 3 executable edges · 0 ownership edges · "
+        "5 backbone nodes · 0 support nodes · "
+        "3 backbone executable edges · 0 backbone ownership edges · "
         "1 isolated changed anchor"
     ) in html
     assert html.count('class="delta-node operation-') == 4
@@ -872,6 +891,126 @@ def test_review_graph_renders_complete_focus_union() -> None:
     assert 'data-focuses="R1 R2 G1"' in html
     for focus_id in ("R1", "R2", "R3", "G1"):
         assert f'data-focus-target="{focus_id}"' in html
+
+
+def test_change_backbone_does_not_transitively_promote_changed_edges() -> None:
+    nodes = tuple(
+            StructuralGraphNode(
+                id=f"N:{name}",
+                review_symbol_id=name,
+                operation="modified",
+                evidence_ids=(),
+            )
+        for name in ("seed", "direct", "transitive")
+    )
+    edges = (
+        StructuralGraphEdge(
+            id="D:direct",
+            source_node_id="N:seed",
+            target_node_id="N:direct",
+            relation="calls",
+            operation="added",
+            relation_change_evidence_id="E:direct",
+        ),
+        StructuralGraphEdge(
+            id="D:transitive",
+            source_node_id="N:direct",
+            target_node_id="N:transitive",
+            relation="calls",
+            operation="added",
+            relation_change_evidence_id="E:transitive",
+        ),
+    )
+
+    node_ids, edge_ids, ownership_edge_ids = _change_backbone(
+        nodes=nodes,
+        edges=edges,
+        ownership_edges=(),
+        seed_node_ids=("N:seed",),
+    )
+
+    assert node_ids == ("N:seed", "N:direct")
+    assert edge_ids == ("D:direct",)
+    assert ownership_edge_ids == ()
+
+
+def test_change_backbone_keeps_retained_edges_only_between_members() -> None:
+    nodes = tuple(
+            StructuralGraphNode(
+                id=f"N:{name}",
+                review_symbol_id=name,
+                operation="modified",
+                evidence_ids=(),
+            )
+        for name in ("left", "right", "support")
+    )
+    edges = (
+        StructuralGraphEdge(
+            id="D:backbone",
+            source_node_id="N:left",
+            target_node_id="N:right",
+            relation="calls",
+            operation="retained",
+            relation_change_evidence_id="E:backbone",
+        ),
+        StructuralGraphEdge(
+            id="D:support",
+            source_node_id="N:right",
+            target_node_id="N:support",
+            relation="calls",
+            operation="retained",
+            relation_change_evidence_id="E:support",
+        ),
+    )
+
+    node_ids, edge_ids, _ = _change_backbone(
+        nodes=nodes,
+        edges=edges,
+        ownership_edges=(),
+        seed_node_ids=("N:left", "N:right"),
+    )
+
+    assert node_ids == ("N:left", "N:right")
+    assert edge_ids == ("D:backbone",)
+
+
+def test_review_graph_preserves_renamed_node_operation() -> None:
+    node = StructuralGraphNode(
+        id="N:renamed",
+        review_symbol_id="renamed",
+        operation="renamed",
+        evidence_ids=("E:renamed",),
+    )
+    evidence = EvidenceCatalog(
+        items=(
+            EvidenceItem(
+                id="E:renamed",
+                summary="Renamed function: renamed_function",
+                kind="symbol",
+                classification="code",
+                profile="production",
+                metadata={
+                    "qualified_name": "renamed_function",
+                    "symbol_kind": "function",
+                },
+            ),
+        )
+    )
+    projection = ReviewProjection(
+        review_graph=ReviewStructuralGraph(
+            nodes=(node,),
+            backbone_node_ids=(node.id,),
+        )
+    )
+
+    html = _review_graph(
+        projection.review_graph,
+        projection,
+        SimpleNamespace(evidence_catalog=evidence),
+    )
+
+    assert 'class="isolated-anchor operation-renamed"' in html
+    assert "renamed_function" in html
 
     occupied: list[tuple[int, int, int, int]] = []
     first = _structural_edge_path(

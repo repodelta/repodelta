@@ -28,9 +28,10 @@ _ROLE_ORDER = {
 }
 _OPERATION_ORDER = {
     "added": 0,
-    "modified": 1,
-    "removed": 2,
-    "context": 3,
+    "renamed": 1,
+    "modified": 2,
+    "removed": 3,
+    "context": 4,
 }
 
 
@@ -57,6 +58,7 @@ def build_review_projection(
     graph_ownership_edge_order: list[str] = []
     graph_ownership_edges: dict[str, StructuralGraphOwnershipEdge] = {}
     graph_path_relation_ids: list[str] = []
+    backbone_seed_node_ids: list[str] = []
 
     for group in candidates.groups:
         converged = convergence_groups[group.focus_statement_id]
@@ -94,6 +96,15 @@ def build_review_projection(
             for node in overlay.nodes
             for relation_id in node.relation_ids
         }
+        backbone_seed_node_ids.extend(
+            node.node_id
+            for node in overlay.nodes
+            if any(
+                relations[relation_id].slot == "changed_anchor"
+                and relations[relation_id].evidence_role == "primary"
+                for relation_id in node.relation_ids
+            )
+        )
         for node in nodes:
             if node.id not in graph_nodes:
                 graph_node_order.append(node.id)
@@ -169,20 +180,101 @@ def build_review_projection(
             )
         )
 
+    complete_nodes = tuple(
+        graph_nodes[node_id] for node_id in graph_node_order
+    )
+    complete_edges = tuple(
+        graph_edges[edge_id] for edge_id in graph_edge_order
+    )
+    complete_ownership_edges = tuple(
+        graph_ownership_edges[edge_id]
+        for edge_id in graph_ownership_edge_order
+    )
+    (
+        backbone_node_ids,
+        backbone_edge_ids,
+        backbone_ownership_edge_ids,
+    ) = _change_backbone(
+        nodes=complete_nodes,
+        edges=complete_edges,
+        ownership_edges=complete_ownership_edges,
+        seed_node_ids=tuple(dict.fromkeys(backbone_seed_node_ids)),
+    )
     projection = ReviewProjection(
         slices=tuple(slices),
         review_graph=ReviewStructuralGraph(
-            nodes=tuple(graph_nodes[node_id] for node_id in graph_node_order),
-            edges=tuple(graph_edges[edge_id] for edge_id in graph_edge_order),
-            ownership_edges=tuple(
-                graph_ownership_edges[edge_id]
-                for edge_id in graph_ownership_edge_order
-            ),
+            nodes=complete_nodes,
+            edges=complete_edges,
+            ownership_edges=complete_ownership_edges,
+            backbone_node_ids=backbone_node_ids,
+            backbone_edge_ids=backbone_edge_ids,
+            backbone_ownership_edge_ids=backbone_ownership_edge_ids,
             path_relation_ids=tuple(dict.fromkeys(graph_path_relation_ids)),
         ),
     )
     projection.validate_consistency(evidence_catalog)
     return projection
+
+
+def _change_backbone(
+    *,
+    nodes: tuple[StructuralGraphNode, ...],
+    edges: tuple[StructuralGraphEdge, ...],
+    ownership_edges: tuple[StructuralGraphOwnershipEdge, ...],
+    seed_node_ids: tuple[str, ...],
+) -> tuple[tuple[str, ...], tuple[str, ...], tuple[str, ...]]:
+    """Project the default change backbone without deleting complete support."""
+
+    node_ids = {item.id for item in nodes}
+    backbone_nodes = set(seed_node_ids) & node_ids
+    backbone_edges: set[str] = set()
+    changed_edge_seed_ids = set(backbone_nodes)
+
+    for edge in edges:
+        if edge.operation not in {"added", "removed"}:
+            continue
+        if (
+            edge.source_node_id not in changed_edge_seed_ids
+            and edge.target_node_id not in changed_edge_seed_ids
+        ):
+            continue
+        backbone_edges.add(edge.id)
+        backbone_nodes.update((edge.source_node_id, edge.target_node_id))
+
+    for edge in edges:
+        if (
+            edge.operation == "retained"
+            and edge.source_node_id in backbone_nodes
+            and edge.target_node_id in backbone_nodes
+        ):
+            backbone_edges.add(edge.id)
+
+    ownership_by_child: dict[str, list[StructuralGraphOwnershipEdge]] = {}
+    for edge in ownership_edges:
+        ownership_by_child.setdefault(edge.child_node_id, []).append(edge)
+    backbone_ownership_edges: set[str] = set()
+    frontier = list(backbone_nodes)
+    expanded: set[str] = set()
+    while frontier:
+        child_node_id = frontier.pop(0)
+        if child_node_id in expanded:
+            continue
+        expanded.add(child_node_id)
+        for edge in ownership_by_child.get(child_node_id, ()):
+            backbone_ownership_edges.add(edge.id)
+            if edge.parent_node_id not in backbone_nodes:
+                backbone_nodes.add(edge.parent_node_id)
+                frontier.append(edge.parent_node_id)
+
+    return (
+        tuple(item.id for item in nodes if item.id in backbone_nodes),
+        tuple(item.id for item in edges if item.id in backbone_edges),
+        tuple(
+            item.id
+            for item in ownership_edges
+            if item.id in backbone_ownership_edges
+        ),
+    )
 
 
 def _structural_focus_overlay(
@@ -461,7 +553,7 @@ def _node_for_review_symbol(
 
 
 def _node_operation(operation: str) -> str:
-    if operation in {"added", "removed"}:
+    if operation in {"added", "renamed", "removed"}:
         return operation
     return "modified"
 

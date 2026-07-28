@@ -16,7 +16,13 @@ Profiles remain canonical in the candidate set; selected relations and
 convergence diagnostics are referenced from `CandidateConvergence`. Each slice
 carries a focus overlay projected from its upstream typed
 `ReviewRelevantStructuralClosure`; `ReviewProjection.review_graph` owns
-canonical nodes and edges once across all overlays. Nodes use the facts-owned
+canonical nodes and edges once across all overlays. The same graph also owns
+the canonical default change-backbone node, executable-edge, and
+ownership-edge IDs. Primary changed anchors seed that backbone; directly
+incident added or removed relations may add one endpoint, retained relations
+connect only existing backbone members, and required ownership ancestors
+organize those members. This selection is non-transitive and leaves all
+support/test members in the complete graph and focus overlays. Nodes use the facts-owned
 exact logical review-symbol identity and carry review operation plus base/head
 provider evidence provenance. Edges reference only the closure's canonical
 `StructuralRelationChangeIdentity` fact IDs; projection never searches all
@@ -43,7 +49,8 @@ Diagnostic scope and provider remain canonical through attention normalization.
 ## Must not
 
 Retrieve or reclassify evidence, select paths, inspect arbitrary provider
-metadata, or format HTML/CLI copy.
+metadata, format HTML/CLI copy, or delete complete support merely because it is
+not part of the default backbone.
 
 ## Diagnostics
 

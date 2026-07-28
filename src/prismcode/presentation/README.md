@@ -17,9 +17,11 @@ does not infer execution or absence. Boundary observations resolve selected
 fact IDs and display their typed per-surface coverage without interpreting
 candidate matches.
 The structural delta view resolves the shared canonical graph and focus-overlay
-IDs. Its deterministic SVG layout includes executable edges and the separate
-canonical ownership hierarchy. Operation styling, isolated-anchor disclosure,
-and client-side focus highlighting are presentation only. Focus controls
+IDs. Its deterministic SVG layout includes only the projection-owned default
+change backbone, including its executable edges and separate canonical
+ownership hierarchy. The complete support graph remains available to overlays
+without being independently reselected here. Operation styling,
+isolated-anchor disclosure, and client-side focus highlighting are presentation only. Focus controls
 toggle existing node/edge memberships, while the Structure control only hides
 or shows ownership edges and ownership-only context nodes. Neither control
 recalculates an association, relation, or parentage. Presentation must not
