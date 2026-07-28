@@ -33,6 +33,12 @@ cannot turn a modified file into an added file. Without applicable
 opposite-revision identity or complete absence proof, a one-sided symbol is
 explicitly `unresolved`; downstream stages never reconstruct or guess its
 revision delta.
+Exact parser-owned replacement relations may connect one removed and one added
+structural change of the same symbol kind in a typed
+`StructuralReplacementCandidate`. Candidates only reference the authoritative
+endpoint facts: they do not rewrite an operation, enter evidence routing, choose
+among many-to-many possibilities, or assert a rename. No lexical, path, name,
+embedding, or model similarity is used at this boundary.
 Revision path steps converge into one canonical
 `StructuralRelationChangeIdentity` per
 directed review-symbol edge. Its base/head path IDs and provider endpoints are

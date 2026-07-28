@@ -600,6 +600,43 @@ class StructuralChangeIdentity:
 
 
 @dataclass(frozen=True)
+class StructuralReplacementCandidate:
+    """Non-authoritative pairing of two canonical structural deltas."""
+
+    id: str
+    removed_change_evidence_id: str
+    added_change_evidence_id: str
+    change_relation_ids: tuple[str, ...]
+    signals: tuple[
+        Literal["shared_replacement_relation", "same_symbol_kind"], ...
+    ] = ("shared_replacement_relation", "same_symbol_kind")
+    schema_version: str = "structural_replacement_candidate.v1"
+
+    def __post_init__(self) -> None:
+        if (
+            not self.id
+            or not self.removed_change_evidence_id
+            or not self.added_change_evidence_id
+        ):
+            raise ValueError("structural replacement candidate fields must be non-empty")
+        if self.removed_change_evidence_id == self.added_change_evidence_id:
+            raise ValueError("structural replacement candidate endpoints must differ")
+        if not self.change_relation_ids:
+            raise ValueError(
+                "structural replacement candidate requires change relations"
+            )
+        if self.change_relation_ids != tuple(sorted(set(self.change_relation_ids))):
+            raise ValueError(
+                "structural replacement candidate relations must be sorted and unique"
+            )
+        if self.signals != (
+            "shared_replacement_relation",
+            "same_symbol_kind",
+        ):
+            raise ValueError("structural replacement candidate signals are canonical")
+
+
+@dataclass(frozen=True)
 class StructuralRelationChangeIdentity:
     """One revision-independent directed logical-symbol relation."""
 
@@ -833,9 +870,12 @@ class EvidenceItem:
 class EvidenceCatalog:
     items: tuple[EvidenceItem, ...] = ()
     change_relations: tuple[ChangeRelation, ...] = ()
+    structural_replacement_candidates: tuple[
+        StructuralReplacementCandidate, ...
+    ] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
     guardrail_scan_diagnostics: tuple[GuardrailScanDiagnostic, ...] = ()
-    schema_version: str = "evidence_catalog.v14"
+    schema_version: str = "evidence_catalog.v15"
 
     def by_id(self) -> dict[str, EvidenceItem]:
         return {item.id: item for item in self.items}
@@ -847,6 +887,69 @@ class EvidenceCatalog:
         ):
             raise ValueError("evidence catalog contains duplicate change relations")
         relation_ids = {item.id for item in self.change_relations}
+        if len({item.id for item in self.structural_replacement_candidates}) != len(
+            self.structural_replacement_candidates
+        ):
+            raise ValueError(
+                "evidence catalog contains duplicate replacement candidates"
+            )
+        if self.structural_replacement_candidates != tuple(
+            sorted(
+                self.structural_replacement_candidates,
+                key=lambda item: item.id,
+            )
+        ):
+            raise ValueError("replacement candidates must use deterministic ordering")
+        for candidate in self.structural_replacement_candidates:
+            removed = items_by_id.get(candidate.removed_change_evidence_id)
+            added = items_by_id.get(candidate.added_change_evidence_id)
+            if (
+                removed is None
+                or removed.kind != "structural_change"
+                or removed.operation != "removed"
+            ):
+                raise ValueError(
+                    f"{candidate.id}: removed endpoint must be a removed "
+                    "structural change"
+                )
+            if (
+                added is None
+                or added.kind != "structural_change"
+                or added.operation != "added"
+            ):
+                raise ValueError(
+                    f"{candidate.id}: added endpoint must be an added structural change"
+                )
+            if (
+                removed.metadata.get("symbol_kind")
+                != added.metadata.get("symbol_kind")
+            ):
+                raise ValueError(
+                    f"{candidate.id}: replacement endpoints must share symbol kind"
+                )
+            unknown = set(candidate.change_relation_ids) - relation_ids
+            if unknown:
+                raise ValueError(
+                    f"{candidate.id}: unknown replacement relation IDs: "
+                    f"{sorted(unknown)}"
+                )
+            if any(
+                relation.kind != "replaced"
+                for relation in self.change_relations
+                if relation.id in candidate.change_relation_ids
+            ):
+                raise ValueError(
+                    f"{candidate.id}: replacement candidates require replaced relations"
+                )
+            shared = (
+                set(removed.change_relation_ids)
+                & set(added.change_relation_ids)
+                & set(candidate.change_relation_ids)
+            )
+            if shared != set(candidate.change_relation_ids):
+                raise ValueError(
+                    f"{candidate.id}: replacement relations must be shared by endpoints"
+                )
         for item in self.items:
             item.validate_consistency()
             unknown = set(item.change_relation_ids) - relation_ids
