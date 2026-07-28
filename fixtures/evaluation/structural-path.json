@@ -1,8 +1,8 @@
 {
   "schema_version": "analysis_fixture.v3",
   "source_packet": {
-    "schema_version": "review_source_packet.v1",
-    "packet_revision": "sha256:e8b0cb07d144dc3bec9e3ea30dfe1405acbef4fa64eef8717f8e4ac52b55bf54",
+    "schema_version": "review_source_packet.v2",
+    "packet_revision": "sha256:4e195c35796af1c37941659a0e6e34a28b11777b0dd399ebf0237af1ce351235",
     "repository": "acme/widget",
     "pull_request": 102,
     "title": "Connect adapter to persistence",
@@ -23,7 +23,8 @@
     ],
     "changed_files": [
       {
-        "path": "src/adapter.py",
+        "base_path": "src/adapter.py",
+        "head_path": "src/adapter.py",
         "status": "modified",
         "additions": 1,
         "deletions": 1,

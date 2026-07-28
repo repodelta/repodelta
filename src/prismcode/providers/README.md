@@ -13,6 +13,10 @@ provider diagnostics.
 
 ## Invariants
 
+Structural overlap coverage and queries use only the path belonging to the
+provider revision. A head provider never probes a base path and a base provider
+never probes a head path.
+
 Providers never mutate repositories or indexes and never produce review
 conclusions.
 

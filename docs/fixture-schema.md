@@ -6,7 +6,16 @@ An offline fixture is an envelope around the same conclusion-free
 ```json
 {
   "schema_version": "analysis_fixture.v3",
-  "source_packet": { "schema_version": "review_source_packet.v1" },
+  "source_packet": {
+    "schema_version": "review_source_packet.v2",
+    "changed_files": [
+      {
+        "base_path": "src/old.py",
+        "head_path": "src/new.py",
+        "status": "renamed"
+      }
+    ]
+  },
   "requirements": [],
   "evidence": []
 }

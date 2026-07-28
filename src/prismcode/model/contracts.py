@@ -162,7 +162,8 @@ class ChangedLine:
 class ChangeRelation:
     id: str
     hunk_id: str
-    file_path: str
+    base_path: str | None
+    head_path: str | None
     kind: ChangeRelationKind
     added: tuple[ChangedLine, ...] = ()
     removed: tuple[ChangedLine, ...] = ()
@@ -183,6 +184,18 @@ class ChangeRelation:
             raise ValueError(
                 f"{self.id}: {self.kind} conflicts with base/head relation shape"
             )
+        if self.removed and not self.base_path:
+            raise ValueError(f"{self.id}: removed lines require a base path")
+        if self.added and not self.head_path:
+            raise ValueError(f"{self.id}: added lines require a head path")
+
+    def path_for_revision(self, revision_side: Literal["base", "head"]) -> str:
+        path = self.base_path if revision_side == "base" else self.head_path
+        if path is None:
+            raise ValueError(
+                f"{self.id}: no {revision_side} path exists for this change"
+            )
+        return path
 
     @property
     def added_lines(self) -> tuple[int, ...]:
@@ -215,13 +228,48 @@ class SourceRecord:
 
 @dataclass(frozen=True)
 class ChangedFile:
-    path: str
+    base_path: str | None
+    head_path: str | None
     status: str = "modified"
     additions: int | None = None
     deletions: int | None = None
     changes: int | None = None
     source_url: str | None = None
     patch: str | None = None
+
+    def __post_init__(self) -> None:
+        if not self.base_path and not self.head_path:
+            raise ValueError("changed file requires a base or head path")
+        expected = {
+            "added": self.base_path is None and self.head_path is not None,
+            "removed": self.base_path is not None and self.head_path is None,
+            "renamed": (
+                self.base_path is not None
+                and self.head_path is not None
+                and self.base_path != self.head_path
+            ),
+            "modified": (
+                self.base_path is not None
+                and self.head_path is not None
+                and self.base_path == self.head_path
+            ),
+        }
+        if self.status in expected and not expected[self.status]:
+            raise ValueError(
+                f"{self.status} changed file has inconsistent revision paths"
+            )
+
+    def path_for_revision(self, revision_side: Literal["base", "head"]) -> str:
+        path = self.base_path if revision_side == "base" else self.head_path
+        if path is None:
+            raise ValueError(
+                f"changed file has no {revision_side} revision path"
+            )
+        return path
+
+    @property
+    def display_path(self) -> str:
+        return self.head_path or self.base_path or ""
 
 
 @dataclass(frozen=True)
@@ -274,7 +322,7 @@ class ReviewSourcePacket:
     base_sha: str | None = None
     diagnostics: tuple[Diagnostic, ...] = ()
     metadata: dict[str, Any] = field(default_factory=dict)
-    schema_version: str = "review_source_packet.v1"
+    schema_version: str = "review_source_packet.v2"
     packet_revision: str = ""
 
     def semantic_dict(self) -> dict[str, Any]:
@@ -292,7 +340,7 @@ class ReviewSourcePacket:
         return replace(self, packet_revision=self.recompute_revision())
 
     def validate_consistency(self) -> None:
-        if self.schema_version != "review_source_packet.v1":
+        if self.schema_version != "review_source_packet.v2":
             raise ValueError(f"unsupported source packet schema: {self.schema_version}")
         if not self.packet_revision or self.packet_revision != self.recompute_revision():
             raise ValueError("review source packet content does not match packet_revision")

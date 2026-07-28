@@ -392,12 +392,25 @@ class GitHubPullRequestAdapter:
                 if not isinstance(item, dict) or not item.get("filename"):
                     continue
                 filename = str(item["filename"])
+                status = str(item.get("status") or "modified")
+                previous_filename = (
+                    str(item["previous_filename"])
+                    if isinstance(item.get("previous_filename"), str)
+                    else None
+                )
                 patch = item.get("patch") if isinstance(item.get("patch"), str) else None
                 source_url = item.get("blob_url") if isinstance(item.get("blob_url"), str) else None
                 files.append(
                     ChangedFile(
-                        path=filename,
-                        status=str(item.get("status") or "modified"),
+                        base_path=(
+                            None
+                            if status == "added"
+                            else previous_filename
+                            if status == "renamed"
+                            else filename
+                        ),
+                        head_path=None if status == "removed" else filename,
+                        status=status,
                         additions=_as_int(item.get("additions")),
                         deletions=_as_int(item.get("deletions")),
                         changes=_as_int(item.get("changes")),

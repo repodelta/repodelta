@@ -101,10 +101,24 @@ def test_catalog_deduplicates_facts_and_links_unchanged_path_symbols() -> None:
         title="Canonical evidence",
         source_records=(),
         changed_files=(
-            ChangedFile(path="src/adapter.py", source_url=changed.sources[0].url),
-            ChangedFile(path="src/adapter.py", source_url=changed.sources[0].url),
-            ChangedFile(path="tests/test_adapter.py"),
-            ChangedFile(path="docs/design.md"),
+            ChangedFile(
+                base_path="src/adapter.py",
+                head_path="src/adapter.py",
+                source_url=changed.sources[0].url,
+            ),
+            ChangedFile(
+                base_path="src/adapter.py",
+                head_path="src/adapter.py",
+                source_url=changed.sources[0].url,
+            ),
+            ChangedFile(
+                base_path="tests/test_adapter.py",
+                head_path="tests/test_adapter.py",
+            ),
+            ChangedFile(
+                base_path="docs/design.md",
+                head_path="docs/design.md",
+            ),
         ),
         verification_observations=(
             VerificationObservation(
@@ -165,7 +179,9 @@ def test_review_brief_serializes_one_canonical_catalog() -> None:
         pull_request=11,
         title="No explicit requirement",
         source_records=(),
-        changed_files=(ChangedFile(path="src/a.py"),),
+        changed_files=(
+            ChangedFile(base_path="src/a.py", head_path="src/a.py"),
+        ),
     ).with_revision()
 
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
@@ -214,7 +230,8 @@ def test_change_relations_are_canonical_fallback_evidence() -> None:
         source_records=(),
         changed_files=(
             ChangedFile(
-                path="src/service.py",
+                base_path="src/service.py",
+                head_path="src/service.py",
                 patch="@@ -1 +1 @@\n-old_call()\n+new_bounded_call()\n",
             ),
         ),
@@ -239,7 +256,8 @@ def test_change_relations_are_canonical_fallback_evidence() -> None:
         {
             "id": relation.id,
             "hunk_id": relation.hunk_id,
-            "file_path": "src/service.py",
+                "base_path": "src/service.py",
+                "head_path": "src/service.py",
             "kind": "replaced",
             "added": ({"number": 1, "text": "new_bounded_call()"},),
             "removed": ({"number": 1, "text": "old_call()"},),
@@ -256,7 +274,8 @@ def test_exact_symbol_replaces_its_mapped_hunk_evidence() -> None:
         source_records=(),
         changed_files=(
             ChangedFile(
-                path="src/service.py",
+                base_path="src/service.py",
+                head_path="src/service.py",
                 patch="@@ -1 +1 @@\n-old_call()\n+new_call()\n",
             ),
         ),
@@ -301,7 +320,8 @@ def test_partial_symbol_mapping_keeps_only_uncovered_relation_content() -> None:
         source_records=(),
         changed_files=(
             ChangedFile(
-                path="src/service.py",
+                base_path="src/service.py",
+                head_path="src/service.py",
                 patch=(
                     "@@ -1,0 +1,2 @@\n"
                     "+first_mapped_call()\n"
@@ -354,7 +374,8 @@ def test_symbol_merges_multiple_change_relations_without_hunk_inference() -> Non
         source_records=(),
         changed_files=(
             ChangedFile(
-                path="src/module.py",
+                base_path="src/module.py",
+                head_path="src/module.py",
                 patch=(
                     "@@ -1,2 +1,3 @@\n"
                     "+first_added()\n"

@@ -12,8 +12,9 @@ Canonical unified-diff parsing and head/base line semantics.
 
 Each hunk owns canonical contiguous `ChangeRelation`s typed as `added`,
 `removed`, or `replaced`. Head and base lines remain separate and retain exact
-revision-side line numbers. Replacement relations own both sides together. Hunk
-snippets are derived from spans rather than stored as parallel truth.
+revision-side line numbers and paths. Replacement relations own both sides
+together. Hunk snippets are derived from spans rather than stored as parallel
+truth. There is no revision-ambiguous changed path.
 
 ## Must not
 
@@ -26,5 +27,5 @@ relation shapes fail at the model boundary.
 
 ## Extension points
 
-Rename and additional patch formats normalize into the same relation
+Additional patch formats normalize into the same revision-path relation
 collection.

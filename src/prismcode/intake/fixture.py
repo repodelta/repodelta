@@ -60,7 +60,7 @@ def load_fixture(path: str | Path) -> AnalysisInput:
         base_sha=packet_raw.get("base_sha"),
         diagnostics=tuple(_diagnostic(item) for item in packet_raw.get("diagnostics", [])),
         metadata=packet_raw.get("metadata", {}),
-        schema_version=packet_raw.get("schema_version", "review_source_packet.v1"),
+        schema_version=packet_raw.get("schema_version", "review_source_packet.v2"),
         packet_revision=packet_raw.get("packet_revision", ""),
     )
     packet.validate_consistency()

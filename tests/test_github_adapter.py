@@ -70,7 +70,7 @@ def test_github_adapter_collects_only_source_facts() -> None:
                 "body": "Explain the result.\n\n## Requirements\n- Emit a trace.\n- Preserve behavior.",
                 "state": "open",
                 "draft": False,
-                "changed_files": 2,
+                "changed_files": 3,
                 "head": {"sha": "head123"},
                 "base": {"sha": "base123"},
                 "user": {"login": "octocat"},
@@ -86,6 +86,13 @@ def test_github_adapter_collects_only_source_facts() -> None:
                     "filename": "tests/test_a.py",
                     "status": "added",
                     "blob_url": "https://github.com/acme/widget/blob/head123/tests/test_a.py",
+                },
+                {
+                    "filename": "src/new_name.py",
+                    "previous_filename": "src/old_name.py",
+                    "status": "renamed",
+                    "blob_url": "https://github.com/acme/widget/blob/head123/src/new_name.py",
+                    "patch": "@@ -1 +1 @@\n-old_name()\n+new_name()\n",
                 },
             ],
             (checks_path, (("per_page", 100),)): {
@@ -105,7 +112,14 @@ def test_github_adapter_collects_only_source_facts() -> None:
     packet = GitHubPullRequestAdapter(client=client).load("acme/widget", 42)
     packet.validate_consistency()
     assert packet.head_sha == "head123"
-    assert [item.path for item in packet.changed_files] == ["src/a.py", "tests/test_a.py"]
+    assert [
+        (item.base_path, item.head_path)
+        for item in packet.changed_files
+    ] == [
+        ("src/a.py", "src/a.py"),
+        (None, "tests/test_a.py"),
+        ("src/old_name.py", "src/new_name.py"),
+    ]
     assert [item.code for item in packet.diagnostics] == [
         "github_patch_unavailable",
         "github_linked_issue_not_found",

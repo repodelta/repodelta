@@ -1,7 +1,7 @@
 {
   "schema_version": "analysis_fixture.v3",
   "source_packet": {
-    "schema_version": "review_source_packet.v1",
+    "schema_version": "review_source_packet.v2",
     "repository": "acme/widget",
     "pull_request": 16,
     "title": "Model semantic section taxonomy",
@@ -34,7 +34,7 @@
     "base_sha": null,
     "diagnostics": [],
     "metadata": {},
-    "packet_revision": "sha256:8e0c26c7414b4b45286d752ea388bf76dc9acef92d4f3119ce0b10a5ec65396c"
+    "packet_revision": "sha256:6bb8fcbc8c7701a012d922d77c236a417151cb74c9ae088a823a277acefb4aa5"
   },
   "requirements": [],
   "evidence": []

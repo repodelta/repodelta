@@ -1498,15 +1498,18 @@ def test_focus_evidence_roles_are_routed_before_convergence_and_presentation() -
         source_records=(),
         changed_files=(
             ChangedFile(
-                path="docs/bounded_trace.md",
+                base_path="docs/bounded_trace.md",
+                head_path="docs/bounded_trace.md",
                 patch="@@ -1,0 +2 @@\n+bounded_trace behavior\n",
             ),
             ChangedFile(
-                path="tests/test_bounded_trace.py",
+                base_path="tests/test_bounded_trace.py",
+                head_path="tests/test_bounded_trace.py",
                 patch="@@ -1,0 +2 @@\n+bounded_trace behavior\n",
             ),
             ChangedFile(
-                path="src/bounded_trace.py",
+                base_path="src/bounded_trace.py",
+                head_path="src/bounded_trace.py",
                 patch="@@ -1,0 +2 @@\n+bounded_trace behavior\n",
             ),
         ),
@@ -1596,7 +1599,8 @@ def test_change_relation_association_scans_beyond_display_preview() -> None:
         source_records=(),
         changed_files=(
             ChangedFile(
-                path="src/large.py",
+                base_path="src/large.py",
+                head_path="src/large.py",
                 patch=(
                     "@@ -0,0 +1 @@\n"
                     f"+{'x' * 4100} {late_identifier}()\n"
@@ -1629,7 +1633,8 @@ def test_base_signature_is_used_only_for_removal_or_guardrail_focus() -> None:
         source_records=(),
         changed_files=(
             ChangedFile(
-                path="src/service.py",
+                base_path="src/service.py",
+                head_path="src/service.py",
                 patch=(
                     "@@ -1 +1 @@\n"
                     "-legacy_bounded_adapter()\n"
