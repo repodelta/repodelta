@@ -1469,6 +1469,7 @@ class StructuralGraphNode:
     review_symbol_id: str
     delta: StructuralGraphNodeDelta
     evidence_ids: tuple[str, ...]
+    display_evidence_id: str
     path_relation_ids: tuple[str, ...] = ()
 
 
@@ -1493,10 +1494,44 @@ class StructuralGraphOwnershipEdge:
 
 
 @dataclass(frozen=True)
+class StructuralGraphPlacement:
+    """Observed revision-local containment for one logical parent/child pair."""
+
+    id: str
+    parent_node_id: str
+    child_node_id: str
+    base_ownership_evidence_ids: tuple[str, ...] = ()
+    head_ownership_evidence_ids: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        if (
+            not self.base_ownership_evidence_ids
+            and not self.head_ownership_evidence_ids
+        ):
+            raise ValueError(f"{self.id}: structural placement requires provenance")
+        for evidence_ids in (
+            self.base_ownership_evidence_ids,
+            self.head_ownership_evidence_ids,
+        ):
+            if evidence_ids != tuple(sorted(set(evidence_ids))):
+                raise ValueError(
+                    f"{self.id}: structural placement provenance must be "
+                    "sorted and unique"
+                )
+        if set(self.base_ownership_evidence_ids) & set(
+            self.head_ownership_evidence_ids
+        ):
+            raise ValueError(
+                f"{self.id}: structural placement provenance cannot cross revisions"
+            )
+
+
+@dataclass(frozen=True)
 class ReviewStructuralGraph:
     nodes: tuple[StructuralGraphNode, ...] = ()
     edges: tuple[StructuralGraphEdge, ...] = ()
     ownership_edges: tuple[StructuralGraphOwnershipEdge, ...] = ()
+    placements: tuple[StructuralGraphPlacement, ...] = ()
     backbone_node_ids: tuple[str, ...] = ()
     backbone_edge_ids: tuple[str, ...] = ()
     backbone_ownership_edge_ids: tuple[str, ...] = ()
@@ -1516,6 +1551,7 @@ class StructuralFocusOverlay:
     nodes: tuple[StructuralFocusNode, ...] = ()
     edge_ids: tuple[str, ...] = ()
     ownership_edge_ids: tuple[str, ...] = ()
+    placement_ids: tuple[str, ...] = ()
     path_relation_ids: tuple[str, ...] = ()
 
 
@@ -1542,7 +1578,7 @@ class ReviewSlice:
 class ReviewProjection:
     slices: tuple[ReviewSlice, ...] = ()
     review_graph: ReviewStructuralGraph = ReviewStructuralGraph()
-    schema_version: str = "review_projection.v16"
+    schema_version: str = "review_projection.v18"
 
     def validate_consistency(
         self,
@@ -1564,6 +1600,9 @@ class ReviewProjection:
         ownership_edges = {
             item.id: item for item in self.review_graph.ownership_edges
         }
+        placements = {
+            item.id: item for item in self.review_graph.placements
+        }
         if len(nodes) != len(self.review_graph.nodes):
             raise ValueError("review structural graph contains duplicate nodes")
         if len(edges) != len(self.review_graph.edges):
@@ -1572,6 +1611,36 @@ class ReviewProjection:
             raise ValueError(
                 "review structural graph contains duplicate ownership edges"
             )
+        if len(placements) != len(self.review_graph.placements):
+            raise ValueError(
+                "review structural graph contains duplicate placements"
+            )
+        for node in self.review_graph.nodes:
+            if node.display_evidence_id not in node.evidence_ids:
+                raise ValueError(
+                    "review structural node display evidence is outside its "
+                    "canonical evidence set"
+                )
+            display_fact = evidence.get(node.display_evidence_id)
+            if display_fact is None:
+                raise ValueError(
+                    "review structural node references missing display evidence"
+                )
+            desired_revision = "base" if node.delta == "removed" else "head"
+            revision_facts = tuple(
+                evidence.get(evidence_id)
+                for evidence_id in node.evidence_ids
+                if evidence.get(evidence_id) is not None
+                and evidence[evidence_id].revision_side == desired_revision
+            )
+            if (
+                revision_facts
+                and display_fact.revision_side != desired_revision
+            ):
+                raise ValueError(
+                    "review structural node display evidence does not use its "
+                    "canonical revision"
+                )
         backbone_node_ids = set(self.review_graph.backbone_node_ids)
         backbone_edge_ids = set(self.review_graph.backbone_edge_ids)
         backbone_ownership_edge_ids = set(
@@ -1662,6 +1731,66 @@ class ReviewProjection:
                     continue
                 visited.add(current)
                 frontier.extend(ownership_children.get(current, ()))
+        placement_pairs: set[tuple[str, str]] = set()
+        placement_children: dict[str, set[str]] = {}
+        for placement in self.review_graph.placements:
+            if (
+                placement.parent_node_id not in nodes
+                or placement.child_node_id not in nodes
+            ):
+                raise ValueError("review structural placement references a missing node")
+            pair = (placement.parent_node_id, placement.child_node_id)
+            if pair in placement_pairs:
+                raise ValueError(
+                    "review structural graph contains duplicate placement identity"
+                )
+            placement_pairs.add(pair)
+            placement_children.setdefault(
+                placement.parent_node_id, set()
+            ).add(placement.child_node_id)
+            for revision, evidence_ids in (
+                ("base", placement.base_ownership_evidence_ids),
+                ("head", placement.head_ownership_evidence_ids),
+            ):
+                for evidence_id in evidence_ids:
+                    fact = evidence.get(evidence_id)
+                    identity = (
+                        fact.structural_ownership if fact is not None else None
+                    )
+                    if (
+                        fact is None
+                        or fact.kind != "structural_ownership"
+                        or fact.revision_side != revision
+                        or identity is None
+                    ):
+                        raise ValueError(
+                            "review structural placement references invalid "
+                            "ownership provenance"
+                        )
+                    parent = evidence.get(identity.parent_symbol_evidence_id)
+                    child = evidence.get(identity.child_symbol_evidence_id)
+                    if (
+                        parent is None
+                        or child is None
+                        or nodes[placement.parent_node_id].review_symbol_id
+                        != parent.metadata.get("review_symbol_id")
+                        or nodes[placement.child_node_id].review_symbol_id
+                        != child.metadata.get("review_symbol_id")
+                    ):
+                        raise ValueError(
+                            "review structural placement provenance identity mismatch"
+                        )
+        for start in placement_children:
+            frontier = list(placement_children[start])
+            visited: set[str] = set()
+            while frontier:
+                current = frontier.pop()
+                if current == start:
+                    raise ValueError("review structural placement contains a cycle")
+                if current in visited:
+                    continue
+                visited.add(current)
+                frontier.extend(placement_children.get(current, ()))
         for review_slice in self.slices:
             overlay = review_slice.structural_overlay
             disposition = review_slice.structural_disposition
@@ -1703,6 +1832,14 @@ class ReviewProjection:
                 raise ValueError(
                     f"{review_slice.focus_statement_id}: structural disposition "
                     "references an invalid diagnostic"
+                )
+            if any(
+                placement_id not in placements
+                for placement_id in overlay.placement_ids
+            ):
+                raise ValueError(
+                    f"{review_slice.focus_statement_id}: structural overlay "
+                    "references missing placement"
                 )
             if (disposition.state == "projected") != bool(overlay.nodes):
                 raise ValueError(

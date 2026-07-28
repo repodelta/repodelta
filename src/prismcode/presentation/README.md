@@ -21,14 +21,23 @@ IDs. Its deterministic SVG layout includes only the projection-owned default
 change backbone, including its executable edges and separate canonical
 ownership hierarchy. The complete support graph remains available to overlays
 without being independently reselected here. Operation styling,
-isolated-anchor disclosure, and client-side focus highlighting are presentation only. Focus controls
-toggle existing node/edge memberships and display the projection-owned
+isolated-anchor disclosure, canonical structural placement, and client-side
+focus highlighting are presentation only. Compound containment consumes only
+projection-owned revision-local placements; the renderer never recovers
+parentage from paths, names, or node kinds. A Head-observed placement owns the
+current visual container when a moved symbol also has a Base-only parent; that
+secondary placement remains explicit without duplicating the symbol. Container
+roots are layered by projected executable topology, and orthogonal edge routes
+consume the resulting node/container geometry. Node labels and links resolve
+only the projection-owned canonical display evidence. Focus controls toggle
+existing node/edge memberships; a container's own focus is shown as direct
+evidence while descendant-only membership is shown as presentation context.
+They also display the projection-owned
 `StructuralFocusDisposition` when a focus has no visible backbone. Deferred
-structural rows resolve the disposition's canonical relation IDs. The
-Structure control only hides or shows ownership edges and ownership-only
-context nodes. Neither control recalculates an association, disposition,
-relation, or parentage. Presentation must not recover parentage from symbol
-names, paths, or node kinds.
+structural rows resolve the disposition's canonical relation IDs. Focus
+controls do not recalculate an association, disposition, relation, or
+parentage. Graph coverage text formats the existing review-level
+`StructuralCoverage`; it does not inspect provider diagnostics.
 Standalone changed facts are grouped by the projection's primary, test-support,
 and document-support references; presentation never reclassifies a fact from
 its path, content, or label.

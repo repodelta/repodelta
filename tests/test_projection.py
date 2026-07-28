@@ -25,12 +25,15 @@ from prismcode.model.contracts import (
     ReviewStructuralGraph,
     SourceRecord,
     StructuralChangeIdentity,
+    StructuralCoverage,
     StructuralFocusNode,
     StructuralFocusDisposition,
     StructuralFocusOverlay,
     StructuralGraphEdge,
     StructuralGraphNode,
+    StructuralGraphPlacement,
     StructuralOwnershipChangeIdentity,
+    StructuralOwnershipIdentity,
     StructuralRelationChangeIdentity,
     VerificationIdentity,
 )
@@ -48,6 +51,7 @@ from prismcode.convergence.core import (
 )
 from prismcode.projection.build import (
     _change_backbone,
+    _display_evidence_id,
     _merge_node,
     _structural_node_id,
     _support_node_delta,
@@ -56,6 +60,7 @@ from prismcode.projection.build import (
 from prismcode.projection.overview import project_diagnostic_presentation
 from prismcode.presentation.html import (
     _review_graph,
+    _structural_compound_layout,
     _structural_disposition,
     _structural_edge_path,
     render_html,
@@ -68,6 +73,37 @@ from prismcode.providers.structural import (
 
 
 SUITE = Path("fixtures/evaluation-suite.json")
+
+
+def test_compound_layout_keeps_every_canonical_membership_for_moved_symbol() -> None:
+    nodes = tuple(
+        StructuralGraphNode(
+            id=f"N:{name}",
+            review_symbol_id=name,
+            delta="modified",
+            evidence_ids=(),
+            display_evidence_id=f"E:{name}",
+        )
+        for name in ("old-parent", "new-parent", "child")
+    )
+    removed = StructuralGraphPlacement(
+        id="P:old",
+        parent_node_id="N:old-parent",
+        child_node_id="N:child",
+        base_ownership_evidence_ids=("E:removed",),
+    )
+    added = StructuralGraphPlacement(
+        id="P:new",
+        parent_node_id="N:new-parent",
+        child_node_id="N:child",
+        head_ownership_evidence_ids=("E:added",),
+    )
+
+    layout = _structural_compound_layout(nodes, (), (removed, added))
+
+    assert set(layout.positions) == {item.id for item in nodes}
+    assert tuple(item.id for item in layout.secondary_placements) == ("P:old",)
+    assert {item.node_id for item in layout.containers} == {"N:new-parent"}
 
 
 def _build_projection(
@@ -205,9 +241,10 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
         '<div class="requirements">'
     )
     assert (
-        "1 backbone nodes · 0 support nodes · "
-        "0 backbone executable edges · 0 backbone ownership edges · "
-        "1 isolated changed anchor"
+            "1 backbone nodes · 0 support nodes · "
+            "0 backbone executable edges · 0 structural placements · "
+            "0 ownership deltas · "
+            "1 isolated changed anchor"
     ) in html
     assert 'data-focus-target="R1"' in html
     assert 'class="requirement" data-focus-id="R1" open' in html
@@ -316,12 +353,60 @@ def test_canonical_ownership_projects_recursive_shared_focus_hierarchy() -> None
             ),
         )
 
+    def ownership_provenance(
+        fact_id: str,
+        revision: str,
+        parent_symbol_id: str,
+        child_symbol_id: str,
+    ) -> EvidenceItem:
+        return EvidenceItem(
+            id=fact_id,
+            summary=f"{revision} ownership",
+            kind="structural_ownership",
+            classification="code",
+            profile="unknown",
+            authority="structural_provider",
+            revision_side=revision,
+            operation="observed",
+            role="structural_ownership",
+            structural_ownership=StructuralOwnershipIdentity(
+                parent_provider_symbol_id=parent_symbol_id,
+                child_provider_symbol_id=child_symbol_id,
+                parent_symbol_evidence_id=f"E:symbol:{parent_symbol_id}",
+                child_symbol_evidence_id=f"E:symbol:{child_symbol_id}",
+            ),
+        )
+
     evidence = EvidenceCatalog(
         items=(
             anchor,
             symbol("E:symbol:child", "child"),
             symbol("E:symbol:parent", "parent"),
             symbol("E:symbol:file", "file"),
+            ownership_provenance(
+                "E:base:E:ownership:parent-child",
+                "base",
+                "parent",
+                "child",
+            ),
+            ownership_provenance(
+                "E:head:E:ownership:parent-child",
+                "head",
+                "parent",
+                "child",
+            ),
+            ownership_provenance(
+                "E:base:E:ownership:file-parent",
+                "base",
+                "file",
+                "parent",
+            ),
+            ownership_provenance(
+                "E:head:E:ownership:file-parent",
+                "head",
+                "file",
+                "parent",
+            ),
             ownership("E:ownership:parent-child", "parent", "child"),
             ownership("E:ownership:file-parent", "file", "parent"),
         )
@@ -392,22 +477,32 @@ def test_canonical_ownership_projects_recursive_shared_focus_hierarchy() -> None
         )
     )
     assert len(projection.review_graph.ownership_edges) == 2
+    assert len(projection.review_graph.placements) == 2
     html = _review_graph(
         projection.review_graph,
         projection,
-        SimpleNamespace(evidence_catalog=evidence),
+        SimpleNamespace(
+            evidence_catalog=evidence,
+            overview=SimpleNamespace(
+                structural_coverage=StructuralCoverage(state="unavailable")
+            ),
+        ),
     )
     assert (
         "3 backbone nodes · 0 support nodes · "
-        "0 backbone executable edges · 2 backbone ownership edges · "
+        "0 backbone executable edges · 2 structural placements · "
+        "2 ownership deltas · "
         "0 isolated changed anchors"
     ) in html
-    assert html.count('class="ownership-edge operation-retained"') == 2
-    assert html.count('data-focuses="R1 R2"') >= 2
-    assert html.count("contains · retained") == 2
-    assert 'class="hierarchy-toggle active"' in html
-    assert 'aria-pressed="true"' in html
-    assert 'class="delta-node operation-unresolved ownership-only"' in html
+    assert html.count('class="structural-container operation-') == 2
+    assert html.count('class="structural-container-header operation-') == 2
+    assert "Structural coverage · unavailable" in html
+    assert html.count('data-context-focuses="R1 R2"') >= 4
+    assert html.count('data-focuses="R1 R2"') == 1
+    assert "member · retained" not in html
+    assert 'class="hierarchy-toggle' not in html
+    assert 'class="ownership-edge' not in html
+    assert html.count('class="delta-node operation-') == 1
 
     cyclic_evidence = replace(
         evidence,
@@ -772,7 +867,12 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
     html = _review_graph(
         graph,
         projection,
-        SimpleNamespace(evidence_catalog=evidence),
+        SimpleNamespace(
+            evidence_catalog=evidence,
+            overview=SimpleNamespace(
+                structural_coverage=StructuralCoverage(state="unavailable")
+            ),
+        ),
     )
     assert html.count('class="delta-canvas"') == 1
     assert graph.backbone_node_ids == (
@@ -863,6 +963,7 @@ def test_review_graph_renders_complete_focus_union() -> None:
             review_symbol_id=node_id,
             delta="modified",
             evidence_ids=(f"E:{node_id}",),
+            display_evidence_id=f"E:{node_id}",
         )
         for node_id in node_ids
     )
@@ -919,13 +1020,19 @@ def test_review_graph_renders_complete_focus_union() -> None:
     html = _review_graph(
         projection.review_graph,
         projection,
-        SimpleNamespace(evidence_catalog=evidence),
+        SimpleNamespace(
+            evidence_catalog=evidence,
+            overview=SimpleNamespace(
+                structural_coverage=StructuralCoverage(state="unavailable")
+            ),
+        ),
     )
 
     assert (
-        "5 backbone nodes · 0 support nodes · "
-        "3 backbone executable edges · 0 backbone ownership edges · "
-        "1 isolated changed anchor"
+            "5 backbone nodes · 0 support nodes · "
+            "3 backbone executable edges · 0 structural placements · "
+            "0 ownership deltas · "
+            "1 isolated changed anchor"
     ) in html
     assert html.count('class="delta-node operation-') == 4
     assert html.count('class="isolated-anchor operation-') == 1
@@ -947,6 +1054,7 @@ def test_change_backbone_does_not_transitively_promote_changed_edges() -> None:
                 review_symbol_id=name,
                 delta="modified",
                 evidence_ids=(),
+                display_evidence_id=f"E:{name}",
             )
         for name in ("seed", "direct", "transitive")
     )
@@ -988,6 +1096,7 @@ def test_change_backbone_keeps_retained_edges_only_between_members() -> None:
                 review_symbol_id=name,
                 delta="modified",
                 evidence_ids=(),
+                display_evidence_id=f"E:{name}",
             )
         for name in ("left", "right", "support")
     )
@@ -1022,7 +1131,13 @@ def test_change_backbone_keeps_retained_edges_only_between_members() -> None:
 
 
 def test_support_node_delta_requires_exact_base_and_head_facts() -> None:
-    def symbol(fact_id: str, revision_side: str) -> EvidenceItem:
+    def symbol(
+        fact_id: str,
+        revision_side: str,
+        *,
+        operation: str = "unchanged",
+        changed: bool = False,
+    ) -> EvidenceItem:
         return EvidenceItem(
             id=fact_id,
             summary=f"{revision_side.title()} symbol",
@@ -1031,8 +1146,9 @@ def test_support_node_delta_requires_exact_base_and_head_facts() -> None:
             profile="production",
             authority="structural_provider",
             revision_side=revision_side,
-            operation="unchanged",
+            operation=operation,
             role="revision_fact",
+            changed=changed,
         )
 
     head = symbol("E:head", "head")
@@ -1040,6 +1156,43 @@ def test_support_node_delta_requires_exact_base_and_head_facts() -> None:
 
     assert _support_node_delta((head, base), ()) == "retained"
     assert _support_node_delta((head,), ()) == "unresolved"
+    removed = symbol(
+        "E:removed",
+        "base",
+        operation="removed",
+        changed=True,
+    )
+    assert _support_node_delta((removed,), ()) == "removed"
+
+
+def test_structural_display_evidence_uses_head_except_for_removed_nodes() -> None:
+    head = EvidenceItem(
+        id="E:head",
+        summary="Head symbol",
+        kind="symbol",
+        classification="code",
+        profile="production",
+        revision_side="head",
+    )
+    base = EvidenceItem(
+        id="E:base",
+        summary="Base symbol",
+        kind="symbol",
+        classification="code",
+        profile="production",
+        revision_side="base",
+    )
+    evidence = {item.id: item for item in (base, head)}
+
+    for delta in ("added", "modified", "renamed", "retained", "unresolved"):
+        assert (
+            _display_evidence_id(delta, ("E:base", "E:head"), evidence)
+            == "E:head"
+        )
+    assert (
+        _display_evidence_id("removed", ("E:head", "E:base"), evidence)
+        == "E:base"
+    )
 
 
 def test_file_support_node_delta_uses_canonical_git_change_truth() -> None:
@@ -1081,12 +1234,14 @@ def test_structural_node_merge_rejects_conflicting_delta_truth() -> None:
         review_symbol_id="service",
         delta="added",
         evidence_ids=("E:head",),
+        display_evidence_id="E:head",
     )
     right = StructuralGraphNode(
         id="N:service",
         review_symbol_id="service",
         delta="removed",
         evidence_ids=("E:base",),
+        display_evidence_id="E:base",
     )
 
     with pytest.raises(
@@ -1102,6 +1257,7 @@ def test_review_graph_preserves_renamed_node_operation() -> None:
         review_symbol_id="renamed",
         delta="renamed",
         evidence_ids=("E:renamed",),
+        display_evidence_id="E:renamed",
     )
     evidence = EvidenceCatalog(
         items=(
@@ -1128,7 +1284,12 @@ def test_review_graph_preserves_renamed_node_operation() -> None:
     html = _review_graph(
         projection.review_graph,
         projection,
-        SimpleNamespace(evidence_catalog=evidence),
+        SimpleNamespace(
+            evidence_catalog=evidence,
+            overview=SimpleNamespace(
+                structural_coverage=StructuralCoverage(state="unavailable")
+            ),
+        ),
     )
 
     assert 'class="isolated-anchor operation-renamed"' in html
@@ -1138,26 +1299,35 @@ def test_review_graph_preserves_renamed_node_operation() -> None:
     first = _structural_edge_path(
         30,
         35,
+        210,
+        72,
         390,
         35,
+        210,
+        72,
         "instantiates · added",
         occupied,
     )
     second = _structural_edge_path(
         30,
         35,
+        210,
+        72,
         390,
         35,
+        210,
+        72,
         "imports · retained",
         occupied,
     )
 
-    assert first[1] == second[1] == 315
+    assert first[0] == "M 240 71 H 315 V 71 H 390"
+    assert first[1] == second[1] == 277
     assert first[2] != second[2]
     assert len(occupied) == 2
     assert occupied[0][2] <= occupied[1][0] or occupied[1][3] <= occupied[0][1]
     for left, _top, right, _bottom in occupied:
-        assert 240 <= left < right <= 390
+        assert 220 <= left < right <= 340
 
 
 def test_every_requirement_is_routed_without_a_global_statement_budget() -> None:
@@ -1338,7 +1508,12 @@ def test_isolated_symbol_and_standalone_document_keep_distinct_canonical_forms()
     graph_html = _review_graph(
         projection.review_graph,
         projection,
-        SimpleNamespace(evidence_catalog=evidence),
+        SimpleNamespace(
+            evidence_catalog=evidence,
+            overview=SimpleNamespace(
+                structural_coverage=StructuralCoverage(state="unavailable")
+            ),
+        ),
     )
     assert "disposition-non_structural_only" in graph_html
     assert (

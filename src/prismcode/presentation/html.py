@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from html import escape
 from pathlib import Path
 import re
@@ -18,10 +19,30 @@ from prismcode.model.contracts import (
     SourceRef,
     StructuralGraphEdge,
     StructuralGraphNode,
-    StructuralGraphOwnershipEdge,
+    StructuralGraphPlacement,
 )
 
 _DEFERRED_STRUCTURAL_PREVIEW_LIMIT = 5
+
+
+@dataclass(frozen=True)
+class _StructuralContainerLayout:
+    node_id: str
+    x: int
+    y: int
+    width: int
+    height: int
+    descendant_node_ids: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class _StructuralLayout:
+    positions: dict[str, tuple[int, int]]
+    sizes: dict[str, tuple[int, int]]
+    containers: tuple[_StructuralContainerLayout, ...]
+    secondary_placements: tuple[StructuralGraphPlacement, ...]
+    width: int
+    height: int
 
 
 def _safe_href(value: str | None) -> str | None:
@@ -246,6 +267,12 @@ def _review_graph(
     nodes = {item.id: item for item in graph.nodes}
     edges = {item.id: item for item in graph.edges}
     ownership_edges = {item.id: item for item in graph.ownership_edges}
+    placements = tuple(
+        item
+        for item in graph.placements
+        if item.parent_node_id in graph.backbone_node_ids
+        and item.child_node_id in graph.backbone_node_ids
+    )
     backbone_nodes = {
         node_id: nodes[node_id] for node_id in graph.backbone_node_ids
     }
@@ -259,6 +286,7 @@ def _review_graph(
     node_focus: dict[str, list[tuple[str, str]]] = {}
     edge_focus: dict[str, list[str]] = {}
     ownership_edge_focus: dict[str, list[str]] = {}
+    placement_focus: dict[str, list[str]] = {}
     for review_slice in projection.slices:
         focus_id = review_slice.focus_statement_id
         for node in review_slice.structural_overlay.nodes:
@@ -284,6 +312,8 @@ def _review_graph(
                     f"edge {edge_id}"
                 )
             ownership_edge_focus.setdefault(edge_id, []).append(focus_id)
+        for placement_id in review_slice.structural_overlay.placement_ids:
+            placement_focus.setdefault(placement_id, []).append(focus_id)
     executable_connected_node_ids = {
         node_id
         for edge in backbone_edges
@@ -294,31 +324,106 @@ def _review_graph(
         for edge in backbone_ownership_edges
         for node_id in (edge.parent_node_id, edge.child_node_id)
     }
-    connected_node_ids = executable_connected_node_ids | ownership_connected_node_ids
+    placement_connected_node_ids = {
+        node_id
+        for placement in placements
+        for node_id in (placement.parent_node_id, placement.child_node_id)
+    }
+    connected_node_ids = (
+        executable_connected_node_ids
+        | ownership_connected_node_ids
+        | placement_connected_node_ids
+    )
     connected_nodes = tuple(
         node
         for node in backbone_nodes.values()
         if node.id in connected_node_ids
     )
-    positions, canvas_width, canvas_height = _structural_layout(
+    layout = _structural_compound_layout(
         connected_nodes,
         backbone_edges,
-        backbone_ownership_edges,
+        placements,
     )
+    positions = layout.positions
+    containers = layout.containers
+    secondary_placements = layout.secondary_placements
+    canvas_width = layout.width
+    canvas_height = layout.height
 
-    ownership_edge_shapes = []
-    occupied_label_boxes: list[tuple[int, int, int, int]] = []
-    for edge in backbone_ownership_edges:
-        parent_node = nodes.get(edge.parent_node_id)
-        child_node = nodes.get(edge.child_node_id)
-        ownership_change = evidence.get(edge.ownership_change_evidence_id)
+    container_shapes = []
+    container_header_shapes = []
+    container_node_ids = {item.node_id for item in containers}
+    for container in containers:
+        parent_node = nodes[container.node_id]
+        fact = _structural_display_fact(parent_node, evidence)
+        full_name = _structural_name(fact)
+        path_label, name_label = _structural_label_parts(full_name)
+        kind = str(fact.metadata.get("symbol_kind", "symbol")).replace("_", " ")
+        direct_focuses = tuple(
+            focus_id
+            for focus_id, role in node_focus.get(container.node_id, ())
+            if role != "intermediate"
+        )
+        contextual_focuses = tuple(
+            dict.fromkeys(
+                focus_id
+                for focus_id in (
+                    *(
+                        item_focus_id
+                        for item_focus_id, role in node_focus.get(
+                            container.node_id, ()
+                        )
+                        if role == "intermediate"
+                    ),
+                    *(
+                        item_focus_id
+                        for node_id in container.descendant_node_ids
+                        for item_focus_id, _role in node_focus.get(node_id, ())
+                    ),
+                )
+                if focus_id not in direct_focuses
+            )
+        )
+        container_shapes.append(
+            f'<rect class="structural-container operation-{escape(parent_node.delta)}" '
+            f'data-focuses="{escape(" ".join(direct_focuses), quote=True)}" '
+            f'data-context-focuses="{escape(" ".join(contextual_focuses), quote=True)}" '
+            f'x="{container.x}" y="{container.y}" '
+            f'width="{container.width}" height="{container.height}" rx="14">'
+            f"<title>{escape(parent_node.review_symbol_id)} ownership container</title>"
+            "</rect>"
+        )
+        header = (
+            f'<g class="structural-container-header operation-{escape(parent_node.delta)}" '
+            f'data-focuses="{escape(" ".join(direct_focuses), quote=True)}" '
+            f'data-context-focuses="{escape(" ".join(contextual_focuses), quote=True)}" '
+            f'transform="translate({container.x + 12} {container.y + 12})">'
+            f'<rect width="{container.width - 24}" height="42" rx="8"/>'
+            f'<text class="delta-node-kind" x="11" y="15">'
+            f'{escape(kind)} · {escape(parent_node.delta)}</text>'
+            f'<text class="delta-node-name" x="11" y="32">'
+            f'{escape(name_label or path_label)}</text>'
+            f"<title>{escape(full_name)}</title></g>"
+        )
+        href = _structural_href(fact, brief)
+        container_header_shapes.append(
+            f'<a href="{escape(href, quote=True)}" target="_blank" '
+            f'rel="noopener">{header}</a>'
+            if href
+            else header
+        )
+
+    secondary_placement_shapes = []
+    for placement in secondary_placements:
+        parent_node = nodes.get(placement.parent_node_id)
+        child_node = nodes.get(placement.child_node_id)
         parent = (
-            _structural_node_fact(parent_node.evidence_ids, evidence)
+            _structural_display_fact(parent_node, evidence)
             if parent_node is not None
             else None
         )
         child = (
-            _structural_node_fact(child_node.evidence_ids, evidence)
+            _structural_display_fact(child_node, evidence)
             if child_node is not None
             else None
         )
@@ -329,59 +434,46 @@ def _review_graph(
             or child is None
         ):
             raise ValueError("ownership edge references a missing node")
-        if (
-            ownership_change is None
-            or ownership_change.kind != "structural_ownership_change"
-        ):
-            raise ValueError(
-                "ownership edge references missing ownership-change evidence"
-            )
-        parent_x, parent_y = positions[edge.parent_node_id]
-        child_x, child_y = positions[edge.child_node_id]
-        label = f"contains · {edge.operation}"
-        path, label_x, label_y, label_width = _structural_edge_path(
-            parent_x,
-            parent_y,
-            child_x,
-            child_y,
-            label,
-            occupied_label_boxes,
-        )
-        ownership_edge_shapes.append(
-            f'<g class="ownership-edge operation-{escape(edge.operation)}" '
-            f'data-focuses="{escape(" ".join(ownership_edge_focus.get(edge.id, ())), quote=True)}">'
-            f'<path d="{path}" marker-end="url(#arrow-ownership-{escape(edge.operation)})"/>'
-            f'<rect class="delta-edge-label-bg" x="{label_x - label_width // 2}" '
-            f'y="{label_y - 11}" width="{label_width}" height="16" rx="4"/>'
-            f'<text class="delta-edge-label" x="{label_x}" y="{label_y}">'
-            f"{escape(label)}</text>"
-            f"<title>{escape(parent.summary)} → {escape(child.summary)}</title></g>"
+        child_x, child_y = positions[placement.child_node_id]
+        label = (
+            "previously in "
+            if placement.base_ownership_evidence_ids
+            and not placement.head_ownership_evidence_ids
+            else "also in "
+        ) + _truncate_label(_structural_name(parent), 22)
+        focus_ids = placement_focus.get(placement.id, ())
+        secondary_placement_shapes.append(
+            '<g class="secondary-placement" '
+            f'data-context-focuses="{escape(" ".join(focus_ids), quote=True)}">'
+            f'<rect x="{child_x + 10}" y="{child_y + 51}" '
+            f'width="{max(94, min(190, len(label) * 5 + 16))}" height="16" rx="7"/>'
+            f'<text x="{child_x + 18}" y="{child_y + 62}">{escape(label)}</text>'
+            f"<title>{escape(parent.summary)} contains {escape(child.summary)}</title>"
+            "</g>"
         )
 
+    occupied_label_boxes: list[tuple[int, int, int, int]] = []
+    node_boxes = tuple(
+        (
+            positions[node.id][0],
+            positions[node.id][1],
+            positions[node.id][0] + layout.sizes[node.id][0],
+            positions[node.id][1] + layout.sizes[node.id][1],
+        )
+        for node in connected_nodes
+    )
     edge_shapes = []
     for edge in backbone_edges:
         source_node = nodes.get(edge.source_node_id)
         target_node = nodes.get(edge.target_node_id)
         relation_change = evidence.get(edge.relation_change_evidence_id)
         source = (
-            next(
-                (
-                    evidence.get(evidence_id)
-                    for evidence_id in source_node.evidence_ids
-                ),
-                None,
-            )
+            _structural_display_fact(source_node, evidence)
             if source_node is not None
             else None
         )
         target = (
-            next(
-                (
-                    evidence.get(evidence_id)
-                    for evidence_id in target_node.evidence_ids
-                ),
-                None,
-            )
+            _structural_display_fact(target_node, evidence)
             if target_node is not None
             else None
         )
@@ -397,10 +489,13 @@ def _review_graph(
         path, label_x, label_y, label_width = _structural_edge_path(
             source_x,
             source_y,
+            *layout.sizes[edge.source_node_id],
             target_x,
             target_y,
+            *layout.sizes[edge.target_node_id],
             label,
             occupied_label_boxes,
+            node_boxes,
         )
         edge_shapes.append(
             f'<g class="delta-edge operation-{escape(edge.operation)}" '
@@ -416,13 +511,22 @@ def _review_graph(
 
     node_shapes = []
     for node in connected_nodes:
-        fact = _structural_node_fact(node.evidence_ids, evidence)
+        if node.id in container_node_ids:
+            continue
+        fact = _structural_display_fact(node, evidence)
         x, y = positions[node.id]
         full_name = _structural_name(fact)
         path_label, name_label = _structural_label_parts(full_name)
         kind = str(fact.metadata.get("symbol_kind", "symbol")).replace("_", " ")
-        focuses = " ".join(
-            focus_id for focus_id, _role in node_focus.get(node.id, ())
+        direct_focuses = " ".join(
+            focus_id
+            for focus_id, role in node_focus.get(node.id, ())
+            if role != "intermediate"
+        )
+        contextual_focuses = " ".join(
+            focus_id
+            for focus_id, role in node_focus.get(node.id, ())
+            if role == "intermediate"
         )
         content = (
             f'<g class="delta-node operation-{escape(node.delta)}'
@@ -432,7 +536,8 @@ def _review_graph(
                 else ""
             )
             + '" '
-            f'data-focuses="{escape(focuses, quote=True)}" '
+            f'data-focuses="{escape(direct_focuses, quote=True)}" '
+            f'data-context-focuses="{escape(contextual_focuses, quote=True)}" '
             f'transform="translate({x} {y})">'
             '<rect width="210" height="72" rx="10"/>'
             f'<text class="delta-node-kind" x="12" y="17">'
@@ -455,7 +560,7 @@ def _review_graph(
     for node in backbone_nodes.values():
         if node.id in connected_node_ids or node.delta == "retained":
             continue
-        fact = _structural_node_fact(node.evidence_ids, evidence)
+        fact = _structural_display_fact(node, evidence)
         sources = _sources(fact, brief)
         focuses = ", ".join(
             focus_id for focus_id, _role in node_focus.get(node.id, ())
@@ -495,6 +600,11 @@ def _review_graph(
             if edge_id in graph.backbone_ownership_edge_ids
             for focus_id in edge_focus_ids
         ),
+        *(
+            focus_id
+            for placement in placements
+            for focus_id in placement_focus.get(placement.id, ())
+        ),
     }
     focus_ids = tuple(
         review_slice.focus_statement_id for review_slice in projection.slices
@@ -521,12 +631,6 @@ def _review_graph(
             )
             for focus_id in focus_ids
         )
-        + (
-            '<button class="hierarchy-toggle active" type="button" '
-            'aria-pressed="true">Structure</button>'
-            if backbone_ownership_edges
-            else ""
-        )
         + "</div>"
     )
     canvas = (
@@ -540,16 +644,12 @@ def _review_graph(
         'refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z"/></marker>'
         '<marker id="arrow-retained" markerWidth="8" markerHeight="8" refX="7" '
         'refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z"/></marker>'
-        '<marker id="arrow-ownership-added" markerWidth="8" markerHeight="8" '
-        'refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z"/></marker>'
-        '<marker id="arrow-ownership-removed" markerWidth="8" markerHeight="8" '
-        'refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z"/></marker>'
-        '<marker id="arrow-ownership-retained" markerWidth="8" markerHeight="8" '
-        'refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z"/></marker>'
         "</defs>"
-        + "".join(ownership_edge_shapes)
+        + "".join(container_shapes)
         + "".join(edge_shapes)
+        + "".join(container_header_shapes)
         + "".join(node_shapes)
+        + "".join(secondary_placement_shapes)
         + "</svg></div>"
         if connected_nodes
         else '<p class="delta-empty">No safe canonical relation delta is available.</p>'
@@ -562,14 +662,27 @@ def _review_graph(
         if isolated_rows
         else ""
     )
+    coverage = brief.overview.structural_coverage
+    coverage_state = coverage.state
+    coverage_copy = (
+        f"Structural coverage · {coverage_state}"
+        + (
+            f" · {coverage.truncated_seed_count} traversal seeds truncated"
+            if coverage.truncated_seed_count
+            else ""
+        )
+    )
     return (
         '<div class="review-structural-graph">'
         '<div class="delta-graph-heading"><div>'
         '<h3>Structural delta graph</h3>'
+        f'<div class="structural-coverage state-{escape(coverage_state)}">'
+        f"{escape(coverage_copy)}</div>"
         f'<div class="subgraph-summary">{len(backbone_nodes)} backbone nodes · '
         f'{len(graph.nodes) - len(backbone_nodes)} support nodes · '
         f'{len(backbone_edges)} backbone executable edges · '
-        f'{len(backbone_ownership_edges)} backbone ownership edges · '
+        f'{len(placements)} structural placements · '
+        f'{len(backbone_ownership_edges)} ownership deltas · '
         f'{len(isolated_rows)} isolated changed anchors · '
         f'{len(graph.path_relation_ids)} support refs</div></div>'
         f'{controls}</div><p class="delta-focus-empty" hidden></p>{canvas}{isolated}'
@@ -618,21 +731,29 @@ def _structural_focus_empty_copy(review_slice: ReviewSlice) -> str:
     }[state]
 
 
-def _structural_node_fact(
-    evidence_ids: tuple[str, ...],
+def _structural_display_fact(
+    node: StructuralGraphNode,
     evidence: dict[str, EvidenceItem],
 ) -> EvidenceItem:
-    fact = next((evidence.get(evidence_id) for evidence_id in evidence_ids), None)
+    fact = evidence.get(node.display_evidence_id)
     if fact is None:
-        raise ValueError("structural graph references missing node evidence")
+        raise ValueError("structural graph references missing display evidence")
     return fact
 
 
 def _structural_label_parts(value: str) -> tuple[str, str]:
     path, separator, name = value.partition(" · ")
     if not separator:
-        return "", _truncate_label(path, 30)
-    return _truncate_label(path, 34), _truncate_label(name, 30)
+        return "", _truncate_qualified_name(path, 30)
+    return _truncate_label(path, 34), _truncate_qualified_name(name, 30)
+
+
+def _truncate_qualified_name(value: str, limit: int) -> str:
+    if len(value) <= limit:
+        return value
+    if "::" not in value:
+        return _truncate_label(value, limit)
+    return "…" + value[-(limit - 1) :]
 
 
 def _truncate_label(value: str, limit: int) -> str:
@@ -653,88 +774,237 @@ def _structural_href(item: EvidenceItem, brief: ReviewBrief) -> str | None:
     return None
 
 
-def _structural_layout(
+def _structural_compound_layout(
     nodes: tuple[StructuralGraphNode, ...],
     edges: tuple[StructuralGraphEdge, ...],
-    ownership_edges: tuple[StructuralGraphOwnershipEdge, ...] = (),
-) -> tuple[dict[str, tuple[int, int]], int, int]:
+    placements: tuple[StructuralGraphPlacement, ...] = (),
+) -> _StructuralLayout:
+    """Lay out observed containment, then order roots by executable topology."""
+
     node_ids = tuple(node.id for node in nodes)
-    predecessors = {node_id: set() for node_id in node_ids}
-    successors = {node_id: set() for node_id in node_ids}
+    node_id_set = set(node_ids)
+    by_child: dict[str, list[StructuralGraphPlacement]] = {}
+    for placement in placements:
+        if (
+            placement.parent_node_id in node_id_set
+            and placement.child_node_id in node_id_set
+        ):
+            by_child.setdefault(placement.child_node_id, []).append(placement)
+    primary_by_child = {
+        child_id: min(
+            candidates,
+            key=lambda item: (
+                0 if item.head_ownership_evidence_ids else 1,
+                item.id,
+            ),
+        )
+        for child_id, candidates in by_child.items()
+    }
+    children_by_parent: dict[str, list[str]] = {}
+    for child_id, placement in primary_by_child.items():
+        children_by_parent.setdefault(
+            placement.parent_node_id, []
+        ).append(child_id)
+
+    descendants: dict[str, tuple[str, ...]] = {}
+
+    def collect_descendants(node_id: str) -> tuple[str, ...]:
+        collected = []
+        for child_id in children_by_parent.get(node_id, ()):
+            collected.append(child_id)
+            collected.extend(collect_descendants(child_id))
+        descendants[node_id] = tuple(collected)
+        return descendants[node_id]
+
+    roots = [
+        node_id
+        for node_id in node_ids
+        if node_id not in primary_by_child
+    ]
+    for root_id in roots:
+        collect_descendants(root_id)
+
+    dimensions: dict[str, tuple[int, int]] = {}
+
+    def measure(node_id: str) -> tuple[int, int]:
+        child_ids = children_by_parent.get(node_id, ())
+        if not child_ids:
+            dimensions[node_id] = (210, 72)
+            return dimensions[node_id]
+        child_width = 210
+        child_height = 0
+        for child_id in child_ids:
+            width, height = measure(child_id)
+            child_width = max(child_width, width)
+            child_height += height + 14
+        dimensions[node_id] = (
+            child_width + 40,
+            70 + child_height,
+        )
+        return dimensions[node_id]
+
+    for root_id in roots:
+        measure(root_id)
+
+    def root_for(node_id: str) -> str:
+        current = node_id
+        while current in primary_by_child:
+            current = primary_by_child[current].parent_node_id
+        return current
+
+    predecessors = {root_id: set() for root_id in roots}
+    successors = {root_id: set() for root_id in roots}
     for edge in edges:
-        if edge.source_node_id in successors and edge.target_node_id in predecessors:
-            successors[edge.source_node_id].add(edge.target_node_id)
-            predecessors[edge.target_node_id].add(edge.source_node_id)
-    for edge in ownership_edges:
-        if edge.parent_node_id in successors and edge.child_node_id in predecessors:
-            successors[edge.parent_node_id].add(edge.child_node_id)
-            predecessors[edge.child_node_id].add(edge.parent_node_id)
-    levels = {node_id: 0 for node_id in node_ids}
-    remaining = set(node_ids)
-    ready = [node_id for node_id in node_ids if not predecessors[node_id]]
-    while ready:
-        node_id = ready.pop(0)
-        if node_id not in remaining:
+        source_root = root_for(edge.source_node_id)
+        target_root = root_for(edge.target_node_id)
+        if source_root == target_root:
             continue
-        remaining.remove(node_id)
-        for target_id in node_ids:
-            if target_id not in successors[node_id]:
+        successors[source_root].add(target_root)
+        predecessors[target_root].add(source_root)
+    levels = {root_id: 0 for root_id in roots}
+    remaining = set(roots)
+    ready = [root_id for root_id in roots if not predecessors[root_id]]
+    while ready:
+        root_id = ready.pop(0)
+        if root_id not in remaining:
+            continue
+        remaining.remove(root_id)
+        for target_id in roots:
+            if target_id not in successors[root_id]:
                 continue
-            levels[target_id] = max(levels[target_id], levels[node_id] + 1)
+            levels[target_id] = max(levels[target_id], levels[root_id] + 1)
             if predecessors[target_id].isdisjoint(remaining):
                 ready.append(target_id)
-    for node_id in node_ids:
-        if node_id in remaining:
-            connected_levels = [
-                levels[source_id] + 1
-                for source_id in predecessors[node_id]
-                if source_id not in remaining
-            ]
-            levels[node_id] = max(connected_levels, default=0)
-    by_level: dict[int, list[str]] = {}
-    for node_id in node_ids:
-        by_level.setdefault(levels[node_id], []).append(node_id)
-    positions = {
-        node_id: (30 + level * 360, 35 + row * 120)
-        for level, level_nodes in by_level.items()
-        for row, node_id in enumerate(level_nodes)
+    for root_id in roots:
+        if root_id in remaining:
+            levels[root_id] = max(
+                (
+                    levels[parent_id] + 1
+                    for parent_id in predecessors[root_id]
+                    if parent_id not in remaining
+                ),
+                default=0,
+            )
+    roots_by_level: dict[int, list[str]] = {}
+    for root_id in roots:
+        roots_by_level.setdefault(levels[root_id], []).append(root_id)
+    column_widths = {
+        level: max(dimensions[root_id][0] for root_id in level_roots)
+        for level, level_roots in roots_by_level.items()
     }
-    column_count = max(by_level, default=0) + 1
-    row_count = max((len(items) for items in by_level.values()), default=1)
-    return positions, max(620, 60 + column_count * 360), 70 + row_count * 120
+    column_x: dict[int, int] = {}
+    next_x = 24
+    for level in sorted(roots_by_level):
+        column_x[level] = next_x
+        next_x += column_widths[level] + 110
+
+    positions: dict[str, tuple[int, int]] = {}
+    sizes: dict[str, tuple[int, int]] = {}
+    containers: list[_StructuralContainerLayout] = []
+
+    def place(node_id: str, x: int, y: int) -> None:
+        width, height = dimensions[node_id]
+        child_ids = children_by_parent.get(node_id, ())
+        if not child_ids:
+            positions[node_id] = (x, y)
+            sizes[node_id] = (210, 72)
+            return
+        positions[node_id] = (x + 12, y + 12)
+        sizes[node_id] = (width - 24, 42)
+        child_y = y + 62
+        for child_id in child_ids:
+            place(child_id, x + 20, child_y)
+            child_y += dimensions[child_id][1] + 14
+        containers.append(
+            _StructuralContainerLayout(
+                node_id=node_id,
+                x=x,
+                y=y,
+                width=width,
+                height=height,
+                descendant_node_ids=descendants[node_id],
+            )
+        )
+
+    max_y = 0
+    for level, level_roots in roots_by_level.items():
+        next_y = 24
+        for root_id in level_roots:
+            place(root_id, column_x[level], next_y)
+            next_y += dimensions[root_id][1] + 56
+        max_y = max(max_y, next_y)
+    for node_id in node_ids:
+        if node_id in positions:
+            continue
+        measure(node_id)
+        place(node_id, next_x, 24)
+        next_x += dimensions[node_id][0] + 110
+        max_y = max(max_y, dimensions[node_id][1] + 80)
+
+    return _StructuralLayout(
+        positions=positions,
+        sizes=sizes,
+        containers=tuple(containers),
+        secondary_placements=tuple(
+            placement
+            for child_id, candidates in by_child.items()
+            for placement in candidates
+            if placement != primary_by_child[child_id]
+        ),
+        width=max(620, next_x - 86),
+        height=max(190, max_y),
+    )
 
 
 def _structural_edge_path(
     source_x: int,
     source_y: int,
+    source_width: int,
+    source_height: int,
     target_x: int,
     target_y: int,
+    target_width: int,
+    target_height: int,
     label: str,
     occupied_label_boxes: list[tuple[int, int, int, int]],
+    node_boxes: tuple[tuple[int, int, int, int], ...] = (),
 ) -> tuple[str, int, int, int]:
-    start_x, start_y = source_x + 210, source_y + 36
-    end_x, end_y = target_x, target_y + 36
-    if end_x > start_x:
-        control = max(36, (end_x - start_x) // 2)
+    source_center_y = source_y + source_height // 2
+    target_center_y = target_y + target_height // 2
+    if target_x >= source_x + source_width:
+        start_x = source_x + source_width
+        end_x = target_x
+        middle_x = (start_x + end_x) // 2
         path = (
-            f"M {start_x} {start_y} C {start_x + control} {start_y}, "
-            f"{end_x - control} {end_y}, {end_x} {end_y}"
+            f"M {start_x} {source_center_y} H {middle_x} "
+            f"V {target_center_y} H {end_x}"
         )
+        label_x = (start_x + middle_x) // 2
+        base_label_y = source_center_y - 7
+    elif source_x >= target_x + target_width:
+        start_x = source_x
+        end_x = target_x + target_width
+        route_y = max(14, min(source_y, target_y) - 22)
+        path = (
+            f"M {start_x} {source_center_y} H {start_x - 28} "
+            f"V {route_y} H {end_x + 28} "
+            f"V {target_center_y} H {end_x}"
+        )
+        label_x = (start_x + end_x) // 2
+        base_label_y = route_y - 5
     else:
-        bend_y = max(source_y + 90, target_y + 90)
+        start_x = source_x + source_width
+        end_x = target_x + target_width
+        gutter_x = max(start_x, end_x) + 30
         path = (
-            f"M {start_x} {start_y} C {start_x + 35} {bend_y}, "
-            f"{end_x - 35} {bend_y}, {end_x} {end_y}"
+            f"M {start_x} {source_center_y} H {gutter_x} "
+            f"V {target_center_y} H {end_x}"
         )
-    right_x, right_y = (
-        (target_x, target_y)
-        if target_x >= source_x
-        else (source_x, source_y)
-    )
-    label_x = right_x - 75
+        label_x = gutter_x
+        base_label_y = (source_center_y + target_center_y) // 2
     label_width = max(52, min(140, len(label) * 5 + 12))
-    for offset in (0, -18, 18, -36, 36, -54, 54):
-        label_y = right_y + 36 + offset
+    for offset in (0, -18, 18, -36, 36, -54, 54, -72, 72):
+        label_y = base_label_y + offset
         candidate = (
             label_x - label_width // 2,
             label_y - 12,
@@ -749,6 +1019,14 @@ def _structural_edge_path(
                 or occupied[3] <= candidate[1]
             )
             for occupied in occupied_label_boxes
+        ) and not any(
+            not (
+                candidate[2] <= node_box[0]
+                or node_box[2] <= candidate[0]
+                or candidate[3] <= node_box[1]
+                or node_box[3] <= candidate[1]
+            )
+            for node_box in node_boxes
         ):
             occupied_label_boxes.append(candidate)
             return path, label_x, label_y, label_width
@@ -1118,13 +1396,7 @@ def render_html(brief: ReviewBrief) -> str:
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{escape(packet.title)} · PrismCode</title>
 <style>
-:root{{color-scheme:dark;--bg:#080c0f;--panel:#10171b;--border:#26373f;--text:#edf3f0;--muted:#9eaaaf;--faint:#6f7d83;--green:#7be3ac;--amber:#e7ca7c;--red:#ef8f91;--blue:#9fcdf0;--shadow:0 22px 64px rgba(0,0,0,.28)}}*{{box-sizing:border-box}}body{{margin:0;color:var(--text);line-height:1.55;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 18% -8%,rgba(69,167,118,.12),transparent 31rem),var(--bg)}}code{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}}.shell{{width:min(1180px,calc(100% - 40px));margin:30px auto 84px}}.topbar{{margin-bottom:22px;font-weight:720}}.brand-mark{{display:inline-block;width:14px;height:14px;margin-right:10px;border:2px solid white;transform:rotate(45deg);border-radius:3px}}.section{{border:2px solid var(--border);border-radius:18px;background:linear-gradient(180deg,rgba(17,24,28,.97),rgba(11,17,21,.98));box-shadow:var(--shadow);padding:28px;margin-bottom:22px}}h1{{font-size:31px;margin:0 0 14px}}h2{{font-size:22px;margin:0 0 14px}}h3{{font-size:16px;margin:0 0 8px}}.meta{{display:flex;flex-wrap:wrap;gap:9px;color:var(--muted);font-size:13px;margin-bottom:16px}}.intent{{max-width:850px;color:#d2dade;font-size:15px}}.source-link,.file-link{{color:#b9dfff;text-decoration:none}}.source-note,.projection-source,.context-source{{display:block;color:var(--faint);font-size:10px;line-height:1.45}}.requirements{{border-top:1px solid rgba(111,128,135,.24)}}.requirement{{border-bottom:1px solid rgba(111,128,135,.24)}}.requirement summary{{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px minmax(0,1fr);gap:16px;padding:18px 0}}.requirement summary::-webkit-details-marker{{display:none}}.req-id{{color:var(--green);font:760 12px ui-monospace,SFMono-Regular,Menlo,monospace}}.req-title{{font-size:14px;font-weight:640}}.req-body{{padding:0 0 22px 68px}}.projection{{display:grid;grid-template-columns:minmax(0,.85fr) 24px minmax(0,1fr) 24px minmax(0,1.35fr);gap:10px;align-items:start}}.projection-column{{min-width:0;padding:14px;border:1px solid rgba(111,128,135,.22);border-radius:12px;background:rgba(5,10,13,.24)}}.projection-heading,.block-title{{display:block;margin-bottom:9px;color:#89979d;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.045em}}.projection-arrow{{align-self:center;color:var(--faint);text-align:center}}.profile-chip,.relation-label{{display:inline-flex;margin:0 0 8px;padding:3px 7px;border-radius:999px;background:rgba(54,118,87,.20);color:#bfeacf;font-size:8px;font-weight:720}}.projection-copy{{margin:0 0 7px;color:#d7dddf;font-size:11px}}.projection-item{{padding:9px 0;border-bottom:1px solid rgba(111,128,135,.16)}}.projection-item:last-child{{border-bottom:0}}.relation-reason{{display:block;color:var(--faint);font-size:9px;margin-bottom:6px}}.projection-group+.projection-group{{margin-top:15px}}.review-structural-graph{{margin-top:24px;padding:18px;border:1px solid rgba(111,128,135,.22);border-radius:12px;background:rgba(5,10,13,.24)}}.delta-graph-heading{{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}}.subgraph-summary{{color:var(--muted);font-size:9px}}.delta-focus-controls{{display:flex;flex:1 1 560px;min-width:0;max-width:720px;flex-wrap:wrap;justify-content:flex-end;gap:5px}}.delta-focus,.hierarchy-toggle{{border:1px solid rgba(111,128,135,.35);border-radius:999px;padding:4px 9px;background:transparent;color:var(--muted);font:700 9px inherit;cursor:pointer}}.delta-focus:hover,.delta-focus.active,.hierarchy-toggle:hover,.hierarchy-toggle.active{{border-color:var(--green);background:rgba(54,118,87,.20);color:#c9efd6}}.hierarchy-toggle{{margin-left:7px;border-color:rgba(159,205,240,.5);color:var(--blue)}}.delta-canvas-scroll{{margin-top:14px;overflow-x:auto;border:1px solid rgba(111,128,135,.16);border-radius:10px;background:rgba(3,7,9,.34)}}.delta-canvas{{display:block;min-width:100%;height:auto;max-height:720px}}.delta-edge,.ownership-edge,.delta-node,.isolated-anchor{{transition:opacity .16s ease,filter .16s ease}}.delta-edge path,.ownership-edge path{{fill:none}}.delta-edge path{{stroke-width:1.8}}.ownership-edge path{{stroke-width:1.25;stroke-dasharray:3 4}}.delta-edge-label-bg{{fill:rgba(3,7,9,.92);stroke:rgba(111,128,135,.24);stroke-width:.7}}.delta-edge-label{{font-size:8px;text-anchor:middle;paint-order:stroke;stroke:var(--bg);stroke-width:2px;stroke-linejoin:round}}.delta-edge.operation-added path,.ownership-edge.operation-added path{{stroke:var(--green)}}.delta-edge.operation-added text,.ownership-edge.operation-added text{{fill:var(--green)}}.delta-edge.operation-removed path,.ownership-edge.operation-removed path{{stroke:var(--red);stroke-dasharray:6 5}}.delta-edge.operation-removed text,.ownership-edge.operation-removed text{{fill:var(--red)}}.delta-edge.operation-retained path{{stroke:#73848c}}.delta-edge.operation-retained text{{fill:#94a2a8}}.ownership-edge.operation-retained path{{stroke:var(--blue)}}.ownership-edge.operation-retained text{{fill:var(--blue)}}#arrow-added path{{fill:var(--green)}}#arrow-removed path{{fill:var(--red)}}#arrow-retained path{{fill:#73848c}}#arrow-ownership-added path{{fill:var(--green)}}#arrow-ownership-removed path{{fill:var(--red)}}#arrow-ownership-retained path{{fill:var(--blue)}}.hierarchy-collapsed .ownership-edge,.hierarchy-collapsed .delta-node.ownership-only{{display:none}}.delta-node rect{{fill:#111a1f;stroke:#53656e;stroke-width:1.2}}.delta-node.operation-added rect{{stroke:var(--green);fill:rgba(54,118,87,.14)}}.delta-node.operation-modified rect{{stroke:var(--amber);fill:rgba(106,85,30,.13)}}.delta-node.operation-removed rect{{stroke:var(--red);stroke-dasharray:6 4;fill:rgba(112,43,48,.12)}}.delta-node-kind{{fill:var(--muted);font-size:8px;text-transform:uppercase}}.delta-node-name{{fill:var(--text);font-size:10px;font-weight:700}}.delta-node-path{{fill:var(--faint);font-size:8px}}.focus-muted{{opacity:.13}}.focus-active{{opacity:1;filter:drop-shadow(0 0 5px rgba(123,227,172,.35))}}.delta-empty{{margin:14px 0 0;padding:18px;border:1px dashed rgba(111,128,135,.26);border-radius:10px;color:var(--faint);font-size:11px}}.isolated-anchors{{margin-top:12px;border-top:1px solid rgba(111,128,135,.18);padding-top:10px}}.isolated-anchors>summary{{cursor:pointer;color:var(--muted);font-size:10px}}.isolated-anchor-list{{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:9px}}.isolated-anchor{{display:grid;grid-template-columns:auto 1fr auto;gap:4px 7px;min-width:0;padding:8px;border:1px solid rgba(111,128,135,.16);border-left:2px solid var(--amber);border-radius:7px}}.isolated-anchor.operation-added{{border-left-color:var(--green)}}.isolated-anchor.operation-removed{{border-left-color:var(--red);border-style:dashed}}.isolated-anchor-focus,.isolated-anchor-operation,.isolated-anchor-kind{{color:var(--faint);font-size:8px}}.isolated-anchor-operation{{text-transform:uppercase}}.isolated-anchor-kind{{text-align:right}}.isolated-anchor-name{{grid-column:1/-1;overflow-wrap:anywhere;font-size:9px}}.isolated-anchor .projection-source{{grid-column:1/-1}}.slot-diagnostic{{margin:9px 0;padding:9px;border-radius:8px;background:rgba(106,85,30,.16);color:#e8d18e;font-size:9px}}.slot-diagnostic p{{margin:3px 0 0;color:var(--muted)}}.context{{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(111,128,135,.24)}}.context>summary{{cursor:pointer;color:var(--muted);font-size:11px}}.context-row{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px;gap:12px;padding:12px 0;border-bottom:1px solid rgba(111,128,135,.18)}}.context-id{{color:#9fcdf0;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace}}.context-copy{{font-size:12px}}.context-authority{{color:var(--muted);font-size:10px;text-align:right}}.context-source{{grid-column:2/-1}}.attention-list,.file-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:var(--amber);font-size:10px;font-weight:700;text-transform:uppercase}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px}}.empty,.empty-state{{color:var(--faint);font-size:12px}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}@media(max-width:950px){{.projection{{grid-template-columns:1fr}}.projection-arrow{{transform:rotate(90deg)}}.req-body{{padding-left:0}}.isolated-anchor-list{{grid-template-columns:repeat(2,minmax(0,1fr))}}}}@media(max-width:600px){{.shell{{width:calc(100% - 18px);margin-top:16px}}.section{{padding:22px 20px}}.attention-row,.context-row{{grid-template-columns:1fr}}.delta-graph-heading{{display:block}}.delta-focus-controls{{max-width:none;justify-content:flex-start;margin-top:10px}}.isolated-anchor-list{{grid-template-columns:1fr}}}}@media print{{:root{{color-scheme:light;--bg:#fff;--panel:#fff;--text:#111;--muted:#444;--faint:#666;--border:#bbb}}body{{background:#fff}}.section{{box-shadow:none;break-inside:avoid}}.delta-focus-controls{{display:none}}.delta-canvas-scroll{{overflow:visible}}.delta-canvas{{max-height:none}}}}
-.delta-graph-heading{{flex-wrap:wrap}}
-.delta-node.operation-renamed rect{{stroke:var(--blue);stroke-dasharray:8 3;fill:rgba(48,83,110,.14)}}.isolated-anchor.operation-renamed{{border-left-color:var(--blue);border-style:dashed}}
-.delta-node.operation-retained rect{{stroke:#53656e;fill:#111a1f}}.delta-node.operation-unresolved rect{{stroke:var(--faint);stroke-dasharray:3 3;fill:rgba(111,125,131,.08)}}.isolated-anchor.operation-unresolved{{border-left-color:var(--faint);border-style:dashed}}
-.delta-focus.no-visible-backbone{{border-style:dashed;color:var(--faint)}}
-.delta-focus-empty{{margin:12px 0 0;padding:9px 11px;border:1px dashed rgba(111,128,135,.3);border-radius:8px;color:var(--muted);font-size:10px}}.deferred-structural>summary{{cursor:pointer;color:var(--muted);font-size:9px}}
-</style></head><body><main class="shell">
+:root{{color-scheme:dark;--bg:#080c0f;--panel:#10171b;--border:#26373f;--text:#edf3f0;--muted:#9eaaaf;--faint:#6f7d83;--green:#7be3ac;--amber:#e7ca7c;--red:#ef8f91;--blue:#9fcdf0;--shadow:0 22px 64px rgba(0,0,0,.28)}}*{{box-sizing:border-box}}body{{margin:0;color:var(--text);line-height:1.55;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 18% -8%,rgba(69,167,118,.12),transparent 31rem),var(--bg)}}code{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}}.shell{{width:min(1180px,calc(100% - 40px));margin:30px auto 84px}}.topbar{{margin-bottom:22px;font-weight:720}}.brand-mark{{display:inline-block;width:14px;height:14px;margin-right:10px;border:2px solid white;transform:rotate(45deg);border-radius:3px}}.section{{border:2px solid var(--border);border-radius:18px;background:linear-gradient(180deg,rgba(17,24,28,.97),rgba(11,17,21,.98));box-shadow:var(--shadow);padding:28px;margin-bottom:22px}}h1{{font-size:31px;margin:0 0 14px}}h2{{font-size:22px;margin:0 0 14px}}h3{{font-size:16px;margin:0 0 8px}}.meta{{display:flex;flex-wrap:wrap;gap:9px;color:var(--muted);font-size:13px;margin-bottom:16px}}.intent{{max-width:850px;color:#d2dade;font-size:15px}}.source-link,.file-link{{color:#b9dfff;text-decoration:none}}.source-note,.projection-source,.context-source{{display:block;color:var(--faint);font-size:10px;line-height:1.45}}.requirements{{border-top:1px solid rgba(111,128,135,.24)}}.requirement{{border-bottom:1px solid rgba(111,128,135,.24)}}.requirement summary{{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px minmax(0,1fr);gap:16px;padding:18px 0}}.requirement summary::-webkit-details-marker{{display:none}}.req-id{{color:var(--green);font:760 12px ui-monospace,SFMono-Regular,Menlo,monospace}}.req-title{{font-size:14px;font-weight:640}}.req-body{{padding:0 0 22px 68px}}.projection{{display:grid;grid-template-columns:minmax(0,.85fr) 24px minmax(0,1fr) 24px minmax(0,1.35fr);gap:10px;align-items:start}}.projection-column{{min-width:0;padding:14px;border:1px solid rgba(111,128,135,.22);border-radius:12px;background:rgba(5,10,13,.24)}}.projection-heading,.block-title{{display:block;margin-bottom:9px;color:#89979d;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.045em}}.projection-arrow{{align-self:center;color:var(--faint);text-align:center}}.profile-chip,.relation-label{{display:inline-flex;margin:0 0 8px;padding:3px 7px;border-radius:999px;background:rgba(54,118,87,.20);color:#bfeacf;font-size:8px;font-weight:720}}.projection-copy{{margin:0 0 7px;color:#d7dddf;font-size:11px}}.projection-item{{padding:9px 0;border-bottom:1px solid rgba(111,128,135,.16)}}.projection-item:last-child{{border-bottom:0}}.relation-reason{{display:block;color:var(--faint);font-size:9px;margin-bottom:6px}}.projection-group+.projection-group{{margin-top:15px}}.review-structural-graph{{margin-top:24px;padding:18px;border:1px solid rgba(111,128,135,.22);border-radius:12px;background:rgba(5,10,13,.24)}}.delta-graph-heading{{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}}.structural-coverage{{margin-bottom:3px;color:var(--muted);font-size:9px}}.structural-coverage.state-partial,.structural-coverage.state-stale,.structural-coverage.state-missing,.structural-coverage.state-invalid,.structural-coverage.state-error{{color:var(--amber)}}.subgraph-summary{{color:var(--muted);font-size:9px}}.delta-focus-controls{{display:flex;flex:1 1 560px;min-width:0;max-width:720px;flex-wrap:wrap;justify-content:flex-end;gap:5px}}.delta-focus{{border:1px solid rgba(111,128,135,.35);border-radius:999px;padding:4px 9px;background:transparent;color:var(--muted);font:700 9px inherit;cursor:pointer}}.delta-focus:hover,.delta-focus.active{{border-color:var(--green);background:rgba(54,118,87,.20);color:#c9efd6}}.delta-canvas-scroll{{margin-top:14px;overflow-x:auto;border:1px solid rgba(111,128,135,.16);border-radius:10px;background:rgba(3,7,9,.34)}}.delta-canvas{{display:block;min-width:100%;height:auto}}.delta-edge,.structural-container,.delta-node,.isolated-anchor{{transition:opacity .16s ease,filter .16s ease}}.delta-edge path{{fill:none;stroke-width:1.8}}.delta-edge-label-bg{{fill:rgba(3,7,9,.92);stroke:rgba(111,128,135,.24);stroke-width:.7}}.delta-edge-label{{font-size:8px;text-anchor:middle;paint-order:stroke;stroke:var(--bg);stroke-width:2px;stroke-linejoin:round}}.delta-edge.operation-added path{{stroke:var(--green)}}.delta-edge.operation-added text{{fill:var(--green)}}.delta-edge.operation-removed path{{stroke:var(--red);stroke-dasharray:6 5}}.delta-edge.operation-removed text{{fill:var(--red)}}.delta-edge.operation-retained path{{stroke:#73848c}}.delta-edge.operation-retained text{{fill:#94a2a8}}#arrow-added path{{fill:var(--green)}}#arrow-removed path{{fill:var(--red)}}#arrow-retained path{{fill:#73848c}}.structural-container{{fill:rgba(16,27,33,.42);stroke:#354a54;stroke-width:1.1}}.structural-container.operation-added{{stroke:rgba(123,227,172,.52);fill:rgba(54,118,87,.06)}}.structural-container.operation-removed{{stroke:rgba(239,143,145,.5);stroke-dasharray:6 4;fill:rgba(112,43,48,.05)}}.delta-node rect{{fill:#111a1f;stroke:#53656e;stroke-width:1.2}}.delta-node.operation-added rect{{stroke:var(--green);fill:rgba(54,118,87,.14)}}.delta-node.operation-modified rect{{stroke:var(--amber);fill:rgba(106,85,30,.13)}}.delta-node.operation-removed rect{{stroke:var(--red);stroke-dasharray:6 4;fill:rgba(112,43,48,.12)}}.delta-node-kind{{fill:var(--muted);font-size:8px;text-transform:uppercase}}.delta-node-name{{fill:var(--text);font-size:10px;font-weight:700}}.delta-node-path{{fill:var(--faint);font-size:8px}}.focus-muted{{opacity:.13}}.focus-context{{opacity:.7}}.structural-container.focus-context,.structural-container-header.focus-context{{filter:drop-shadow(0 0 2px rgba(159,205,240,.22))}}.focus-active{{opacity:1;filter:drop-shadow(0 0 5px rgba(123,227,172,.35))}}.delta-empty{{margin:14px 0 0;padding:18px;border:1px dashed rgba(111,128,135,.26);border-radius:10px;color:var(--faint);font-size:11px}}.isolated-anchors{{margin-top:12px;border-top:1px solid rgba(111,128,135,.18);padding-top:10px}}.isolated-anchors>summary{{cursor:pointer;color:var(--muted);font-size:10px}}.isolated-anchor-list{{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:9px}}.isolated-anchor{{display:grid;grid-template-columns:auto 1fr auto;gap:4px 7px;min-width:0;padding:8px;border:1px solid rgba(111,128,135,.16);border-left:2px solid var(--amber);border-radius:7px}}.isolated-anchor.operation-added{{border-left-color:var(--green)}}.isolated-anchor.operation-removed{{border-left-color:var(--red);border-style:dashed}}.isolated-anchor-focus,.isolated-anchor-operation,.isolated-anchor-kind{{color:var(--faint);font-size:8px}}.isolated-anchor-operation{{text-transform:uppercase}}.isolated-anchor-kind{{text-align:right}}.isolated-anchor-name{{grid-column:1/-1;overflow-wrap:anywhere;font-size:9px}}.isolated-anchor .projection-source{{grid-column:1/-1}}.slot-diagnostic{{margin:9px 0;padding:9px;border-radius:8px;background:rgba(106,85,30,.16);color:#e8d18e;font-size:9px}}.slot-diagnostic p{{margin:3px 0 0;color:var(--muted)}}.context{{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(111,128,135,.24)}}.context>summary{{cursor:pointer;color:var(--muted);font-size:11px}}.context-row{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px;gap:12px;padding:12px 0;border-bottom:1px solid rgba(111,128,135,.18)}}.context-id{{color:#9fcdf0;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace}}.context-copy{{font-size:12px}}.context-authority{{color:var(--muted);font-size:10px;text-align:right}}.context-source{{grid-column:2/-1}}.attention-list,.file-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:var(--amber);font-size:10px;font-weight:700;text-transform:uppercase}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px}}.empty,.empty-state{{color:var(--faint);font-size:12px}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}@media(max-width:950px){{.projection{{grid-template-columns:1fr}}.projection-arrow{{transform:rotate(90deg)}}.req-body{{padding-left:0}}.isolated-anchor-list{{grid-template-columns:repeat(2,minmax(0,1fr))}}}}@media(max-width:600px){{.shell{{width:calc(100% - 18px);margin-top:16px}}.section{{padding:22px 20px}}.attention-row,.context-row{{grid-template-columns:1fr}}.delta-graph-heading{{display:block}}.delta-focus-controls{{max-width:none;justify-content:flex-start;margin-top:10px}}.isolated-anchor-list{{grid-template-columns:1fr}}}}@media print{{:root{{color-scheme:light;--bg:#fff;--panel:#fff;--text:#111;--muted:#444;--faint:#666;--border:#bbb}}body{{background:#fff}}.section{{box-shadow:none;break-inside:avoid}}.delta-focus-controls{{display:none}}.delta-canvas-scroll{{overflow:visible}}}}.delta-graph-heading{{flex-wrap:wrap}}.delta-node.operation-renamed rect{{stroke:var(--blue);stroke-dasharray:8 3;fill:rgba(48,83,110,.14)}}.isolated-anchor.operation-renamed{{border-left-color:var(--blue);border-style:dashed}}.delta-node.operation-retained rect{{stroke:#53656e;fill:#111a1f}}.delta-node.operation-unresolved rect{{stroke:var(--faint);stroke-dasharray:3 3;fill:rgba(111,125,131,.08)}}.isolated-anchor.operation-unresolved{{border-left-color:var(--faint);border-style:dashed}}.structural-container-header,.secondary-placement{{transition:opacity .16s ease,filter .16s ease}}.structural-container-header rect{{fill:#132027;stroke:#58707c;stroke-width:1.1}}.structural-container-header.operation-added rect{{stroke:var(--green);fill:rgba(54,118,87,.14)}}.structural-container-header.operation-modified rect{{stroke:var(--amber);fill:rgba(106,85,30,.13)}}.structural-container-header.operation-removed rect{{stroke:var(--red);stroke-dasharray:6 4;fill:rgba(112,43,48,.12)}}.structural-container-header.operation-unresolved rect{{stroke:var(--faint);stroke-dasharray:3 3}}.secondary-placement rect{{fill:rgba(48,83,110,.18);stroke:var(--blue);stroke-width:.8;stroke-dasharray:3 2}}.secondary-placement text{{fill:var(--blue);font-size:8px}}.delta-focus.no-visible-backbone{{border-style:dashed;color:var(--faint)}}.delta-focus-empty{{margin:12px 0 0;padding:9px 11px;border:1px dashed rgba(111,128,135,.3);border-radius:8px;color:var(--muted);font-size:10px}}.deferred-structural>summary{{cursor:pointer;color:var(--muted);font-size:9px}}</style></head><body><main class="shell">
 <div class="topbar"><span class="brand-mark"></span>PrismCode</div>
 <section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{brief.overview.changed_file_count} changed files</span><span>·</span><span>{escape(ci_copy)}</span></div><h1>{escape(packet.title)}</h1><div class="intent">{escape(brief.intent.text)}</div><span class="source-note">Source: {source_line}</span>{review_contract}</section>
 <section class="section"><h2>Review checks</h2>{semantic_context}{review_graph}<div class="requirements">{"".join(cards)}</div></section>
@@ -1143,13 +1415,18 @@ document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
       const active = item.dataset.focusTarget === focus;
       item.classList.toggle("active", active);
       if (active) activeButton = item;
-    }});
-    graph.querySelectorAll("[data-focuses]").forEach((item) => {{
-      const active = focus === "all" ||
-        item.dataset.focuses.split(/\\s+/).includes(focus);
-      item.classList.toggle("focus-muted", !active);
-      item.classList.toggle("focus-active", focus !== "all" && active);
-    }});
+    }}
+);
+    graph.querySelectorAll("[data-focuses], [data-context-focuses]").forEach((item) => {{
+      const direct = focus === "all" ||
+        (item.dataset.focuses || "").split(/\\s+/).includes(focus);
+      const contextual = focus !== "all" && !direct &&
+        (item.dataset.contextFocuses || "").split(/\\s+/).includes(focus);
+      item.classList.toggle("focus-muted", !direct && !contextual);
+      item.classList.toggle("focus-context", contextual);
+      item.classList.toggle("focus-active", focus !== "all" && direct);
+    }}
+);
     const empty = graph.querySelector(".delta-focus-empty");
     if (empty) {{
       const show = focus !== "all" &&
@@ -1157,24 +1434,21 @@ document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
       empty.hidden = !show;
       empty.textContent = show ? activeButton.dataset.emptyCopy : "";
     }}
-  }};
+
+  }}
+;
   graph.querySelectorAll(".delta-focus").forEach((button) => {{
     button.addEventListener("click", () =>
       activateFocus(button.dataset.focusTarget));
-  }});
-  const hierarchyToggle = graph.querySelector(".hierarchy-toggle");
-  if (hierarchyToggle) {{
-    hierarchyToggle.addEventListener("click", () => {{
-      const collapsed = graph.classList.toggle("hierarchy-collapsed");
-      hierarchyToggle.classList.toggle("active", !collapsed);
-      hierarchyToggle.setAttribute("aria-pressed", String(!collapsed));
-    }});
   }}
+);
   requirements.forEach((requirement) => {{
     requirement.querySelector("summary").addEventListener("click", () =>
       activateFocus(requirement.dataset.focusId));
-  }});
-}});
+  }}
+);
+}}
+);
 </script></body></html>"""
 
 
