@@ -84,6 +84,7 @@ class DeterministicAnalyzer:
             candidate_convergence,
             evidence_catalog,
             diagnostic_presentation=diagnostic_presentation,
+            changed_files=packet.changed_files,
             guardrail_scan_plans=guardrail_scan_plans,
         )
         overview = build_review_overview(

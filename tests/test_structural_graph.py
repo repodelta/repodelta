@@ -551,7 +551,7 @@ def test_unavailable_counterpart_lookup_does_not_claim_symbol_addition(
         item.operation
         for item in brief.evidence_catalog.items
         if item.kind == "structural_change"
-    } == {"modified"}
+        } == {"unresolved"}
 
 
 def test_removed_relation_maps_exact_base_symbol(tmp_path: Path) -> None:
@@ -845,7 +845,7 @@ def test_unmapped_opposite_revision_does_not_prove_symbol_addition() -> None:
         if item.kind == "structural_change"
     )
 
-    assert structural_change.operation == "modified"
+    assert structural_change.operation == "unresolved"
 
 
 def test_mapping_another_relation_in_the_hunk_does_not_prove_absence() -> None:
@@ -890,8 +890,8 @@ def test_mapping_another_relation_in_the_hunk_does_not_prove_absence() -> None:
     }
 
     assert operations == {
-        "first": "modified",
-        "second": "modified",
+        "first": "unresolved",
+        "second": "unresolved",
     }
 
 

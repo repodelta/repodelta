@@ -47,7 +47,9 @@ from prismcode.convergence.core import (
 )
 from prismcode.projection.build import (
     _change_backbone,
+    _merge_node,
     _structural_node_id,
+    _support_node_delta,
     build_review_projection,
 )
 from prismcode.projection.overview import project_diagnostic_presentation
@@ -246,7 +248,7 @@ def test_identical_focus_graphs_share_one_review_graph() -> None:
     assert second.structural_overlay.path_relation_ids == ()
     html = render_html(brief)
     assert html.count("Structural delta graph") == 1
-    assert html.count('<div class="isolated-anchor operation-modified"') == 1
+    assert html.count('<div class="isolated-anchor operation-unresolved"') == 1
     assert 'data-focus-target="R1"' in html
     assert 'data-focus-target="R2"' in html
     assert "Structural overlay" not in html
@@ -403,7 +405,7 @@ def test_canonical_ownership_projects_recursive_shared_focus_hierarchy() -> None
     assert html.count("contains · retained") == 2
     assert 'class="hierarchy-toggle active"' in html
     assert 'aria-pressed="true"' in html
-    assert 'class="delta-node operation-context ownership-only"' in html
+    assert 'class="delta-node operation-unresolved ownership-only"' in html
 
     cyclic_evidence = replace(
         evidence,
@@ -842,7 +844,7 @@ def test_review_graph_renders_complete_focus_union() -> None:
         StructuralGraphNode(
             id=f"N:{node_id}",
             review_symbol_id=node_id,
-            operation="modified",
+            delta="modified",
             evidence_ids=(f"E:{node_id}",),
         )
         for node_id in node_ids
@@ -922,7 +924,7 @@ def test_change_backbone_does_not_transitively_promote_changed_edges() -> None:
             StructuralGraphNode(
                 id=f"N:{name}",
                 review_symbol_id=name,
-                operation="modified",
+                delta="modified",
                 evidence_ids=(),
             )
         for name in ("seed", "direct", "transitive")
@@ -963,7 +965,7 @@ def test_change_backbone_keeps_retained_edges_only_between_members() -> None:
             StructuralGraphNode(
                 id=f"N:{name}",
                 review_symbol_id=name,
-                operation="modified",
+                delta="modified",
                 evidence_ids=(),
             )
         for name in ("left", "right", "support")
@@ -998,11 +1000,86 @@ def test_change_backbone_keeps_retained_edges_only_between_members() -> None:
     assert edge_ids == ("D:backbone",)
 
 
+def test_support_node_delta_requires_exact_base_and_head_facts() -> None:
+    def symbol(fact_id: str, revision_side: str) -> EvidenceItem:
+        return EvidenceItem(
+            id=fact_id,
+            summary=f"{revision_side.title()} symbol",
+            kind="symbol",
+            classification="code",
+            profile="production",
+            authority="structural_provider",
+            revision_side=revision_side,
+            operation="unchanged",
+            role="revision_fact",
+        )
+
+    head = symbol("E:head", "head")
+    base = symbol("E:base", "base")
+
+    assert _support_node_delta((head, base), ()) == "retained"
+    assert _support_node_delta((head,), ()) == "unresolved"
+
+
+def test_file_support_node_delta_uses_canonical_git_change_truth() -> None:
+    def file_symbol(fact_id: str, revision_side: str) -> EvidenceItem:
+        return EvidenceItem(
+            id=fact_id,
+            summary=f"{revision_side.title()} file symbol",
+            kind="symbol",
+            classification="code",
+            profile="production",
+            authority="structural_provider",
+            revision_side=revision_side,
+            operation="unchanged",
+            role="revision_fact",
+            metadata={
+                "path": "src/service.py",
+                "symbol_kind": "file",
+            },
+        )
+
+    assert _support_node_delta(
+        (
+            file_symbol("E:head-file", "head"),
+            file_symbol("E:base-file", "base"),
+        ),
+        (
+            ChangedFile(
+                base_path="src/service.py",
+                head_path="src/service.py",
+                status="modified",
+            ),
+        ),
+    ) == "modified"
+
+
+def test_structural_node_merge_rejects_conflicting_delta_truth() -> None:
+    left = StructuralGraphNode(
+        id="N:service",
+        review_symbol_id="service",
+        delta="added",
+        evidence_ids=("E:head",),
+    )
+    right = StructuralGraphNode(
+        id="N:service",
+        review_symbol_id="service",
+        delta="removed",
+        evidence_ids=("E:base",),
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="canonical structural graph node delta is inconsistent",
+    ):
+        _merge_node(left, right)
+
+
 def test_review_graph_preserves_renamed_node_operation() -> None:
     node = StructuralGraphNode(
         id="N:renamed",
         review_symbol_id="renamed",
-        operation="renamed",
+        delta="renamed",
         evidence_ids=("E:renamed",),
     )
     evidence = EvidenceCatalog(

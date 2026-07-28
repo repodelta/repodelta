@@ -61,6 +61,7 @@ ChangeOperation = Literal[
     "removed",
     "renamed",
     "retained",
+    "unresolved",
     "observed",
     "unchanged",
 ]
@@ -736,13 +737,16 @@ class EvidenceItem:
                 raise ValueError(
                     f"{self.id}: changed revision fact must identify head or base"
                 )
-            if self.operation not in {
+            changed_operations = {
                 "added",
                 "modified",
                 "replaced",
                 "removed",
                 "renamed",
-            }:
+            }
+            if self.kind == "structural_change":
+                changed_operations.add("unresolved")
+            if self.operation not in changed_operations:
                 raise ValueError(f"{self.id}: changed fact has invalid operation")
         elif self.role == "changed_anchor":
             raise ValueError(f"{self.id}: changed_anchor role requires changed=True")
@@ -1328,12 +1332,13 @@ StructuralFocusNodeRole = Literal[
     "intermediate",
 ]
 
-StructuralGraphNodeOperation = Literal[
+StructuralGraphNodeDelta = Literal[
     "added",
     "modified",
     "renamed",
     "removed",
-    "context",
+    "retained",
+    "unresolved",
 ]
 
 
@@ -1341,7 +1346,7 @@ StructuralGraphNodeOperation = Literal[
 class StructuralGraphNode:
     id: str
     review_symbol_id: str
-    operation: StructuralGraphNodeOperation
+    delta: StructuralGraphNodeDelta
     evidence_ids: tuple[str, ...]
     path_relation_ids: tuple[str, ...] = ()
 

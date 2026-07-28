@@ -579,7 +579,7 @@ def _structural_change_operation(
         for relation_id in relation_ids
     ):
         return "added" if head is not None else "removed"
-    return "modified"
+    return "unresolved"
 
 
 def _opposite_counterpart_complete(

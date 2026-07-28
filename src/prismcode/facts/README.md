@@ -30,8 +30,9 @@ associated replacement relation has complete opposite-revision directional
 line mapping. Mapping another relation in the same hunk is never absence proof.
 A file symbol follows the GitHub changed-file status, so a module-level overlap
 cannot turn a modified file into an added file. Without applicable
-opposite-revision mapping, directional hunk provenance provides the bounded
-fallback operation; downstream stages never reconstruct it.
+opposite-revision identity or complete absence proof, a one-sided symbol is
+explicitly `unresolved`; downstream stages never reconstruct or guess its
+revision delta.
 Revision path steps converge into one canonical
 `StructuralRelationChangeIdentity` per
 directed review-symbol edge. Its base/head path IDs and provider endpoints are
