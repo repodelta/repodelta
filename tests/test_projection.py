@@ -866,6 +866,7 @@ def test_review_graph_renders_complete_focus_union() -> None:
             overlay("R2", "shared", "r2_only"),
             overlay("G1", "g_only", "shared"),
             overlay("R3", "isolated"),
+            ReviewSlice(focus_statement_id="G2"),
         ),
         review_graph=ReviewStructuralGraph(
             nodes=nodes,
@@ -889,8 +890,12 @@ def test_review_graph_renders_complete_focus_union() -> None:
     assert html.count('class="isolated-anchor operation-') == 1
     assert html.count('class="delta-edge operation-') == 3
     assert 'data-focuses="R1 R2 G1"' in html
-    for focus_id in ("R1", "R2", "R3", "G1"):
+    for focus_id in ("R1", "R2", "R3", "G1", "G2"):
         assert f'data-focus-target="{focus_id}"' in html
+    assert (
+        'class="delta-focus no-visible-backbone" type="button" '
+        'data-focus-target="G2"'
+    ) in html
 
 
 def test_change_backbone_does_not_transitively_promote_changed_edges() -> None:
