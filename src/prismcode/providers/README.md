@@ -15,7 +15,14 @@ provider diagnostics.
 
 Structural overlap coverage and queries use only the path belonging to the
 provider revision. A head provider never probes a base path and a base provider
-never probes a head path.
+never probes a head path. After both directional overlap results exist, each
+provider performs one exact local lookup for the other revision's changed
+symbol identities using repository path, qualified name, and symbol kind.
+Those counterpart symbols are separate revision provenance: they do not become
+hunk overlaps, traversal seeds, or paths. Existing local overlaps win by
+identity and are never duplicated. Typed counterpart coverage names only the
+exact identities whose revision-specific files passed index inspection; only
+that set can prove exact absence.
 
 Providers never mutate repositories or indexes and never produce review
 conclusions.
@@ -30,7 +37,9 @@ and HTML copy.
 Reports provider availability, revision side, checkout revision, coverage, and
 traversal limits. Structural expansion is depth-phased across the review and
 round-robin fair between seeds within a depth. Head maps added lines; base maps
-removed lines through the same provider implementation.
+removed lines through the same provider implementation. Exact counterpart
+query failure is reported explicitly and never fabricates opposite-revision
+presence.
 
 Codegraph `contains` edges are emitted through the separate
 `StructuralOwnershipRelation` contract for exact and bounded-path symbols.

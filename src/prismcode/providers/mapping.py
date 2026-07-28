@@ -23,12 +23,27 @@ def map_packet_changed_symbols(
 ) -> StructuralGraphCollection:
     """Collect revision-aware structural facts without computing a delta."""
 
-    head = _map_revision(packet, changes, head_provider, "head")
-    revisions = [head]
+    head = _map_revision(changes, head_provider, "head")
+    revisions: list[StructuralGraphResult] = []
     diagnostics = list(changes.diagnostics)
     if base_provider is not None:
-        revisions.append(_map_revision(packet, changes, base_provider, "base"))
+        base = _map_revision(changes, base_provider, "base")
+        head = head_provider.complete_counterparts(
+            head,
+            tuple(overlap.symbol for overlap in base.overlaps),
+        )
+        base = base_provider.complete_counterparts(
+            base,
+            tuple(overlap.symbol for overlap in head.overlaps),
+        )
+        revisions.extend(
+            (
+                _attach_github_line_sources(packet, head),
+                _attach_github_line_sources(packet, base),
+            )
+        )
     elif any(hunk.removed_lines for hunk in changes.hunks):
+        revisions.append(_attach_github_line_sources(packet, head))
         diagnostics.append(
             Diagnostic(
                 code="structural_graph_base_input_missing",
@@ -38,6 +53,8 @@ def map_packet_changed_symbols(
                 ),
             )
         )
+    else:
+        revisions.append(_attach_github_line_sources(packet, head))
     result = StructuralGraphCollection(
         revisions=tuple(revisions),
         diagnostics=tuple(diagnostics),
@@ -47,7 +64,6 @@ def map_packet_changed_symbols(
 
 
 def _map_revision(
-    packet: ReviewSourcePacket,
     changes: DiffHunkCollection,
     provider: StructuralGraphProvider,
     revision_side: StructuralRevision,
@@ -55,8 +71,7 @@ def _map_revision(
     result = provider.symbols_overlapping(changes.hunks)
     if result.revision_side != revision_side:
         raise ValueError("structural provider returned the wrong revision side")
-    result = provider.expand_structure(result)
-    return _attach_github_line_sources(packet, result)
+    return provider.expand_structure(result)
 
 
 def _attach_github_line_sources(
@@ -123,9 +138,13 @@ def _attach_github_line_sources(
         )
         for relation in result.ownership_relations
     )
+    counterpart_symbols = tuple(
+        enrich_symbol(symbol) for symbol in result.counterpart_symbols
+    )
     return replace(
         result,
         overlaps=overlaps,
+        counterpart_symbols=counterpart_symbols,
         paths=paths,
         ownership_relations=ownership_relations,
     )
