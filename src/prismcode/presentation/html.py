@@ -718,6 +718,16 @@ def _projection_slice(
             "changed fact",
         ),
         (
+            "Test support",
+            review_slice.standalone_test_support_relation_ids,
+            "changed test",
+        ),
+        (
+            "Documentation support",
+            review_slice.standalone_document_support_relation_ids,
+            "changed document",
+        ),
+        (
             "Runtime context",
             review_slice.standalone_runtime_relation_ids,
             "context fact",

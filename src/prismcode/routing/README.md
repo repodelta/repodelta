@@ -2,8 +2,8 @@
 
 ## Owns
 
-Requirement profiles, fact eligibility, authority-aware association, and
-complete per-R/G typed candidate enumeration.
+Requirement profiles, fact eligibility, authority-aware association,
+focus-relative evidence roles, and complete per-R/G typed candidate enumeration.
 
 ## Input / output
 
@@ -30,6 +30,17 @@ Structural changed-anchor candidates come only from canonical
 `structural_change` facts; revision-specific symbols are provenance and path
 endpoints, not parallel candidates. Uncovered spans continue through the
 canonical `change_relation` fallback.
+Every changed-anchor relation is classified once as primary, test support, or
+documentation support from the typed focus and fact profiles. Documents are
+primary only for documentation focuses; tests are primary for test/verification
+focuses. Other eligible documents and tests remain support evidence and never
+disappear merely to reduce display counts. This role participates in
+safety-boundary ordering before association authority.
+Documentation and test profiles use explicit leading intent forms such as
+`Document…`, `Documentation explains…`, `Tests verify…`, or `Verify…`.
+The grammar requires an action or delivery predicate; an incidental
+`document fact`, `test fact`, or `Documentation and test profiles…` subject
+does not reclassify the focus.
 
 ## Must not
 

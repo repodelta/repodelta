@@ -87,6 +87,11 @@ RequirementProfile = Literal[
     "guardrail",
     "generic",
 ]
+FocusEvidenceRole = Literal[
+    "primary",
+    "test_support",
+    "document_support",
+]
 ProjectionSlot = Literal[
     "claim",
     "changed_anchor",
@@ -1043,6 +1048,7 @@ class ProjectionRelation:
     target_id: str
     association: AssociationKind
     reasons: tuple[AssociationReason, ...]
+    evidence_role: FocusEvidenceRole = "primary"
     bridge_ids: tuple[str, ...] = ()
     source_ordinal: int = 0
 
@@ -1086,7 +1092,7 @@ class ProjectionCandidateSet:
     relations: tuple[ProjectionRelation, ...] = ()
     groups: tuple[ProjectionCandidateGroup, ...] = ()
     diagnostics: tuple[ProjectionDiagnostic, ...] = ()
-    schema_version: str = "projection_candidate_set.v4"
+    schema_version: str = "projection_candidate_set.v5"
 
     def by_id(self) -> dict[str, ProjectionRelation]:
         return {item.id: item for item in self.relations}
@@ -1119,6 +1125,13 @@ class ProjectionCandidateSet:
                 if relation.focus_statement_id != group.focus_statement_id:
                     raise ValueError(
                         f"{relation_id}: relation belongs to a different focus statement"
+                    )
+                if (
+                    relation.slot != "changed_anchor"
+                    and relation.evidence_role != "primary"
+                ):
+                    raise ValueError(
+                        f"{relation_id}: only changed anchors may carry a support role"
                     )
             for diagnostic_id in group.diagnostic_ids:
                 diagnostic = diagnostics.get(diagnostic_id)
@@ -1328,6 +1341,8 @@ class ReviewSlice:
     focus_statement_id: str
     claim_relation_ids: tuple[str, ...] = ()
     standalone_changed_fact_relation_ids: tuple[str, ...] = ()
+    standalone_test_support_relation_ids: tuple[str, ...] = ()
+    standalone_document_support_relation_ids: tuple[str, ...] = ()
     standalone_runtime_relation_ids: tuple[str, ...] = ()
     standalone_test_relation_ids: tuple[str, ...] = ()
     verification_relation_ids: tuple[str, ...] = ()
@@ -1341,7 +1356,7 @@ class ReviewSlice:
 class ReviewProjection:
     slices: tuple[ReviewSlice, ...] = ()
     review_graph: ReviewStructuralGraph = ReviewStructuralGraph()
-    schema_version: str = "review_projection.v12"
+    schema_version: str = "review_projection.v13"
 
     def validate_consistency(self, evidence_catalog: EvidenceCatalog) -> None:
         evidence = evidence_catalog.by_id()
@@ -1527,7 +1542,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v29"
+    schema_version: str = "review_brief.v30"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

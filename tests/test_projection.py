@@ -37,6 +37,10 @@ from prismcode.evaluation.core import load_evaluation_suite
 from prismcode.facts.lexical import association_signature
 from prismcode.intake.fixture import load_fixture
 from prismcode.routing.candidates import build_projection_candidates
+from prismcode.routing.semantics import (
+    focus_evidence_role,
+    requirement_profile,
+)
 from prismcode.convergence.core import (
     ConvergencePolicy,
     converge_candidates,
@@ -72,6 +76,45 @@ def _selected_targets(brief, focus_id: str, slot: str) -> tuple[str, ...]:
         and item.slot == slot
         and item.id in selected
     )
+
+
+@pytest.mark.parametrize(
+    ("focus_profile", "fact_profile", "expected"),
+    (
+        ("documentation", "document", "primary"),
+        ("generic", "document", "document_support"),
+        ("test_verification", "test", "primary"),
+        ("behavior", "test", "test_support"),
+        ("generic", "production", "primary"),
+        ("workflow_configuration", "workflow", "primary"),
+    ),
+)
+def test_focus_evidence_role_uses_typed_focus_and_fact_profiles(
+    focus_profile,
+    fact_profile,
+    expected,
+) -> None:
+    assert focus_evidence_role(focus_profile, fact_profile) == expected
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    (
+        ("Document bounded_trace behavior", "documentation"),
+        ("Documentation explains bounded_trace", "documentation"),
+        ("Tests verify bounded_trace", "test_verification"),
+        ("Verify bounded_trace behavior", "test_verification"),
+        ("A document fact remains supporting evidence", "generic"),
+        ("A test fact remains supporting evidence", "generic"),
+        ("Documentation and test focus profiles retain typed roles", "generic"),
+        ("Display document and test support in HTML", "ui"),
+    ),
+)
+def test_requirement_profile_uses_intent_not_incidental_fact_nouns(
+    text,
+    expected,
+) -> None:
+    assert requirement_profile(Requirement(id="R1", text=text)) == expected
 
 
 def test_direct_hunks_and_claim_route_into_independent_slots() -> None:
@@ -1444,6 +1487,77 @@ def test_document_and_workflow_facts_are_routed_by_profile() -> None:
     assert ("R2", "E:workflow") in selected
     assert ("R3", "E:doc") not in selected
     assert ("R3", "E:workflow") not in selected
+
+
+def test_focus_evidence_roles_are_routed_before_convergence_and_presentation() -> None:
+    packet = ReviewSourcePacket(
+        repository="acme/widget",
+        pull_request=44,
+        title="Expose bounded trace",
+        source_url="https://github.com/acme/widget/pull/44",
+        source_records=(),
+        changed_files=(
+            ChangedFile(
+                path="docs/bounded_trace.md",
+                patch="@@ -1,0 +2 @@\n+bounded_trace behavior\n",
+            ),
+            ChangedFile(
+                path="tests/test_bounded_trace.py",
+                patch="@@ -1,0 +2 @@\n+bounded_trace behavior\n",
+            ),
+            ChangedFile(
+                path="src/bounded_trace.py",
+                patch="@@ -1,0 +2 @@\n+bounded_trace behavior\n",
+            ),
+        ),
+    ).with_revision()
+    brief = DeterministicAnalyzer().analyze(
+        AnalysisInput(
+            packet=packet,
+            requirements=(
+                Requirement(id="R1", text="Expose bounded_trace behavior"),
+            ),
+        )
+    )
+    anchor_relations = tuple(
+        item
+        for item in brief.projection_candidates.relations
+        if item.focus_statement_id == "R1"
+        and item.slot == "changed_anchor"
+    )
+    evidence = brief.evidence_catalog.by_id()
+
+    assert {
+        evidence[item.target_id].profile: item.evidence_role
+        for item in anchor_relations
+    } == {
+        "production": "primary",
+        "test": "test_support",
+        "document": "document_support",
+    }
+    review_slice = brief.projection.slices[0]
+    assert len(review_slice.standalone_changed_fact_relation_ids) == 1
+    assert len(review_slice.standalone_test_support_relation_ids) == 1
+    assert len(review_slice.standalone_document_support_relation_ids) == 1
+    html = render_html(brief)
+    assert "Changed anchors" in html
+    assert "Test support" in html
+    assert "Documentation support" in html
+
+    bounded = converge_candidates(
+        brief.projection_candidates,
+        evidence_catalog=brief.evidence_catalog,
+        policy=ConvergencePolicy(
+            max_direct_anchor_identities=2,
+            max_anchor_identities=2,
+        ),
+    )
+    selected = set(bounded.selected_relation_ids())
+    assert [
+        item.evidence_role
+        for item in anchor_relations
+        if item.id in selected
+    ] == ["primary", "test_support"]
 
 
 def test_graph_and_no_graph_use_the_same_projection_contract() -> None:

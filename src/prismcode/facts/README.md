@@ -59,7 +59,9 @@ evidence.
 
 ## Must not
 
-Extract statements, associate R/G, select candidates, or render output.
+Extract statements, profile review focuses, determine focus-relative fact
+eligibility or support roles, associate R/G, select candidates, or render
+output.
 
 ## Diagnostics
 

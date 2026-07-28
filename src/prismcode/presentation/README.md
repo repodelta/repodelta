@@ -24,6 +24,9 @@ toggle existing node/edge memberships, while the Structure control only hides
 or shows ownership edges and ownership-only context nodes. Neither control
 recalculates an association, relation, or parentage. Presentation must not
 recover parentage from symbol names, paths, or node kinds.
+Standalone changed facts are grouped by the projection's primary, test-support,
+and document-support references; presentation never reclassifies a fact from
+its path, content, or label.
 
 ## Must not
 

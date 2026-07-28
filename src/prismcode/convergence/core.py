@@ -61,6 +61,11 @@ _ASSOCIATION_ORDER: dict[AssociationKind, int] = {
     "structural_bridge": 5,
     "current_head": 6,
 }
+_EVIDENCE_ROLE_ORDER = {
+    "primary": 0,
+    "test_support": 1,
+    "document_support": 2,
+}
 _DIRECT_ANCHOR_ASSOCIATIONS: frozenset[AssociationKind] = frozenset(
     {
         "provided_association",
@@ -211,6 +216,7 @@ def converge_candidates(
 def relation_key(item: ProjectionRelation) -> tuple[object, ...]:
     return (
         item.slot,
+        _EVIDENCE_ROLE_ORDER[item.evidence_role],
         _semantic_tier(item),
         item.source_ordinal,
         item.target_id,

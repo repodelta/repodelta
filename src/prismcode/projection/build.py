@@ -122,6 +122,21 @@ def build_review_projection(
                 standalone_changed_fact_relation_ids=tuple(
                     item.id
                     for item in by_slot["changed_anchor"]
+                    if item.evidence_role == "primary"
+                    if evidence[item.target_id].kind
+                    not in {"symbol", "structural_change"}
+                ),
+                standalone_test_support_relation_ids=tuple(
+                    item.id
+                    for item in by_slot["changed_anchor"]
+                    if item.evidence_role == "test_support"
+                    if evidence[item.target_id].kind
+                    not in {"symbol", "structural_change"}
+                ),
+                standalone_document_support_relation_ids=tuple(
+                    item.id
+                    for item in by_slot["changed_anchor"]
+                    if item.evidence_role == "document_support"
                     if evidence[item.target_id].kind
                     not in {"symbol", "structural_change"}
                 ),
