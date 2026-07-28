@@ -4,6 +4,7 @@ import hashlib
 
 from prismcode.model.contracts import (
     CandidateConvergence,
+    ChangedFile,
     DiagnosticPresentation,
     EvidenceCatalog,
     EvidenceItem,
@@ -27,21 +28,13 @@ _ROLE_ORDER = {
     "test_context": 2,
     "intermediate": 3,
 }
-_OPERATION_ORDER = {
-    "added": 0,
-    "renamed": 1,
-    "modified": 2,
-    "removed": 3,
-    "context": 4,
-}
-
-
 def build_review_projection(
     candidates: ProjectionCandidateSet,
     convergence: CandidateConvergence,
     evidence_catalog: EvidenceCatalog,
     *,
     diagnostic_presentation: DiagnosticPresentation,
+    changed_files: tuple[ChangedFile, ...] = (),
     guardrail_scan_plans: GuardrailScanPlanSet = GuardrailScanPlanSet(),
 ) -> ReviewProjection:
     """Project converged canonical facts without performing retrieval or selection."""
@@ -93,6 +86,7 @@ def build_review_projection(
             runtime_relations=by_slot["runtime_context"],
             test_relations=by_slot["test_context"],
             evidence=evidence,
+            changed_files=changed_files,
         )
         represented_relation_ids = {
             relation_id
@@ -288,6 +282,7 @@ def _structural_focus_overlay(
     runtime_relations: tuple[ProjectionRelation, ...],
     test_relations: tuple[ProjectionRelation, ...],
     evidence: dict[str, EvidenceItem],
+    changed_files: tuple[ChangedFile, ...],
 ) -> tuple[
     StructuralFocusOverlay,
     tuple[StructuralGraphNode, ...],
@@ -331,6 +326,7 @@ def _structural_focus_overlay(
                     review_id,
                     evidence=evidence,
                     symbols_by_review_id=symbols_by_review_id,
+                    changed_files=changed_files,
                     anchor=fact,
                 )
 
@@ -373,6 +369,7 @@ def _structural_focus_overlay(
                     review_id,
                     evidence=evidence,
                     symbols_by_review_id=symbols_by_review_id,
+                    changed_files=changed_files,
                 )
             node_path_ids.setdefault(review_id, []).extend(support_relation_ids)
         edge_ids.append(relation_change.id)
@@ -412,6 +409,7 @@ def _structural_focus_overlay(
                     parent_review_id,
                     evidence=evidence,
                     symbols_by_review_id=symbols_by_review_id,
+                    changed_files=changed_files,
                 )
                 node_path_ids.setdefault(parent_review_id, [])
                 frontier.append(parent_review_id)
@@ -432,7 +430,7 @@ def _structural_focus_overlay(
             StructuralGraphNode(
                 id=node.id,
                 review_symbol_id=node.review_symbol_id,
-                operation=node.operation,
+                delta=node.delta,
                 evidence_ids=node.evidence_ids,
                 path_relation_ids=tuple(
                     dict.fromkeys(node_path_ids.get(review_id, ()))
@@ -516,6 +514,7 @@ def _node_for_review_symbol(
     *,
     evidence: dict[str, EvidenceItem],
     symbols_by_review_id: dict[str, tuple[EvidenceItem, ...]],
+    changed_files: tuple[ChangedFile, ...],
     anchor: EvidenceItem | None = None,
 ) -> StructuralGraphNode:
     symbol_items = symbols_by_review_id.get(review_id, ())
@@ -542,23 +541,53 @@ def _node_for_review_symbol(
         raise ValueError(
             f"structural graph references missing symbol fact: {review_id}"
         )
-    operation = (
-        _node_operation(anchor.operation)
+    delta = (
+        _node_delta(anchor.operation)
         if anchor is not None and anchor.changed
-        else "context"
+        else _support_node_delta(symbol_items, changed_files)
     )
     return StructuralGraphNode(
         id=_structural_node_id(review_id),
         review_symbol_id=review_id,
-        operation=operation,
+        delta=delta,
         evidence_ids=evidence_ids,
     )
 
 
-def _node_operation(operation: str) -> str:
-    if operation in {"added", "renamed", "removed"}:
+def _node_delta(operation: str) -> str:
+    if operation in {
+        "added",
+        "modified",
+        "renamed",
+        "removed",
+        "unresolved",
+    }:
         return operation
-    return "modified"
+    raise ValueError(f"unsupported structural node delta: {operation}")
+
+
+def _support_node_delta(
+    symbol_items: tuple[EvidenceItem, ...],
+    changed_files: tuple[ChangedFile, ...],
+) -> str:
+    if any(item.metadata.get("symbol_kind") == "file" for item in symbol_items):
+        symbol_paths = {
+            str(item.metadata["path"])
+            for item in symbol_items
+            if item.metadata.get("path")
+        }
+        changed_file = next(
+            (
+                item
+                for item in changed_files
+                if symbol_paths & {item.base_path, item.head_path}
+            ),
+            None,
+        )
+        if changed_file is not None:
+            return changed_file.status
+    revisions = {item.revision_side for item in symbol_items}
+    return "retained" if {"base", "head"} <= revisions else "unresolved"
 
 
 def _merge_node(
@@ -567,13 +596,15 @@ def _merge_node(
 ) -> StructuralGraphNode:
     if left.id != right.id or left.review_symbol_id != right.review_symbol_id:
         raise ValueError("cannot merge different structural graph nodes")
+    if left.delta != right.delta:
+        raise ValueError(
+            "canonical structural graph node delta is inconsistent: "
+            f"{left.review_symbol_id} ({left.delta} != {right.delta})"
+        )
     return StructuralGraphNode(
         id=left.id,
         review_symbol_id=left.review_symbol_id,
-        operation=min(
-            (left.operation, right.operation),
-            key=_OPERATION_ORDER.__getitem__,
-        ),
+        delta=left.delta,
         evidence_ids=tuple(dict.fromkeys((*left.evidence_ids, *right.evidence_ids))),
         path_relation_ids=tuple(
             dict.fromkeys((*left.path_relation_ids, *right.path_relation_ids))

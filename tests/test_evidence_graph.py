@@ -305,7 +305,7 @@ def test_exact_symbol_replaces_its_mapped_hunk_evidence() -> None:
     ] == ["S"]
     assert "newcall" in catalog.items[0].head_signature.identifiers
     assert "oldcall" in catalog.items[0].base_signature.identifiers
-    assert catalog.items[0].operation == "modified"
+    assert catalog.items[0].operation == "unresolved"
     assert catalog.items[0].change_relation_ids == (
         catalog.change_relations[0].id,
     )

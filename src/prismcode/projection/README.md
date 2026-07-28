@@ -7,7 +7,8 @@ and canonical review-wide overview facts.
 
 ## Input / output
 
-Typed candidates, `CandidateConvergence`, and packet/provider state →
+Typed candidates, `CandidateConvergence`, canonical `ChangedFile` truth, and
+packet/provider state →
 `ReviewProjection` and `ReviewOverview`.
 
 ## Invariants
@@ -23,8 +24,14 @@ incident added or removed relations may add one endpoint, retained relations
 connect only existing backbone members, and required ownership ancestors
 organize those members. This selection is non-transitive and leaves all
 support/test members in the complete graph and focus overlays. Nodes use the facts-owned
-exact logical review-symbol identity and carry review operation plus base/head
-provider evidence provenance. Edges reference only the closure's canonical
+exact logical review-symbol identity and carry one Base-to-Head delta:
+`added`, `modified`, `renamed`, `removed`, `retained`, or `unresolved`.
+Exact Base+Head support identities are retained; incomplete one-sided support
+is unresolved. File-container nodes instead consume the canonical Git
+`ChangedFile.status`, so child-span mapping cannot make a changed file appear
+retained. Focus-relative roles exist only in `StructuralFocusNode` overlays.
+Conflicting deltas for one canonical node identity are rejected rather than
+priority-merged. Edges reference only the closure's canonical
 `StructuralRelationChangeIdentity` fact IDs; projection never searches all
 evidence for relevance or rebuilds edge truth from provider path steps. Selected
 structural-change anchors follow canonical `StructuralOwnershipChangeIdentity`
