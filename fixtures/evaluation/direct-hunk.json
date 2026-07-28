@@ -1,8 +1,8 @@
 {
   "schema_version": "analysis_fixture.v3",
   "source_packet": {
-    "schema_version": "review_source_packet.v1",
-    "packet_revision": "sha256:75afa4a59460294e9c43463638a27ec35fe8b18a77c30cfd52f2d1f88c012b41",
+    "schema_version": "review_source_packet.v2",
+    "packet_revision": "sha256:3994972a9d6e783c04a891f8d7bbbc48256161e4f811e6e20c6c88fcfde2ec88",
     "repository": "acme/widget",
     "pull_request": 101,
     "title": "Expose bounded semantic trace",
@@ -23,7 +23,8 @@
     ],
     "changed_files": [
       {
-        "path": "src/runtime.py",
+        "base_path": "src/runtime.py",
+        "head_path": "src/runtime.py",
         "status": "modified",
         "additions": 1,
         "deletions": 1,
@@ -32,7 +33,8 @@
         "patch": "@@ -10 +10 @@\n-return payload\n+return bounded_semantic_trace(payload)\n"
       },
       {
-        "path": "tests/test_runtime.py",
+        "base_path": "tests/test_runtime.py",
+        "head_path": "tests/test_runtime.py",
         "status": "modified",
         "additions": 1,
         "deletions": 0,

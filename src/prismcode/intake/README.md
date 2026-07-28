@@ -12,7 +12,9 @@ External API or fixture JSON → source packet and `AnalysisInput`.
 ## Invariants
 
 Packet revision matches packet content. Intake preserves source authority and
-does not produce review conclusions.
+does not produce review conclusions. GitHub `filename` and
+`previous_filename` normalize into explicit head/base paths; added and removed
+files retain only their applicable revision path.
 
 ## Must not
 

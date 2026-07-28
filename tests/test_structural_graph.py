@@ -123,7 +123,8 @@ def _packet(patch: str | None) -> ReviewSourcePacket:
         source_records=(),
         changed_files=(
             ChangedFile(
-                path="src/service.py",
+                base_path="src/service.py",
+                head_path="src/service.py",
                 patch=patch,
                 source_url="https://github.com/acme/widget/pull/7/files",
             ),
@@ -225,7 +226,8 @@ def test_change_relation_model_rejects_invalid_revision_shape() -> None:
         ChangeRelation(
             id="change:1",
             hunk_id="hunk:1",
-            file_path="src/a.py",
+            base_path="src/a.py",
+            head_path="src/a.py",
             kind="added",
             removed=(ChangedLine(1, "old"),),
         )
@@ -370,6 +372,93 @@ def test_replacement_collects_distinct_head_and_base_symbol_facts(
         changes[0].structural_change.base_symbol_evidence_id,
         changes[0].structural_change.head_symbol_evidence_id,
     } == {item.id for item in symbols}
+
+
+def test_explicit_rename_maps_each_revision_path_and_converges_symbol(
+    tmp_path: Path,
+) -> None:
+    head_root = tmp_path / "head"
+    base_root = tmp_path / "base"
+    _create_index(head_root, method_id="head:run")
+    _create_index(base_root, method_id="base:run")
+
+    for root, renamed_path in (
+        (head_root, "src/new_service.py"),
+        (base_root, "src/old_service.py"),
+    ):
+        original = root / "src" / "service.py"
+        renamed = root / renamed_path
+        original.rename(renamed)
+        with sqlite3.connect(root / ".codegraph" / "codegraph.db") as connection:
+            connection.execute(
+                "UPDATE nodes SET file_path = ?",
+                (renamed_path,),
+            )
+            module_name = (
+                "src.new_service"
+                if root == head_root
+                else "src.old_service"
+            )
+            connection.execute(
+                """
+                UPDATE nodes
+                SET qualified_name = REPLACE(
+                    qualified_name,
+                    'src.service',
+                    ?
+                )
+                """,
+                (module_name,),
+            )
+            connection.execute(
+                "UPDATE files SET path = ?",
+                (renamed_path,),
+            )
+
+    packet = ReviewSourcePacket(
+        repository="acme/widget",
+        pull_request=7,
+        title="Rename service",
+        source_records=(),
+        changed_files=(
+            ChangedFile(
+                base_path="src/old_service.py",
+                head_path="src/new_service.py",
+                status="renamed",
+                patch="@@ -2 +2 @@\n-    def run(self):\n+    def run(self):\n",
+            ),
+        ),
+        head_sha="head123",
+        base_sha="base123",
+    ).with_revision()
+    changes = parse_changed_files(packet.changed_files)
+
+    graph = map_packet_changed_symbols(
+        packet,
+        changes,
+        CodegraphProvider(head_root, revision_side="head"),
+        base_provider=CodegraphProvider(base_root, revision_side="base"),
+    )
+    brief = DeterministicAnalyzer().analyze(
+        AnalysisInput(
+            packet=packet,
+            changes=changes,
+            structural_graph=graph,
+        )
+    )
+
+    assert graph.for_revision("head").index.indexed_files == 1
+    assert graph.for_revision("base").index.indexed_files == 1
+    structural_changes = tuple(
+        item
+        for item in brief.evidence_catalog.items
+        if item.kind == "structural_change"
+        and item.metadata["symbol_kind"] == "method"
+    )
+    assert len(structural_changes) == 1
+    assert structural_changes[0].operation == "renamed"
+    assert structural_changes[0].metadata["base_path"] == "src/old_service.py"
+    assert structural_changes[0].metadata["head_path"] == "src/new_service.py"
 
 
 def test_added_relation_produces_one_head_only_structural_change(
@@ -1199,7 +1288,8 @@ def test_bounded_paths_load_unchanged_y_to_x_to_z_neighbors(tmp_path: Path) -> N
         source_records=(),
         changed_files=(
             ChangedFile(
-                path="src/adapter.py",
+                base_path="src/adapter.py",
+                head_path="src/adapter.py",
                 patch="@@ -2 +2 @@\n-    return old()\n+    return core()\n",
             ),
         ),

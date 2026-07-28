@@ -211,31 +211,48 @@ class CodegraphProvider:
     def symbols_overlapping(
         self, hunks: tuple[ChangedHunk, ...]
     ) -> StructuralGraphResult:
+        revision_paths = {
+            hunk.id: (
+                hunk.head_path
+                if self.revision_side == "head"
+                else hunk.base_path
+            )
+            for hunk in hunks
+        }
         structural_hunks = tuple(
-            hunk for hunk in hunks if _is_structural_candidate(hunk.file_path)
+            hunk
+            for hunk in hunks
+            if revision_paths[hunk.id]
+            and _is_structural_candidate(revision_paths[hunk.id] or "")
         )
         applicable_hunks = tuple(
             hunk for hunk in structural_hunks if self._changed_lines(hunk)
         )
         applicable_files = frozenset(
-            hunk.file_path for hunk in applicable_hunks
+            hunk.path_for_revision(self.revision_side)
+            for hunk in applicable_hunks
         )
         non_structural_files = tuple(
             dict.fromkeys(
-                hunk.file_path
+                revision_paths[hunk.id]
                 for hunk in hunks
-                if not _is_structural_candidate(hunk.file_path)
+                if revision_paths[hunk.id]
+                and not _is_structural_candidate(revision_paths[hunk.id] or "")
             )
         )
         revision_inapplicable_files = tuple(
             dict.fromkeys(
-                hunk.file_path
+                hunk.path_for_revision(self.revision_side)
                 for hunk in structural_hunks
-                if hunk.file_path not in applicable_files
+                if hunk.path_for_revision(self.revision_side)
+                not in applicable_files
             )
         )
         requested_files = tuple(
-            dict.fromkeys(hunk.file_path for hunk in applicable_hunks)
+            dict.fromkeys(
+                hunk.path_for_revision(self.revision_side)
+                for hunk in applicable_hunks
+            )
         )
         provenance_diagnostics = (
             *(
@@ -297,7 +314,8 @@ class CodegraphProvider:
         queryable = tuple(
             hunk
             for hunk in applicable_hunks
-            if hunk.file_path not in unindexed_files
+            if hunk.path_for_revision(self.revision_side)
+            not in unindexed_files
         )
         if not queryable:
             return StructuralGraphResult(
@@ -326,7 +344,12 @@ class CodegraphProvider:
                                     f"lines in {hunk.id}."
                                 ),
                                 sources=(
-                                    SourceRef(label="diff hunk", path=hunk.file_path),
+                                    SourceRef(
+                                        label="diff hunk",
+                                        path=hunk.path_for_revision(
+                                            self.revision_side
+                                        ),
+                                    ),
                                 ),
                             )
                         )
@@ -340,7 +363,9 @@ class CodegraphProvider:
                                 sources=(
                                     SourceRef(
                                         label="diff hunk",
-                                        path=hunk.file_path,
+                                        path=hunk.path_for_revision(
+                                            self.revision_side
+                                        ),
                                         line_start=min(lines),
                                         line_end=max(lines),
                                     ),
@@ -786,7 +811,12 @@ class CodegraphProvider:
               AND end_line >= ?
             ORDER BY start_line, end_line, qualified_name
             """,
-            (hunk.file_path, *_SUPPORTED_KINDS, high, low),
+            (
+                hunk.path_for_revision(self.revision_side),
+                *_SUPPORTED_KINDS,
+                high,
+                low,
+            ),
         ).fetchall()
         symbols = [_symbol(row) for row in rows]
         selected: dict[str, tuple[GraphSymbol, set[int]]] = {}

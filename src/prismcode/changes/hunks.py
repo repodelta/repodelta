@@ -35,7 +35,8 @@ class _MutableHunk(TypedDict):
 @dataclass(frozen=True)
 class ChangedHunk:
     id: str
-    file_path: str
+    base_path: str | None
+    head_path: str | None
     old_start: int
     old_count: int
     new_start: int
@@ -74,6 +75,12 @@ class ChangedHunk:
     def is_deletion_only(self) -> bool:
         return bool(self.removed_lines) and not self.added_lines
 
+    def path_for_revision(self, revision_side: str) -> str:
+        path = self.base_path if revision_side == "base" else self.head_path
+        if path is None:
+            raise ValueError(f"{self.id}: no {revision_side} path exists")
+        return path
+
 
 @dataclass(frozen=True)
 class DiffHunkCollection:
@@ -85,29 +92,45 @@ def parse_changed_files(changed_files: tuple[ChangedFile, ...]) -> DiffHunkColle
     hunks: list[ChangedHunk] = []
     diagnostics: list[Diagnostic] = []
     for changed_file in changed_files:
+        display_path = changed_file.display_path
         if not changed_file.patch:
             diagnostics.append(
                 Diagnostic(
                     code="structural_graph_patch_unavailable",
                     message=(
-                        f"GitHub did not provide patch text for {changed_file.path}; "
+                        f"GitHub did not provide patch text for {display_path}; "
                         "hunk-to-symbol mapping was not attempted."
                     ),
                     sources=(
                         SourceRef(
                             label="changed file",
                             url=changed_file.source_url,
-                            path=changed_file.path,
+                            path=display_path,
                         ),
                     ),
                 )
             )
             continue
-        hunks.extend(parse_unified_patch(changed_file.path, changed_file.patch))
+        hunks.extend(
+            parse_unified_patch(
+                changed_file.head_path,
+                changed_file.patch,
+                base_path=changed_file.base_path,
+            )
+        )
     return DiffHunkCollection(tuple(hunks), tuple(diagnostics))
 
 
-def parse_unified_patch(file_path: str, patch: str) -> tuple[ChangedHunk, ...]:
+def parse_unified_patch(
+    head_path: str | None,
+    patch: str,
+    *,
+    base_path: str | None = None,
+) -> tuple[ChangedHunk, ...]:
+    if base_path is None and head_path is not None:
+        base_path = head_path
+    if base_path is None and head_path is None:
+        raise ValueError("unified patch requires a base or head path")
     parsed: list[ChangedHunk] = []
     current: _MutableHunk | None = None
     old_line = 0
@@ -136,11 +159,17 @@ def parse_unified_patch(file_path: str, patch: str) -> tuple[ChangedHunk, ...]:
             return
         finish_relation()
         index = len(parsed)
-        hunk_id = f"hunk:{file_path}:{index}"
+        identity_path = (
+            head_path
+            if base_path == head_path
+            else f"{base_path or ''}→{head_path or ''}"
+        )
+        hunk_id = f"hunk:{identity_path}:{index}"
         parsed.append(
             ChangedHunk(
                 id=hunk_id,
-                file_path=file_path,
+                base_path=base_path,
+                head_path=head_path,
                 old_start=int(current["old_start"]),
                 old_count=int(current["old_count"]),
                 new_start=int(current["new_start"]),
@@ -149,7 +178,8 @@ def parse_unified_patch(file_path: str, patch: str) -> tuple[ChangedHunk, ...]:
                     ChangeRelation(
                         id=f"{hunk_id}:change:{relation_index}",
                         hunk_id=hunk_id,
-                        file_path=file_path,
+                        base_path=base_path,
+                        head_path=head_path,
                         kind=(
                             "replaced"
                             if relation["added"] and relation["removed"]

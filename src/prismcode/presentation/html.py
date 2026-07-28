@@ -90,11 +90,12 @@ def _sources(item: EvidenceItem, brief: ReviewBrief) -> str:
 
 def _changed_file(item: ChangedFile) -> str:
     href = _safe_href(item.source_url)
+    display_path = item.display_path
     source = (
         f'<a class="file-link" href="{escape(href, quote=True)}" '
-        f'target="_blank" rel="noopener">{escape(Path(item.path).name)}</a>'
+        f'target="_blank" rel="noopener">{escape(Path(display_path).name)}</a>'
     if href
-        else escape(Path(item.path).name)
+        else escape(Path(display_path).name)
     )
     counts = []
     if item.additions is not None:
@@ -103,11 +104,17 @@ def _changed_file(item: ChangedFile) -> str:
         counts.append(f"-{item.deletions}")
     return (
         '<div class="file-row"><div class="file-name">'
-        f'{source}<span class="file-path">{escape(item.path)}</span></div>'
+        f'{source}<span class="file-path">{escape(_changed_file_path(item))}</span></div>'
         f'<div class="file-state">{escape(item.status)}'
         + (f" · {' '.join(counts)}" if counts else "")
         + "</div></div>"
     )
+
+
+def _changed_file_path(item: ChangedFile) -> str:
+    if item.status == "renamed":
+        return f"{item.base_path} → {item.head_path}"
+    return item.display_path
 
 
 def _statement_context(label: str, statements: tuple[ReviewStatement, ...]) -> str:

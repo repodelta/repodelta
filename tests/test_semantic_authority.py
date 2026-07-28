@@ -712,7 +712,8 @@ def test_context_and_typed_claims_use_the_canonical_binding_path() -> None:
         ),
         changed_files=(
             ChangedFile(
-                path="src/prismcode/evaluation/core.py",
+                base_path="src/prismcode/evaluation/core.py",
+                head_path="src/prismcode/evaluation/core.py",
                 patch=(
                     "@@ -1,1 +1,4 @@\n"
                     "+statement purpose and authority\n"

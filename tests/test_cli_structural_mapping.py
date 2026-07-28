@@ -21,7 +21,8 @@ def _write_fixture(tmp_path: Path) -> Path:
         source_records=(),
         changed_files=(
             ChangedFile(
-                path="src/service.py",
+                base_path="src/service.py",
+                head_path="src/service.py",
                 patch=(
                     "@@ -1,2 +1,2 @@\n"
                     " def run():\n"
@@ -212,7 +213,8 @@ def test_cli_partial_index_reports_coverage(
     packet_raw["changed_files"].append(
         asdict(
             ChangedFile(
-                path="src/unindexed.py",
+                base_path="src/unindexed.py",
+                head_path="src/unindexed.py",
                 patch="@@ -0,0 +1 @@\n+VALUE = 1\n",
             )
         )

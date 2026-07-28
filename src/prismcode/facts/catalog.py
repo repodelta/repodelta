@@ -75,9 +75,12 @@ def build_evidence_catalog(
     """Normalize source, structural, and supplied facts into one ID-addressed catalog."""
 
     items: dict[str, EvidenceItem] = {}
-    hunks_by_path: dict[str, list[ChangedHunk]] = {}
+    hunks_by_paths: dict[tuple[str | None, str | None], list[ChangedHunk]] = {}
     for hunk in changes.hunks:
-        hunks_by_path.setdefault(hunk.file_path, []).append(hunk)
+        hunks_by_paths.setdefault(
+            (hunk.base_path, hunk.head_path),
+            [],
+        ).append(hunk)
     hunks_by_id = {hunk.id: hunk for hunk in changes.hunks}
     change_relations = tuple(
         relation for hunk in changes.hunks for relation in hunk.relations
@@ -98,7 +101,10 @@ def build_evidence_catalog(
                 ).update(overlap.changed_lines)
 
     for changed_file in packet.changed_files:
-        file_hunks = hunks_by_path.get(changed_file.path, ())
+        file_hunks = hunks_by_paths.get(
+            (changed_file.base_path, changed_file.head_path),
+            (),
+        )
         if not file_hunks:
             _put(items, _changed_file_fallback(changed_file))
             continue
@@ -141,7 +147,7 @@ def build_evidence_catalog(
                 revision_graph,
                 hunks_by_id=hunks_by_id,
             )
-        _assign_review_symbol_ids(items)
+        _assign_review_symbol_ids(items, packet.changed_files)
         _put_structural_changes(
             items,
             change_relations=change_relations,
@@ -389,7 +395,6 @@ def _put_structural_changes(
                 (item.revision_side, relation_id),
                 set(),
             ).update(changed_lines & directional_lines)
-    file_statuses = {item.path: item.status.casefold() for item in changed_files}
     symbols_by_review_id: dict[str, dict[str, EvidenceItem]] = {}
     for item in items.values():
         if item.kind != "symbol" or not item.changed:
@@ -407,7 +412,7 @@ def _put_structural_changes(
             head=head,
             relations_by_id=relations_by_id,
             mapped_relation_lines=mapped_relation_lines,
-            file_statuses=file_statuses,
+            changed_files=changed_files,
         )
         exemplar = head or base
         assert exemplar is not None
@@ -472,6 +477,12 @@ def _put_structural_changes(
                     "review_symbol_id": review_symbol_id,
                     "qualified_name": exemplar.metadata["qualified_name"],
                     "path": exemplar.metadata["path"],
+                    "base_path": (
+                        base.metadata["path"] if base is not None else None
+                    ),
+                    "head_path": (
+                        head.metadata["path"] if head is not None else None
+                    ),
                     "symbol_kind": exemplar.metadata["symbol_kind"],
                     "start_line": exemplar.metadata["start_line"],
                 },
@@ -485,18 +496,38 @@ def _structural_change_operation(
     head: EvidenceItem | None,
     relations_by_id: dict[str, ChangeRelation],
     mapped_relation_lines: dict[tuple[StructuralRevision, str], set[int]],
-    file_statuses: dict[str, str],
+    changed_files: tuple[ChangedFile, ...],
 ) -> ChangeOperation:
     if base is not None and head is not None:
-        return "modified"
+        return (
+            "renamed"
+            if any(
+                item.status == "renamed"
+                and item.base_path == base.metadata["path"]
+                and item.head_path == head.metadata["path"]
+                for item in changed_files
+            )
+            else "modified"
+        )
 
     exemplar = head or base
     assert exemplar is not None
     if exemplar.metadata["symbol_kind"] == "file":
-        status = file_statuses.get(str(exemplar.metadata["path"]), "modified")
-        if status == "added" and head is not None:
+        changed_file = next(
+            (
+                item
+                for item in changed_files
+                if (
+                    item.head_path == exemplar.metadata["path"]
+                    if head is not None
+                    else item.base_path == exemplar.metadata["path"]
+                )
+            ),
+            None,
+        )
+        if changed_file is not None and changed_file.status == "added" and head is not None:
             return "added"
-        if status == "removed" and base is not None:
+        if changed_file is not None and changed_file.status == "removed" and base is not None:
             return "removed"
         return "modified"
 
@@ -542,14 +573,33 @@ def _opposite_relation_is_fully_mapped(
     )
 
 
-def _assign_review_symbol_ids(items: dict[str, EvidenceItem]) -> None:
+def _assign_review_symbol_ids(
+    items: dict[str, EvidenceItem],
+    changed_files: tuple[ChangedFile, ...],
+) -> None:
     """Replace candidate keys with exact, collision-safe review identities."""
 
     symbols_by_candidate: dict[str, list[EvidenceItem]] = {}
     for item in items.values():
         if item.kind == "symbol":
+            path = str(item.metadata["path"])
+            renamed_file = next(
+                (
+                    changed_file
+                    for changed_file in changed_files
+                    if changed_file.status == "renamed"
+                    and path
+                    in {changed_file.base_path, changed_file.head_path}
+                ),
+                None,
+            )
+            candidate = (
+                _renamed_review_symbol_candidate(item, renamed_file)
+                if renamed_file is not None
+                else str(item.metadata["review_symbol_id"])
+            )
             symbols_by_candidate.setdefault(
-                str(item.metadata["review_symbol_id"]),
+                candidate,
                 [],
             ).append(item)
 
@@ -581,6 +631,30 @@ def _assign_review_symbol_ids(items: dict[str, EvidenceItem]) -> None:
                     "review_symbol_id": review_symbol_id,
                 },
             )
+
+
+def _renamed_review_symbol_candidate(
+    item: EvidenceItem,
+    changed_file: ChangedFile,
+) -> str:
+    """Return an exact relocation candidate without inferring symbol similarity."""
+
+    return evidence_id(
+        "review_symbol",
+        "\0".join(
+            (
+                changed_file.base_path or "",
+                changed_file.head_path or "",
+                ",".join(sorted(item.change_relation_ids)),
+                str(item.metadata["symbol_kind"]),
+                (
+                    ""
+                    if item.metadata["symbol_kind"] == "file"
+                    else str(item.metadata["name"])
+                ),
+            )
+        ),
+    )
 
 
 def _put_structural_ownership_changes(
@@ -1012,8 +1086,13 @@ def provided_evidence(
 
 
 def _changed_file_fallback(changed_file: ChangedFile) -> EvidenceItem:
-    path = changed_file.path
-    summary = f"{changed_file.status.title()} file: {path}"
+    path = changed_file.display_path
+    summary_path = (
+        f"{changed_file.base_path} → {changed_file.head_path}"
+        if changed_file.status == "renamed"
+        else path
+    )
+    summary = f"{changed_file.status.title()} file: {summary_path}"
     return EvidenceItem(
         id=evidence_id("changed_file", path),
         kind="changed_file",
@@ -1045,6 +1124,8 @@ def _changed_file_fallback(changed_file: ChangedFile) -> EvidenceItem:
         ),
         metadata={
             "path": path,
+            "base_path": changed_file.base_path,
+            "head_path": changed_file.head_path,
             "status": changed_file.status,
             "additions": changed_file.additions,
             "deletions": changed_file.deletions,
@@ -1061,7 +1142,8 @@ def _change_relation_item(
     added: tuple[ChangedLine, ...],
     removed: tuple[ChangedLine, ...],
 ) -> EvidenceItem:
-    path = relation.file_path
+    revision_side = "base" if relation.kind == "removed" else "head"
+    path = relation.path_for_revision(revision_side)
     head_text = "\n".join(item.text for item in added)
     base_text = "\n".join(item.text for item in removed)
     display_lines = added or removed
@@ -1078,7 +1160,7 @@ def _change_relation_item(
         classification=_path_classification(path),
         profile=_fact_profile(path),
         authority="github_diff",
-        revision_side="base" if relation.kind == "removed" else "head",
+        revision_side=revision_side,
         operation=relation.kind,
         role="changed_anchor",
         changed=True,
@@ -1097,6 +1179,8 @@ def _change_relation_item(
         metadata={
             "hunk_id": relation.hunk_id,
             "path": path,
+            "base_path": relation.base_path,
+            "head_path": relation.head_path,
             "added_lines": tuple(item.number for item in added),
             "removed_lines": tuple(item.number for item in removed),
             "head_preview": head_text[:4000],
@@ -1192,6 +1276,7 @@ def _symbol_item(
                 symbol.kind,
             ),
             "symbol_kind": symbol.kind,
+            "name": symbol.name,
             "qualified_name": symbol.qualified_name,
             "path": symbol.file_path,
             "language": symbol.language,

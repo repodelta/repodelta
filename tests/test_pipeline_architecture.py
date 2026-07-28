@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import ast
+from dataclasses import fields
 from pathlib import Path
 
 import prismcode.pipeline as pipeline
+from prismcode.changes.hunks import ChangedHunk
 from prismcode.intake.fixture import load_fixture
+from prismcode.model.contracts import ChangeRelation, ChangedFile
 
 
 SOURCE = Path("src/prismcode")
@@ -44,6 +47,14 @@ REQUIRED_README_SECTIONS = (
     "## Diagnostics",
     "## Extension points",
 )
+
+
+def test_changed_path_models_have_one_revision_aware_contract() -> None:
+    for model in (ChangedFile, ChangedHunk, ChangeRelation):
+        names = {item.name for item in fields(model)}
+        assert {"base_path", "head_path"} <= names
+        assert "path" not in names
+        assert "file_path" not in names
 REMOVED_ROOT_MODULES = (
     "analysis.py",
     "association.py",
