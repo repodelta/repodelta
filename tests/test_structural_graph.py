@@ -40,6 +40,7 @@ def _create_index(
     source: str = "class Service:\n    def run(self):\n        return 1\n",
     connect_symbols: bool = False,
     method_id: str = "method:Service.run",
+    include_method: bool = True,
 ) -> Path:
     source_path = root / "src" / "service.py"
     source_path.parent.mkdir(parents=True)
@@ -70,24 +71,20 @@ def _create_index(
             );
             """
         )
-        connection.executemany(
-            """
-            INSERT INTO nodes
-                (id, kind, name, qualified_name, file_path, language,
-                 start_line, end_line)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """,
+        node_rows = [
             (
-                (
-                    "class:Service",
-                    "class",
-                    "Service",
-                    "src.service.Service",
-                    "src/service.py",
-                    "python",
-                    1,
-                    3,
-                ),
+                "class:Service",
+                "class",
+                "Service",
+                "src.service.Service",
+                "src/service.py",
+                "python",
+                1,
+                3,
+            ),
+        ]
+        if include_method:
+            node_rows.append(
                 (
                     method_id,
                     "method",
@@ -97,14 +94,22 @@ def _create_index(
                     "python",
                     2,
                     3,
-                ),
-            ),
+                )
+            )
+        connection.executemany(
+            """
+            INSERT INTO nodes
+                (id, kind, name, qualified_name, file_path, language,
+                 start_line, end_line)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            node_rows,
         )
         connection.execute(
             "INSERT INTO files (path, content_hash) VALUES (?, ?)",
             ("src/service.py", hashlib.sha256(source.encode()).hexdigest()),
         )
-        if connect_symbols:
+        if connect_symbols and include_method:
             connection.execute(
                 "INSERT INTO edges VALUES (?, ?, ?)",
                 ("class:Service", method_id, "calls"),
@@ -329,6 +334,8 @@ def test_replacement_collects_distinct_head_and_base_symbol_facts(
     base = graph.for_revision("base")
     assert head is not None and base is not None
     assert head.mapped_hunk_count == base.mapped_hunk_count == 1
+    assert head.counterpart_symbols == ()
+    assert base.counterpart_symbols == ()
     symbols = tuple(
         sorted(
             (
@@ -464,7 +471,14 @@ def test_explicit_rename_maps_each_revision_path_and_converges_symbol(
 def test_added_relation_produces_one_head_only_structural_change(
     tmp_path: Path,
 ) -> None:
-    _create_index(tmp_path)
+    head_root = tmp_path / "head"
+    base_root = tmp_path / "base"
+    _create_index(head_root)
+    _create_index(
+        base_root,
+        source="class Service:\n    pass\n",
+        include_method=False,
+    )
     packet = _packet(
         "@@ -0,0 +1,3 @@\n"
         "+class Service:\n"
@@ -475,21 +489,69 @@ def test_added_relation_produces_one_head_only_structural_change(
     graph = map_packet_changed_symbols(
         packet,
         changes,
-        CodegraphProvider(tmp_path, revision_side="head"),
+        CodegraphProvider(head_root, revision_side="head"),
+        base_provider=CodegraphProvider(base_root, revision_side="base"),
     )
     brief = DeterministicAnalyzer().analyze(
         AnalysisInput(packet=packet, changes=changes, structural_graph=graph)
     )
 
-    structural_change = next(
-        item
+    structural_changes = {
+        item.metadata["qualified_name"]: item
         for item in brief.evidence_catalog.items
         if item.kind == "structural_change"
-    )
+    }
+    assert structural_changes["src.service.Service"].operation == "modified"
+    structural_change = structural_changes["src.service.Service.run"]
     assert structural_change.operation == "added"
     assert structural_change.structural_change is not None
     assert structural_change.structural_change.base_symbol_evidence_id is None
     assert structural_change.structural_change.head_symbol_evidence_id is not None
+
+
+def test_unavailable_counterpart_lookup_does_not_claim_symbol_addition(
+    tmp_path: Path,
+) -> None:
+    head_root = tmp_path / "head"
+    missing_base_root = tmp_path / "base"
+    _create_index(head_root)
+    packet = _packet(
+        "@@ -0,0 +1,3 @@\n"
+        "+class Service:\n"
+        "+    def run(self):\n"
+        "+        return 1\n"
+    )
+    changes = parse_changed_files(packet.changed_files)
+
+    graph = map_packet_changed_symbols(
+        packet,
+        changes,
+        CodegraphProvider(head_root, revision_side="head"),
+        base_provider=CodegraphProvider(
+            missing_base_root,
+            revision_side="base",
+        ),
+    )
+    base = graph.for_revision("base")
+    assert base is not None
+    assert base.counterpart_coverage is not None
+    assert base.counterpart_coverage.state == "unavailable"
+    assert "codegraph_index_missing" in {
+        item.code for item in base.diagnostics
+    }
+
+    brief = DeterministicAnalyzer().analyze(
+        AnalysisInput(
+            packet=packet,
+            changes=changes,
+            structural_graph=graph,
+        )
+    )
+    assert {
+        item.operation
+        for item in brief.evidence_catalog.items
+        if item.kind == "structural_change"
+    } == {"modified"}
 
 
 def test_removed_relation_maps_exact_base_symbol(tmp_path: Path) -> None:
@@ -498,6 +560,7 @@ def test_removed_relation_maps_exact_base_symbol(tmp_path: Path) -> None:
     _create_index(
         head_root,
         source="class Service:\n    pass\n",
+        include_method=False,
     )
     _create_index(base_root)
     packet = _packet(
@@ -540,6 +603,119 @@ def test_removed_relation_maps_exact_base_symbol(tmp_path: Path) -> None:
     assert structural_change.structural_change is not None
     assert structural_change.structural_change.base_symbol_evidence_id == removed[0].id
     assert structural_change.structural_change.head_symbol_evidence_id is None
+
+
+def test_added_only_line_pairs_existing_base_symbol_as_modified(
+    tmp_path: Path,
+) -> None:
+    head_root = tmp_path / "head"
+    base_root = tmp_path / "base"
+    _create_index(
+        head_root,
+        source=(
+            "class Service:\n"
+            "    def run(self):\n"
+            "        trace()\n"
+            "        return 1\n"
+        ),
+    )
+    _create_index(base_root)
+    packet = _packet(
+        "@@ -2,2 +2,3 @@\n"
+        "     def run(self):\n"
+        "+        trace()\n"
+        "         return 1\n"
+    )
+    changes = parse_changed_files(packet.changed_files)
+
+    graph = map_packet_changed_symbols(
+        packet,
+        changes,
+        CodegraphProvider(head_root, revision_side="head"),
+        base_provider=CodegraphProvider(base_root, revision_side="base"),
+    )
+    head, base = graph.revisions
+    assert len(head.overlaps) == 1
+    assert base.overlaps == ()
+    assert [item.qualified_name for item in base.counterpart_symbols] == [
+        "src.service.Service.run"
+    ]
+
+    brief = DeterministicAnalyzer().analyze(
+        AnalysisInput(
+            packet=packet,
+            changes=changes,
+            structural_graph=graph,
+        )
+    )
+    structural_change = next(
+        item
+        for item in brief.evidence_catalog.items
+        if item.kind == "structural_change"
+    )
+    assert structural_change.operation == "modified"
+    assert structural_change.structural_change is not None
+    assert structural_change.structural_change.base_symbol_evidence_id
+    assert structural_change.structural_change.head_symbol_evidence_id
+    base_counterpart_id = structural_change.structural_change.base_symbol_evidence_id
+    assert base_counterpart_id not in {
+        relation.target_id
+        for relation in brief.projection_candidates.relations
+    }
+
+
+def test_removed_only_line_pairs_existing_head_symbol_as_modified(
+    tmp_path: Path,
+) -> None:
+    head_root = tmp_path / "head"
+    base_root = tmp_path / "base"
+    _create_index(head_root)
+    _create_index(
+        base_root,
+        source=(
+            "class Service:\n"
+            "    def run(self):\n"
+            "        trace()\n"
+            "        return 1\n"
+        ),
+    )
+    packet = _packet(
+        "@@ -2,3 +2,2 @@\n"
+        "     def run(self):\n"
+        "-        trace()\n"
+        "         return 1\n"
+    )
+    changes = parse_changed_files(packet.changed_files)
+
+    graph = map_packet_changed_symbols(
+        packet,
+        changes,
+        CodegraphProvider(head_root, revision_side="head"),
+        base_provider=CodegraphProvider(base_root, revision_side="base"),
+    )
+    head, base = graph.revisions
+    assert head.overlaps == ()
+    assert len(base.overlaps) == 1
+    assert [item.qualified_name for item in head.counterpart_symbols] == [
+        "src.service.Service.run"
+    ]
+
+    brief = DeterministicAnalyzer().analyze(
+        AnalysisInput(
+            packet=packet,
+            changes=changes,
+            structural_graph=graph,
+        )
+    )
+    structural_change = next(
+        item
+        for item in brief.evidence_catalog.items
+        if item.kind == "structural_change"
+    )
+    assert structural_change.operation == "modified"
+    assert structural_change.structural_change is not None
+    assert structural_change.structural_change.base_symbol_evidence_id
+    assert structural_change.structural_change.head_symbol_evidence_id
 
 
 def test_replacement_hunk_uses_presence_for_distinct_symbol_identities() -> None:

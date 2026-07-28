@@ -12,6 +12,7 @@ PathClassification = Literal["runtime", "test", "mixed"]
 TraversalDirection = Literal["outgoing", "incoming"]
 TraversalCoverageState = Literal["complete", "truncated"]
 OwnershipCoverageState = Literal["complete", "truncated", "unavailable"]
+CounterpartCoverageState = Literal["complete", "unavailable"]
 OwnershipLimit = Literal["depth_budget", "relation_budget"]
 TraversalLimit = Literal[
     "seed_node_budget",
@@ -86,6 +87,25 @@ class HunkSymbolOverlap:
 
 
 @dataclass(frozen=True)
+class StructuralSymbolIdentity:
+    file_path: str
+    qualified_name: str
+    kind: str
+
+
+@dataclass(frozen=True)
+class StructuralCounterpartCoverage:
+    state: CounterpartCoverageState
+    requested_identities: tuple[StructuralSymbolIdentity, ...]
+
+    def __post_init__(self) -> None:
+        if not self.requested_identities:
+            raise ValueError("counterpart coverage requires requested identities")
+        if len(set(self.requested_identities)) != len(self.requested_identities):
+            raise ValueError("counterpart coverage contains duplicate identities")
+
+
+@dataclass(frozen=True)
 class GraphPathStep:
     source: GraphSymbol
     target: GraphSymbol
@@ -150,12 +170,14 @@ class StructuralGraphResult:
     revision_side: StructuralRevision = "head"
     hunk_count: int = 0
     overlaps: tuple[HunkSymbolOverlap, ...] = ()
+    counterpart_symbols: tuple[GraphSymbol, ...] = ()
+    counterpart_coverage: StructuralCounterpartCoverage | None = None
     paths: tuple[StructuralPath, ...] = ()
     ownership_relations: tuple[StructuralOwnershipRelation, ...] = ()
     ownership_coverage: StructuralOwnershipCoverage | None = None
     traversal_coverage: tuple[StructuralSeedCoverage, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
-    schema_version: str = "structural_graph_result.v6"
+    schema_version: str = "structural_graph_result.v7"
 
     @property
     def mapped_hunk_count(self) -> int:
@@ -199,6 +221,42 @@ class StructuralGraphCollection:
                 )
             if any(parent_id == child_id for parent_id, child_id in ownership_ids):
                 raise ValueError("structural ownership relation cannot contain itself")
+            counterpart_ids = tuple(
+                symbol.id for symbol in result.counterpart_symbols
+            )
+            if len(set(counterpart_ids)) != len(counterpart_ids):
+                raise ValueError(
+                    "structural graph contains duplicate counterpart symbols"
+                )
+            if set(counterpart_ids) & {
+                overlap.symbol.id for overlap in result.overlaps
+            }:
+                raise ValueError(
+                    "structural counterpart duplicates a changed overlap"
+                )
+            counterpart_coverage = result.counterpart_coverage
+            if (
+                result.counterpart_symbols
+                and (
+                    counterpart_coverage is None
+                    or counterpart_coverage.state != "complete"
+                )
+            ):
+                raise ValueError(
+                    "structural counterparts require complete typed coverage"
+                )
+            if counterpart_coverage is not None and any(
+                StructuralSymbolIdentity(
+                    file_path=symbol.file_path,
+                    qualified_name=symbol.qualified_name,
+                    kind=symbol.kind,
+                )
+                not in counterpart_coverage.requested_identities
+                for symbol in result.counterpart_symbols
+            ):
+                raise ValueError(
+                    "structural counterpart falls outside requested coverage"
+                )
             coverage = result.ownership_coverage
             if result.ownership_relations and coverage is None:
                 raise ValueError(
@@ -227,6 +285,12 @@ class StructuralGraphProvider(Protocol):
 
     def symbols_overlapping(
         self, hunks: tuple[ChangedHunk, ...]
+    ) -> StructuralGraphResult: ...
+
+    def complete_counterparts(
+        self,
+        result: StructuralGraphResult,
+        candidates: tuple[GraphSymbol, ...],
     ) -> StructuralGraphResult: ...
 
     def expand_structure(

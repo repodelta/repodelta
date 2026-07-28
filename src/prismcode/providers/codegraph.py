@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 import sqlite3
 import subprocess
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 from prismcode.model.contracts import Diagnostic, SourceRef
@@ -15,12 +15,14 @@ from prismcode.providers.structural import (
     OwnershipLimit,
     StructuralGraphIndexStatus,
     StructuralGraphResult,
+    StructuralCounterpartCoverage,
     StructuralOwnershipCoverage,
     StructuralOwnershipPolicy,
     StructuralOwnershipRelation,
     StructuralRevision,
     StructuralPath,
     StructuralSeedCoverage,
+    StructuralSymbolIdentity,
     StructuralTraversalPolicy,
     TraversalLimit,
 )
@@ -387,6 +389,123 @@ class CodegraphProvider:
             hunk_count=len(applicable_hunks),
             overlaps=tuple(overlaps),
             diagnostics=tuple(diagnostics),
+        )
+
+    def complete_counterparts(
+        self,
+        result: StructuralGraphResult,
+        candidates: tuple[GraphSymbol, ...],
+    ) -> StructuralGraphResult:
+        """Load exact local-revision counterparts without expanding the graph."""
+
+        if result.revision_side != self.revision_side:
+            raise ValueError("structural provider returned the wrong revision side")
+        if not candidates:
+            return result
+        identities = tuple(
+            dict.fromkeys(
+                StructuralSymbolIdentity(
+                    file_path=candidate.file_path,
+                    qualified_name=candidate.qualified_name,
+                    kind=candidate.kind,
+                )
+                for candidate in candidates
+            )
+        )
+        counterpart_index = self.inspect_index(
+            requested_files=tuple(
+                dict.fromkeys(identity.file_path for identity in identities)
+            )
+        )
+        diagnostics = (
+            *result.diagnostics,
+            *counterpart_index.diagnostics,
+        )
+        if not counterpart_index.usable:
+            return replace(
+                result,
+                counterpart_coverage=StructuralCounterpartCoverage(
+                    state="unavailable",
+                    requested_identities=identities,
+                ),
+                diagnostics=diagnostics,
+            )
+        unindexed_files = {
+            source.path
+            for diagnostic in counterpart_index.diagnostics
+            if diagnostic.code == "codegraph_file_not_indexed"
+            for source in diagnostic.sources
+            if source.path
+        }
+        query_identities = tuple(
+            identity
+            for identity in identities
+            if identity.file_path not in unindexed_files
+        )
+        if not query_identities:
+            return replace(
+                result,
+                counterpart_coverage=StructuralCounterpartCoverage(
+                    state="unavailable",
+                    requested_identities=identities,
+                ),
+                diagnostics=diagnostics,
+            )
+        overlap_ids = {overlap.symbol.id for overlap in result.overlaps}
+        counterparts: dict[str, GraphSymbol] = {
+            symbol.id: symbol for symbol in result.counterpart_symbols
+        }
+        try:
+            with self._connect() as connection:
+                connection.row_factory = sqlite3.Row
+                for identity in query_identities:
+                    rows = connection.execute(
+                        """
+                        SELECT id, kind, name, qualified_name, file_path,
+                               language, start_line, end_line
+                        FROM nodes
+                        WHERE file_path = ?
+                          AND qualified_name = ?
+                          AND kind = ?
+                        ORDER BY id
+                        """,
+                        (
+                            identity.file_path,
+                            identity.qualified_name,
+                            identity.kind,
+                        ),
+                    ).fetchall()
+                    for row in rows:
+                        symbol = _symbol(row)
+                        if symbol.id not in overlap_ids:
+                            counterparts[symbol.id] = symbol
+        except sqlite3.Error as exc:
+            return replace(
+                result,
+                counterpart_coverage=StructuralCounterpartCoverage(
+                    state="unavailable",
+                    requested_identities=identities,
+                ),
+                diagnostics=(
+                    *diagnostics,
+                    Diagnostic(
+                        code="codegraph_counterpart_query_failed",
+                        message=(
+                            "Codegraph exact counterpart query failed: "
+                            f"{type(exc).__name__}."
+                        ),
+                        severity="error",
+                    ),
+                ),
+            )
+        return replace(
+            result,
+            counterpart_symbols=tuple(counterparts.values()),
+            counterpart_coverage=StructuralCounterpartCoverage(
+                state="complete",
+                requested_identities=query_identities,
+            ),
+            diagnostics=diagnostics,
         )
 
     def expand_structure(

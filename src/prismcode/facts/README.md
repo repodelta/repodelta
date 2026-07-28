@@ -18,7 +18,13 @@ base/head. A same-revision collision stays distinct rather than being inferred
 as the same symbol. One typed `StructuralChangeIdentity` pairs optional
 base/head evidence IDs under that review identity and is the only structural
 changed anchor. Added, removed, and modified identities retain the union of
-their change-relation IDs, paths, signatures, and revision links. Revision path
+their change-relation IDs, paths, signatures, and revision links. Exact
+provider-owned counterpart symbols complete an otherwise one-sided changed
+identity before operation truth is constructed. They retain `revision_fact`
+provenance, carry no structural paths, and never become independent routing
+candidates. A missing counterpart implies addition or removal only when typed
+provider coverage proves that exact identity was queried on the opposite
+revision. Missing, stale, partial, or failed coverage remains uncertainty.
 Structural change operations come from canonical base/head presence when every
 associated replacement relation has complete opposite-revision directional
 line mapping. Mapping another relation in the same hunk is never absence proof.

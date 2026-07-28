@@ -23,6 +23,7 @@ fixture or GitHub
   -> one canonical DiffHunkCollection
   -> optional StructuralGraphProvider
        -> exact changed-hunk / symbol-span overlaps
+       -> exact opposite-revision symbol counterparts
        -> bounded direction-aware paths to unchanged runtime/test neighbors
   -> canonical EvidenceCatalog
        -> exact symbol for each mapped hunk

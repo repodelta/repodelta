@@ -16,6 +16,7 @@ from prismcode.model.contracts import (
     EvidenceCatalog,
     EvidenceClassification,
     EvidenceItem,
+    FactRole,
     GuardrailScanDiagnostic,
     GuardrailScanResult,
     GuardrailScanResultSet,
@@ -150,6 +151,7 @@ def build_evidence_catalog(
         _assign_review_symbol_ids(items, packet.changed_files)
         _put_structural_changes(
             items,
+            structural_graph=structural_graph,
             change_relations=change_relations,
             changed_files=packet.changed_files,
         )
@@ -217,6 +219,9 @@ def _put_structural_revision(
         changed_symbol_ids = {
             overlap.symbol.id for overlap in structural_graph.overlaps
         }
+        revision_fact_symbol_ids = changed_symbol_ids | {
+            symbol.id for symbol in structural_graph.counterpart_symbols
+        }
         path_ids = {
             _path_key(path, revision_side): evidence_id(
                 "structural_path", _path_key(path, revision_side)
@@ -233,7 +238,7 @@ def _put_structural_revision(
 
         for relation in structural_graph.ownership_relations:
             for symbol in (relation.parent, relation.child):
-                if symbol.id in changed_symbol_ids:
+                if symbol.id in revision_fact_symbol_ids:
                     continue
                 _put(
                     items,
@@ -247,6 +252,19 @@ def _put_structural_revision(
                         ),
                     ),
                 )
+
+        for symbol in structural_graph.counterpart_symbols:
+            _put(
+                items,
+                _symbol_item(
+                    symbol,
+                    changed=False,
+                    operation="unchanged",
+                    revision_side=revision_side,
+                    structural_path_ids=(),
+                    role="revision_fact",
+                ),
+            )
 
         for overlap in structural_graph.overlaps:
             hunk = hunks_by_id.get(overlap.hunk_id)
@@ -315,7 +333,7 @@ def _put_structural_revision(
         for path in structural_graph.paths:
             for step in path.steps:
                 for symbol in (step.source, step.target):
-                    if symbol.id in changed_symbol_ids:
+                    if symbol.id in revision_fact_symbol_ids:
                         continue
                     _put(
                         items,
@@ -370,6 +388,7 @@ def _put_structural_revision(
 def _put_structural_changes(
     items: dict[str, EvidenceItem],
     *,
+    structural_graph: StructuralGraphCollection,
     change_relations: tuple[ChangeRelation, ...],
     changed_files: tuple[ChangedFile, ...],
 ) -> None:
@@ -397,7 +416,7 @@ def _put_structural_changes(
             ).update(changed_lines & directional_lines)
     symbols_by_review_id: dict[str, dict[str, EvidenceItem]] = {}
     for item in items.values():
-        if item.kind != "symbol" or not item.changed:
+        if item.kind != "symbol":
             continue
         review_symbol_id = str(item.metadata["review_symbol_id"])
         symbols_by_review_id.setdefault(review_symbol_id, {})[
@@ -405,11 +424,18 @@ def _put_structural_changes(
         ] = item
 
     for review_symbol_id, revisions in symbols_by_review_id.items():
+        if not any(item.changed for item in revisions.values()):
+            continue
         base = revisions.get("base")
         head = revisions.get("head")
         operation = _structural_change_operation(
             base=base,
             head=head,
+            opposite_counterpart_complete=_opposite_counterpart_complete(
+                base=base,
+                head=head,
+                structural_graph=structural_graph,
+            ),
             relations_by_id=relations_by_id,
             mapped_relation_lines=mapped_relation_lines,
             changed_files=changed_files,
@@ -494,6 +520,7 @@ def _structural_change_operation(
     *,
     base: EvidenceItem | None,
     head: EvidenceItem | None,
+    opposite_counterpart_complete: bool,
     relations_by_id: dict[str, ChangeRelation],
     mapped_relation_lines: dict[tuple[StructuralRevision, str], set[int]],
     changed_files: tuple[ChangedFile, ...],
@@ -533,11 +560,11 @@ def _structural_change_operation(
 
     relation_ids = exemplar.change_relation_ids
     relations = tuple(relations_by_id[item] for item in relation_ids)
-    if head is not None and relations and all(
+    if opposite_counterpart_complete and head is not None and relations and all(
         relation.kind == "added" for relation in relations
     ):
         return "added"
-    if base is not None and relations and all(
+    if opposite_counterpart_complete and base is not None and relations and all(
         relation.kind == "removed" for relation in relations
     ):
         return "removed"
@@ -553,6 +580,29 @@ def _structural_change_operation(
     ):
         return "added" if head is not None else "removed"
     return "modified"
+
+
+def _opposite_counterpart_complete(
+    *,
+    base: EvidenceItem | None,
+    head: EvidenceItem | None,
+    structural_graph: StructuralGraphCollection,
+) -> bool:
+    if (base is None) == (head is None):
+        return False
+    exemplar = head or base
+    assert exemplar is not None
+    opposite_revision: StructuralRevision = "base" if head is not None else "head"
+    result = structural_graph.for_revision(opposite_revision)
+    coverage = result.counterpart_coverage if result is not None else None
+    if coverage is None or coverage.state != "complete":
+        return False
+    return any(
+        identity.file_path == exemplar.metadata["path"]
+        and identity.qualified_name == exemplar.metadata["qualified_name"]
+        and identity.kind == exemplar.metadata["symbol_kind"]
+        for identity in coverage.requested_identities
+    )
 
 
 def _opposite_relation_is_fully_mapped(
@@ -1233,6 +1283,7 @@ def _symbol_item(
     change_relation_ids: tuple[str, ...] = (),
     changed_hunk_ids: tuple[str, ...] = (),
     changed_lines: tuple[int, ...] = (),
+    role: FactRole | None = None,
 ) -> EvidenceItem:
     canonical_signature = association_signature(
         symbol.qualified_name,
@@ -1247,7 +1298,8 @@ def _symbol_item(
         authority="structural_provider",
         revision_side=revision_side,
         operation=operation,
-        role=(
+        role=role
+        or (
             "revision_fact"
             if changed
             else "test_context"
