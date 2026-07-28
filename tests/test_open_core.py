@@ -21,7 +21,7 @@ def test_fixture_to_requirement_first_html(tmp_path: Path) -> None:
 
     assert "AI review brief · requirement-first" not in html
     assert "What this PR is trying to do" not in html
-    assert '<details class="requirement" open>' in html
+    assert '<details class="requirement" data-focus-id="R1" open>' in html
     assert 'class="brand-mark"' in html
     assert "Existing semantic spine artifacts are reused." in html
     assert "unit_semantic_alignment_trace" in html

@@ -928,8 +928,6 @@ def render_html(brief: ReviewBrief) -> str:
             )
         focus_attribute = (
             f' data-focus-id="{escape(statement.id, quote=True)}"'
-            if review_slice.structural_overlay.nodes
-            else ""
         )
         cards.append(
             f'<details class="requirement"{focus_attribute}'
