@@ -23,11 +23,11 @@ def map_packet_changed_symbols(
 ) -> StructuralGraphCollection:
     """Collect revision-aware structural facts without computing a delta."""
 
-    head = _map_revision(changes, head_provider, "head")
+    head = _map_overlaps(changes, head_provider, "head")
     revisions: list[StructuralGraphResult] = []
     diagnostics = list(changes.diagnostics)
     if base_provider is not None:
-        base = _map_revision(changes, base_provider, "base")
+        base = _map_overlaps(changes, base_provider, "base")
         head = head_provider.complete_counterparts(
             head,
             tuple(overlap.symbol for overlap in base.overlaps),
@@ -36,6 +36,8 @@ def map_packet_changed_symbols(
             base,
             tuple(overlap.symbol for overlap in head.overlaps),
         )
+        head = head_provider.expand_structure(head)
+        base = base_provider.expand_structure(base)
         revisions.extend(
             (
                 _attach_github_line_sources(packet, head),
@@ -43,6 +45,7 @@ def map_packet_changed_symbols(
             )
         )
     elif any(hunk.removed_lines for hunk in changes.hunks):
+        head = head_provider.expand_structure(head)
         revisions.append(_attach_github_line_sources(packet, head))
         diagnostics.append(
             Diagnostic(
@@ -54,6 +57,7 @@ def map_packet_changed_symbols(
             )
         )
     else:
+        head = head_provider.expand_structure(head)
         revisions.append(_attach_github_line_sources(packet, head))
     result = StructuralGraphCollection(
         revisions=tuple(revisions),
@@ -63,7 +67,7 @@ def map_packet_changed_symbols(
     return result
 
 
-def _map_revision(
+def _map_overlaps(
     changes: DiffHunkCollection,
     provider: StructuralGraphProvider,
     revision_side: StructuralRevision,
@@ -71,7 +75,7 @@ def _map_revision(
     result = provider.symbols_overlapping(changes.hunks)
     if result.revision_side != revision_side:
         raise ValueError("structural provider returned the wrong revision side")
-    return provider.expand_structure(result)
+    return result
 
 
 def _attach_github_line_sources(

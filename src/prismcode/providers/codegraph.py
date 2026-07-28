@@ -593,6 +593,12 @@ class CodegraphProvider:
                     )
                 }
                 observed_symbols.update(seed_symbols)
+                observed_symbols.update(
+                    {
+                        symbol.id: symbol
+                        for symbol in result.counterpart_symbols
+                    }
+                )
                 query_phase = "ownership"
                 ownership_relations, ownership_limits = (
                     self._collect_ownership_relations(
@@ -619,6 +625,8 @@ class CodegraphProvider:
                 index=result.index,
                 hunk_count=result.hunk_count,
                 overlaps=result.overlaps,
+                counterpart_symbols=result.counterpart_symbols,
+                counterpart_coverage=result.counterpart_coverage,
                 paths=tuple(paths),
                 ownership_relations=ownership_relations,
                 ownership_coverage=ownership_coverage,
@@ -682,6 +690,8 @@ class CodegraphProvider:
             index=result.index,
             hunk_count=result.hunk_count,
             overlaps=result.overlaps,
+            counterpart_symbols=result.counterpart_symbols,
+            counterpart_coverage=result.counterpart_coverage,
             paths=tuple(paths),
             ownership_relations=ownership_relations,
             ownership_coverage=ownership_coverage,

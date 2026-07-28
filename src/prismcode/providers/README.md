@@ -19,8 +19,10 @@ never probes a head path. After both directional overlap results exist, each
 provider performs one exact local lookup for the other revision's changed
 symbol identities using repository path, qualified name, and symbol kind.
 Those counterpart symbols are separate revision provenance: they do not become
-hunk overlaps, traversal seeds, or paths. Existing local overlaps win by
-identity and are never duplicated. Typed counterpart coverage names only the
+hunk overlaps, executable traversal seeds, or paths. Counterpart completion
+precedes the revision's single structural expansion so exact counterparts do
+participate in the same bounded ownership-ancestry collection. Existing local
+overlaps win by identity and are never duplicated. Typed counterpart coverage names only the
 exact identities whose revision-specific files passed index inspection; only
 that set can prove exact absence.
 

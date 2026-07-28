@@ -41,6 +41,7 @@ def _create_index(
     connect_symbols: bool = False,
     method_id: str = "method:Service.run",
     include_method: bool = True,
+    contain_method: bool = False,
 ) -> Path:
     source_path = root / "src" / "service.py"
     source_path.parent.mkdir(parents=True)
@@ -113,6 +114,11 @@ def _create_index(
             connection.execute(
                 "INSERT INTO edges VALUES (?, ?, ?)",
                 ("class:Service", method_id, "calls"),
+            )
+        if contain_method and include_method:
+            connection.execute(
+                "INSERT INTO edges VALUES (?, ?, ?)",
+                ("class:Service", method_id, "contains"),
             )
     return database
 
@@ -379,6 +385,125 @@ def test_replacement_collects_distinct_head_and_base_symbol_facts(
         changes[0].structural_change.base_symbol_evidence_id,
         changes[0].structural_change.head_symbol_evidence_id,
     } == {item.id for item in symbols}
+
+
+def test_exact_counterpart_ownership_connects_modified_member(
+    tmp_path: Path,
+) -> None:
+    head_root = tmp_path / "head"
+    base_root = tmp_path / "base"
+    _create_index(
+        head_root,
+        source=(
+            "class Service:\n"
+            "    def run(self):\n"
+            "        return new_result_value\n"
+        ),
+        method_id="head:method:Service.run",
+        contain_method=True,
+    )
+    _create_index(
+        base_root,
+        source=(
+            "class Service:\n"
+            "    def run(self):\n"
+            "        return old_result_value\n"
+        ),
+        method_id="base:method:Service.run",
+        contain_method=True,
+    )
+    with sqlite3.connect(base_root / ".codegraph" / "codegraph.db") as connection:
+        connection.execute(
+            "UPDATE nodes SET end_line = 2 WHERE id = ?",
+            ("base:method:Service.run",),
+        )
+    packet = _packet(
+        "@@ -3 +3 @@\n"
+        "-        return old_result_value\n"
+        "+        return new_result_value\n"
+    )
+    changes = parse_changed_files(packet.changed_files)
+
+    graph = map_packet_changed_symbols(
+        packet,
+        changes,
+        CodegraphProvider(head_root, revision_side="head"),
+        base_provider=CodegraphProvider(base_root, revision_side="base"),
+    )
+    brief = DeterministicAnalyzer().analyze(
+        AnalysisInput(
+            packet=packet,
+            changes=changes,
+            structural_graph=graph,
+            requirements=(
+                Requirement(
+                    id="R1",
+                    text="Use new_result_value in Service.run",
+                ),
+            ),
+        )
+    )
+
+    head = graph.for_revision("head")
+    base = graph.for_revision("base")
+    assert head is not None and base is not None
+    assert [item.symbol.qualified_name for item in head.overlaps] == [
+        "src.service.Service.run"
+    ]
+    assert [item.symbol.qualified_name for item in base.overlaps] == [
+        "src.service.Service"
+    ]
+    assert [item.qualified_name for item in head.counterpart_symbols] == [
+        "src.service.Service"
+    ]
+    assert [item.qualified_name for item in base.counterpart_symbols] == [
+        "src.service.Service.run"
+    ]
+    assert [path.seed_symbol_id for path in head.paths] == []
+    assert [path.seed_symbol_id for path in base.paths] == []
+    assert [item.seed_symbol_id for item in head.traversal_coverage] == [
+        "head:method:Service.run"
+    ]
+    assert [item.seed_symbol_id for item in base.traversal_coverage] == [
+        "class:Service"
+    ]
+    assert head.ownership_coverage is not None
+    assert base.ownership_coverage is not None
+    assert set(head.ownership_coverage.observed_symbol_ids) == {
+        "class:Service",
+        "head:method:Service.run",
+    }
+    assert set(base.ownership_coverage.observed_symbol_ids) == {
+        "class:Service",
+        "base:method:Service.run",
+    }
+    assert [
+        (
+            relation.parent.qualified_name,
+            relation.child.qualified_name,
+        )
+        for result in (head, base)
+        for relation in result.ownership_relations
+    ] == [
+        ("src.service.Service", "src.service.Service.run"),
+        ("src.service.Service", "src.service.Service.run"),
+    ]
+    ownership = [
+        item
+        for item in brief.evidence_catalog.items
+        if item.kind == "structural_ownership_change"
+    ]
+    assert len(ownership) == 1
+    assert ownership[0].operation == "retained"
+    review_graph = brief.projection.review_graph
+    assert len(review_graph.backbone_ownership_edge_ids) == 1
+    incident_node_ids = {
+        node_id
+        for edge in review_graph.ownership_edges
+        for node_id in (edge.parent_node_id, edge.child_node_id)
+    }
+    assert set(review_graph.backbone_node_ids) <= incident_node_ids
+    assert "0 isolated changed anchors" in render_html(brief)
 
 
 def test_explicit_rename_maps_each_revision_path_and_converges_symbol(
