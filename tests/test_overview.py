@@ -2,8 +2,18 @@ from __future__ import annotations
 
 from dataclasses import asdict
 
-from prismcode.model.contracts import ProjectionDiagnostic, SourceRef
-from prismcode.projection.overview import _projection_attention
+from prismcode.model.contracts import (
+    CandidateConvergence,
+    ConvergenceGroup,
+    ProjectionCandidateGroup,
+    ProjectionCandidateSet,
+    ProjectionDiagnostic,
+    SourceRef,
+)
+from prismcode.projection.overview import (
+    _projection_attention,
+    project_diagnostic_presentation,
+)
 from prismcode.providers.structural import (
     StructuralGraphCollection,
     StructuralGraphIndexStatus,
@@ -167,3 +177,105 @@ def test_acceptance_basis_label_remains_unchanged() -> None:
 
     assert len(attention) == 1
     assert attention[0].label == "Acceptance basis"
+
+
+def test_diagnostic_presentation_assigns_one_focus_diagnostic_inline() -> None:
+    diagnostic = _diagnostic("R1", message="Only R1 lacks test context.")
+    candidates = ProjectionCandidateSet(
+        groups=(
+            ProjectionCandidateGroup(
+                focus_statement_id="R1",
+                profile="generic",
+                diagnostic_ids=(diagnostic.id,),
+            ),
+        ),
+        diagnostics=(diagnostic,),
+    )
+    convergence = CandidateConvergence(
+        groups=(ConvergenceGroup(focus_statement_id="R1"),),
+    )
+
+    presentation = project_diagnostic_presentation(candidates, convergence)
+
+    assert presentation.ids_by_focus() == {"R1": (diagnostic.id,)}
+    assert presentation.attention == ()
+
+
+def test_diagnostic_presentation_aggregates_equivalent_cross_focus_diagnostics() -> None:
+    first = _diagnostic("R1", message="R1 retained a bounded path set.")
+    second = _diagnostic("G1", message="G1 retained a bounded path set.")
+    candidates = ProjectionCandidateSet(
+        groups=tuple(
+            ProjectionCandidateGroup(
+                focus_statement_id=focus_id,
+                profile="generic",
+                diagnostic_ids=(diagnostic.id,),
+            )
+            for focus_id, diagnostic in (("R1", first), ("G1", second))
+        ),
+        diagnostics=(first, second),
+    )
+    convergence = CandidateConvergence(
+        groups=tuple(
+            ConvergenceGroup(focus_statement_id=focus_id)
+            for focus_id in ("R1", "G1")
+        ),
+    )
+
+    presentation = project_diagnostic_presentation(candidates, convergence)
+
+    assert presentation.ids_by_focus() == {"R1": (), "G1": ()}
+    assert len(presentation.attention) == 1
+    assert presentation.attention[0].focus_statement_ids == ("R1", "G1")
+
+
+def test_diagnostic_presentation_keeps_unattached_acceptance_basis_review_level() -> None:
+    diagnostic = _diagnostic(
+        "I1",
+        slot="claim",
+        state="source_absent",
+        message="No explicit acceptance basis.",
+    )
+    candidates = ProjectionCandidateSet(diagnostics=(diagnostic,))
+
+    presentation = project_diagnostic_presentation(
+        candidates,
+        CandidateConvergence(),
+    )
+
+    assert presentation.ids_by_focus() == {}
+    assert len(presentation.attention) == 1
+    assert presentation.attention[0].label == "Acceptance basis"
+
+
+def test_diagnostic_presentation_is_independent_of_input_order() -> None:
+    first = _diagnostic("R1", message="First focus.")
+    second = _diagnostic("R2", message="Second focus.")
+
+    def presentation(
+        diagnostics: tuple[ProjectionDiagnostic, ...],
+    ):
+        candidates = ProjectionCandidateSet(
+            groups=tuple(
+                ProjectionCandidateGroup(
+                    focus_statement_id=item.focus_statement_id,
+                    profile="generic",
+                    diagnostic_ids=(item.id,),
+                )
+                for item in diagnostics
+            ),
+            diagnostics=diagnostics,
+        )
+        convergence = CandidateConvergence(
+            groups=tuple(
+                ConvergenceGroup(
+                    focus_statement_id=item.focus_statement_id,
+                )
+                for item in diagnostics
+            ),
+        )
+        return project_diagnostic_presentation(candidates, convergence)
+
+    assert presentation((first, second)).attention == presentation(
+        (second, first)
+    ).attention

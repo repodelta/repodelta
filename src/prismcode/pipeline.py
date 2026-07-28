@@ -17,7 +17,10 @@ from prismcode.guardrails.scanning import (
 from prismcode.routing.candidates import build_projection_candidates
 from prismcode.convergence.core import converge_candidates
 from prismcode.projection.build import build_review_projection
-from prismcode.projection.overview import build_review_overview
+from prismcode.projection.overview import (
+    build_review_overview,
+    project_diagnostic_presentation,
+)
 
 
 class ReviewAnalyzer(Protocol):
@@ -72,19 +75,23 @@ class DeterministicAnalyzer:
             projection_candidates,
             evidence_catalog,
         )
+        diagnostic_presentation = project_diagnostic_presentation(
+            projection_candidates,
+            candidate_convergence,
+        )
         projection = build_review_projection(
             projection_candidates,
             candidate_convergence,
             evidence_catalog,
+            diagnostic_presentation=diagnostic_presentation,
             guardrail_scan_plans=guardrail_scan_plans,
         )
         overview = build_review_overview(
             packet,
             requirements,
-            projection_candidates,
             evidence_catalog,
             analysis_input.structural_graph,
-            convergence=candidate_convergence,
+            diagnostic_presentation=diagnostic_presentation,
             structural_graph_disabled=analysis_input.structural_graph_disabled,
         )
         return ReviewBrief(

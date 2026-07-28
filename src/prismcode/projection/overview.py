@@ -5,9 +5,11 @@ from typing import Literal
 
 from prismcode.model.contracts import (
     CandidateConvergence,
+    DiagnosticPresentation,
     ProjectionCandidateSet,
     ProjectionDiagnostic,
     EvidenceCatalog,
+    FocusDiagnosticPresentation,
     Requirement,
     ReviewAttention,
     ReviewCiState,
@@ -36,23 +38,124 @@ _FOCUS_KIND_ORDER = {
 }
 
 
+def project_diagnostic_presentation(
+    candidates: ProjectionCandidateSet,
+    convergence: CandidateConvergence,
+) -> DiagnosticPresentation:
+    """Assign diagnostics to exactly one focus, review, or hidden owner."""
+
+    diagnostics = {
+        **candidates.diagnostics_by_id(),
+        **convergence.diagnostics_by_id(),
+    }
+    ordered_ids_by_focus: dict[str, tuple[str, ...]] = {}
+    candidate_groups = {
+        item.focus_statement_id: item for item in candidates.groups
+    }
+    convergence_groups = {
+        item.focus_statement_id: item for item in convergence.groups
+    }
+    focus_order = tuple(
+        dict.fromkeys(
+            (
+                *(item.focus_statement_id for item in candidates.groups),
+                *(item.focus_statement_id for item in convergence.groups),
+            )
+        )
+    )
+    referenced_ids = set()
+    for focus_id in focus_order:
+        diagnostic_ids = tuple(
+            dict.fromkeys(
+                (
+                    *(
+                        candidate_groups[focus_id].diagnostic_ids
+                        if focus_id in candidate_groups
+                        else ()
+                    ),
+                    *(
+                        convergence_groups[focus_id].diagnostic_ids
+                        if focus_id in convergence_groups
+                        else ()
+                    ),
+                )
+            )
+        )
+        ordered_ids_by_focus[focus_id] = diagnostic_ids
+        referenced_ids.update(diagnostic_ids)
+
+    grouped: dict[
+        tuple[str, str, str, str],
+        list[ProjectionDiagnostic],
+    ] = {}
+    suppressed_ids = []
+    for diagnostic in diagnostics.values():
+        if diagnostic.state == "not_applicable":
+            suppressed_ids.append(diagnostic.id)
+            continue
+        key = (
+            diagnostic.scope,
+            diagnostic.provider,
+            diagnostic.slot,
+            diagnostic.state,
+        )
+        grouped.setdefault(key, []).append(diagnostic)
+
+    attention_ids = set()
+    for (scope, _provider, _slot, _state), group in grouped.items():
+        focus_ids = {
+            item.focus_statement_id
+            for item in group
+            if item.id in referenced_ids
+        }
+        if (
+            scope == "review"
+            or len(focus_ids) != 1
+            or any(item.id not in referenced_ids for item in group)
+        ):
+            attention_ids.update(item.id for item in group)
+
+    focus = tuple(
+        FocusDiagnosticPresentation(
+            focus_statement_id=focus_id,
+            diagnostic_ids=tuple(
+                diagnostic_id
+                for diagnostic_id in ordered_ids_by_focus[focus_id]
+                if diagnostic_id not in attention_ids
+                and diagnostic_id not in suppressed_ids
+            ),
+        )
+        for focus_id in focus_order
+    )
+    attention_diagnostics = tuple(
+        item for item in diagnostics.values() if item.id in attention_ids
+    )
+    owned_ids = {
+        diagnostic_id
+        for item in focus
+        for diagnostic_id in item.diagnostic_ids
+    } | attention_ids | set(suppressed_ids)
+    if owned_ids != set(diagnostics):
+        raise ValueError("every projection diagnostic must have one display owner")
+    return DiagnosticPresentation(
+        focus=focus,
+        attention=_projection_attention(attention_diagnostics),
+        suppressed_diagnostic_ids=tuple(suppressed_ids),
+    )
+
+
 def build_review_overview(
     packet: ReviewSourcePacket,
     requirements: tuple[Requirement, ...],
-    candidates: ProjectionCandidateSet,
     evidence_catalog: EvidenceCatalog,
     structural_graph: StructuralGraphCollection | None,
     *,
-    convergence: CandidateConvergence,
+    diagnostic_presentation: DiagnosticPresentation,
     structural_graph_disabled: bool,
 ) -> ReviewOverview:
     """Normalize review-wide status once for every presentation adapter."""
 
-    attention = list(
-        _projection_attention(
-            (*candidates.diagnostics, *convergence.diagnostics)
-        )
-    )
+    attention = list(diagnostic_presentation.attention)
     source_messages = tuple(
         item
         for item in packet.diagnostics

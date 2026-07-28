@@ -4,6 +4,7 @@ import hashlib
 
 from prismcode.model.contracts import (
     CandidateConvergence,
+    DiagnosticPresentation,
     EvidenceCatalog,
     EvidenceItem,
     GuardrailScanPlanSet,
@@ -40,6 +41,7 @@ def build_review_projection(
     convergence: CandidateConvergence,
     evidence_catalog: EvidenceCatalog,
     *,
+    diagnostic_presentation: DiagnosticPresentation,
     guardrail_scan_plans: GuardrailScanPlanSet = GuardrailScanPlanSet(),
 ) -> ReviewProjection:
     """Project converged canonical facts without performing retrieval or selection."""
@@ -50,6 +52,7 @@ def build_review_projection(
         item.focus_statement_id: item for item in convergence.groups
     }
     plans_by_guardrail = guardrail_scan_plans.by_guardrail_id()
+    diagnostic_ids_by_focus = diagnostic_presentation.ids_by_focus()
     slices = []
     graph_node_order: list[str] = []
     graph_nodes: dict[str, StructuralGraphNode] = {}
@@ -173,9 +176,9 @@ def build_review_projection(
                     else None
                 ),
                 structural_overlay=overlay,
-                diagnostic_ids=(
-                    *group.diagnostic_ids,
-                    *converged.diagnostic_ids,
+                diagnostic_ids=diagnostic_ids_by_focus.get(
+                    group.focus_statement_id,
+                    (),
                 ),
             )
         )

@@ -50,6 +50,7 @@ from prismcode.projection.build import (
     _structural_node_id,
     build_review_projection,
 )
+from prismcode.projection.overview import project_diagnostic_presentation
 from prismcode.presentation.html import (
     _review_graph,
     _structural_edge_path,
@@ -63,6 +64,24 @@ from prismcode.providers.structural import (
 
 
 SUITE = Path("fixtures/evaluation-suite.json")
+
+
+def _build_projection(
+    candidates: ProjectionCandidateSet,
+    convergence: CandidateConvergence,
+    evidence: EvidenceCatalog,
+    **kwargs,
+) -> ReviewProjection:
+    return build_review_projection(
+        candidates,
+        convergence,
+        evidence,
+        diagnostic_presentation=project_diagnostic_presentation(
+            candidates,
+            convergence,
+        ),
+        **kwargs,
+    )
 
 
 def _head_graph(**values) -> StructuralGraphCollection:
@@ -344,7 +363,7 @@ def test_canonical_ownership_projects_recursive_shared_focus_hierarchy() -> None
         )
     )
 
-    projection = build_review_projection(candidates, convergence, evidence)
+    projection = _build_projection(candidates, convergence, evidence)
 
     assert {
         node.review_symbol_id for node in projection.review_graph.nodes
@@ -397,7 +416,7 @@ def test_canonical_ownership_projects_recursive_shared_focus_hierarchy() -> None
         ValueError,
         match="review structural ownership contains a cycle",
     ):
-        build_review_projection(candidates, convergence, cyclic_evidence)
+        _build_projection(candidates, convergence, cyclic_evidence)
 
 
 def test_projection_uses_review_relevant_structural_closure() -> None:
@@ -690,7 +709,7 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
     assert "E:relation:peripheral" not in closure.relation_change_evidence_ids
     assert "P-anchor-link" in convergence.groups[0].deferred_relation_ids
 
-    projection = build_review_projection(candidates, convergence, evidence)
+    projection = _build_projection(candidates, convergence, evidence)
     overlay = projection.slices[0].structural_overlay
     second_overlay = projection.slices[1].structural_overlay
     graph = projection.review_graph
@@ -1101,7 +1120,7 @@ def test_every_requirement_is_routed_without_a_global_statement_budget() -> None
         head_sha=None,
     )
     convergence = converge_candidates(candidates, evidence_catalog=EvidenceCatalog())
-    projection = build_review_projection(
+    projection = _build_projection(
         candidates,
         convergence,
         EvidenceCatalog(items=evidence),
@@ -1201,7 +1220,7 @@ def test_isolated_symbol_and_standalone_document_keep_distinct_canonical_forms()
     )
     convergence = converge_candidates(candidates, evidence_catalog=evidence)
 
-    projection = build_review_projection(candidates, convergence, evidence)
+    projection = _build_projection(candidates, convergence, evidence)
     code_slice, document_slice = projection.slices
 
     assert len(code_slice.structural_overlay.nodes) == 1
