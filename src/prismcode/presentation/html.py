@@ -291,6 +291,7 @@ def _review_graph(
         for edge_id in graph.backbone_ownership_edge_ids
     )
     node_focus: dict[str, list[tuple[str, str]]] = {}
+    edge_focus: dict[str, list[str]] = {}
     relation_group_focus: dict[str, list[str]] = {}
     ownership_edge_focus: dict[str, list[str]] = {}
     placement_focus: dict[str, list[str]] = {}
@@ -312,6 +313,13 @@ def _review_graph(
                     f"group {group_id}"
                 )
             relation_group_focus.setdefault(group_id, []).append(focus_id)
+        for edge_id in review_slice.structural_overlay.edge_ids:
+            if edge_id not in edges:
+                raise ValueError(
+                    f"{focus_id}: structural overlay references missing edge "
+                    f"{edge_id}"
+                )
+            edge_focus.setdefault(edge_id, []).append(focus_id)
         for edge_id in review_slice.structural_overlay.ownership_edge_ids:
             if edge_id not in ownership_edges:
                 raise ValueError(
@@ -507,6 +515,9 @@ def _review_graph(
         )
         edge_shapes.append(
             f'<g class="delta-edge operation-{escape(group.operation)}" '
+            f'tabindex="0" role="button" aria-expanded="false" '
+            f'aria-controls="members-{escape(group.id, quote=True)}" '
+            f'data-group-target="{escape(group.id, quote=True)}" '
             f'data-focuses="{escape(" ".join(relation_group_focus.get(group.id, ())), quote=True)}">'
             f'<path d="{path}" marker-end="url(#arrow-{escape(group.operation)})"/>'
             f'<rect class="delta-edge-label-bg" x="{label_x - label_width // 2}" '
@@ -516,6 +527,54 @@ def _review_graph(
             f"<title>{escape(source.summary)} → {escape(target.summary)} · "
             f'{len(group.member_edge_ids)} canonical edges · '
             f'{len(group.path_relation_ids)} support refs</title></g>'
+        )
+
+    navigation_targets = {
+        item.id: item for item in graph.navigation_targets
+    }
+    relation_group_details = []
+    for group in backbone_relation_groups:
+        member_rows = []
+        group_focuses = tuple(relation_group_focus.get(group.id, ()))
+        for edge_id in group.member_edge_ids:
+            edge = edges[edge_id]
+            source_node = nodes[edge.source_node_id]
+            target_node = nodes[edge.target_node_id]
+            source = _structural_display_fact(source_node, evidence)
+            target = _structural_display_fact(target_node, evidence)
+            source_target = navigation_targets.get(
+                edge.source_navigation_target_id
+            )
+            target_target = navigation_targets.get(
+                edge.target_navigation_target_id
+            )
+            direct_focuses = tuple(edge_focus.get(edge.id, ()))
+            context_focuses = tuple(
+                focus_id
+                for focus_id in group_focuses
+                if focus_id not in direct_focuses
+            )
+            member_rows.append(
+                '<div class="relation-member" '
+                f'data-focuses="{escape(" ".join(direct_focuses), quote=True)}" '
+                f'data-context-focuses="{escape(" ".join(context_focuses), quote=True)}">'
+                f'<span class="relation-member-operation">{escape(edge.operation)}</span>'
+                f'{_structural_navigation_link(source, source_target)}'
+                '<span class="relation-member-arrow">→</span>'
+                f'{_structural_navigation_link(target, target_target)}'
+                f'<span class="relation-member-kind">{escape(edge.relation)}</span>'
+                "</div>"
+            )
+        relation_group_details.append(
+            '<details class="relation-group-details" '
+            f'id="members-{escape(group.id, quote=True)}" '
+            f'data-group-id="{escape(group.id, quote=True)}" '
+            f'data-focuses="{escape(" ".join(group_focuses), quote=True)}">'
+            f'<summary>{escape(group.relation)} · {escape(group.operation)} · '
+            f'{len(group.member_edge_ids)} exact edge'
+            f'{"s" if len(group.member_edge_ids) != 1 else ""}</summary>'
+            f'<div class="relation-member-list">{"".join(member_rows)}</div>'
+            "</details>"
         )
 
     node_shapes = []
@@ -695,7 +754,9 @@ def _review_graph(
         f'{len(backbone_ownership_edges)} ownership deltas · '
         f'{len(isolated_rows)} isolated changed anchors · '
         f'{len(graph.path_relation_ids)} support refs</div></div>'
-        f'{controls}</div><p class="delta-focus-empty" hidden></p>{canvas}{isolated}'
+        f'{controls}</div><p class="delta-focus-empty" hidden></p>{canvas}'
+        f'<div class="relation-group-inspector">{"".join(relation_group_details)}</div>'
+        f'{isolated}'
         "</div>"
     )
 
@@ -785,6 +846,22 @@ def _structural_node_href(
         else symbol
     )
     return selected.url if selected.state == "available" else None
+
+
+def _structural_navigation_link(
+    fact: EvidenceItem,
+    target: StructuralNavigationTarget | None,
+) -> str:
+    label = escape(_structural_name(fact))
+    if target is None or target.state != "available" or not target.url:
+        return (
+            '<span class="relation-member-node unavailable">'
+            f"{label}<small>navigation unavailable</small></span>"
+        )
+    return (
+        f'<a class="relation-member-node" href="{escape(target.url, quote=True)}" '
+        f'target="_blank" rel="noopener">{label}</a>'
+    )
 
 
 def _structural_compound_layout(
@@ -1407,7 +1484,20 @@ def render_html(brief: ReviewBrief) -> str:
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{escape(packet.title)} · PrismCode</title>
 <style>
-:root{{color-scheme:dark;--bg:#080c0f;--panel:#10171b;--border:#26373f;--text:#edf3f0;--muted:#9eaaaf;--faint:#6f7d83;--green:#7be3ac;--amber:#e7ca7c;--red:#ef8f91;--blue:#9fcdf0;--shadow:0 22px 64px rgba(0,0,0,.28)}}*{{box-sizing:border-box}}body{{margin:0;color:var(--text);line-height:1.55;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 18% -8%,rgba(69,167,118,.12),transparent 31rem),var(--bg)}}code{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}}.shell{{width:min(1180px,calc(100% - 40px));margin:30px auto 84px}}.topbar{{margin-bottom:22px;font-weight:720}}.brand-mark{{display:inline-block;width:14px;height:14px;margin-right:10px;border:2px solid white;transform:rotate(45deg);border-radius:3px}}.section{{border:2px solid var(--border);border-radius:18px;background:linear-gradient(180deg,rgba(17,24,28,.97),rgba(11,17,21,.98));box-shadow:var(--shadow);padding:28px;margin-bottom:22px}}h1{{font-size:31px;margin:0 0 14px}}h2{{font-size:22px;margin:0 0 14px}}h3{{font-size:16px;margin:0 0 8px}}.meta{{display:flex;flex-wrap:wrap;gap:9px;color:var(--muted);font-size:13px;margin-bottom:16px}}.intent{{max-width:850px;color:#d2dade;font-size:15px}}.source-link,.file-link{{color:#b9dfff;text-decoration:none}}.source-note,.projection-source,.context-source{{display:block;color:var(--faint);font-size:10px;line-height:1.45}}.requirements{{border-top:1px solid rgba(111,128,135,.24)}}.requirement{{border-bottom:1px solid rgba(111,128,135,.24)}}.requirement summary{{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px minmax(0,1fr);gap:16px;padding:18px 0}}.requirement summary::-webkit-details-marker{{display:none}}.req-id{{color:var(--green);font:760 12px ui-monospace,SFMono-Regular,Menlo,monospace}}.req-title{{font-size:14px;font-weight:640}}.req-body{{padding:0 0 22px 68px}}.projection{{display:grid;grid-template-columns:minmax(0,.85fr) 24px minmax(0,1fr) 24px minmax(0,1.35fr);gap:10px;align-items:start}}.projection-column{{min-width:0;padding:14px;border:1px solid rgba(111,128,135,.22);border-radius:12px;background:rgba(5,10,13,.24)}}.projection-heading,.block-title{{display:block;margin-bottom:9px;color:#89979d;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.045em}}.projection-arrow{{align-self:center;color:var(--faint);text-align:center}}.profile-chip,.relation-label{{display:inline-flex;margin:0 0 8px;padding:3px 7px;border-radius:999px;background:rgba(54,118,87,.20);color:#bfeacf;font-size:8px;font-weight:720}}.projection-copy{{margin:0 0 7px;color:#d7dddf;font-size:11px}}.projection-item{{padding:9px 0;border-bottom:1px solid rgba(111,128,135,.16)}}.projection-item:last-child{{border-bottom:0}}.relation-reason{{display:block;color:var(--faint);font-size:9px;margin-bottom:6px}}.projection-group+.projection-group{{margin-top:15px}}.review-structural-graph{{margin-top:24px;padding:18px;border:1px solid rgba(111,128,135,.22);border-radius:12px;background:rgba(5,10,13,.24)}}.delta-graph-heading{{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}}.structural-coverage{{margin-bottom:3px;color:var(--muted);font-size:9px}}.structural-coverage.state-partial,.structural-coverage.state-stale,.structural-coverage.state-missing,.structural-coverage.state-invalid,.structural-coverage.state-error{{color:var(--amber)}}.subgraph-summary{{color:var(--muted);font-size:9px}}.delta-focus-controls{{display:flex;flex:1 1 560px;min-width:0;max-width:720px;flex-wrap:wrap;justify-content:flex-end;gap:5px}}.delta-focus{{border:1px solid rgba(111,128,135,.35);border-radius:999px;padding:4px 9px;background:transparent;color:var(--muted);font:700 9px inherit;cursor:pointer}}.delta-focus:hover,.delta-focus.active{{border-color:var(--green);background:rgba(54,118,87,.20);color:#c9efd6}}.delta-canvas-scroll{{margin-top:14px;overflow-x:auto;border:1px solid rgba(111,128,135,.16);border-radius:10px;background:rgba(3,7,9,.34)}}.delta-canvas{{display:block;min-width:100%;height:auto}}.delta-edge,.structural-container,.delta-node,.isolated-anchor{{transition:opacity .16s ease,filter .16s ease}}.delta-edge path{{fill:none;stroke-width:1.8}}.delta-edge-label-bg{{fill:rgba(3,7,9,.92);stroke:rgba(111,128,135,.24);stroke-width:.7}}.delta-edge-label{{font-size:8px;text-anchor:middle;paint-order:stroke;stroke:var(--bg);stroke-width:2px;stroke-linejoin:round}}.delta-edge.operation-added path{{stroke:var(--green)}}.delta-edge.operation-added text{{fill:var(--green)}}.delta-edge.operation-removed path{{stroke:var(--red);stroke-dasharray:6 5}}.delta-edge.operation-removed text{{fill:var(--red)}}.delta-edge.operation-retained path{{stroke:#73848c}}.delta-edge.operation-retained text{{fill:#94a2a8}}#arrow-added path{{fill:var(--green)}}#arrow-removed path{{fill:var(--red)}}#arrow-retained path{{fill:#73848c}}.structural-container{{fill:rgba(16,27,33,.42);stroke:#354a54;stroke-width:1.1}}.structural-container.operation-added{{stroke:rgba(123,227,172,.52);fill:rgba(54,118,87,.06)}}.structural-container.operation-removed{{stroke:rgba(239,143,145,.5);stroke-dasharray:6 4;fill:rgba(112,43,48,.05)}}.delta-node rect{{fill:#111a1f;stroke:#53656e;stroke-width:1.2}}.delta-node.operation-added rect{{stroke:var(--green);fill:rgba(54,118,87,.14)}}.delta-node.operation-modified rect{{stroke:var(--amber);fill:rgba(106,85,30,.13)}}.delta-node.operation-removed rect{{stroke:var(--red);stroke-dasharray:6 4;fill:rgba(112,43,48,.12)}}.delta-node-kind{{fill:var(--muted);font-size:8px;text-transform:uppercase}}.delta-node-name{{fill:var(--text);font-size:10px;font-weight:700}}.delta-node-path{{fill:var(--faint);font-size:8px}}.focus-muted{{opacity:.13}}.focus-context{{opacity:.7}}.structural-container.focus-context,.structural-container-header.focus-context{{filter:drop-shadow(0 0 2px rgba(159,205,240,.22))}}.focus-active{{opacity:1;filter:drop-shadow(0 0 5px rgba(123,227,172,.35))}}.delta-empty{{margin:14px 0 0;padding:18px;border:1px dashed rgba(111,128,135,.26);border-radius:10px;color:var(--faint);font-size:11px}}.isolated-anchors{{margin-top:12px;border-top:1px solid rgba(111,128,135,.18);padding-top:10px}}.isolated-anchors>summary{{cursor:pointer;color:var(--muted);font-size:10px}}.isolated-anchor-list{{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:9px}}.isolated-anchor{{display:grid;grid-template-columns:auto 1fr auto;gap:4px 7px;min-width:0;padding:8px;border:1px solid rgba(111,128,135,.16);border-left:2px solid var(--amber);border-radius:7px}}.isolated-anchor.operation-added{{border-left-color:var(--green)}}.isolated-anchor.operation-removed{{border-left-color:var(--red);border-style:dashed}}.isolated-anchor-focus,.isolated-anchor-operation,.isolated-anchor-kind{{color:var(--faint);font-size:8px}}.isolated-anchor-operation{{text-transform:uppercase}}.isolated-anchor-kind{{text-align:right}}.isolated-anchor-name{{grid-column:1/-1;overflow-wrap:anywhere;font-size:9px}}.isolated-anchor .projection-source{{grid-column:1/-1}}.slot-diagnostic{{margin:9px 0;padding:9px;border-radius:8px;background:rgba(106,85,30,.16);color:#e8d18e;font-size:9px}}.slot-diagnostic p{{margin:3px 0 0;color:var(--muted)}}.context{{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(111,128,135,.24)}}.context>summary{{cursor:pointer;color:var(--muted);font-size:11px}}.context-row{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px;gap:12px;padding:12px 0;border-bottom:1px solid rgba(111,128,135,.18)}}.context-id{{color:#9fcdf0;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace}}.context-copy{{font-size:12px}}.context-authority{{color:var(--muted);font-size:10px;text-align:right}}.context-source{{grid-column:2/-1}}.attention-list,.file-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:var(--amber);font-size:10px;font-weight:700;text-transform:uppercase}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px}}.empty,.empty-state{{color:var(--faint);font-size:12px}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}@media(max-width:950px){{.projection{{grid-template-columns:1fr}}.projection-arrow{{transform:rotate(90deg)}}.req-body{{padding-left:0}}.isolated-anchor-list{{grid-template-columns:repeat(2,minmax(0,1fr))}}}}@media(max-width:600px){{.shell{{width:calc(100% - 18px);margin-top:16px}}.section{{padding:22px 20px}}.attention-row,.context-row{{grid-template-columns:1fr}}.delta-graph-heading{{display:block}}.delta-focus-controls{{max-width:none;justify-content:flex-start;margin-top:10px}}.isolated-anchor-list{{grid-template-columns:1fr}}}}@media print{{:root{{color-scheme:light;--bg:#fff;--panel:#fff;--text:#111;--muted:#444;--faint:#666;--border:#bbb}}body{{background:#fff}}.section{{box-shadow:none;break-inside:avoid}}.delta-focus-controls{{display:none}}.delta-canvas-scroll{{overflow:visible}}}}.delta-graph-heading{{flex-wrap:wrap}}.delta-node.operation-renamed rect{{stroke:var(--blue);stroke-dasharray:8 3;fill:rgba(48,83,110,.14)}}.isolated-anchor.operation-renamed{{border-left-color:var(--blue);border-style:dashed}}.delta-node.operation-retained rect{{stroke:#53656e;fill:#111a1f}}.delta-node.operation-unresolved rect{{stroke:var(--faint);stroke-dasharray:3 3;fill:rgba(111,125,131,.08)}}.isolated-anchor.operation-unresolved{{border-left-color:var(--faint);border-style:dashed}}.structural-container-header,.secondary-placement{{transition:opacity .16s ease,filter .16s ease}}.structural-container-header rect{{fill:#132027;stroke:#58707c;stroke-width:1.1}}.structural-container-header.operation-added rect{{stroke:var(--green);fill:rgba(54,118,87,.14)}}.structural-container-header.operation-modified rect{{stroke:var(--amber);fill:rgba(106,85,30,.13)}}.structural-container-header.operation-removed rect{{stroke:var(--red);stroke-dasharray:6 4;fill:rgba(112,43,48,.12)}}.structural-container-header.operation-unresolved rect{{stroke:var(--faint);stroke-dasharray:3 3}}.secondary-placement rect{{fill:rgba(48,83,110,.18);stroke:var(--blue);stroke-width:.8;stroke-dasharray:3 2}}.secondary-placement text{{fill:var(--blue);font-size:8px}}.delta-focus.no-visible-backbone{{border-style:dashed;color:var(--faint)}}.delta-focus-empty{{margin:12px 0 0;padding:9px 11px;border:1px dashed rgba(111,128,135,.3);border-radius:8px;color:var(--muted);font-size:10px}}.deferred-structural>summary{{cursor:pointer;color:var(--muted);font-size:9px}}</style></head><body><main class="shell">
+:root{{color-scheme:dark;--bg:#080c0f;--panel:#10171b;--border:#26373f;--text:#edf3f0;--muted:#9eaaaf;--faint:#6f7d83;--green:#7be3ac;--amber:#e7ca7c;--red:#ef8f91;--blue:#9fcdf0;--shadow:0 22px 64px rgba(0,0,0,.28)}}*{{box-sizing:border-box}}body{{margin:0;color:var(--text);line-height:1.55;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 18% -8%,rgba(69,167,118,.12),transparent 31rem),var(--bg)}}code{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}}.shell{{width:min(1180px,calc(100% - 40px));margin:30px auto 84px}}.topbar{{margin-bottom:22px;font-weight:720}}.brand-mark{{display:inline-block;width:14px;height:14px;margin-right:10px;border:2px solid white;transform:rotate(45deg);border-radius:3px}}.section{{border:2px solid var(--border);border-radius:18px;background:linear-gradient(180deg,rgba(17,24,28,.97),rgba(11,17,21,.98));box-shadow:var(--shadow);padding:28px;margin-bottom:22px}}h1{{font-size:31px;margin:0 0 14px}}h2{{font-size:22px;margin:0 0 14px}}h3{{font-size:16px;margin:0 0 8px}}.meta{{display:flex;flex-wrap:wrap;gap:9px;color:var(--muted);font-size:13px;margin-bottom:16px}}.intent{{max-width:850px;color:#d2dade;font-size:15px}}.source-link,.file-link{{color:#b9dfff;text-decoration:none}}.source-note,.projection-source,.context-source{{display:block;color:var(--faint);font-size:10px;line-height:1.45}}.requirements{{border-top:1px solid rgba(111,128,135,.24)}}.requirement{{border-bottom:1px solid rgba(111,128,135,.24)}}.requirement summary{{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px minmax(0,1fr);gap:16px;padding:18px 0}}.requirement summary::-webkit-details-marker{{display:none}}.req-id{{color:var(--green);font:760 12px ui-monospace,SFMono-Regular,Menlo,monospace}}.req-title{{font-size:14px;font-weight:640}}.req-body{{padding:0 0 22px 68px}}.projection{{display:grid;grid-template-columns:minmax(0,.85fr) 24px minmax(0,1fr) 24px minmax(0,1.35fr);gap:10px;align-items:start}}.projection-column{{min-width:0;padding:14px;border:1px solid rgba(111,128,135,.22);border-radius:12px;background:rgba(5,10,13,.24)}}.projection-heading,.block-title{{display:block;margin-bottom:9px;color:#89979d;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.045em}}.projection-arrow{{align-self:center;color:var(--faint);text-align:center}}.profile-chip,.relation-label{{display:inline-flex;margin:0 0 8px;padding:3px 7px;border-radius:999px;background:rgba(54,118,87,.20);color:#bfeacf;font-size:8px;font-weight:720}}.projection-copy{{margin:0 0 7px;color:#d7dddf;font-size:11px}}.projection-item{{padding:9px 0;border-bottom:1px solid rgba(111,128,135,.16)}}.projection-item:last-child{{border-bottom:0}}.relation-reason{{display:block;color:var(--faint);font-size:9px;margin-bottom:6px}}.projection-group+.projection-group{{margin-top:15px}}.review-structural-graph{{margin-top:24px;padding:18px;border:1px solid rgba(111,128,135,.22);border-radius:12px;background:rgba(5,10,13,.24)}}.delta-graph-heading{{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}}.structural-coverage{{margin-bottom:3px;color:var(--muted);font-size:9px}}.structural-coverage.state-partial,.structural-coverage.state-stale,.structural-coverage.state-missing,.structural-coverage.state-invalid,.structural-coverage.state-error{{color:var(--amber)}}.subgraph-summary{{color:var(--muted);font-size:9px}}.delta-focus-controls{{display:flex;flex:1 1 560px;min-width:0;max-width:720px;flex-wrap:wrap;justify-content:flex-end;gap:5px}}.delta-focus{{border:1px solid rgba(111,128,135,.35);border-radius:999px;padding:4px 9px;background:transparent;color:var(--muted);font:700 9px inherit;cursor:pointer}}.delta-focus:hover,.delta-focus.active{{border-color:var(--green);background:rgba(54,118,87,.20);color:#c9efd6}}.delta-canvas-scroll{{margin-top:14px;overflow-x:auto;border:1px solid rgba(111,128,135,.16);border-radius:10px;background:rgba(3,7,9,.34)}}.delta-canvas{{display:block;min-width:100%;height:auto}}.delta-edge,.structural-container,.delta-node,.isolated-anchor{{transition:opacity .16s ease,filter .16s ease}}.delta-edge path{{fill:none;stroke-width:1.8}}.delta-edge-label-bg{{fill:rgba(3,7,9,.92);stroke:rgba(111,128,135,.24);stroke-width:.7}}.delta-edge-label{{font-size:8px;text-anchor:middle;paint-order:stroke;stroke:var(--bg);stroke-width:2px;stroke-linejoin:round}}.delta-edge.operation-added path{{stroke:var(--green)}}.delta-edge.operation-added text{{fill:var(--green)}}.delta-edge.operation-removed path{{stroke:var(--red);stroke-dasharray:6 5}}.delta-edge.operation-removed text{{fill:var(--red)}}.delta-edge.operation-retained path{{stroke:#73848c}}.delta-edge.operation-retained text{{fill:#94a2a8}}#arrow-added path{{fill:var(--green)}}#arrow-removed path{{fill:var(--red)}}#arrow-retained path{{fill:#73848c}}.structural-container{{fill:rgba(16,27,33,.42);stroke:#354a54;stroke-width:1.1}}.structural-container.operation-added{{stroke:rgba(123,227,172,.52);fill:rgba(54,118,87,.06)}}.structural-container.operation-removed{{stroke:rgba(239,143,145,.5);stroke-dasharray:6 4;fill:rgba(112,43,48,.05)}}.delta-node rect{{fill:#111a1f;stroke:#53656e;stroke-width:1.2}}.delta-node.operation-added rect{{stroke:var(--green);fill:rgba(54,118,87,.14)}}.delta-node.operation-modified rect{{stroke:var(--amber);fill:rgba(106,85,30,.13)}}.delta-node.operation-removed rect{{stroke:var(--red);stroke-dasharray:6 4;fill:rgba(112,43,48,.12)}}.delta-node-kind{{fill:var(--muted);font-size:8px;text-transform:uppercase}}.delta-node-name{{fill:var(--text);font-size:10px;font-weight:700}}.delta-node-path{{fill:var(--faint);font-size:8px}}.focus-muted{{opacity:.13}}.focus-context{{opacity:.7}}.structural-container.focus-context,.structural-container-header.focus-context{{filter:drop-shadow(0 0 2px rgba(159,205,240,.22))}}.focus-active{{opacity:1;filter:drop-shadow(0 0 5px rgba(123,227,172,.35))}}.delta-empty{{margin:14px 0 0;padding:18px;border:1px dashed rgba(111,128,135,.26);border-radius:10px;color:var(--faint);font-size:11px}}.isolated-anchors{{margin-top:12px;border-top:1px solid rgba(111,128,135,.18);padding-top:10px}}.isolated-anchors>summary{{cursor:pointer;color:var(--muted);font-size:10px}}.isolated-anchor-list{{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:9px}}.isolated-anchor{{display:grid;grid-template-columns:auto 1fr auto;gap:4px 7px;min-width:0;padding:8px;border:1px solid rgba(111,128,135,.16);border-left:2px solid var(--amber);border-radius:7px}}.isolated-anchor.operation-added{{border-left-color:var(--green)}}.isolated-anchor.operation-removed{{border-left-color:var(--red);border-style:dashed}}.isolated-anchor-focus,.isolated-anchor-operation,.isolated-anchor-kind{{color:var(--faint);font-size:8px}}.isolated-anchor-operation{{text-transform:uppercase}}.isolated-anchor-kind{{text-align:right}}.isolated-anchor-name{{grid-column:1/-1;overflow-wrap:anywhere;font-size:9px}}.isolated-anchor .projection-source{{grid-column:1/-1}}.slot-diagnostic{{margin:9px 0;padding:9px;border-radius:8px;background:rgba(106,85,30,.16);color:#e8d18e;font-size:9px}}.slot-diagnostic p{{margin:3px 0 0;color:var(--muted)}}.context{{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(111,128,135,.24)}}.context>summary{{cursor:pointer;color:var(--muted);font-size:11px}}.context-row{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px;gap:12px;padding:12px 0;border-bottom:1px solid rgba(111,128,135,.18)}}.context-id{{color:#9fcdf0;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace}}.context-copy{{font-size:12px}}.context-authority{{color:var(--muted);font-size:10px;text-align:right}}.context-source{{grid-column:2/-1}}.attention-list,.file-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:var(--amber);font-size:10px;font-weight:700;text-transform:uppercase}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px}}.empty,.empty-state{{color:var(--faint);font-size:12px}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}@media(max-width:950px){{.projection{{grid-template-columns:1fr}}.projection-arrow{{transform:rotate(90deg)}}.req-body{{padding-left:0}}.isolated-anchor-list{{grid-template-columns:repeat(2,minmax(0,1fr))}}}}@media(max-width:600px){{.shell{{width:calc(100% - 18px);margin-top:16px}}.section{{padding:22px 20px}}.attention-row,.context-row{{grid-template-columns:1fr}}.delta-graph-heading{{display:block}}.delta-focus-controls{{max-width:none;justify-content:flex-start;margin-top:10px}}.isolated-anchor-list{{grid-template-columns:1fr}}}}@media print{{:root{{color-scheme:light;--bg:#fff;--panel:#fff;--text:#111;--muted:#444;--faint:#666;--border:#bbb}}body{{background:#fff}}.section{{box-shadow:none;break-inside:avoid}}.delta-focus-controls{{display:none}}.delta-canvas-scroll{{overflow:visible}}}}.delta-graph-heading{{flex-wrap:wrap}}.delta-node.operation-renamed rect{{stroke:var(--blue);stroke-dasharray:8 3;fill:rgba(48,83,110,.14)}}.isolated-anchor.operation-renamed{{border-left-color:var(--blue);border-style:dashed}}.delta-node.operation-retained rect{{stroke:#53656e;fill:#111a1f}}.delta-node.operation-unresolved rect{{stroke:var(--faint);stroke-dasharray:3 3;fill:rgba(111,125,131,.08)}}.isolated-anchor.operation-unresolved{{border-left-color:var(--faint);border-style:dashed}}.structural-container-header,.secondary-placement{{transition:opacity .16s ease,filter .16s ease}}.structural-container-header rect{{fill:#132027;stroke:#58707c;stroke-width:1.1}}.structural-container-header.operation-added rect{{stroke:var(--green);fill:rgba(54,118,87,.14)}}.structural-container-header.operation-modified rect{{stroke:var(--amber);fill:rgba(106,85,30,.13)}}.structural-container-header.operation-removed rect{{stroke:var(--red);stroke-dasharray:6 4;fill:rgba(112,43,48,.12)}}.structural-container-header.operation-unresolved rect{{stroke:var(--faint);stroke-dasharray:3 3}}.secondary-placement rect{{fill:rgba(48,83,110,.18);stroke:var(--blue);stroke-width:.8;stroke-dasharray:3 2}}.secondary-placement text{{fill:var(--blue);font-size:8px}}.delta-focus.no-visible-backbone{{border-style:dashed;color:var(--faint)}}.delta-focus-empty{{margin:12px 0 0;padding:9px 11px;border:1px dashed rgba(111,128,135,.3);border-radius:8px;color:var(--muted);font-size:10px}}.deferred-structural>summary{{cursor:pointer;color:var(--muted);font-size:9px}}
+.delta-edge[role="button"]{{cursor:pointer;outline:none}}
+.delta-edge[role="button"]:focus path,.delta-edge.group-expanded path{{stroke-width:3}}
+.relation-group-inspector{{display:grid;gap:7px;margin-top:10px}}
+.relation-group-details{{border:1px solid rgba(111,128,135,.2);border-radius:8px;background:rgba(3,7,9,.28)}}
+.relation-group-details>summary{{cursor:pointer;padding:8px 10px;color:var(--muted);font-size:9px}}
+.relation-member-list{{padding:0 10px 8px}}
+.relation-member{{display:grid;grid-template-columns:55px minmax(0,1fr) 20px minmax(0,1fr) 70px;gap:6px;align-items:center;padding:7px 0;border-top:1px solid rgba(111,128,135,.16);font-size:9px}}
+.relation-member-node{{color:#b9dfff;text-decoration:none;overflow-wrap:anywhere}}
+.relation-member-node.unavailable{{color:var(--faint)}}
+.relation-member-node small{{display:block;font-size:7px}}
+.relation-member-operation,.relation-member-kind{{color:var(--faint);text-transform:uppercase}}
+.relation-member-arrow{{color:var(--muted);text-align:center}}
+</style></head><body><main class="shell">
 <div class="topbar"><span class="brand-mark"></span>PrismCode</div>
 <section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{brief.overview.changed_file_count} changed files</span><span>·</span><span>{escape(ci_copy)}</span></div><h1>{escape(packet.title)}</h1><div class="intent">{escape(brief.intent.text)}</div><span class="source-note">Source: {source_line}</span>{review_contract}</section>
 <section class="section"><h2>Review checks</h2>{semantic_context}{review_graph}<div class="requirements">{"".join(cards)}</div></section>
@@ -1420,7 +1510,9 @@ document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
   const requirements = section
     ? section.querySelectorAll(".requirement[data-focus-id]")
     : [];
+  const interaction = {{ focus: "all", expandedGroup: null }};
   const activateFocus = (focus) => {{
+    interaction.focus = focus;
     let activeButton = null;
     graph.querySelectorAll(".delta-focus").forEach((item) => {{
       const active = item.dataset.focusTarget === focus;
@@ -1453,6 +1545,39 @@ document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
       activateFocus(button.dataset.focusTarget));
   }}
 );
+  const toggleGroup = (groupId) => {{
+    interaction.expandedGroup =
+      interaction.expandedGroup === groupId ? null : groupId;
+    graph.querySelectorAll("[data-group-target]").forEach((item) => {{
+      const expanded = item.dataset.groupTarget === interaction.expandedGroup;
+      item.classList.toggle("group-expanded", expanded);
+      item.setAttribute("aria-expanded", String(expanded));
+    }});
+    graph.querySelectorAll(".relation-group-details").forEach((item) => {{
+      item.open = item.dataset.groupId === interaction.expandedGroup;
+    }});
+  }};
+  graph.querySelectorAll("[data-group-target]").forEach((group) => {{
+    const toggle = () => toggleGroup(group.dataset.groupTarget);
+    group.addEventListener("click", toggle);
+    group.addEventListener("keydown", (event) => {{
+      if (event.key === "Enter" || event.key === " ") {{
+        event.preventDefault();
+        toggle();
+      }}
+    }});
+  }});
+  graph.querySelectorAll(".relation-group-details").forEach((details) => {{
+    details.addEventListener("toggle", () => {{
+      if (details.open &&
+        interaction.expandedGroup !== details.dataset.groupId) {{
+        toggleGroup(details.dataset.groupId);
+      }} else if (!details.open &&
+        interaction.expandedGroup === details.dataset.groupId) {{
+        toggleGroup(details.dataset.groupId);
+      }}
+    }});
+  }});
   requirements.forEach((requirement) => {{
     requirement.querySelector("summary").addEventListener("click", () =>
       activateFocus(requirement.dataset.focusId));
