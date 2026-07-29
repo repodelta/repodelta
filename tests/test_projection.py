@@ -58,6 +58,9 @@ from prismcode.projection.build import (
     build_review_projection,
 )
 from prismcode.projection.overview import project_diagnostic_presentation
+from prismcode.projection.structural_groups import (
+    project_structural_relation_groups,
+)
 from prismcode.presentation.html import (
     _review_graph,
     _structural_compound_layout,
@@ -99,7 +102,12 @@ def test_compound_layout_keeps_every_canonical_membership_for_moved_symbol() -> 
         head_ownership_evidence_ids=("E:added",),
     )
 
-    layout = _structural_compound_layout(nodes, (), (removed, added))
+    layout = _structural_compound_layout(
+        nodes,
+        (),
+        (removed, added),
+        primary_placement_ids=("P:new",),
+    )
 
     assert set(layout.positions) == {item.id for item in nodes}
     assert tuple(item.id for item in layout.secondary_placements) == ("P:old",)
@@ -242,7 +250,8 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
     )
     assert (
             "1 backbone nodes · 0 support nodes · "
-            "0 backbone executable edges · 0 structural placements · "
+            "0 backbone relation groups · 0 canonical executable edges · "
+            "0 structural placements · "
             "0 ownership deltas · "
             "1 isolated changed anchor"
     ) in html
@@ -490,7 +499,8 @@ def test_canonical_ownership_projects_recursive_shared_focus_hierarchy() -> None
     )
     assert (
         "3 backbone nodes · 0 support nodes · "
-        "0 backbone executable edges · 2 structural placements · "
+        "0 backbone relation groups · 0 canonical executable edges · "
+        "2 structural placements · "
         "2 ownership deltas · "
         "0 isolated changed anchors"
     ) in html
@@ -986,6 +996,12 @@ def test_review_graph_renders_complete_focus_union() -> None:
             ("G1", "g_only", "shared", "removed"),
         )
     )
+    group_projection = project_structural_relation_groups(
+        nodes=nodes,
+        edges=edges,
+        placements=(),
+        backbone_edge_ids=tuple(item.id for item in edges),
+    )
 
     def overlay(focus_id: str, *focus_node_ids: str) -> ReviewSlice:
         edge_ids = () if focus_id == "R3" else (f"D:{focus_id}",)
@@ -1003,6 +1019,10 @@ def test_review_graph_renders_complete_focus_union() -> None:
                     for node_id in focus_node_ids
                 ),
                 edge_ids=edge_ids,
+                relation_group_ids=tuple(
+                    group_projection.group_id_by_edge_id[edge_id]
+                    for edge_id in edge_ids
+                ),
             ),
         )
 
@@ -1017,8 +1037,10 @@ def test_review_graph_renders_complete_focus_union() -> None:
         review_graph=ReviewStructuralGraph(
             nodes=nodes,
             edges=edges,
+            relation_groups=group_projection.groups,
             backbone_node_ids=tuple(item.id for item in nodes),
             backbone_edge_ids=tuple(item.id for item in edges),
+            backbone_relation_group_ids=group_projection.backbone_group_ids,
         ),
     )
     html = _review_graph(
@@ -1033,10 +1055,11 @@ def test_review_graph_renders_complete_focus_union() -> None:
     )
 
     assert (
-            "5 backbone nodes · 0 support nodes · "
-            "3 backbone executable edges · 0 structural placements · "
-            "0 ownership deltas · "
-            "1 isolated changed anchor"
+        "5 backbone nodes · 0 support nodes · "
+        "3 backbone relation groups · 3 canonical executable edges · "
+        "0 structural placements · "
+        "0 ownership deltas · "
+        "1 isolated changed anchor"
     ) in html
     assert html.count('class="delta-node operation-') == 4
     assert html.count('class="isolated-anchor operation-') == 1

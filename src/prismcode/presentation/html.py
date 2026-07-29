@@ -20,6 +20,7 @@ from prismcode.model.contracts import (
     StructuralGraphEdge,
     StructuralGraphNode,
     StructuralGraphPlacement,
+    StructuralRelationGroup,
 )
 
 _DEFERRED_STRUCTURAL_PREVIEW_LIMIT = 5
@@ -266,6 +267,7 @@ def _review_graph(
     evidence = brief.evidence_catalog.by_id()
     nodes = {item.id: item for item in graph.nodes}
     edges = {item.id: item for item in graph.edges}
+    relation_groups = {item.id: item for item in graph.relation_groups}
     ownership_edges = {item.id: item for item in graph.ownership_edges}
     placements = tuple(
         item
@@ -279,12 +281,16 @@ def _review_graph(
     backbone_edges = tuple(
         edges[edge_id] for edge_id in graph.backbone_edge_ids
     )
+    backbone_relation_groups = tuple(
+        relation_groups[group_id]
+        for group_id in graph.backbone_relation_group_ids
+    )
     backbone_ownership_edges = tuple(
         ownership_edges[edge_id]
         for edge_id in graph.backbone_ownership_edge_ids
     )
     node_focus: dict[str, list[tuple[str, str]]] = {}
-    edge_focus: dict[str, list[str]] = {}
+    relation_group_focus: dict[str, list[str]] = {}
     ownership_edge_focus: dict[str, list[str]] = {}
     placement_focus: dict[str, list[str]] = {}
     for review_slice in projection.slices:
@@ -298,13 +304,13 @@ def _review_graph(
             node_focus.setdefault(node.node_id, []).append(
                 (focus_id, node.role)
             )
-        for edge_id in review_slice.structural_overlay.edge_ids:
-            if edge_id not in edges:
+        for group_id in review_slice.structural_overlay.relation_group_ids:
+            if group_id not in relation_groups:
                 raise ValueError(
-                    f"{focus_id}: structural overlay references missing edge "
-                    f"{edge_id}"
+                    f"{focus_id}: structural overlay references missing relation "
+                    f"group {group_id}"
                 )
-            edge_focus.setdefault(edge_id, []).append(focus_id)
+            relation_group_focus.setdefault(group_id, []).append(focus_id)
         for edge_id in review_slice.structural_overlay.ownership_edge_ids:
             if edge_id not in ownership_edges:
                 raise ValueError(
@@ -316,8 +322,8 @@ def _review_graph(
             placement_focus.setdefault(placement_id, []).append(focus_id)
     executable_connected_node_ids = {
         node_id
-        for edge in backbone_edges
-        for node_id in (edge.source_node_id, edge.target_node_id)
+        for group in backbone_relation_groups
+        for node_id in (group.source_node_id, group.target_node_id)
     }
     ownership_connected_node_ids = {
         node_id
@@ -341,8 +347,9 @@ def _review_graph(
     )
     layout = _structural_compound_layout(
         connected_nodes,
-        backbone_edges,
+        backbone_relation_groups,
         placements,
+        primary_placement_ids=graph.primary_placement_ids,
     )
     positions = layout.positions
     containers = layout.containers
@@ -463,10 +470,9 @@ def _review_graph(
         for node in connected_nodes
     )
     edge_shapes = []
-    for edge in backbone_edges:
-        source_node = nodes.get(edge.source_node_id)
-        target_node = nodes.get(edge.target_node_id)
-        relation_change = evidence.get(edge.relation_change_evidence_id)
+    for group in backbone_relation_groups:
+        source_node = nodes.get(group.source_node_id)
+        target_node = nodes.get(group.target_node_id)
         source = (
             _structural_display_fact(source_node, evidence)
             if source_node is not None
@@ -479,34 +485,33 @@ def _review_graph(
         )
         if source_node is None or target_node is None or source is None or target is None:
             raise ValueError("structural graph edge references a missing node")
-        if relation_change is None or relation_change.kind != "structural_relation_change":
-            raise ValueError(
-                "structural graph edge references a missing relation-change fact"
-            )
-        source_x, source_y = positions[edge.source_node_id]
-        target_x, target_y = positions[edge.target_node_id]
-        label = f"{edge.relation} · {edge.operation}"
+        source_x, source_y = positions[group.source_node_id]
+        target_x, target_y = positions[group.target_node_id]
+        label = f"{group.relation} · {group.operation}"
+        if len(group.member_edge_ids) > 1:
+            label += f" · {len(group.member_edge_ids)} edges"
         path, label_x, label_y, label_width = _structural_edge_path(
             source_x,
             source_y,
-            *layout.sizes[edge.source_node_id],
+            *layout.sizes[group.source_node_id],
             target_x,
             target_y,
-            *layout.sizes[edge.target_node_id],
+            *layout.sizes[group.target_node_id],
             label,
             occupied_label_boxes,
             node_boxes,
         )
         edge_shapes.append(
-            f'<g class="delta-edge operation-{escape(edge.operation)}" '
-            f'data-focuses="{escape(" ".join(edge_focus.get(edge.id, ())), quote=True)}">'
-            f'<path d="{path}" marker-end="url(#arrow-{escape(edge.operation)})"/>'
+            f'<g class="delta-edge operation-{escape(group.operation)}" '
+            f'data-focuses="{escape(" ".join(relation_group_focus.get(group.id, ())), quote=True)}">'
+            f'<path d="{path}" marker-end="url(#arrow-{escape(group.operation)})"/>'
             f'<rect class="delta-edge-label-bg" x="{label_x - label_width // 2}" '
             f'y="{label_y - 11}" width="{label_width}" height="16" rx="4"/>'
             f'<text class="delta-edge-label" x="{label_x}" y="{label_y}">'
             f"{escape(label)}</text>"
             f"<title>{escape(source.summary)} → {escape(target.summary)} · "
-            f'{len(edge.path_relation_ids)} support refs</title></g>'
+            f'{len(group.member_edge_ids)} canonical edges · '
+            f'{len(group.path_relation_ids)} support refs</title></g>'
         )
 
     node_shapes = []
@@ -590,9 +595,9 @@ def _review_graph(
         ),
         *(
             focus_id
-            for edge_id, edge_focus_ids in edge_focus.items()
-            if edge_id in graph.backbone_edge_ids
-            for focus_id in edge_focus_ids
+            for group_id, group_focus_ids in relation_group_focus.items()
+            if group_id in graph.backbone_relation_group_ids
+            for focus_id in group_focus_ids
         ),
         *(
             focus_id
@@ -680,7 +685,8 @@ def _review_graph(
         f"{escape(coverage_copy)}</div>"
         f'<div class="subgraph-summary">{len(backbone_nodes)} backbone nodes · '
         f'{len(graph.nodes) - len(backbone_nodes)} support nodes · '
-        f'{len(backbone_edges)} backbone executable edges · '
+        f'{len(backbone_relation_groups)} backbone relation groups · '
+        f'{len(backbone_edges)} canonical executable edges · '
         f'{len(placements)} structural placements · '
         f'{len(backbone_ownership_edges)} ownership deltas · '
         f'{len(isolated_rows)} isolated changed anchors · '
@@ -776,8 +782,10 @@ def _structural_href(item: EvidenceItem, brief: ReviewBrief) -> str | None:
 
 def _structural_compound_layout(
     nodes: tuple[StructuralGraphNode, ...],
-    edges: tuple[StructuralGraphEdge, ...],
+    edges: tuple[StructuralGraphEdge | StructuralRelationGroup, ...],
     placements: tuple[StructuralGraphPlacement, ...] = (),
+    *,
+    primary_placement_ids: tuple[str, ...] = (),
 ) -> _StructuralLayout:
     """Lay out observed containment, then order roots by executable topology."""
 
@@ -790,15 +798,11 @@ def _structural_compound_layout(
             and placement.child_node_id in node_id_set
         ):
             by_child.setdefault(placement.child_node_id, []).append(placement)
+    primary_ids = set(primary_placement_ids)
     primary_by_child = {
-        child_id: min(
-            candidates,
-            key=lambda item: (
-                0 if item.head_ownership_evidence_ids else 1,
-                item.id,
-            ),
-        )
-        for child_id, candidates in by_child.items()
+        placement.child_node_id: placement
+        for placement in placements
+        if placement.id in primary_ids
     }
     children_by_parent: dict[str, list[str]] = {}
     for child_id, placement in primary_by_child.items():
