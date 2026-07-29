@@ -10,6 +10,7 @@ from prismcode.pipeline import DeterministicAnalyzer
 from prismcode.model.contracts import (
     AnalysisInput,
     CandidateConvergence,
+    CanonicalChangeMapEntry,
     ChangedFile,
     ConvergenceGroup,
     EvidenceCatalog,
@@ -233,7 +234,7 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
         "E:symbol:9e703e599343229d97c1"
     ]
     assert set(selected_paths) <= set(anchor.structural_path_ids)
-    overlay = brief.projection.slices[0].structural_overlay
+    overlay = brief.projection.slices[0].change_map.structural_overlay
     graph = brief.projection.review_graph
     assert [item.role for item in overlay.nodes] == ["changed_anchor"]
     assert overlay.path_relation_ids == ()
@@ -288,12 +289,12 @@ def test_identical_focus_graphs_share_one_review_graph() -> None:
     first, second = brief.projection.slices
     assert len(graph.nodes) == 1
     assert len(graph.edges) == 0
-    assert tuple(item.node_id for item in first.structural_overlay.nodes) == tuple(
-        item.node_id for item in second.structural_overlay.nodes
+    assert tuple(item.node_id for item in first.change_map.structural_overlay.nodes) == tuple(
+        item.node_id for item in second.change_map.structural_overlay.nodes
     )
-    assert first.structural_overlay.edge_ids == second.structural_overlay.edge_ids
-    assert first.structural_overlay.path_relation_ids == ()
-    assert second.structural_overlay.path_relation_ids == ()
+    assert first.change_map.structural_overlay.edge_ids == second.change_map.structural_overlay.edge_ids
+    assert first.change_map.structural_overlay.path_relation_ids == ()
+    assert second.change_map.structural_overlay.path_relation_ids == ()
     html = render_html(brief)
     assert html.count("Structural delta graph") == 1
     assert html.count('<div class="isolated-anchor operation-unresolved"') == 1
@@ -478,8 +479,8 @@ def test_canonical_ownership_projects_recursive_shared_focus_hierarchy() -> None
         ("E:ownership:file-parent", "retained"),
     ]
     assert (
-        projection.slices[0].structural_overlay.ownership_edge_ids
-        == projection.slices[1].structural_overlay.ownership_edge_ids
+        projection.slices[0].change_map.structural_overlay.ownership_edge_ids
+        == projection.slices[1].change_map.structural_overlay.ownership_edge_ids
         == (
             "E:ownership:parent-child",
             "E:ownership:file-parent",
@@ -820,11 +821,11 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
     assert "P-anchor-link" in convergence.groups[0].selected_relation_ids
 
     projection = _build_projection(candidates, convergence, evidence)
-    assert projection.slices[0].structural_disposition.state == "projected"
+    assert projection.slices[0].change_map.structural_disposition.state == "projected"
     assert (
         "P-runtime-long"
         in projection.slices[0]
-        .structural_disposition
+        .change_map.structural_disposition
         .deferred_structural_relation_ids
     )
     disposition_html = _structural_disposition(
@@ -835,8 +836,8 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
     assert '<details class="deferred-structural">' in disposition_html
     assert "1 of 1 deferred structural candidate" in disposition_html
     assert "E:path:runtime-long" in disposition_html
-    overlay = projection.slices[0].structural_overlay
-    second_overlay = projection.slices[1].structural_overlay
+    overlay = projection.slices[0].change_map.structural_overlay
+    second_overlay = projection.slices[1].change_map.structural_overlay
     graph = projection.review_graph
     assert {item.review_symbol_id for item in graph.nodes} == {
         "anchor",
@@ -1006,22 +1007,27 @@ def test_review_graph_renders_complete_focus_union() -> None:
     def overlay(focus_id: str, *focus_node_ids: str) -> ReviewSlice:
         edge_ids = () if focus_id == "R3" else (f"D:{focus_id}",)
         return ReviewSlice(
-            focus_statement_id=focus_id,
-            structural_disposition=StructuralFocusDisposition(
-                state="projected"
-            ),
-            structural_overlay=StructuralFocusOverlay(
-                nodes=tuple(
-                    StructuralFocusNode(
-                        node_id=f"N:{node_id}",
-                        role="changed_anchor",
-                    )
-                    for node_id in focus_node_ids
+            change_map=CanonicalChangeMapEntry(
+                focus_statement_id=focus_id,
+                claim_relation_ids=(
+                    ("P:claim",) if focus_id == "R1" else ()
                 ),
-                edge_ids=edge_ids,
-                relation_group_ids=tuple(
-                    group_projection.group_id_by_edge_id[edge_id]
-                    for edge_id in edge_ids
+                structural_disposition=StructuralFocusDisposition(
+                    state="projected"
+                ),
+                structural_overlay=StructuralFocusOverlay(
+                    nodes=tuple(
+                        StructuralFocusNode(
+                            node_id=f"N:{node_id}",
+                            role="changed_anchor",
+                        )
+                        for node_id in focus_node_ids
+                    ),
+                    edge_ids=edge_ids,
+                    relation_group_ids=tuple(
+                        group_projection.group_id_by_edge_id[edge_id]
+                        for edge_id in edge_ids
+                    )
                 ),
             ),
         )
@@ -1032,7 +1038,9 @@ def test_review_graph_renders_complete_focus_union() -> None:
             overlay("R2", "shared", "r2_only"),
             overlay("G1", "g_only", "shared"),
             overlay("R3", "isolated"),
-            ReviewSlice(focus_statement_id="G2"),
+            ReviewSlice(
+                change_map=CanonicalChangeMapEntry(focus_statement_id="G2")
+            ),
         ),
         review_graph=ReviewStructuralGraph(
             nodes=nodes,
@@ -1048,6 +1056,33 @@ def test_review_graph_renders_complete_focus_union() -> None:
         projection,
         SimpleNamespace(
             evidence_catalog=evidence,
+            requirements=tuple(
+                Requirement(id=focus_id, text=f"{focus_id} contract")
+                for focus_id in ("R1", "R2", "R3")
+            ),
+            guardrails=tuple(
+                Requirement(
+                    id=focus_id,
+                    text=f"{focus_id} guardrail",
+                    kind="guardrail",
+                    purpose="guardrail",
+                )
+                for focus_id in ("G1", "G2")
+            ),
+            claims=(ReviewStatement(id="C1", text="R1 implementation claim"),),
+            projection_candidates=ProjectionCandidateSet(
+                relations=(
+                    ProjectionRelation(
+                        id="P:claim",
+                        focus_statement_id="R1",
+                        slot="claim",
+                        target_type="statement",
+                        target_id="C1",
+                        association="exact_identifier",
+                        reasons=(),
+                    ),
+                )
+            ),
             overview=SimpleNamespace(
                 structural_coverage=StructuralCoverage(state="unavailable")
             ),
@@ -1058,6 +1093,11 @@ def test_review_graph_renders_complete_focus_union() -> None:
     assert html.count('data-group-target="') == 3
     assert html.count('role="button" aria-expanded="false"') == 3
     assert "navigation unavailable" in html
+    assert html.count('class="change-map-entry"') == 5
+    assert "R1 implementation claim" in html
+    assert "No selected PR claim association." in html
+    assert 'data-group-expand="' in html
+    assert "Contract statements, typed PR bindings, and repository facts remain separate" in html
 
     assert (
         "5 backbone nodes · 0 support nodes · "
@@ -1432,7 +1472,7 @@ def test_every_requirement_is_routed_without_a_global_statement_budget() -> None
         item.standalone_changed_fact_relation_ids
         for item in projection.slices
     )
-    assert all(item.structural_overlay.nodes for item in projection.slices)
+    assert all(item.change_map.structural_overlay.nodes for item in projection.slices)
     assert len(projection.review_graph.nodes) == 80
     assert not [
         item
@@ -1523,7 +1563,7 @@ def test_isolated_symbol_and_standalone_document_keep_distinct_canonical_forms()
     projection = _build_projection(candidates, convergence, evidence)
     code_slice, document_slice = projection.slices
 
-    assert len(code_slice.structural_overlay.nodes) == 1
+    assert len(code_slice.change_map.structural_overlay.nodes) == 1
     assert projection.review_graph.nodes[0].review_symbol_id == "S:bounded_trace"
     assert projection.review_graph.nodes[0].evidence_ids == (
         "E:structural-change",
@@ -1531,10 +1571,10 @@ def test_isolated_symbol_and_standalone_document_keep_distinct_canonical_forms()
     )
     assert projection.review_graph.edges == ()
     assert len(document_slice.standalone_changed_fact_relation_ids) == 1
-    assert code_slice.structural_disposition.state == "projected"
-    assert document_slice.structural_disposition.state == "non_structural_only"
+    assert code_slice.change_map.structural_disposition.state == "projected"
+    assert document_slice.change_map.structural_disposition.state == "non_structural_only"
     assert (
-        document_slice.structural_disposition.non_structural_relation_ids
+        document_slice.change_map.structural_disposition.non_structural_relation_ids
         == document_slice.standalone_changed_fact_relation_ids
     )
     graph_html = _review_graph(
@@ -2070,8 +2110,8 @@ def test_graph_and_no_graph_use_the_same_projection_contract() -> None:
     assert with_graph.projection.review_graph.nodes
     assert without_graph.projection.review_graph.path_relation_ids == ()
     assert with_graph.projection.review_graph.path_relation_ids == ()
-    assert without_graph.projection.slices[0].structural_overlay.nodes == ()
-    assert with_graph.projection.slices[0].structural_overlay.nodes
+    assert without_graph.projection.slices[0].change_map.structural_overlay.nodes == ()
+    assert with_graph.projection.slices[0].change_map.structural_overlay.nodes
 
 
 def test_change_relation_association_scans_beyond_display_preview() -> None:

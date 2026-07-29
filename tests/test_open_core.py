@@ -22,6 +22,8 @@ def test_fixture_to_requirement_first_html(tmp_path: Path) -> None:
     assert "AI review brief · requirement-first" not in html
     assert "What this PR is trying to do" not in html
     assert ":root{color-scheme:dark" in html
+    assert "Canonical Change Map" in html
+    assert "No projected structural graph is available." in html
     assert ".section{border:2px solid var(--border)" in html
     assert '<details class="requirement" data-focus-id="R1" open>' in html
     assert 'class="brand-mark"' in html
