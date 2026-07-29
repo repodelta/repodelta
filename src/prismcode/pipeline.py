@@ -86,6 +86,7 @@ class DeterministicAnalyzer:
             diagnostic_presentation=diagnostic_presentation,
             changed_files=packet.changed_files,
             guardrail_scan_plans=guardrail_scan_plans,
+            packet=packet,
         )
         overview = build_review_overview(
             packet,
