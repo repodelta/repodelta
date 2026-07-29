@@ -93,7 +93,12 @@ def _verification_relation(fact_id: str, *, ordinal: int = 0) -> ProjectionRelat
     )
 
 
-def _path(fact_id: str, *, depth: int = 1) -> EvidenceItem:
+def _path(
+    fact_id: str,
+    *,
+    depth: int = 1,
+    steps: tuple[tuple[str, str], ...] = (),
+) -> EvidenceItem:
     return EvidenceItem(
         id=fact_id,
         summary=f"Structural path at depth {depth}",
@@ -102,8 +107,31 @@ def _path(fact_id: str, *, depth: int = 1) -> EvidenceItem:
         profile="structural_path",
         authority="structural_provider",
         role="structural_path",
-        metadata={"depth": depth},
+        metadata={
+            "depth": depth,
+            "steps": tuple(
+                {
+                    "source_evidence_id": source,
+                    "target_evidence_id": target,
+                }
+                for source, target in steps
+            ),
+        },
         sources=(SourceRef(label=fact_id),),
+    )
+
+
+def _symbol(fact_id: str, review_symbol_id: str) -> EvidenceItem:
+    return EvidenceItem(
+        id=fact_id,
+        summary=f"Changed function: {review_symbol_id}",
+        kind="symbol",
+        classification="code",
+        profile="production",
+        authority="structural_provider",
+        role="revision_fact",
+        changed=True,
+        metadata={"review_symbol_id": review_symbol_id},
     )
 
 
@@ -529,7 +557,7 @@ def test_terminal_path_replaces_unrelated_shallow_path() -> None:
     ]
 
 
-def test_equivalent_shortest_terminal_paths_remain_canonical_support() -> None:
+def test_equivalent_shortest_terminal_paths_converge_to_one_support() -> None:
     candidates = _candidates(
         _relation(
             "anchor",
@@ -578,12 +606,62 @@ def test_equivalent_shortest_terminal_paths_remain_canonical_support() -> None:
     assert result.selected_relation_ids() == (
         "anchor",
         "path-a",
-        "path-b",
         "runtime",
     )
     assert result.groups[0].structural_closure.path_relation_ids == (
         "path-a",
-        "path-b",
+    )
+
+
+def test_changed_anchor_connection_is_a_backbone_closure_obligation() -> None:
+    candidates = _candidates(
+        _relation(
+            "anchor-a",
+            slot="changed_anchor",
+            target="E:anchor:a",
+            association="exact_identifier",
+        ),
+        _relation(
+            "anchor-b",
+            slot="changed_anchor",
+            target="E:anchor:b",
+            association="exact_identifier",
+            ordinal=1,
+        ),
+        _relation(
+            "backbone-path",
+            slot="structural_path",
+            target="E:path:backbone",
+            association="structural_bridge",
+            bridges=("E:anchor:a",),
+        ),
+    )
+
+    result = converge_candidates(
+        candidates,
+        evidence_catalog=EvidenceCatalog(
+            items=(
+                _symbol("E:anchor:a", "S:a"),
+                _symbol("E:anchor:b", "S:b"),
+                _path(
+                    "E:path:backbone",
+                    steps=(("E:anchor:a", "E:anchor:b"),),
+                ),
+            )
+        ),
+        policy=ConvergencePolicy(
+            max_paths_per_anchor=1,
+            max_path_identities=1,
+        ),
+    )
+
+    assert result.selected_relation_ids() == (
+        "anchor-a",
+        "anchor-b",
+        "backbone-path",
+    )
+    assert result.groups[0].structural_closure.path_relation_ids == (
+        "backbone-path",
     )
 
 

@@ -795,6 +795,7 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
     convergence = converge_candidates(candidates, evidence_catalog=evidence)
     closure = convergence.groups[0].structural_closure
     assert closure.path_relation_ids == (
+        "P-anchor-link",
         "P-runtime",
         "P-test",
         "P-independent",
@@ -806,12 +807,12 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
         "E:relation:anchor-anchor2",
     )
     assert "E:relation:peripheral" not in closure.relation_change_evidence_ids
-    assert "P-anchor-link" in convergence.groups[0].deferred_relation_ids
+    assert "P-anchor-link" in convergence.groups[0].selected_relation_ids
 
     projection = _build_projection(candidates, convergence, evidence)
     assert projection.slices[0].structural_disposition.state == "projected"
     assert (
-        "P-anchor-link"
+        "P-runtime-long"
         in projection.slices[0]
         .structural_disposition
         .deferred_structural_relation_ids
@@ -822,8 +823,8 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
         relations=candidates.by_id(),
     )
     assert '<details class="deferred-structural">' in disposition_html
-    assert "of 2 deferred structural candidates" in disposition_html
-    assert "E:path:anchor-link" in disposition_html
+    assert "1 of 1 deferred structural candidate" in disposition_html
+    assert "E:path:runtime-long" in disposition_html
     overlay = projection.slices[0].structural_overlay
     second_overlay = projection.slices[1].structural_overlay
     graph = projection.review_graph
@@ -848,7 +849,10 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
         for item in graph.edges
         if item.relation_change_evidence_id == "E:relation:anchor-anchor2"
     )
-    assert direct_edge.path_relation_ids == ()
+    assert direct_edge.path_relation_ids == (
+        "P-anchor-link",
+        "R2-P-anchor-link",
+    )
     assert tuple(item.node_id for item in overlay.nodes) == tuple(
         item.node_id for item in second_overlay.nodes
     )
@@ -858,10 +862,10 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
         for graph_node in graph.nodes
         if graph_node.id == item.node_id
     } == {
-        "anchor": ("P-runtime",),
+        "anchor": ("P-runtime", "P-anchor-link"),
         "runtime": ("P-runtime", "P-test"),
         "test": ("P-test",),
-        "anchor_2": ("P-independent",),
+        "anchor_2": ("P-independent", "P-anchor-link"),
         "runtime_2": ("P-independent",),
     }
     html = _review_graph(
