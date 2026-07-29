@@ -44,8 +44,16 @@ Each structural node also owns one canonical display-evidence reference:
 Head for added, modified, renamed, retained, and unresolved nodes when Head
 provenance exists; Base for removed nodes when Base provenance exists.
 Presentation never selects a revision from evidence order.
-Focus-relative roles and association/path relation IDs remain in
-overlays. Review-wide CI,
+Projection also owns canonical executable relation groups. It selects one
+primary placement per child, maps concrete edge endpoints to the nearest
+distinct ownership cells, and groups only edges with the same display
+endpoints, relation, and operation. Every concrete edge remains in exactly one
+group with its evidence identity intact. Groups carry the union of member path
+provenance, and backbone/focus group IDs are projected from canonical
+backbone/focus edge membership. The renderer consumes these groups directly;
+it never regroups edges or chooses display endpoints.
+Focus-relative roles and association/path relation IDs remain in overlays.
+Review-wide CI,
 source coverage, empty state, and structural coverage are computed once here.
 Each G slice references its upstream `GuardrailScanPlan` by ID; projection does
 not reconstruct scan scope or query intent. Selected boundary facts are

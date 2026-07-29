@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+from dataclasses import replace
 
 from prismcode.model.contracts import (
     CandidateConvergence,
@@ -21,6 +22,9 @@ from prismcode.model.contracts import (
     StructuralGraphNode,
     StructuralGraphOwnershipEdge,
     StructuralGraphPlacement,
+)
+from prismcode.projection.structural_groups import (
+    project_structural_relation_groups,
 )
 
 
@@ -255,15 +259,39 @@ def build_review_projection(
         placements=complete_placements,
         seed_node_ids=tuple(dict.fromkeys(backbone_seed_node_ids)),
     )
+    relation_groups = project_structural_relation_groups(
+        nodes=complete_nodes,
+        edges=complete_edges,
+        placements=complete_placements,
+        backbone_edge_ids=backbone_edge_ids,
+    )
+    slices = [
+        replace(
+            review_slice,
+            structural_overlay=replace(
+                review_slice.structural_overlay,
+                relation_group_ids=tuple(
+                    dict.fromkeys(
+                        relation_groups.group_id_by_edge_id[edge_id]
+                        for edge_id in review_slice.structural_overlay.edge_ids
+                    )
+                ),
+            ),
+        )
+        for review_slice in slices
+    ]
     projection = ReviewProjection(
         slices=tuple(slices),
         review_graph=ReviewStructuralGraph(
             nodes=complete_nodes,
             edges=complete_edges,
+            relation_groups=relation_groups.groups,
             ownership_edges=complete_ownership_edges,
             placements=complete_placements,
+            primary_placement_ids=relation_groups.primary_placement_ids,
             backbone_node_ids=backbone_node_ids,
             backbone_edge_ids=backbone_edge_ids,
+            backbone_relation_group_ids=relation_groups.backbone_group_ids,
             backbone_ownership_edge_ids=backbone_ownership_edge_ids,
             path_relation_ids=tuple(dict.fromkeys(graph_path_relation_ids)),
         ),

@@ -1485,6 +1485,39 @@ class StructuralGraphEdge:
 
 
 @dataclass(frozen=True)
+class StructuralRelationGroup:
+    """Projection-owned display lane over canonical executable edges."""
+
+    id: str
+    source_node_id: str
+    target_node_id: str
+    relation: str
+    operation: Literal["added", "removed", "retained"]
+    member_edge_ids: tuple[str, ...]
+    path_relation_ids: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        if not self.member_edge_ids:
+            raise ValueError(f"{self.id}: structural relation group requires members")
+        if len(set(self.member_edge_ids)) != len(self.member_edge_ids):
+            raise ValueError(
+                f"{self.id}: structural relation group members must be unique"
+            )
+        if self.member_edge_ids != tuple(sorted(self.member_edge_ids)):
+            raise ValueError(
+                f"{self.id}: structural relation group members must be sorted"
+            )
+        if len(set(self.path_relation_ids)) != len(self.path_relation_ids):
+            raise ValueError(
+                f"{self.id}: structural relation group paths must be unique"
+            )
+        if self.source_node_id == self.target_node_id:
+            raise ValueError(
+                f"{self.id}: structural relation group requires distinct endpoints"
+            )
+
+
+@dataclass(frozen=True)
 class StructuralGraphOwnershipEdge:
     id: str
     parent_node_id: str
@@ -1530,10 +1563,13 @@ class StructuralGraphPlacement:
 class ReviewStructuralGraph:
     nodes: tuple[StructuralGraphNode, ...] = ()
     edges: tuple[StructuralGraphEdge, ...] = ()
+    relation_groups: tuple[StructuralRelationGroup, ...] = ()
     ownership_edges: tuple[StructuralGraphOwnershipEdge, ...] = ()
     placements: tuple[StructuralGraphPlacement, ...] = ()
+    primary_placement_ids: tuple[str, ...] = ()
     backbone_node_ids: tuple[str, ...] = ()
     backbone_edge_ids: tuple[str, ...] = ()
+    backbone_relation_group_ids: tuple[str, ...] = ()
     backbone_ownership_edge_ids: tuple[str, ...] = ()
     path_relation_ids: tuple[str, ...] = ()
 
@@ -1550,6 +1586,7 @@ class StructuralFocusNode:
 class StructuralFocusOverlay:
     nodes: tuple[StructuralFocusNode, ...] = ()
     edge_ids: tuple[str, ...] = ()
+    relation_group_ids: tuple[str, ...] = ()
     ownership_edge_ids: tuple[str, ...] = ()
     placement_ids: tuple[str, ...] = ()
     path_relation_ids: tuple[str, ...] = ()
@@ -1578,7 +1615,7 @@ class ReviewSlice:
 class ReviewProjection:
     slices: tuple[ReviewSlice, ...] = ()
     review_graph: ReviewStructuralGraph = ReviewStructuralGraph()
-    schema_version: str = "review_projection.v18"
+    schema_version: str = "review_projection.v19"
 
     def validate_consistency(
         self,
@@ -1597,6 +1634,9 @@ class ReviewProjection:
         }
         nodes = {item.id: item for item in self.review_graph.nodes}
         edges = {item.id: item for item in self.review_graph.edges}
+        relation_groups = {
+            item.id: item for item in self.review_graph.relation_groups
+        }
         ownership_edges = {
             item.id: item for item in self.review_graph.ownership_edges
         }
@@ -1607,6 +1647,10 @@ class ReviewProjection:
             raise ValueError("review structural graph contains duplicate nodes")
         if len(edges) != len(self.review_graph.edges):
             raise ValueError("review structural graph contains duplicate edges")
+        if len(relation_groups) != len(self.review_graph.relation_groups):
+            raise ValueError(
+                "review structural graph contains duplicate relation groups"
+            )
         if len(ownership_edges) != len(self.review_graph.ownership_edges):
             raise ValueError(
                 "review structural graph contains duplicate ownership edges"
@@ -1643,6 +1687,9 @@ class ReviewProjection:
                 )
         backbone_node_ids = set(self.review_graph.backbone_node_ids)
         backbone_edge_ids = set(self.review_graph.backbone_edge_ids)
+        backbone_relation_group_ids = set(
+            self.review_graph.backbone_relation_group_ids
+        )
         backbone_ownership_edge_ids = set(
             self.review_graph.backbone_ownership_edge_ids
         )
@@ -1650,6 +1697,12 @@ class ReviewProjection:
             raise ValueError("review structural backbone contains duplicate nodes")
         if len(backbone_edge_ids) != len(self.review_graph.backbone_edge_ids):
             raise ValueError("review structural backbone contains duplicate edges")
+        if len(backbone_relation_group_ids) != len(
+            self.review_graph.backbone_relation_group_ids
+        ):
+            raise ValueError(
+                "review structural backbone contains duplicate relation groups"
+            )
         if len(backbone_ownership_edge_ids) != len(
             self.review_graph.backbone_ownership_edge_ids
         ):
@@ -1659,6 +1712,7 @@ class ReviewProjection:
         if (
             not backbone_node_ids <= set(nodes)
             or not backbone_edge_ids <= set(edges)
+            or not backbone_relation_group_ids <= set(relation_groups)
             or not backbone_ownership_edge_ids <= set(ownership_edges)
         ):
             raise ValueError(
@@ -1689,6 +1743,131 @@ class ReviewProjection:
                 raise ValueError(
                     "review structural edge references invalid relation evidence"
                 )
+        primary_placement_ids = set(self.review_graph.primary_placement_ids)
+        if len(primary_placement_ids) != len(
+            self.review_graph.primary_placement_ids
+        ) or not primary_placement_ids <= set(placements):
+            raise ValueError(
+                "review structural graph references invalid primary placements"
+            )
+        primary_children = [
+            placements[placement_id].child_node_id
+            for placement_id in self.review_graph.primary_placement_ids
+        ]
+        if len(primary_children) != len(set(primary_children)):
+            raise ValueError(
+                "review structural graph has multiple primary placements "
+                "for one child"
+            )
+        if set(primary_children) != {
+            placement.child_node_id
+            for placement in self.review_graph.placements
+        }:
+            raise ValueError(
+                "review structural graph must select one primary placement "
+                "for every placed child"
+            )
+        primary_parent = {
+            placements[placement_id].child_node_id: (
+                placements[placement_id].parent_node_id
+            )
+            for placement_id in self.review_graph.primary_placement_ids
+        }
+
+        def belongs_to_display_endpoint(
+            member_node_id: str,
+            display_node_id: str,
+        ) -> bool:
+            current = member_node_id
+            visited = {current}
+            while True:
+                if current == display_node_id:
+                    return True
+                if current not in primary_parent:
+                    return False
+                current = primary_parent[current]
+                if current in visited:
+                    raise ValueError(
+                        "review structural primary placement contains a cycle"
+                    )
+                visited.add(current)
+
+        grouped_edge_ids = []
+        for group in self.review_graph.relation_groups:
+            if (
+                group.source_node_id not in nodes
+                or group.target_node_id not in nodes
+            ):
+                raise ValueError(
+                    "review structural relation group references a missing node"
+                )
+            members = tuple(edges.get(edge_id) for edge_id in group.member_edge_ids)
+            if any(item is None for item in members):
+                raise ValueError(
+                    "review structural relation group references a missing edge"
+                )
+            if any(
+                item.relation != group.relation
+                or item.operation != group.operation
+                for item in members
+                if item is not None
+            ):
+                raise ValueError(
+                    "review structural relation group member semantics mismatch"
+                )
+            if any(
+                not belongs_to_display_endpoint(
+                    item.source_node_id,
+                    group.source_node_id,
+                )
+                or not belongs_to_display_endpoint(
+                    item.target_node_id,
+                    group.target_node_id,
+                )
+                for item in members
+                if item is not None
+            ):
+                raise ValueError(
+                    "review structural relation group display endpoint mismatch"
+                )
+            expected_paths = tuple(
+                dict.fromkeys(
+                    path_relation_id
+                    for item in members
+                    if item is not None
+                    for path_relation_id in item.path_relation_ids
+                )
+            )
+            if group.path_relation_ids != expected_paths:
+                raise ValueError(
+                    "review structural relation group path provenance mismatch"
+                )
+            grouped_edge_ids.extend(group.member_edge_ids)
+        if (
+            len(grouped_edge_ids) != len(set(grouped_edge_ids))
+            or set(grouped_edge_ids) != set(edges)
+        ):
+            raise ValueError(
+                "review structural relation groups must partition canonical edges"
+            )
+        if any(
+            not set(relation_groups[group_id].member_edge_ids)
+            & backbone_edge_ids
+            for group_id in backbone_relation_group_ids
+        ):
+            raise ValueError(
+                "review structural backbone group requires a backbone member edge"
+            )
+        expected_backbone_groups = {
+            group.id
+            for group in self.review_graph.relation_groups
+            if set(group.member_edge_ids) & backbone_edge_ids
+        }
+        if backbone_relation_group_ids != expected_backbone_groups:
+            raise ValueError(
+                "review structural backbone groups must project every "
+                "backbone executable edge"
+            )
         ownership_pairs: set[tuple[str, str]] = set()
         ownership_children: dict[str, set[str]] = {}
         for edge in self.review_graph.ownership_edges:
@@ -1863,6 +2042,14 @@ class ReviewProjection:
                     "a missing structural edge"
                 )
             if any(
+                group_id not in relation_groups
+                for group_id in overlay.relation_group_ids
+            ):
+                raise ValueError(
+                    f"{review_slice.focus_statement_id}: structural overlay "
+                    "references a missing relation group"
+                )
+            if any(
                 edge_id not in ownership_edges
                 for edge_id in overlay.ownership_edge_ids
             ):
@@ -1878,6 +2065,28 @@ class ReviewProjection:
                 raise ValueError(
                     f"{review_slice.focus_statement_id}: structural edge "
                     "endpoints must belong to the overlay"
+                )
+            if any(
+                relation_groups[group_id].source_node_id not in overlay_node_ids
+                or relation_groups[group_id].target_node_id
+                not in overlay_node_ids
+                or not set(relation_groups[group_id].member_edge_ids)
+                & set(overlay.edge_ids)
+                for group_id in overlay.relation_group_ids
+            ):
+                raise ValueError(
+                    f"{review_slice.focus_statement_id}: structural relation "
+                    "group must represent overlay edges between overlay nodes"
+                )
+            expected_overlay_groups = {
+                group.id
+                for group in self.review_graph.relation_groups
+                if set(group.member_edge_ids) & set(overlay.edge_ids)
+            }
+            if set(overlay.relation_group_ids) != expected_overlay_groups:
+                raise ValueError(
+                    f"{review_slice.focus_statement_id}: structural relation "
+                    "groups must project every overlay edge"
                 )
             if any(
                 ownership_edges[edge_id].parent_node_id not in overlay_node_ids
