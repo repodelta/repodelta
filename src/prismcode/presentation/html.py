@@ -20,6 +20,7 @@ from prismcode.model.contracts import (
     StructuralGraphEdge,
     StructuralGraphNode,
     StructuralGraphPlacement,
+    StructuralNavigationTarget,
     StructuralRelationGroup,
 )
 
@@ -412,7 +413,10 @@ def _review_graph(
             f'{escape(name_label or path_label)}</text>'
             f"<title>{escape(full_name)}</title></g>"
         )
-        href = _structural_href(fact, brief)
+        href = _structural_node_href(
+            parent_node,
+            graph.navigation_targets,
+        )
         container_header_shapes.append(
             f'<a href="{escape(href, quote=True)}" target="_blank" '
             f'rel="noopener">{header}</a>'
@@ -553,7 +557,7 @@ def _review_graph(
             f'{escape(path_label)}</text>'
             f"<title>{escape(full_name)}</title></g>"
         )
-        href = _structural_href(fact, brief)
+        href = _structural_node_href(node, graph.navigation_targets)
         node_shapes.append(
             f'<a href="{escape(href, quote=True)}" target="_blank" '
             f'rel="noopener">{content}</a>'
@@ -766,18 +770,21 @@ def _truncate_label(value: str, limit: int) -> str:
     return value if len(value) <= limit else value[: limit - 1] + "…"
 
 
-def _structural_href(item: EvidenceItem, brief: ReviewBrief) -> str | None:
-    for source in item.sources:
-        href = _safe_href(source.url)
-        if href:
-            return href
-        if source.path and brief.packet.head_sha:
-            line = f"#L{source.line_start}" if source.line_start else ""
-            return (
-                f"https://github.com/{brief.packet.repository}/blob/"
-                f"{brief.packet.head_sha}/{quote(source.path, safe='/')}{line}"
-            )
-    return None
+def _structural_node_href(
+    node: StructuralGraphNode,
+    targets: tuple[StructuralNavigationTarget, ...],
+) -> str | None:
+    by_id = {item.id: item for item in targets}
+    change = by_id.get(node.change_navigation_target_id)
+    symbol = by_id.get(node.symbol_navigation_target_id)
+    if symbol is None:
+        return None
+    selected = (
+        change
+        if change is not None and change.state == "available"
+        else symbol
+    )
+    return selected.url if selected.state == "available" else None
 
 
 def _structural_compound_layout(

@@ -13,6 +13,7 @@ from prismcode.model.contracts import (
     ProjectionCandidateSet,
     ProjectionRelation,
     ReviewProjection,
+    ReviewSourcePacket,
     ReviewSlice,
     ReviewStructuralGraph,
     StructuralFocusNode,
@@ -25,6 +26,9 @@ from prismcode.model.contracts import (
 )
 from prismcode.projection.structural_groups import (
     project_structural_relation_groups,
+)
+from prismcode.projection.structural_navigation import (
+    project_structural_navigation,
 )
 
 
@@ -42,6 +46,7 @@ def build_review_projection(
     diagnostic_presentation: DiagnosticPresentation,
     changed_files: tuple[ChangedFile, ...] = (),
     guardrail_scan_plans: GuardrailScanPlanSet = GuardrailScanPlanSet(),
+    packet: ReviewSourcePacket | None = None,
 ) -> ReviewProjection:
     """Project converged canonical facts without performing retrieval or selection."""
 
@@ -265,6 +270,12 @@ def build_review_projection(
         placements=complete_placements,
         backbone_edge_ids=backbone_edge_ids,
     )
+    navigation = project_structural_navigation(
+        nodes=complete_nodes,
+        edges=complete_edges,
+        evidence=evidence,
+        packet=packet,
+    )
     slices = [
         replace(
             review_slice,
@@ -283,8 +294,8 @@ def build_review_projection(
     projection = ReviewProjection(
         slices=tuple(slices),
         review_graph=ReviewStructuralGraph(
-            nodes=complete_nodes,
-            edges=complete_edges,
+            nodes=navigation.nodes,
+            edges=navigation.edges,
             relation_groups=relation_groups.groups,
             ownership_edges=complete_ownership_edges,
             placements=complete_placements,
@@ -294,6 +305,7 @@ def build_review_projection(
             backbone_relation_group_ids=relation_groups.backbone_group_ids,
             backbone_ownership_edge_ids=backbone_ownership_edge_ids,
             path_relation_ids=tuple(dict.fromkeys(graph_path_relation_ids)),
+            navigation_targets=navigation.targets,
         ),
     )
     projection.validate_consistency(

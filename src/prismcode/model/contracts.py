@@ -1461,6 +1461,54 @@ StructuralGraphNodeDelta = Literal[
     "retained",
     "unresolved",
 ]
+StructuralNavigationState = Literal["available", "unavailable"]
+StructuralNavigationKind = Literal["revision_symbol", "pull_request_diff"]
+StructuralNavigationPurpose = Literal["symbol", "change"]
+
+
+@dataclass(frozen=True)
+class StructuralNavigationTarget:
+    """Projection-owned destination; renderers must not derive repository URLs."""
+
+    id: str
+    owner_node_id: str
+    purpose: StructuralNavigationPurpose
+    state: StructuralNavigationState
+    kind: StructuralNavigationKind | None = None
+    revision_side: Literal["base", "head"] | None = None
+    url: str | None = None
+    path: str | None = None
+    line_start: int | None = None
+    line_end: int | None = None
+    reason: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.state == "available":
+            if (
+                self.kind is None
+                or self.revision_side is None
+                or self.url is None
+                or self.path is None
+            ):
+                raise ValueError(
+                    f"{self.id}: available structural navigation is incomplete"
+                )
+            if self.reason is not None:
+                raise ValueError(
+                    f"{self.id}: available structural navigation has a reason"
+                )
+        elif (
+            self.kind is not None
+            or self.revision_side is not None
+            or self.url is not None
+            or self.path is not None
+            or self.line_start is not None
+            or self.line_end is not None
+            or not self.reason
+        ):
+            raise ValueError(
+                f"{self.id}: unavailable structural navigation carries a target"
+            )
 
 
 @dataclass(frozen=True)
@@ -1471,6 +1519,8 @@ class StructuralGraphNode:
     evidence_ids: tuple[str, ...]
     display_evidence_id: str
     path_relation_ids: tuple[str, ...] = ()
+    symbol_navigation_target_id: str = ""
+    change_navigation_target_id: str = ""
 
 
 @dataclass(frozen=True)
@@ -1482,6 +1532,8 @@ class StructuralGraphEdge:
     operation: Literal["added", "removed", "retained"]
     relation_change_evidence_id: str
     path_relation_ids: tuple[str, ...] = ()
+    source_navigation_target_id: str = ""
+    target_navigation_target_id: str = ""
 
 
 @dataclass(frozen=True)
@@ -1572,6 +1624,7 @@ class ReviewStructuralGraph:
     backbone_relation_group_ids: tuple[str, ...] = ()
     backbone_ownership_edge_ids: tuple[str, ...] = ()
     path_relation_ids: tuple[str, ...] = ()
+    navigation_targets: tuple[StructuralNavigationTarget, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -1615,7 +1668,7 @@ class ReviewSlice:
 class ReviewProjection:
     slices: tuple[ReviewSlice, ...] = ()
     review_graph: ReviewStructuralGraph = ReviewStructuralGraph()
-    schema_version: str = "review_projection.v19"
+    schema_version: str = "review_projection.v20"
 
     def validate_consistency(
         self,
@@ -1643,6 +1696,9 @@ class ReviewProjection:
         placements = {
             item.id: item for item in self.review_graph.placements
         }
+        navigation_targets = {
+            item.id: item for item in self.review_graph.navigation_targets
+        }
         if len(nodes) != len(self.review_graph.nodes):
             raise ValueError("review structural graph contains duplicate nodes")
         if len(edges) != len(self.review_graph.edges):
@@ -1658,6 +1714,12 @@ class ReviewProjection:
         if len(placements) != len(self.review_graph.placements):
             raise ValueError(
                 "review structural graph contains duplicate placements"
+            )
+        if len(navigation_targets) != len(
+            self.review_graph.navigation_targets
+        ):
+            raise ValueError(
+                "review structural graph contains duplicate navigation targets"
             )
         for node in self.review_graph.nodes:
             if node.display_evidence_id not in node.evidence_ids:
@@ -1684,6 +1746,44 @@ class ReviewProjection:
                 raise ValueError(
                     "review structural node display evidence does not use its "
                     "canonical revision"
+                )
+            symbol_target = navigation_targets.get(
+                node.symbol_navigation_target_id
+            )
+            change_target = navigation_targets.get(
+                node.change_navigation_target_id
+            )
+            if (
+                symbol_target is None
+                or symbol_target.owner_node_id != node.id
+                or symbol_target.purpose != "symbol"
+                or change_target is None
+                or change_target.owner_node_id != node.id
+                or change_target.purpose != "change"
+            ):
+                raise ValueError(
+                    "review structural node references invalid navigation targets"
+                )
+            desired_revision = (
+                "base"
+                if node.delta == "removed"
+                else "head"
+                if node.delta in {"added", "modified", "renamed"}
+                else display_fact.revision_side
+            )
+            if (
+                symbol_target.state == "available"
+                and symbol_target.revision_side != desired_revision
+            ):
+                raise ValueError(
+                    "review structural node symbol navigation revision mismatch"
+                )
+            if (
+                change_target.state == "available"
+                and change_target.revision_side != desired_revision
+            ):
+                raise ValueError(
+                    "review structural node change navigation revision mismatch"
                 )
         backbone_node_ids = set(self.review_graph.backbone_node_ids)
         backbone_edge_ids = set(self.review_graph.backbone_edge_ids)
@@ -1743,6 +1843,45 @@ class ReviewProjection:
                 raise ValueError(
                     "review structural edge references invalid relation evidence"
                 )
+            source_target = navigation_targets.get(
+                edge.source_navigation_target_id
+            )
+            target_target = navigation_targets.get(
+                edge.target_navigation_target_id
+            )
+            if (
+                source_target is None
+                or source_target.owner_node_id != edge.source_node_id
+                or source_target.purpose != "symbol"
+                or target_target is None
+                or target_target.owner_node_id != edge.target_node_id
+                or target_target.purpose != "symbol"
+            ):
+                raise ValueError(
+                    "review structural edge references invalid endpoint navigation"
+                )
+        referenced_navigation_target_ids = {
+            *(
+                target_id
+                for node in self.review_graph.nodes
+                for target_id in (
+                    node.symbol_navigation_target_id,
+                    node.change_navigation_target_id,
+                )
+            ),
+            *(
+                target_id
+                for edge in self.review_graph.edges
+                for target_id in (
+                    edge.source_navigation_target_id,
+                    edge.target_navigation_target_id,
+                )
+            ),
+        }
+        if referenced_navigation_target_ids != set(navigation_targets):
+            raise ValueError(
+                "review structural graph contains dangling navigation targets"
+            )
         primary_placement_ids = set(self.review_graph.primary_placement_ids)
         if len(primary_placement_ids) != len(
             self.review_graph.primary_placement_ids
@@ -2193,7 +2332,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v32"
+    schema_version: str = "review_brief.v33"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
