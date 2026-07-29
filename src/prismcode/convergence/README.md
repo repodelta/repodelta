@@ -24,19 +24,23 @@ Within those safety boundaries, the routing-owned focus-evidence role retains
 primary anchors before test and document support. Convergence never derives the
 role or suppresses a support lane semantically.
 
-Structural paths and structurally bridged runtime/test contexts converge as one
-terminal-aware unit. For each reachable anchor-terminal connection, shortest
-canonical path identities are eligible; distinct terminal coverage precedes
-redundant equivalent support. Per-anchor, total-path, and context-identity
-limits apply only to that peripheral connection set. One
-`ReviewRelevantStructuralClosure` replaces terminal-only support: it references
-the selected path relations plus every already-collected canonical
-relation-change fact whose endpoints are selected anchors, selected terminals,
-or nodes on retained connecting paths. Direct review-relevant edges do not
-compete with terminal path budgets. All other path provenance remains canonical
-in the group's deferred relation IDs. Direct/provider context without a path
-bridge remains standalone. A terminal available only behind a safety-deferred
-connection is `upstream_deferred`, not unassociated.
+Structural paths and structurally bridged runtime/test contexts converge under
+one `ReviewRelevantStructuralClosure` authority. The closure first retains a
+canonical path for each observed changed-anchor-to-changed-anchor backbone
+connection, then adds one canonical support path per distinct runtime/test
+terminal. A path shared by multiple obligations is stored once. Equivalent
+shortest paths are provenance alternatives, not separate coverage obligations,
+so they remain deferred rather than consuming the safety budget.
+
+Per-anchor, total-path, and context-identity limits apply only at complete path
+identity boundaries. Diagnostics count uncovered backbone and terminal
+obligations; they do not describe the number of raw reachable path candidates.
+The closure references the retained path relations plus every already-collected
+canonical relation-change fact whose endpoints are selected anchors, selected
+terminals, or nodes on retained paths. Direct review-relevant edges do not
+compete with path budgets. Direct/provider context without a path bridge remains
+standalone. A terminal available only behind a safety-deferred closure
+obligation is `upstream_deferred`, not unassociated.
 
 Claim bridges remain reachable only through selected claims. In the remaining
 competitive claim slot, stable source order breaks ties only within one
