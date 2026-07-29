@@ -1,21 +1,16 @@
 from __future__ import annotations
 
-import hashlib
 from typing import Iterable, Literal
 
 from prismcode.routing.association import (
-    distinctive_signature_terms,
     distinctive_text_terms,
-    evidence_reasons,
     statement_reasons,
 )
 from prismcode.model.contracts import (
-    AssociationKind,
     AssociationReason,
     CoverageState,
     EvidenceCatalog,
     EvidenceItem,
-    FocusEvidenceRole,
     GuardrailScanPlanSet,
     ProjectionCandidateGroup,
     ProjectionCandidateSet,
@@ -23,15 +18,13 @@ from prismcode.model.contracts import (
     ProjectionRelation,
     ProjectionSlot,
     Requirement,
-    RequirementProfile,
     ReviewStatement,
 )
 from prismcode.routing.coverage import review_provider_diagnostics
+from prismcode.routing.focus_anchors import associate_focus_anchors
+from prismcode.routing.relations import candidate_key, projection_relation
 from prismcode.routing.semantics import (
     anchor_key,
-    eligible_changed_anchor,
-    evidence_signature,
-    focus_evidence_role,
     requirement_profile,
 )
 from prismcode.providers.structural import StructuralGraphCollection
@@ -131,14 +124,11 @@ def build_projection_candidates(
                 )
             )
 
-        eligible_anchors = tuple(
-            item for item in changed if eligible_changed_anchor(item, profile, focus)
-        )
-        anchor_relations = _focus_relevant_anchor_relations(
+        anchor_associations = associate_focus_anchors(
             focus,
             associated_claims,
             claims,
-            eligible_anchors,
+            changed,
             focus_distinctive_terms=focus_distinctive_terms.get(
                 focus.id,
                 frozenset(),
@@ -146,6 +136,8 @@ def build_projection_candidates(
             claim_distinctive_terms=claim_distinctive_terms,
             profile=profile,
         )
+        anchor_relations = anchor_associations.relations
+        eligible_anchor_ids = anchor_associations.eligible_anchor_ids
         focus_relations.extend(anchor_relations)
         candidate_anchor_ids = tuple(
             relation.target_id for relation in anchor_relations
@@ -157,7 +149,7 @@ def build_projection_candidates(
                 else "unsupported_change_type"
                 if all(item.profile == "generated" for item in changed)
                 else "no_eligible_fact"
-                if not eligible_anchors
+                if not eligible_anchor_ids
                 else "no_association"
             )
             focus_diagnostics.append(
@@ -244,7 +236,7 @@ def build_projection_candidates(
             )
             for ordinal, fact in enumerate(boundary_facts):
                 focus_relations.append(
-                    _relation(
+                    projection_relation(
                         focus.id,
                         "boundary_fact",
                         "evidence",
@@ -320,7 +312,7 @@ def build_projection_candidates(
 
         focus_relations = sorted(
             {item.id: item for item in focus_relations}.values(),
-            key=_candidate_key,
+            key=candidate_key,
         )
         focus_diagnostics = list(
             {
@@ -367,7 +359,7 @@ def _claim_relations(
         if not reasons:
             continue
         result.append(
-            _relation(
+            projection_relation(
                 focus.id,
                 "claim",
                 "statement",
@@ -377,177 +369,7 @@ def _claim_relations(
                 source_ordinal=ordinal,
             )
         )
-    return tuple(sorted(result, key=_candidate_key))
-
-
-def _focus_relevant_anchor_relations(
-    focus: Requirement,
-    associated_claim_ids: set[str],
-    claims: tuple[ReviewStatement, ...],
-    anchors: tuple[EvidenceItem, ...],
-    *,
-    focus_distinctive_terms: frozenset[str],
-    claim_distinctive_terms: dict[str, frozenset[str]],
-    profile: RequirementProfile,
-) -> tuple[ProjectionRelation, ...]:
-    """Return the sole changed-anchor authority for one review focus."""
-
-    claims_by_id = {item.id: item for item in claims}
-    direct_anchor_terms = distinctive_signature_terms(
-        tuple(
-            (anchor.id, evidence_signature(anchor, focus))
-            for anchor in anchors
-        )
-    )
-    anchor_terms_by_claim = {
-        claim_id: distinctive_signature_terms(
-            tuple(
-                (anchor.id, evidence_signature(anchor, claim))
-                for anchor in anchors
-            )
-        )
-        for claim_id in associated_claim_ids
-        for claim in (claims_by_id.get(claim_id),)
-        if claim is not None
-    }
-    direct_reasons_by_anchor = {
-        anchor.id: evidence_reasons(
-            focus,
-            evidence_signature(anchor, focus),
-            distinctive_terms=focus_distinctive_terms,
-        )
-        for anchor in anchors
-    }
-    discriminative_direct_reasons_by_anchor = {
-        anchor.id: evidence_reasons(
-            focus,
-            evidence_signature(anchor, focus),
-            distinctive_terms=(
-                focus_distinctive_terms
-                & direct_anchor_terms.get(anchor.id, frozenset())
-            ),
-        )
-        for anchor in anchors
-    }
-    discriminative_phrase_profiles = {
-        anchor.profile
-        for anchor in anchors
-        if (
-            reasons := discriminative_direct_reasons_by_anchor[anchor.id]
-        )
-        and reasons[0].kind == "distinctive_phrase"
-    }
-    result = []
-    for ordinal, anchor in enumerate(anchors):
-        evidence_role = focus_evidence_role(
-            profile,
-            anchor.profile,
-        )
-        provided = anchor.associated_statement_ids
-        if focus.id in provided:
-            reasons = (
-                AssociationReason(
-                    kind="provided_association",
-                    detail="The provider explicitly associates this fact with the focus.",
-                ),
-            )
-            result.append(
-                _relation(
-                    focus.id,
-                    "changed_anchor",
-                    "evidence",
-                    anchor.id,
-                    "provided_association",
-                    reasons,
-                    evidence_role=evidence_role,
-                    source_ordinal=ordinal,
-                )
-            )
-            continue
-        direct = _converged_direct_reasons(
-            direct_reasons_by_anchor[anchor.id],
-            discriminative_direct_reasons_by_anchor[anchor.id],
-            has_discriminative_phrase_cohort=(
-                anchor.profile in discriminative_phrase_profiles
-            ),
-        )
-        bridges = []
-        bridge_matched_terms: set[str] = set()
-        for claim_id in sorted(associated_claim_ids):
-            claim = claims_by_id.get(claim_id)
-            if claim is None:
-                continue
-            bridge_terms = (
-                claim_distinctive_terms.get(claim_id, frozenset())
-                & anchor_terms_by_claim.get(claim_id, {}).get(
-                    anchor.id,
-                    frozenset(),
-                )
-            )
-            bridge_reasons = evidence_reasons(
-                claim,
-                evidence_signature(anchor, claim),
-                distinctive_terms=bridge_terms,
-            )
-            if not bridge_reasons:
-                continue
-            bridges.append(claim_id)
-            bridge_matched_terms.update(bridge_reasons[0].matched_terms)
-        if direct:
-            result.append(
-                _relation(
-                    focus.id,
-                    "changed_anchor",
-                    "evidence",
-                    anchor.id,
-                    direct[0].kind,
-                    direct,
-                    evidence_role=evidence_role,
-                    source_ordinal=ordinal,
-                )
-            )
-        elif bridges:
-            result.append(
-                _relation(
-                    focus.id,
-                    "changed_anchor",
-                    "evidence",
-                    anchor.id,
-                    "claim_bridge",
-                    (
-                        AssociationReason(
-                            kind="claim_bridge",
-                            detail=(
-                                "An associated PR claim has a deterministic "
-                                "identifier or discriminative phrase relation "
-                                "to this changed anchor."
-                            ),
-                            matched_terms=tuple(sorted(bridge_matched_terms)),
-                        ),
-                    ),
-                    evidence_role=evidence_role,
-                    bridge_ids=tuple(bridges),
-                    source_ordinal=ordinal,
-                )
-            )
-    return tuple(sorted(result, key=_candidate_key))
-
-
-def _converged_direct_reasons(
-    direct: tuple[AssociationReason, ...],
-    discriminative: tuple[AssociationReason, ...],
-    *,
-    has_discriminative_phrase_cohort: bool,
-) -> tuple[AssociationReason, ...]:
-    if not direct:
-        return ()
-    if direct[0].kind == "exact_identifier":
-        return direct
-    if discriminative:
-        return discriminative
-    if has_discriminative_phrase_cohort:
-        return ()
-    return direct
+    return tuple(sorted(result, key=candidate_key))
 
 
 def _structural_relations(
@@ -577,7 +399,7 @@ def _structural_relations(
             )
         )
         result.append(
-            _relation(
+            projection_relation(
                 focus.id,
                 "structural_path",
                 "evidence",
@@ -606,7 +428,7 @@ def _structural_relations(
             if slot is None:
                 continue
             result.append(
-                _relation(
+                projection_relation(
                     focus.id,
                     slot,
                     "evidence",
@@ -625,7 +447,7 @@ def _structural_relations(
                     source_ordinal=item_ordinal,
                 )
             )
-    return tuple(sorted(result, key=_candidate_key))
+    return tuple(sorted(result, key=candidate_key))
 
 
 def _verification_relations(
@@ -644,7 +466,7 @@ def _verification_relations(
         if observed_sha != head_sha:
             continue
         result.append(
-            _relation(
+            projection_relation(
                 focus.id,
                 "verification",
                 "evidence",
@@ -659,7 +481,7 @@ def _verification_relations(
                 source_ordinal=ordinal,
             )
         )
-    return tuple(sorted(result, key=_candidate_key))
+    return tuple(sorted(result, key=candidate_key))
 
 
 def _provided_context_relations(
@@ -680,7 +502,7 @@ def _provided_context_relations(
         if slot is None:
             continue
         result.append(
-            _relation(
+            projection_relation(
                 focus.id,
                 slot,
                 "evidence",
@@ -698,7 +520,7 @@ def _provided_context_relations(
                 source_ordinal=ordinal,
             )
         )
-    return tuple(sorted(result, key=_candidate_key))
+    return tuple(sorted(result, key=candidate_key))
 
 
 def _missing(
@@ -738,43 +560,3 @@ def _structural_missing(
             "the structural source state."
         )
     return "no_association", f"No eligible {label} was connected to the selected anchor."
-
-
-def _relation(
-    focus_id: str,
-    slot: ProjectionSlot,
-    target_type: Literal["statement", "evidence"],
-    target_id: str,
-    association: AssociationKind,
-    reasons: tuple[AssociationReason, ...],
-    *,
-    evidence_role: FocusEvidenceRole = "primary",
-    bridge_ids: tuple[str, ...] = (),
-    source_ordinal: int = 0,
-) -> ProjectionRelation:
-    identity = (
-        f"{focus_id}\0{slot}\0{target_type}\0{target_id}\0"
-        f"{association}\0{evidence_role}"
-    )
-    digest = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:20]
-    return ProjectionRelation(
-        id=f"PR:{digest}",
-        focus_statement_id=focus_id,
-        slot=slot,
-        target_type=target_type,
-        target_id=target_id,
-        association=association,
-        reasons=reasons,
-        evidence_role=evidence_role,
-        bridge_ids=bridge_ids,
-        source_ordinal=source_ordinal,
-    )
-
-
-def _candidate_key(item: ProjectionRelation) -> tuple[object, ...]:
-    return (
-        item.slot,
-        item.source_ordinal,
-        item.target_id,
-        item.association,
-    )

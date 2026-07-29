@@ -4,6 +4,8 @@
 
 Requirement profiles, fact eligibility, authority-aware association,
 focus-relative evidence roles, and complete per-R/G typed candidate enumeration.
+`FocusAnchorAssociationSet` is the one production authority for the closed
+focus + claims + changed facts → changed-anchor relation region.
 
 ## Input / output
 
@@ -21,6 +23,10 @@ fan-out; otherwise anchors sharing one legitimate implementation meaning remain
 a set. Documentation, production, and test facts never suppress one another.
 This focus-relevant anchor relation set is the only authority that may seed
 structural path, runtime, or test expansion.
+Delivery requirements may use discriminative phrase association. Guardrails
+require provider association, an exact identifier, or a deterministic bridge
+through an already-associated PR claim; generic phrase overlap is not
+implementation evidence for an out-of-scope boundary.
 Document frequency is computed over unique semantic meanings, so duplicate
 focus text retains the same authority. Exact identifiers, explicit references,
 and provider associations do not depend on phrase distinctiveness. Claim

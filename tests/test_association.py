@@ -11,6 +11,7 @@ from prismcode.routing.association import (
     statement_reasons,
 )
 from prismcode.routing.candidates import build_projection_candidates
+from prismcode.routing.focus_anchors import associate_focus_anchors
 
 
 def _focus(identifier: str, text: str) -> Requirement:
@@ -282,3 +283,173 @@ def test_phrase_cohorts_do_not_suppress_other_fact_profiles() -> None:
         for item in candidates.relations
         if item.slot == "changed_anchor"
     } == {"E:production", "E:document:nodes"}
+
+
+def test_guardrail_phrase_overlap_is_not_implementation_association() -> None:
+    focus = Requirement(
+        id="G1",
+        text="No renderer graph presentation changes",
+        purpose="guardrail",
+        kind="guardrail",
+    )
+    anchor = EvidenceItem(
+        id="E:presentation",
+        summary="Changed renderer graph presentation layout",
+        kind="change_relation",
+        classification="code",
+        profile="production",
+        authority="github_diff",
+        revision_side="head",
+        operation="modified",
+        role="changed_anchor",
+        changed=True,
+        head_signature=association_signature(
+            "Changed renderer graph presentation layout"
+        ),
+    )
+
+    candidates = build_projection_candidates(
+        requirements=(focus,),
+        claims=(),
+        evidence_catalog=EvidenceCatalog(items=(anchor,)),
+        structural_graph=None,
+        head_sha=None,
+    )
+
+    assert not [
+        item for item in candidates.relations if item.slot == "changed_anchor"
+    ]
+
+
+def test_guardrail_keeps_exact_and_provided_anchor_authority() -> None:
+    focus = Requirement(
+        id="G1",
+        text="Do not call build_focus_overlay",
+        purpose="guardrail",
+        kind="guardrail",
+    )
+    exact = EvidenceItem(
+        id="E:exact",
+        summary="Changed function: build_focus_overlay",
+        kind="change_relation",
+        classification="code",
+        profile="production",
+        authority="github_diff",
+        revision_side="head",
+        operation="modified",
+        role="changed_anchor",
+        changed=True,
+        head_signature=association_signature(
+            "Changed function: build_focus_overlay"
+        ),
+    )
+    provided = EvidenceItem(
+        id="E:provided",
+        summary="Changed unrelated cleanup",
+        kind="change_relation",
+        classification="code",
+        profile="production",
+        authority="github_diff",
+        revision_side="head",
+        operation="modified",
+        role="changed_anchor",
+        changed=True,
+        associated_statement_ids=("G1",),
+        head_signature=association_signature("Changed unrelated cleanup"),
+    )
+
+    candidates = build_projection_candidates(
+        requirements=(focus,),
+        claims=(),
+        evidence_catalog=EvidenceCatalog(items=(exact, provided)),
+        structural_graph=None,
+        head_sha=None,
+    )
+
+    assert {
+        (item.target_id, item.association)
+        for item in candidates.relations
+        if item.slot == "changed_anchor"
+    } == {
+        ("E:exact", "exact_identifier"),
+        ("E:provided", "provided_association"),
+    }
+
+
+def test_guardrail_keeps_deterministic_associated_claim_bridge() -> None:
+    focus = Requirement(
+        id="G1",
+        text="No presentation changes",
+        purpose="guardrail",
+        kind="guardrail",
+    )
+    claim = _claim("C1", "Keep structural overlay renderer unchanged")
+    anchor = EvidenceItem(
+        id="E:overlay",
+        summary="Changed structural overlay renderer",
+        kind="change_relation",
+        classification="code",
+        profile="production",
+        authority="github_diff",
+        revision_side="head",
+        operation="modified",
+        role="changed_anchor",
+        changed=True,
+        head_signature=association_signature(
+            "Changed structural overlay renderer"
+        ),
+    )
+
+    associations = associate_focus_anchors(
+        focus,
+        {"C1"},
+        (claim,),
+        (anchor,),
+        focus_distinctive_terms=frozenset(),
+        claim_distinctive_terms={"C1": frozenset({"overlay", "renderer"})},
+        profile="guardrail",
+    )
+
+    assert len(associations.relations) == 1
+    assert associations.relations[0].association == "claim_bridge"
+    assert associations.relations[0].bridge_ids == ("C1",)
+
+
+def test_direct_and_claim_bridge_merge_into_one_anchor_relation() -> None:
+    focus = _focus("R1", "Render canonical structural graph nodes")
+    claim = _claim("C1", "Render canonical structural graph nodes from projection")
+    anchor = EvidenceItem(
+        id="E:nodes",
+        summary="Render canonical structural graph nodes from projection",
+        kind="change_relation",
+        classification="code",
+        profile="production",
+        authority="github_diff",
+        revision_side="head",
+        operation="modified",
+        role="changed_anchor",
+        changed=True,
+        head_signature=association_signature(
+            "Render canonical structural graph nodes from projection"
+        ),
+    )
+
+    associations = associate_focus_anchors(
+        focus,
+        {"C1"},
+        (claim,),
+        (anchor,),
+        focus_distinctive_terms=frozenset({"nodes"}),
+        claim_distinctive_terms={"C1": frozenset({"projection"})},
+        profile="ui",
+    )
+
+    assert len(associations.relations) == 1
+    relation = associations.relations[0]
+    assert relation.target_id == "E:nodes"
+    assert relation.association == "distinctive_phrase"
+    assert relation.bridge_ids == ("C1",)
+    assert [reason.kind for reason in relation.reasons] == [
+        "distinctive_phrase",
+        "claim_bridge",
+    ]
