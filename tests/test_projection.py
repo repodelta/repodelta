@@ -1053,6 +1053,11 @@ def test_review_graph_renders_complete_focus_union() -> None:
             ),
         ),
     )
+    assert html.count('class="relation-group-details"') == 3
+    assert html.count('class="relation-member"') == 3
+    assert html.count('data-group-target="') == 3
+    assert html.count('role="button" aria-expanded="false"') == 3
+    assert "navigation unavailable" in html
 
     assert (
         "5 backbone nodes · 0 support nodes · "
