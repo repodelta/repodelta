@@ -10,6 +10,12 @@ from prismcode.model.contracts import (
     StatementAuthority,
     StatementPurpose,
     StatementRole,
+    TransformationClaim,
+    TransformationClaimKind,
+    TransformationContract,
+    TransformationMigration,
+    TransformationRegion,
+    TransformationTopology,
 )
 
 _OBLIGATION_HEADINGS = {
@@ -155,7 +161,7 @@ _LIST_ITEM_RE = re.compile(
     r"^(?P<indent>[ \t]*)"
     r"(?:(?:[-*+]|\u2022|\u00b7|\u25aa|\u25e6)\s+(?:\[[ xX]\]\s+)?"
     r"|(?:\d+[.)]|\(\d+\)|\d+\u3001|[一二三四五六七八九十]+\u3001)\s*"
-    r"|(?:R|AC|REQ)[-_ ]?\d+\s*[:.\u3001]\s*)"
+    r"|(?:R|G|V|O|S|C|B|VC|T|CC|AC|REQ)[-_ ]?\d+\s*[:.\u3001]\s*)"
     r"(?P<text>.+?)\s*$",
     re.IGNORECASE,
 )
@@ -163,6 +169,10 @@ _INLINE_NUMBER_RE = re.compile(r"(?:(?<=^)|(?<=[;\uff1b]))\s*(?:\d+[.)]|\(\d+\))
 _STATEMENT_LABEL_RE = re.compile(
     r"^(?P<prefix>R|G|V|O|S|C|B|VC|AC|REQ)[-_ ]?\d+"
     r"\s*[:.\u3001]\s*",
+    re.IGNORECASE,
+)
+_TRANSFORMATION_LABEL_RE = re.compile(
+    r"^(?:T|CC)[-_ ]?\d+\s*[:.\u3001]\s*",
     re.IGNORECASE,
 )
 _LABEL_PREFIXES_BY_PURPOSE: dict[StatementPurpose, frozenset[str]] = {
@@ -177,6 +187,60 @@ _LABEL_PREFIXES_BY_PURPOSE: dict[StatementPurpose, frozenset[str]] = {
 _HEADING_RE = re.compile(r"^\s{0,3}#{1,6}\s+(.+?)\s*#*\s*$")
 _FENCE_RE = re.compile(r"^\s*(```+|~~~+)")
 _HEADING_DECORATION_RE = re.compile(r"^[^a-z0-9]+|[^a-z0-9]+$")
+_TRANSFORMATION_HEADINGS: dict[str, TransformationClaimKind] = {
+    "change": "change",
+    "selected region": "selected_region",
+    "change region": "selected_region",
+    "transformation region": "selected_region",
+    "before topology": "before_topology",
+    "base topology": "before_topology",
+    "after topology": "after_topology",
+    "target topology": "after_topology",
+    "canonical authority": "authority",
+    "authority": "authority",
+    "production path": "production_path",
+    "production paths": "production_path",
+    "canonical production path": "production_path",
+    "migration": "migration",
+    "migrations": "migration",
+    "removed legacy paths": "removal",
+    "legacy removal": "removal",
+    "removal": "removal",
+    "completion condition": "completion_condition",
+    "completion conditions": "completion_condition",
+    "uncertainty": "uncertainty",
+    "uncertainties": "uncertainty",
+}
+_TRANSFORMATION_CHILD_HEADINGS: dict[
+    tuple[str, str], TransformationClaimKind
+] = {
+    ("selected region", "inputs"): "input_boundary",
+    ("selected region", "input boundary"): "input_boundary",
+    ("selected region", "input boundaries"): "input_boundary",
+    ("selected region", "outputs"): "output_boundary",
+    ("selected region", "output boundary"): "output_boundary",
+    ("selected region", "output boundaries"): "output_boundary",
+    ("selected region", "boundaries"): "boundary",
+    ("selected region", "external boundaries"): "boundary",
+    ("change region", "inputs"): "input_boundary",
+    ("change region", "outputs"): "output_boundary",
+    ("change region", "boundaries"): "boundary",
+    ("transformation region", "inputs"): "input_boundary",
+    ("transformation region", "outputs"): "output_boundary",
+    ("transformation region", "boundaries"): "boundary",
+    ("migration", "producers"): "producer_migration",
+    ("migration", "producer migration"): "producer_migration",
+    ("migration", "producer migrations"): "producer_migration",
+    ("migration", "consumers"): "consumer_migration",
+    ("migration", "consumer migration"): "consumer_migration",
+    ("migration", "consumer migrations"): "consumer_migration",
+    ("migration", "tests"): "test_migration",
+    ("migration", "test migration"): "test_migration",
+    ("migration", "test migrations"): "test_migration",
+    ("migrations", "producers"): "producer_migration",
+    ("migrations", "consumers"): "consumer_migration",
+    ("migrations", "tests"): "test_migration",
+}
 
 
 @dataclass(frozen=True)
@@ -188,11 +252,20 @@ class _ParsedItem:
     line: int
 
 
+@dataclass(frozen=True)
+class _ParsedTransformationItem:
+    text: str
+    kind: TransformationClaimKind
+    section: str
+    line: int
+
+
 @dataclass
 class _ListItem:
     text: str
-    role: StatementRole
-    purpose: StatementPurpose
+    role: StatementRole | None
+    purpose: StatementPurpose | None
+    transformation_kind: TransformationClaimKind | None
     section: str
     line: int
     indent: int
@@ -203,6 +276,7 @@ class _ListItem:
 @dataclass(frozen=True)
 class ParsedBody:
     items: tuple[_ParsedItem, ...] = ()
+    transformation_items: tuple[_ParsedTransformationItem, ...] = ()
     introductory_intent: str = ""
     introductory_line: int | None = None
 
@@ -215,6 +289,7 @@ class ReviewSemantics:
     scope: tuple[ReviewStatement, ...] = ()
     verification_expectations: tuple[ReviewStatement, ...] = ()
     claims: tuple[ReviewStatement, ...] = ()
+    transformation_contract: TransformationContract = TransformationContract()
 
 
 def _clean_markdown_text(value: str) -> str:
@@ -279,10 +354,14 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
     if not body:
         return ParsedBody()
     items: list[_ParsedItem] = []
+    transformation_items: list[_ParsedTransformationItem] = []
     seen: set[tuple[StatementRole, StatementPurpose, str]] = set()
+    seen_transformation: set[tuple[TransformationClaimKind, str]] = set()
     current_section = ""
     current_role: StatementRole | None = None
     current_purpose: StatementPurpose | None = None
+    current_transformation_kind: TransformationClaimKind | None = None
+    heading_stack: list[tuple[int, str]] = []
     paragraph: list[tuple[int, str]] = []
     list_items: list[_ListItem] = []
     list_stack: list[int] = []
@@ -303,20 +382,49 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
             items.append(_ParsedItem(cleaned, role, purpose, section, line))
             seen.add(marker)
 
+    def append_transformation_item(
+        text: str,
+        kind: TransformationClaimKind,
+        section: str,
+        line: int,
+    ) -> None:
+        cleaned = _clean_markdown_text(text)
+        marker = (kind, cleaned.casefold())
+        if cleaned and marker not in seen_transformation:
+            transformation_items.append(
+                _ParsedTransformationItem(cleaned, kind, section, line)
+            )
+            seen_transformation.add(marker)
+
     def finish_paragraph() -> None:
         nonlocal paragraph
         if (
             paragraph
-            and current_role in {"objective", "claim", "context"}
-            and current_purpose is not None
-        ):
-            append_item(
-                " ".join(text for _, text in paragraph),
-                current_role,
-                current_purpose,
-                current_section,
-                paragraph[0][0],
+            and (
+                current_transformation_kind is not None
+                or (
+                    current_role in {"objective", "claim", "context"}
+                    and current_purpose is not None
+                )
             )
+        ):
+            text = " ".join(text for _, text in paragraph)
+            if current_transformation_kind is not None:
+                append_transformation_item(
+                    text,
+                    current_transformation_kind,
+                    current_section,
+                    paragraph[0][0],
+                )
+            else:
+                assert current_role is not None and current_purpose is not None
+                append_item(
+                    text,
+                    current_role,
+                    current_purpose,
+                    current_section,
+                    paragraph[0][0],
+                )
         paragraph = []
 
     def finish_list() -> None:
@@ -333,13 +441,22 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
             parent_texts.reverse()
             text = ": ".join((*parent_texts, item.text))
             for statement in _split_explicit_inline_items(text):
-                append_item(
-                    statement,
-                    item.role,
-                    item.purpose,
-                    item.section,
-                    item.line,
-                )
+                if item.transformation_kind is not None:
+                    append_transformation_item(
+                        statement,
+                        item.transformation_kind,
+                        item.section,
+                        item.line,
+                    )
+                else:
+                    assert item.role is not None and item.purpose is not None
+                    append_item(
+                        statement,
+                        item.role,
+                        item.purpose,
+                        item.section,
+                        item.line,
+                    )
         list_items = []
         list_stack = []
 
@@ -361,8 +478,23 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
             finish_list()
             heading_seen = True
             current_section = _clean_markdown_text(heading_match.group(1))
-            semantics = _SEMANTICS_BY_HEADING.get(
-                _normalize_heading(current_section)
+            heading_level = len(raw_line) - len(raw_line.lstrip("#"))
+            normalized_heading = _normalize_heading(current_section)
+            while heading_stack and heading_stack[-1][0] >= heading_level:
+                heading_stack.pop()
+            parent_heading = heading_stack[-1][1] if heading_stack else ""
+            current_transformation_kind = _TRANSFORMATION_CHILD_HEADINGS.get(
+                (parent_heading, normalized_heading)
+            )
+            if current_transformation_kind is None:
+                current_transformation_kind = _TRANSFORMATION_HEADINGS.get(
+                    normalized_heading
+                )
+            heading_stack.append((heading_level, normalized_heading))
+            semantics = (
+                None
+                if current_transformation_kind is not None
+                else _SEMANTICS_BY_HEADING.get(normalized_heading)
             )
             current_role = semantics[0] if semantics is not None else None
             current_purpose = semantics[1] if semantics is not None else None
@@ -371,7 +503,10 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
         list_match = _LIST_ITEM_RE.match(raw_line)
         if list_match:
             finish_paragraph()
-            if current_role is not None and current_purpose is not None:
+            if (
+                current_transformation_kind is not None
+                or (current_role is not None and current_purpose is not None)
+            ):
                 indent = _indent_width(list_match.group("indent"))
                 while list_stack and list_items[list_stack[-1]].indent >= indent:
                     list_stack.pop()
@@ -380,12 +515,20 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
                     list_items[parent].has_children = True
                 list_items.append(
                     _ListItem(
-                        text=_strip_explicit_statement_label(
-                            list_match.group("text"),
-                            purpose=current_purpose,
+                        text=(
+                            _TRANSFORMATION_LABEL_RE.sub(
+                                "",
+                                list_match.group("text"),
+                            )
+                            if current_transformation_kind is not None
+                            else _strip_explicit_statement_label(
+                                list_match.group("text"),
+                                purpose=current_purpose or "implementation",
+                            )
                         ),
                         role=current_role,
                         purpose=current_purpose,
+                        transformation_kind=current_transformation_kind,
                         section=current_section,
                         line=line_number,
                         indent=indent,
@@ -402,10 +545,15 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
             if introductory:
                 intro_complete = True
             continue
-        if list_items and current_role is not None:
+        if list_items and (
+            current_role is not None or current_transformation_kind is not None
+        ):
             list_items[-1].text = f"{list_items[-1].text} {stripped}"
             continue
-        if current_role in {"objective", "claim", "context"}:
+        if (
+            current_transformation_kind is not None
+            or current_role in {"objective", "claim", "context"}
+        ):
             paragraph.append((line_number, stripped))
         elif not heading_seen and not intro_complete:
             introductory.append((line_number, stripped))
@@ -415,6 +563,7 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
     intro = _clean_markdown_text(" ".join(text for _, text in introductory))
     return ParsedBody(
         items=tuple(items),
+        transformation_items=tuple(transformation_items),
         introductory_intent=intro,
         introductory_line=introductory[0][0] if introductory else None,
     )
@@ -509,6 +658,21 @@ def extract_review_semantics(
         tuple(item for item in pr.items if item.role == "claim"),
         source=pr_source,
     )
+    transformation_contract = _transformation_contract(
+        pr.transformation_items,
+        source=pr_source,
+    )
+    transformation_contract = replace(
+        transformation_contract,
+        source_state=(
+            "source_absent"
+            if not pr_body or not pr_body.strip()
+            else "available"
+            if transformation_contract.claims
+            else "extraction_missing"
+        ),
+    )
+    transformation_contract.validate_consistency()
     if pr.introductory_intent:
         intent = ReviewStatement(
             id="I1",
@@ -540,6 +704,66 @@ def extract_review_semantics(
         scope=scope,
         verification_expectations=verification_expectations,
         claims=claims,
+        transformation_contract=transformation_contract,
+    )
+
+
+def _transformation_contract(
+    items: tuple[_ParsedTransformationItem, ...],
+    *,
+    source: SourceRef,
+) -> TransformationContract:
+    transformation_index = 0
+    completion_index = 0
+    claims = []
+    for item in items:
+        if item.kind == "completion_condition":
+            completion_index += 1
+            claim_id = f"CC{completion_index}"
+        else:
+            transformation_index += 1
+            claim_id = f"T{transformation_index}"
+        claims.append(
+            TransformationClaim(
+                id=claim_id,
+                kind=item.kind,
+                text=item.text,
+                sources=(
+                    replace(
+                        source,
+                        label=f"{source.label} · {item.section}",
+                        line_start=item.line,
+                    ),
+                ),
+            )
+        )
+    def ids(kind: TransformationClaimKind) -> tuple[str, ...]:
+        return tuple(item.id for item in claims if item.kind == kind)
+
+    return TransformationContract(
+        claims=tuple(claims),
+        change_claim_ids=ids("change"),
+        region=TransformationRegion(
+            selected_claim_ids=ids("selected_region"),
+            input_boundary_claim_ids=ids("input_boundary"),
+            output_boundary_claim_ids=ids("output_boundary"),
+            boundary_claim_ids=ids("boundary"),
+        ),
+        topology=TransformationTopology(
+            before_claim_ids=ids("before_topology"),
+            after_claim_ids=ids("after_topology"),
+        ),
+        authority_claim_ids=ids("authority"),
+        production_path_claim_ids=ids("production_path"),
+        migration=TransformationMigration(
+            general_claim_ids=ids("migration"),
+            producer_claim_ids=ids("producer_migration"),
+            consumer_claim_ids=ids("consumer_migration"),
+            test_claim_ids=ids("test_migration"),
+        ),
+        removal_claim_ids=ids("removal"),
+        completion_condition_claim_ids=ids("completion_condition"),
+        uncertainty_claim_ids=ids("uncertainty"),
     )
 
 

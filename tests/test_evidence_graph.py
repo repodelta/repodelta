@@ -187,7 +187,7 @@ def test_review_brief_serializes_one_canonical_catalog() -> None:
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
     serialized = brief.to_dict()
 
-    assert brief.schema_version == "review_brief.v34"
+    assert brief.schema_version == "review_brief.v35"
     assert serialized["evidence_catalog"]["schema_version"] == "evidence_catalog.v15"
     assert serialized["candidate_convergence"]["schema_version"] == (
         "candidate_convergence.v7"

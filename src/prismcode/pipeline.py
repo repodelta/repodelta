@@ -39,6 +39,7 @@ class DeterministicAnalyzer:
         changes = analysis_input.changes or parse_changed_files(packet.changed_files)
         extracted = extract_packet_semantics(packet)
         semantics = extracted.statements
+        semantics.transformation_contract.validate_consistency()
         requirements = analysis_input.requirements or semantics.obligations
         for requirement in requirements:
             requirement.validate_consistency()
@@ -105,6 +106,7 @@ class DeterministicAnalyzer:
             scope=semantics.scope,
             verification_expectations=semantics.verification_expectations,
             claims=semantics.claims,
+            transformation_contract=semantics.transformation_contract,
             guardrail_scan_plans=guardrail_scan_plans,
             evidence_catalog=evidence_catalog,
             projection_candidates=projection_candidates,

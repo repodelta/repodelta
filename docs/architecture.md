@@ -10,6 +10,7 @@ fixture or GitHub
        -> obligations and guardrails (R/G)
        -> objectives (O), scope context (S)
        -> implementation/boundary (C), baseline (B), verification (V) claims
+       -> PR-authored typed transformation contract (T/CC)
        -> intent (I)
   -> canonical guardrail scan planning
        -> one source-backed plan per G
@@ -99,6 +100,11 @@ Each Issue or PR Markdown body is parsed once into canonical
 7. Summary, Implementation, Changes, What Changed, and Approach are
    implementation claims. Baseline/Results are typed baseline claims.
 8. The PR introduction and title are intent only.
+9. Structured Change, Selected region, Before/After topology, Canonical
+   authority, Production path, Migration, Removed legacy paths, Completion
+   conditions, and Uncertainty sections form one PR-authored
+   `TransformationContract`. These T/CC claims remain separate from observed
+   repository facts and from any future assessment.
 
 Deliverables use stable IDs (`R1`, `R2`, ...), negative scope constraints use
 `G1`, objectives use `O1`, scope uses `S1`, and Issue verification expectations
