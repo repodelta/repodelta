@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import argparse
 import os
+import subprocess
 import sys
 from contextlib import nullcontext
 from dataclasses import replace
 from pathlib import Path
+from urllib.parse import urlparse
 
 from prismcode.pipeline import DeterministicAnalyzer
 from prismcode.providers.codegraph import CodegraphProvider
@@ -38,6 +40,70 @@ def _positive_int(value: str) -> int:
     return parsed
 
 
+def _github_cli_hostname(api_url: str) -> str | None:
+    hostname = urlparse(api_url).hostname
+    if not hostname:
+        return None
+    return "github.com" if hostname.casefold() == "api.github.com" else hostname
+
+
+def _github_token_from_cli(api_url: str) -> str | None:
+    hostname = _github_cli_hostname(api_url)
+    if not hostname:
+        return None
+    try:
+        completed = subprocess.run(
+            ["gh", "auth", "token", "--hostname", hostname],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+    except (FileNotFoundError, OSError, subprocess.TimeoutExpired):
+        return None
+    if completed.returncode != 0:
+        return None
+    token = completed.stdout.strip()
+    return token or None
+
+
+def _resolve_github_token(env_name: str | None, api_url: str) -> str | None:
+    if not env_name:
+        return None
+    token = os.environ.get(env_name)
+    if token and token.strip():
+        return token.strip()
+    return _github_token_from_cli(api_url)
+
+
+def _enrich_github_auth_error(
+    error: GitHubApiError,
+    *,
+    token: str | None,
+    token_env: str | None,
+    api_url: str,
+) -> GitHubApiError:
+    if error.status_code not in {401, 403, 404}:
+        return error
+    hostname = _github_cli_hostname(api_url) or "the configured GitHub host"
+    if token:
+        detail = (
+            "The selected GitHub credentials may not have access to the private "
+            "repository or pull request"
+        )
+    else:
+        source = token_env or "the configured token environment variable"
+        detail = (
+            f"No GitHub token was available from {source} or "
+            f"gh auth token --hostname {hostname}"
+        )
+    return GitHubApiError(
+        f"{error}. {detail}",
+        status_code=error.status_code,
+        url=error.url,
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="prismcode", description="Generate evidence-linked review briefs")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -49,7 +115,11 @@ def build_parser() -> argparse.ArgumentParser:
     review.add_argument(
         "--github-token-env",
         default="GITHUB_TOKEN",
-        help="Environment variable containing a GitHub token (default: GITHUB_TOKEN)",
+        help=(
+            "Environment variable containing a GitHub token; when unset, "
+            "PrismCode tries gh auth token for the API host "
+            "(default: GITHUB_TOKEN)"
+        ),
     )
     review.add_argument(
         "--github-api-url",
@@ -127,13 +197,24 @@ def main() -> int:
         else:
             if args.pr is None:
                 parser.error("--pr is required with --repo")
-            token = os.environ.get(args.github_token_env) if args.github_token_env else None
+            token = _resolve_github_token(args.github_token_env, args.github_api_url)
             client = GitHubClient(
                 token=token,
                 api_url=args.github_api_url,
                 trusted_api_hosts=("api.github.com", *args.trusted_github_api_host),
             )
-            packet = GitHubPullRequestAdapter(client=client, max_files=args.max_files).load(args.repo, args.pr)
+            try:
+                packet = GitHubPullRequestAdapter(
+                    client=client,
+                    max_files=args.max_files,
+                ).load(args.repo, args.pr)
+            except GitHubApiError as exc:
+                raise _enrich_github_auth_error(
+                    exc,
+                    token=token,
+                    token_env=args.github_token_env,
+                    api_url=args.github_api_url,
+                ) from exc
             analysis_input = AnalysisInput(packet=packet)
         workspace = (
             nullcontext(
