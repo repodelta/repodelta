@@ -1646,9 +1646,18 @@ class StructuralFocusOverlay:
 
 
 @dataclass(frozen=True)
-class ReviewSlice:
+class CanonicalChangeMapEntry:
     focus_statement_id: str
     claim_relation_ids: tuple[str, ...] = ()
+    structural_overlay: StructuralFocusOverlay = StructuralFocusOverlay()
+    structural_disposition: StructuralFocusDisposition = (
+        StructuralFocusDisposition()
+    )
+
+
+@dataclass(frozen=True)
+class ReviewSlice:
+    change_map: CanonicalChangeMapEntry
     standalone_changed_fact_relation_ids: tuple[str, ...] = ()
     standalone_test_support_relation_ids: tuple[str, ...] = ()
     standalone_document_support_relation_ids: tuple[str, ...] = ()
@@ -1657,10 +1666,6 @@ class ReviewSlice:
     verification_relation_ids: tuple[str, ...] = ()
     boundary_fact_relation_ids: tuple[str, ...] = ()
     guardrail_scan_plan_id: str | None = None
-    structural_overlay: StructuralFocusOverlay = StructuralFocusOverlay()
-    structural_disposition: StructuralFocusDisposition = (
-        StructuralFocusDisposition()
-    )
     diagnostic_ids: tuple[str, ...] = ()
 
 
@@ -1668,7 +1673,7 @@ class ReviewSlice:
 class ReviewProjection:
     slices: tuple[ReviewSlice, ...] = ()
     review_graph: ReviewStructuralGraph = ReviewStructuralGraph()
-    schema_version: str = "review_projection.v20"
+    schema_version: str = "review_projection.v21"
 
     def validate_consistency(
         self,
@@ -2109,38 +2114,61 @@ class ReviewProjection:
                     continue
                 visited.add(current)
                 frontier.extend(placement_children.get(current, ()))
+        change_map_focus_ids = tuple(
+            item.change_map.focus_statement_id for item in self.slices
+        )
+        if len(change_map_focus_ids) != len(set(change_map_focus_ids)):
+            raise ValueError("canonical change map contains duplicate focus entries")
         for review_slice in self.slices:
-            overlay = review_slice.structural_overlay
-            disposition = review_slice.structural_disposition
-            converged = convergence_by_focus.get(review_slice.focus_statement_id)
+            change_map = review_slice.change_map
+            focus_id = change_map.focus_statement_id
+            overlay = change_map.structural_overlay
+            disposition = change_map.structural_disposition
+            converged = convergence_by_focus.get(focus_id)
             if converged is None:
                 raise ValueError(
-                    f"{review_slice.focus_statement_id}: structural disposition "
+                    f"{focus_id}: canonical change map "
                     "has no convergence group"
                 )
             selected_ids = set(converged.selected_relation_ids)
             deferred_ids = set(converged.deferred_relation_ids)
+            if len(change_map.claim_relation_ids) != len(
+                set(change_map.claim_relation_ids)
+            ):
+                raise ValueError(
+                    f"{focus_id}: canonical change map contains duplicate claim bindings"
+                )
+            if any(
+                relation_id not in relations
+                or relations[relation_id].focus_statement_id != focus_id
+                or relations[relation_id].slot != "claim"
+                or relation_id not in selected_ids
+                for relation_id in change_map.claim_relation_ids
+            ):
+                raise ValueError(
+                    f"{focus_id}: canonical change map references an invalid claim binding"
+                )
             if any(
                 relation_id not in relations
                 or relations[relation_id].focus_statement_id
-                != review_slice.focus_statement_id
+                != focus_id
                 for relation_id in (
                     *disposition.non_structural_relation_ids,
                     *disposition.deferred_structural_relation_ids,
                 )
             ):
                 raise ValueError(
-                    f"{review_slice.focus_statement_id}: structural disposition "
+                    f"{focus_id}: structural disposition "
                     "references an invalid relation"
                 )
             if not set(disposition.non_structural_relation_ids) <= selected_ids:
                 raise ValueError(
-                    f"{review_slice.focus_statement_id}: non-structural disposition "
+                    f"{focus_id}: non-structural disposition "
                     "must reference selected relations"
                 )
             if not set(disposition.deferred_structural_relation_ids) <= deferred_ids:
                 raise ValueError(
-                    f"{review_slice.focus_statement_id}: deferred structural "
+                    f"{focus_id}: deferred structural "
                     "disposition must reference deferred relations"
                 )
             if any(
@@ -2148,7 +2176,7 @@ class ReviewProjection:
                 for item in disposition.diagnostic_ids
             ):
                 raise ValueError(
-                    f"{review_slice.focus_statement_id}: structural disposition "
+                    f"{focus_id}: structural disposition "
                     "references an invalid diagnostic"
                 )
             if any(
@@ -2156,28 +2184,28 @@ class ReviewProjection:
                 for placement_id in overlay.placement_ids
             ):
                 raise ValueError(
-                    f"{review_slice.focus_statement_id}: structural overlay "
+                    f"{focus_id}: structural overlay "
                     "references missing placement"
                 )
             if (disposition.state == "projected") != bool(overlay.nodes):
                 raise ValueError(
-                    f"{review_slice.focus_statement_id}: projected disposition "
+                    f"{focus_id}: projected disposition "
                     "must agree with the structural overlay"
                 )
             overlay_node_ids = {item.node_id for item in overlay.nodes}
             if len(overlay_node_ids) != len(overlay.nodes):
                 raise ValueError(
-                    f"{review_slice.focus_statement_id}: overlay contains "
+                    f"{focus_id}: overlay contains "
                     "duplicate structural nodes"
                 )
             if any(node_id not in nodes for node_id in overlay_node_ids):
                 raise ValueError(
-                    f"{review_slice.focus_statement_id}: overlay references "
+                    f"{focus_id}: overlay references "
                     "a missing structural node"
                 )
             if any(edge_id not in edges for edge_id in overlay.edge_ids):
                 raise ValueError(
-                    f"{review_slice.focus_statement_id}: overlay references "
+                    f"{focus_id}: overlay references "
                     "a missing structural edge"
                 )
             if any(
@@ -2185,7 +2213,7 @@ class ReviewProjection:
                 for group_id in overlay.relation_group_ids
             ):
                 raise ValueError(
-                    f"{review_slice.focus_statement_id}: structural overlay "
+                    f"{focus_id}: structural overlay "
                     "references a missing relation group"
                 )
             if any(
@@ -2193,7 +2221,7 @@ class ReviewProjection:
                 for edge_id in overlay.ownership_edge_ids
             ):
                 raise ValueError(
-                    f"{review_slice.focus_statement_id}: overlay references "
+                    f"{focus_id}: overlay references "
                     "a missing ownership edge"
                 )
             if any(
@@ -2202,7 +2230,7 @@ class ReviewProjection:
                 for edge_id in overlay.edge_ids
             ):
                 raise ValueError(
-                    f"{review_slice.focus_statement_id}: structural edge "
+                    f"{focus_id}: structural edge "
                     "endpoints must belong to the overlay"
                 )
             if any(
@@ -2214,7 +2242,7 @@ class ReviewProjection:
                 for group_id in overlay.relation_group_ids
             ):
                 raise ValueError(
-                    f"{review_slice.focus_statement_id}: structural relation "
+                    f"{focus_id}: structural relation "
                     "group must represent overlay edges between overlay nodes"
                 )
             expected_overlay_groups = {
@@ -2224,7 +2252,7 @@ class ReviewProjection:
             }
             if set(overlay.relation_group_ids) != expected_overlay_groups:
                 raise ValueError(
-                    f"{review_slice.focus_statement_id}: structural relation "
+                    f"{focus_id}: structural relation "
                     "groups must project every overlay edge"
                 )
             if any(
@@ -2233,7 +2261,7 @@ class ReviewProjection:
                 for edge_id in overlay.ownership_edge_ids
             ):
                 raise ValueError(
-                    f"{review_slice.focus_statement_id}: ownership edge "
+                    f"{focus_id}: ownership edge "
                     "endpoints must belong to the overlay"
                 )
 
@@ -2332,7 +2360,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v33"
+    schema_version: str = "review_brief.v34"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

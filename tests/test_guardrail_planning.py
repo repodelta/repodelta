@@ -101,7 +101,8 @@ def test_pipeline_projects_plan_only_for_g_and_keeps_absence_unproven() -> None:
     assert brief.guardrail_scan_plans.schema_version == "guardrail_scan_plan_set.v2"
     assert len(brief.guardrail_scan_plans.plans) == 2
     slices = {
-        item.focus_statement_id: item for item in brief.projection.slices
+        item.change_map.focus_statement_id: item
+        for item in brief.projection.slices
     }
     assert slices["R1"].guardrail_scan_plan_id is None
     assert slices["G1"].guardrail_scan_plan_id == "GSP:G1"

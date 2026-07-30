@@ -264,7 +264,15 @@ def _review_graph(
     brief: ReviewBrief,
 ) -> str:
     if not graph.nodes:
-        return ""
+        change_map = _canonical_change_map(graph, projection, brief)
+        return (
+            '<div class="review-structural-graph">'
+            f"{change_map}"
+            '<p class="delta-empty">No projected structural graph is available.</p>'
+            "</div>"
+            if change_map
+            else ""
+        )
     evidence = brief.evidence_catalog.by_id()
     nodes = {item.id: item for item in graph.nodes}
     edges = {item.id: item for item in graph.edges}
@@ -296,8 +304,8 @@ def _review_graph(
     ownership_edge_focus: dict[str, list[str]] = {}
     placement_focus: dict[str, list[str]] = {}
     for review_slice in projection.slices:
-        focus_id = review_slice.focus_statement_id
-        for node in review_slice.structural_overlay.nodes:
+        focus_id = review_slice.change_map.focus_statement_id
+        for node in review_slice.change_map.structural_overlay.nodes:
             if node.node_id not in nodes:
                 raise ValueError(
                     f"{focus_id}: structural overlay references missing node "
@@ -306,28 +314,28 @@ def _review_graph(
             node_focus.setdefault(node.node_id, []).append(
                 (focus_id, node.role)
             )
-        for group_id in review_slice.structural_overlay.relation_group_ids:
+        for group_id in review_slice.change_map.structural_overlay.relation_group_ids:
             if group_id not in relation_groups:
                 raise ValueError(
                     f"{focus_id}: structural overlay references missing relation "
                     f"group {group_id}"
                 )
             relation_group_focus.setdefault(group_id, []).append(focus_id)
-        for edge_id in review_slice.structural_overlay.edge_ids:
+        for edge_id in review_slice.change_map.structural_overlay.edge_ids:
             if edge_id not in edges:
                 raise ValueError(
                     f"{focus_id}: structural overlay references missing edge "
                     f"{edge_id}"
                 )
             edge_focus.setdefault(edge_id, []).append(focus_id)
-        for edge_id in review_slice.structural_overlay.ownership_edge_ids:
+        for edge_id in review_slice.change_map.structural_overlay.ownership_edge_ids:
             if edge_id not in ownership_edges:
                 raise ValueError(
                     f"{focus_id}: structural overlay references missing ownership "
                     f"edge {edge_id}"
                 )
             ownership_edge_focus.setdefault(edge_id, []).append(focus_id)
-        for placement_id in review_slice.structural_overlay.placement_ids:
+        for placement_id in review_slice.change_map.structural_overlay.placement_ids:
             placement_focus.setdefault(placement_id, []).append(focus_id)
     executable_connected_node_ids = {
         node_id
@@ -675,10 +683,10 @@ def _review_graph(
         ),
     }
     focus_ids = tuple(
-        review_slice.focus_statement_id for review_slice in projection.slices
+        review_slice.change_map.focus_statement_id for review_slice in projection.slices
     )
     slices_by_focus = {
-        review_slice.focus_statement_id: review_slice
+        review_slice.change_map.focus_statement_id: review_slice
         for review_slice in projection.slices
     }
     controls = (
@@ -690,7 +698,7 @@ def _review_graph(
             (
             f'<button class="delta-focus'
             f'{" no-visible-backbone" if focus_id not in visible_focus_ids else ""}'
-            f' disposition-{escape(slices_by_focus[focus_id].structural_disposition.state)}" '
+            f' disposition-{escape(slices_by_focus[focus_id].change_map.structural_disposition.state)}" '
             f'type="button" '
             f'data-focus-target="{escape(focus_id, quote=True)}" '
             f'data-empty-copy="{escape(_structural_focus_empty_copy(slices_by_focus[focus_id]), quote=True)}" '
@@ -740,8 +748,10 @@ def _review_graph(
             else ""
         )
     )
+    change_map = _canonical_change_map(graph, projection, brief)
     return (
         '<div class="review-structural-graph">'
+        f"{change_map}"
         '<div class="delta-graph-heading"><div>'
         '<h3>Structural delta graph</h3>'
         f'<div class="structural-coverage state-{escape(coverage_state)}">'
@@ -761,8 +771,144 @@ def _review_graph(
     )
 
 
+def _canonical_change_map(
+    graph: ReviewStructuralGraph,
+    projection: ReviewProjection,
+    brief: ReviewBrief,
+) -> str:
+    if not all(
+        hasattr(brief, attribute)
+        for attribute in (
+            "requirements",
+            "guardrails",
+            "claims",
+            "projection_candidates",
+        )
+    ):
+        return ""
+    statements = {
+        item.id: item for item in (*brief.requirements, *brief.guardrails)
+    }
+    claims = {item.id: item for item in brief.claims}
+    relations = brief.projection_candidates.by_id()
+    nodes = {item.id: item for item in graph.nodes}
+    groups = {item.id: item for item in graph.relation_groups}
+    evidence = brief.evidence_catalog.by_id()
+    rows = []
+    for review_slice in projection.slices:
+        entry = review_slice.change_map
+        statement = statements.get(entry.focus_statement_id)
+        if statement is None:
+            raise ValueError(
+                f"canonical change map references missing focus: "
+                f"{entry.focus_statement_id}"
+            )
+        claim_rows = []
+        for relation_id in entry.claim_relation_ids:
+            relation = relations.get(relation_id)
+            claim = claims.get(relation.target_id) if relation else None
+            if relation is None or claim is None:
+                raise ValueError(
+                    "canonical change map references missing claim binding: "
+                    f"{relation_id}"
+                )
+            claim_rows.append(
+                '<div class="change-map-binding">'
+                f'<span class="relation-label">'
+                f'{escape(relation.association.replace("_", " "))}</span>'
+                f'<span><b>{escape(claim.id)}</b> {escape(claim.text)}</span>'
+                "</div>"
+            )
+        overlay = entry.structural_overlay
+        group_rows = []
+        for group_id in overlay.relation_group_ids:
+            group = groups.get(group_id)
+            if group is None:
+                raise ValueError(
+                    "canonical change map references missing structural group: "
+                    f"{group_id}"
+                )
+            source = _structural_display_fact(nodes[group.source_node_id], evidence)
+            target = _structural_display_fact(nodes[group.target_node_id], evidence)
+            group_rows.append(
+                '<button class="change-map-fact" type="button" '
+                f'data-group-expand="{escape(group.id, quote=True)}">'
+                f'<span>{escape(group.operation)} {escape(group.relation)}</span>'
+                f'<b>{escape(_structural_name(source))} → '
+                f'{escape(_structural_name(target))}</b>'
+                "</button>"
+            )
+        direct_nodes = tuple(
+            item for item in overlay.nodes if item.role != "intermediate"
+        )
+        if any(item.node_id not in nodes for item in direct_nodes):
+            missing_node_id = next(
+                item.node_id for item in direct_nodes if item.node_id not in nodes
+            )
+            raise ValueError(
+                "canonical change map references missing structural node: "
+                f"{missing_node_id}"
+            )
+        node_set = (
+            '<button class="change-map-node-set" type="button" '
+            f'data-focus-select="{escape(entry.focus_statement_id, quote=True)}" '
+            f'data-node-ids="{escape(" ".join(item.node_id for item in direct_nodes), quote=True)}">'
+            f'{len(direct_nodes)} directly associated structural node'
+            f'{"s" if len(direct_nodes) != 1 else ""} · inspect in graph'
+            "</button>"
+            if direct_nodes
+            else ""
+        )
+        binding_count = len(claim_rows)
+        fact_count = len(group_rows) + bool(node_set)
+        rows.append(
+            '<details class="change-map-entry" '
+            f'data-focus-target="{escape(entry.focus_statement_id, quote=True)}">'
+            '<summary>'
+            '<span class="change-map-contract">'
+            f'<b>{escape(statement.id)}</b>{escape(statement.text)}</span>'
+            '<span class="change-map-count">'
+            f'{binding_count} typed claim binding'
+            f'{"s" if binding_count != 1 else ""}</span>'
+            '<span class="change-map-count">'
+            + (
+                f'{fact_count} structural fact group'
+                f'{"s" if fact_count != 1 else ""}'
+                if fact_count
+                else escape(_structural_disposition_label(review_slice))
+            )
+            + "</span></summary>"
+            '<div class="change-map-flow">'
+            '<div><span class="projection-heading">Contract says</span>'
+            f'<p>{escape(statement.text)}</p></div>'
+            '<div><span class="projection-heading">Typed bindings</span>'
+            + (
+                "".join(claim_rows)
+                if claim_rows
+                else '<p class="empty">No selected PR claim association.</p>'
+            )
+            + '</div><div><span class="projection-heading">'
+            "Repository fact groups</span>"
+            + (
+                "".join(group_rows) + node_set
+                if fact_count
+                else '<p class="empty">No projected structural fact group.</p>'
+            )
+            + "</div></div></details>"
+        )
+    return (
+        '<div class="canonical-change-map"><div class="change-map-heading">'
+        '<div><h3>Canonical Change Map</h3>'
+        '<p>Contract statements, typed PR bindings, and repository facts remain '
+        "separate; selecting a row focuses the structural graph.</p></div></div>"
+        f'<div class="change-map-list">{"".join(rows)}</div></div>'
+        if rows
+        else ""
+    )
+
+
 def _structural_disposition_label(review_slice: ReviewSlice) -> str:
-    state = review_slice.structural_disposition.state
+    state = review_slice.change_map.structural_disposition.state
     return {
         "projected": "Structural evidence projected",
         "non_structural_only": "Review evidence only; no structural projection",
@@ -774,8 +920,8 @@ def _structural_disposition_label(review_slice: ReviewSlice) -> str:
 
 
 def _structural_focus_empty_copy(review_slice: ReviewSlice) -> str:
-    focus_id = review_slice.focus_statement_id
-    state = review_slice.structural_disposition.state
+    focus_id = review_slice.change_map.focus_statement_id
+    state = review_slice.change_map.structural_disposition.state
     if state == "projected":
         return (
             f"{focus_id} has projected structural evidence outside the default "
@@ -1144,7 +1290,7 @@ def _projection_slice(
     claims = {item.id: item for item in brief.claims}
 
     claim_rows = []
-    for relation_id in review_slice.claim_relation_ids:
+    for relation_id in review_slice.change_map.claim_relation_ids:
         relation = relations.get(relation_id)
         claim = claims.get(relation.target_id) if relation else None
         if relation is None or claim is None:
@@ -1313,7 +1459,7 @@ def _structural_disposition(
     *,
     relations: dict[str, ProjectionRelation],
 ) -> str:
-    disposition = review_slice.structural_disposition
+    disposition = review_slice.change_map.structural_disposition
     if (
         disposition.state == "projected"
         and not disposition.deferred_structural_relation_ids
@@ -1395,11 +1541,11 @@ def render_html(brief: ReviewBrief) -> str:
     }
     cards = []
     for index, review_slice in enumerate(brief.projection.slices):
-        statement = statements.get(review_slice.focus_statement_id)
-        group = groups.get(review_slice.focus_statement_id)
+        statement = statements.get(review_slice.change_map.focus_statement_id)
+        group = groups.get(review_slice.change_map.focus_statement_id)
         if statement is None or group is None:
             raise ValueError(
-                f"projection references missing focus: {review_slice.focus_statement_id}"
+                f"projection references missing focus: {review_slice.change_map.focus_statement_id}"
             )
         slice_diagnostics = tuple(
             diagnostics[diagnostic_id]
@@ -1408,7 +1554,7 @@ def render_html(brief: ReviewBrief) -> str:
         )
         if len(slice_diagnostics) != len(review_slice.diagnostic_ids):
             raise ValueError(
-                f"projection references missing diagnostic: {review_slice.focus_statement_id}"
+                f"projection references missing diagnostic: {review_slice.change_map.focus_statement_id}"
             )
         focus_attribute = (
             f' data-focus-id="{escape(statement.id, quote=True)}"'
@@ -1497,6 +1643,25 @@ def render_html(brief: ReviewBrief) -> str:
 .relation-member-node small{{display:block;font-size:7px}}
 .relation-member-operation,.relation-member-kind{{color:var(--faint);text-transform:uppercase}}
 .relation-member-arrow{{color:var(--muted);text-align:center}}
+.canonical-change-map{{margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid rgba(111,128,135,.22)}}
+.change-map-heading p{{margin:0 0 12px;color:var(--muted);font-size:10px}}
+.change-map-list{{display:grid;gap:6px}}
+.change-map-entry{{border:1px solid rgba(111,128,135,.2);border-radius:9px;background:rgba(3,7,9,.28)}}
+.change-map-entry>summary{{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(120px,.55fr) minmax(150px,.7fr);gap:12px;align-items:center;padding:9px 11px;cursor:pointer;list-style:none}}
+.change-map-entry>summary::-webkit-details-marker{{display:none}}
+.change-map-entry[open]{{border-color:rgba(123,227,172,.42)}}
+.change-map-contract{{display:grid;grid-template-columns:34px minmax(0,1fr);gap:7px;font-size:10px}}
+.change-map-contract b{{color:var(--green)}}
+.change-map-count{{color:var(--muted);font-size:9px}}
+.change-map-flow{{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1fr) minmax(0,1.2fr);gap:8px;padding:0 10px 10px}}
+.change-map-flow>div{{min-width:0;padding:10px;border:1px solid rgba(111,128,135,.16);border-radius:8px}}
+.change-map-flow p{{margin:0;color:var(--muted);font-size:9px}}
+.change-map-binding{{display:grid;gap:3px;padding:6px 0;border-top:1px solid rgba(111,128,135,.12);font-size:9px}}
+.change-map-fact{{display:grid;width:100%;gap:2px;padding:6px 0;border:0;border-top:1px solid rgba(111,128,135,.12);background:transparent;color:var(--text);text-align:left;cursor:pointer;font:9px inherit}}
+.change-map-fact span{{display:block;color:var(--muted);font-size:8px}}
+.change-map-fact b{{font-weight:600;overflow-wrap:anywhere}}
+.change-map-node-set{{width:100%;padding:7px 0;border:0;border-top:1px solid rgba(111,128,135,.12);background:transparent;color:var(--blue);text-align:left;cursor:pointer;font:9px inherit}}
+@media(max-width:800px){{.change-map-entry>summary,.change-map-flow{{grid-template-columns:1fr}}}}
 </style></head><body><main class="shell">
 <div class="topbar"><span class="brand-mark"></span>PrismCode</div>
 <section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{brief.overview.changed_file_count} changed files</span><span>·</span><span>{escape(ci_copy)}</span></div><h1>{escape(packet.title)}</h1><div class="intent">{escape(brief.intent.text)}</div><span class="source-note">Source: {source_line}</span>{review_contract}</section>
@@ -1520,6 +1685,12 @@ document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
       if (active) activeButton = item;
     }}
 );
+    graph.querySelectorAll(".change-map-entry").forEach((item) => {{
+      item.classList.toggle(
+        "focus-active",
+        item.dataset.focusTarget === focus
+      );
+    }});
     graph.querySelectorAll("[data-focuses], [data-context-focuses]").forEach((item) => {{
       const direct = focus === "all" ||
         (item.dataset.focuses || "").split(/\\s+/).includes(focus);
@@ -1567,6 +1738,16 @@ document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
       }}
     }});
   }});
+  graph.querySelectorAll("[data-group-expand]").forEach((control) => {{
+    control.addEventListener("click", (event) => {{
+      event.preventDefault();
+      toggleGroup(control.dataset.groupExpand);
+    }});
+  }});
+  graph.querySelectorAll("[data-focus-select]").forEach((control) => {{
+    control.addEventListener("click", () =>
+      activateFocus(control.dataset.focusSelect));
+  }});
   graph.querySelectorAll(".relation-group-details").forEach((details) => {{
     details.addEventListener("toggle", () => {{
       if (details.open &&
@@ -1583,6 +1764,10 @@ document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
       activateFocus(requirement.dataset.focusId));
   }}
 );
+  graph.querySelectorAll(".change-map-entry").forEach((entry) => {{
+    entry.querySelector("summary").addEventListener("click", () =>
+      activateFocus(entry.dataset.focusTarget));
+  }});
 }}
 );
 </script></body></html>"""

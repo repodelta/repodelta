@@ -5,6 +5,7 @@ from dataclasses import replace
 
 from prismcode.model.contracts import (
     CandidateConvergence,
+    CanonicalChangeMapEntry,
     ChangedFile,
     DiagnosticPresentation,
     EvidenceCatalog,
@@ -186,8 +187,14 @@ def build_review_projection(
         graph_path_relation_ids.extend(overlay.path_relation_ids)
         slices.append(
             ReviewSlice(
-                focus_statement_id=group.focus_statement_id,
-                claim_relation_ids=tuple(item.id for item in by_slot["claim"]),
+                change_map=CanonicalChangeMapEntry(
+                    focus_statement_id=group.focus_statement_id,
+                    claim_relation_ids=tuple(
+                        item.id for item in by_slot["claim"]
+                    ),
+                    structural_overlay=overlay,
+                    structural_disposition=structural_disposition,
+                ),
                 standalone_changed_fact_relation_ids=tuple(
                     item.id
                     for item in by_slot["changed_anchor"]
@@ -230,8 +237,6 @@ def build_review_projection(
                     if group.focus_statement_id in plans_by_guardrail
                     else None
                 ),
-                structural_overlay=overlay,
-                structural_disposition=structural_disposition,
                 diagnostic_ids=diagnostic_ids_by_focus.get(
                     group.focus_statement_id,
                     (),
@@ -279,12 +284,17 @@ def build_review_projection(
     slices = [
         replace(
             review_slice,
-            structural_overlay=replace(
-                review_slice.structural_overlay,
-                relation_group_ids=tuple(
-                    dict.fromkeys(
-                        relation_groups.group_id_by_edge_id[edge_id]
-                        for edge_id in review_slice.structural_overlay.edge_ids
+            change_map=replace(
+                review_slice.change_map,
+                structural_overlay=replace(
+                    review_slice.change_map.structural_overlay,
+                    relation_group_ids=tuple(
+                        dict.fromkeys(
+                            relation_groups.group_id_by_edge_id[edge_id]
+                            for edge_id in (
+                                review_slice.change_map.structural_overlay.edge_ids
+                            )
+                        )
                     )
                 ),
             ),
