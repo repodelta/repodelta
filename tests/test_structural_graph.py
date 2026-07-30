@@ -1478,7 +1478,7 @@ def test_analyzer_preserves_structural_facts_without_using_them_as_conclusions(
         AnalysisInput(packet=packet, structural_graph=structural)
     )
 
-    assert brief.schema_version == "review_brief.v35"
+    assert brief.schema_version == "review_brief.v36"
     assert brief.requirements == lexical_only.requirements == ()
     serialized = brief.to_dict()
     assert "structural_graph" not in serialized
@@ -1487,6 +1487,13 @@ def test_analyzer_preserves_structural_facts_without_using_them_as_conclusions(
         if item["kind"] == "symbol"
     )
     assert symbol["metadata"]["qualified_name"] == "src.service.Service.run"
+    observed = brief.observed_transformation
+    assert len(observed.structural_change_evidence_ids) == 1
+    assert observed.topology.base_symbol_change_evidence_ids == ()
+    assert observed.topology.head_symbol_change_evidence_ids == (
+        observed.structural_change_evidence_ids
+    )
+    assert observed.fallback_change_evidence_ids == ()
 
 
 def test_bounded_paths_load_unchanged_y_to_x_to_z_neighbors(tmp_path: Path) -> None:

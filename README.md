@@ -105,6 +105,12 @@ These fields remain PR-authored claims. The current analyzer serializes them
 once in `ReviewBrief.transformation_contract`; it does not treat them as
 repository observations, assessment results, or merge approval.
 
+Independently, the facts stage reconstructs
+`ReviewBrief.observed_transformation` from canonical diff, Base/Head structural,
+path, replacement-candidate, and current-head verification fact IDs. It never
+reads the authored transformation contract and does not yet bind or assess its
+claims.
+
 The canonical stage map, ownership rules, and dependency direction are
 documented in [`docs/architecture.md`](docs/architecture.md). Each stage also
 keeps its local input/output contract beside its code.
