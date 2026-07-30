@@ -4,7 +4,8 @@
 
 One-pass Markdown section parsing, canonical heading normalization, statement
 taxonomy, source authority, stable O/S/R/G/V contract identities, distinct
-C/B/VC PR-claim identities, and PR-claim source state.
+C/B/VC PR-claim identities, typed T/CC transformation-contract identities,
+and source state.
 
 ## Input / output
 
@@ -17,6 +18,9 @@ PR statements remain claims or provisional obligations according to their
 source section. Heading aliases normalize through an exact canonical vocabulary,
 never loose substring matching. Implementation aliases cover common summary,
 approach, solution, and semantic-atom conventions through that same vocabulary.
+Structured transformation headings produce one PR-authored
+`TransformationContract`. They do not also enter the generic C claim path and
+never become repository observations or assessments.
 Boundary aliases cover guardrail, constraint, and safety-boundary conventions;
 verification aliases cover regression, test-evidence, and validation-result
 conventions. Their source authority remains decisive: Issue boundaries become

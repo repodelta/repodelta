@@ -729,3 +729,157 @@ def test_context_and_typed_claims_use_the_canonical_binding_path() -> None:
     assert [item.id for item in brief.scope] == ["S1"]
     assert [item.id for item in brief.claims] == ["C1", "B1", "VC1"]
     assert brief.projection.slices == ()
+
+
+def test_pr_transformation_contract_preserves_typed_structure_once() -> None:
+    packet = _packet(
+        pr_body=(
+            "## Change\n"
+            "Move transformation declaration authority into semantics.\n\n"
+            "## Selected region\n"
+            "- `ReviewSourcePacket` to `ReviewBrief` semantics boundary.\n\n"
+            "### Inputs\n"
+            "- Pull request description Markdown.\n\n"
+            "### Outputs\n"
+            "- `TransformationContract`.\n\n"
+            "### Boundaries\n"
+            "- Facts and projection remain unchanged.\n\n"
+            "## Before topology\n"
+            "- PR transformation prose entered generic claims or was ignored.\n\n"
+            "## After topology\n"
+            "- PR description → semantics → TransformationContract.\n\n"
+            "## Canonical authority\n"
+            "- Semantics owns transformation declaration extraction.\n\n"
+            "## Production path\n"
+            "- `extract_packet_semantics()` produces the contract once.\n\n"
+            "## Migration\n"
+            "### Producers\n"
+            "- GitHub and fixture packets remain unchanged.\n"
+            "### Consumers\n"
+            "- `DeterministicAnalyzer` carries the contract into `ReviewBrief`.\n"
+            "### Tests\n"
+            "- Semantic authority tests cover typed fields and provenance.\n\n"
+            "## Removed legacy paths\n"
+            "- No transformation item also enters the generic C claim lane.\n\n"
+            "## Completion conditions\n"
+            "CC9: Every supported section has one typed identity.\n"
+            "CC10: The renderer performs no transformation parsing.\n\n"
+            "## Uncertainty\n"
+            "- Repository observations are intentionally deferred.\n\n"
+            "## Out of scope\n"
+            "- Transformation assessment remains a later change.\n"
+        )
+    )
+
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    contract = brief.transformation_contract
+
+    assert contract.source_state == "available"
+    assert [(item.id, item.kind) for item in contract.claims] == [
+        ("T1", "change"),
+        ("T2", "selected_region"),
+        ("T3", "input_boundary"),
+        ("T4", "output_boundary"),
+        ("T5", "boundary"),
+        ("T6", "before_topology"),
+        ("T7", "after_topology"),
+        ("T8", "authority"),
+        ("T9", "production_path"),
+        ("T10", "producer_migration"),
+        ("T11", "consumer_migration"),
+        ("T12", "test_migration"),
+        ("T13", "removal"),
+        ("CC1", "completion_condition"),
+        ("CC2", "completion_condition"),
+        ("T14", "uncertainty"),
+    ]
+    assert all(item.authority == "pr_description" for item in contract.claims)
+    assert all(item.sources[0].line_start for item in contract.claims)
+    assert contract.region.selected_claim_ids == ("T2",)
+    assert contract.region.input_boundary_claim_ids == ("T3",)
+    assert contract.region.output_boundary_claim_ids == ("T4",)
+    assert contract.region.boundary_claim_ids == ("T5",)
+    assert contract.topology.before_claim_ids == ("T6",)
+    assert contract.topology.after_claim_ids == ("T7",)
+    assert contract.authority_claim_ids == ("T8",)
+    assert contract.production_path_claim_ids == ("T9",)
+    assert contract.migration.producer_claim_ids == ("T10",)
+    assert contract.migration.consumer_claim_ids == ("T11",)
+    assert contract.migration.test_claim_ids == ("T12",)
+    assert contract.removal_claim_ids == ("T13",)
+    assert contract.completion_condition_claim_ids == ("CC1", "CC2")
+    assert contract.uncertainty_claim_ids == ("T14",)
+    assert [item.text for item in brief.claims] == [
+        "Transformation assessment remains a later change."
+    ]
+    serialized = brief.to_dict()["transformation_contract"]
+    assert serialized["schema_version"] == "transformation_contract.v1"
+    assert serialized["claims"][8]["text"] == (
+        "extract_packet_semantics() produces the contract once."
+    )
+    assert serialized["region"]["boundary_claim_ids"] == ("T5",)
+
+
+def test_transformation_heading_aliases_are_exact_and_context_aware() -> None:
+    semantics = extract_review_semantics(
+        issue_body=None,
+        issue_source=None,
+        pr_body=(
+            "## Transformation region\n"
+            "- semantics and model\n"
+            "### Inputs\n"
+            "- PR body\n"
+            "### Outputs\n"
+            "- typed contract\n\n"
+            "## Migrations\n"
+            "### Producers\n"
+            "- source packets\n"
+            "### Consumers\n"
+            "- review brief\n"
+            "### Tests\n"
+            "- semantic tests\n\n"
+            "## Target topology\n"
+            "- packet → semantics → contract\n\n"
+            "## Completion condition\n"
+            "- No duplicate claim identity.\n\n"
+            "## Testing\n"
+            "- Existing regression tests pass.\n"
+        ),
+        pr_source=_pr_source(),
+        pr_title="Type transformation declarations",
+    )
+
+    assert [item.kind for item in semantics.transformation_contract.claims] == [
+        "selected_region",
+        "input_boundary",
+        "output_boundary",
+        "producer_migration",
+        "consumer_migration",
+        "test_migration",
+        "after_topology",
+        "completion_condition",
+    ]
+    assert [(item.id, item.purpose) for item in semantics.claims] == [
+        ("VC1", "verification"),
+    ]
+
+
+def test_transformation_source_state_distinguishes_missing_extraction() -> None:
+    absent = extract_review_semantics(
+        issue_body=None,
+        issue_source=None,
+        pr_body=None,
+        pr_source=_pr_source(),
+        pr_title="No description",
+    )
+    unrelated = extract_review_semantics(
+        issue_body=None,
+        issue_source=None,
+        pr_body="## Summary\n- Ordinary implementation claim.\n",
+        pr_source=_pr_source(),
+        pr_title="Ordinary PR",
+    )
+
+    assert absent.transformation_contract.source_state == "source_absent"
+    assert unrelated.transformation_contract.source_state == "extraction_missing"
+    assert unrelated.transformation_contract.claims == ()

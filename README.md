@@ -34,7 +34,7 @@ The open core provides:
   exact symbol identities and only unmapped spans/files remain fallbacks,
   alongside bounded paths and CI/runtime observations;
 - explainable deterministic O/S/R/G/V review contracts, typed C/B/VC PR
-  claims, and evidence candidates;
+  claims, typed T/CC transformation declarations, and evidence candidates;
 - deterministic same-R/G, same-slot candidate convergence with typed
   dominance, bridge reachability, canonical changed-anchor and verification
   sets, bounded structural evidence subgraphs, compact claim selection, and
@@ -67,11 +67,43 @@ into PR prose. The analyzer applies one authority policy:
 - PR Summary/Implementation/Changes and Boundary statements become
   `C1`, `C2`, ... PR-authored claims;
 - PR Baseline/Results and Verification/Testing become `B1` and `VC1` claims;
+- structured PR transformation sections become typed `T1`, `T2`, ...
+  declarations, while Completion conditions become `CC1`, `CC2`, ...;
 - the PR introduction or title is intent only and is never promoted to `R1`.
 
 When no explicit acceptance criteria are present, the report says so instead
 of manufacturing a requirement from the PR title. Candidate relevance is never
 presented as implementation, verification, or acceptance.
+
+PRs may declare an independently verifiable transformation contract with
+exact Markdown headings:
+
+```markdown
+## Change
+
+## Selected region
+### Inputs
+### Outputs
+### Boundaries
+
+## Before topology
+## After topology
+## Canonical authority
+## Production path
+
+## Migration
+### Producers
+### Consumers
+### Tests
+
+## Removed legacy paths
+## Completion conditions
+## Uncertainty
+```
+
+These fields remain PR-authored claims. The current analyzer serializes them
+once in `ReviewBrief.transformation_contract`; it does not treat them as
+repository observations, assessment results, or merge approval.
 
 The canonical stage map, ownership rules, and dependency direction are
 documented in [`docs/architecture.md`](docs/architecture.md). Each stage also

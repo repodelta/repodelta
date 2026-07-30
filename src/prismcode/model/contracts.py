@@ -30,6 +30,29 @@ StatementAuthority = Literal[
     "pr_title",
     "provided",
 ]
+TransformationClaimKind = Literal[
+    "change",
+    "selected_region",
+    "input_boundary",
+    "output_boundary",
+    "boundary",
+    "before_topology",
+    "after_topology",
+    "authority",
+    "production_path",
+    "migration",
+    "producer_migration",
+    "consumer_migration",
+    "test_migration",
+    "removal",
+    "completion_condition",
+    "uncertainty",
+]
+TransformationContractSourceState = Literal[
+    "source_absent",
+    "extraction_missing",
+    "available",
+]
 EvidenceClassification = Literal[
     "code", "test", "document", "ci", "runtime", "mixed"
 ]
@@ -388,6 +411,137 @@ class Requirement(ReviewStatement):
             raise ValueError(
                 f"{self.id}: guardrail identity/purpose requires guardrail kind"
             )
+
+
+@dataclass(frozen=True)
+class TransformationClaim:
+    """One typed PR-authored transformation assertion, never an observation."""
+
+    id: str
+    kind: TransformationClaimKind
+    text: str
+    authority: Literal["pr_description"] = "pr_description"
+    sources: tuple[SourceRef, ...] = ()
+
+    def validate_consistency(self) -> None:
+        expected_prefix = "CC" if self.kind == "completion_condition" else "T"
+        numeric_id = self.id[len(expected_prefix) :]
+        if (
+            not self.id.startswith(expected_prefix)
+            or not numeric_id.isdigit()
+            or int(numeric_id) < 1
+        ):
+            raise ValueError(
+                f"{self.id}: {self.kind} requires {expected_prefix} identity"
+            )
+        if self.authority != "pr_description":
+            raise ValueError(
+                f"{self.id}: transformation claim must remain PR-authored"
+            )
+        if not self.text.strip():
+            raise ValueError(f"{self.id}: transformation claim requires text")
+        if not self.sources:
+            raise ValueError(
+                f"{self.id}: transformation claim requires source provenance"
+            )
+
+
+@dataclass(frozen=True)
+class TransformationRegion:
+    selected_claim_ids: tuple[str, ...] = ()
+    input_boundary_claim_ids: tuple[str, ...] = ()
+    output_boundary_claim_ids: tuple[str, ...] = ()
+    boundary_claim_ids: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class TransformationTopology:
+    before_claim_ids: tuple[str, ...] = ()
+    after_claim_ids: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class TransformationMigration:
+    general_claim_ids: tuple[str, ...] = ()
+    producer_claim_ids: tuple[str, ...] = ()
+    consumer_claim_ids: tuple[str, ...] = ()
+    test_claim_ids: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class TransformationContract:
+    """Canonical typed claims extracted from one PR description."""
+
+    claims: tuple[TransformationClaim, ...] = ()
+    change_claim_ids: tuple[str, ...] = ()
+    region: TransformationRegion = TransformationRegion()
+    topology: TransformationTopology = TransformationTopology()
+    authority_claim_ids: tuple[str, ...] = ()
+    production_path_claim_ids: tuple[str, ...] = ()
+    migration: TransformationMigration = TransformationMigration()
+    removal_claim_ids: tuple[str, ...] = ()
+    completion_condition_claim_ids: tuple[str, ...] = ()
+    uncertainty_claim_ids: tuple[str, ...] = ()
+    source_state: TransformationContractSourceState = "source_absent"
+    schema_version: str = "transformation_contract.v1"
+
+    def by_kind(
+        self,
+        kind: TransformationClaimKind,
+    ) -> tuple[TransformationClaim, ...]:
+        return tuple(item for item in self.claims if item.kind == kind)
+
+    def validate_consistency(self) -> None:
+        if self.schema_version != "transformation_contract.v1":
+            raise ValueError(
+                f"unsupported transformation contract schema: {self.schema_version}"
+            )
+        ids = tuple(item.id for item in self.claims)
+        if len(ids) != len(set(ids)):
+            raise ValueError("transformation contract contains duplicate claim IDs")
+        for item in self.claims:
+            item.validate_consistency()
+        if (self.source_state == "available") != bool(self.claims):
+            raise ValueError(
+                "available transformation contract must contain typed claims"
+            )
+        references_by_kind = {
+            "change": self.change_claim_ids,
+            "selected_region": self.region.selected_claim_ids,
+            "input_boundary": self.region.input_boundary_claim_ids,
+            "output_boundary": self.region.output_boundary_claim_ids,
+            "boundary": self.region.boundary_claim_ids,
+            "before_topology": self.topology.before_claim_ids,
+            "after_topology": self.topology.after_claim_ids,
+            "authority": self.authority_claim_ids,
+            "production_path": self.production_path_claim_ids,
+            "migration": self.migration.general_claim_ids,
+            "producer_migration": self.migration.producer_claim_ids,
+            "consumer_migration": self.migration.consumer_claim_ids,
+            "test_migration": self.migration.test_claim_ids,
+            "removal": self.removal_claim_ids,
+            "completion_condition": self.completion_condition_claim_ids,
+            "uncertainty": self.uncertainty_claim_ids,
+        }
+        referenced_ids = tuple(
+            claim_id
+            for claim_ids in references_by_kind.values()
+            for claim_id in claim_ids
+        )
+        if len(referenced_ids) != len(set(referenced_ids)):
+            raise ValueError(
+                "transformation contract groups contain duplicate claim references"
+            )
+        if set(referenced_ids) != set(ids):
+            raise ValueError(
+                "transformation contract groups must reference every claim once"
+            )
+        claims_by_id = {item.id: item for item in self.claims}
+        for kind, claim_ids in references_by_kind.items():
+            if any(claims_by_id[item].kind != kind for item in claim_ids):
+                raise ValueError(
+                    f"transformation contract group conflicts with {kind} claim kind"
+                )
 
 
 @dataclass(frozen=True)
@@ -2348,6 +2502,7 @@ class ReviewBrief:
     scope: tuple[ReviewStatement, ...] = ()
     verification_expectations: tuple[ReviewStatement, ...] = ()
     claims: tuple[ReviewStatement, ...] = ()
+    transformation_contract: TransformationContract = TransformationContract()
     guardrail_scan_plans: GuardrailScanPlanSet = GuardrailScanPlanSet()
     evidence_catalog: EvidenceCatalog = EvidenceCatalog()
     projection_candidates: ProjectionCandidateSet = ProjectionCandidateSet()
@@ -2360,7 +2515,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v34"
+    schema_version: str = "review_brief.v35"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
