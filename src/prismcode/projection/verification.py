@@ -1,0 +1,491 @@
+from __future__ import annotations
+
+from prismcode.model.contracts import (
+    EvidenceCatalog,
+    EvidenceItem,
+    ProjectionRelation,
+    ObservedTransformation,
+    ProjectionCandidateSet,
+    Requirement,
+    ReviewSlice,
+    ReviewStructuralGraph,
+    StructuralFocusNode,
+    StructuralFocusOverlay,
+    TransformationAlignment,
+    TransformationAssessment,
+    TransformationEvidenceBinding,
+    TransformationContract,
+    TransformationSummaryProjection,
+    VerificationEvidenceInspection,
+    VerificationMatrixEntry,
+    VerificationStatusCount,
+    VerificationWorkspace,
+)
+
+
+def project_verification_workspace(
+    focus_statements: tuple[Requirement, ...],
+    contract: TransformationContract,
+    observed: ObservedTransformation,
+    alignment: TransformationAlignment,
+    assessment: TransformationAssessment,
+    evidence_catalog: EvidenceCatalog,
+    candidates: ProjectionCandidateSet,
+    slices: tuple[ReviewSlice, ...],
+    review_graph: ReviewStructuralGraph,
+) -> VerificationWorkspace:
+    """Project all review subjects onto one matrix and inspector boundary."""
+
+    relations = candidates.by_id()
+    evidence = evidence_catalog.by_id()
+    slices_by_focus = {
+        item.change_map.focus_statement_id: item for item in slices
+    }
+    alignment_by_claim = alignment.by_claim_id()
+    assessment_by_claim = assessment.by_claim_id()
+    matrix: list[VerificationMatrixEntry] = []
+    inspections: list[VerificationEvidenceInspection] = []
+
+    for statement in focus_statements:
+        review_slice = slices_by_focus[statement.id]
+        relation_ids = _slice_relation_ids(review_slice)
+        observed_ids = tuple(
+            dict.fromkeys(
+                (
+                    *(
+                        relations[item].target_id
+                        for item in relation_ids
+                        if relations[item].target_type == "evidence"
+                    ),
+                    *_overlay_evidence_ids(
+                        review_slice.change_map.structural_overlay,
+                        review_graph,
+                    ),
+                )
+            )
+        )
+        inspection = VerificationEvidenceInspection(
+            id=f"VEI:{statement.id}",
+            subject_id=statement.id,
+            observed_evidence_ids=observed_ids,
+            projection_relation_ids=relation_ids,
+            diagnostic_ids=review_slice.diagnostic_ids,
+            structural_overlay=review_slice.change_map.structural_overlay,
+        )
+        inspections.append(inspection)
+        matrix.append(
+            VerificationMatrixEntry(
+                id=f"VME:{statement.id}",
+                subject_id=statement.id,
+                subject_kind=(
+                    "guardrail" if statement.kind == "guardrail" else "requirement"
+                ),
+                text=statement.text,
+                authority=statement.authority,
+                status="not_assessed",
+                inspector_id=inspection.id,
+                sources=statement.sources,
+            )
+        )
+
+    for claim in contract.claims:
+        claim_bindings = alignment_by_claim.get(claim.id, ())
+        claim_assessment = assessment_by_claim[claim.id]
+        observed_ids = tuple(
+            dict.fromkeys(item.evidence_id for item in claim_bindings)
+        )
+        supporting_ids = _binding_evidence_ids(
+            claim_assessment.supporting_binding_ids,
+            claim_bindings,
+        )
+        contradicting_ids = _binding_evidence_ids(
+            claim_assessment.contradicting_binding_ids,
+            claim_bindings,
+        )
+        inspection = VerificationEvidenceInspection(
+            id=f"VEI:{claim.id}",
+            subject_id=claim.id,
+            observed_evidence_ids=observed_ids,
+            supporting_evidence_ids=supporting_ids,
+            contradicting_evidence_ids=contradicting_ids,
+            transformation_binding_ids=tuple(item.id for item in claim_bindings),
+            structural_overlay=_evidence_overlay(
+                observed_ids,
+                review_graph,
+                evidence,
+            ),
+            assessment_reasons=claim_assessment.reasons,
+        )
+        inspections.append(inspection)
+        matrix.append(
+            VerificationMatrixEntry(
+                id=f"VME:{claim.id}",
+                subject_id=claim.id,
+                subject_kind=(
+                    "completion_condition"
+                    if claim.kind == "completion_condition"
+                    else "transformation_claim"
+                ),
+                text=claim.text,
+                authority=claim.authority,
+                status=claim_assessment.status,
+                inspector_id=inspection.id,
+                sources=claim.sources,
+            )
+        )
+
+    workspace = VerificationWorkspace(
+        transformation_summary=_transformation_summary(
+            contract,
+            observed,
+            alignment,
+            assessment,
+        ),
+        matrix=tuple(matrix),
+        inspections=tuple(inspections),
+    )
+    _validate_workspace(
+        workspace,
+        focus_statements,
+        contract,
+        observed,
+        alignment,
+        assessment,
+        evidence,
+        relations,
+        review_graph,
+    )
+    return workspace
+
+
+def _transformation_summary(
+    contract: TransformationContract,
+    observed: ObservedTransformation,
+    alignment: TransformationAlignment,
+    assessment: TransformationAssessment,
+) -> TransformationSummaryProjection:
+    status_order = (
+        "demonstrated",
+        "partial",
+        "contradicted",
+        "unverified",
+    )
+    bound_claim_ids = {item.claim_id for item in alignment.bindings}
+    topology = observed.topology
+    return TransformationSummaryProjection(
+        source_state=contract.source_state,
+        claim_ids=tuple(item.id for item in contract.claims),
+        selected_region_claim_ids=contract.region.selected_claim_ids,
+        boundary_claim_ids=tuple(
+            dict.fromkeys(
+                (
+                    *contract.region.input_boundary_claim_ids,
+                    *contract.region.output_boundary_claim_ids,
+                    *contract.region.boundary_claim_ids,
+                )
+            )
+        ),
+        before_topology_claim_ids=contract.topology.before_claim_ids,
+        after_topology_claim_ids=contract.topology.after_claim_ids,
+        authority_claim_ids=contract.authority_claim_ids,
+        production_path_claim_ids=contract.production_path_claim_ids,
+        migration_claim_ids=tuple(
+            dict.fromkeys(
+                (
+                    *contract.migration.general_claim_ids,
+                    *contract.migration.producer_claim_ids,
+                    *contract.migration.consumer_claim_ids,
+                    *contract.migration.test_claim_ids,
+                )
+            )
+        ),
+        removal_claim_ids=contract.removal_claim_ids,
+        completion_condition_claim_ids=contract.completion_condition_claim_ids,
+        uncertainty_claim_ids=contract.uncertainty_claim_ids,
+        observed_evidence_ids=observed.evidence_ids(),
+        base_topology_evidence_ids=tuple(
+            dict.fromkeys(
+                (
+                    *topology.base_symbol_change_evidence_ids,
+                    *topology.base_relation_change_evidence_ids,
+                    *topology.base_ownership_change_evidence_ids,
+                )
+            )
+        ),
+        head_topology_evidence_ids=tuple(
+            dict.fromkeys(
+                (
+                    *topology.head_symbol_change_evidence_ids,
+                    *topology.head_relation_change_evidence_ids,
+                    *topology.head_ownership_change_evidence_ids,
+                )
+            )
+        ),
+        aligned_claim_ids=tuple(
+            item.id for item in contract.claims if item.id in bound_claim_ids
+        ),
+        unassociated_claim_ids=tuple(
+            item.id for item in contract.claims if item.id not in bound_claim_ids
+        ),
+        status_counts=tuple(
+            VerificationStatusCount(
+                status=status,
+                count=sum(item.status == status for item in assessment.claims),
+            )
+            for status in status_order
+        ),
+    )
+
+
+def _slice_relation_ids(review_slice: ReviewSlice) -> tuple[str, ...]:
+    overlay = review_slice.change_map.structural_overlay
+    return tuple(
+        dict.fromkeys(
+            (
+                *review_slice.change_map.claim_relation_ids,
+                *(
+                    relation_id
+                    for node in overlay.nodes
+                    for relation_id in node.relation_ids
+                ),
+                *overlay.path_relation_ids,
+                *review_slice.standalone_changed_fact_relation_ids,
+                *review_slice.standalone_test_support_relation_ids,
+                *review_slice.standalone_document_support_relation_ids,
+                *review_slice.standalone_runtime_relation_ids,
+                *review_slice.standalone_test_relation_ids,
+                *review_slice.verification_relation_ids,
+                *review_slice.closure_fact_relation_ids,
+            )
+        )
+    )
+
+
+def _binding_evidence_ids(
+    binding_ids: tuple[str, ...],
+    bindings: tuple[TransformationEvidenceBinding, ...],
+) -> tuple[str, ...]:
+    evidence_by_binding = {item.id: item.evidence_id for item in bindings}
+    return tuple(evidence_by_binding[item] for item in binding_ids)
+
+
+def _overlay_evidence_ids(
+    overlay: StructuralFocusOverlay,
+    graph: ReviewStructuralGraph,
+) -> tuple[str, ...]:
+    node_ids = {item.node_id for item in overlay.nodes}
+    edge_ids = set(overlay.edge_ids)
+    ownership_ids = set(overlay.ownership_edge_ids)
+    placement_ids = set(overlay.placement_ids)
+    return tuple(
+        dict.fromkeys(
+            (
+                *(
+                    evidence_id
+                    for node in graph.nodes
+                    if node.id in node_ids
+                    for evidence_id in node.evidence_ids
+                ),
+                *(
+                    edge.relation_change_evidence_id
+                    for edge in graph.edges
+                    if edge.id in edge_ids
+                ),
+                *(
+                    edge.ownership_change_evidence_id
+                    for edge in graph.ownership_edges
+                    if edge.id in ownership_ids
+                ),
+                *(
+                    evidence_id
+                    for placement in graph.placements
+                    if placement.id in placement_ids
+                    for evidence_id in (
+                        *placement.base_ownership_evidence_ids,
+                        *placement.head_ownership_evidence_ids,
+                    )
+                ),
+            )
+        )
+    )
+
+
+def _evidence_overlay(
+    evidence_ids: tuple[str, ...],
+    graph: ReviewStructuralGraph,
+    evidence: dict[str, EvidenceItem],
+) -> StructuralFocusOverlay:
+    selected_evidence = set(evidence_ids)
+
+    def path_linked(evidence_id: str) -> bool:
+        fact = evidence.get(evidence_id)
+        return bool(
+            fact is not None
+            and selected_evidence & set(fact.structural_path_ids)
+        )
+
+    selected_node_ids = {
+        node.id
+        for node in graph.nodes
+        if selected_evidence & set(node.evidence_ids)
+        or any(path_linked(item) for item in node.evidence_ids)
+    }
+    selected_edge_ids = {
+        edge.id
+        for edge in graph.edges
+        if edge.relation_change_evidence_id in selected_evidence
+        or path_linked(edge.relation_change_evidence_id)
+    }
+    for edge in graph.edges:
+        if edge.id in selected_edge_ids:
+            selected_node_ids.update((edge.source_node_id, edge.target_node_id))
+    selected_ownership_ids = {
+        edge.id
+        for edge in graph.ownership_edges
+        if edge.ownership_change_evidence_id in selected_evidence
+    }
+    for edge in graph.ownership_edges:
+        if edge.id in selected_ownership_ids:
+            selected_node_ids.update((edge.parent_node_id, edge.child_node_id))
+    selected_placement_ids: set[str] = set()
+    direct_node_ids = set(selected_node_ids)
+    changed = True
+    while changed:
+        changed = False
+        for placement in graph.placements:
+            if placement.child_node_id not in selected_node_ids:
+                continue
+            selected_placement_ids.add(placement.id)
+            if placement.parent_node_id not in selected_node_ids:
+                selected_node_ids.add(placement.parent_node_id)
+                changed = True
+    group_ids = tuple(
+        group.id
+        for group in graph.relation_groups
+        if set(group.member_edge_ids) & selected_edge_ids
+    )
+    return StructuralFocusOverlay(
+        nodes=tuple(
+            StructuralFocusNode(
+                node_id=node.id,
+                role=(
+                    "changed_anchor"
+                    if node.id in direct_node_ids
+                    else "intermediate"
+                ),
+            )
+            for node in graph.nodes
+            if node.id in selected_node_ids
+        ),
+        edge_ids=tuple(edge.id for edge in graph.edges if edge.id in selected_edge_ids),
+        relation_group_ids=group_ids,
+        ownership_edge_ids=tuple(
+            edge.id
+            for edge in graph.ownership_edges
+            if edge.id in selected_ownership_ids
+        ),
+        placement_ids=tuple(
+            item.id for item in graph.placements if item.id in selected_placement_ids
+        ),
+    )
+
+
+def _validate_workspace(
+    workspace: VerificationWorkspace,
+    focus_statements: tuple[Requirement, ...],
+    contract: TransformationContract,
+    observed: ObservedTransformation,
+    alignment: TransformationAlignment,
+    assessment: TransformationAssessment,
+    evidence: dict[str, EvidenceItem],
+    relations: dict[str, ProjectionRelation],
+    graph: ReviewStructuralGraph,
+) -> None:
+    if workspace.schema_version != "verification_workspace.v1":
+        raise ValueError("unsupported verification workspace schema")
+    if workspace.transformation_summary != _transformation_summary(
+        contract,
+        observed,
+        alignment,
+        assessment,
+    ):
+        raise ValueError("verification workspace changed transformation summary")
+    expected_ids = (
+        *(item.id for item in focus_statements),
+        *(item.id for item in contract.claims),
+    )
+    if tuple(item.subject_id for item in workspace.matrix) != expected_ids:
+        raise ValueError("verification matrix must preserve every subject once")
+    if tuple(item.subject_id for item in workspace.inspections) != expected_ids:
+        raise ValueError("evidence inspector must preserve every subject once")
+    inspections = {item.id: item for item in workspace.inspections}
+    if len({item.id for item in workspace.matrix}) != len(workspace.matrix):
+        raise ValueError("verification workspace contains duplicate matrix entries")
+    if len(inspections) != len(workspace.inspections):
+        raise ValueError("verification workspace contains duplicate inspectors")
+    assessment_by_claim = assessment.by_claim_id()
+    alignment_by_claim = alignment.by_claim_id()
+    binding_ids = {item.id for item in alignment.bindings}
+    graph_node_ids = {item.id for item in graph.nodes}
+    graph_edge_ids = {item.id for item in graph.edges}
+    graph_group_ids = {item.id for item in graph.relation_groups}
+    graph_ownership_ids = {item.id for item in graph.ownership_edges}
+    graph_placement_ids = {item.id for item in graph.placements}
+    for entry in workspace.matrix:
+        if entry.id != f"VME:{entry.subject_id}":
+            raise ValueError("verification matrix entry has non-canonical ID")
+        inspection = inspections.get(entry.inspector_id)
+        if inspection is None or inspection.subject_id != entry.subject_id:
+            raise ValueError("verification matrix references invalid inspector")
+        if entry.subject_id in assessment_by_claim:
+            claim_assessment = assessment_by_claim[entry.subject_id]
+            if entry.status != claim_assessment.status:
+                raise ValueError("verification projection changed assessment status")
+            if inspection.assessment_reasons != claim_assessment.reasons:
+                raise ValueError("verification projection changed assessment reasons")
+        elif entry.status != "not_assessed":
+            raise ValueError("R/G projection cannot invent an assessment")
+    for inspection in workspace.inspections:
+        if inspection.id != f"VEI:{inspection.subject_id}":
+            raise ValueError("verification inspection has non-canonical ID")
+        if not set(inspection.observed_evidence_ids) <= set(evidence):
+            raise ValueError("verification inspector references unknown evidence")
+        if not set(inspection.projection_relation_ids) <= set(relations):
+            raise ValueError("verification inspector references unknown relation")
+        if not set(inspection.transformation_binding_ids) <= binding_ids:
+            raise ValueError("verification inspector references unknown binding")
+        if inspection.subject_id in assessment_by_claim:
+            expected_bindings = tuple(
+                item.id
+                for item in alignment_by_claim.get(inspection.subject_id, ())
+            )
+            if inspection.transformation_binding_ids != expected_bindings:
+                raise ValueError(
+                    "verification inspector changed transformation bindings"
+                )
+        elif inspection.transformation_binding_ids:
+            raise ValueError("R/G inspector cannot reference T/CC bindings")
+        if not set(inspection.supporting_evidence_ids) <= set(
+            inspection.observed_evidence_ids
+        ) or not set(inspection.contradicting_evidence_ids) <= set(
+            inspection.observed_evidence_ids
+        ):
+            raise ValueError(
+                "verification inspector assessment evidence is not observed"
+            )
+        if any(
+            relations[relation_id].focus_statement_id != inspection.subject_id
+            for relation_id in inspection.projection_relation_ids
+        ):
+            raise ValueError("verification inspector relation belongs to another focus")
+        overlay = inspection.structural_overlay
+        if not {item.node_id for item in overlay.nodes} <= graph_node_ids:
+            raise ValueError("verification inspector references unknown graph node")
+        if not set(overlay.edge_ids) <= graph_edge_ids:
+            raise ValueError("verification inspector references unknown graph edge")
+        if not set(overlay.relation_group_ids) <= graph_group_ids:
+            raise ValueError("verification inspector references unknown graph group")
+        if not set(overlay.ownership_edge_ids) <= graph_ownership_ids:
+            raise ValueError("verification inspector references unknown ownership")
+        if not set(overlay.placement_ids) <= graph_placement_ids:
+            raise ValueError("verification inspector references unknown placement")

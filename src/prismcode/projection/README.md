@@ -10,6 +10,11 @@ and canonical review-wide overview facts.
 Typed candidates, `CandidateConvergence`, canonical `ChangedFile` truth, and
 packet/provider state →
 `ReviewProjection` and `ReviewOverview`.
+`ReviewProjection.verification_workspace` is the single matrix and evidence
+inspector boundary over R/G subjects and typed T/CC assessments.
+Its transformation summary projects claim groups, observed Base/Head evidence
+IDs, association coverage, and assessment counts so presentation never reads
+raw contract, observation, alignment, or assessment truth.
 
 ## Invariants
 
@@ -78,12 +83,20 @@ review attention; single-focus diagnostics remain on that slice; and
 not-applicable diagnostics are explicitly suppressed. `ReviewProjection` and
 `ReviewOverview` consume this same disposition rather than independently
 deciding where a diagnostic belongs.
+The verification workspace preserves every R/G and T/CC subject exactly once.
+R/G entries remain explicitly `not_assessed`; projection never upgrades
+retrieval relevance into a conclusion. T/CC status and reasons are copied from
+the sole `TransformationAssessment` authority. Inspector entries reference
+canonical relation, binding, evidence, diagnostic, and shared structural-graph
+IDs. T/CC graph overlays are identity joins against the existing shared graph,
+not a second graph or another association pass.
 
 ## Must not
 
 Retrieve or reclassify evidence, select paths, inspect arbitrary provider
 metadata, invent identities for no-association diagnostics, format HTML/CLI
-copy, or delete complete support merely because it is not part of the default
+copy, assess R/G, recalculate T/CC status, or delete complete support merely
+because it is not part of the default
 backbone.
 
 ## Diagnostics

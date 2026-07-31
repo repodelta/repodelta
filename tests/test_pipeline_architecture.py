@@ -127,6 +127,7 @@ def test_presentation_does_not_read_raw_truth_sources() -> None:
         "observed_transformation",
         "transformation_alignment",
         "transformation_assessment",
+        "verification_workspace",
     )
     assert [value for value in forbidden if value in presentation] == []
 

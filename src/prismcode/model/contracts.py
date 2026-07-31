@@ -85,6 +85,19 @@ TransformationAssessmentReasonKind = Literal[
     "no_binding",
     "uncertainty_context",
 ]
+VerificationSubjectKind = Literal[
+    "requirement",
+    "guardrail",
+    "transformation_claim",
+    "completion_condition",
+]
+VerificationProjectionStatus = Literal[
+    "not_assessed",
+    "demonstrated",
+    "partial",
+    "contradicted",
+    "unverified",
+]
 EvidenceClassification = Literal[
     "code", "test", "document", "ci", "runtime", "mixed"
 ]
@@ -2322,10 +2335,85 @@ class ReviewSlice:
 
 
 @dataclass(frozen=True)
+class VerificationMatrixEntry:
+    id: str
+    subject_id: str
+    subject_kind: VerificationSubjectKind
+    text: str
+    authority: str
+    status: VerificationProjectionStatus
+    inspector_id: str
+    sources: tuple[SourceRef, ...] = ()
+
+
+@dataclass(frozen=True)
+class VerificationEvidenceInspection:
+    id: str
+    subject_id: str
+    observed_evidence_ids: tuple[str, ...] = ()
+    supporting_evidence_ids: tuple[str, ...] = ()
+    contradicting_evidence_ids: tuple[str, ...] = ()
+    projection_relation_ids: tuple[str, ...] = ()
+    transformation_binding_ids: tuple[str, ...] = ()
+    diagnostic_ids: tuple[str, ...] = ()
+    structural_overlay: StructuralFocusOverlay = StructuralFocusOverlay()
+    assessment_reasons: tuple[TransformationAssessmentReason, ...] = ()
+
+
+@dataclass(frozen=True)
+class VerificationStatusCount:
+    status: VerificationProjectionStatus
+    count: int
+
+
+@dataclass(frozen=True)
+class TransformationSummaryProjection:
+    source_state: TransformationContractSourceState = "source_absent"
+    claim_ids: tuple[str, ...] = ()
+    selected_region_claim_ids: tuple[str, ...] = ()
+    boundary_claim_ids: tuple[str, ...] = ()
+    before_topology_claim_ids: tuple[str, ...] = ()
+    after_topology_claim_ids: tuple[str, ...] = ()
+    authority_claim_ids: tuple[str, ...] = ()
+    production_path_claim_ids: tuple[str, ...] = ()
+    migration_claim_ids: tuple[str, ...] = ()
+    removal_claim_ids: tuple[str, ...] = ()
+    completion_condition_claim_ids: tuple[str, ...] = ()
+    uncertainty_claim_ids: tuple[str, ...] = ()
+    observed_evidence_ids: tuple[str, ...] = ()
+    base_topology_evidence_ids: tuple[str, ...] = ()
+    head_topology_evidence_ids: tuple[str, ...] = ()
+    aligned_claim_ids: tuple[str, ...] = ()
+    unassociated_claim_ids: tuple[str, ...] = ()
+    status_counts: tuple[VerificationStatusCount, ...] = ()
+
+
+@dataclass(frozen=True)
+class VerificationWorkspace:
+    """Single presentation boundary for matrix and evidence-inspector views."""
+
+    transformation_summary: TransformationSummaryProjection = (
+        TransformationSummaryProjection()
+    )
+    matrix: tuple[VerificationMatrixEntry, ...] = ()
+    inspections: tuple[VerificationEvidenceInspection, ...] = ()
+    schema_version: str = "verification_workspace.v1"
+
+    def by_subject_id(self) -> dict[str, VerificationMatrixEntry]:
+        return {item.subject_id: item for item in self.matrix}
+
+    def inspections_by_subject_id(
+        self,
+    ) -> dict[str, VerificationEvidenceInspection]:
+        return {item.subject_id: item for item in self.inspections}
+
+
+@dataclass(frozen=True)
 class ReviewProjection:
     slices: tuple[ReviewSlice, ...] = ()
     review_graph: ReviewStructuralGraph = ReviewStructuralGraph()
-    schema_version: str = "review_projection.v21"
+    verification_workspace: VerificationWorkspace = VerificationWorkspace()
+    schema_version: str = "review_projection.v22"
 
     def validate_consistency(
         self,
@@ -3016,7 +3104,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v39"
+    schema_version: str = "review_brief.v40"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

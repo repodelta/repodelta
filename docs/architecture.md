@@ -53,6 +53,9 @@ fixture or GitHub
        -> claim/anchor/path bridge reachability
        -> bounded inspection, display selection, and explicit ambiguity
   -> bounded ReviewProjection
+       -> one unified R/G + T/CC verification matrix
+       -> one evidence-inspector record per subject
+       -> shared structural graph overlays by canonical evidence identity
   -> canonical ReviewOverview
   -> ReviewBrief
   -> HTML / CLI presentation
