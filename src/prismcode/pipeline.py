@@ -109,6 +109,11 @@ class DeterministicAnalyzer:
             changed_files=packet.changed_files,
             closure_scan_plans=closure_scan_plans,
             packet=packet,
+            focus_statements=requirements,
+            transformation_contract=semantics.transformation_contract,
+            observed_transformation=observed_transformation,
+            transformation_alignment=transformation_alignment,
+            transformation_assessment=transformation_assessment,
         )
         overview = build_review_overview(
             packet,

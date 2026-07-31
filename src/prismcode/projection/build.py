@@ -7,12 +7,14 @@ from prismcode.model.contracts import (
     CandidateConvergence,
     CanonicalChangeMapEntry,
     ChangedFile,
+    ClosureScanPlanSet,
     DiagnosticPresentation,
     EvidenceCatalog,
     EvidenceItem,
-    ClosureScanPlanSet,
+    ObservedTransformation,
     ProjectionCandidateSet,
     ProjectionRelation,
+    Requirement,
     ReviewProjection,
     ReviewSourcePacket,
     ReviewSlice,
@@ -24,6 +26,9 @@ from prismcode.model.contracts import (
     StructuralGraphNode,
     StructuralGraphOwnershipEdge,
     StructuralGraphPlacement,
+    TransformationAlignment,
+    TransformationAssessment,
+    TransformationContract,
 )
 from prismcode.projection.structural_groups import (
     project_structural_relation_groups,
@@ -31,6 +36,7 @@ from prismcode.projection.structural_groups import (
 from prismcode.projection.structural_navigation import (
     project_structural_navigation,
 )
+from prismcode.projection.verification import project_verification_workspace
 
 
 _ROLE_ORDER = {
@@ -39,6 +45,8 @@ _ROLE_ORDER = {
     "test_context": 2,
     "intermediate": 3,
 }
+
+
 def build_review_projection(
     candidates: ProjectionCandidateSet,
     convergence: CandidateConvergence,
@@ -48,6 +56,11 @@ def build_review_projection(
     changed_files: tuple[ChangedFile, ...] = (),
     closure_scan_plans: ClosureScanPlanSet = ClosureScanPlanSet(),
     packet: ReviewSourcePacket | None = None,
+    focus_statements: tuple[Requirement, ...],
+    transformation_contract: TransformationContract,
+    observed_transformation: ObservedTransformation,
+    transformation_alignment: TransformationAlignment,
+    transformation_assessment: TransformationAssessment,
 ) -> ReviewProjection:
     """Project converged canonical facts without performing retrieval or selection."""
 
@@ -301,22 +314,35 @@ def build_review_projection(
         )
         for review_slice in slices
     ]
+    review_graph = ReviewStructuralGraph(
+        nodes=navigation.nodes,
+        edges=navigation.edges,
+        relation_groups=relation_groups.groups,
+        ownership_edges=complete_ownership_edges,
+        placements=complete_placements,
+        primary_placement_ids=relation_groups.primary_placement_ids,
+        backbone_node_ids=backbone_node_ids,
+        backbone_edge_ids=backbone_edge_ids,
+        backbone_relation_group_ids=relation_groups.backbone_group_ids,
+        backbone_ownership_edge_ids=backbone_ownership_edge_ids,
+        path_relation_ids=tuple(dict.fromkeys(graph_path_relation_ids)),
+        navigation_targets=navigation.targets,
+    )
+    verification_workspace = project_verification_workspace(
+        focus_statements,
+        transformation_contract,
+        observed_transformation,
+        transformation_alignment,
+        transformation_assessment,
+        evidence_catalog,
+        candidates,
+        tuple(slices),
+        review_graph,
+    )
     projection = ReviewProjection(
         slices=tuple(slices),
-        review_graph=ReviewStructuralGraph(
-            nodes=navigation.nodes,
-            edges=navigation.edges,
-            relation_groups=relation_groups.groups,
-            ownership_edges=complete_ownership_edges,
-            placements=complete_placements,
-            primary_placement_ids=relation_groups.primary_placement_ids,
-            backbone_node_ids=backbone_node_ids,
-            backbone_edge_ids=backbone_edge_ids,
-            backbone_relation_group_ids=relation_groups.backbone_group_ids,
-            backbone_ownership_edge_ids=backbone_ownership_edge_ids,
-            path_relation_ids=tuple(dict.fromkeys(graph_path_relation_ids)),
-            navigation_targets=navigation.targets,
-        ),
+        review_graph=review_graph,
+        verification_workspace=verification_workspace,
     )
     projection.validate_consistency(
         evidence_catalog,

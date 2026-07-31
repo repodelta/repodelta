@@ -117,6 +117,10 @@ The assessment stage then assigns exactly one conservative
 transformation claim. It uses only aligned canonical facts, complete closure
 observations, and current-head verification; it still does not decide whether
 the PR may merge.
+The canonical `ReviewProjection` then exposes one verification workspace for
+R/G and T/CC subjects. Matrix rows and evidence-inspector records reference the
+same selected relations, bindings, evidence, diagnostics, and structural graph;
+the projection does not perform another assessment.
 
 The canonical stage map, ownership rules, and dependency direction are
 documented in [`docs/architecture.md`](docs/architecture.md). Each stage also

@@ -15,6 +15,7 @@ from prismcode.model.contracts import (
     ConvergenceGroup,
     EvidenceCatalog,
     EvidenceItem,
+    ObservedTransformation,
     ProjectionCandidateGroup,
     ProjectionCandidateSet,
     ProjectionRelation,
@@ -36,6 +37,9 @@ from prismcode.model.contracts import (
     StructuralOwnershipChangeIdentity,
     StructuralOwnershipIdentity,
     StructuralRelationChangeIdentity,
+    TransformationAlignment,
+    TransformationAssessment,
+    TransformationContract,
     VerificationIdentity,
 )
 from prismcode.evaluation.core import load_evaluation_suite
@@ -129,6 +133,11 @@ def _build_projection(
             candidates,
             convergence,
         ),
+        focus_statements=(),
+        transformation_contract=TransformationContract(),
+        observed_transformation=ObservedTransformation(),
+        transformation_alignment=TransformationAlignment(),
+        transformation_assessment=TransformationAssessment(),
         **kwargs,
     )
 
