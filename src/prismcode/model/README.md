@@ -13,6 +13,8 @@ No transformation. Other stages exchange only the contracts defined here.
 - statement role, purpose, kind, and display identity agree;
 - transformation claims retain PR authority, typed kind, T/CC identity, source
   state, and provenance without carrying observed or assessed state;
+- observed transformation references canonical fact identities and Base/Head
+  provenance without carrying authored claims or assessment state;
 - each canonical diff relation owns one valid added/removed/replaced shape and
   changed evidence references its relation IDs;
 - guardrail scan plans map one-to-one to canonical G statements and preserve

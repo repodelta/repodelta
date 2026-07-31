@@ -122,6 +122,7 @@ def test_presentation_does_not_read_raw_truth_sources() -> None:
         "github_linked_issue_not_found",
         "github_patch_unavailable",
         "transformation_contract",
+        "observed_transformation",
     )
     assert [value for value in forbidden if value in presentation] == []
 

@@ -3,11 +3,13 @@
 ## Owns
 
 Canonical evidence construction, path classification, line-level exact-symbol
-coverage of change spans, and evidence identity validation.
+coverage of change spans, evidence identity validation, and claim-independent
+observed-transformation reconstruction.
 
 ## Input / output
 
 Source packet, canonical changes, and provider results → one `EvidenceCatalog`.
+The catalog then projects once into a reference-only `ObservedTransformation`.
 
 ## Invariants
 
@@ -66,6 +68,10 @@ changed-anchor path.
 Verification facts carry first-class provider, kind, normalized name, status,
 conclusion, and observed head SHA; downstream stages must not recover those
 fields from presentation metadata.
+`ObservedTransformation` references every canonical changed anchor, structural
+delta, replacement candidate, structural path, and verification observation
+once. Its Base/Head topology membership comes only from facts-owned revision
+provenance. It never reads the authored `TransformationContract`.
 Observed guardrail scans normalize once as `boundary_fact` items carrying their
 typed scan result and explicit G association. Unavailable scans never become
 evidence.
@@ -74,7 +80,8 @@ evidence.
 
 Extract statements, profile review focuses, determine focus-relative fact
 eligibility or support roles, associate R/G, select candidates, or render
-output.
+output. Reconstruction must not infer authority, migration intent, completion,
+absence, or assessment status.
 
 ## Diagnostics
 

@@ -545,6 +545,183 @@ class TransformationContract:
 
 
 @dataclass(frozen=True)
+class ObservedTopology:
+    """Base/Head membership of canonical structural facts."""
+
+    base_symbol_change_evidence_ids: tuple[str, ...] = ()
+    head_symbol_change_evidence_ids: tuple[str, ...] = ()
+    base_relation_change_evidence_ids: tuple[str, ...] = ()
+    head_relation_change_evidence_ids: tuple[str, ...] = ()
+    base_ownership_change_evidence_ids: tuple[str, ...] = ()
+    head_ownership_change_evidence_ids: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class ObservedTransformation:
+    """Claim-independent reconstruction, never an assessment or conclusion."""
+
+    structural_change_evidence_ids: tuple[str, ...] = ()
+    fallback_change_evidence_ids: tuple[str, ...] = ()
+    relation_change_evidence_ids: tuple[str, ...] = ()
+    ownership_change_evidence_ids: tuple[str, ...] = ()
+    replacement_candidate_ids: tuple[str, ...] = ()
+    structural_path_evidence_ids: tuple[str, ...] = ()
+    verification_evidence_ids: tuple[str, ...] = ()
+    topology: ObservedTopology = ObservedTopology()
+    schema_version: str = "observed_transformation.v1"
+
+    def validate_consistency(self, evidence_catalog: EvidenceCatalog) -> None:
+        if self.schema_version != "observed_transformation.v1":
+            raise ValueError(
+                f"unsupported observed transformation schema: {self.schema_version}"
+            )
+        structural_changes = tuple(
+            item
+            for item in evidence_catalog.items
+            if item.kind == "structural_change"
+        )
+        relation_changes = tuple(
+            item
+            for item in evidence_catalog.items
+            if item.kind == "structural_relation_change"
+        )
+        ownership_changes = tuple(
+            item
+            for item in evidence_catalog.items
+            if item.kind == "structural_ownership_change"
+        )
+        changed_anchors = tuple(
+            item
+            for item in evidence_catalog.items
+            if item.changed and item.role == "changed_anchor"
+        )
+        expected = {
+            "structural_change_evidence_ids": tuple(
+                item.id for item in structural_changes
+            ),
+            "fallback_change_evidence_ids": tuple(
+                item.id
+                for item in changed_anchors
+                if item.kind != "structural_change"
+            ),
+            "relation_change_evidence_ids": tuple(
+                item.id for item in relation_changes
+            ),
+            "ownership_change_evidence_ids": tuple(
+                item.id for item in ownership_changes
+            ),
+            "replacement_candidate_ids": tuple(
+                item.id
+                for item in evidence_catalog.structural_replacement_candidates
+            ),
+            "structural_path_evidence_ids": tuple(
+                item.id
+                for item in evidence_catalog.items
+                if item.kind == "structural_path"
+            ),
+            "verification_evidence_ids": tuple(
+                item.id
+                for item in evidence_catalog.items
+                if item.role == "verification"
+            ),
+            "base_symbol_change_evidence_ids": tuple(
+                item.id
+                for item in structural_changes
+                if item.structural_change is not None
+                and item.structural_change.base_symbol_evidence_id is not None
+            ),
+            "head_symbol_change_evidence_ids": tuple(
+                item.id
+                for item in structural_changes
+                if item.structural_change is not None
+                and item.structural_change.head_symbol_evidence_id is not None
+            ),
+            "base_relation_change_evidence_ids": tuple(
+                item.id
+                for item in relation_changes
+                if item.structural_relation_change is not None
+                and item.structural_relation_change.base_path_evidence_ids
+            ),
+            "head_relation_change_evidence_ids": tuple(
+                item.id
+                for item in relation_changes
+                if item.structural_relation_change is not None
+                and item.structural_relation_change.head_path_evidence_ids
+            ),
+            "base_ownership_change_evidence_ids": tuple(
+                item.id
+                for item in ownership_changes
+                if item.structural_ownership_change is not None
+                and (
+                    item.structural_ownership_change.base_ownership_evidence_id
+                    is not None
+                )
+            ),
+            "head_ownership_change_evidence_ids": tuple(
+                item.id
+                for item in ownership_changes
+                if item.structural_ownership_change is not None
+                and (
+                    item.structural_ownership_change.head_ownership_evidence_id
+                    is not None
+                )
+            ),
+        }
+        actual = {
+            "structural_change_evidence_ids": self.structural_change_evidence_ids,
+            "fallback_change_evidence_ids": self.fallback_change_evidence_ids,
+            "relation_change_evidence_ids": self.relation_change_evidence_ids,
+            "ownership_change_evidence_ids": self.ownership_change_evidence_ids,
+            "replacement_candidate_ids": self.replacement_candidate_ids,
+            "structural_path_evidence_ids": self.structural_path_evidence_ids,
+            "verification_evidence_ids": self.verification_evidence_ids,
+            "base_symbol_change_evidence_ids": (
+                self.topology.base_symbol_change_evidence_ids
+            ),
+            "head_symbol_change_evidence_ids": (
+                self.topology.head_symbol_change_evidence_ids
+            ),
+            "base_relation_change_evidence_ids": (
+                self.topology.base_relation_change_evidence_ids
+            ),
+            "head_relation_change_evidence_ids": (
+                self.topology.head_relation_change_evidence_ids
+            ),
+            "base_ownership_change_evidence_ids": (
+                self.topology.base_ownership_change_evidence_ids
+            ),
+            "head_ownership_change_evidence_ids": (
+                self.topology.head_ownership_change_evidence_ids
+            ),
+        }
+        for field_name, expected_ids in expected.items():
+            if actual[field_name] != expected_ids:
+                raise ValueError(
+                    f"observed transformation {field_name} conflicts with "
+                    "canonical evidence"
+                )
+            if len(actual[field_name]) != len(set(actual[field_name])):
+                raise ValueError(
+                    f"observed transformation {field_name} contains duplicates"
+                )
+        structural_ids = set(self.structural_change_evidence_ids)
+        fallback_ids = set(self.fallback_change_evidence_ids)
+        if structural_ids & fallback_ids:
+            raise ValueError(
+                "observed structural and fallback change lanes must be disjoint"
+            )
+        changed_anchor_ids = {
+            item.id
+            for item in evidence_catalog.items
+            if item.changed and item.role == "changed_anchor"
+        }
+        if structural_ids | fallback_ids != changed_anchor_ids:
+            raise ValueError(
+                "observed change lanes must partition canonical changed anchors"
+            )
+
+
+@dataclass(frozen=True)
 class GuardrailScanPlan:
     """Source-backed scan intent. A plan is never evidence that a scan ran."""
 
@@ -2503,6 +2680,7 @@ class ReviewBrief:
     verification_expectations: tuple[ReviewStatement, ...] = ()
     claims: tuple[ReviewStatement, ...] = ()
     transformation_contract: TransformationContract = TransformationContract()
+    observed_transformation: ObservedTransformation = ObservedTransformation()
     guardrail_scan_plans: GuardrailScanPlanSet = GuardrailScanPlanSet()
     evidence_catalog: EvidenceCatalog = EvidenceCatalog()
     projection_candidates: ProjectionCandidateSet = ProjectionCandidateSet()
@@ -2515,7 +2693,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v35"
+    schema_version: str = "review_brief.v36"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

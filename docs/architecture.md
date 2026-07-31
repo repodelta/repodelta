@@ -26,11 +26,15 @@ fixture or GitHub
        -> exact changed-hunk / symbol-span overlaps
        -> exact opposite-revision symbol counterparts
        -> bounded direction-aware paths to unchanged runtime/test neighbors
-  -> canonical EvidenceCatalog
+   -> canonical EvidenceCatalog
        -> exact symbol for each mapped hunk
        -> changed-hunk evidence for each unmapped hunk
        -> changed-file fallback only when no parseable hunk exists
-       -> bounded paths + CI/runtime observations
+        -> bounded paths + CI/runtime observations
+   -> claim-independent observed transformation reconstruction
+        -> changed anchors + uncovered diff facts
+        -> Base/Head symbol, executable relation, and ownership topology
+        -> replacement candidates + structural paths + verification observations
   -> deterministic typed fact routing
        -> eligibility by fact profile and projection slot
        -> per-R/G claim, changed-anchor, runtime, test, CI, path, boundary candidates

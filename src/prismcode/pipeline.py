@@ -9,6 +9,7 @@ from prismcode.model.contracts import (
 from prismcode.semantics.review import extract_packet_semantics
 from prismcode.changes.hunks import parse_changed_files
 from prismcode.facts.catalog import build_evidence_catalog
+from prismcode.facts.transformation import reconstruct_observed_transformation
 from prismcode.guardrails.planning import compile_guardrail_scan_plans
 from prismcode.guardrails.scanning import (
     GuardrailScanner,
@@ -57,6 +58,9 @@ class DeterministicAnalyzer:
             analysis_input.structural_graph,
             supplied=analysis_input.supplied_evidence,
             guardrail_scan_results=guardrail_scan_results,
+        )
+        observed_transformation = reconstruct_observed_transformation(
+            evidence_catalog
         )
         projection_candidates = build_projection_candidates(
             requirements=requirements,
@@ -107,6 +111,7 @@ class DeterministicAnalyzer:
             verification_expectations=semantics.verification_expectations,
             claims=semantics.claims,
             transformation_contract=semantics.transformation_contract,
+            observed_transformation=observed_transformation,
             guardrail_scan_plans=guardrail_scan_plans,
             evidence_catalog=evidence_catalog,
             projection_candidates=projection_candidates,
