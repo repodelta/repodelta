@@ -53,6 +53,18 @@ TransformationContractSourceState = Literal[
     "extraction_missing",
     "available",
 ]
+TransformationEvidenceRole = Literal[
+    "change",
+    "relation_change",
+    "ownership_change",
+    "structural_path",
+    "verification",
+    "closure",
+]
+TransformationAlignmentCoverageState = Literal[
+    "no_eligible_fact",
+    "no_association",
+]
 EvidenceClassification = Literal[
     "code", "test", "document", "ci", "runtime", "mixed"
 ]
@@ -576,6 +588,22 @@ class ObservedTransformation:
     topology: ObservedTopology = ObservedTopology()
     schema_version: str = "observed_transformation.v1"
 
+    def evidence_ids(self) -> tuple[str, ...]:
+        """Canonical observed evidence identities, excluding non-fact candidates."""
+
+        return tuple(
+            dict.fromkeys(
+                (
+                    *self.structural_change_evidence_ids,
+                    *self.fallback_change_evidence_ids,
+                    *self.relation_change_evidence_ids,
+                    *self.ownership_change_evidence_ids,
+                    *self.structural_path_evidence_ids,
+                    *self.verification_evidence_ids,
+                )
+            )
+        )
+
     def validate_consistency(self, evidence_catalog: EvidenceCatalog) -> None:
         if self.schema_version != "observed_transformation.v1":
             raise ValueError(
@@ -725,6 +753,115 @@ class ObservedTransformation:
             raise ValueError(
                 "observed change lanes must partition canonical changed anchors"
             )
+
+
+@dataclass(frozen=True)
+class TransformationEvidenceBinding:
+    """One deterministic relevance edge, never an assessment."""
+
+    id: str
+    claim_id: str
+    evidence_id: str
+    evidence_role: TransformationEvidenceRole
+    association: AssociationKind
+    reasons: tuple[AssociationReason, ...]
+
+
+@dataclass(frozen=True)
+class TransformationAlignmentDiagnostic:
+    id: str
+    claim_id: str
+    state: TransformationAlignmentCoverageState
+    message: str
+
+
+@dataclass(frozen=True)
+class TransformationAlignment:
+    """Typed PR-claim to observed-fact relevance without status or selection."""
+
+    bindings: tuple[TransformationEvidenceBinding, ...] = ()
+    diagnostics: tuple[TransformationAlignmentDiagnostic, ...] = ()
+    schema_version: str = "transformation_alignment.v1"
+
+    def by_claim_id(self) -> dict[str, tuple[TransformationEvidenceBinding, ...]]:
+        return {
+            claim_id: tuple(
+                item for item in self.bindings if item.claim_id == claim_id
+            )
+            for claim_id in dict.fromkeys(item.claim_id for item in self.bindings)
+        }
+
+    def validate_consistency(
+        self,
+        contract: TransformationContract,
+        observed: ObservedTransformation,
+        evidence_catalog: EvidenceCatalog,
+    ) -> None:
+        if self.schema_version != "transformation_alignment.v1":
+            raise ValueError(
+                f"unsupported transformation alignment schema: {self.schema_version}"
+            )
+        claim_ids = {item.id for item in contract.claims}
+        evidence = evidence_catalog.by_id()
+        closure_ids = {
+            item.id for item in evidence.values() if item.role == "closure_fact"
+        }
+        eligible_evidence_ids = set(observed.evidence_ids()) | closure_ids
+        pairs = {(item.claim_id, item.evidence_id) for item in self.bindings}
+        if len(pairs) != len(self.bindings):
+            raise ValueError("transformation alignment contains duplicate bindings")
+        for binding in self.bindings:
+            if (
+                binding.claim_id not in claim_ids
+                or binding.evidence_id not in eligible_evidence_ids
+                or binding.evidence_id not in evidence
+            ):
+                raise ValueError(
+                    f"{binding.id}: transformation binding references unknown identity"
+                )
+            if binding.id != f"TAB:{binding.claim_id}:{binding.evidence_id}":
+                raise ValueError(
+                    f"{binding.id}: non-canonical transformation binding ID"
+                )
+            fact = evidence[binding.evidence_id]
+            expected_role = fact.transformation_evidence_role()
+            if binding.evidence_role != expected_role:
+                raise ValueError(
+                    f"{binding.id}: transformation evidence role conflicts"
+                )
+            if (
+                not binding.reasons
+                or binding.association != binding.reasons[0].kind
+            ):
+                raise ValueError(
+                    f"{binding.id}: binding association requires canonical reasons"
+                )
+            if binding.evidence_role == "closure" and (
+                fact.associated_statement_ids != (binding.claim_id,)
+                or binding.association != "provided_association"
+            ):
+                raise ValueError(
+                    f"{binding.id}: closure binding must preserve provider authority"
+                )
+        diagnostic_claim_ids = tuple(item.claim_id for item in self.diagnostics)
+        if len(diagnostic_claim_ids) != len(set(diagnostic_claim_ids)):
+            raise ValueError(
+                "transformation alignment contains duplicate claim diagnostics"
+            )
+        bound_claim_ids = {item.claim_id for item in self.bindings}
+        if set(diagnostic_claim_ids) & bound_claim_ids:
+            raise ValueError(
+                "bound transformation claims cannot carry coverage diagnostics"
+            )
+        if bound_claim_ids | set(diagnostic_claim_ids) != claim_ids:
+            raise ValueError(
+                "transformation alignment must cover every typed claim"
+            )
+        for diagnostic in self.diagnostics:
+            if diagnostic.id != f"TAD:{diagnostic.claim_id}":
+                raise ValueError(
+                    f"{diagnostic.id}: non-canonical alignment diagnostic ID"
+                )
 
 
 @dataclass(frozen=True)
@@ -1105,6 +1242,23 @@ class EvidenceItem:
     structural_ownership_change: StructuralOwnershipChangeIdentity | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
+    def transformation_evidence_role(
+        self,
+    ) -> TransformationEvidenceRole | None:
+        if self.role == "closure_fact":
+            return "closure"
+        if self.role == "verification":
+            return "verification"
+        if self.kind == "structural_path":
+            return "structural_path"
+        if self.kind == "structural_relation_change":
+            return "relation_change"
+        if self.kind == "structural_ownership_change":
+            return "ownership_change"
+        if self.changed and self.role == "changed_anchor":
+            return "change"
+        return None
+
     def validate_consistency(self) -> None:
         if self.kind == "structural_relation_change":
             if (
@@ -1260,7 +1414,7 @@ class EvidenceCatalog:
     ] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
     closure_scan_diagnostics: tuple[ClosureScanDiagnostic, ...] = ()
-    schema_version: str = "evidence_catalog.v16"
+    schema_version: str = "evidence_catalog.v17"
 
     def by_id(self) -> dict[str, EvidenceItem]:
         return {item.id: item for item in self.items}
@@ -2735,6 +2889,7 @@ class ReviewBrief:
     claims: tuple[ReviewStatement, ...] = ()
     transformation_contract: TransformationContract = TransformationContract()
     observed_transformation: ObservedTransformation = ObservedTransformation()
+    transformation_alignment: TransformationAlignment = TransformationAlignment()
     closure_scan_plans: ClosureScanPlanSet = ClosureScanPlanSet()
     evidence_catalog: EvidenceCatalog = EvidenceCatalog()
     projection_candidates: ProjectionCandidateSet = ProjectionCandidateSet()
@@ -2747,7 +2902,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v37"
+    schema_version: str = "review_brief.v38"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

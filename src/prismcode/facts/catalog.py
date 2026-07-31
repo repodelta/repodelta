@@ -1304,6 +1304,11 @@ def verification_evidence(observation: VerificationObservation) -> EvidenceItem:
         verification_identity=identity,
         verification_status=observation.status.strip().casefold() or "unknown",
         verification_conclusion=observation.conclusion.strip().casefold(),
+        head_signature=association_signature(
+            observation.name,
+            observation.provider,
+            observation.kind,
+        ),
         sources=(SourceRef(label=observation.name, url=observation.details_url),),
     )
 

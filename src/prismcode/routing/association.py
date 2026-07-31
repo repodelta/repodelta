@@ -7,6 +7,7 @@ from prismcode.model.contracts import (
     AssociationReason,
     AssociationSignature,
     ReviewStatement,
+    TransformationClaim,
 )
 from prismcode.facts.lexical import identifier_keys, semantic_tokens
 
@@ -45,7 +46,7 @@ def statement_reasons(
 
 
 def evidence_reasons(
-    source: ReviewStatement,
+    source: ReviewStatement | TransformationClaim,
     target: AssociationSignature,
     *,
     distinctive_terms: frozenset[str],

@@ -15,6 +15,9 @@ No transformation. Other stages exchange only the contracts defined here.
   state, and provenance without carrying observed or assessed state;
 - observed transformation references canonical fact identities and Base/Head
   provenance without carrying authored claims or assessment state;
+- transformation alignment references only typed claims and canonical observed
+  or closure facts, preserves association reasons, and carries no selection or
+  assessment state;
 - each canonical diff relation owns one valid added/removed/replaced shape and
   changed evidence references its relation IDs;
 - closure scan plans map one-to-one to eligible G/removal/negative-completion

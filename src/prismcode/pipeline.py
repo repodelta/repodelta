@@ -16,6 +16,7 @@ from prismcode.closure.scanning import (
     unavailable_scan_results,
 )
 from prismcode.routing.candidates import build_projection_candidates
+from prismcode.routing.transformation import build_transformation_alignment
 from prismcode.convergence.core import converge_candidates
 from prismcode.projection.build import build_review_projection
 from prismcode.projection.overview import (
@@ -64,6 +65,11 @@ class DeterministicAnalyzer:
         )
         observed_transformation = reconstruct_observed_transformation(
             evidence_catalog
+        )
+        transformation_alignment = build_transformation_alignment(
+            semantics.transformation_contract,
+            observed_transformation,
+            evidence_catalog,
         )
         projection_candidates = build_projection_candidates(
             requirements=requirements,
@@ -115,6 +121,7 @@ class DeterministicAnalyzer:
             claims=semantics.claims,
             transformation_contract=semantics.transformation_contract,
             observed_transformation=observed_transformation,
+            transformation_alignment=transformation_alignment,
             closure_scan_plans=closure_scan_plans,
             evidence_catalog=evidence_catalog,
             projection_candidates=projection_candidates,

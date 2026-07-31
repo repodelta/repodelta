@@ -108,8 +108,10 @@ repository observations, assessment results, or merge approval.
 Independently, the facts stage reconstructs
 `ReviewBrief.observed_transformation` from canonical diff, Base/Head structural,
 path, replacement-candidate, and current-head verification fact IDs. It never
-reads the authored transformation contract and does not yet bind or assess its
-claims.
+reads the authored transformation contract. The routing stage then creates a
+typed `ReviewBrief.transformation_alignment` from eligible observed facts and
+provider-owned closure facts. Alignment records deterministic relevance and
+coverage only; it does not select evidence, assess a claim, or approve merge.
 
 The canonical stage map, ownership rules, and dependency direction are
 documented in [`docs/architecture.md`](docs/architecture.md). Each stage also
