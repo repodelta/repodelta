@@ -112,6 +112,11 @@ reads the authored transformation contract. The routing stage then creates a
 typed `ReviewBrief.transformation_alignment` from eligible observed facts and
 provider-owned closure facts. Alignment records deterministic relevance and
 coverage only; it does not select evidence, assess a claim, or approve merge.
+The assessment stage then assigns exactly one conservative
+`demonstrated` / `partial` / `contradicted` / `unverified` status to each typed
+transformation claim. It uses only aligned canonical facts, complete closure
+observations, and current-head verification; it still does not decide whether
+the PR may merge.
 
 The canonical stage map, ownership rules, and dependency direction are
 documented in [`docs/architecture.md`](docs/architecture.md). Each stage also

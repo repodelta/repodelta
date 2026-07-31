@@ -65,6 +65,26 @@ TransformationAlignmentCoverageState = Literal[
     "no_eligible_fact",
     "no_association",
 ]
+TransformationAssessmentStatus = Literal[
+    "demonstrated",
+    "partial",
+    "contradicted",
+    "unverified",
+]
+TransformationAssessmentReasonKind = Literal[
+    "exact_fact_observed",
+    "association_only",
+    "closure_transition_observed",
+    "closure_absence_observed",
+    "closure_conflict_observed",
+    "current_verification_success",
+    "current_verification_failure",
+    "verification_incomplete",
+    "stale_verification",
+    "coverage_incomplete",
+    "no_binding",
+    "uncertainty_context",
+]
 EvidenceClassification = Literal[
     "code", "test", "document", "ci", "runtime", "mixed"
 ]
@@ -861,6 +881,99 @@ class TransformationAlignment:
             if diagnostic.id != f"TAD:{diagnostic.claim_id}":
                 raise ValueError(
                     f"{diagnostic.id}: non-canonical alignment diagnostic ID"
+                )
+
+
+@dataclass(frozen=True)
+class TransformationAssessmentReason:
+    kind: TransformationAssessmentReasonKind
+    detail: str
+    binding_ids: tuple[str, ...] = ()
+    evidence_ids: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class TransformationClaimAssessment:
+    id: str
+    claim_id: str
+    status: TransformationAssessmentStatus
+    supporting_binding_ids: tuple[str, ...] = ()
+    contradicting_binding_ids: tuple[str, ...] = ()
+    reasons: tuple[TransformationAssessmentReason, ...] = ()
+
+
+@dataclass(frozen=True)
+class TransformationAssessment:
+    """One conservative deterministic status per authored transformation claim."""
+
+    claims: tuple[TransformationClaimAssessment, ...] = ()
+    schema_version: str = "transformation_assessment.v1"
+
+    def by_claim_id(self) -> dict[str, TransformationClaimAssessment]:
+        return {item.claim_id: item for item in self.claims}
+
+    def validate_consistency(
+        self,
+        contract: TransformationContract,
+        alignment: TransformationAlignment,
+        evidence_catalog: EvidenceCatalog,
+    ) -> None:
+        if self.schema_version != "transformation_assessment.v1":
+            raise ValueError(
+                f"unsupported transformation assessment schema: {self.schema_version}"
+            )
+        claim_ids = tuple(item.id for item in contract.claims)
+        if tuple(item.claim_id for item in self.claims) != claim_ids:
+            raise ValueError(
+                "transformation assessment must preserve every contract claim once"
+            )
+        binding_ids = {item.id for item in alignment.bindings}
+        evidence_ids = set(evidence_catalog.by_id())
+        for item in self.claims:
+            if item.id != f"TAS:{item.claim_id}":
+                raise ValueError(f"{item.id}: non-canonical assessment ID")
+            referenced = (
+                *item.supporting_binding_ids,
+                *item.contradicting_binding_ids,
+                *(
+                    binding_id
+                    for reason in item.reasons
+                    for binding_id in reason.binding_ids
+                ),
+            )
+            if any(binding_id not in binding_ids for binding_id in referenced):
+                raise ValueError(f"{item.id}: assessment references unknown binding")
+            claim_binding_ids = {
+                binding.id
+                for binding in alignment.bindings
+                if binding.claim_id == item.claim_id
+            }
+            if any(binding_id not in claim_binding_ids for binding_id in referenced):
+                raise ValueError(
+                    f"{item.id}: assessment references another claim's binding"
+                )
+            if set(item.supporting_binding_ids) & set(
+                item.contradicting_binding_ids
+            ):
+                raise ValueError(
+                    f"{item.id}: one binding cannot support and contradict a claim"
+                )
+            reason_evidence_ids = {
+                evidence_id
+                for reason in item.reasons
+                for evidence_id in reason.evidence_ids
+            }
+            if not reason_evidence_ids <= evidence_ids:
+                raise ValueError(f"{item.id}: assessment references unknown evidence")
+            if not item.reasons:
+                raise ValueError(f"{item.id}: assessment requires typed reasons")
+            if item.status == "demonstrated" and not item.supporting_binding_ids:
+                raise ValueError(
+                    f"{item.id}: demonstrated assessment requires support"
+                )
+            if item.status == "contradicted" and not item.contradicting_binding_ids:
+                raise ValueError(
+                    f"{item.id}: contradicted assessment requires conflict"
                 )
 
 
@@ -2890,6 +3003,7 @@ class ReviewBrief:
     transformation_contract: TransformationContract = TransformationContract()
     observed_transformation: ObservedTransformation = ObservedTransformation()
     transformation_alignment: TransformationAlignment = TransformationAlignment()
+    transformation_assessment: TransformationAssessment = TransformationAssessment()
     closure_scan_plans: ClosureScanPlanSet = ClosureScanPlanSet()
     evidence_catalog: EvidenceCatalog = EvidenceCatalog()
     projection_candidates: ProjectionCandidateSet = ProjectionCandidateSet()
@@ -2902,7 +3016,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v38"
+    schema_version: str = "review_brief.v39"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
