@@ -2,20 +2,22 @@
 
 ## Owns
 
-ID resolution, lossless grouping, escaping, link construction, and HTML/CLI
-formatting.
+ID resolution, escaping, link construction, deterministic graph layout, and
+HTML/CLI formatting. HTML consumes the projection-owned
+`VerificationWorkspace` as its only subject/status/inspection authority.
 
 ## Input / output
 
-`ReviewBrief` → HTML or terminal copy.
+`ReviewBrief` with canonical `ReviewProjection.verification_workspace` → HTML
+or terminal copy.
 
 ## Invariants
 
-Missing references fail visibly. Both adapters consume the same canonical
-overview and coverage facts. G scan-plan copy resolves an upstream plan ID and
-does not infer execution or absence. Boundary observations resolve selected
-fact IDs and display their typed per-surface coverage without interpreting
-candidate matches.
+Missing references fail visibly. The HTML presents one verification accordion,
+the projection-owned structural graph, and a collapsed Evidence Appendix.
+Accordion headings and expanded claim/observation/assessment details are copied
+from one verification workspace; the renderer does not rebuild alignment or
+assessment.
 The structural delta view resolves the shared canonical graph and focus-overlay
 IDs. Its deterministic SVG layout includes only the projection-owned default
 change backbone, including its executable edges and separate canonical
@@ -32,21 +34,18 @@ consume the resulting node/container geometry. Node labels and links resolve
 only the projection-owned canonical display evidence. Focus controls toggle
 existing node/edge memberships; a container's own focus is shown as direct
 evidence while descendant-only membership is shown as presentation context.
-They also display the projection-owned
-`StructuralFocusDisposition` when a focus has no visible backbone. Deferred
-structural rows resolve the disposition's canonical relation IDs. Focus
-controls do not recalculate an association, disposition, relation, or
-parentage. Graph coverage text formats the existing review-level
+Opening an accordion subject drives the graph focus for its projected overlay.
+Controls do not recalculate an association, status, relation, or parentage.
+Graph coverage text formats the existing review-level
 `StructuralCoverage`; it does not inspect provider diagnostics.
-Standalone changed facts are grouped by the projection's primary, test-support,
-and document-support references; presentation never reclassifies a fact from
-its path, content, or label.
 
 ## Must not
 
 Infer CI status, acceptance-source absence, diagnostic taxonomy, statement
 purpose, provider coverage, relevance, graph membership, structural relation
-truth, verification, or acceptance.
+truth, transformation status, verification, acceptance, or mergeability. It
+must not read raw transformation contract, observation, alignment, or
+assessment models after projection.
 
 ## Diagnostics
 

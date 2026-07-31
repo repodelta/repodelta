@@ -121,6 +121,12 @@ The canonical `ReviewProjection` then exposes one verification workspace for
 R/G and T/CC subjects. Matrix rows and evidence-inspector records reference the
 same selected relations, bindings, evidence, diagnostics, and structural graph;
 the projection does not perform another assessment.
+The HTML consumes that workspace through one verification accordion, the
+projection-owned structural graph, and a collapsed Evidence Appendix. This
+replaces the former Canonical Change Map and repeated per-R/G review cards
+without creating a second presentation truth. T/CC structural focus remains
+unavailable until canonical subject selection and bounded closure project it;
+the renderer never manufactures graph membership from aligned evidence alone.
 
 The canonical stage map, ownership rules, and dependency direction are
 documented in [`docs/architecture.md`](docs/architecture.md). Each stage also

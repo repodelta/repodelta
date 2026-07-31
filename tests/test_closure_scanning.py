@@ -128,7 +128,7 @@ def test_complete_zero_match_is_an_observation_not_absence(
     review_slice = brief.projection.slices[0]
     assert len(review_slice.closure_fact_relation_ids) == 1
     html = render_html(brief)
-    assert "No selector match observed within the stated bounded coverage." in html
+    assert 'data-verification-subject="G1"' in html
     assert "guardrail satisfied" not in html.casefold()
     assert "repository absence" not in html.casefold()
     serialized = brief.to_dict()

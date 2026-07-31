@@ -170,7 +170,7 @@ def test_transformation_binding_projects_to_shared_graph_overlay() -> None:
     )
 
 
-def test_verification_workspace_is_serialized_without_renderer_consumption() -> None:
+def test_verification_workspace_is_serialized_for_renderer_consumption() -> None:
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=_mixed_packet()))
     serialized = brief.to_dict()["projection"]
 
