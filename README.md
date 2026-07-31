@@ -103,7 +103,14 @@ exact Markdown headings:
 
 These fields remain PR-authored claims. The current analyzer serializes them
 once in `ReviewBrief.transformation_contract`; it does not treat them as
-repository observations, assessment results, or merge approval.
+repository observations, assessment results, or merge approval. Contract v2
+also records deterministic selector predicates only when the author uses
+explicit Markdown code spans such as `` `DeterministicAnalyzer` ``,
+`` `src/prismcode/pipeline.py` ``, or an ordered
+`` `Source` -> `Analyzer` -> `ReviewBrief` `` path. Unmarked prose remains a
+claim with a typed `no_explicit_selector` diagnostic. PrismCode does not guess
+code identities from prose, and this predicate layer does not itself observe,
+associate, assess, or display repository evidence.
 
 Independently, the facts stage reconstructs
 `ReviewBrief.observed_transformation` from canonical diff, Base/Head structural,

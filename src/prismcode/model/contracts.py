@@ -53,6 +53,18 @@ TransformationContractSourceState = Literal[
     "extraction_missing",
     "available",
 ]
+TransformationPredicateSelectorKind = Literal[
+    "symbol",
+    "repository_path",
+    "ordered_path",
+]
+TransformationPredicateExpectation = Literal[
+    "reference",
+    "present_base",
+    "present_head",
+    "absent_head",
+    "verified_head",
+]
 TransformationEvidenceRole = Literal[
     "change",
     "relation_change",
@@ -498,6 +510,94 @@ class TransformationClaim:
 
 
 @dataclass(frozen=True)
+class TransformationPredicate:
+    """One explicit PR-authored selector predicate, never an observation."""
+
+    id: str
+    claim_id: str
+    selector_kind: TransformationPredicateSelectorKind
+    values: tuple[str, ...]
+    expectation: TransformationPredicateExpectation
+    sources: tuple[SourceRef, ...] = ()
+
+    def validate_consistency(self) -> None:
+        if self.id != f"TP:{self.claim_id}:{self.id.rsplit(':', 1)[-1]}":
+            raise ValueError(f"{self.id}: non-canonical predicate ID")
+        ordinal = self.id.rsplit(":", 1)[-1]
+        if not ordinal.isdigit() or int(ordinal) < 1:
+            raise ValueError(f"{self.id}: predicate requires positive ordinal")
+        if not self.values or any(not item.strip() for item in self.values):
+            raise ValueError(f"{self.id}: predicate requires selector values")
+        if (
+            self.selector_kind != "ordered_path"
+            and len(self.values) != len(set(self.values))
+        ):
+            raise ValueError(f"{self.id}: predicate values must be unique")
+        if self.selector_kind == "ordered_path" and len(self.values) < 2:
+            raise ValueError(f"{self.id}: ordered path requires two selectors")
+        if self.selector_kind != "ordered_path" and len(self.values) != 1:
+            raise ValueError(f"{self.id}: scalar predicate requires one selector")
+        if not self.sources:
+            raise ValueError(f"{self.id}: predicate requires source provenance")
+
+
+@dataclass(frozen=True)
+class TransformationPredicateDiagnostic:
+    id: str
+    claim_id: str
+    state: Literal["no_explicit_selector"]
+    message: str
+
+    def validate_consistency(self) -> None:
+        if self.id != f"TPD:{self.claim_id}:{self.state}":
+            raise ValueError(f"{self.id}: non-canonical predicate diagnostic ID")
+        if not self.message.strip():
+            raise ValueError(f"{self.id}: predicate diagnostic requires a message")
+
+
+@dataclass(frozen=True)
+class TransformationPredicateSet:
+    predicates: tuple[TransformationPredicate, ...] = ()
+    diagnostics: tuple[TransformationPredicateDiagnostic, ...] = ()
+    schema_version: str = "transformation_predicate_set.v1"
+
+    def by_claim_id(self) -> dict[str, tuple[TransformationPredicate, ...]]:
+        return {
+            claim_id: tuple(
+                item for item in self.predicates if item.claim_id == claim_id
+            )
+            for claim_id in dict.fromkeys(item.claim_id for item in self.predicates)
+        }
+
+    def validate_consistency(self, claim_ids: set[str]) -> None:
+        if self.schema_version != "transformation_predicate_set.v1":
+            raise ValueError("unsupported transformation predicate schema")
+        ids = tuple(item.id for item in self.predicates)
+        diagnostic_ids = tuple(item.id for item in self.diagnostics)
+        if (
+            len(ids) != len(set(ids))
+            or len(diagnostic_ids) != len(set(diagnostic_ids))
+        ):
+            raise ValueError("transformation predicates contain duplicate IDs")
+        for item in self.predicates:
+            item.validate_consistency()
+        for item in self.diagnostics:
+            item.validate_consistency()
+        referenced = {
+            *(item.claim_id for item in self.predicates),
+            *(item.claim_id for item in self.diagnostics),
+        }
+        if not referenced <= claim_ids:
+            raise ValueError("transformation predicates reference unknown claims")
+        predicate_claims = {item.claim_id for item in self.predicates}
+        diagnostic_claims = {item.claim_id for item in self.diagnostics}
+        if predicate_claims & diagnostic_claims:
+            raise ValueError(
+                "one claim cannot have predicates and missing-selector diagnostics"
+            )
+
+
+@dataclass(frozen=True)
 class TransformationRegion:
     selected_claim_ids: tuple[str, ...] = ()
     input_boundary_claim_ids: tuple[str, ...] = ()
@@ -524,6 +624,7 @@ class TransformationContract:
     """Canonical typed claims extracted from one PR description."""
 
     claims: tuple[TransformationClaim, ...] = ()
+    predicates: TransformationPredicateSet = TransformationPredicateSet()
     change_claim_ids: tuple[str, ...] = ()
     region: TransformationRegion = TransformationRegion()
     topology: TransformationTopology = TransformationTopology()
@@ -534,7 +635,7 @@ class TransformationContract:
     completion_condition_claim_ids: tuple[str, ...] = ()
     uncertainty_claim_ids: tuple[str, ...] = ()
     source_state: TransformationContractSourceState = "source_absent"
-    schema_version: str = "transformation_contract.v1"
+    schema_version: str = "transformation_contract.v2"
 
     def by_kind(
         self,
@@ -543,7 +644,7 @@ class TransformationContract:
         return tuple(item for item in self.claims if item.kind == kind)
 
     def validate_consistency(self) -> None:
-        if self.schema_version != "transformation_contract.v1":
+        if self.schema_version != "transformation_contract.v2":
             raise ValueError(
                 f"unsupported transformation contract schema: {self.schema_version}"
             )
@@ -552,6 +653,7 @@ class TransformationContract:
             raise ValueError("transformation contract contains duplicate claim IDs")
         for item in self.claims:
             item.validate_consistency()
+        self.predicates.validate_consistency(set(ids))
         if (self.source_state == "available") != bool(self.claims):
             raise ValueError(
                 "available transformation contract must contain typed claims"

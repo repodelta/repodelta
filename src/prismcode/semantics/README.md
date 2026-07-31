@@ -19,8 +19,14 @@ source section. Heading aliases normalize through an exact canonical vocabulary,
 never loose substring matching. Implementation aliases cover common summary,
 approach, solution, and semantic-atom conventions through that same vocabulary.
 Structured transformation headings produce one PR-authored
-`TransformationContract`. They do not also enter the generic C claim path and
-never become repository observations or assessments.
+`TransformationContract`. The same parse owns its selector predicates: only
+explicit inline-code spans become symbol/path selectors, and explicit arrow
+sequences become ordered-path selectors. Cleaned claim text remains the
+canonical authored statement; raw Markdown is used only while extracting
+selectors and is not retained as a parallel contract. Claims without explicit
+selectors receive a typed diagnostic instead of a guessed code identity.
+Transformation claims do not also enter the generic C claim path and never
+become repository observations or assessments.
 Boundary aliases cover guardrail, constraint, and safety-boundary conventions;
 verification aliases cover regression, test-evidence, and validation-result
 conventions. Their source authority remains decisive: Issue boundaries become
