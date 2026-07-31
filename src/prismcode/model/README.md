@@ -13,6 +13,9 @@ No transformation. Other stages exchange only the contracts defined here.
 - statement role, purpose, kind, and display identity agree;
 - transformation claims retain PR authority, typed kind, T/CC identity, source
   state, and provenance without carrying observed or assessed state;
+- transformation predicates retain their owning claim, explicit selector kind,
+  expected revision state, ordered values, and provenance; missing explicit
+  selectors remain typed diagnostics rather than inferred identities;
 - observed transformation references canonical fact identities and Base/Head
   provenance without carrying authored claims or assessment state;
 - transformation alignment references only typed claims and canonical observed

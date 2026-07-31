@@ -11,6 +11,7 @@ fixture or GitHub
        -> objectives (O), scope context (S)
        -> implementation/boundary (C), baseline (B), verification (V) claims
        -> PR-authored typed transformation contract (T/CC)
+       -> explicit code-selector predicates and missing-selector diagnostics
        -> intent (I)
   -> canonical closure scan planning
        -> one source-backed plan per eligible G/removal/negative CC
@@ -126,6 +127,11 @@ Each Issue or PR Markdown body is parsed once into canonical
    `TransformationContract`. Routing may bind these claims to observed facts,
    and the assessment stage evaluates those bindings without changing either
    the authored claims or observed facts.
+10. Transformation selector predicates come only from explicit Markdown code
+    spans and arrow paths in those sections. They are authored lookup intent,
+    not repository observations. Unmarked prose produces a typed diagnostic;
+    semantics never guesses an identifier, and downstream consumption remains
+    a separate pipeline change.
 
 Deliverables use stable IDs (`R1`, `R2`, ...), negative scope constraints use
 `G1`, objectives use `O1`, scope uses `S1`, and Issue verification expectations

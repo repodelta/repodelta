@@ -14,6 +14,11 @@ from prismcode.model.contracts import (
     TransformationClaimKind,
     TransformationContract,
     TransformationMigration,
+    TransformationPredicate,
+    TransformationPredicateDiagnostic,
+    TransformationPredicateExpectation,
+    TransformationPredicateSelectorKind,
+    TransformationPredicateSet,
     TransformationRegion,
     TransformationTopology,
 )
@@ -175,6 +180,14 @@ _TRANSFORMATION_LABEL_RE = re.compile(
     r"^(?:T|CC)[-_ ]?\d+\s*[:.\u3001]\s*",
     re.IGNORECASE,
 )
+_INLINE_CODE_RE = re.compile(r"`([^`\n]+)`")
+_TOPOLOGY_ARROW_RE = re.compile(r"\s*(?:→|->|=>)\s*")
+_REPOSITORY_PATH_PREFIXES = ("src/", "tests/", "docs/", ".github/")
+_REPOSITORY_PATH_SUFFIXES = (
+    ".py", ".pyi", ".js", ".jsx", ".ts", ".tsx", ".java", ".go",
+    ".rs", ".rb", ".php", ".cs", ".cpp", ".c", ".h", ".md",
+    ".toml", ".yaml", ".yml", ".json",
+)
 _LABEL_PREFIXES_BY_PURPOSE: dict[StatementPurpose, frozenset[str]] = {
     "acceptance": frozenset({"R", "AC", "REQ"}),
     "baseline": frozenset({"B"}),
@@ -255,6 +268,7 @@ class _ParsedItem:
 @dataclass(frozen=True)
 class _ParsedTransformationItem:
     text: str
+    raw_text: str
     kind: TransformationClaimKind
     section: str
     line: int
@@ -392,7 +406,7 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
         marker = (kind, cleaned.casefold())
         if cleaned and marker not in seen_transformation:
             transformation_items.append(
-                _ParsedTransformationItem(cleaned, kind, section, line)
+                _ParsedTransformationItem(cleaned, text, kind, section, line)
             )
             seen_transformation.add(marker)
 
@@ -742,6 +756,10 @@ def _transformation_contract(
 
     return TransformationContract(
         claims=tuple(claims),
+        predicates=_transformation_predicates(
+            tuple(claims),
+            tuple(item.raw_text for item in items),
+        ),
         change_claim_ids=ids("change"),
         region=TransformationRegion(
             selected_claim_ids=ids("selected_region"),
@@ -765,6 +783,111 @@ def _transformation_contract(
         completion_condition_claim_ids=ids("completion_condition"),
         uncertainty_claim_ids=ids("uncertainty"),
     )
+
+
+def _transformation_predicates(
+    claims: tuple[TransformationClaim, ...],
+    raw_texts: tuple[str, ...],
+) -> TransformationPredicateSet:
+    predicates = []
+    diagnostics = []
+    for claim, raw_text in zip(claims, raw_texts, strict=True):
+        matches = tuple(_INLINE_CODE_RE.finditer(raw_text))
+        selectors = tuple(
+            value
+            for match in matches
+            if (value := match.group(1).strip())
+        )
+        ordered_values: tuple[str, ...] = ()
+        if len(selectors) == 1:
+            parts = tuple(
+                item.strip()
+                for item in _TOPOLOGY_ARROW_RE.split(selectors[0])
+                if item.strip()
+            )
+            if len(parts) > 1:
+                ordered_values = parts
+        elif len(selectors) > 1 and all(
+            _TOPOLOGY_ARROW_RE.search(
+                raw_text[matches[index].end() : matches[index + 1].start()]
+            )
+            for index in range(len(matches) - 1)
+        ):
+            ordered_values = selectors
+
+        expectation = _predicate_expectation(claim.kind)
+        if ordered_values:
+            predicates.append(
+                TransformationPredicate(
+                    id=f"TP:{claim.id}:1",
+                    claim_id=claim.id,
+                    selector_kind="ordered_path",
+                    values=ordered_values,
+                    expectation=expectation,
+                    sources=claim.sources,
+                )
+            )
+            continue
+        unique_selectors = tuple(dict.fromkeys(selectors))
+        predicates.extend(
+            TransformationPredicate(
+                id=f"TP:{claim.id}:{index}",
+                claim_id=claim.id,
+                selector_kind=_selector_kind(value),
+                values=(value,),
+                expectation=expectation,
+                sources=claim.sources,
+            )
+            for index, value in enumerate(unique_selectors, start=1)
+        )
+        if not unique_selectors:
+            diagnostics.append(
+                TransformationPredicateDiagnostic(
+                    id=f"TPD:{claim.id}:no_explicit_selector",
+                    claim_id=claim.id,
+                    state="no_explicit_selector",
+                    message=(
+                        "No explicit Markdown code selector was authored; the "
+                        "claim remains prose and cannot seed deterministic "
+                        "structural selection."
+                    ),
+                )
+            )
+    return TransformationPredicateSet(
+        predicates=tuple(predicates),
+        diagnostics=tuple(diagnostics),
+    )
+
+
+def _selector_kind(value: str) -> TransformationPredicateSelectorKind:
+    normalized = value.casefold()
+    if normalized.startswith(_REPOSITORY_PATH_PREFIXES) or normalized.endswith(
+        _REPOSITORY_PATH_SUFFIXES
+    ):
+        return "repository_path"
+    return "symbol"
+
+
+def _predicate_expectation(
+    kind: TransformationClaimKind,
+) -> TransformationPredicateExpectation:
+    if kind == "before_topology":
+        return "present_base"
+    if kind == "removal":
+        return "absent_head"
+    if kind == "completion_condition":
+        return "verified_head"
+    if kind in {
+        "after_topology",
+        "authority",
+        "production_path",
+        "migration",
+        "producer_migration",
+        "consumer_migration",
+        "test_migration",
+    }:
+        return "present_head"
+    return "reference"
 
 
 def extract_requirement_texts(body: str | None) -> tuple[str, ...]:

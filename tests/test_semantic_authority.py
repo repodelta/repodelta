@@ -813,11 +813,66 @@ def test_pr_transformation_contract_preserves_typed_structure_once() -> None:
         "Transformation assessment remains a later change."
     ]
     serialized = brief.to_dict()["transformation_contract"]
-    assert serialized["schema_version"] == "transformation_contract.v1"
+    assert serialized["schema_version"] == "transformation_contract.v2"
     assert serialized["claims"][8]["text"] == (
         "extract_packet_semantics() produces the contract once."
     )
     assert serialized["region"]["boundary_claim_ids"] == ("T5",)
+    assert [
+        (item.claim_id, item.selector_kind, item.values, item.expectation)
+        for item in contract.predicates.predicates
+    ] == [
+        ("T2", "symbol", ("ReviewSourcePacket",), "reference"),
+        ("T2", "symbol", ("ReviewBrief",), "reference"),
+        ("T4", "symbol", ("TransformationContract",), "reference"),
+        ("T9", "symbol", ("extract_packet_semantics()",), "present_head"),
+        ("T11", "symbol", ("DeterministicAnalyzer",), "present_head"),
+        ("T11", "symbol", ("ReviewBrief",), "present_head"),
+    ]
+    assert {item.claim_id for item in contract.predicates.diagnostics} == {
+        "T1", "T3", "T5", "T6", "T7", "T8", "T10", "T12", "T13",
+        "CC1", "CC2", "T14",
+    }
+
+
+def test_transformation_predicates_require_explicit_code_selectors() -> None:
+    semantics = extract_review_semantics(
+        issue_body=None,
+        issue_source=None,
+        pr_body=(
+            "## Selected region\n"
+            "- `src/input.py` and prose_module are in the region.\n\n"
+            "## After topology\n"
+            "- `Adapter` → `Analyzer` → `ReviewBrief`.\n\n"
+            "## Removed legacy paths\n"
+            "- Remove `legacy/adapter.py`.\n\n"
+            "## Canonical authority\n"
+            "- Analyzer owns assessment authority.\n"
+        ),
+        pr_source=_pr_source(),
+        pr_title="Type predicates",
+    )
+    contract = semantics.transformation_contract
+
+    assert [
+        (item.claim_id, item.selector_kind, item.values, item.expectation)
+        for item in contract.predicates.predicates
+    ] == [
+        ("T1", "repository_path", ("src/input.py",), "reference"),
+        (
+            "T2",
+            "ordered_path",
+            ("Adapter", "Analyzer", "ReviewBrief"),
+            "present_head",
+        ),
+        ("T3", "repository_path", ("legacy/adapter.py",), "absent_head"),
+    ]
+    assert [item.claim_id for item in contract.predicates.diagnostics] == ["T4"]
+    assert "prose_module" not in {
+        value
+        for item in contract.predicates.predicates
+        for value in item.values
+    }
 
 
 def test_transformation_heading_aliases_are_exact_and_context_aware() -> None:
