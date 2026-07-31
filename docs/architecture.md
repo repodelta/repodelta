@@ -12,15 +12,15 @@ fixture or GitHub
        -> implementation/boundary (C), baseline (B), verification (V) claims
        -> PR-authored typed transformation contract (T/CC)
        -> intent (I)
-  -> canonical guardrail scan planning
-       -> one source-backed plan per G
-       -> head revision + repository scope
+  -> canonical closure scan planning
+       -> one source-backed plan per eligible G/removal/negative CC
+       -> typed base/head revision scope
        -> canonical executable selectors + supported surfaces
-  -> bounded guardrail scanning
-       -> validated clean PR-head checkout
+  -> bounded closure scanning
+       -> validated clean base/head checkouts
        -> deterministic path/content/symbol-name inspection
        -> typed file/byte/match safety limits
-       -> typed result coverage and candidate locations
+       -> revision-aware coverage, path profiles, and candidate locations
   -> one canonical DiffHunkCollection
   -> optional StructuralGraphProvider
        -> exact changed-hunk / symbol-span overlaps
@@ -37,7 +37,7 @@ fixture or GitHub
         -> replacement candidates + structural paths + verification observations
   -> deterministic typed fact routing
        -> eligibility by fact profile and projection slot
-       -> per-R/G claim, changed-anchor, runtime, test, CI, path, boundary candidates
+       -> per-R/G claim, changed-anchor, runtime, test, CI, path, closure candidates
        -> complete typed relations with association reasons
   -> deterministic candidate convergence
        -> same-R/G, same-slot typed dominance
@@ -55,7 +55,7 @@ code:
 - [`model`](../src/prismcode/model/README.md)
 - [`intake`](../src/prismcode/intake/README.md)
 - [`semantics`](../src/prismcode/semantics/README.md)
-- [`guardrails`](../src/prismcode/guardrails/README.md)
+- [`closure`](../src/prismcode/closure/README.md)
 - [`changes`](../src/prismcode/changes/README.md)
 - [`providers`](../src/prismcode/providers/README.md)
 - [`facts`](../src/prismcode/facts/README.md)
@@ -78,8 +78,8 @@ becoming alternate intake, classification, routing, or presentation paths.
    It never means implemented, verified, satisfied, or in scope.
 5. Renderers project the brief and never infer or upgrade a conclusion.
 6. Structural providers return repository facts and diagnostics only.
-7. Guardrail scan plans own execution intent and selectors. Observed scans
-   become boundary facts; neither plans nor zero-match observations prove
+7. Closure scan plans own execution intent and selectors. Observed scans
+   become revision-aware closure facts; neither plans nor zero-match observations prove
    satisfaction or repository-wide absence.
 
 ## Semantic authority
@@ -247,7 +247,7 @@ relations without selecting or truncating them:
 - runtime and test context;
 - current-head verification;
 - structural paths;
-- guardrail boundary facts plus explicit unavailable/partial scan coverage.
+- G closure facts plus explicit unavailable/partial scan coverage.
 
 Eligibility is determined from canonical fact and requirement profiles.
 Typed association kinds include explicit provider association, explicit R/G

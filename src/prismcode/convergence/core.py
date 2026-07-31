@@ -34,7 +34,7 @@ class ConvergencePolicy:
     def selected_limit(self, slot: ProjectionSlot) -> int:
         return {
             "claim": self.max_claims,
-            "boundary_fact": 1,
+            "closure_fact": 1,
         }[slot]
 
 
@@ -45,7 +45,7 @@ _SLOT_ORDER: tuple[ProjectionSlot, ...] = (
     "runtime_context",
     "test_context",
     "verification",
-    "boundary_fact",
+    "closure_fact",
 )
 _DIRECT_ANCHOR_ASSOCIATIONS: frozenset[AssociationKind] = frozenset(
     {

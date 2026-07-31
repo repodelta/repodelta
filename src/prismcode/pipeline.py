@@ -10,9 +10,9 @@ from prismcode.semantics.review import extract_packet_semantics
 from prismcode.changes.hunks import parse_changed_files
 from prismcode.facts.catalog import build_evidence_catalog
 from prismcode.facts.transformation import reconstruct_observed_transformation
-from prismcode.guardrails.planning import compile_guardrail_scan_plans
-from prismcode.guardrails.scanning import (
-    GuardrailScanner,
+from prismcode.closure.planning import compile_closure_scan_plans
+from prismcode.closure.scanning import (
+    ClosureScanner,
     unavailable_scan_results,
 )
 from prismcode.routing.candidates import build_projection_candidates
@@ -31,8 +31,8 @@ class ReviewAnalyzer(Protocol):
 class DeterministicAnalyzer:
     """Build one conclusion-free requirement-to-evidence candidate graph."""
 
-    def __init__(self, *, guardrail_scanner: GuardrailScanner | None = None) -> None:
-        self.guardrail_scanner = guardrail_scanner
+    def __init__(self, *, closure_scanner: ClosureScanner | None = None) -> None:
+        self.closure_scanner = closure_scanner
 
     def analyze(self, analysis_input: AnalysisInput) -> ReviewBrief:
         packet = analysis_input.packet
@@ -46,18 +46,21 @@ class DeterministicAnalyzer:
             requirement.validate_consistency()
         deliverables = tuple(item for item in requirements if item.kind != "guardrail")
         guardrails = tuple(item for item in requirements if item.kind == "guardrail")
-        guardrail_scan_plans = compile_guardrail_scan_plans(guardrails)
-        guardrail_scan_results = (
-            self.guardrail_scanner.scan(guardrail_scan_plans)
-            if self.guardrail_scanner is not None
-            else unavailable_scan_results(guardrail_scan_plans)
+        closure_scan_plans = compile_closure_scan_plans(
+            guardrails,
+            semantics.transformation_contract,
+        )
+        closure_scan_results = (
+            self.closure_scanner.scan(closure_scan_plans)
+            if self.closure_scanner is not None
+            else unavailable_scan_results(closure_scan_plans)
         )
         evidence_catalog = build_evidence_catalog(
             packet,
             changes,
             analysis_input.structural_graph,
             supplied=analysis_input.supplied_evidence,
-            guardrail_scan_results=guardrail_scan_results,
+            closure_scan_results=closure_scan_results,
         )
         observed_transformation = reconstruct_observed_transformation(
             evidence_catalog
@@ -69,7 +72,7 @@ class DeterministicAnalyzer:
             structural_graph=analysis_input.structural_graph,
             head_sha=packet.head_sha,
             claim_source_state=extracted.claim_source_state,
-            guardrail_scan_plans=guardrail_scan_plans,
+            closure_scan_plans=closure_scan_plans,
         )
         projection_candidates.validate_consistency()
         candidate_convergence = converge_candidates(
@@ -90,7 +93,7 @@ class DeterministicAnalyzer:
             evidence_catalog,
             diagnostic_presentation=diagnostic_presentation,
             changed_files=packet.changed_files,
-            guardrail_scan_plans=guardrail_scan_plans,
+            closure_scan_plans=closure_scan_plans,
             packet=packet,
         )
         overview = build_review_overview(
@@ -112,7 +115,7 @@ class DeterministicAnalyzer:
             claims=semantics.claims,
             transformation_contract=semantics.transformation_contract,
             observed_transformation=observed_transformation,
-            guardrail_scan_plans=guardrail_scan_plans,
+            closure_scan_plans=closure_scan_plans,
             evidence_catalog=evidence_catalog,
             projection_candidates=projection_candidates,
             candidate_convergence=candidate_convergence,

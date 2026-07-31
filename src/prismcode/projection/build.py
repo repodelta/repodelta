@@ -10,7 +10,7 @@ from prismcode.model.contracts import (
     DiagnosticPresentation,
     EvidenceCatalog,
     EvidenceItem,
-    GuardrailScanPlanSet,
+    ClosureScanPlanSet,
     ProjectionCandidateSet,
     ProjectionRelation,
     ReviewProjection,
@@ -46,7 +46,7 @@ def build_review_projection(
     *,
     diagnostic_presentation: DiagnosticPresentation,
     changed_files: tuple[ChangedFile, ...] = (),
-    guardrail_scan_plans: GuardrailScanPlanSet = GuardrailScanPlanSet(),
+    closure_scan_plans: ClosureScanPlanSet = ClosureScanPlanSet(),
     packet: ReviewSourcePacket | None = None,
 ) -> ReviewProjection:
     """Project converged canonical facts without performing retrieval or selection."""
@@ -56,7 +56,7 @@ def build_review_projection(
     convergence_groups = {
         item.focus_statement_id: item for item in convergence.groups
     }
-    plans_by_guardrail = guardrail_scan_plans.by_guardrail_id()
+    plans_by_statement = closure_scan_plans.by_statement_id()
     diagnostic_ids_by_focus = diagnostic_presentation.ids_by_focus()
     structural_diagnostics = {
         item.id: item
@@ -91,7 +91,7 @@ def build_review_projection(
                 "test_context",
                 "verification",
                 "structural_path",
-                "boundary_fact",
+                "closure_fact",
             )
         }
         overlay, nodes, edges, ownership_edges, placements = _structural_focus_overlay(
@@ -229,12 +229,12 @@ def build_review_projection(
                 verification_relation_ids=tuple(
                     item.id for item in by_slot["verification"]
                 ),
-                boundary_fact_relation_ids=tuple(
-                    item.id for item in by_slot["boundary_fact"]
+                closure_fact_relation_ids=tuple(
+                    item.id for item in by_slot["closure_fact"]
                 ),
-                guardrail_scan_plan_id=(
-                    plans_by_guardrail[group.focus_statement_id].id
-                    if group.focus_statement_id in plans_by_guardrail
+                closure_scan_plan_id=(
+                    plans_by_statement[group.focus_statement_id].id
+                    if group.focus_statement_id in plans_by_statement
                     else None
                 ),
                 diagnostic_ids=diagnostic_ids_by_focus.get(

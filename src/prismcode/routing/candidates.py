@@ -11,7 +11,7 @@ from prismcode.model.contracts import (
     CoverageState,
     EvidenceCatalog,
     EvidenceItem,
-    GuardrailScanPlanSet,
+    ClosureScanPlanSet,
     ProjectionCandidateGroup,
     ProjectionCandidateSet,
     ProjectionDiagnostic,
@@ -40,7 +40,7 @@ def build_projection_candidates(
     claim_source_state: Literal[
         "source_absent", "extraction_missing", "available"
     ] = "available",
-    guardrail_scan_plans: GuardrailScanPlanSet = GuardrailScanPlanSet(),
+    closure_scan_plans: ClosureScanPlanSet = ClosureScanPlanSet(),
 ) -> ProjectionCandidateSet:
     """Enumerate typed per-focus candidates without selecting or truncating."""
 
@@ -63,7 +63,7 @@ def build_projection_candidates(
     claim_distinctive_terms = distinctive_text_terms(
         tuple((item.id, item.text) for item in claims)
     )
-    plans_by_guardrail = guardrail_scan_plans.by_guardrail_id()
+    plans_by_statement = closure_scan_plans.by_statement_id()
     relations: list[ProjectionRelation] = []
     groups: list[ProjectionCandidateGroup] = []
     diagnostics: list[ProjectionDiagnostic] = list(
@@ -222,23 +222,23 @@ def build_projection_candidates(
             )
 
         if focus.kind == "guardrail":
-            plan = plans_by_guardrail.get(focus.id)
-            boundary_facts = tuple(
+            plan = plans_by_statement.get(focus.id)
+            closure_facts = tuple(
                 item
                 for item in evidence.values()
-                if item.role == "boundary_fact"
+                if item.role == "closure_fact"
                 and item.associated_statement_ids == (focus.id,)
             )
             result = (
-                boundary_facts[0].guardrail_scan_result
-                if boundary_facts
+                closure_facts[0].closure_scan_result
+                if closure_facts
                 else None
             )
-            for ordinal, fact in enumerate(boundary_facts):
+            for ordinal, fact in enumerate(closure_facts):
                 focus_relations.append(
                     projection_relation(
                         focus.id,
-                        "boundary_fact",
+                        "closure_fact",
                         "evidence",
                         fact.id,
                         "provided_association",
@@ -258,8 +258,8 @@ def build_projection_candidates(
                 diagnostic = next(
                     (
                         item
-                        for item in evidence_catalog.guardrail_scan_diagnostics
-                        if item.guardrail_id == focus.id
+                        for item in evidence_catalog.closure_scan_diagnostics
+                        if item.statement_id == focus.id
                         or (plan is not None and item.plan_id == plan.id)
                     ),
                     None,
@@ -267,34 +267,36 @@ def build_projection_candidates(
                 focus_diagnostics.append(
                     _missing(
                         focus.id,
-                        "boundary_fact",
+                        "closure_fact",
                         (
                             "stale_source"
                             if diagnostic
-                            and diagnostic.code == "guardrail_scan_stale_checkout"
+                            and diagnostic.code == "closure_scan_stale_checkout"
                             else "provider_unavailable"
                         ),
                         (
                             diagnostic.message
                             if diagnostic is not None
                             else (
-                                f"Guardrail scan plan {plan.id} exists, but no "
+                                f"Closure scan plan {plan.id} exists, but no "
                                 "bounded repository scan fact was collected."
                                 if plan is not None
-                                else "No canonical guardrail scan plan applies."
+                                else "No canonical closure scan plan applies."
                             )
                         ),
                         affected_ids=(plan.id,) if plan is not None else (),
                     )
                 )
-            elif result.state == "partial":
+            elif any(
+                item.state == "partial" for item in result.revisions
+            ):
                 focus_diagnostics.append(
                     _missing(
                         focus.id,
-                        "boundary_fact",
+                        "closure_fact",
                         "partial_coverage",
                         (
-                            "A bounded guardrail scan fact was collected, but one "
+                            "A bounded closure scan fact was collected, but one "
                             "or more planned surfaces have incomplete coverage."
                         ),
                         affected_ids=(result.id,),
@@ -304,9 +306,9 @@ def build_projection_candidates(
             focus_diagnostics.append(
                 _missing(
                     focus.id,
-                    "boundary_fact",
+                    "closure_fact",
                     "not_applicable",
-                    "Boundary scanning applies only to guardrails.",
+                    "Closure scanning applies only to guardrails.",
                 )
             )
 

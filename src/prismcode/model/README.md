@@ -17,9 +17,9 @@ No transformation. Other stages exchange only the contracts defined here.
   provenance without carrying authored claims or assessment state;
 - each canonical diff relation owns one valid added/removed/replaced shape and
   changed evidence references its relation IDs;
-- guardrail scan plans map one-to-one to canonical G statements and preserve
-  their query text, executable selectors, and provenance;
-- boundary scan observations identify plan, G, revision, coverage, and
+- closure scan plans map one-to-one to eligible G/removal/negative-completion
+  statements and preserve query text, executable selectors, and provenance;
+- closure scan observations identify plan, statement, revision, coverage, and
   candidate locations without carrying a satisfaction conclusion;
 - evidence authority, revision side, operation, role, and changed state agree;
 - reference-only views point to canonical IDs.

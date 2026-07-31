@@ -73,7 +73,7 @@ FactAuthority = Literal[
     "github_diff",
     "structural_provider",
     "verification_provider",
-    "guardrail_scan_provider",
+    "closure_scan_provider",
     "supplied",
 ]
 RevisionSide = Literal["head", "base", "review", "unchanged"]
@@ -97,7 +97,7 @@ FactRole = Literal[
     "structural_path",
     "structural_relation",
     "structural_ownership",
-    "boundary_fact",
+    "closure_fact",
     "provided_context",
 ]
 RequirementProfile = Literal[
@@ -123,7 +123,7 @@ ProjectionSlot = Literal[
     "test_context",
     "verification",
     "structural_path",
-    "boundary_fact",
+    "closure_fact",
 ]
 AssociationKind = Literal[
     "provided_association",
@@ -160,10 +160,16 @@ StructuralCoverageState = Literal[
     "invalid",
     "error",
 ]
-GuardrailScanSurface = Literal["paths", "file_content", "symbol_names"]
-GuardrailScanState = Literal["complete", "partial", "unavailable"]
-GuardrailSelectorKind = Literal["identifier", "phrase"]
-GuardrailScanBoundaryKind = Literal["file_limit", "byte_limit", "match_limit"]
+ClosureScanSurface = Literal["paths", "file_content", "symbol_names"]
+ClosureScanState = Literal["complete", "partial", "unavailable"]
+ClosureSelectorKind = Literal["identifier", "phrase"]
+ClosureStatementKind = Literal[
+    "guardrail",
+    "removal",
+    "completion_condition",
+]
+ClosureExpectation = Literal["absence", "transition"]
+ClosureScanBoundaryKind = Literal["file_limit", "byte_limit", "match_limit"]
 ChangeRelationKind = Literal["added", "removed", "replaced"]
 
 
@@ -722,75 +728,96 @@ class ObservedTransformation:
 
 
 @dataclass(frozen=True)
-class GuardrailScanPlan:
+class ClosureScanPlan:
     """Source-backed scan intent. A plan is never evidence that a scan ran."""
 
     id: str
-    guardrail_id: str
+    statement_id: str
+    statement_kind: ClosureStatementKind
+    expectation: ClosureExpectation
     query_text: str
-    revision_side: Literal["head"] = "head"
+    revision_sides: tuple[Literal["base", "head"], ...] = ("head",)
     scope: Literal["repository"] = "repository"
     root_paths: tuple[str, ...] = (".",)
-    surfaces: tuple[GuardrailScanSurface, ...] = (
+    surfaces: tuple[ClosureScanSurface, ...] = (
         "paths",
         "file_content",
     )
-    selectors: tuple[GuardrailScanSelector, ...] = ()
+    selectors: tuple[ClosureScanSelector, ...] = ()
     sources: tuple[SourceRef, ...] = ()
 
 
 @dataclass(frozen=True)
-class GuardrailScanSelector:
+class ClosureScanSelector:
     id: str
-    kind: GuardrailSelectorKind
+    kind: ClosureSelectorKind
     value: str
 
 
 @dataclass(frozen=True)
-class GuardrailScanPlanSet:
-    plans: tuple[GuardrailScanPlan, ...] = ()
-    schema_version: str = "guardrail_scan_plan_set.v2"
+class ClosureScanPlanSet:
+    plans: tuple[ClosureScanPlan, ...] = ()
+    schema_version: str = "closure_scan_plan_set.v2"
 
-    def by_id(self) -> dict[str, GuardrailScanPlan]:
+    def by_id(self) -> dict[str, ClosureScanPlan]:
         return {item.id: item for item in self.plans}
 
-    def by_guardrail_id(self) -> dict[str, GuardrailScanPlan]:
-        return {item.guardrail_id: item for item in self.plans}
+    def by_statement_id(self) -> dict[str, ClosureScanPlan]:
+        return {item.statement_id: item for item in self.plans}
 
     def validate_consistency(
         self,
-        guardrails: tuple[Requirement, ...],
+        statements: tuple[Requirement | TransformationClaim, ...],
     ) -> None:
         plan_ids = self.by_id()
-        by_guardrail = self.by_guardrail_id()
-        expected = {item.id for item in guardrails}
+        by_statement = self.by_statement_id()
+        expected = {item.id for item in statements}
         if len(plan_ids) != len(self.plans):
-            raise ValueError("guardrail scan plan set contains duplicate plan IDs")
-        if len(by_guardrail) != len(self.plans):
-            raise ValueError("guardrail scan plan set contains duplicate guardrail IDs")
-        if set(by_guardrail) != expected:
+            raise ValueError("closure scan plan set contains duplicate plan IDs")
+        if len(by_statement) != len(self.plans):
+            raise ValueError("closure scan plan set contains duplicate statement IDs")
+        if set(by_statement) != expected:
             raise ValueError(
-                "guardrail scan plans must map one-to-one to canonical guardrails"
+                "closure scan plans must map one-to-one to eligible statements"
             )
-        for guardrail in guardrails:
+        for statement in statements:
+            plan = by_statement[statement.id]
+            expected_kind: ClosureStatementKind
+            if isinstance(statement, Requirement):
+                if (
+                    statement.kind != "guardrail"
+                    or statement.purpose != "guardrail"
+                    or not statement.id.startswith("G")
+                ):
+                    raise ValueError(
+                        "closure scan requirement must be a canonical guardrail"
+                    )
+                expected_kind = "guardrail"
+            elif statement.kind in {"removal", "completion_condition"}:
+                expected_kind = statement.kind
+            else:
+                raise ValueError(
+                    "closure scan claim must be removal or completion condition"
+                )
+            if plan.id != f"CSP:{statement.id}":
+                raise ValueError(f"{plan.id}: non-canonical closure scan plan ID")
             if (
-                guardrail.kind != "guardrail"
-                or guardrail.purpose != "guardrail"
-                or not guardrail.id.startswith("G")
+                plan.statement_kind != expected_kind
+                or plan.query_text != statement.text
+                or plan.sources != statement.sources
             ):
                 raise ValueError(
-                    "guardrail scan plans must map one-to-one to canonical guardrails"
+                    f"{plan.id}: scan intent must preserve typed source authority"
                 )
-            plan = by_guardrail[guardrail.id]
-            if plan.id != f"GSP:{guardrail.id}":
-                raise ValueError(f"{plan.id}: non-canonical guardrail scan plan ID")
-            if plan.query_text != guardrail.text or plan.sources != guardrail.sources:
-                raise ValueError(
-                    f"{plan.id}: scan intent must preserve guardrail text and sources"
-                )
+            expected_shape = (
+                ("transition", ("base", "head"))
+                if expected_kind == "removal"
+                else ("absence", ("head",))
+            )
+            if (plan.expectation, plan.revision_sides) != expected_shape:
+                raise ValueError(f"{plan.id}: closure expectation shape conflicts")
             if (
-                plan.revision_side != "head"
-                or plan.scope != "repository"
+                plan.scope != "repository"
                 or plan.root_paths != (".",)
                 or plan.surfaces
                 != ("paths", "file_content", "symbol_names")
@@ -806,120 +833,147 @@ class GuardrailScanPlanSet:
 
 
 @dataclass(frozen=True)
-class GuardrailScanMatch:
+class ClosureScanMatch:
     id: str
     plan_id: str
-    guardrail_id: str
+    statement_id: str
     selector_id: str
-    surface: GuardrailScanSurface
+    revision_side: Literal["base", "head"]
+    surface: ClosureScanSurface
+    profile: FactProfile
     path: str
     line: int | None = None
     excerpt: str = ""
 
 
 @dataclass(frozen=True)
-class GuardrailScanCoverage:
-    surface: GuardrailScanSurface
-    state: GuardrailScanState
+class ClosureScanCoverage:
+    surface: ClosureScanSurface
+    state: ClosureScanState
     inspected_count: int = 0
     inspected_bytes: int = 0
     message: str = ""
 
 
 @dataclass(frozen=True)
-class GuardrailScanTruncation:
-    kind: GuardrailScanBoundaryKind
-    surface: GuardrailScanSurface
+class ClosureScanTruncation:
+    kind: ClosureScanBoundaryKind
+    surface: ClosureScanSurface
     limit: int
     observed: int
 
 
 @dataclass(frozen=True)
-class GuardrailScanResult:
-    id: str
-    plan_id: str
-    guardrail_id: str
+class ClosureRevisionObservation:
+    revision_side: Literal["base", "head"]
     revision: str
     root_path: str
-    state: GuardrailScanState
-    coverages: tuple[GuardrailScanCoverage, ...] = ()
-    truncations: tuple[GuardrailScanTruncation, ...] = ()
-    matches: tuple[GuardrailScanMatch, ...] = ()
+    state: ClosureScanState
+    coverages: tuple[ClosureScanCoverage, ...] = ()
+    truncations: tuple[ClosureScanTruncation, ...] = ()
+    matches: tuple[ClosureScanMatch, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
 
 
 @dataclass(frozen=True)
-class GuardrailScanResultSet:
-    results: tuple[GuardrailScanResult, ...] = ()
-    schema_version: str = "guardrail_scan_result_set.v1"
-
-    def by_guardrail_id(self) -> dict[str, GuardrailScanResult]:
-        return {item.guardrail_id: item for item in self.results}
-
-    def validate_consistency(self, plans: GuardrailScanPlanSet) -> None:
-        plan_by_id = plans.by_id()
-        if len(self.by_guardrail_id()) != len(self.results):
-            raise ValueError("guardrail scan results contain duplicate guardrail IDs")
-        if {item.plan_id for item in self.results} != set(plan_by_id):
-            raise ValueError("guardrail scan results must map one-to-one to plans")
-        for result in self.results:
-            plan = plan_by_id[result.plan_id]
-            if result.id != f"GSR:{result.guardrail_id}":
-                raise ValueError(f"{result.id}: non-canonical scan-result ID")
-            if result.guardrail_id != plan.guardrail_id:
-                raise ValueError(f"{result.id}: result guardrail conflicts with plan")
-            selector_ids = {item.id for item in plan.selectors}
-            if any(item.selector_id not in selector_ids for item in result.matches):
-                raise ValueError(f"{result.id}: match references unknown selector")
-            if any(item.surface not in plan.surfaces for item in result.matches):
-                raise ValueError(f"{result.id}: match references unplanned surface")
-            if tuple(item.surface for item in result.coverages) != plan.surfaces:
-                raise ValueError(
-                    f"{result.id}: result coverage must preserve plan surfaces"
-                )
-            if any(
-                item.surface not in plan.surfaces
-                or item.limit <= 0
-                or item.observed < item.limit
-                for item in result.truncations
-            ):
-                raise ValueError(f"{result.id}: invalid scan truncation")
-            if result.state == "complete" and result.truncations:
-                raise ValueError(
-                    f"{result.id}: complete result cannot carry truncation"
-                )
-            if result.state == "complete" and any(
-                item.state != "complete" for item in result.coverages
-            ):
-                raise ValueError(
-                    f"{result.id}: complete result requires complete surfaces"
-                )
-            if result.state == "partial" and not result.truncations:
-                raise ValueError(
-                    f"{result.id}: partial result requires typed truncation"
-                )
-            if result.state == "partial" and all(
-                item.state == "complete" for item in result.coverages
-            ):
-                raise ValueError(
-                    f"{result.id}: partial result requires partial surface"
-                )
-            if result.state == "unavailable" and any(
-                item.state != "unavailable" for item in result.coverages
-            ):
-                raise ValueError(
-                    f"{result.id}: unavailable result requires unavailable surfaces"
-                )
-            if result.state != "unavailable" and not result.revision:
-                raise ValueError(f"{result.id}: observed scan requires a revision")
+class ClosureScanResult:
+    id: str
+    plan_id: str
+    statement_id: str
+    statement_kind: ClosureStatementKind
+    expectation: ClosureExpectation
+    revisions: tuple[ClosureRevisionObservation, ...] = ()
 
 
 @dataclass(frozen=True)
-class GuardrailScanDiagnostic:
+class ClosureScanResultSet:
+    results: tuple[ClosureScanResult, ...] = ()
+    schema_version: str = "closure_scan_result_set.v1"
+
+    def by_statement_id(self) -> dict[str, ClosureScanResult]:
+        return {item.statement_id: item for item in self.results}
+
+    def validate_consistency(self, plans: ClosureScanPlanSet) -> None:
+        plan_by_id = plans.by_id()
+        if len(self.by_statement_id()) != len(self.results):
+            raise ValueError("closure scan results contain duplicate statement IDs")
+        if {item.plan_id for item in self.results} != set(plan_by_id):
+            raise ValueError("closure scan results must map one-to-one to plans")
+        for result in self.results:
+            plan = plan_by_id[result.plan_id]
+            if result.id != f"CSR:{result.statement_id}":
+                raise ValueError(f"{result.id}: non-canonical scan-result ID")
+            if (
+                result.statement_id != plan.statement_id
+                or result.statement_kind != plan.statement_kind
+                or result.expectation != plan.expectation
+            ):
+                raise ValueError(f"{result.id}: result statement conflicts with plan")
+            if tuple(item.revision_side for item in result.revisions) != (
+                plan.revision_sides
+            ):
+                raise ValueError(
+                    f"{result.id}: result revisions must preserve plan order"
+                )
+            selector_ids = {item.id for item in plan.selectors}
+            for revision in result.revisions:
+                if any(
+                    item.selector_id not in selector_ids
+                    or item.statement_id != result.statement_id
+                    or item.revision_side != revision.revision_side
+                    for item in revision.matches
+                ):
+                    raise ValueError(f"{result.id}: match identity conflicts")
+                if any(item.surface not in plan.surfaces for item in revision.matches):
+                    raise ValueError(f"{result.id}: match references unplanned surface")
+                if tuple(item.surface for item in revision.coverages) != plan.surfaces:
+                    raise ValueError(
+                        f"{result.id}: result coverage must preserve plan surfaces"
+                    )
+                if any(
+                    item.surface not in plan.surfaces
+                    or item.limit <= 0
+                    or item.observed < item.limit
+                    for item in revision.truncations
+                ):
+                    raise ValueError(f"{result.id}: invalid scan truncation")
+                if revision.state == "complete" and (
+                    revision.truncations
+                    or any(
+                        item.state != "complete" for item in revision.coverages
+                    )
+                ):
+                    raise ValueError(
+                        f"{result.id}: complete revision requires complete surfaces"
+                    )
+                if revision.state == "partial" and (
+                    not revision.truncations
+                    or all(
+                        item.state == "complete" for item in revision.coverages
+                    )
+                ):
+                    raise ValueError(
+                        f"{result.id}: partial revision requires typed truncation"
+                    )
+                if revision.state == "unavailable" and any(
+                    item.state != "unavailable" for item in revision.coverages
+                ):
+                    raise ValueError(
+                        f"{result.id}: unavailable revision requires unavailable surfaces"
+                    )
+                if revision.state != "unavailable" and not revision.revision:
+                    raise ValueError(
+                        f"{result.id}: observed scan requires a revision"
+                    )
+
+
+@dataclass(frozen=True)
+class ClosureScanDiagnostic:
     code: str
     message: str
     plan_id: str
-    guardrail_id: str
+    statement_id: str
+    revision_side: Literal["base", "head"]
 
 
 @dataclass(frozen=True)
@@ -1041,7 +1095,7 @@ class EvidenceItem:
     verification_identity: VerificationIdentity | None = None
     verification_status: str = ""
     verification_conclusion: str = ""
-    guardrail_scan_result: GuardrailScanResult | None = None
+    closure_scan_result: ClosureScanResult | None = None
     sources: tuple[SourceRef, ...] = ()
     change_relation_ids: tuple[str, ...] = ()
     structural_path_ids: tuple[str, ...] = ()
@@ -1162,26 +1216,26 @@ class EvidenceItem:
                 raise ValueError(f"{self.id}: verification fact requires a status")
         if self.role == "structural_path" and self.profile != "structural_path":
             raise ValueError(f"{self.id}: structural path role requires structural path profile")
-        if self.role == "boundary_fact":
-            if self.authority != "guardrail_scan_provider":
+        if self.role == "closure_fact":
+            if self.authority != "closure_scan_provider":
                 raise ValueError(
-                    f"{self.id}: boundary fact requires guardrail scan authority"
+                    f"{self.id}: closure fact requires closure scan authority"
                 )
-            if self.guardrail_scan_result is None:
-                raise ValueError(f"{self.id}: boundary fact requires a scan result")
-            if self.revision_side != "head" or self.operation != "observed":
+            if self.closure_scan_result is None:
+                raise ValueError(f"{self.id}: closure fact requires a scan result")
+            if self.revision_side != "review" or self.operation != "observed":
                 raise ValueError(
-                    f"{self.id}: boundary fact must be an observed head fact"
+                    f"{self.id}: closure fact must aggregate observed revisions"
                 )
             if self.associated_statement_ids != (
-                self.guardrail_scan_result.guardrail_id,
+                self.closure_scan_result.statement_id,
             ):
                 raise ValueError(
-                    f"{self.id}: boundary fact must own its G association"
+                    f"{self.id}: closure fact must own its statement association"
                 )
-        elif self.guardrail_scan_result is not None:
+        elif self.closure_scan_result is not None:
             raise ValueError(
-                f"{self.id}: only boundary facts may carry a scan result"
+                f"{self.id}: only closure facts may carry a scan result"
             )
         expected_classifications = {
             "test": {"test"},
@@ -1205,8 +1259,8 @@ class EvidenceCatalog:
         StructuralReplacementCandidate, ...
     ] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
-    guardrail_scan_diagnostics: tuple[GuardrailScanDiagnostic, ...] = ()
-    schema_version: str = "evidence_catalog.v15"
+    closure_scan_diagnostics: tuple[ClosureScanDiagnostic, ...] = ()
+    schema_version: str = "evidence_catalog.v16"
 
     def by_id(self) -> dict[str, EvidenceItem]:
         return {item.id: item for item in self.items}
@@ -1995,8 +2049,8 @@ class ReviewSlice:
     standalone_runtime_relation_ids: tuple[str, ...] = ()
     standalone_test_relation_ids: tuple[str, ...] = ()
     verification_relation_ids: tuple[str, ...] = ()
-    boundary_fact_relation_ids: tuple[str, ...] = ()
-    guardrail_scan_plan_id: str | None = None
+    closure_fact_relation_ids: tuple[str, ...] = ()
+    closure_scan_plan_id: str | None = None
     diagnostic_ids: tuple[str, ...] = ()
 
 
@@ -2681,7 +2735,7 @@ class ReviewBrief:
     claims: tuple[ReviewStatement, ...] = ()
     transformation_contract: TransformationContract = TransformationContract()
     observed_transformation: ObservedTransformation = ObservedTransformation()
-    guardrail_scan_plans: GuardrailScanPlanSet = GuardrailScanPlanSet()
+    closure_scan_plans: ClosureScanPlanSet = ClosureScanPlanSet()
     evidence_catalog: EvidenceCatalog = EvidenceCatalog()
     projection_candidates: ProjectionCandidateSet = ProjectionCandidateSet()
     candidate_convergence: CandidateConvergence = CandidateConvergence()
@@ -2693,7 +2747,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v36"
+    schema_version: str = "review_brief.v37"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

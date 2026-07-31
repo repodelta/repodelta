@@ -3,7 +3,6 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import replace
-from pathlib import Path
 from typing import Iterable
 
 from prismcode.model.contracts import (
@@ -17,9 +16,9 @@ from prismcode.model.contracts import (
     EvidenceClassification,
     EvidenceItem,
     FactRole,
-    GuardrailScanDiagnostic,
-    GuardrailScanResult,
-    GuardrailScanResultSet,
+    ClosureScanDiagnostic,
+    ClosureScanResult,
+    ClosureScanResultSet,
     ReviewSourcePacket,
     SourceRef,
     StructuralChangeIdentity,
@@ -36,6 +35,7 @@ from prismcode.changes.hunks import (
     DiffHunkCollection,
 )
 from prismcode.facts.lexical import association_signature, merge_signatures
+from prismcode.facts.path_profile import fact_profile, path_classification
 from prismcode.providers.structural import (
     GraphSymbol,
     StructuralGraphCollection,
@@ -44,35 +44,13 @@ from prismcode.providers.structural import (
     StructuralRevision,
 )
 
-_DOCUMENT_SUFFIXES = {".md", ".mdx", ".rst", ".txt", ".pdf", ".doc", ".docx"}
-_WORKFLOW_PREFIXES = (".github/workflows/", ".circleci/")
-_CONFIG_NAMES = {
-    "pyproject.toml",
-    "setup.cfg",
-    "tox.ini",
-    "package.json",
-    "tsconfig.json",
-    "dockerfile",
-}
-_DEPENDENCY_NAMES = {
-    "requirements.txt",
-    "poetry.lock",
-    "uv.lock",
-    "package-lock.json",
-    "pnpm-lock.yaml",
-    "yarn.lock",
-    "cargo.lock",
-    "go.sum",
-}
-
-
 def build_evidence_catalog(
     packet: ReviewSourcePacket,
     changes: DiffHunkCollection,
     structural_graph: StructuralGraphCollection | None = None,
     *,
     supplied: tuple[SuppliedEvidence, ...] = (),
-    guardrail_scan_results: GuardrailScanResultSet = GuardrailScanResultSet(),
+    closure_scan_results: ClosureScanResultSet = ClosureScanResultSet(),
 ) -> EvidenceCatalog:
     """Normalize source, structural, and supplied facts into one ID-addressed catalog."""
 
@@ -172,9 +150,9 @@ def build_evidence_catalog(
 
     for observation in packet.verification_observations:
         _put(items, verification_evidence(observation))
-    for result in guardrail_scan_results.results:
-        if result.state != "unavailable":
-            _put(items, boundary_evidence(result))
+    for result in closure_scan_results.results:
+        if any(item.state != "unavailable" for item in result.revisions):
+            _put(items, closure_evidence(result))
     for item in supplied:
         _put(
             items,
@@ -197,19 +175,22 @@ def build_evidence_catalog(
             *structural_relation_diagnostics,
             *(
                 diagnostic
-                for result in guardrail_scan_results.results
-                for diagnostic in result.diagnostics
+                for result in closure_scan_results.results
+                for revision in result.revisions
+                for diagnostic in revision.diagnostics
             ),
         ),
-        guardrail_scan_diagnostics=tuple(
-            GuardrailScanDiagnostic(
+        closure_scan_diagnostics=tuple(
+            ClosureScanDiagnostic(
                 code=diagnostic.code,
                 message=diagnostic.message,
                 plan_id=result.plan_id,
-                guardrail_id=result.guardrail_id,
+                statement_id=result.statement_id,
+                revision_side=revision.revision_side,
             )
-            for result in guardrail_scan_results.results
-            for diagnostic in result.diagnostics
+            for result in closure_scan_results.results
+            for revision in result.revisions
+            for diagnostic in revision.diagnostics
         ),
     )
     catalog.validate_consistency()
@@ -360,7 +341,7 @@ def _put_structural_revision(
                         f"Observed ownership: {relation.parent.qualified_name} "
                         f"contains {relation.child.qualified_name}"
                     ),
-                    classification=_path_classification(relation.child.file_path),
+                    classification=path_classification(relation.child.file_path),
                     profile="unknown",
                     authority="structural_provider",
                     revision_side=revision_side,
@@ -1100,34 +1081,40 @@ def evidence_id(kind: str, identity: str) -> str:
     return f"E:{kind}:{digest}"
 
 
-def boundary_evidence(result: GuardrailScanResult) -> EvidenceItem:
-    """Normalize one observed bounded scan as the sole boundary-fact identity."""
+def closure_evidence(result: ClosureScanResult) -> EvidenceItem:
+    """Normalize one multi-revision scan as the sole closure-fact identity."""
 
     match_sources = tuple(
         SourceRef(
-            label=f"guardrail scan · {match.surface}",
+            label=(
+                f"closure scan · {match.revision_side} · {match.surface}"
+            ),
             path=match.path,
             line_start=match.line,
             line_end=match.line,
         )
-        for match in result.matches
+        for revision in result.revisions
+        for match in revision.matches
+    )
+    match_count = sum(len(item.matches) for item in result.revisions)
+    coverage = ", ".join(
+        f"{item.revision_side} {item.state}" for item in result.revisions
     )
     return EvidenceItem(
-        id=evidence_id("boundary_fact", result.id),
+        id=evidence_id("closure_fact", result.id),
         summary=(
-            f"Bounded head scan observed {len(result.matches)} candidate "
-            f"match{'es' if len(result.matches) != 1 else ''} "
-            f"with {result.state} coverage."
+            f"Bounded closure scan observed {match_count} candidate "
+            f"match{'es' if match_count != 1 else ''}; {coverage} coverage."
         ),
-        kind="boundary_fact",
+        kind="closure_fact",
         classification="mixed",
         profile="unknown",
-        authority="guardrail_scan_provider",
-        revision_side="head",
+        authority="closure_scan_provider",
+        revision_side="review",
         operation="observed",
-        role="boundary_fact",
-        associated_statement_ids=(result.guardrail_id,),
-        guardrail_scan_result=result,
+        role="closure_fact",
+        associated_statement_ids=(result.statement_id,),
+        closure_scan_result=result,
         sources=match_sources,
     )
 
@@ -1198,8 +1185,8 @@ def _changed_file_fallback(changed_file: ChangedFile) -> EvidenceItem:
         id=evidence_id("changed_file", path),
         kind="changed_file",
         summary=summary,
-        classification=_path_classification(path),
-        profile=_fact_profile(path),
+        classification=path_classification(path),
+        profile=fact_profile(path),
         authority="github_diff",
         revision_side=(
             "base" if changed_file.status == "removed" else "head"
@@ -1258,8 +1245,8 @@ def _change_relation_item(
         id=evidence_id("change_relation", identity),
         kind="change_relation",
         summary=summary,
-        classification=_path_classification(path),
-        profile=_fact_profile(path),
+        classification=path_classification(path),
+        profile=fact_profile(path),
         authority="github_diff",
         revision_side=revision_side,
         operation=relation.kind,
@@ -1344,8 +1331,8 @@ def _symbol_item(
         id=_symbol_evidence_id(symbol.id, revision_side),
         kind="symbol",
         summary=f"{'Changed' if changed else 'Unchanged'} {symbol.kind}: {symbol.qualified_name}",
-        classification=_path_classification(symbol.file_path),
-        profile=_fact_profile(symbol.file_path),
+        classification=path_classification(symbol.file_path),
+        profile=fact_profile(symbol.file_path),
         authority="structural_provider",
         revision_side=revision_side,
         operation=operation,
@@ -1354,7 +1341,7 @@ def _symbol_item(
             "revision_fact"
             if changed
             else "test_context"
-            if _fact_profile(symbol.file_path) == "test"
+            if fact_profile(symbol.file_path) == "test"
             else "runtime_context"
         ),
         changed=changed,
@@ -1507,41 +1494,6 @@ def _path_summary(path: StructuralPath) -> str:
     return " ".join(parts)
 
 
-def _path_classification(path: str) -> EvidenceClassification:
-    normalized = path.casefold().replace("\\", "/")
-    name = Path(normalized).name
-    if (
-        normalized.startswith(("test/", "tests/"))
-        or "/test/" in normalized
-        or "/tests/" in normalized
-        or name.startswith("test_")
-        or name.endswith(("_test.py", ".test.js", ".test.ts", ".spec.js", ".spec.ts"))
-    ):
-        return "test"
-    if Path(normalized).suffix in _DOCUMENT_SUFFIXES:
-        return "document"
-    return "code"
-
-
-def _fact_profile(path: str) -> str:
-    normalized = path.casefold().replace("\\", "/")
-    name = Path(normalized).name
-    suffix = Path(normalized).suffix
-    if _path_classification(path) == "test":
-        return "test"
-    if suffix in _DOCUMENT_SUFFIXES:
-        return "document"
-    if normalized.startswith(_WORKFLOW_PREFIXES):
-        return "workflow"
-    if name in _DEPENDENCY_NAMES:
-        return "dependency"
-    if name in _CONFIG_NAMES or suffix in {".ini", ".toml", ".yaml", ".yml", ".json"}:
-        return "configuration"
-    if "migration" in normalized or "schema" in normalized:
-        return "schema"
-    if any(part in normalized.split("/") for part in ("vendor", "generated", "dist")):
-        return "generated"
-    return "production"
 
 
 def _put(items: dict[str, EvidenceItem], candidate: EvidenceItem) -> None:

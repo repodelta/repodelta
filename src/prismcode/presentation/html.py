@@ -193,30 +193,30 @@ def _relation_fact(
     )
 
 
-def _boundary_fact(
+def _closure_fact(
     relation: ProjectionRelation,
     brief: ReviewBrief,
 ) -> str:
     evidence = brief.evidence_catalog.by_id().get(relation.target_id)
-    if evidence is None or evidence.guardrail_scan_result is None:
+    if evidence is None or evidence.closure_scan_result is None:
         raise ValueError(
-            f"projection references invalid boundary fact: {relation.target_id}"
+            f"projection references invalid closure fact: {relation.target_id}"
         )
-    result = evidence.guardrail_scan_result
+    result = evidence.closure_scan_result
     coverage = " · ".join(
-        (
-            f"{item.surface}: {item.state}"
-            f" ({item.inspected_count} inspected"
-            f"{f', {item.inspected_bytes} bytes' if item.inspected_bytes else ''})"
-        )
-        for item in result.coverages
+        f"{revision.revision_side}/{item.surface}: {item.state} "
+        f"({item.inspected_count} inspected"
+        f"{f', {item.inspected_bytes} bytes' if item.inspected_bytes else ''})"
+        for revision in result.revisions
+        for item in revision.coverages
     )
     truncation = " · ".join(
         (
             f"{item.kind.replace('_', ' ')} on {item.surface}: "
             f"limit {item.limit}, observed {item.observed}"
         )
-        for item in result.truncations
+        for revision in result.revisions
+        for item in revision.truncations
     )
     sources = _sources(evidence, brief)
     return (
@@ -1354,22 +1354,23 @@ def _projection_slice(
     )
     if disposition:
         fact_groups.append(disposition)
-    if review_slice.guardrail_scan_plan_id is not None:
-        plan = brief.guardrail_scan_plans.by_id().get(
-            review_slice.guardrail_scan_plan_id
+    if review_slice.closure_scan_plan_id is not None:
+        plan = brief.closure_scan_plans.by_id().get(
+            review_slice.closure_scan_plan_id
         )
         if plan is None:
             raise ValueError(
-                "projection references missing guardrail scan plan: "
-                f"{review_slice.guardrail_scan_plan_id}"
+                    "projection references missing closure scan plan: "
+                f"{review_slice.closure_scan_plan_id}"
             )
         sources = " · ".join(_source(source) for source in plan.sources)
         fact_groups.append(
             '<div class="projection-group">'
-            '<span class="block-title">Guardrail scan plan</span>'
-            f'<span class="projection-copy">{escape(plan.scope)} '
-            f'{" / ".join(escape(item) for item in plan.surfaces)} · '
-            f'{escape(plan.revision_side)} revision</span>'
+                '<span class="block-title">Closure scan plan</span>'
+                f'<span class="projection-copy">{escape(plan.scope)} '
+                f'{" / ".join(escape(item) for item in plan.surfaces)} · '
+                f'{" / ".join(escape(item) for item in plan.revision_sides)} '
+                "revision</span>"
             f'<span class="relation-reason">{escape(plan.query_text)}</span>'
             + (
                 '<span class="relation-reason">Selectors: '
@@ -1387,14 +1388,14 @@ def _projection_slice(
             + "</div>"
         )
     boundary_rows = "".join(
-        _boundary_fact(relations[relation_id], brief)
-        for relation_id in review_slice.boundary_fact_relation_ids
+        _closure_fact(relations[relation_id], brief)
+        for relation_id in review_slice.closure_fact_relation_ids
         if relation_id in relations
     )
     if boundary_rows:
         fact_groups.append(
             '<div class="projection-group"><span class="block-title">'
-            f"Boundary scan observation</span>{boundary_rows}</div>"
+            f"Closure scan observation</span>{boundary_rows}</div>"
         )
     for heading, relation_ids, label in groups:
         rows = "".join(
@@ -1419,7 +1420,7 @@ def _projection_slice(
             "test_context",
             "verification",
             "structural_path",
-            "boundary_fact",
+            "closure_fact",
         },
     )
     contract_label = statement.authority.replace("_", " ")

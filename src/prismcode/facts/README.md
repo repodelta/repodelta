@@ -72,9 +72,9 @@ fields from presentation metadata.
 delta, replacement candidate, structural path, and verification observation
 once. Its Base/Head topology membership comes only from facts-owned revision
 provenance. It never reads the authored `TransformationContract`.
-Observed guardrail scans normalize once as `boundary_fact` items carrying their
-typed scan result and explicit G association. Unavailable scans never become
-evidence.
+Observed closure scans normalize once as `closure_fact` items carrying their
+typed multi-revision result and provider-owned statement association.
+Unavailable-only scans never become evidence.
 
 ## Must not
 

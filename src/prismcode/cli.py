@@ -11,7 +11,7 @@ from urllib.parse import urlparse
 
 from prismcode.pipeline import DeterministicAnalyzer
 from prismcode.providers.codegraph import CodegraphProvider
-from prismcode.guardrails.scanning import RepositoryGuardrailScanner
+from prismcode.closure.scanning import RepositoryClosureScanner
 from prismcode.model.contracts import AnalysisInput
 from prismcode.evaluation.core import (
     evaluate_suite,
@@ -272,10 +272,14 @@ def main() -> int:
                     structural_graph=structural_graph,
                 )
             brief = DeterministicAnalyzer(
-                guardrail_scanner=RepositoryGuardrailScanner(
+                closure_scanner=RepositoryClosureScanner(
                     roots.head,
-                    expected_revision=(
+                    expected_head_revision=(
                         analysis_input.packet.head_sha if not args.fixture else None
+                    ),
+                    base_root=roots.base,
+                    expected_base_revision=(
+                        analysis_input.packet.base_sha if not args.fixture else None
                     ),
                 )
             ).analyze(analysis_input)
