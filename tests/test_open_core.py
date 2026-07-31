@@ -22,10 +22,18 @@ def test_fixture_to_requirement_first_html(tmp_path: Path) -> None:
     assert "AI review brief · requirement-first" not in html
     assert "What this PR is trying to do" not in html
     assert ":root{color-scheme:dark" in html
-    assert "Canonical Change Map" in html
+    assert "Verification" in html
+    assert "Evidence Appendix" in html
+    assert html.index("Verification") < html.index("Evidence Appendix")
+    assert "Transformation Summary" not in html
+    assert "Verification Matrix" not in html
+    assert "Evidence Inspector" not in html
+    assert "Canonical Change Map" not in html
+    assert '<div class="requirements">' not in html
+    assert "Review checks" not in html
     assert "No projected structural graph is available." in html
     assert ".section{border:2px solid var(--border)" in html
-    assert '<details class="requirement" data-focus-id="R1" open>' in html
+    assert 'data-verification-subject="R1"' in html
     assert 'class="brand-mark"' in html
     assert "Existing semantic spine artifacts are reused." in html
     assert "unit_semantic_alignment_trace" in html
@@ -40,8 +48,7 @@ def test_fixture_to_requirement_first_html(tmp_path: Path) -> None:
     assert "5 delivery requirements" not in html
     assert "CI/Actions observations" not in html
     assert "PR #574" in html and "Merged" in html and "CI: no run observed" in html
-    assert "Needs attention" in html
-    assert "Implemented" in html
+    assert "Diagnostics" in html
     assert '<span class="block-title">Verification</span>' not in html
     assert '<span class="block-title">Gaps</span>' not in html
     assert "No verification evidence recorded." not in html
@@ -51,7 +58,7 @@ def test_fixture_to_requirement_first_html(tmp_path: Path) -> None:
     assert "The trace builder consumes existing inspection units" in html
     assert "unit_semantic_alignment_trace.py" in html
     assert "test_workspace_public_review_map_routes.py" in html
-    assert "https://github.com/interact-space/PrismCode/blob/7de0211956a35e8f9c6c576cd2dbb7acd7fd5560/prismcode/workspace/unit_semantic_alignment_trace.py" in html
+    assert "unit_semantic_alignment_trace.py" in html
     assert "Data sources &amp; coverage" not in html
     assert "Issue #573" in html and "PR #574" in html
     assert "Issue #573 · Acceptance criteria" in html

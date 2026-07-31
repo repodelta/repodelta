@@ -127,9 +127,12 @@ def test_presentation_does_not_read_raw_truth_sources() -> None:
         "observed_transformation",
         "transformation_alignment",
         "transformation_assessment",
-        "verification_workspace",
     )
     assert [value for value in forbidden if value in presentation] == []
+    assert "verification_workspace" in presentation
+    assert "_canonical_change_map" not in presentation
+    assert "_projection_slice" not in presentation
+    assert "_structural_disposition" not in presentation
 
 
 def test_pipeline_parses_changed_files_once(monkeypatch) -> None:

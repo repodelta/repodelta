@@ -69,7 +69,6 @@ from prismcode.projection.structural_groups import (
 from prismcode.presentation.html import (
     _review_graph,
     _structural_compound_layout,
-    _structural_disposition,
     _structural_edge_path,
     render_html,
 )
@@ -78,6 +77,20 @@ from prismcode.providers.structural import (
     StructuralGraphIndexStatus,
     StructuralGraphResult,
 )
+
+
+def _with_verification_overlays(projection: ReviewProjection) -> SimpleNamespace:
+    return SimpleNamespace(
+        verification_workspace=SimpleNamespace(
+            inspections=tuple(
+                SimpleNamespace(
+                    subject_id=item.change_map.focus_statement_id,
+                    structural_overlay=item.change_map.structural_overlay,
+                )
+                for item in projection.slices
+            )
+        )
+    )
 
 
 SUITE = Path("fixtures/evaluation-suite.json")
@@ -157,6 +170,8 @@ def _selected_targets(brief, focus_id: str, slot: str) -> tuple[str, ...]:
         and item.slot == slot
         and item.id in selected
     )
+
+
 
 
 @pytest.mark.parametrize(
@@ -255,9 +270,7 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
     )
     html = render_html(brief)
     assert html.count("Structural delta graph") == 1
-    assert html.index("Structural delta graph") < html.index(
-        '<div class="requirements">'
-    )
+    assert html.index("Verification") < html.index("Structural delta graph")
     assert (
             "1 backbone nodes · 0 support nodes · "
             "0 backbone relation groups · 0 canonical executable edges · "
@@ -265,16 +278,12 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
             "0 ownership deltas · "
             "1 isolated changed anchor"
     ) in html
-    assert 'data-focus-target="R1"' in html
-    assert 'class="requirement" data-focus-id="R1" open' in html
-    assert 'requirement.querySelector("summary").addEventListener("click"' in html
-    assert "activateFocus(requirement.dataset.focusId)" in html
+    assert 'data-verification-subject="R1"' in html
     assert 'class="delta-canvas"' not in html
     assert '<details class="isolated-anchors">' in html
     assert "No safe canonical relation delta is available." in html
     assert '<span class="block-title">Structural paths</span>' not in html
-    assert '<span class="block-title">Runtime context</span>' in html
-    assert '<span class="block-title">Test context</span>' in html
+    assert "No associated canonical evidence." not in html
     assert '<span class="block-title">Structural overlay</span>' not in html
 
 
@@ -307,8 +316,8 @@ def test_identical_focus_graphs_share_one_review_graph() -> None:
     html = render_html(brief)
     assert html.count("Structural delta graph") == 1
     assert html.count('<div class="isolated-anchor operation-unresolved"') == 1
-    assert 'data-focus-target="R1"' in html
-    assert 'data-focus-target="R2"' in html
+    assert 'data-verification-subject="R1"' in html
+    assert 'data-verification-subject="R2"' in html
     assert "Structural overlay" not in html
 
 
@@ -499,7 +508,7 @@ def test_canonical_ownership_projects_recursive_shared_focus_hierarchy() -> None
     assert len(projection.review_graph.placements) == 2
     html = _review_graph(
         projection.review_graph,
-        projection,
+        _with_verification_overlays(projection),
         SimpleNamespace(
             evidence_catalog=evidence,
             overview=SimpleNamespace(
@@ -837,14 +846,6 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
         .change_map.structural_disposition
         .deferred_structural_relation_ids
     )
-    disposition_html = _structural_disposition(
-        projection.slices[0],
-        SimpleNamespace(evidence_catalog=evidence),
-        relations=candidates.by_id(),
-    )
-    assert '<details class="deferred-structural">' in disposition_html
-    assert "1 of 1 deferred structural candidate" in disposition_html
-    assert "E:path:runtime-long" in disposition_html
     overlay = projection.slices[0].change_map.structural_overlay
     second_overlay = projection.slices[1].change_map.structural_overlay
     graph = projection.review_graph
@@ -890,7 +891,7 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
     }
     html = _review_graph(
         graph,
-        projection,
+        _with_verification_overlays(projection),
         SimpleNamespace(
             evidence_catalog=evidence,
             overview=SimpleNamespace(
@@ -913,8 +914,7 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
     assert "function · modified" in html
     assert "class · context" not in html
     assert "variable · context" not in html
-    assert 'data-focus-target="R1"' in html
-    assert 'data-focus-target="R2"' in html
+    assert 'data-focuses="R1 R2"' in html
 
 
 def test_review_graph_renders_complete_focus_union() -> None:
@@ -1062,7 +1062,17 @@ def test_review_graph_renders_complete_focus_union() -> None:
     )
     html = _review_graph(
         projection.review_graph,
-        projection,
+        SimpleNamespace(
+            verification_workspace=SimpleNamespace(
+                inspections=tuple(
+                    SimpleNamespace(
+                        subject_id=item.change_map.focus_statement_id,
+                        structural_overlay=item.change_map.structural_overlay,
+                    )
+                    for item in projection.slices
+                )
+            )
+        ),
         SimpleNamespace(
             evidence_catalog=evidence,
             requirements=tuple(
@@ -1102,11 +1112,8 @@ def test_review_graph_renders_complete_focus_union() -> None:
     assert html.count('data-group-target="') == 3
     assert html.count('role="button" aria-expanded="false"') == 3
     assert "navigation unavailable" in html
-    assert html.count('class="change-map-entry"') == 5
-    assert "R1 implementation claim" in html
-    assert "No selected PR claim association." in html
-    assert 'data-group-expand="' in html
-    assert "Contract statements, typed PR bindings, and repository facts remain separate" in html
+    assert 'class="change-map-entry"' not in html
+    assert "Canonical Change Map" not in html
 
     assert (
         "5 backbone nodes · 0 support nodes · "
@@ -1119,13 +1126,7 @@ def test_review_graph_renders_complete_focus_union() -> None:
     assert html.count('class="isolated-anchor operation-') == 1
     assert html.count('class="delta-edge operation-') == 3
     assert 'data-focuses="R1 R2 G1"' in html
-    for focus_id in ("R1", "R2", "R3", "G1", "G2"):
-        assert f'data-focus-target="{focus_id}"' in html
-    assert (
-        'class="delta-focus no-visible-backbone disposition-no_structural_evidence" '
-        'type="button" '
-        'data-focus-target="G2"'
-    ) in html
+    assert html.count('data-focus-target="all"') == 1
 
 
 def test_change_backbone_does_not_transitively_promote_changed_edges() -> None:
@@ -1364,7 +1365,7 @@ def test_review_graph_preserves_renamed_node_operation() -> None:
 
     html = _review_graph(
         projection.review_graph,
-        projection,
+        _with_verification_overlays(projection),
         SimpleNamespace(
             evidence_catalog=evidence,
             overview=SimpleNamespace(
@@ -1588,7 +1589,7 @@ def test_isolated_symbol_and_standalone_document_keep_distinct_canonical_forms()
     )
     graph_html = _review_graph(
         projection.review_graph,
-        projection,
+        _with_verification_overlays(projection),
         SimpleNamespace(
             evidence_catalog=evidence,
             overview=SimpleNamespace(
@@ -1596,11 +1597,7 @@ def test_isolated_symbol_and_standalone_document_keep_distinct_canonical_forms()
             ),
         ),
     )
-    assert "disposition-non_structural_only" in graph_html
-    assert (
-        "R2 has review evidence, but no deterministically associated "
-        "structural node or edge."
-    ) in graph_html
+    assert 'data-focuses="R1"' in graph_html
     standalone_targets = {
         candidates.by_id()[relation_id].target_id
         for review_slice in projection.slices
@@ -1827,7 +1824,7 @@ def test_selection_and_rendering_are_byte_stable() -> None:
     assert "candidate_binding" not in html
     assert "Issue contract" not in html
     assert "provided" in html
-    assert "Repository facts" in html
+    assert "Observed" in html
 
 
 def test_generic_inspection_budget_does_not_truncate_changed_anchor_set() -> None:
@@ -2076,9 +2073,8 @@ def test_focus_evidence_roles_are_routed_before_convergence_and_presentation() -
     assert len(review_slice.standalone_test_support_relation_ids) == 1
     assert len(review_slice.standalone_document_support_relation_ids) == 1
     html = render_html(brief)
-    assert "Changed anchors" in html
-    assert "Test support" in html
-    assert "Documentation support" in html
+    assert "Observed" in html
+    assert "production" in html
 
     bounded = converge_candidates(
         brief.projection_candidates,

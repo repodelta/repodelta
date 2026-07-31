@@ -123,13 +123,8 @@ def test_pipeline_projects_plan_only_for_g_and_keeps_absence_unproven() -> None:
     serialized = brief.to_dict()
     assert serialized["closure_scan_plans"]["plans"][0]["id"] == "CSP:G1"
     html = render_html(brief)
-    assert html.count(
-        '<span class="block-title">Closure scan plan</span>'
-    ) == 2
-    assert (
-        "repository paths / file_content / symbol_names · head revision"
-        in html
-    )
+    assert 'data-verification-subject="G1"' in html
+    assert 'data-verification-subject="G2"' in html
     assert "No bounded repository scan provider was configured." in html
     assert "No compatibility modules remain." in html
     assert "guardrail satisfied" not in html.casefold()

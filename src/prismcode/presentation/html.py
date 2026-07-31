@@ -9,11 +9,8 @@ from urllib.parse import quote, urlparse, urlunparse
 from prismcode.model.contracts import (
     ChangedFile,
     EvidenceItem,
-    ProjectionDiagnostic,
-    ProjectionRelation,
     ReviewBrief,
     ReviewProjection,
-    ReviewSlice,
     ReviewStatement,
     ReviewStructuralGraph,
     SourceRef,
@@ -23,9 +20,6 @@ from prismcode.model.contracts import (
     StructuralNavigationTarget,
     StructuralRelationGroup,
 )
-
-_DEFERRED_STRUCTURAL_PREVIEW_LIMIT = 5
-
 
 @dataclass(frozen=True)
 class _StructuralContainerLayout:
@@ -167,95 +161,6 @@ def _statement_context(label: str, statements: tuple[ReviewStatement, ...]) -> s
     )
 
 
-def _relation_fact(
-    relation: ProjectionRelation,
-    brief: ReviewBrief,
-    *,
-    label: str,
-) -> str:
-    evidence = brief.evidence_catalog.by_id().get(relation.target_id)
-    if evidence is None:
-        raise ValueError(f"projection references missing evidence: {relation.target_id}")
-    sources = _sources(evidence, brief)
-    reason = relation.reasons[0] if relation.reasons else None
-    reason_copy = reason.detail if reason else relation.association.replace("_", " ")
-    return (
-        '<div class="projection-item">'
-        f'<span class="relation-label">{escape(label)}</span>'
-        f'<span class="projection-copy">{escape(evidence.summary)}</span>'
-        f'<span class="relation-reason">{escape(reason_copy)}</span>'
-        + (
-            f'<span class="projection-source">Source: {sources}</span>'
-            if sources
-            else ""
-        )
-        + "</div>"
-    )
-
-
-def _closure_fact(
-    relation: ProjectionRelation,
-    brief: ReviewBrief,
-) -> str:
-    evidence = brief.evidence_catalog.by_id().get(relation.target_id)
-    if evidence is None or evidence.closure_scan_result is None:
-        raise ValueError(
-            f"projection references invalid closure fact: {relation.target_id}"
-        )
-    result = evidence.closure_scan_result
-    coverage = " · ".join(
-        f"{revision.revision_side}/{item.surface}: {item.state} "
-        f"({item.inspected_count} inspected"
-        f"{f', {item.inspected_bytes} bytes' if item.inspected_bytes else ''})"
-        for revision in result.revisions
-        for item in revision.coverages
-    )
-    truncation = " · ".join(
-        (
-            f"{item.kind.replace('_', ' ')} on {item.surface}: "
-            f"limit {item.limit}, observed {item.observed}"
-        )
-        for revision in result.revisions
-        for item in revision.truncations
-    )
-    sources = _sources(evidence, brief)
-    return (
-        '<div class="projection-item">'
-        '<span class="relation-label">bounded observation</span>'
-        f'<span class="projection-copy">{escape(evidence.summary)}</span>'
-        f'<span class="relation-reason">{escape(coverage)}</span>'
-        + (
-            f'<span class="relation-reason">Safety boundary: '
-            f"{escape(truncation)}</span>"
-            if truncation
-            else ""
-        )
-        + (
-            f'<span class="projection-source">Candidate locations: {sources}</span>'
-            if sources
-            else '<span class="projection-source">No selector match observed '
-            "within the stated bounded coverage.</span>"
-        )
-        + "</div>"
-    )
-
-
-def _diagnostic_rows(
-    diagnostics: tuple[ProjectionDiagnostic, ...],
-    *,
-    slots: set[str],
-) -> str:
-    rows = []
-    for item in diagnostics:
-        if item.slot not in slots or item.state == "not_applicable":
-            continue
-        rows.append(
-            '<div class="slot-diagnostic">'
-            f'<span>{escape(item.slot.replace("_", " "))} · '
-            f'{escape(item.state.replace("_", " "))}</span>'
-            f"<p>{escape(item.message)}</p></div>"
-        )
-    return "".join(rows)
 
 
 def _review_graph(
@@ -264,14 +169,10 @@ def _review_graph(
     brief: ReviewBrief,
 ) -> str:
     if not graph.nodes:
-        change_map = _canonical_change_map(graph, projection, brief)
         return (
             '<div class="review-structural-graph">'
-            f"{change_map}"
             '<p class="delta-empty">No projected structural graph is available.</p>'
             "</div>"
-            if change_map
-            else ""
         )
     evidence = brief.evidence_catalog.by_id()
     nodes = {item.id: item for item in graph.nodes}
@@ -303,9 +204,11 @@ def _review_graph(
     relation_group_focus: dict[str, list[str]] = {}
     ownership_edge_focus: dict[str, list[str]] = {}
     placement_focus: dict[str, list[str]] = {}
-    for review_slice in projection.slices:
-        focus_id = review_slice.change_map.focus_statement_id
-        for node in review_slice.change_map.structural_overlay.nodes:
+    workspace = projection.verification_workspace
+    for inspection in workspace.inspections:
+        focus_id = inspection.subject_id
+        overlay = inspection.structural_overlay
+        for node in overlay.nodes:
             if node.node_id not in nodes:
                 raise ValueError(
                     f"{focus_id}: structural overlay references missing node "
@@ -314,28 +217,28 @@ def _review_graph(
             node_focus.setdefault(node.node_id, []).append(
                 (focus_id, node.role)
             )
-        for group_id in review_slice.change_map.structural_overlay.relation_group_ids:
+        for group_id in overlay.relation_group_ids:
             if group_id not in relation_groups:
                 raise ValueError(
                     f"{focus_id}: structural overlay references missing relation "
                     f"group {group_id}"
                 )
             relation_group_focus.setdefault(group_id, []).append(focus_id)
-        for edge_id in review_slice.change_map.structural_overlay.edge_ids:
+        for edge_id in overlay.edge_ids:
             if edge_id not in edges:
                 raise ValueError(
                     f"{focus_id}: structural overlay references missing edge "
                     f"{edge_id}"
                 )
             edge_focus.setdefault(edge_id, []).append(focus_id)
-        for edge_id in review_slice.change_map.structural_overlay.ownership_edge_ids:
+        for edge_id in overlay.ownership_edge_ids:
             if edge_id not in ownership_edges:
                 raise ValueError(
                     f"{focus_id}: structural overlay references missing ownership "
                     f"edge {edge_id}"
                 )
             ownership_edge_focus.setdefault(edge_id, []).append(focus_id)
-        for placement_id in review_slice.change_map.structural_overlay.placement_ids:
+        for placement_id in overlay.placement_ids:
             placement_focus.setdefault(placement_id, []).append(focus_id)
     executable_connected_node_ids = {
         node_id
@@ -657,56 +560,11 @@ def _review_graph(
             + "</div>"
         )
 
-    visible_focus_ids = {
-        *(
-            focus_id
-            for node_id, focus_roles in node_focus.items()
-            if node_id in backbone_nodes
-            for focus_id, _role in focus_roles
-        ),
-        *(
-            focus_id
-            for group_id, group_focus_ids in relation_group_focus.items()
-            if group_id in graph.backbone_relation_group_ids
-            for focus_id in group_focus_ids
-        ),
-        *(
-            focus_id
-            for edge_id, edge_focus_ids in ownership_edge_focus.items()
-            if edge_id in graph.backbone_ownership_edge_ids
-            for focus_id in edge_focus_ids
-        ),
-        *(
-            focus_id
-            for placement in placements
-            for focus_id in placement_focus.get(placement.id, ())
-        ),
-    }
-    focus_ids = tuple(
-        review_slice.change_map.focus_statement_id for review_slice in projection.slices
-    )
-    slices_by_focus = {
-        review_slice.change_map.focus_statement_id: review_slice
-        for review_slice in projection.slices
-    }
     controls = (
         '<div class="delta-focus-controls" role="group" '
         'aria-label="Structural graph focus">'
         '<button class="delta-focus active" type="button" '
         'data-focus-target="all">All</button>'
-        + "".join(
-            (
-            f'<button class="delta-focus'
-            f'{" no-visible-backbone" if focus_id not in visible_focus_ids else ""}'
-            f' disposition-{escape(slices_by_focus[focus_id].change_map.structural_disposition.state)}" '
-            f'type="button" '
-            f'data-focus-target="{escape(focus_id, quote=True)}" '
-            f'data-empty-copy="{escape(_structural_focus_empty_copy(slices_by_focus[focus_id]), quote=True)}" '
-            f'title="{escape(_structural_disposition_label(slices_by_focus[focus_id]), quote=True)}">'
-            f"{escape(focus_id)}</button>"
-            )
-            for focus_id in focus_ids
-        )
         + "</div>"
     )
     canvas = (
@@ -748,10 +606,8 @@ def _review_graph(
             else ""
         )
     )
-    change_map = _canonical_change_map(graph, projection, brief)
     return (
         '<div class="review-structural-graph">'
-        f"{change_map}"
         '<div class="delta-graph-heading"><div>'
         '<h3>Structural delta graph</h3>'
         f'<div class="structural-coverage state-{escape(coverage_state)}">'
@@ -771,181 +627,6 @@ def _review_graph(
     )
 
 
-def _canonical_change_map(
-    graph: ReviewStructuralGraph,
-    projection: ReviewProjection,
-    brief: ReviewBrief,
-) -> str:
-    if not all(
-        hasattr(brief, attribute)
-        for attribute in (
-            "requirements",
-            "guardrails",
-            "claims",
-            "projection_candidates",
-        )
-    ):
-        return ""
-    statements = {
-        item.id: item for item in (*brief.requirements, *brief.guardrails)
-    }
-    claims = {item.id: item for item in brief.claims}
-    relations = brief.projection_candidates.by_id()
-    nodes = {item.id: item for item in graph.nodes}
-    groups = {item.id: item for item in graph.relation_groups}
-    evidence = brief.evidence_catalog.by_id()
-    rows = []
-    for review_slice in projection.slices:
-        entry = review_slice.change_map
-        statement = statements.get(entry.focus_statement_id)
-        if statement is None:
-            raise ValueError(
-                f"canonical change map references missing focus: "
-                f"{entry.focus_statement_id}"
-            )
-        claim_rows = []
-        for relation_id in entry.claim_relation_ids:
-            relation = relations.get(relation_id)
-            claim = claims.get(relation.target_id) if relation else None
-            if relation is None or claim is None:
-                raise ValueError(
-                    "canonical change map references missing claim binding: "
-                    f"{relation_id}"
-                )
-            claim_rows.append(
-                '<div class="change-map-binding">'
-                f'<span class="relation-label">'
-                f'{escape(relation.association.replace("_", " "))}</span>'
-                f'<span><b>{escape(claim.id)}</b> {escape(claim.text)}</span>'
-                "</div>"
-            )
-        overlay = entry.structural_overlay
-        group_rows = []
-        for group_id in overlay.relation_group_ids:
-            group = groups.get(group_id)
-            if group is None:
-                raise ValueError(
-                    "canonical change map references missing structural group: "
-                    f"{group_id}"
-                )
-            source = _structural_display_fact(nodes[group.source_node_id], evidence)
-            target = _structural_display_fact(nodes[group.target_node_id], evidence)
-            group_rows.append(
-                '<button class="change-map-fact" type="button" '
-                f'data-group-expand="{escape(group.id, quote=True)}">'
-                f'<span>{escape(group.operation)} {escape(group.relation)}</span>'
-                f'<b>{escape(_structural_name(source))} → '
-                f'{escape(_structural_name(target))}</b>'
-                "</button>"
-            )
-        direct_nodes = tuple(
-            item for item in overlay.nodes if item.role != "intermediate"
-        )
-        if any(item.node_id not in nodes for item in direct_nodes):
-            missing_node_id = next(
-                item.node_id for item in direct_nodes if item.node_id not in nodes
-            )
-            raise ValueError(
-                "canonical change map references missing structural node: "
-                f"{missing_node_id}"
-            )
-        node_set = (
-            '<button class="change-map-node-set" type="button" '
-            f'data-focus-select="{escape(entry.focus_statement_id, quote=True)}" '
-            f'data-node-ids="{escape(" ".join(item.node_id for item in direct_nodes), quote=True)}">'
-            f'{len(direct_nodes)} directly associated structural node'
-            f'{"s" if len(direct_nodes) != 1 else ""} · inspect in graph'
-            "</button>"
-            if direct_nodes
-            else ""
-        )
-        binding_count = len(claim_rows)
-        fact_count = len(group_rows) + bool(node_set)
-        rows.append(
-            '<details class="change-map-entry" '
-            f'data-focus-target="{escape(entry.focus_statement_id, quote=True)}">'
-            '<summary>'
-            '<span class="change-map-contract">'
-            f'<b>{escape(statement.id)}</b>{escape(statement.text)}</span>'
-            '<span class="change-map-count">'
-            f'{binding_count} typed claim binding'
-            f'{"s" if binding_count != 1 else ""}</span>'
-            '<span class="change-map-count">'
-            + (
-                f'{fact_count} structural fact group'
-                f'{"s" if fact_count != 1 else ""}'
-                if fact_count
-                else escape(_structural_disposition_label(review_slice))
-            )
-            + "</span></summary>"
-            '<div class="change-map-flow">'
-            '<div><span class="projection-heading">Contract says</span>'
-            f'<p>{escape(statement.text)}</p></div>'
-            '<div><span class="projection-heading">Typed bindings</span>'
-            + (
-                "".join(claim_rows)
-                if claim_rows
-                else '<p class="empty">No selected PR claim association.</p>'
-            )
-            + '</div><div><span class="projection-heading">'
-            "Repository fact groups</span>"
-            + (
-                "".join(group_rows) + node_set
-                if fact_count
-                else '<p class="empty">No projected structural fact group.</p>'
-            )
-            + "</div></div></details>"
-        )
-    return (
-        '<div class="canonical-change-map"><div class="change-map-heading">'
-        '<div><h3>Canonical Change Map</h3>'
-        '<p>Contract statements, typed PR bindings, and repository facts remain '
-        "separate; selecting a row focuses the structural graph.</p></div></div>"
-        f'<div class="change-map-list">{"".join(rows)}</div></div>'
-        if rows
-        else ""
-    )
-
-
-def _structural_disposition_label(review_slice: ReviewSlice) -> str:
-    state = review_slice.change_map.structural_disposition.state
-    return {
-        "projected": "Structural evidence projected",
-        "non_structural_only": "Review evidence only; no structural projection",
-        "deferred": "Structural candidates deferred",
-        "unassociated": "No deterministic structural association",
-        "unavailable": "Structural evidence unavailable or not applicable",
-        "no_structural_evidence": "No structural evidence",
-    }[state]
-
-
-def _structural_focus_empty_copy(review_slice: ReviewSlice) -> str:
-    focus_id = review_slice.change_map.focus_statement_id
-    state = review_slice.change_map.structural_disposition.state
-    if state == "projected":
-        return (
-            f"{focus_id} has projected structural evidence outside the default "
-            "change backbone."
-        )
-    return {
-        "non_structural_only": (
-            f"{focus_id} has review evidence, but no deterministically associated "
-            "structural node or edge."
-        ),
-        "deferred": (
-            f"{focus_id} has structural candidates, but they were deferred by an "
-            "upstream safety boundary."
-        ),
-        "unassociated": (
-            f"{focus_id} has no deterministic structural association."
-        ),
-        "unavailable": (
-            f"{focus_id} structural evidence is unavailable or not applicable."
-        ),
-        "no_structural_evidence": (
-            f"{focus_id} has no eligible structural evidence."
-        ),
-    }[state]
 
 
 def _structural_display_fact(
@@ -1278,240 +959,6 @@ def _structural_name(item: EvidenceItem) -> str:
     return f"{short_path} · {qualified_name}"
 
 
-def _projection_slice(
-    review_slice: ReviewSlice,
-    statement: ReviewStatement,
-    brief: ReviewBrief,
-    *,
-    profile: str,
-    diagnostics: tuple[ProjectionDiagnostic, ...],
-) -> str:
-    relations = brief.projection_candidates.by_id()
-    claims = {item.id: item for item in brief.claims}
-
-    claim_rows = []
-    for relation_id in review_slice.change_map.claim_relation_ids:
-        relation = relations.get(relation_id)
-        claim = claims.get(relation.target_id) if relation else None
-        if relation is None or claim is None:
-            raise ValueError(f"projection references missing claim relation: {relation_id}")
-        source = " · ".join(_source(item) for item in claim.sources)
-        reason = relation.reasons[0] if relation.reasons else None
-        claim_rows.append(
-            '<div class="projection-item">'
-            f'<span class="relation-label">{escape(relation.association.replace("_", " "))}</span>'
-            f'<span class="projection-copy"><b>{escape(claim.id)}</b> {escape(claim.text)}</span>'
-            + (
-                f'<span class="relation-reason">{escape(reason.detail)}</span>'
-                if reason
-                else ""
-            )
-            + (
-                f'<span class="projection-source">Source: {source}</span>'
-                if source
-                else ""
-            )
-            + "</div>"
-        )
-
-    groups = (
-        (
-            "Changed anchors",
-            review_slice.standalone_changed_fact_relation_ids,
-            "changed fact",
-        ),
-        (
-            "Test support",
-            review_slice.standalone_test_support_relation_ids,
-            "changed test",
-        ),
-        (
-            "Documentation support",
-            review_slice.standalone_document_support_relation_ids,
-            "changed document",
-        ),
-        (
-            "Runtime context",
-            review_slice.standalone_runtime_relation_ids,
-            "context fact",
-        ),
-        (
-            "Test context",
-            review_slice.standalone_test_relation_ids,
-            "context fact",
-        ),
-        (
-            "Verification",
-            review_slice.verification_relation_ids,
-            "current-head observation",
-        ),
-    )
-    fact_groups = []
-    disposition = _structural_disposition(
-        review_slice,
-        brief,
-        relations=relations,
-    )
-    if disposition:
-        fact_groups.append(disposition)
-    if review_slice.closure_scan_plan_id is not None:
-        plan = brief.closure_scan_plans.by_id().get(
-            review_slice.closure_scan_plan_id
-        )
-        if plan is None:
-            raise ValueError(
-                    "projection references missing closure scan plan: "
-                f"{review_slice.closure_scan_plan_id}"
-            )
-        sources = " · ".join(_source(source) for source in plan.sources)
-        fact_groups.append(
-            '<div class="projection-group">'
-                '<span class="block-title">Closure scan plan</span>'
-                f'<span class="projection-copy">{escape(plan.scope)} '
-                f'{" / ".join(escape(item) for item in plan.surfaces)} · '
-                f'{" / ".join(escape(item) for item in plan.revision_sides)} '
-                "revision</span>"
-            f'<span class="relation-reason">{escape(plan.query_text)}</span>'
-            + (
-                '<span class="relation-reason">Selectors: '
-                + " · ".join(escape(item.value) for item in plan.selectors)
-                + "</span>"
-                if plan.selectors
-                else '<span class="relation-reason">No conservative executable '
-                "selector.</span>"
-            )
-            + (
-                f'<span class="projection-source">Source: {sources}</span>'
-                if sources
-                else ""
-            )
-            + "</div>"
-        )
-    boundary_rows = "".join(
-        _closure_fact(relations[relation_id], brief)
-        for relation_id in review_slice.closure_fact_relation_ids
-        if relation_id in relations
-    )
-    if boundary_rows:
-        fact_groups.append(
-            '<div class="projection-group"><span class="block-title">'
-            f"Closure scan observation</span>{boundary_rows}</div>"
-        )
-    for heading, relation_ids, label in groups:
-        rows = "".join(
-            _relation_fact(relations[relation_id], brief, label=label)
-            for relation_id in relation_ids
-            if relation_id in relations
-        )
-        if rows:
-            fact_groups.append(
-                f'<div class="projection-group"><span class="block-title">'
-                f"{escape(heading)}</span>{rows}</div>"
-            )
-    claim_diagnostics = _diagnostic_rows(
-        diagnostics,
-        slots={"claim"},
-    )
-    fact_diagnostics = _diagnostic_rows(
-        diagnostics,
-        slots={
-            "changed_anchor",
-            "runtime_context",
-            "test_context",
-            "verification",
-            "structural_path",
-            "closure_fact",
-        },
-    )
-    contract_label = statement.authority.replace("_", " ")
-    statement_sources = " · ".join(_source(source) for source in statement.sources)
-    authority_note = f"{statement.role.replace('_', ' ')} · {statement.purpose.replace('_', ' ')}"
-    return (
-        '<div class="projection">'
-        '<div class="projection-column">'
-        f'<span class="projection-heading">{escape(contract_label)}</span>'
-        f'<span class="profile-chip">{escape(profile.replace("_", " "))}</span>'
-        f'<p class="projection-copy">{escape(statement.text)}</p>'
-        f'<span class="relation-reason">{escape(authority_note)}</span>'
-        + (
-            f'<span class="projection-source">Source: {statement_sources}</span>'
-            if statement_sources
-            else ""
-        )
-        + "</div>"
-        '<div class="projection-arrow">→</div>'
-        '<div class="projection-column">'
-        '<span class="projection-heading">PR says</span>'
-        + "".join(claim_rows)
-        + claim_diagnostics
-        + "</div>"
-        '<div class="projection-arrow">→</div>'
-        '<div class="projection-column projection-facts">'
-        '<span class="projection-heading">Repository facts</span>'
-        + "".join(fact_groups)
-        + fact_diagnostics
-        + "</div></div>"
-    )
-
-
-def _structural_disposition(
-    review_slice: ReviewSlice,
-    brief: ReviewBrief,
-    *,
-    relations: dict[str, ProjectionRelation],
-) -> str:
-    disposition = review_slice.change_map.structural_disposition
-    if (
-        disposition.state == "projected"
-        and not disposition.deferred_structural_relation_ids
-    ):
-        return ""
-    deferred_relation_ids = disposition.deferred_structural_relation_ids
-    displayed_deferred_ids = deferred_relation_ids[
-        :_DEFERRED_STRUCTURAL_PREVIEW_LIMIT
-    ]
-    deferred_rows = "".join(
-        _relation_fact(
-            relations[relation_id],
-            brief,
-            label="deferred structural candidate",
-        )
-        for relation_id in displayed_deferred_ids
-        if relation_id in relations
-    )
-    return (
-        '<div class="projection-group structural-disposition">'
-        '<span class="block-title">Structural disposition</span>'
-        f'<span class="projection-copy">{escape(_structural_disposition_label(review_slice))}</span>'
-        + (
-            '<span class="relation-reason">'
-            f'{len(disposition.non_structural_relation_ids)} selected '
-            "non-structural evidence "
-            f'item{"s" if len(disposition.non_structural_relation_ids) != 1 else ""}.'
-            "</span>"
-            if disposition.non_structural_relation_ids
-            else ""
-        )
-        + (
-            '<details class="deferred-structural"><summary>'
-            f'{len(displayed_deferred_ids)} of {len(deferred_relation_ids)} deferred '
-            "structural candidate"
-            f'{"s" if len(deferred_relation_ids) != 1 else ""}'
-            f"</summary>{deferred_rows}"
-            + (
-                '<span class="relation-reason">'
-                f'{len(deferred_relation_ids) - len(displayed_deferred_ids)} '
-                "additional canonical relations omitted from display."
-                "</span>"
-                if len(deferred_relation_ids) > len(displayed_deferred_ids)
-                else ""
-            )
-            + "</details>"
-            if deferred_rows
-            else ""
-        )
-        + "</div>"
-    )
 
 
 def _attention(brief: ReviewBrief) -> str:
@@ -1527,55 +974,156 @@ def _attention(brief: ReviewBrief) -> str:
     return rendered or '<p class="empty">No unresolved attention items.</p>'
 
 
+
+def _verification_accordion(brief: ReviewBrief) -> str:
+    workspace = brief.projection.verification_workspace
+    evidence = brief.evidence_catalog.by_id()
+    inspections = workspace.inspections_by_subject_id()
+    group_labels = {
+        "requirement": "Requirements",
+        "guardrail": "Guardrails",
+        "transformation_claim": "Transformation claims",
+        "completion_condition": "Completion conditions",
+    }
+    rows = []
+    previous_kind = None
+    for index, entry in enumerate(workspace.matrix):
+        inspection = inspections[entry.subject_id]
+        if entry.subject_kind != previous_kind:
+            rows.append(
+                '<div class="verification-group-label">'
+                f'{escape(group_labels[entry.subject_kind])}</div>'
+            )
+            previous_kind = entry.subject_kind
+        observed = tuple(
+            evidence[item]
+            for item in inspection.observed_evidence_ids
+            if item in evidence
+        )
+        observed_rows = "".join(
+            '<div class="verification-evidence">'
+            f'<span class="evidence-kind">'
+            f'{escape(item.profile.replace("_", " "))}</span>'
+            f'<span>{escape(item.summary)}</span>'
+            + (
+                '<span class="projection-source">Source: '
+                + " · ".join(_source(source) for source in item.sources)
+                + "</span>"
+                if item.sources
+                else ""
+            )
+            + "</div>"
+            for item in observed[:12]
+        )
+        if len(observed) > 12:
+            observed_rows += (
+                '<p class="display-boundary">'
+                f'{len(observed) - 12} additional canonical evidence references '
+                'remain in the serialized inspection.</p>'
+            )
+        reasons = "".join(
+            '<li><b>'
+            f'{escape(item.kind.replace("_", " "))}</b> '
+            f'{escape(item.detail)}</li>'
+            for item in inspection.assessment_reasons
+        )
+        if not reasons:
+            reasons = (
+                '<li>R/G assessment is not owned by the current deterministic '
+                'pipeline; evidence remains review support only.</li>'
+            )
+        source = " · ".join(_source(item) for item in entry.sources)
+        graph_copy = (
+            f'{len(inspection.structural_overlay.nodes)} projected graph nodes'
+            if inspection.structural_overlay.nodes
+            else "Structural focus not projected for this subject."
+        )
+        rows.append(
+            '<details class="verification-item" '
+            f'data-verification-subject="{escape(entry.subject_id, quote=True)}"'
+            f'{" open" if index == 0 else ""}><summary>'
+            f'<span class="verification-id">{escape(entry.subject_id)}</span>'
+            f'<span class="verification-title">{escape(entry.text)}</span>'
+            f'<span class="verification-authority">'
+            f'{escape(entry.authority.replace("_", " "))}</span>'
+            f'<span class="status-pill status-{escape(entry.status)}">'
+            f'{escape(entry.status.replace("_", " "))}</span></summary>'
+            '<div class="verification-detail">'
+            '<div><span class="projection-heading">Claimed</span>'
+            f'<p>{escape(entry.authority.replace("_", " "))}</p>'
+            + (
+                f'<span class="projection-source">Source: {source}</span>'
+                if source
+                else ""
+            )
+            + '</div><div><span class="projection-heading">Observed</span>'
+            + (
+                observed_rows
+                if observed_rows
+                else '<p class="empty">No associated canonical evidence.</p>'
+            )
+            + '</div><div><span class="projection-heading">Assessment</span>'
+            f'<ul class="assessment-reasons">{reasons}</ul>'
+            '<span class="verification-coverage">'
+            f'{len(inspection.supporting_evidence_ids)} supporting · '
+            f'{len(inspection.contradicting_evidence_ids)} contradicting'
+            f' · {escape(graph_copy)}</span></div></div></details>'
+        )
+    empty = brief.overview.empty_review_message
+    content = "".join(rows)
+    return (
+        '<div class="verification-accordion">'
+        + (
+            content
+            if content
+            else f'<p class="empty-state">{escape(empty or "No verification subject is available.")}</p>'
+        )
+        + "</div>"
+    )
+
+
+def _evidence_appendix(brief: ReviewBrief, files: str) -> str:
+    verification = tuple(
+        item for item in brief.evidence_catalog.items if item.role == "verification"
+    )
+    verification_rows = "".join(
+        '<div class="appendix-row"><b>'
+        f'{escape(item.verification_identity.name if item.verification_identity else item.summary)}</b>'
+        f'<span>{escape(item.verification_status)} '
+        f'{escape(item.verification_conclusion or "no conclusion")}</span></div>'
+        for item in verification
+    )
+    coverage = brief.overview.structural_coverage
+    context = (
+        _statement_context("Goals", brief.objectives)
+        + _statement_context("Scope", brief.scope)
+        + _statement_context(
+            "Verification expectations",
+            brief.verification_expectations,
+        )
+        + _statement_context("PR claim context", brief.claims)
+    )
+    return (
+        '<section class="section evidence-appendix"><details><summary>'
+        '<span>'
+        '<b>Evidence Appendix</b></span><span>tests · coverage · changed areas · diagnostics</span>'
+        '</summary><div class="appendix-grid">'
+        '<div><h3>Verification observations</h3>'
+        f'{verification_rows or "<p class=\"empty\">No current-head verification observed.</p>"}</div>'
+        '<div><h3>Structural coverage</h3>'
+        f'<p>{escape(coverage.state)} · {coverage.mapped_hunk_count}/'
+        f'{coverage.hunk_count} head hunks · {coverage.base_mapped_hunk_count}/'
+        f'{coverage.base_hunk_count} base hunks · '
+        f'{coverage.truncated_seed_count} truncated seeds</p></div>'
+        f'<div><h3>Diagnostics</h3><div class="attention-list">{_attention(brief)}</div></div>'
+        f'<div><h3>Changed areas</h3><div class="file-list">{files or "<p class=\"empty\">Not provided.</p>"}</div></div>'
+        f'<div class="appendix-context"><h3>Review context</h3>{context or "<p class=\"empty\">Not provided.</p>"}</div>'
+        '</div></details></section>'
+    )
+
+
 def render_html(brief: ReviewBrief) -> str:
     packet = brief.packet
-    statements = {
-        item.id: item for item in (*brief.requirements, *brief.guardrails)
-    }
-    groups = {
-        item.focus_statement_id: item
-        for item in brief.projection_candidates.groups
-    }
-    diagnostics = {
-        **brief.projection_candidates.diagnostics_by_id(),
-        **brief.candidate_convergence.diagnostics_by_id(),
-    }
-    cards = []
-    for index, review_slice in enumerate(brief.projection.slices):
-        statement = statements.get(review_slice.change_map.focus_statement_id)
-        group = groups.get(review_slice.change_map.focus_statement_id)
-        if statement is None or group is None:
-            raise ValueError(
-                f"projection references missing focus: {review_slice.change_map.focus_statement_id}"
-            )
-        slice_diagnostics = tuple(
-            diagnostics[diagnostic_id]
-            for diagnostic_id in review_slice.diagnostic_ids
-            if diagnostic_id in diagnostics
-        )
-        if len(slice_diagnostics) != len(review_slice.diagnostic_ids):
-            raise ValueError(
-                f"projection references missing diagnostic: {review_slice.change_map.focus_statement_id}"
-            )
-        focus_attribute = (
-            f' data-focus-id="{escape(statement.id, quote=True)}"'
-        )
-        cards.append(
-            f'<details class="requirement"{focus_attribute}'
-            f'{" open" if index == 0 else ""}>'
-            '<summary>'
-            f'<span class="req-id">{escape(statement.id)}</span>'
-            f'<span class="req-title">{escape(statement.text)}</span>'
-            '</summary><div class="req-body">'
-            f"{_projection_slice(review_slice, statement, brief, profile=group.profile, diagnostics=slice_diagnostics)}</div></details>"
-        )
-    if not cards:
-        if brief.overview.empty_review_message is None:
-            raise ValueError("projection rendered no cards without an empty-review fact")
-        cards.append(
-            f'<div class="empty-state">{escape(brief.overview.empty_review_message)}</div>'
-        )
-
     source_priority = {"linked_issue": 0, "ticket": 0, "pull_request": 1}
     source_links = [
         _source(SourceRef(label=record.kind, url=record.url))
@@ -1604,34 +1152,19 @@ def render_html(brief: ReviewBrief) -> str:
         else escape(pr_label)
     )
     files = "".join(_changed_file(item) for item in packet.changed_files)
-    review_contract = (
-        '<div class="review-contract">'
-        + _statement_context("Goals", brief.objectives)
-        + _statement_context("Scope", brief.scope)
-        + _statement_context(
-            "Verification expectations",
-            brief.verification_expectations,
-        )
-        + "</div>"
-        if (
-            brief.objectives
-            or brief.scope
-            or brief.verification_expectations
-        )
-        else ""
-    )
-    semantic_context = _statement_context("PR claim context", brief.claims)
     review_graph = _review_graph(
         brief.projection.review_graph,
         brief.projection,
         brief,
     )
+    verification_accordion = _verification_accordion(brief)
+    appendix = _evidence_appendix(brief, files)
 
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{escape(packet.title)} · PrismCode</title>
 <style>
-:root{{color-scheme:dark;--bg:#080c0f;--panel:#10171b;--border:#26373f;--text:#edf3f0;--muted:#9eaaaf;--faint:#6f7d83;--green:#7be3ac;--amber:#e7ca7c;--red:#ef8f91;--blue:#9fcdf0;--shadow:0 22px 64px rgba(0,0,0,.28)}}*{{box-sizing:border-box}}body{{margin:0;color:var(--text);line-height:1.55;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 18% -8%,rgba(69,167,118,.12),transparent 31rem),var(--bg)}}code{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}}.shell{{width:min(1180px,calc(100% - 40px));margin:30px auto 84px}}.topbar{{margin-bottom:22px;font-weight:720}}.brand-mark{{display:inline-block;width:14px;height:14px;margin-right:10px;border:2px solid white;transform:rotate(45deg);border-radius:3px}}.section{{border:2px solid var(--border);border-radius:18px;background:linear-gradient(180deg,rgba(17,24,28,.97),rgba(11,17,21,.98));box-shadow:var(--shadow);padding:28px;margin-bottom:22px}}h1{{font-size:31px;margin:0 0 14px}}h2{{font-size:22px;margin:0 0 14px}}h3{{font-size:16px;margin:0 0 8px}}.meta{{display:flex;flex-wrap:wrap;gap:9px;color:var(--muted);font-size:13px;margin-bottom:16px}}.intent{{max-width:850px;color:#d2dade;font-size:15px}}.source-link,.file-link{{color:#b9dfff;text-decoration:none}}.source-note,.projection-source,.context-source{{display:block;color:var(--faint);font-size:10px;line-height:1.45}}.requirements{{border-top:1px solid rgba(111,128,135,.24)}}.requirement{{border-bottom:1px solid rgba(111,128,135,.24)}}.requirement summary{{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px minmax(0,1fr);gap:16px;padding:18px 0}}.requirement summary::-webkit-details-marker{{display:none}}.req-id{{color:var(--green);font:760 12px ui-monospace,SFMono-Regular,Menlo,monospace}}.req-title{{font-size:14px;font-weight:640}}.req-body{{padding:0 0 22px 68px}}.projection{{display:grid;grid-template-columns:minmax(0,.85fr) 24px minmax(0,1fr) 24px minmax(0,1.35fr);gap:10px;align-items:start}}.projection-column{{min-width:0;padding:14px;border:1px solid rgba(111,128,135,.22);border-radius:12px;background:rgba(5,10,13,.24)}}.projection-heading,.block-title{{display:block;margin-bottom:9px;color:#89979d;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.045em}}.projection-arrow{{align-self:center;color:var(--faint);text-align:center}}.profile-chip,.relation-label{{display:inline-flex;margin:0 0 8px;padding:3px 7px;border-radius:999px;background:rgba(54,118,87,.20);color:#bfeacf;font-size:8px;font-weight:720}}.projection-copy{{margin:0 0 7px;color:#d7dddf;font-size:11px}}.projection-item{{padding:9px 0;border-bottom:1px solid rgba(111,128,135,.16)}}.projection-item:last-child{{border-bottom:0}}.relation-reason{{display:block;color:var(--faint);font-size:9px;margin-bottom:6px}}.projection-group+.projection-group{{margin-top:15px}}.review-structural-graph{{margin-top:24px;padding:18px;border:1px solid rgba(111,128,135,.22);border-radius:12px;background:rgba(5,10,13,.24)}}.delta-graph-heading{{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}}.structural-coverage{{margin-bottom:3px;color:var(--muted);font-size:9px}}.structural-coverage.state-partial,.structural-coverage.state-stale,.structural-coverage.state-missing,.structural-coverage.state-invalid,.structural-coverage.state-error{{color:var(--amber)}}.subgraph-summary{{color:var(--muted);font-size:9px}}.delta-focus-controls{{display:flex;flex:1 1 560px;min-width:0;max-width:720px;flex-wrap:wrap;justify-content:flex-end;gap:5px}}.delta-focus{{border:1px solid rgba(111,128,135,.35);border-radius:999px;padding:4px 9px;background:transparent;color:var(--muted);font:700 9px inherit;cursor:pointer}}.delta-focus:hover,.delta-focus.active{{border-color:var(--green);background:rgba(54,118,87,.20);color:#c9efd6}}.delta-canvas-scroll{{margin-top:14px;overflow-x:auto;border:1px solid rgba(111,128,135,.16);border-radius:10px;background:rgba(3,7,9,.34)}}.delta-canvas{{display:block;min-width:100%;height:auto}}.delta-edge,.structural-container,.delta-node,.isolated-anchor{{transition:opacity .16s ease,filter .16s ease}}.delta-edge path{{fill:none;stroke-width:1.8}}.delta-edge-label-bg{{fill:rgba(3,7,9,.92);stroke:rgba(111,128,135,.24);stroke-width:.7}}.delta-edge-label{{font-size:8px;text-anchor:middle;paint-order:stroke;stroke:var(--bg);stroke-width:2px;stroke-linejoin:round}}.delta-edge.operation-added path{{stroke:var(--green)}}.delta-edge.operation-added text{{fill:var(--green)}}.delta-edge.operation-removed path{{stroke:var(--red);stroke-dasharray:6 5}}.delta-edge.operation-removed text{{fill:var(--red)}}.delta-edge.operation-retained path{{stroke:#73848c}}.delta-edge.operation-retained text{{fill:#94a2a8}}#arrow-added path{{fill:var(--green)}}#arrow-removed path{{fill:var(--red)}}#arrow-retained path{{fill:#73848c}}.structural-container{{fill:rgba(16,27,33,.42);stroke:#354a54;stroke-width:1.1}}.structural-container.operation-added{{stroke:rgba(123,227,172,.52);fill:rgba(54,118,87,.06)}}.structural-container.operation-removed{{stroke:rgba(239,143,145,.5);stroke-dasharray:6 4;fill:rgba(112,43,48,.05)}}.delta-node rect{{fill:#111a1f;stroke:#53656e;stroke-width:1.2}}.delta-node.operation-added rect{{stroke:var(--green);fill:rgba(54,118,87,.14)}}.delta-node.operation-modified rect{{stroke:var(--amber);fill:rgba(106,85,30,.13)}}.delta-node.operation-removed rect{{stroke:var(--red);stroke-dasharray:6 4;fill:rgba(112,43,48,.12)}}.delta-node-kind{{fill:var(--muted);font-size:8px;text-transform:uppercase}}.delta-node-name{{fill:var(--text);font-size:10px;font-weight:700}}.delta-node-path{{fill:var(--faint);font-size:8px}}.focus-muted{{opacity:.13}}.focus-context{{opacity:.7}}.structural-container.focus-context,.structural-container-header.focus-context{{filter:drop-shadow(0 0 2px rgba(159,205,240,.22))}}.focus-active{{opacity:1;filter:drop-shadow(0 0 5px rgba(123,227,172,.35))}}.delta-empty{{margin:14px 0 0;padding:18px;border:1px dashed rgba(111,128,135,.26);border-radius:10px;color:var(--faint);font-size:11px}}.isolated-anchors{{margin-top:12px;border-top:1px solid rgba(111,128,135,.18);padding-top:10px}}.isolated-anchors>summary{{cursor:pointer;color:var(--muted);font-size:10px}}.isolated-anchor-list{{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:9px}}.isolated-anchor{{display:grid;grid-template-columns:auto 1fr auto;gap:4px 7px;min-width:0;padding:8px;border:1px solid rgba(111,128,135,.16);border-left:2px solid var(--amber);border-radius:7px}}.isolated-anchor.operation-added{{border-left-color:var(--green)}}.isolated-anchor.operation-removed{{border-left-color:var(--red);border-style:dashed}}.isolated-anchor-focus,.isolated-anchor-operation,.isolated-anchor-kind{{color:var(--faint);font-size:8px}}.isolated-anchor-operation{{text-transform:uppercase}}.isolated-anchor-kind{{text-align:right}}.isolated-anchor-name{{grid-column:1/-1;overflow-wrap:anywhere;font-size:9px}}.isolated-anchor .projection-source{{grid-column:1/-1}}.slot-diagnostic{{margin:9px 0;padding:9px;border-radius:8px;background:rgba(106,85,30,.16);color:#e8d18e;font-size:9px}}.slot-diagnostic p{{margin:3px 0 0;color:var(--muted)}}.context{{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(111,128,135,.24)}}.context>summary{{cursor:pointer;color:var(--muted);font-size:11px}}.context-row{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px;gap:12px;padding:12px 0;border-bottom:1px solid rgba(111,128,135,.18)}}.context-id{{color:#9fcdf0;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace}}.context-copy{{font-size:12px}}.context-authority{{color:var(--muted);font-size:10px;text-align:right}}.context-source{{grid-column:2/-1}}.attention-list,.file-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:var(--amber);font-size:10px;font-weight:700;text-transform:uppercase}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px}}.empty,.empty-state{{color:var(--faint);font-size:12px}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}@media(max-width:950px){{.projection{{grid-template-columns:1fr}}.projection-arrow{{transform:rotate(90deg)}}.req-body{{padding-left:0}}.isolated-anchor-list{{grid-template-columns:repeat(2,minmax(0,1fr))}}}}@media(max-width:600px){{.shell{{width:calc(100% - 18px);margin-top:16px}}.section{{padding:22px 20px}}.attention-row,.context-row{{grid-template-columns:1fr}}.delta-graph-heading{{display:block}}.delta-focus-controls{{max-width:none;justify-content:flex-start;margin-top:10px}}.isolated-anchor-list{{grid-template-columns:1fr}}}}@media print{{:root{{color-scheme:light;--bg:#fff;--panel:#fff;--text:#111;--muted:#444;--faint:#666;--border:#bbb}}body{{background:#fff}}.section{{box-shadow:none;break-inside:avoid}}.delta-focus-controls{{display:none}}.delta-canvas-scroll{{overflow:visible}}}}.delta-graph-heading{{flex-wrap:wrap}}.delta-node.operation-renamed rect{{stroke:var(--blue);stroke-dasharray:8 3;fill:rgba(48,83,110,.14)}}.isolated-anchor.operation-renamed{{border-left-color:var(--blue);border-style:dashed}}.delta-node.operation-retained rect{{stroke:#53656e;fill:#111a1f}}.delta-node.operation-unresolved rect{{stroke:var(--faint);stroke-dasharray:3 3;fill:rgba(111,125,131,.08)}}.isolated-anchor.operation-unresolved{{border-left-color:var(--faint);border-style:dashed}}.structural-container-header,.secondary-placement{{transition:opacity .16s ease,filter .16s ease}}.structural-container-header rect{{fill:#132027;stroke:#58707c;stroke-width:1.1}}.structural-container-header.operation-added rect{{stroke:var(--green);fill:rgba(54,118,87,.14)}}.structural-container-header.operation-modified rect{{stroke:var(--amber);fill:rgba(106,85,30,.13)}}.structural-container-header.operation-removed rect{{stroke:var(--red);stroke-dasharray:6 4;fill:rgba(112,43,48,.12)}}.structural-container-header.operation-unresolved rect{{stroke:var(--faint);stroke-dasharray:3 3}}.secondary-placement rect{{fill:rgba(48,83,110,.18);stroke:var(--blue);stroke-width:.8;stroke-dasharray:3 2}}.secondary-placement text{{fill:var(--blue);font-size:8px}}.delta-focus.no-visible-backbone{{border-style:dashed;color:var(--faint)}}.delta-focus-empty{{margin:12px 0 0;padding:9px 11px;border:1px dashed rgba(111,128,135,.3);border-radius:8px;color:var(--muted);font-size:10px}}.deferred-structural>summary{{cursor:pointer;color:var(--muted);font-size:9px}}
+:root{{color-scheme:dark;--bg:#080c0f;--panel:#10171b;--border:#26373f;--text:#edf3f0;--muted:#9eaaaf;--faint:#6f7d83;--green:#7be3ac;--amber:#e7ca7c;--red:#ef8f91;--blue:#9fcdf0;--shadow:0 22px 64px rgba(0,0,0,.28)}}*{{box-sizing:border-box}}body{{margin:0;color:var(--text);line-height:1.55;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 18% -8%,rgba(69,167,118,.12),transparent 31rem),var(--bg)}}code{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}}.shell{{width:min(1180px,calc(100% - 40px));margin:30px auto 84px}}.topbar{{margin-bottom:22px;font-weight:720}}.brand-mark{{display:inline-block;width:14px;height:14px;margin-right:10px;border:2px solid white;transform:rotate(45deg);border-radius:3px}}.section{{border:2px solid var(--border);border-radius:18px;background:linear-gradient(180deg,rgba(17,24,28,.97),rgba(11,17,21,.98));box-shadow:var(--shadow);padding:28px;margin-bottom:22px}}h1{{font-size:31px;margin:0 0 14px}}h2{{font-size:22px;margin:0 0 14px}}h3{{font-size:16px;margin:0 0 8px}}.meta{{display:flex;flex-wrap:wrap;gap:9px;color:var(--muted);font-size:13px;margin-bottom:16px}}.intent{{max-width:850px;color:#d2dade;font-size:15px}}.source-link,.file-link{{color:#b9dfff;text-decoration:none}}.source-note,.projection-source,.context-source{{display:block;color:var(--faint);font-size:10px;line-height:1.45}}.projection-heading{{display:block;margin-bottom:9px;color:#89979d;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.045em}}.review-structural-graph{{margin-top:24px;padding:18px;border:1px solid rgba(111,128,135,.22);border-radius:12px;background:rgba(5,10,13,.24)}}.delta-graph-heading{{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}}.structural-coverage{{margin-bottom:3px;color:var(--muted);font-size:9px}}.structural-coverage.state-partial,.structural-coverage.state-stale,.structural-coverage.state-missing,.structural-coverage.state-invalid,.structural-coverage.state-error{{color:var(--amber)}}.subgraph-summary{{color:var(--muted);font-size:9px}}.delta-focus-controls{{display:flex;flex:1 1 560px;min-width:0;max-width:720px;flex-wrap:wrap;justify-content:flex-end;gap:5px}}.delta-focus{{border:1px solid rgba(111,128,135,.35);border-radius:999px;padding:4px 9px;background:transparent;color:var(--muted);font:700 9px inherit;cursor:pointer}}.delta-focus:hover,.delta-focus.active{{border-color:var(--green);background:rgba(54,118,87,.20);color:#c9efd6}}.delta-canvas-scroll{{margin-top:14px;overflow-x:auto;border:1px solid rgba(111,128,135,.16);border-radius:10px;background:rgba(3,7,9,.34)}}.delta-canvas{{display:block;min-width:100%;height:auto}}.delta-edge,.structural-container,.delta-node,.isolated-anchor{{transition:opacity .16s ease,filter .16s ease}}.delta-edge path{{fill:none;stroke-width:1.8}}.delta-edge-label-bg{{fill:rgba(3,7,9,.92);stroke:rgba(111,128,135,.24);stroke-width:.7}}.delta-edge-label{{font-size:8px;text-anchor:middle;paint-order:stroke;stroke:var(--bg);stroke-width:2px;stroke-linejoin:round}}.delta-edge.operation-added path{{stroke:var(--green)}}.delta-edge.operation-added text{{fill:var(--green)}}.delta-edge.operation-removed path{{stroke:var(--red);stroke-dasharray:6 5}}.delta-edge.operation-removed text{{fill:var(--red)}}.delta-edge.operation-retained path{{stroke:#73848c}}.delta-edge.operation-retained text{{fill:#94a2a8}}#arrow-added path{{fill:var(--green)}}#arrow-removed path{{fill:var(--red)}}#arrow-retained path{{fill:#73848c}}.structural-container{{fill:rgba(16,27,33,.42);stroke:#354a54;stroke-width:1.1}}.structural-container.operation-added{{stroke:rgba(123,227,172,.52);fill:rgba(54,118,87,.06)}}.structural-container.operation-removed{{stroke:rgba(239,143,145,.5);stroke-dasharray:6 4;fill:rgba(112,43,48,.05)}}.delta-node rect{{fill:#111a1f;stroke:#53656e;stroke-width:1.2}}.delta-node.operation-added rect{{stroke:var(--green);fill:rgba(54,118,87,.14)}}.delta-node.operation-modified rect{{stroke:var(--amber);fill:rgba(106,85,30,.13)}}.delta-node.operation-removed rect{{stroke:var(--red);stroke-dasharray:6 4;fill:rgba(112,43,48,.12)}}.delta-node-kind{{fill:var(--muted);font-size:8px;text-transform:uppercase}}.delta-node-name{{fill:var(--text);font-size:10px;font-weight:700}}.delta-node-path{{fill:var(--faint);font-size:8px}}.focus-muted{{opacity:.13}}.focus-context{{opacity:.7}}.structural-container.focus-context,.structural-container-header.focus-context{{filter:drop-shadow(0 0 2px rgba(159,205,240,.22))}}.focus-active{{opacity:1;filter:drop-shadow(0 0 5px rgba(123,227,172,.35))}}.delta-empty{{margin:14px 0 0;padding:18px;border:1px dashed rgba(111,128,135,.26);border-radius:10px;color:var(--faint);font-size:11px}}.isolated-anchors{{margin-top:12px;border-top:1px solid rgba(111,128,135,.18);padding-top:10px}}.isolated-anchors>summary{{cursor:pointer;color:var(--muted);font-size:10px}}.isolated-anchor-list{{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:9px}}.isolated-anchor{{display:grid;grid-template-columns:auto 1fr auto;gap:4px 7px;min-width:0;padding:8px;border:1px solid rgba(111,128,135,.16);border-left:2px solid var(--amber);border-radius:7px}}.isolated-anchor.operation-added{{border-left-color:var(--green)}}.isolated-anchor.operation-removed{{border-left-color:var(--red);border-style:dashed}}.isolated-anchor-focus,.isolated-anchor-operation,.isolated-anchor-kind{{color:var(--faint);font-size:8px}}.isolated-anchor-operation{{text-transform:uppercase}}.isolated-anchor-kind{{text-align:right}}.isolated-anchor-name{{grid-column:1/-1;overflow-wrap:anywhere;font-size:9px}}.isolated-anchor .projection-source{{grid-column:1/-1}}.context{{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(111,128,135,.24)}}.context>summary{{cursor:pointer;color:var(--muted);font-size:11px}}.context-row{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px;gap:12px;padding:12px 0;border-bottom:1px solid rgba(111,128,135,.18)}}.context-id{{color:#9fcdf0;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace}}.context-copy{{font-size:12px}}.context-authority{{color:var(--muted);font-size:10px;text-align:right}}.context-source{{grid-column:2/-1}}.attention-list,.file-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:var(--amber);font-size:10px;font-weight:700;text-transform:uppercase}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px}}.empty,.empty-state{{color:var(--faint);font-size:12px}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}@media(max-width:950px){{.isolated-anchor-list{{grid-template-columns:repeat(2,minmax(0,1fr))}}}}@media(max-width:600px){{.shell{{width:calc(100% - 18px);margin-top:16px}}.section{{padding:22px 20px}}.attention-row,.context-row{{grid-template-columns:1fr}}.delta-graph-heading{{display:block}}.delta-focus-controls{{max-width:none;justify-content:flex-start;margin-top:10px}}.isolated-anchor-list{{grid-template-columns:1fr}}}}@media print{{:root{{color-scheme:light;--bg:#fff;--panel:#fff;--text:#111;--muted:#444;--faint:#666;--border:#bbb}}body{{background:#fff}}.section{{box-shadow:none;break-inside:avoid}}.delta-focus-controls{{display:none}}.delta-canvas-scroll{{overflow:visible}}}}.delta-graph-heading{{flex-wrap:wrap}}.delta-node.operation-renamed rect{{stroke:var(--blue);stroke-dasharray:8 3;fill:rgba(48,83,110,.14)}}.isolated-anchor.operation-renamed{{border-left-color:var(--blue);border-style:dashed}}.delta-node.operation-retained rect{{stroke:#53656e;fill:#111a1f}}.delta-node.operation-unresolved rect{{stroke:var(--faint);stroke-dasharray:3 3;fill:rgba(111,125,131,.08)}}.isolated-anchor.operation-unresolved{{border-left-color:var(--faint);border-style:dashed}}.structural-container-header,.secondary-placement{{transition:opacity .16s ease,filter .16s ease}}.structural-container-header rect{{fill:#132027;stroke:#58707c;stroke-width:1.1}}.structural-container-header.operation-added rect{{stroke:var(--green);fill:rgba(54,118,87,.14)}}.structural-container-header.operation-modified rect{{stroke:var(--amber);fill:rgba(106,85,30,.13)}}.structural-container-header.operation-removed rect{{stroke:var(--red);stroke-dasharray:6 4;fill:rgba(112,43,48,.12)}}.structural-container-header.operation-unresolved rect{{stroke:var(--faint);stroke-dasharray:3 3}}.secondary-placement rect{{fill:rgba(48,83,110,.18);stroke:var(--blue);stroke-width:.8;stroke-dasharray:3 2}}.secondary-placement text{{fill:var(--blue);font-size:8px}}.delta-focus.no-visible-backbone{{border-style:dashed;color:var(--faint)}}.delta-focus-empty{{margin:12px 0 0;padding:9px 11px;border:1px dashed rgba(111,128,135,.3);border-radius:8px;color:var(--muted);font-size:10px}}
 .delta-edge[role="button"]{{cursor:pointer;outline:none}}
 .delta-edge[role="button"]:focus path,.delta-edge.group-expanded path{{stroke-width:3}}
 .relation-group-inspector{{display:grid;gap:7px;margin-top:10px}}
@@ -1644,59 +1177,55 @@ def render_html(brief: ReviewBrief) -> str:
 .relation-member-node small{{display:block;font-size:7px}}
 .relation-member-operation,.relation-member-kind{{color:var(--faint);text-transform:uppercase}}
 .relation-member-arrow{{color:var(--muted);text-align:center}}
-.canonical-change-map{{margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid rgba(111,128,135,.22)}}
-.change-map-heading p{{margin:0 0 12px;color:var(--muted);font-size:10px}}
-.change-map-list{{display:grid;gap:6px}}
-.change-map-entry{{border:1px solid rgba(111,128,135,.2);border-radius:9px;background:rgba(3,7,9,.28)}}
-.change-map-entry>summary{{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(120px,.55fr) minmax(150px,.7fr);gap:12px;align-items:center;padding:9px 11px;cursor:pointer;list-style:none}}
-.change-map-entry>summary::-webkit-details-marker{{display:none}}
-.change-map-entry[open]{{border-color:rgba(123,227,172,.42)}}
-.change-map-contract{{display:grid;grid-template-columns:34px minmax(0,1fr);gap:7px;font-size:10px}}
-.change-map-contract b{{color:var(--green)}}
-.change-map-count{{color:var(--muted);font-size:9px}}
-.change-map-flow{{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1fr) minmax(0,1.2fr);gap:8px;padding:0 10px 10px}}
-.change-map-flow>div{{min-width:0;padding:10px;border:1px solid rgba(111,128,135,.16);border-radius:8px}}
-.change-map-flow p{{margin:0;color:var(--muted);font-size:9px}}
-.change-map-binding{{display:grid;gap:3px;padding:6px 0;border-top:1px solid rgba(111,128,135,.12);font-size:9px}}
-.change-map-fact{{display:grid;width:100%;gap:2px;padding:6px 0;border:0;border-top:1px solid rgba(111,128,135,.12);background:transparent;color:var(--text);text-align:left;cursor:pointer;font:9px inherit}}
-.change-map-fact span{{display:block;color:var(--muted);font-size:8px}}
-.change-map-fact b{{font-weight:600;overflow-wrap:anywhere}}
-.change-map-node-set{{width:100%;padding:7px 0;border:0;border-top:1px solid rgba(111,128,135,.12);background:transparent;color:var(--blue);text-align:left;cursor:pointer;font:9px inherit}}
-@media(max-width:800px){{.change-map-entry>summary,.change-map-flow{{grid-template-columns:1fr}}}}
+.eyebrow{{display:block;margin-bottom:4px;color:var(--green);font-size:9px;font-weight:760;text-transform:uppercase;letter-spacing:.09em}}
+.section-intro{{margin:0 0 16px;color:var(--muted);font-size:10px}}
+.verification-accordion{{display:grid;gap:7px}}
+.verification-group-label{{margin-top:8px;color:var(--faint);font-size:9px;font-weight:750;text-transform:uppercase;letter-spacing:.07em}}
+.verification-item{{border:1px solid rgba(111,128,135,.2);border-radius:10px;overflow:hidden;background:rgba(3,7,9,.2)}}
+.verification-item[open]{{border-color:rgba(123,227,172,.38)}}
+.verification-item>summary{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px 105px;gap:10px;align-items:center;padding:12px;cursor:pointer;list-style:none}}
+.verification-item>summary::-webkit-details-marker{{display:none}}
+.verification-item>summary:hover{{background:rgba(54,118,87,.1)}}
+.verification-id{{color:var(--green);font:760 10px ui-monospace,SFMono-Regular,Menlo,monospace}}
+.verification-title{{font-size:11px;font-weight:620}}
+.verification-authority{{color:var(--faint);font-size:8px;text-transform:uppercase}}
+.status-pill{{display:inline-flex;justify-content:center;padding:4px 7px;border-radius:999px;font-size:8px;font-weight:750;text-transform:uppercase}}
+.status-demonstrated{{background:rgba(54,118,87,.22);color:var(--green)}}.status-partial{{background:rgba(106,85,30,.2);color:var(--amber)}}
+.status-contradicted{{background:rgba(112,43,48,.22);color:var(--red)}}.status-unverified,.status-not_assessed{{background:rgba(111,128,135,.14);color:var(--muted)}}
+.verification-detail{{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.25fr) minmax(0,1fr);gap:9px;padding:0 12px 12px;border-top:1px solid rgba(111,128,135,.14)}}
+.verification-detail>div{{min-width:0;margin-top:12px;padding:12px;border:1px solid rgba(111,128,135,.16);border-radius:9px}}
+.verification-detail p{{font-size:10px}}
+.verification-evidence{{display:grid;gap:3px;padding:7px 0;border-top:1px solid rgba(111,128,135,.12);font-size:9px}}
+.evidence-kind{{color:var(--blue);font-size:8px;text-transform:uppercase}}
+.assessment-reasons{{margin:0;padding-left:17px;color:var(--muted);font-size:9px}}.assessment-reasons li+li{{margin-top:7px}}
+.verification-coverage,.display-boundary{{display:block;margin-top:10px;color:var(--faint);font-size:8px}}
+.evidence-appendix>details>summary{{display:flex;justify-content:space-between;align-items:center;cursor:pointer;list-style:none}}.evidence-appendix>details>summary b{{font-size:18px}}
+.appendix-grid{{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:20px}}.appendix-grid>div{{min-width:0}}
+.appendix-row{{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid rgba(111,128,135,.15);font-size:9px}}.appendix-context{{grid-column:1/-1}}
+@media(max-width:800px){{.verification-detail,.appendix-grid{{grid-template-columns:1fr}}.verification-item>summary{{grid-template-columns:42px minmax(0,1fr)}}.verification-authority,.verification-item>summary .status-pill{{grid-column:2}}}}
 </style></head><body><main class="shell">
 <div class="topbar"><span class="brand-mark"></span>PrismCode</div>
-<section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{brief.overview.changed_file_count} changed files</span><span>·</span><span>{escape(ci_copy)}</span></div><h1>{escape(packet.title)}</h1><div class="intent">{escape(brief.intent.text)}</div><span class="source-note">Source: {source_line}</span>{review_contract}</section>
-<section class="section"><h2>Review checks</h2>{semantic_context}{review_graph}<div class="requirements">{"".join(cards)}</div></section>
-<section class="section"><h2>Needs attention</h2><div class="attention-list">{_attention(brief)}</div></section>
-<section class="section"><h2>Changed areas</h2><div class="file-list">{files or '<p class="empty">Not provided.</p>'}</div></section>
+<section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{brief.overview.changed_file_count} changed files</span><span>·</span><span>{escape(ci_copy)}</span></div><h1>{escape(packet.title)}</h1><div class="intent">{escape(brief.intent.text)}</div><span class="source-note">Source: {source_line}</span></section>
+<section class="section verification-workspace"><h2>Verification</h2><p class="section-intro">Expand one R/G/T/CC subject to compare its authored claim, canonical observations, deterministic assessment, and structural coverage.</p>{verification_accordion}{review_graph}</section>
+{appendix}
 <div class="footer">PrismCode · {escape(pr_label)} · Schema {escape(brief.schema_version)} · Generated by {escape(brief.generated_by)}</div>
 </main><script>
 document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
-  const section = graph.closest(".section");
-  const requirements = section
-    ? section.querySelectorAll(".requirement[data-focus-id]")
-    : [];
   const interaction = {{ focus: "all", expandedGroup: null }};
   const activateFocus = (focus) => {{
     interaction.focus = focus;
-    let activeButton = null;
     graph.querySelectorAll(".delta-focus").forEach((item) => {{
       const active = item.dataset.focusTarget === focus;
       item.classList.toggle("active", active);
-      if (active) activeButton = item;
     }}
 );
-    graph.querySelectorAll(".change-map-entry").forEach((item) => {{
-      item.classList.toggle(
-        "focus-active",
-        item.dataset.focusTarget === focus
-      );
-    }});
+    let matched = false;
     graph.querySelectorAll("[data-focuses], [data-context-focuses]").forEach((item) => {{
       const direct = focus === "all" ||
         (item.dataset.focuses || "").split(/\\s+/).includes(focus);
       const contextual = focus !== "all" && !direct &&
         (item.dataset.contextFocuses || "").split(/\\s+/).includes(focus);
+      if (focus !== "all" && (direct || contextual)) matched = true;
       item.classList.toggle("focus-muted", !direct && !contextual);
       item.classList.toggle("focus-context", contextual);
       item.classList.toggle("focus-active", focus !== "all" && direct);
@@ -1704,10 +1233,11 @@ document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
 );
     const empty = graph.querySelector(".delta-focus-empty");
     if (empty) {{
-      const show = focus !== "all" &&
-        activeButton?.classList.contains("no-visible-backbone");
+      const show = focus !== "all" && !matched;
       empty.hidden = !show;
-      empty.textContent = show ? activeButton.dataset.emptyCopy : "";
+      empty.textContent = show
+        ? `${{focus}} has no structural evidence in the default change backbone.`
+        : "";
     }}
 
   }}
@@ -1739,16 +1269,6 @@ document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
       }}
     }});
   }});
-  graph.querySelectorAll("[data-group-expand]").forEach((control) => {{
-    control.addEventListener("click", (event) => {{
-      event.preventDefault();
-      toggleGroup(control.dataset.groupExpand);
-    }});
-  }});
-  graph.querySelectorAll("[data-focus-select]").forEach((control) => {{
-    control.addEventListener("click", () =>
-      activateFocus(control.dataset.focusSelect));
-  }});
   graph.querySelectorAll(".relation-group-details").forEach((details) => {{
     details.addEventListener("toggle", () => {{
       if (details.open &&
@@ -1760,15 +1280,22 @@ document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
       }}
     }});
   }});
-  requirements.forEach((requirement) => {{
-    requirement.querySelector("summary").addEventListener("click", () =>
-      activateFocus(requirement.dataset.focusId));
-  }}
-);
-  graph.querySelectorAll(".change-map-entry").forEach((entry) => {{
-    entry.querySelector("summary").addEventListener("click", () =>
-      activateFocus(entry.dataset.focusTarget));
+  const verificationItems = document.querySelectorAll(
+    ".verification-item[data-verification-subject]"
+  );
+  verificationItems.forEach((item) => {{
+    item.addEventListener("toggle", () => {{
+      if (!item.open) return;
+      verificationItems.forEach((other) => {{
+        if (other !== item) other.open = false;
+      }});
+      activateFocus(item.dataset.verificationSubject);
+    }});
   }});
+  const initialItem = document.querySelector(
+    ".verification-item[open][data-verification-subject]"
+  );
+  if (initialItem) activateFocus(initialItem.dataset.verificationSubject);
 }}
 );
 </script></body></html>"""

@@ -335,10 +335,10 @@ def test_pr_acceptance_criteria_are_provisional_without_linked_issue() -> None:
     assert brief.intent.text == "Add structure-aware review support."
     html = render_html(brief)
     assert "pr description" in html
-    assert "obligation · acceptance" in html
-    assert "Review checks" in html
+    assert 'data-verification-subject="R1"' in html
+    assert "<h2>Verification</h2>" in html
     assert "Goals · 1 statement" in html
-    assert html.index("Goals · 1 statement") < html.index("Review checks")
+    assert html.index("<h2>Verification</h2>") < html.index("Goals · 1 statement")
     assert "Preserve deterministic review behavior." in html
     assert "Introduces a read-only provider boundary." in html
 
@@ -669,8 +669,8 @@ def test_review_contract_aliases_preserve_source_and_verification_identity() -> 
     ]
     html = render_html(brief)
     assert html.count("Verification expectations · 1 statement") == 1
-    assert html.index("Verification expectations · 1 statement") < html.index(
-        "Review checks"
+    assert html.index("<h2>Verification</h2>") < html.index(
+        "Verification expectations · 1 statement"
     )
     assert "Verification notes for maintainers" not in html
     assert "Project motivation details" not in html
