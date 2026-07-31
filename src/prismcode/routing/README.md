@@ -56,9 +56,10 @@ score candidates globally, construct final layout, or render diagnostics.
 ## Diagnostics
 
 Produces typed focus/slot source and association coverage diagnostics.
-For G boundary coverage it routes only canonical `boundary_fact` evidence by
+For G closure coverage it routes only canonical `closure_fact` evidence by
 its provider-owned G association and preserves unavailable/partial coverage.
-Non-G focuses receive no boundary candidates.
+Transformation claims remain catalogued facts until the later unified
+verification projection; current R focuses receive no closure candidates.
 
 ## Extension points
 

@@ -55,8 +55,8 @@ it never regroups edges or chooses display endpoints.
 Focus-relative roles and association/path relation IDs remain in overlays.
 Review-wide CI,
 source coverage, empty state, and structural coverage are computed once here.
-Each G slice references its upstream `GuardrailScanPlan` by ID; projection does
-not reconstruct scan scope or query intent. Selected boundary facts are
+Each G slice references its upstream `ClosureScanPlan` by ID; projection does
+not reconstruct scan scope or query intent. Selected closure facts are
 reference-only relation IDs from convergence.
 Each slice also owns one `StructuralFocusDisposition`. It partitions selected
 non-structural evidence references, deferred structural relation references,

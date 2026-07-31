@@ -161,7 +161,7 @@ accepts only eligible fact or relation types.
 | `test_context` | What tests structurally exercise or reach the selected anchor/context? | changed test anchors and unchanged test symbols on eligible paths | arbitrary test files sharing generic terms |
 | `verification` | What ran for the current head? | current-head CI/status/manual observations | PR verification prose |
 | `structural_path` | How are selected repository facts connected? | bounded paths whose seed is a selected changed anchor and whose nodes are selected context | paths unrelated to selected anchors |
-| `boundary_fact` | What changed area is relevant to a guardrail scan? | typed changed anchors and explicit scan coverage | claims of absence without a stated scan scope |
+| `closure_fact` | What bounded base/head observation is relevant to a G, removal, or negative completion statement? | typed revision-specific matches and explicit scan coverage | claims of absence without a stated scan scope |
 | `diagnostic` | Why is a slot empty or incomplete? | typed extraction, eligibility, association, provider, coverage, and budget states | renderer-generated guesses |
 
 Changed test code is a changed anchor and may also appear in the test-oriented

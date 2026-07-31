@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import pytest
 
-from prismcode.guardrails.planning import compile_guardrail_scan_plans
+from prismcode.closure.planning import compile_closure_scan_plans
 from prismcode.model.contracts import (
     AnalysisInput,
-    GuardrailScanPlanSet,
+    ClosureScanPlanSet,
     Requirement,
     ReviewSourcePacket,
     SourceRef,
+    TransformationClaim,
+    TransformationContract,
 )
 from prismcode.pipeline import DeterministicAnalyzer
 from prismcode.presentation.html import render_html
@@ -37,13 +39,13 @@ def test_guardrail_plans_are_one_to_one_stable_and_conclusion_free() -> None:
         _guardrail("G2", "Do not add feature flags or dual writes."),
     )
 
-    first = compile_guardrail_scan_plans(guardrails)
-    second = compile_guardrail_scan_plans(guardrails)
+    first = compile_closure_scan_plans(guardrails)
+    second = compile_closure_scan_plans(guardrails)
 
     assert first == second
-    assert [item.id for item in first.plans] == ["GSP:G1", "GSP:G2"]
-    assert [item.guardrail_id for item in first.plans] == ["G1", "G2"]
-    assert all(item.revision_side == "head" for item in first.plans)
+    assert [item.id for item in first.plans] == ["CSP:G1", "CSP:G2"]
+    assert [item.statement_id for item in first.plans] == ["G1", "G2"]
+    assert all(item.revision_sides == ("head",) for item in first.plans)
     assert all(item.scope == "repository" for item in first.plans)
     assert all(item.root_paths == (".",) for item in first.plans)
     assert all(
@@ -70,14 +72,14 @@ def test_guardrail_plans_are_one_to_one_stable_and_conclusion_free() -> None:
 
 def test_plan_validation_rejects_missing_or_non_guardrail_ownership() -> None:
     guardrail = _guardrail("G1", "No legacy path remains.")
-    plans = compile_guardrail_scan_plans((guardrail,))
+    plans = compile_closure_scan_plans((guardrail,))
     requirement = Requirement(id="R1", text="Add the canonical path.")
 
     with pytest.raises(ValueError, match="one-to-one"):
         plans.validate_consistency((guardrail, _guardrail("G2", "No fallback.")))
     with pytest.raises(ValueError, match="one-to-one"):
         plans.validate_consistency((requirement,))
-    GuardrailScanPlanSet().validate_consistency(())
+    ClosureScanPlanSet().validate_consistency(())
 
 
 def test_pipeline_projects_plan_only_for_g_and_keeps_absence_unproven() -> None:
@@ -98,31 +100,31 @@ def test_pipeline_projects_plan_only_for_g_and_keeps_absence_unproven() -> None:
         AnalysisInput(packet=packet, requirements=requirements)
     )
 
-    assert brief.guardrail_scan_plans.schema_version == "guardrail_scan_plan_set.v2"
-    assert len(brief.guardrail_scan_plans.plans) == 2
+    assert brief.closure_scan_plans.schema_version == "closure_scan_plan_set.v2"
+    assert len(brief.closure_scan_plans.plans) == 2
     slices = {
         item.change_map.focus_statement_id: item
         for item in brief.projection.slices
     }
-    assert slices["R1"].guardrail_scan_plan_id is None
-    assert slices["G1"].guardrail_scan_plan_id == "GSP:G1"
-    assert slices["G2"].guardrail_scan_plan_id == "GSP:G2"
+    assert slices["R1"].closure_scan_plan_id is None
+    assert slices["G1"].closure_scan_plan_id == "CSP:G1"
+    assert slices["G2"].closure_scan_plan_id == "CSP:G2"
     boundary = [
         item
         for item in brief.projection_candidates.diagnostics
-        if item.slot == "boundary_fact" and item.focus_statement_id == "G1"
+        if item.slot == "closure_fact" and item.focus_statement_id == "G1"
     ]
     assert boundary[0].state == "provider_unavailable"
-    assert boundary[0].affected_ids == ("GSP:G1",)
+    assert boundary[0].affected_ids == ("CSP:G1",)
     assert "No bounded repository scan provider was configured." in (
         boundary[0].message
     )
 
     serialized = brief.to_dict()
-    assert serialized["guardrail_scan_plans"]["plans"][0]["id"] == "GSP:G1"
+    assert serialized["closure_scan_plans"]["plans"][0]["id"] == "CSP:G1"
     html = render_html(brief)
     assert html.count(
-        '<span class="block-title">Guardrail scan plan</span>'
+        '<span class="block-title">Closure scan plan</span>'
     ) == 2
     assert (
         "repository paths / file_content / symbol_names · head revision"
@@ -131,3 +133,69 @@ def test_pipeline_projects_plan_only_for_g_and_keeps_absence_unproven() -> None:
     assert "No bounded repository scan provider was configured." in html
     assert "No compatibility modules remain." in html
     assert "guardrail satisfied" not in html.casefold()
+
+
+def test_planning_includes_removal_and_only_executable_negative_completion() -> None:
+    source = (SourceRef(label="PR #1", url="https://example.test/pr/1"),)
+    removal = TransformationClaim(
+        id="T1",
+        kind="removal",
+        text="Remove `Requirement.status`.",
+        sources=source,
+    )
+    negative = TransformationClaim(
+        id="CC1",
+        kind="completion_condition",
+        text="No `legacy_writer` remains.",
+        sources=source,
+    )
+    positive = TransformationClaim(
+        id="CC2",
+        kind="completion_condition",
+        text="All tests pass.",
+        sources=source,
+    )
+    contract = TransformationContract(
+        claims=(removal, negative, positive),
+        removal_claim_ids=("T1",),
+        completion_condition_claim_ids=("CC1", "CC2"),
+        source_state="available",
+    )
+    contract.validate_consistency()
+
+    plans = compile_closure_scan_plans((), contract)
+
+    assert [item.statement_id for item in plans.plans] == ["T1", "CC1"]
+    assert plans.plans[0].expectation == "transition"
+    assert plans.plans[0].revision_sides == ("base", "head")
+    assert [item.value for item in plans.plans[0].selectors] == [
+        "Requirement.status"
+    ]
+    assert plans.plans[1].expectation == "absence"
+    assert plans.plans[1].revision_sides == ("head",)
+
+
+def test_removal_selectors_survive_markdown_normalization() -> None:
+    claim = TransformationClaim(
+        id="T1",
+        kind="removal",
+        text=(
+            "Removed src/prismcode/guardrails, GuardrailScan, "
+            "guardrail_scan_provider, and GSP/GSR/GSM identities."
+        ),
+        sources=(SourceRef(label="PR #1"),),
+    )
+    contract = TransformationContract(
+        claims=(claim,),
+        removal_claim_ids=("T1",),
+        source_state="available",
+    )
+
+    plan = compile_closure_scan_plans((), contract).plans[0]
+
+    assert [item.value for item in plan.selectors] == [
+        "src/prismcode/guardrails",
+        "GuardrailScan",
+        "guardrail_scan_provider",
+        "GSP/GSR/GSM",
+    ]
