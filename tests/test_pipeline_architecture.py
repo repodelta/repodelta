@@ -20,6 +20,7 @@ STAGES = (
     "providers",
     "facts",
     "routing",
+    "assessment",
     "convergence",
     "projection",
     "presentation",
@@ -34,6 +35,7 @@ ALLOWED = {
     "providers": {"model", "changes", "providers"},
     "facts": {"model", "changes", "providers", "facts"},
     "routing": {"model", "facts", "providers", "routing"},
+    "assessment": {"model", "assessment"},
     "convergence": {"model", "convergence"},
     "projection": {"model", "providers", "projection"},
     "presentation": {"model", "presentation"},
@@ -124,6 +126,7 @@ def test_presentation_does_not_read_raw_truth_sources() -> None:
         "transformation_contract",
         "observed_transformation",
         "transformation_alignment",
+        "transformation_assessment",
     )
     assert [value for value in forbidden if value in presentation] == []
 

@@ -39,6 +39,11 @@ fixture or GitHub
        -> typed T/CC-to-observed-fact bindings with association reasons
        -> provider-owned T/CC-to-closure-fact bindings
        -> explicit no-eligible-fact / no-association coverage
+  -> deterministic transformation assessment
+       -> exactly one conservative status per typed T/CC claim
+       -> complete revision-aware closure for absence/transition conclusions
+       -> current-head verification identity for execution conclusions
+       -> typed reasons and explicit uncertainty; never merge approval
   -> deterministic typed fact routing
        -> eligibility by fact profile and projection slot
        -> per-R/G claim, changed-anchor, runtime, test, CI, path, closure candidates
@@ -64,6 +69,7 @@ code:
 - [`providers`](../src/prismcode/providers/README.md)
 - [`facts`](../src/prismcode/facts/README.md)
 - [`routing`](../src/prismcode/routing/README.md)
+- [`assessment`](../src/prismcode/assessment/README.md)
 - [`convergence`](../src/prismcode/convergence/README.md)
 - [`projection`](../src/prismcode/projection/README.md)
 - [`presentation`](../src/prismcode/presentation/README.md)
@@ -85,6 +91,9 @@ becoming alternate intake, classification, routing, or presentation paths.
 7. Closure scan plans own execution intent and selectors. Observed scans
    become revision-aware closure facts; neither plans nor zero-match observations prove
    satisfaction or repository-wide absence.
+8. `TransformationAssessment` is the only authority for deterministic T/CC
+   status. Missing association is unverified, local change is not global
+   absence proof, and no status implies acceptance or mergeability.
 
 ## Semantic authority
 
@@ -112,7 +121,8 @@ Each Issue or PR Markdown body is parsed once into canonical
    authority, Production path, Migration, Removed legacy paths, Completion
    conditions, and Uncertainty sections form one PR-authored
    `TransformationContract`. Routing may bind these claims to observed facts,
-   but bindings remain separate from both facts and future assessment.
+   and the assessment stage evaluates those bindings without changing either
+   the authored claims or observed facts.
 
 Deliverables use stable IDs (`R1`, `R2`, ...), negative scope constraints use
 `G1`, objectives use `O1`, scope uses `S1`, and Issue verification expectations

@@ -22,6 +22,7 @@ from prismcode.facts.transformation import reconstruct_observed_transformation
 from prismcode.pipeline import DeterministicAnalyzer
 from prismcode.presentation.html import render_html
 from prismcode.routing.transformation import build_transformation_alignment
+from prismcode.assessment.transformation import assess_transformation
 
 
 def _guardrail(text: str) -> Requirement:
@@ -359,3 +360,14 @@ def test_removal_scan_preserves_base_head_transition_and_path_profiles(
     assert len(alignment.bindings) == 1
     assert alignment.bindings[0].evidence_role == "closure"
     assert alignment.bindings[0].association == "provided_association"
+    assessment = assess_transformation(
+        contract,
+        alignment,
+        catalog,
+        plans,
+        head_sha=head_revision,
+    )
+    assert assessment.claims[0].status == "demonstrated"
+    assert assessment.claims[0].reasons[0].kind == (
+        "closure_transition_observed"
+    )
