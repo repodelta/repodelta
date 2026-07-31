@@ -9,12 +9,16 @@ focus + claims + changed facts → changed-anchor relation region.
 `TransformationAlignment` is the separate typed projection for T/CC claims to
 canonical observed/closure facts; it reuses the same lexical association
 authority without entering R/G routing.
+`TransformationSubjectSelection` is narrower: it is the only authority that
+resolves explicit transformation predicates to canonical changed structural
+identities. It performs exact, revision-aware symbol/path matching and does not
+use claim prose, traverse neighbors, or rank equally valid identities.
 
 ## Input / output
 
 Canonical statements, scan results, `ObservedTransformation`, and
 `EvidenceCatalog` → unselected `ProjectionCandidateSet` plus conclusion-free
-`TransformationAlignment`.
+`TransformationAlignment` and `TransformationSubjectSelection`.
 
 ## Invariants
 
@@ -65,6 +69,10 @@ its provider-owned G association and preserves unavailable/partial coverage.
 Transformation alignment reports `no_eligible_fact` and `no_association`
 without interpreting either as partial, contradicted, or unverified. Current R
 focuses receive no transformation or closure candidates.
+Subject selection covers every explicit predicate value exactly once with one
+or more matches or one `no_structural_match` diagnostic. Ordered-path values
+remain ordered seeds; proving or expanding the connecting topology belongs to
+bounded transformation closure.
 
 ## Extension points
 

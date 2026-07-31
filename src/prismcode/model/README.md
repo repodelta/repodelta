@@ -16,6 +16,8 @@ No transformation. Other stages exchange only the contracts defined here.
 - transformation predicates retain their owning claim, explicit selector kind,
   expected revision state, ordered values, and provenance; missing explicit
   selectors remain typed diagnostics rather than inferred identities;
+- transformation subject selection partitions every predicate selector into
+  exact canonical changed-structure matches or one typed no-match diagnostic;
 - observed transformation references canonical fact identities and Base/Head
   provenance without carrying authored claims or assessment state;
 - transformation alignment references only typed claims and canonical observed

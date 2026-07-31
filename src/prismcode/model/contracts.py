@@ -65,6 +65,9 @@ TransformationPredicateExpectation = Literal[
     "absent_head",
     "verified_head",
 ]
+TransformationSubjectSelectionState = Literal[
+    "no_structural_match",
+]
 TransformationEvidenceRole = Literal[
     "change",
     "relation_change",
@@ -595,6 +598,115 @@ class TransformationPredicateSet:
             raise ValueError(
                 "one claim cannot have predicates and missing-selector diagnostics"
             )
+
+
+@dataclass(frozen=True)
+class TransformationSubjectMatch:
+    """One exact selector value to canonical changed-structure identity."""
+
+    id: str
+    claim_id: str
+    predicate_id: str
+    selector_index: int
+    selector_value: str
+    evidence_id: str
+
+
+@dataclass(frozen=True)
+class TransformationSubjectDiagnostic:
+    id: str
+    claim_id: str
+    predicate_id: str
+    selector_index: int
+    state: TransformationSubjectSelectionState
+    message: str
+
+
+@dataclass(frozen=True)
+class TransformationSubjectSelection:
+    """Canonical explicit-selector matches, before structural closure."""
+
+    matches: tuple[TransformationSubjectMatch, ...] = ()
+    diagnostics: tuple[TransformationSubjectDiagnostic, ...] = ()
+    schema_version: str = "transformation_subject_selection.v1"
+
+    def by_claim_id(self) -> dict[str, tuple[TransformationSubjectMatch, ...]]:
+        return {
+            claim_id: tuple(item for item in self.matches if item.claim_id == claim_id)
+            for claim_id in dict.fromkeys(item.claim_id for item in self.matches)
+        }
+
+    def validate_consistency(
+        self,
+        contract: TransformationContract,
+        observed: ObservedTransformation,
+        evidence_catalog: EvidenceCatalog,
+    ) -> None:
+        if self.schema_version != "transformation_subject_selection.v1":
+            raise ValueError("unsupported transformation subject selection schema")
+        predicates = {
+            item.id: item for item in contract.predicates.predicates
+        }
+        evidence = evidence_catalog.by_id()
+        observed_ids = set(observed.structural_change_evidence_ids)
+        identities = tuple(
+            (item.predicate_id, item.selector_index, item.evidence_id)
+            for item in self.matches
+        )
+        if len(identities) != len(set(identities)):
+            raise ValueError("transformation subject selection contains duplicates")
+        diagnostic_keys = tuple(
+            (item.predicate_id, item.selector_index) for item in self.diagnostics
+        )
+        if len(diagnostic_keys) != len(set(diagnostic_keys)):
+            raise ValueError("transformation subject diagnostics contain duplicates")
+        matched_keys = {
+            (item.predicate_id, item.selector_index) for item in self.matches
+        }
+        if matched_keys & set(diagnostic_keys):
+            raise ValueError("one selector cannot be both matched and diagnostic")
+        expected_keys = {
+            (predicate.id, index)
+            for predicate in predicates.values()
+            for index in range(1, len(predicate.values) + 1)
+        }
+        if matched_keys | set(diagnostic_keys) != expected_keys:
+            raise ValueError(
+                "subject selection must cover every predicate selector once"
+            )
+        for item in self.matches:
+            predicate = predicates.get(item.predicate_id)
+            fact = evidence.get(item.evidence_id)
+            if (
+                predicate is None
+                or item.claim_id != predicate.claim_id
+                or item.selector_index < 1
+                or item.selector_index > len(predicate.values)
+                or item.selector_value != predicate.values[item.selector_index - 1]
+                or fact is None
+                or fact.kind != "structural_change"
+                or item.evidence_id not in observed_ids
+            ):
+                raise ValueError(f"{item.id}: invalid structural subject match")
+            if item.id != (
+                f"TSM:{item.predicate_id}:{item.selector_index}:{item.evidence_id}"
+            ):
+                raise ValueError(f"{item.id}: non-canonical subject match ID")
+        for item in self.diagnostics:
+            predicate = predicates.get(item.predicate_id)
+            if (
+                predicate is None
+                or item.claim_id != predicate.claim_id
+                or item.selector_index < 1
+                or item.selector_index > len(predicate.values)
+                or not item.message.strip()
+                or item.state != "no_structural_match"
+            ):
+                raise ValueError(f"{item.id}: invalid subject diagnostic")
+            if item.id != (
+                f"TSD:{item.predicate_id}:{item.selector_index}:{item.state}"
+            ):
+                raise ValueError(f"{item.id}: non-canonical subject diagnostic ID")
 
 
 @dataclass(frozen=True)
@@ -3192,6 +3304,9 @@ class ReviewBrief:
     claims: tuple[ReviewStatement, ...] = ()
     transformation_contract: TransformationContract = TransformationContract()
     observed_transformation: ObservedTransformation = ObservedTransformation()
+    transformation_subject_selection: TransformationSubjectSelection = (
+        TransformationSubjectSelection()
+    )
     transformation_alignment: TransformationAlignment = TransformationAlignment()
     transformation_assessment: TransformationAssessment = TransformationAssessment()
     closure_scan_plans: ClosureScanPlanSet = ClosureScanPlanSet()
@@ -3206,7 +3321,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v40"
+    schema_version: str = "review_brief.v41"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

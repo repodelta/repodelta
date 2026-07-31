@@ -112,6 +112,13 @@ claim with a typed `no_explicit_selector` diagnostic. PrismCode does not guess
 code identities from prose, and this predicate layer does not itself observe,
 associate, assess, or display repository evidence.
 
+The next deterministic stage resolves each explicit predicate value against
+canonical changed structural identities on its expected Base/Head side. Its
+`TransformationSubjectSelection` retains every exact match and emits one typed
+diagnostic for an unmatched selector; it never guesses from claim prose,
+traverses neighboring graph nodes, or treats a match as verification. This is
+the sole seed boundary for later bounded transformation closure.
+
 Independently, the facts stage reconstructs
 `ReviewBrief.observed_transformation` from canonical diff, Base/Head structural,
 path, replacement-candidate, and current-head verification fact IDs. It never
