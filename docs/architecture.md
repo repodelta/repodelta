@@ -35,6 +35,10 @@ fixture or GitHub
         -> changed anchors + uncovered diff facts
         -> Base/Head symbol, executable relation, and ownership topology
         -> replacement candidates + structural paths + verification observations
+  -> deterministic transformation alignment
+       -> typed T/CC-to-observed-fact bindings with association reasons
+       -> provider-owned T/CC-to-closure-fact bindings
+       -> explicit no-eligible-fact / no-association coverage
   -> deterministic typed fact routing
        -> eligibility by fact profile and projection slot
        -> per-R/G claim, changed-anchor, runtime, test, CI, path, closure candidates
@@ -107,8 +111,8 @@ Each Issue or PR Markdown body is parsed once into canonical
 9. Structured Change, Selected region, Before/After topology, Canonical
    authority, Production path, Migration, Removed legacy paths, Completion
    conditions, and Uncertainty sections form one PR-authored
-   `TransformationContract`. These T/CC claims remain separate from observed
-   repository facts and from any future assessment.
+   `TransformationContract`. Routing may bind these claims to observed facts,
+   but bindings remain separate from both facts and future assessment.
 
 Deliverables use stable IDs (`R1`, `R2`, ...), negative scope constraints use
 `G1`, objectives use `O1`, scope uses `S1`, and Issue verification expectations

@@ -6,11 +6,15 @@ Requirement profiles, fact eligibility, authority-aware association,
 focus-relative evidence roles, and complete per-R/G typed candidate enumeration.
 `FocusAnchorAssociationSet` is the one production authority for the closed
 focus + claims + changed facts → changed-anchor relation region.
+`TransformationAlignment` is the separate typed projection for T/CC claims to
+canonical observed/closure facts; it reuses the same lexical association
+authority without entering R/G routing.
 
 ## Input / output
 
-Canonical statements, scan results, and `EvidenceCatalog` → unselected
-`ProjectionCandidateSet`.
+Canonical statements, scan results, `ObservedTransformation`, and
+`EvidenceCatalog` → unselected `ProjectionCandidateSet` plus conclusion-free
+`TransformationAlignment`.
 
 ## Invariants
 
@@ -58,8 +62,9 @@ score candidates globally, construct final layout, or render diagnostics.
 Produces typed focus/slot source and association coverage diagnostics.
 For G closure coverage it routes only canonical `closure_fact` evidence by
 its provider-owned G association and preserves unavailable/partial coverage.
-Transformation claims remain catalogued facts until the later unified
-verification projection; current R focuses receive no closure candidates.
+Transformation alignment reports `no_eligible_fact` and `no_association`
+without interpreting either as partial, contradicted, or unverified. Current R
+focuses receive no transformation or closure candidates.
 
 ## Extension points
 

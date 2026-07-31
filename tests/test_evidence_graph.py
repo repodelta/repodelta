@@ -165,7 +165,7 @@ def test_catalog_deduplicates_facts_and_links_unchanged_path_symbols() -> None:
     )
     assert verification.verification_status == "completed"
     assert verification.verification_conclusion == "success"
-    assert catalog.schema_version == "evidence_catalog.v16"
+    assert catalog.schema_version == "evidence_catalog.v17"
 
     repeated = build_evidence_catalog(
         packet, parse_changed_files(packet.changed_files), structural
@@ -187,11 +187,11 @@ def test_review_brief_serializes_one_canonical_catalog() -> None:
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
     serialized = brief.to_dict()
 
-    assert brief.schema_version == "review_brief.v37"
+    assert brief.schema_version == "review_brief.v38"
     assert serialized["observed_transformation"]["schema_version"] == (
         "observed_transformation.v1"
     )
-    assert serialized["evidence_catalog"]["schema_version"] == "evidence_catalog.v16"
+    assert serialized["evidence_catalog"]["schema_version"] == "evidence_catalog.v17"
     assert serialized["candidate_convergence"]["schema_version"] == (
         "candidate_convergence.v7"
     )
