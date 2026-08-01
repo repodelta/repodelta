@@ -1,0 +1,252 @@
+from __future__ import annotations
+
+from prismcode.convergence.transformation import (
+    TransformationClosurePolicy,
+    converge_transformation_closure,
+)
+from prismcode.model.contracts import (
+    AnalysisInput,
+    EvidenceCatalog,
+    EvidenceItem,
+    ReviewSourcePacket,
+    SourceRef,
+    StructuralChangeIdentity,
+    StructuralOwnershipChangeIdentity,
+    StructuralRelationChangeIdentity,
+    TransformationSubjectMatch,
+    TransformationSubjectSelection,
+)
+from prismcode.pipeline import DeterministicAnalyzer
+from prismcode.semantics.criteria import extract_review_semantics
+
+
+def _contract():
+    return extract_review_semantics(
+        issue_body=None,
+        issue_source=None,
+        pr_body=(
+            "## Selected region\n- `Adapter`\n\n"
+            "## Uncertainty\n- External behavior is unknown.\n"
+        ),
+        pr_source=SourceRef(label="PR #10"),
+        pr_title="Close transformation structure",
+    ).transformation_contract
+
+
+def _symbol(identity: str) -> EvidenceItem:
+    return EvidenceItem(
+        id=f"E:symbol:{identity}",
+        summary=identity,
+        kind="symbol",
+        classification="code",
+        profile="production",
+        authority="structural_provider",
+        revision_side="head",
+        operation="unchanged",
+        role="runtime_context",
+        metadata={"review_symbol_id": identity},
+    )
+
+
+def _path(identity: str, *review_ids: str) -> EvidenceItem:
+    return EvidenceItem(
+        id=identity,
+        summary=identity,
+        kind="structural_path",
+        classification="code",
+        profile="structural_path",
+        authority="structural_provider",
+        revision_side="head",
+        operation="observed",
+        role="structural_path",
+        structural_path_ids=(identity,),
+        metadata={
+            "depth": len(review_ids) - 1,
+            "steps": tuple(
+                {
+                    "source_evidence_id": f"E:symbol:{source}",
+                    "target_evidence_id": f"E:symbol:{target}",
+                    "relation": "calls",
+                    "direction": "outgoing",
+                }
+                for source, target in zip(
+                    review_ids,
+                    review_ids[1:],
+                    strict=False,
+                )
+            ),
+        },
+    )
+
+
+def _fixture():
+    contract = _contract()
+    predicate = contract.predicates.predicates[0]
+    seed = EvidenceItem(
+        id="E:change:adapter",
+        summary="Modified Adapter",
+        kind="structural_change",
+        classification="code",
+        profile="production",
+        authority="structural_provider",
+        revision_side="review",
+        operation="modified",
+        role="changed_anchor",
+        changed=True,
+        structural_path_ids=("E:path:service", "E:path:store", "E:path:deep"),
+        structural_change=StructuralChangeIdentity(review_symbol_id="adapter"),
+    )
+    paths = (
+        _path("E:path:service", "adapter", "service"),
+        _path("E:path:store", "adapter", "service", "store"),
+        _path("E:path:deep", "adapter", "one", "two", "three", "four"),
+    )
+    relation_service = EvidenceItem(
+        id="E:relation:adapter-service",
+        summary="adapter calls service",
+        kind="structural_relation_change",
+        classification="code",
+        profile="structural_path",
+        authority="structural_provider",
+        revision_side="review",
+        operation="retained",
+        role="structural_relation",
+        structural_path_ids=("E:path:service",),
+        structural_relation_change=StructuralRelationChangeIdentity(
+            source_review_symbol_id="adapter",
+            target_review_symbol_id="service",
+            relation="calls",
+            head_path_evidence_ids=("E:path:service",),
+        ),
+    )
+    relation_store = EvidenceItem(
+        id="E:relation:service-store",
+        summary="service calls store",
+        kind="structural_relation_change",
+        classification="code",
+        profile="structural_path",
+        authority="structural_provider",
+        revision_side="review",
+        operation="retained",
+        role="structural_relation",
+        structural_path_ids=("E:path:store",),
+        structural_relation_change=StructuralRelationChangeIdentity(
+            source_review_symbol_id="service",
+            target_review_symbol_id="store",
+            relation="calls",
+            head_path_evidence_ids=("E:path:store",),
+        ),
+    )
+    ownership = EvidenceItem(
+        id="E:ownership:module-adapter",
+        summary="module contains adapter",
+        kind="structural_ownership_change",
+        classification="code",
+        profile="production",
+        authority="structural_provider",
+        revision_side="review",
+        operation="retained",
+        role="structural_ownership",
+        structural_ownership_change=StructuralOwnershipChangeIdentity(
+            parent_review_symbol_id="module",
+            child_review_symbol_id="adapter",
+            head_ownership_evidence_id="E:ownership:head",
+        ),
+    )
+    symbols = tuple(
+        _symbol(identity)
+        for identity in ("adapter", "service", "store", "one", "two", "three", "four")
+    )
+    catalog = EvidenceCatalog(
+        items=(
+            seed,
+            *symbols,
+            *paths,
+            relation_service,
+            relation_store,
+            ownership,
+        )
+    )
+    match = TransformationSubjectMatch(
+        id=f"TSM:{predicate.id}:1:{seed.id}",
+        claim_id=predicate.claim_id,
+        predicate_id=predicate.id,
+        selector_index=1,
+        selector_value=predicate.values[0],
+        evidence_id=seed.id,
+    )
+    return contract, TransformationSubjectSelection(matches=(match,)), catalog
+
+
+def test_closure_reuses_collected_two_to_three_hop_paths_and_ownership() -> None:
+    contract, selection, catalog = _fixture()
+
+    closure = converge_transformation_closure(contract, selection, catalog)
+    group = closure.by_claim_id()["T1"]
+
+    assert group.seed_evidence_ids == ("E:change:adapter",)
+    assert group.path_evidence_ids == ("E:path:service", "E:path:store")
+    assert group.deferred_path_evidence_ids == ("E:path:deep",)
+    assert group.relation_change_evidence_ids == (
+        "E:relation:adapter-service",
+        "E:relation:service-store",
+    )
+    assert group.ownership_change_evidence_ids == (
+        "E:ownership:module-adapter",
+    )
+    assert set(group.review_symbol_ids) == {"adapter", "service", "store", "module"}
+    assert closure.diagnostics[0].affected_evidence_ids == ("E:path:deep",)
+    assert closure.by_claim_id()["T2"].seed_evidence_ids == ()
+
+
+def test_closure_truncates_only_at_complete_path_identity_boundaries() -> None:
+    contract, selection, catalog = _fixture()
+
+    closure = converge_transformation_closure(
+        contract,
+        selection,
+        catalog,
+        policy=TransformationClosurePolicy(max_path_identities=1),
+    )
+    group = closure.by_claim_id()["T1"]
+
+    assert group.path_evidence_ids == ("E:path:service",)
+    assert group.deferred_path_evidence_ids == (
+        "E:path:store",
+        "E:path:deep",
+    )
+    assert group.relation_change_evidence_ids == (
+        "E:relation:adapter-service",
+    )
+    assert closure.diagnostics[0].state == "budget_truncated"
+
+
+def test_pipeline_builds_transformation_closure_once(monkeypatch) -> None:
+    import prismcode.pipeline as pipeline
+
+    calls = 0
+    real_converge = pipeline.converge_transformation_closure
+
+    def counting_converge(contract, selection, catalog):
+        nonlocal calls
+        calls += 1
+        return real_converge(contract, selection, catalog)
+
+    monkeypatch.setattr(
+        pipeline,
+        "converge_transformation_closure",
+        counting_converge,
+    )
+    packet = ReviewSourcePacket(
+        repository="acme/widget",
+        pull_request=10,
+        title="Close transformation structure",
+        source_records=(),
+    ).with_revision()
+
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+
+    assert calls == 1
+    assert brief.transformation_structural_closure.schema_version == (
+        "transformation_structural_closure.v1"
+    )

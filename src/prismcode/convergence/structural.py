@@ -3,6 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from prismcode.convergence.ordering import relation_key
+from prismcode.model.structural_refs import (
+    ordered_path_review_ids,
+    path_review_ids,
+    review_symbol_id,
+)
 from prismcode.model.contracts import (
     EvidenceItem,
     ProjectionDiagnostic,
@@ -59,7 +64,7 @@ def converge_structural_closure(
     selected_review_ids = {
         review_id
         for anchor_id in selected_anchor_ids
-        if (review_id := _review_symbol_id(evidence.get(anchor_id))) is not None
+        if (review_id := review_symbol_id(evidence.get(anchor_id))) is not None
     }
     backbone_options: dict[
         tuple[str, str],
@@ -257,11 +262,11 @@ def converge_structural_closure(
     relevant_review_ids.update(
         review_id
         for target_id in selected_contexts
-        if (review_id := _review_symbol_id(evidence.get(target_id))) is not None
+        if (review_id := review_symbol_id(evidence.get(target_id))) is not None
     )
     for path in selected_paths.values():
         relevant_review_ids.update(
-            _path_review_ids(evidence.get(path.target_id), evidence)
+            path_review_ids(evidence.get(path.target_id), evidence)
         )
     relation_change_evidence_ids = tuple(
         item.id
@@ -310,61 +315,12 @@ def _changed_connections(
 ) -> tuple[tuple[str, str], ...]:
     ordered = tuple(
         review_id
-        for review_id in _ordered_path_review_ids(path, evidence)
+        for review_id in ordered_path_review_ids(path, evidence)
         if review_id in selected_review_ids
     )
     return tuple(
         dict.fromkeys(zip(ordered, ordered[1:], strict=False))
     )
-
-
-def _ordered_path_review_ids(
-    path: EvidenceItem,
-    evidence: dict[str, EvidenceItem],
-) -> tuple[str, ...]:
-    steps = tuple(path.metadata.get("steps", ()))
-    if not steps:
-        return ()
-    evidence_ids = (
-        steps[0].get("source_evidence_id"),
-        *(step.get("target_evidence_id") for step in steps),
-    )
-    return tuple(
-        review_id
-        for evidence_id in evidence_ids
-        if evidence_id is not None
-        if (review_id := _review_symbol_id(evidence.get(str(evidence_id))))
-        is not None
-    )
-
-
-def _path_review_ids(
-    path: EvidenceItem | None,
-    evidence: dict[str, EvidenceItem],
-) -> set[str]:
-    if path is None:
-        return set()
-    result = set()
-    for step in path.metadata.get("steps", ()):
-        for endpoint in ("source_evidence_id", "target_evidence_id"):
-            endpoint_id = step.get(endpoint)
-            review_id = _review_symbol_id(
-                evidence.get(str(endpoint_id)) if endpoint_id is not None else None
-            )
-            if review_id is not None:
-                result.add(review_id)
-    return result
-
-
-def _review_symbol_id(item: EvidenceItem | None) -> str | None:
-    if item is None:
-        return None
-    if item.kind == "structural_change" and item.structural_change is not None:
-        return item.structural_change.review_symbol_id
-    if item.kind == "symbol":
-        value = item.metadata.get("review_symbol_id")
-        return str(value) if value else None
-    return None
 
 
 def _path_depth(

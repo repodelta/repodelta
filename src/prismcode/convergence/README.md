@@ -9,6 +9,9 @@ selection, typed set convergence, and bounded structural evidence subgraphs.
 
 `ProjectionCandidateSet` → reference-only `CandidateConvergence`.
 
+`TransformationContract` + `TransformationSubjectSelection` +
+`EvidenceCatalog` → reference-only `TransformationStructuralClosure`.
+
 ## Invariants
 
 Candidates never compete across R/G or slots. Claims are compact competitive
@@ -66,6 +69,14 @@ conflicting outcomes for one verification identity. Multiple relevant
 anchor, path, context, or check identities never produce semantic ambiguity.
 Support omission is a deterministic presentation projection over already
 selected facts; it is not provider or convergence truncation.
+
+Transformation structural closure is a separate pre-alignment authority. It
+starts only from exact subject-selection seeds, reuses the provider's
+already-collected structural paths, retains complete path identities within a
+three-hop and identity safety boundary, and attaches the corresponding
+canonical relation-change and bounded ownership-change facts. It never calls a
+provider or performs another BFS. Deferred whole paths remain explicit coverage
+diagnostics rather than being partially represented.
 
 ## Extension points
 
