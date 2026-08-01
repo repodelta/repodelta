@@ -938,6 +938,81 @@ def test_head_only_file_symbol_retains_modified_file_status() -> None:
     assert structural_change.operation == "modified"
 
 
+@pytest.mark.parametrize(
+    ("status", "base_path", "head_path", "patch", "revision_side"),
+    (
+        (
+            "added",
+            None,
+            "src/service.py",
+            "@@ -0,0 +1 @@\n+def run(): pass\n",
+            "head",
+        ),
+        (
+            "removed",
+            "src/service.py",
+            None,
+            "@@ -1 +0,0 @@\n-def run(): pass\n",
+            "base",
+        ),
+    ),
+)
+def test_file_existence_status_applies_to_every_structural_symbol(
+    status: str,
+    base_path: str | None,
+    head_path: str | None,
+    patch: str,
+    revision_side: str,
+) -> None:
+    packet = ReviewSourcePacket(
+        repository="acme/widget",
+        pull_request=8,
+        title=f"{status.title()} service",
+        source_records=(),
+        head_sha="head123",
+        base_sha="base123",
+        changed_files=(
+            ChangedFile(
+                base_path=base_path,
+                head_path=head_path,
+                status=status,
+                patch=patch,
+            ),
+        ),
+    ).with_revision()
+    changes = parse_changed_files(packet.changed_files)
+    hunk_id = changes.hunks[0].id
+    symbol = _symbol(f"{revision_side}:run", "run")
+    head_symbols = (symbol,) if revision_side == "head" else ()
+    base_symbols = (symbol,) if revision_side == "base" else ()
+    graph = StructuralGraphCollection(
+        revisions=(
+            _revision_result(
+                "head",
+                hunk_id,
+                *head_symbols,
+            ),
+            _revision_result(
+                "base",
+                hunk_id,
+                *base_symbols,
+            ),
+        )
+    )
+
+    brief = DeterministicAnalyzer().analyze(
+        AnalysisInput(packet=packet, changes=changes, structural_graph=graph)
+    )
+    structural_change = next(
+        item
+        for item in brief.evidence_catalog.items
+        if item.kind == "structural_change"
+    )
+
+    assert structural_change.metadata["symbol_kind"] == "function"
+    assert structural_change.operation == status
+
+
 def test_unmapped_opposite_revision_does_not_prove_symbol_addition() -> None:
     packet = _packet(
         "@@ -2 +2 @@\n"
