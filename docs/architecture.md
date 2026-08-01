@@ -36,6 +36,10 @@ fixture or GitHub
         -> changed anchors + uncovered diff facts
         -> Base/Head symbol, executable relation, and ownership topology
         -> replacement candidates + structural paths + verification observations
+  -> canonical transformation structural subject selection
+       -> explicit selector values only; never claim-prose inference
+       -> exact Base/Head-aware symbol and repository-path matches
+       -> complete match/no-match coverage without traversal or ranking
   -> deterministic transformation alignment
        -> typed T/CC-to-observed-fact bindings with association reasons
        -> provider-owned T/CC-to-closure-fact bindings
