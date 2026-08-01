@@ -30,8 +30,10 @@ revision. Missing, stale, partial, or failed coverage remains uncertainty.
 Structural change operations come from canonical base/head presence when every
 associated replacement relation has complete opposite-revision directional
 line mapping. Mapping another relation in the same hunk is never absence proof.
-A file symbol follows the GitHub changed-file status, so a module-level overlap
-cannot turn a modified file into an added file. Without applicable
+Every symbol inside a GitHub-declared added or removed file inherits that
+revision-existence fact even when patch text or opposite traversal is
+incomplete. A file symbol in a modified file remains modified, so a module-level
+overlap cannot turn that file into an addition. Without applicable
 opposite-revision identity or complete absence proof, a one-sided symbol is
 explicitly `unresolved`; downstream stages never reconstruct or guess its
 revision delta.

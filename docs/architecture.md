@@ -244,8 +244,10 @@ signatures. Structural provider anchors are review-level change identities
 that reference their optional base/head symbol facts; the revision facts are
 not routed independently. With complete opposite-revision directional line
 mapping for every associated replacement relation, exact symbol presence is the
-structural change operation authority: head-only is added, base-only is removed,
-and presence on both sides is modified. Mapping an unrelated relation in the
+structural change operation authority: every symbol in a GitHub-declared added
+or removed file inherits that file-existence fact; otherwise head-only is added,
+base-only is removed, and presence on both sides is modified. Mapping an
+unrelated relation in the
 same hunk is never absence proof. File symbols retain GitHub changed-file status
 so module-level overlap does not relabel a modified file as added. Without
 applicable opposite mapping, directional hunk provenance supplies the bounded

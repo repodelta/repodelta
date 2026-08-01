@@ -571,23 +571,31 @@ def _structural_change_operation(
 
     exemplar = head or base
     assert exemplar is not None
+    changed_file = next(
+        (
+            item
+            for item in changed_files
+            if (
+                item.head_path == exemplar.metadata["path"]
+                if head is not None
+                else item.base_path == exemplar.metadata["path"]
+            )
+        ),
+        None,
+    )
+    if (
+        changed_file is not None
+        and changed_file.status == "added"
+        and head is not None
+    ):
+        return "added"
+    if (
+        changed_file is not None
+        and changed_file.status == "removed"
+        and base is not None
+    ):
+        return "removed"
     if exemplar.metadata["symbol_kind"] == "file":
-        changed_file = next(
-            (
-                item
-                for item in changed_files
-                if (
-                    item.head_path == exemplar.metadata["path"]
-                    if head is not None
-                    else item.base_path == exemplar.metadata["path"]
-                )
-            ),
-            None,
-        )
-        if changed_file is not None and changed_file.status == "added" and head is not None:
-            return "added"
-        if changed_file is not None and changed_file.status == "removed" and base is not None:
-            return "removed"
         return "modified"
 
     relation_ids = exemplar.change_relation_ids
