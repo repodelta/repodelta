@@ -20,6 +20,7 @@ from prismcode.routing.transformation import build_transformation_alignment
 from prismcode.routing.transformation_subjects import select_transformation_subjects
 from prismcode.assessment.transformation import assess_transformation
 from prismcode.convergence.core import converge_candidates
+from prismcode.convergence.transformation import converge_transformation_closure
 from prismcode.projection.build import build_review_projection
 from prismcode.projection.overview import (
     build_review_overview,
@@ -71,6 +72,11 @@ class DeterministicAnalyzer:
         transformation_subject_selection = select_transformation_subjects(
             semantics.transformation_contract,
             observed_transformation,
+            evidence_catalog,
+        )
+        transformation_structural_closure = converge_transformation_closure(
+            semantics.transformation_contract,
+            transformation_subject_selection,
             evidence_catalog,
         )
         transformation_alignment = build_transformation_alignment(
@@ -141,6 +147,7 @@ class DeterministicAnalyzer:
             transformation_contract=semantics.transformation_contract,
             observed_transformation=observed_transformation,
             transformation_subject_selection=transformation_subject_selection,
+            transformation_structural_closure=transformation_structural_closure,
             transformation_alignment=transformation_alignment,
             transformation_assessment=transformation_assessment,
             closure_scan_plans=closure_scan_plans,

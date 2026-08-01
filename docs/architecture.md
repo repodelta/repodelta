@@ -40,6 +40,11 @@ fixture or GitHub
        -> explicit selector values only; never claim-prose inference
        -> exact Base/Head-aware symbol and repository-path matches
        -> complete match/no-match coverage without traversal or ranking
+  -> bounded transformation structural closure
+       -> already-collected paths reachable from selected subject identities
+       -> whole path identities within three-hop and review safety limits
+       -> canonical relation and bounded ownership change support
+       -> explicit deferral diagnostics; no second provider traversal
   -> deterministic transformation alignment
        -> typed T/CC-to-observed-fact bindings with association reasons
        -> provider-owned T/CC-to-closure-fact bindings

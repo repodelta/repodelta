@@ -119,6 +119,13 @@ diagnostic for an unmatched selector; it never guesses from claim prose,
 traverses neighboring graph nodes, or treats a match as verification. This is
 the sole seed boundary for later bounded transformation closure.
 
+Bounded transformation closure then reuses only structural paths already
+collected by the Codegraph provider for those selected seeds. It retains whole
+path identities at up to three hops, adds their canonical relation and ownership
+change facts, and records an explicit diagnostic when the identity safety limit
+defers support. This stage does not invoke Codegraph, perform another graph
+traversal, widen selection from prose, or decide presentation topology.
+
 Independently, the facts stage reconstructs
 `ReviewBrief.observed_transformation` from canonical diff, Base/Head structural,
 path, replacement-candidate, and current-head verification fact IDs. It never

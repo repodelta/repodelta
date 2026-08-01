@@ -68,6 +68,7 @@ TransformationPredicateExpectation = Literal[
 TransformationSubjectSelectionState = Literal[
     "no_structural_match",
 ]
+TransformationStructuralClosureState = Literal["budget_truncated"]
 TransformationEvidenceRole = Literal[
     "change",
     "relation_change",
@@ -707,6 +708,165 @@ class TransformationSubjectSelection:
                 f"TSD:{item.predicate_id}:{item.selector_index}:{item.state}"
             ):
                 raise ValueError(f"{item.id}: non-canonical subject diagnostic ID")
+
+
+@dataclass(frozen=True)
+class TransformationStructuralClosureGroup:
+    """Collected structural support reachable from one claim's selected seeds."""
+
+    claim_id: str
+    subject_match_ids: tuple[str, ...] = ()
+    seed_evidence_ids: tuple[str, ...] = ()
+    path_evidence_ids: tuple[str, ...] = ()
+    deferred_path_evidence_ids: tuple[str, ...] = ()
+    review_symbol_ids: tuple[str, ...] = ()
+    relation_change_evidence_ids: tuple[str, ...] = ()
+    ownership_change_evidence_ids: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class TransformationStructuralClosureDiagnostic:
+    id: str
+    claim_id: str
+    state: TransformationStructuralClosureState
+    message: str
+    affected_evidence_ids: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class TransformationStructuralClosure:
+    groups: tuple[TransformationStructuralClosureGroup, ...] = ()
+    diagnostics: tuple[TransformationStructuralClosureDiagnostic, ...] = ()
+    schema_version: str = "transformation_structural_closure.v1"
+
+    def by_claim_id(self) -> dict[str, TransformationStructuralClosureGroup]:
+        return {item.claim_id: item for item in self.groups}
+
+    def validate_consistency(
+        self,
+        contract: TransformationContract,
+        selection: TransformationSubjectSelection,
+        evidence_catalog: EvidenceCatalog,
+    ) -> None:
+        if self.schema_version != "transformation_structural_closure.v1":
+            raise ValueError("unsupported transformation structural closure schema")
+        claim_ids = tuple(item.id for item in contract.claims)
+        if tuple(item.claim_id for item in self.groups) != claim_ids:
+            raise ValueError("transformation closure must preserve every claim once")
+        evidence = evidence_catalog.by_id()
+        matches = {item.id: item for item in selection.matches}
+        diagnostics_by_claim = {item.claim_id: item for item in self.diagnostics}
+        if len(diagnostics_by_claim) != len(self.diagnostics):
+            raise ValueError("transformation closure contains duplicate diagnostics")
+        for group in self.groups:
+            expected_matches = tuple(
+                item.id for item in selection.matches if item.claim_id == group.claim_id
+            )
+            if group.subject_match_ids != expected_matches:
+                raise ValueError(f"{group.claim_id}: closure match identities conflict")
+            expected_seeds = tuple(
+                dict.fromkeys(matches[item].evidence_id for item in expected_matches)
+            )
+            if group.seed_evidence_ids != expected_seeds:
+                raise ValueError(f"{group.claim_id}: closure seed identities conflict")
+            selected_paths = set(group.path_evidence_ids)
+            deferred_paths = set(group.deferred_path_evidence_ids)
+            if (
+                len(selected_paths) != len(group.path_evidence_ids)
+                or len(deferred_paths) != len(group.deferred_path_evidence_ids)
+                or selected_paths & deferred_paths
+            ):
+                raise ValueError(f"{group.claim_id}: invalid closure path partition")
+            candidate_paths = {
+                path_id
+                for seed_id in group.seed_evidence_ids
+                for path_id in evidence[seed_id].structural_path_ids
+                if path_id in evidence and evidence[path_id].kind == "structural_path"
+            }
+            if selected_paths | deferred_paths != candidate_paths:
+                raise ValueError(f"{group.claim_id}: closure paths are incomplete")
+            review_ids = set(group.review_symbol_ids)
+            if len(review_ids) != len(group.review_symbol_ids):
+                raise ValueError(f"{group.claim_id}: duplicate closure symbol identity")
+            expected_relation_ids = {
+                item.id
+                for item in evidence.values()
+                if item.structural_relation_change is not None
+                and selected_paths
+                & {
+                    *item.structural_path_ids,
+                    *item.structural_relation_change.base_path_evidence_ids,
+                    *item.structural_relation_change.head_path_evidence_ids,
+                }
+            }
+            if set(group.relation_change_evidence_ids) != expected_relation_ids:
+                raise ValueError(
+                    f"{group.claim_id}: closure relation evidence is incomplete"
+                )
+            for field_name, ids, expected_kind in (
+                (
+                    "relation",
+                    group.relation_change_evidence_ids,
+                    "structural_relation_change",
+                ),
+                (
+                    "ownership",
+                    group.ownership_change_evidence_ids,
+                    "structural_ownership_change",
+                ),
+            ):
+                if len(ids) != len(set(ids)) or any(
+                    item_id not in evidence or evidence[item_id].kind != expected_kind
+                    for item_id in ids
+                ):
+                    raise ValueError(
+                        f"{group.claim_id}: invalid closure {field_name} evidence"
+                    )
+            relation_endpoints = {
+                endpoint
+                for item_id in group.relation_change_evidence_ids
+                for endpoint in (
+                    evidence[
+                        item_id
+                    ].structural_relation_change.source_review_symbol_id,
+                    evidence[
+                        item_id
+                    ].structural_relation_change.target_review_symbol_id,
+                )
+                if evidence[item_id].structural_relation_change is not None
+            }
+            ownership_endpoints = {
+                endpoint
+                for item_id in group.ownership_change_evidence_ids
+                for endpoint in (
+                    evidence[
+                        item_id
+                    ].structural_ownership_change.parent_review_symbol_id,
+                    evidence[
+                        item_id
+                    ].structural_ownership_change.child_review_symbol_id,
+                )
+                if evidence[item_id].structural_ownership_change is not None
+            }
+            if not (relation_endpoints | ownership_endpoints) <= review_ids:
+                raise ValueError(
+                    f"{group.claim_id}: closure endpoints are missing symbols"
+                )
+            diagnostic = diagnostics_by_claim.get(group.claim_id)
+            if bool(group.deferred_path_evidence_ids) != bool(diagnostic):
+                raise ValueError(
+                    f"{group.claim_id}: deferred closure paths require one diagnostic"
+                )
+        for item in self.diagnostics:
+            if (
+                item.id != f"TSCD:{item.claim_id}:{item.state}"
+                or item.state != "budget_truncated"
+                or not item.message.strip()
+                or item.claim_id not in claim_ids
+                or item.affected_evidence_ids
+                != self.by_claim_id()[item.claim_id].deferred_path_evidence_ids
+            ):
+                raise ValueError(f"{item.id}: invalid transformation closure diagnostic")
 
 
 @dataclass(frozen=True)
@@ -3307,6 +3467,9 @@ class ReviewBrief:
     transformation_subject_selection: TransformationSubjectSelection = (
         TransformationSubjectSelection()
     )
+    transformation_structural_closure: TransformationStructuralClosure = (
+        TransformationStructuralClosure()
+    )
     transformation_alignment: TransformationAlignment = TransformationAlignment()
     transformation_assessment: TransformationAssessment = TransformationAssessment()
     closure_scan_plans: ClosureScanPlanSet = ClosureScanPlanSet()
@@ -3321,7 +3484,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v41"
+    schema_version: str = "review_brief.v42"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

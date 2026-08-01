@@ -30,6 +30,7 @@ from prismcode.model.contracts import (
     TransformationAssessment,
     TransformationContract,
 )
+from prismcode.model.structural_refs import review_symbol_id
 from prismcode.projection.structural_groups import (
     project_structural_relation_groups,
 )
@@ -513,7 +514,7 @@ def _structural_focus_overlay(
                     f"selected {relation.slot} relation references missing evidence: "
                     f"{relation.id}"
                 )
-            review_id = _review_symbol_id(fact)
+            review_id = review_symbol_id(fact)
             if review_id is None:
                 continue
             relation_ids_by_review_id.setdefault(review_id, []).append(relation.id)
@@ -719,8 +720,8 @@ def _placements_by_child(
             continue
         parent = evidence.get(identity.parent_symbol_evidence_id)
         child = evidence.get(identity.child_symbol_evidence_id)
-        parent_review_id = _review_symbol_id(parent) if parent is not None else None
-        child_review_id = _review_symbol_id(child) if child is not None else None
+        parent_review_id = review_symbol_id(parent)
+        child_review_id = review_symbol_id(child)
         if parent_review_id is None or child_review_id is None:
             raise ValueError(
                 f"{item.id}: structural ownership references symbols without "
@@ -756,21 +757,12 @@ def _placements_by_child(
     )
 
 
-def _review_symbol_id(item: EvidenceItem) -> str | None:
-    if item.kind == "structural_change" and item.structural_change is not None:
-        return item.structural_change.review_symbol_id
-    if item.kind == "symbol":
-        value = item.metadata.get("review_symbol_id")
-        return str(value) if value else None
-    return None
-
-
 def _symbols_by_review_id(
     evidence: dict[str, EvidenceItem],
 ) -> dict[str, tuple[EvidenceItem, ...]]:
     grouped: dict[str, list[EvidenceItem]] = {}
     for item in evidence.values():
-        review_id = _review_symbol_id(item)
+        review_id = review_symbol_id(item)
         if item.kind == "symbol" and review_id is not None:
             grouped.setdefault(review_id, []).append(item)
     return {

@@ -18,6 +18,9 @@ No transformation. Other stages exchange only the contracts defined here.
   selectors remain typed diagnostics rather than inferred identities;
 - transformation subject selection partitions every predicate selector into
   exact canonical changed-structure matches or one typed no-match diagnostic;
+- transformation structural closure preserves every T/CC claim once, partitions
+  every seed-owned collected path into retained or explicitly deferred
+  identities, and references only canonical relation and ownership facts;
 - observed transformation references canonical fact identities and Base/Head
   provenance without carrying authored claims or assessment state;
 - transformation alignment references only typed claims and canonical observed
@@ -44,3 +47,5 @@ Contract violations raise `ValueError` at the stage boundary.
 ## Extension points
 
 Add versioned fields here only when one canonical stage owns their value.
+Shared canonical structural symbol/path reference accessors also live here so
+facts, convergence, and projection do not recreate identity rules.
