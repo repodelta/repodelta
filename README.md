@@ -255,15 +255,20 @@ future presentation work.
 
 The CLI may run from anywhere. The supplied local repository may be on another
 branch or have uncommitted work because analysis never reads that working tree;
-all review facts come from the private exact-revision roots. Guardrail plans own their
-deterministic selectors; the scanner inspects eligible paths and text under
+all review facts come from the private exact-revision roots. Guardrail and
+removal plans own canonical target predicates with optional path scopes; the
+scanner inspects each target only inside its declared scope under
 explicit file, byte, and match limits and reports per-surface coverage. It
-scans only tracked head files, excluding untracked checkout content and
+consumes the typed selectors produced by the one-pass PR semantics stage rather
+than reparsing normalized claim prose, and scans only tracked head files,
+excluding untracked checkout content and
 symlink targets, and refuses a tracked working tree that differs from HEAD.
 Path, file-content, and lexical symbol-name coverage are recorded separately;
 truncation retains the exact boundary kind, limit, and observed count. A
 zero-match observation is never presented as guardrail satisfaction or
-repository-wide absence.
+repository-wide absence. A scoped removal requires an exact target and complete
+Base/Head observations; the continued existence of the containing file does not
+contradict removal of a symbol inside it.
 
 Use `--verbose` for individual structural diagnostics, or
 `--no-structural-graph` to skip the probe explicitly. Missing, stale, partial,

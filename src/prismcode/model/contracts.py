@@ -58,6 +58,7 @@ TransformationPredicateSelectorKind = Literal[
     "repository_path",
     "ordered_path",
 ]
+TransformationPredicateRole = Literal["target", "path_scope"]
 TransformationPredicateExpectation = Literal[
     "reference",
     "present_base",
@@ -223,7 +224,7 @@ StructuralCoverageState = Literal[
 ]
 ClosureScanSurface = Literal["paths", "file_content", "symbol_names"]
 ClosureScanState = Literal["complete", "partial", "unavailable"]
-ClosureSelectorKind = Literal["identifier", "phrase"]
+ClosureSelectorKind = Literal["identifier", "path", "phrase"]
 ClosureStatementKind = Literal[
     "guardrail",
     "removal",
@@ -522,6 +523,7 @@ class TransformationPredicate:
     selector_kind: TransformationPredicateSelectorKind
     values: tuple[str, ...]
     expectation: TransformationPredicateExpectation
+    role: TransformationPredicateRole = "target"
     sources: tuple[SourceRef, ...] = ()
 
     def validate_consistency(self) -> None:
@@ -539,6 +541,8 @@ class TransformationPredicate:
             raise ValueError(f"{self.id}: predicate values must be unique")
         if self.selector_kind == "ordered_path" and len(self.values) < 2:
             raise ValueError(f"{self.id}: ordered path requires two selectors")
+        if self.role == "path_scope" and self.selector_kind != "repository_path":
+            raise ValueError(f"{self.id}: path scope requires repository path")
         if self.selector_kind != "ordered_path" and len(self.values) != 1:
             raise ValueError(f"{self.id}: scalar predicate requires one selector")
         if not self.sources:
@@ -563,7 +567,7 @@ class TransformationPredicateDiagnostic:
 class TransformationPredicateSet:
     predicates: tuple[TransformationPredicate, ...] = ()
     diagnostics: tuple[TransformationPredicateDiagnostic, ...] = ()
-    schema_version: str = "transformation_predicate_set.v1"
+    schema_version: str = "transformation_predicate_set.v2"
 
     def by_claim_id(self) -> dict[str, tuple[TransformationPredicate, ...]]:
         return {
@@ -574,7 +578,7 @@ class TransformationPredicateSet:
         }
 
     def validate_consistency(self, claim_ids: set[str]) -> None:
-        if self.schema_version != "transformation_predicate_set.v1":
+        if self.schema_version != "transformation_predicate_set.v2":
             raise ValueError("unsupported transformation predicate schema")
         ids = tuple(item.id for item in self.predicates)
         diagnostic_ids = tuple(item.id for item in self.diagnostics)
@@ -646,7 +650,9 @@ class TransformationSubjectSelection:
         if self.schema_version != "transformation_subject_selection.v1":
             raise ValueError("unsupported transformation subject selection schema")
         predicates = {
-            item.id: item for item in contract.predicates.predicates
+            item.id: item
+            for item in contract.predicates.predicates
+            if item.role == "target"
         }
         evidence = evidence_catalog.by_id()
         observed_ids = set(observed.structural_change_evidence_ids)
@@ -907,7 +913,7 @@ class TransformationContract:
     completion_condition_claim_ids: tuple[str, ...] = ()
     uncertainty_claim_ids: tuple[str, ...] = ()
     source_state: TransformationContractSourceState = "source_absent"
-    schema_version: str = "transformation_contract.v2"
+    schema_version: str = "transformation_contract.v3"
 
     def by_kind(
         self,
@@ -916,7 +922,7 @@ class TransformationContract:
         return tuple(item for item in self.claims if item.kind == kind)
 
     def validate_consistency(self) -> None:
-        if self.schema_version != "transformation_contract.v2":
+        if self.schema_version != "transformation_contract.v3":
             raise ValueError(
                 f"unsupported transformation contract schema: {self.schema_version}"
             )
@@ -1365,6 +1371,22 @@ class TransformationAssessment:
 
 
 @dataclass(frozen=True)
+class ClosureScanSelector:
+    id: str
+    kind: ClosureSelectorKind
+    value: str
+
+
+@dataclass(frozen=True)
+class ClosureScanPredicate:
+    """One target constrained to its declared path-scope set."""
+
+    id: str
+    target: ClosureScanSelector
+    path_scopes: tuple[ClosureScanSelector, ...] = ()
+
+
+@dataclass(frozen=True)
 class ClosureScanPlan:
     """Source-backed scan intent. A plan is never evidence that a scan ran."""
 
@@ -1380,21 +1402,14 @@ class ClosureScanPlan:
         "paths",
         "file_content",
     )
-    selectors: tuple[ClosureScanSelector, ...] = ()
+    predicates: tuple[ClosureScanPredicate, ...] = ()
     sources: tuple[SourceRef, ...] = ()
-
-
-@dataclass(frozen=True)
-class ClosureScanSelector:
-    id: str
-    kind: ClosureSelectorKind
-    value: str
 
 
 @dataclass(frozen=True)
 class ClosureScanPlanSet:
     plans: tuple[ClosureScanPlan, ...] = ()
-    schema_version: str = "closure_scan_plan_set.v2"
+    schema_version: str = "closure_scan_plan_set.v3"
 
     def by_id(self) -> dict[str, ClosureScanPlan]:
         return {item.id: item for item in self.plans}
@@ -1460,13 +1475,57 @@ class ClosureScanPlanSet:
                 != ("paths", "file_content", "symbol_names")
             ):
                 raise ValueError(f"{plan.id}: unsupported scan-plan boundary")
-            if len({item.id for item in plan.selectors}) != len(plan.selectors):
+            if len({item.id for item in plan.predicates}) != len(plan.predicates):
+                raise ValueError(f"{plan.id}: duplicate predicate ID")
+            selector_ids: list[str] = []
+            predicate_keys: list[tuple[object, ...]] = []
+            for index, predicate in enumerate(plan.predicates, start=1):
+                expected_id = f"{plan.id}:predicate:{index}"
+                if predicate.id != expected_id:
+                    raise ValueError(f"{predicate.id}: non-canonical predicate ID")
+                if (
+                    predicate.target.id != f"{expected_id}:target"
+                    or not predicate.target.value.strip()
+                ):
+                    raise ValueError(
+                        f"{predicate.target.id}: invalid predicate target"
+                    )
+                if predicate.target.kind == "phrase" and predicate.path_scopes:
+                    raise ValueError(
+                        f"{predicate.id}: scoped predicate target must be exact"
+                    )
+                for scope_index, selector in enumerate(
+                    predicate.path_scopes,
+                    start=1,
+                ):
+                    if (
+                        selector.id
+                        != f"{expected_id}:path_scope:{scope_index}"
+                        or selector.kind != "path"
+                        or not selector.value.strip()
+                    ):
+                        raise ValueError(
+                            f"{selector.id}: invalid predicate path scope"
+                        )
+                scope_values = tuple(
+                    item.value.casefold() for item in predicate.path_scopes
+                )
+                if len(scope_values) != len(set(scope_values)):
+                    raise ValueError(f"{predicate.id}: duplicate path scope")
+                predicate_keys.append(
+                    (
+                        predicate.target.kind,
+                        predicate.target.value.casefold(),
+                        scope_values,
+                    )
+                )
+                selector_ids.extend(
+                    (predicate.target.id, *(item.id for item in predicate.path_scopes))
+                )
+            if len(selector_ids) != len(set(selector_ids)):
                 raise ValueError(f"{plan.id}: duplicate selector ID")
-            for index, selector in enumerate(plan.selectors, start=1):
-                if selector.id != f"{plan.id}:selector:{index}":
-                    raise ValueError(f"{selector.id}: non-canonical selector ID")
-                if not selector.value.strip():
-                    raise ValueError(f"{selector.id}: empty selector")
+            if len(predicate_keys) != len(set(predicate_keys)):
+                raise ValueError(f"{plan.id}: duplicate semantic predicate")
 
 
 @dataclass(frozen=True)
@@ -1474,6 +1533,7 @@ class ClosureScanMatch:
     id: str
     plan_id: str
     statement_id: str
+    predicate_id: str
     selector_id: str
     revision_side: Literal["base", "head"]
     surface: ClosureScanSurface
@@ -1525,7 +1585,7 @@ class ClosureScanResult:
 @dataclass(frozen=True)
 class ClosureScanResultSet:
     results: tuple[ClosureScanResult, ...] = ()
-    schema_version: str = "closure_scan_result_set.v1"
+    schema_version: str = "closure_scan_result_set.v2"
 
     def by_statement_id(self) -> dict[str, ClosureScanResult]:
         return {item.statement_id: item for item in self.results}
@@ -1552,10 +1612,12 @@ class ClosureScanResultSet:
                 raise ValueError(
                     f"{result.id}: result revisions must preserve plan order"
                 )
-            selector_ids = {item.id for item in plan.selectors}
+            predicates = {item.id: item for item in plan.predicates}
             for revision in result.revisions:
                 if any(
-                    item.selector_id not in selector_ids
+                    item.predicate_id not in predicates
+                    or item.selector_id
+                    != predicates[item.predicate_id].target.id
                     or item.statement_id != result.statement_id
                     or item.revision_side != revision.revision_side
                     for item in revision.matches
@@ -3484,7 +3546,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v42"
+    schema_version: str = "review_brief.v43"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

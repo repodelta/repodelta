@@ -14,8 +14,9 @@ No transformation. Other stages exchange only the contracts defined here.
 - transformation claims retain PR authority, typed kind, T/CC identity, source
   state, and provenance without carrying observed or assessed state;
 - transformation predicates retain their owning claim, explicit selector kind,
-  expected revision state, ordered values, and provenance; missing explicit
-  selectors remain typed diagnostics rather than inferred identities;
+  target/path-scope role, expected revision state, ordered values, and
+  provenance; missing explicit selectors remain typed diagnostics rather than
+  inferred identities;
 - transformation subject selection partitions every predicate selector into
   exact canonical changed-structure matches or one typed no-match diagnostic;
 - transformation structural closure preserves every T/CC claim once, partitions
@@ -29,9 +30,10 @@ No transformation. Other stages exchange only the contracts defined here.
 - each canonical diff relation owns one valid added/removed/replaced shape and
   changed evidence references its relation IDs;
 - closure scan plans map one-to-one to eligible G/removal/negative-completion
-  statements and preserve query text, executable selectors, and provenance;
-- closure scan observations identify plan, statement, revision, coverage, and
-  candidate locations without carrying a satisfaction conclusion;
+  statements and preserve query text, canonical target-plus-path-scope
+  predicates, and provenance;
+- closure scan observations identify plan, statement, predicate, revision,
+  coverage, and candidate locations without carrying a satisfaction conclusion;
 - evidence authority, revision side, operation, role, and changed state agree;
 - reference-only views point to canonical IDs.
 

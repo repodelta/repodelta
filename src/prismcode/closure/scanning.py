@@ -14,6 +14,7 @@ from prismcode.model.contracts import (
     ClosureScanMatch,
     ClosureScanPlan,
     ClosureScanPlanSet,
+    ClosureScanPredicate,
     ClosureScanResult,
     ClosureScanResultSet,
     ClosureScanSelector,
@@ -131,14 +132,14 @@ class RepositoryClosureScanner:
                     "checkout content to match the reviewed revision exactly."
                 ),
             )
-        if not plan.selectors:
+        if not plan.predicates:
             return _unavailable_revision(
                 plan,
                 revision_side,
                 root,
                 revision,
                 "closure_scan_no_executable_selector",
-                f"{plan.id} has no conservative executable selector.",
+                f"{plan.id} has no conservative executable predicate.",
             )
         paths, path_truncation = _repository_paths(root, self.limits)
         return _scan_paths(
@@ -234,7 +235,7 @@ def _scan_paths(
     stopped = False
 
     def add_match(
-        selector: ClosureScanSelector,
+        predicate: ClosureScanPredicate,
         surface: ClosureScanSurface,
         path: str,
         line: int | None,
@@ -242,7 +243,7 @@ def _scan_paths(
     ) -> None:
         nonlocal stopped
         matches.append(
-            _match(plan, selector, revision_side, surface, path, line, excerpt)
+            _match(plan, predicate, revision_side, surface, path, line, excerpt)
         )
         if len(matches) >= limits.max_matches_per_plan:
             truncations.append(
@@ -259,9 +260,14 @@ def _scan_paths(
     for path in paths:
         inspected_paths += 1
         relative = path.relative_to(root).as_posix()
-        for selector in plan.selectors:
-            if _matches(relative, selector):
-                add_match(selector, "paths", relative, None, relative)
+        for predicate in plan.predicates:
+            selector = predicate.target
+            if (
+                selector.kind == "path"
+                and _within_path_scope(relative, predicate)
+                and _matches(relative, selector)
+            ):
+                add_match(predicate, "paths", relative, None, relative)
                 if stopped:
                     break
         if stopped:
@@ -269,6 +275,13 @@ def _scan_paths(
 
     for path in (() if stopped else paths):
         relative = path.relative_to(root).as_posix()
+        predicates = tuple(
+            item for item in plan.predicates
+            if item.target.kind != "path"
+            and _within_path_scope(relative, item)
+        )
+        if not predicates:
+            continue
         try:
             raw = path.read_bytes()
         except OSError:
@@ -290,10 +303,11 @@ def _scan_paths(
         for line_number, line in enumerate(
             raw.decode("utf-8", errors="replace").splitlines(), start=1
         ):
-            for selector in plan.selectors:
+            for predicate in predicates:
+                selector = predicate.target
                 if _matches(line, selector):
                     add_match(
-                        selector, "file_content", relative, line_number,
+                        predicate, "file_content", relative, line_number,
                         line.strip()[:240],
                     )
                     if stopped:
@@ -302,13 +316,18 @@ def _scan_paths(
                 break
             for symbol in _SYMBOL_NAME.findall(line):
                 inspected_symbols += 1
-                for selector in plan.selectors:
+                for predicate in predicates:
+                    selector = predicate.target
                     if (
                         selector.kind == "identifier"
                         and symbol.casefold() == selector.value.casefold()
                     ):
                         add_match(
-                            selector, "symbol_names", relative, line_number, symbol
+                            predicate,
+                            "symbol_names",
+                            relative,
+                            line_number,
+                            symbol,
                         )
                         if stopped:
                             break
@@ -396,23 +415,42 @@ def _matches(value: str, selector: ClosureScanSelector) -> bool:
     ))
 
 
+def _within_path_scope(
+    relative: str,
+    predicate: ClosureScanPredicate,
+) -> bool:
+    return not predicate.path_scopes or any(
+        _matches(relative, selector) for selector in predicate.path_scopes
+    )
+
+
 def _match(
     plan: ClosureScanPlan,
-    selector: ClosureScanSelector,
+    predicate: ClosureScanPredicate,
     revision_side: Literal["base", "head"],
     surface: ClosureScanSurface,
     path: str,
     line: int | None,
     excerpt: str,
 ) -> ClosureScanMatch:
+    selector = predicate.target
     identity = "\0".join(
-        (plan.id, revision_side, selector.id, surface, path, str(line or 0))
+        (
+            plan.id,
+            predicate.id,
+            revision_side,
+            selector.id,
+            surface,
+            path,
+            str(line or 0),
+        )
     )
     digest = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:16]
     return ClosureScanMatch(
         id=f"CSM:{digest}",
         plan_id=plan.id,
         statement_id=plan.statement_id,
+        predicate_id=predicate.id,
         selector_id=selector.id,
         revision_side=revision_side,
         surface=surface,

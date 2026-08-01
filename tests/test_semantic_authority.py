@@ -813,21 +813,33 @@ def test_pr_transformation_contract_preserves_typed_structure_once() -> None:
         "Transformation assessment remains a later change."
     ]
     serialized = brief.to_dict()["transformation_contract"]
-    assert serialized["schema_version"] == "transformation_contract.v2"
+    assert serialized["schema_version"] == "transformation_contract.v3"
     assert serialized["claims"][8]["text"] == (
         "extract_packet_semantics() produces the contract once."
     )
     assert serialized["region"]["boundary_claim_ids"] == ("T5",)
     assert [
-        (item.claim_id, item.selector_kind, item.values, item.expectation)
+        (
+            item.claim_id,
+            item.selector_kind,
+            item.values,
+            item.expectation,
+            item.role,
+        )
         for item in contract.predicates.predicates
     ] == [
-        ("T2", "symbol", ("ReviewSourcePacket",), "reference"),
-        ("T2", "symbol", ("ReviewBrief",), "reference"),
-        ("T4", "symbol", ("TransformationContract",), "reference"),
-        ("T9", "symbol", ("extract_packet_semantics()",), "present_head"),
-        ("T11", "symbol", ("DeterministicAnalyzer",), "present_head"),
-        ("T11", "symbol", ("ReviewBrief",), "present_head"),
+        ("T2", "symbol", ("ReviewSourcePacket",), "reference", "target"),
+        ("T2", "symbol", ("ReviewBrief",), "reference", "target"),
+        ("T4", "symbol", ("TransformationContract",), "reference", "target"),
+        (
+            "T9",
+            "symbol",
+            ("extract_packet_semantics()",),
+            "present_head",
+            "target",
+        ),
+        ("T11", "symbol", ("DeterministicAnalyzer",), "present_head", "target"),
+        ("T11", "symbol", ("ReviewBrief",), "present_head", "target"),
     ]
     assert {item.claim_id for item in contract.predicates.diagnostics} == {
         "T1", "T3", "T5", "T6", "T7", "T8", "T10", "T12", "T13",
@@ -855,17 +867,30 @@ def test_transformation_predicates_require_explicit_code_selectors() -> None:
     contract = semantics.transformation_contract
 
     assert [
-        (item.claim_id, item.selector_kind, item.values, item.expectation)
+        (
+            item.claim_id,
+            item.selector_kind,
+            item.values,
+            item.expectation,
+            item.role,
+        )
         for item in contract.predicates.predicates
     ] == [
-        ("T1", "repository_path", ("src/input.py",), "reference"),
+        ("T1", "repository_path", ("src/input.py",), "reference", "target"),
         (
             "T2",
             "ordered_path",
             ("Adapter", "Analyzer", "ReviewBrief"),
             "present_head",
+            "target",
         ),
-        ("T3", "repository_path", ("legacy/adapter.py",), "absent_head"),
+        (
+            "T3",
+            "repository_path",
+            ("legacy/adapter.py",),
+            "absent_head",
+            "target",
+        ),
     ]
     assert [item.claim_id for item in contract.predicates.diagnostics] == ["T4"]
     assert "prose_module" not in {
@@ -873,6 +898,32 @@ def test_transformation_predicates_require_explicit_code_selectors() -> None:
         for item in contract.predicates.predicates
         for value in item.values
     }
+
+
+def test_transformation_predicates_preserve_path_scope_role() -> None:
+    semantics = extract_review_semantics(
+        issue_body=None,
+        issue_source=None,
+        pr_body=(
+            "## Removed legacy paths\n"
+            "- Remove `_review_symbol_id` from "
+            "`src/prismcode/convergence/structural.py`.\n"
+        ),
+        pr_source=_pr_source(),
+        pr_title="Preserve predicate roles",
+    )
+
+    assert [
+        (item.selector_kind, item.values, item.role)
+        for item in semantics.transformation_contract.predicates.predicates
+    ] == [
+        ("symbol", ("_review_symbol_id",), "target"),
+        (
+            "repository_path",
+            ("src/prismcode/convergence/structural.py",),
+            "path_scope",
+        ),
+    ]
 
 
 def test_transformation_heading_aliases_are_exact_and_context_aware() -> None:

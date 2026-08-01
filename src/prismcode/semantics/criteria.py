@@ -182,6 +182,10 @@ _TRANSFORMATION_LABEL_RE = re.compile(
 )
 _INLINE_CODE_RE = re.compile(r"`([^`\n]+)`")
 _TOPOLOGY_ARROW_RE = re.compile(r"\s*(?:→|->|=>)\s*")
+_PATH_SCOPE_PREFIX_RE = re.compile(
+    r"\b(?:from|in|under|within)\s*$",
+    re.IGNORECASE,
+)
 _REPOSITORY_PATH_PREFIXES = ("src/", "tests/", "docs/", ".github/")
 _REPOSITORY_PATH_SUFFIXES = (
     ".py", ".pyi", ".js", ".jsx", ".ts", ".tsx", ".java", ".go",
@@ -828,19 +832,41 @@ def _transformation_predicates(
                 )
             )
             continue
-        unique_selectors = tuple(dict.fromkeys(selectors))
+        selector_specs = tuple(
+            dict.fromkeys(
+                (
+                    _selector_kind(value),
+                    value,
+                    (
+                        "path_scope"
+                        if _selector_kind(value) == "repository_path"
+                        and _PATH_SCOPE_PREFIX_RE.search(
+                            raw_text[: match.start()]
+                        )
+                        is not None
+                        else "target"
+                    ),
+                )
+                for match in matches
+                if (value := match.group(1).strip())
+            )
+        )
         predicates.extend(
             TransformationPredicate(
                 id=f"TP:{claim.id}:{index}",
                 claim_id=claim.id,
-                selector_kind=_selector_kind(value),
+                selector_kind=selector_kind,
                 values=(value,),
                 expectation=expectation,
+                role=role,
                 sources=claim.sources,
             )
-            for index, value in enumerate(unique_selectors, start=1)
+            for index, (selector_kind, value, role) in enumerate(
+                selector_specs,
+                start=1,
+            )
         )
-        if not unique_selectors:
+        if not selector_specs:
             diagnostics.append(
                 TransformationPredicateDiagnostic(
                     id=f"TPD:{claim.id}:no_explicit_selector",

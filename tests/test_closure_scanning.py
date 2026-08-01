@@ -16,6 +16,8 @@ from prismcode.model.contracts import (
     SourceRef,
     TransformationClaim,
     TransformationContract,
+    TransformationPredicate,
+    TransformationPredicateSet,
 )
 from prismcode.facts.catalog import build_evidence_catalog
 from prismcode.facts.transformation import reconstruct_observed_transformation
@@ -308,6 +310,18 @@ def test_removal_scan_preserves_base_head_transition_and_path_profiles(
     )
     contract = TransformationContract(
         claims=(claim,),
+        predicates=TransformationPredicateSet(
+            predicates=(
+                TransformationPredicate(
+                    id="TP:T1:1",
+                    claim_id="T1",
+                    selector_kind="symbol",
+                    values=("legacy_writer",),
+                    expectation="absent_head",
+                    sources=claim.sources,
+                ),
+            ),
+        ),
         removal_claim_ids=("T1",),
         source_state="available",
     )
@@ -367,6 +381,125 @@ def test_removal_scan_preserves_base_head_transition_and_path_profiles(
         plans,
         head_sha=head_revision,
     )
+    assert assessment.claims[0].status == "demonstrated"
+    assert assessment.claims[0].reasons[0].kind == (
+        "closure_transition_observed"
+    )
+
+
+def test_scoped_removal_ignores_same_symbol_outside_declared_path(
+    tmp_path: Path,
+) -> None:
+    base, base_revision = _repository(
+        tmp_path,
+        {
+            "src/prismcode/convergence/structural.py": (
+                "def _review_symbol_id():\n    return 'legacy'\n"
+            ),
+            "src/prismcode/facts/catalog.py": (
+                "def _review_symbol_id():\n    return 'canonical-other-surface'\n"
+            ),
+        },
+    )
+    head = tmp_path / "head"
+    subprocess.run(["git", "clone", "-q", str(base), str(head)], check=True)
+    subprocess.run(
+        ["git", "-C", str(head), "config", "user.email", "test@example.com"],
+        check=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(head), "config", "user.name", "PrismCode Test"],
+        check=True,
+    )
+    (head / "src/prismcode/convergence/structural.py").write_text(
+        "from prismcode.model.structural_refs import review_symbol_id\n",
+        encoding="utf-8",
+    )
+    subprocess.run(["git", "-C", str(head), "add", "."], check=True)
+    subprocess.run(
+        ["git", "-C", str(head), "commit", "-qm", "move identity authority"],
+        check=True,
+    )
+    head_revision = subprocess.run(
+        ["git", "-C", str(head), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    claim = TransformationClaim(
+        id="T1",
+        kind="removal",
+        text=(
+            "Removed `_review_symbol_id` from "
+            "`src/prismcode/convergence/structural.py`."
+        ),
+        sources=(SourceRef(label="PR #1"),),
+    )
+    contract = TransformationContract(
+        claims=(claim,),
+        predicates=TransformationPredicateSet(
+            predicates=(
+                TransformationPredicate(
+                    id="TP:T1:1",
+                    claim_id="T1",
+                    selector_kind="symbol",
+                    values=("_review_symbol_id",),
+                    expectation="absent_head",
+                    sources=claim.sources,
+                ),
+                TransformationPredicate(
+                    id="TP:T1:2",
+                    claim_id="T1",
+                    selector_kind="repository_path",
+                    values=("src/prismcode/convergence/structural.py",),
+                    expectation="absent_head",
+                    role="path_scope",
+                    sources=claim.sources,
+                ),
+            ),
+        ),
+        removal_claim_ids=("T1",),
+        source_state="available",
+    )
+    plans = compile_closure_scan_plans((), contract)
+    result_set = RepositoryClosureScanner(
+        head,
+        expected_head_revision=head_revision,
+        base_root=base,
+        expected_base_revision=base_revision,
+    ).scan(plans)
+    result = result_set.results[0]
+
+    assert {item.path for item in result.revisions[0].matches} == {
+        "src/prismcode/convergence/structural.py"
+    }
+    assert result.revisions[1].matches == ()
+
+    catalog = build_evidence_catalog(
+        ReviewSourcePacket(
+            repository="acme/widget",
+            pull_request=1,
+            title="Move identity authority",
+            source_records=(),
+            head_sha=head_revision,
+            base_sha=base_revision,
+        ).with_revision(),
+        parse_changed_files(()),
+        closure_scan_results=result_set,
+    )
+    alignment = build_transformation_alignment(
+        contract,
+        reconstruct_observed_transformation(catalog),
+        catalog,
+    )
+    assessment = assess_transformation(
+        contract,
+        alignment,
+        catalog,
+        plans,
+        head_sha=head_revision,
+    )
+
     assert assessment.claims[0].status == "demonstrated"
     assert assessment.claims[0].reasons[0].kind == (
         "closure_transition_observed"

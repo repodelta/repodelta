@@ -16,8 +16,13 @@ Canonical G statements plus `TransformationContract` claims become
 
 Each eligible statement owns one stable plan and one result. Guardrails and
 negative completion conditions inspect head; removals preserve separate base
-and head observations. Plans retain source text and provenance. Every observed
-match carries revision, surface, canonical path profile, and location.
+and head observations. Transformation plans consume the one-pass typed
+`TransformationPredicateSet`; they never reparse normalized claim prose.
+Plans retain source text and provenance. Every observed
+match carries its predicate, target, revision, surface, canonical path profile,
+and location. Each predicate owns one target plus an optional path-scope set;
+the scanner evaluates the target only inside that set. A path scope without an
+exact target is diagnostic rather than an executable absence assertion.
 Unavailable or partial revision coverage stays explicit.
 
 ## Must not
@@ -28,7 +33,7 @@ or decide demonstrated/partial/contradicted/unverified status.
 
 ## Diagnostics
 
-Reports missing selectors, missing base input, stale or dirty checkouts, and
+Reports missing executable predicates, missing base input, stale or dirty checkouts, and
 typed file/byte/match safety boundaries independently for each revision.
 
 ## Extension points
