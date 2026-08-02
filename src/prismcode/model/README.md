@@ -17,6 +17,8 @@ No transformation. Other stages exchange only the contracts defined here.
   target/path-scope role, expected revision state, ordered values, and
   provenance; missing explicit selectors remain typed diagnostics rather than
   inferred identities;
+- identifier normalization and revision-aware predicate-to-fact matching have
+  one shared reference authority consumed by routing and assessment;
 - transformation subject selection partitions every predicate selector into
   exact canonical changed-structure matches or one typed no-match diagnostic;
 - transformation structural closure preserves every T/CC claim once, partitions

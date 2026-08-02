@@ -9,7 +9,8 @@ from prismcode.model.contracts import (
     ReviewStatement,
     TransformationClaim,
 )
-from prismcode.facts.lexical import identifier_keys, semantic_tokens
+from prismcode.model.predicate_refs import identifier_keys
+from prismcode.facts.lexical import semantic_tokens
 
 _REFERENCE_RE = re.compile(r"\b(?:R|G|AC|REQ)[-_ ]?\d+\b", re.IGNORECASE)
 

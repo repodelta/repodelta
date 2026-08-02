@@ -13,6 +13,9 @@ authority without entering R/G routing.
 resolves explicit transformation predicates to canonical changed structural
 identities. It performs exact, revision-aware symbol/path matching and does not
 use claim prose, traverse neighbors, or rank equally valid identities.
+The same typed selector matcher is the canonical lexical fallback boundary for
+predicate assessment when no changed structural subject is available; it never
+loans a claim-level binding from one predicate to another.
 
 ## Input / output
 
