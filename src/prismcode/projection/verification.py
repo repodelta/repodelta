@@ -15,6 +15,9 @@ from prismcode.model.contracts import (
     TransformationAssessment,
     TransformationEvidenceBinding,
     TransformationContract,
+    TransformationStructuralClosure,
+    TransformationStructuralClosureGroup,
+    TransformationStructuralTopology,
     TransformationSummaryProjection,
     VerificationEvidenceInspection,
     VerificationMatrixEntry,
@@ -33,6 +36,9 @@ def project_verification_workspace(
     candidates: ProjectionCandidateSet,
     slices: tuple[ReviewSlice, ...],
     review_graph: ReviewStructuralGraph,
+    *,
+    transformation_structural_topology: TransformationStructuralTopology,
+    transformation_structural_closure: TransformationStructuralClosure,
 ) -> VerificationWorkspace:
     """Project all review subjects onto one matrix and inspector boundary."""
 
@@ -43,6 +49,7 @@ def project_verification_workspace(
     }
     alignment_by_claim = alignment.by_claim_id()
     assessment_by_claim = assessment.by_claim_id()
+    topology_by_claim = transformation_structural_topology.by_claim_id()
     matrix: list[VerificationMatrixEntry] = []
     inspections: list[VerificationEvidenceInspection] = []
 
@@ -91,8 +98,23 @@ def project_verification_workspace(
     for claim in contract.claims:
         claim_bindings = alignment_by_claim.get(claim.id, ())
         claim_assessment = assessment_by_claim[claim.id]
+        closure_group = transformation_structural_closure.by_claim_id().get(
+            claim.id
+        )
+        topology_group = topology_by_claim.get(claim.id)
+        structural_overlay = (
+            topology_group.structural_overlay
+            if topology_group is not None
+            else StructuralFocusOverlay()
+        )
         observed_ids = tuple(
-            dict.fromkeys(item.evidence_id for item in claim_bindings)
+            dict.fromkeys(
+                (
+                    *(item.evidence_id for item in claim_bindings),
+                    *_transformation_closure_evidence_ids(closure_group),
+                    *_overlay_evidence_ids(structural_overlay, review_graph),
+                )
+            )
         )
         supporting_ids = _binding_evidence_ids(
             claim_assessment.supporting_binding_ids,
@@ -109,11 +131,12 @@ def project_verification_workspace(
             supporting_evidence_ids=supporting_ids,
             contradicting_evidence_ids=contradicting_ids,
             transformation_binding_ids=tuple(item.id for item in claim_bindings),
-            structural_overlay=_evidence_overlay(
-                observed_ids,
-                review_graph,
-                evidence,
+            diagnostic_ids=(
+                topology_group.diagnostic_ids
+                if topology_group is not None
+                else ()
             ),
+            structural_overlay=structural_overlay,
             assessment_reasons=claim_assessment.reasons,
         )
         inspections.append(inspection)
@@ -141,6 +164,7 @@ def project_verification_workspace(
             alignment,
             assessment,
         ),
+        transformation_structural_topology=transformation_structural_topology,
         matrix=tuple(matrix),
         inspections=tuple(inspections),
     )
@@ -154,6 +178,8 @@ def project_verification_workspace(
         evidence,
         relations,
         review_graph,
+        transformation_structural_topology,
+        transformation_structural_closure,
     )
     return workspace
 
@@ -269,6 +295,23 @@ def _binding_evidence_ids(
     return tuple(evidence_by_binding[item] for item in binding_ids)
 
 
+def _transformation_closure_evidence_ids(
+    closure_group: TransformationStructuralClosureGroup | None,
+) -> tuple[str, ...]:
+    if closure_group is None:
+        return ()
+    return tuple(
+        dict.fromkeys(
+            (
+                *closure_group.seed_evidence_ids,
+                *closure_group.path_evidence_ids,
+                *closure_group.relation_change_evidence_ids,
+                *closure_group.ownership_change_evidence_ids,
+            )
+        )
+    )
+
+
 def _overlay_evidence_ids(
     overlay: StructuralFocusOverlay,
     graph: ReviewStructuralGraph,
@@ -310,86 +353,6 @@ def _overlay_evidence_ids(
     )
 
 
-def _evidence_overlay(
-    evidence_ids: tuple[str, ...],
-    graph: ReviewStructuralGraph,
-    evidence: dict[str, EvidenceItem],
-) -> StructuralFocusOverlay:
-    selected_evidence = set(evidence_ids)
-
-    def path_linked(evidence_id: str) -> bool:
-        fact = evidence.get(evidence_id)
-        return bool(
-            fact is not None
-            and selected_evidence & set(fact.structural_path_ids)
-        )
-
-    selected_node_ids = {
-        node.id
-        for node in graph.nodes
-        if selected_evidence & set(node.evidence_ids)
-        or any(path_linked(item) for item in node.evidence_ids)
-    }
-    selected_edge_ids = {
-        edge.id
-        for edge in graph.edges
-        if edge.relation_change_evidence_id in selected_evidence
-        or path_linked(edge.relation_change_evidence_id)
-    }
-    for edge in graph.edges:
-        if edge.id in selected_edge_ids:
-            selected_node_ids.update((edge.source_node_id, edge.target_node_id))
-    selected_ownership_ids = {
-        edge.id
-        for edge in graph.ownership_edges
-        if edge.ownership_change_evidence_id in selected_evidence
-    }
-    for edge in graph.ownership_edges:
-        if edge.id in selected_ownership_ids:
-            selected_node_ids.update((edge.parent_node_id, edge.child_node_id))
-    selected_placement_ids: set[str] = set()
-    direct_node_ids = set(selected_node_ids)
-    changed = True
-    while changed:
-        changed = False
-        for placement in graph.placements:
-            if placement.child_node_id not in selected_node_ids:
-                continue
-            selected_placement_ids.add(placement.id)
-            if placement.parent_node_id not in selected_node_ids:
-                selected_node_ids.add(placement.parent_node_id)
-                changed = True
-    group_ids = tuple(
-        group.id
-        for group in graph.relation_groups
-        if set(group.member_edge_ids) & selected_edge_ids
-    )
-    return StructuralFocusOverlay(
-        nodes=tuple(
-            StructuralFocusNode(
-                node_id=node.id,
-                role=(
-                    "changed_anchor"
-                    if node.id in direct_node_ids
-                    else "intermediate"
-                ),
-            )
-            for node in graph.nodes
-            if node.id in selected_node_ids
-        ),
-        edge_ids=tuple(edge.id for edge in graph.edges if edge.id in selected_edge_ids),
-        relation_group_ids=group_ids,
-        ownership_edge_ids=tuple(
-            edge.id
-            for edge in graph.ownership_edges
-            if edge.id in selected_ownership_ids
-        ),
-        placement_ids=tuple(
-            item.id for item in graph.placements if item.id in selected_placement_ids
-        ),
-    )
-
-
 def _validate_workspace(
     workspace: VerificationWorkspace,
     focus_statements: tuple[Requirement, ...],
@@ -400,9 +363,15 @@ def _validate_workspace(
     evidence: dict[str, EvidenceItem],
     relations: dict[str, ProjectionRelation],
     graph: ReviewStructuralGraph,
+    transformation_structural_topology: TransformationStructuralTopology,
+    transformation_structural_closure: TransformationStructuralClosure,
 ) -> None:
-    if workspace.schema_version != "verification_workspace.v1":
+    if workspace.schema_version != "verification_workspace.v2":
         raise ValueError("unsupported verification workspace schema")
+    if workspace.transformation_structural_topology != (
+        transformation_structural_topology
+    ):
+        raise ValueError("verification workspace changed transformation topology")
     if workspace.transformation_summary != _transformation_summary(
         contract,
         observed,
@@ -431,6 +400,66 @@ def _validate_workspace(
     graph_group_ids = {item.id for item in graph.relation_groups}
     graph_ownership_ids = {item.id for item in graph.ownership_edges}
     graph_placement_ids = {item.id for item in graph.placements}
+    closure_by_claim = transformation_structural_closure.by_claim_id()
+    topology_by_claim = transformation_structural_topology.by_claim_id()
+    if transformation_structural_topology.schema_version != (
+        "transformation_structural_topology.v1"
+    ):
+        raise ValueError("unsupported transformation structural topology schema")
+    if tuple(
+        item.claim_id for item in transformation_structural_topology.groups
+    ) != tuple(item.id for item in contract.claims):
+        raise ValueError("transformation topology must preserve every claim once")
+    closure_diagnostic_ids = {
+        item.id for item in transformation_structural_closure.diagnostics
+    }
+    for topology_group in transformation_structural_topology.groups:
+        closure_group = closure_by_claim.get(topology_group.claim_id)
+        if closure_group is None:
+            raise ValueError(
+                f"{topology_group.claim_id}: topology has no closure group"
+            )
+        expected_diagnostics = tuple(
+            item.id
+            for item in transformation_structural_closure.diagnostics
+            if item.claim_id == topology_group.claim_id
+        )
+        if topology_group.diagnostic_ids != expected_diagnostics:
+            raise ValueError(
+                f"{topology_group.claim_id}: topology diagnostics diverge from closure"
+            )
+        overlay = topology_group.structural_overlay
+        overlay_review_ids = {
+            item.review_symbol_id
+            for item in graph.nodes
+            if item.id in {node.node_id for node in overlay.nodes}
+        }
+        if not set(closure_group.review_symbol_ids) <= overlay_review_ids:
+            raise ValueError(
+                f"{topology_group.claim_id}: closure symbols were dropped"
+            )
+        overlay_relation_ids = {
+            edge.relation_change_evidence_id
+            for edge in graph.edges
+            if edge.id in set(overlay.edge_ids)
+        }
+        if overlay_relation_ids != set(closure_group.relation_change_evidence_ids):
+            raise ValueError(
+                f"{topology_group.claim_id}: closure relation membership changed"
+            )
+        overlay_ownership_ids = {
+            edge.ownership_change_evidence_id
+            for edge in graph.ownership_edges
+            if edge.id in set(overlay.ownership_edge_ids)
+        }
+        if overlay_ownership_ids != set(closure_group.ownership_change_evidence_ids):
+            raise ValueError(
+                f"{topology_group.claim_id}: closure ownership membership changed"
+            )
+        if not set(topology_group.diagnostic_ids) <= closure_diagnostic_ids:
+            raise ValueError(
+                f"{topology_group.claim_id}: topology references unknown closure diagnostic"
+            )
     for entry in workspace.matrix:
         if entry.id != f"VME:{entry.subject_id}":
             raise ValueError("verification matrix entry has non-canonical ID")
@@ -465,6 +494,24 @@ def _validate_workspace(
                 )
         elif inspection.transformation_binding_ids:
             raise ValueError("R/G inspector cannot reference T/CC bindings")
+        if inspection.subject_id in topology_by_claim:
+            topology_group = topology_by_claim[inspection.subject_id]
+            closure_group = closure_by_claim[inspection.subject_id]
+            closure_evidence_ids = set(
+                _transformation_closure_evidence_ids(closure_group)
+            )
+            if not closure_evidence_ids <= set(inspection.observed_evidence_ids):
+                raise ValueError(
+                    "transformation inspector dropped closure evidence"
+                )
+            if inspection.structural_overlay != topology_group.structural_overlay:
+                raise ValueError(
+                    "transformation inspector diverges from canonical topology"
+                )
+            if inspection.diagnostic_ids != topology_group.diagnostic_ids:
+                raise ValueError(
+                    "transformation inspector changed closure diagnostics"
+                )
         if not set(inspection.supporting_evidence_ids) <= set(
             inspection.observed_evidence_ids
         ) or not set(inspection.contradicting_evidence_ids) <= set(

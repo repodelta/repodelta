@@ -40,6 +40,7 @@ from prismcode.model.contracts import (
     TransformationAlignment,
     TransformationAssessment,
     TransformationContract,
+    TransformationStructuralClosure,
     VerificationIdentity,
 )
 from prismcode.evaluation.core import load_evaluation_suite
@@ -149,6 +150,7 @@ def _build_projection(
         focus_statements=(),
         transformation_contract=TransformationContract(),
         observed_transformation=ObservedTransformation(),
+        transformation_structural_closure=TransformationStructuralClosure(),
         transformation_alignment=TransformationAlignment(),
         transformation_assessment=TransformationAssessment(),
         **kwargs,

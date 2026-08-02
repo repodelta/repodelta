@@ -29,6 +29,9 @@ from prismcode.model.contracts import (
     TransformationAlignment,
     TransformationAssessment,
     TransformationContract,
+    TransformationStructuralClosure,
+    TransformationStructuralTopology,
+    TransformationStructuralTopologyGroup,
 )
 from prismcode.model.structural_refs import review_symbol_id
 from prismcode.projection.structural_groups import (
@@ -60,6 +63,7 @@ def build_review_projection(
     focus_statements: tuple[Requirement, ...],
     transformation_contract: TransformationContract,
     observed_transformation: ObservedTransformation,
+    transformation_structural_closure: TransformationStructuralClosure,
     transformation_alignment: TransformationAlignment,
     transformation_assessment: TransformationAssessment,
 ) -> ReviewProjection:
@@ -89,6 +93,9 @@ def build_review_projection(
     graph_placements: dict[str, StructuralGraphPlacement] = {}
     graph_path_relation_ids: list[str] = []
     backbone_seed_node_ids: list[str] = []
+    transformation_topology_groups: list[
+        TransformationStructuralTopologyGroup
+    ] = []
 
     for group in candidates.groups:
         converged = convergence_groups[group.focus_statement_id]
@@ -170,34 +177,20 @@ def build_review_projection(
                 for relation_id in node.relation_ids
             )
         )
-        for node in nodes:
-            if node.id not in graph_nodes:
-                graph_node_order.append(node.id)
-                graph_nodes[node.id] = node
-            else:
-                graph_nodes[node.id] = _merge_node(graph_nodes[node.id], node)
-        for edge in edges:
-            if edge.id not in graph_edges:
-                graph_edge_order.append(edge.id)
-                graph_edges[edge.id] = edge
-            else:
-                graph_edges[edge.id] = _merge_edge(graph_edges[edge.id], edge)
-        for edge in ownership_edges:
-            if edge.id not in graph_ownership_edges:
-                graph_ownership_edge_order.append(edge.id)
-                graph_ownership_edges[edge.id] = edge
-            elif graph_ownership_edges[edge.id] != edge:
-                raise ValueError(
-                    "canonical structural ownership edge identity is inconsistent"
-                )
-        for placement in placements:
-            if placement.id not in graph_placements:
-                graph_placement_order.append(placement.id)
-                graph_placements[placement.id] = placement
-            elif graph_placements[placement.id] != placement:
-                raise ValueError(
-                    "canonical structural placement identity is inconsistent"
-                )
+        _merge_structural_members(
+            nodes=nodes,
+            edges=edges,
+            ownership_edges=ownership_edges,
+            placements=placements,
+            graph_node_order=graph_node_order,
+            graph_nodes=graph_nodes,
+            graph_edge_order=graph_edge_order,
+            graph_edges=graph_edges,
+            graph_ownership_edge_order=graph_ownership_edge_order,
+            graph_ownership_edges=graph_ownership_edges,
+            graph_placement_order=graph_placement_order,
+            graph_placements=graph_placements,
+        )
         graph_path_relation_ids.extend(overlay.path_relation_ids)
         slices.append(
             ReviewSlice(
@@ -253,6 +246,71 @@ def build_review_projection(
                 ),
                 diagnostic_ids=diagnostic_ids_by_focus.get(
                     group.focus_statement_id,
+                    (),
+                ),
+            )
+        )
+
+    # T/CC structural membership comes only from the already-converged
+    # transformation closure.  The same graph builder and merge dictionaries
+    # are used as for R/G; alignment may annotate the result later but cannot
+    # add or remove graph members.
+    closure_diagnostics_by_claim: dict[str, tuple[str, ...]] = {}
+    for diagnostic in transformation_structural_closure.diagnostics:
+        closure_diagnostics_by_claim.setdefault(diagnostic.claim_id, ())
+        closure_diagnostics_by_claim[diagnostic.claim_id] = (
+            *closure_diagnostics_by_claim[diagnostic.claim_id],
+            diagnostic.id,
+        )
+    for closure_group in transformation_structural_closure.groups:
+        anchor_review_ids = tuple(
+            dict.fromkeys(
+                review_id
+                for evidence_id in closure_group.seed_evidence_ids
+                if (fact := evidence.get(evidence_id)) is not None
+                if (review_id := review_symbol_id(fact)) is not None
+            )
+        )
+        overlay, nodes, edges, ownership_edges, placements = (
+            _structural_focus_overlay(
+                path_relations=(),
+                relation_change_evidence_ids=(
+                    closure_group.relation_change_evidence_ids
+                ),
+                anchor_relations=(),
+                runtime_relations=(),
+                test_relations=(),
+                evidence=evidence,
+                changed_files=changed_files,
+                selected_path_evidence_ids=closure_group.path_evidence_ids,
+                selected_review_symbol_ids=closure_group.review_symbol_ids,
+                anchor_review_symbol_ids=anchor_review_ids,
+                selected_ownership_change_evidence_ids=(
+                    closure_group.ownership_change_evidence_ids
+                ),
+            )
+        )
+        _merge_structural_members(
+            nodes=nodes,
+            edges=edges,
+            ownership_edges=ownership_edges,
+            placements=placements,
+            graph_node_order=graph_node_order,
+            graph_nodes=graph_nodes,
+            graph_edge_order=graph_edge_order,
+            graph_edges=graph_edges,
+            graph_ownership_edge_order=graph_ownership_edge_order,
+            graph_ownership_edges=graph_ownership_edges,
+            graph_placement_order=graph_placement_order,
+            graph_placements=graph_placements,
+        )
+        graph_path_relation_ids.extend(overlay.path_relation_ids)
+        transformation_topology_groups.append(
+            TransformationStructuralTopologyGroup(
+                claim_id=closure_group.claim_id,
+                structural_overlay=overlay,
+                diagnostic_ids=closure_diagnostics_by_claim.get(
+                    closure_group.claim_id,
                     (),
                 ),
             )
@@ -315,6 +373,23 @@ def build_review_projection(
         )
         for review_slice in slices
     ]
+    transformation_topology = TransformationStructuralTopology(
+        groups=tuple(
+            replace(
+                group,
+                structural_overlay=replace(
+                    group.structural_overlay,
+                    relation_group_ids=tuple(
+                        dict.fromkeys(
+                            relation_groups.group_id_by_edge_id[edge_id]
+                            for edge_id in group.structural_overlay.edge_ids
+                        )
+                    ),
+                ),
+            )
+            for group in transformation_topology_groups
+        )
+    )
     review_graph = ReviewStructuralGraph(
         nodes=navigation.nodes,
         edges=navigation.edges,
@@ -339,6 +414,8 @@ def build_review_projection(
         candidates,
         tuple(slices),
         review_graph,
+        transformation_structural_topology=transformation_topology,
+        transformation_structural_closure=transformation_structural_closure,
     )
     projection = ReviewProjection(
         slices=tuple(slices),
@@ -484,6 +561,10 @@ def _structural_focus_overlay(
     test_relations: tuple[ProjectionRelation, ...],
     evidence: dict[str, EvidenceItem],
     changed_files: tuple[ChangedFile, ...],
+    selected_path_evidence_ids: tuple[str, ...] = (),
+    selected_review_symbol_ids: tuple[str, ...] = (),
+    anchor_review_symbol_ids: tuple[str, ...] = (),
+    selected_ownership_change_evidence_ids: tuple[str, ...] | None = None,
 ) -> tuple[
     StructuralFocusOverlay,
     tuple[StructuralGraphNode, ...],
@@ -496,7 +577,9 @@ def _structural_focus_overlay(
     path_relation_by_evidence_id = {
         relation.target_id: relation for relation in path_relations
     }
-    selected_path_ids = set(path_relation_by_evidence_id)
+    selected_path_ids = set(path_relation_by_evidence_id) | set(
+        selected_path_evidence_ids
+    )
     symbols_by_review_id = _symbols_by_review_id(evidence)
     relation_ids_by_review_id: dict[str, list[str]] = {}
     role_by_review_id: dict[str, str] = {}
@@ -534,12 +617,27 @@ def _structural_focus_overlay(
 
     edges = []
     nodes_by_review_id = dict(anchor_nodes)
+    for review_id in selected_review_symbol_ids:
+        if review_id not in nodes_by_review_id:
+            nodes_by_review_id[review_id] = _node_for_review_symbol(
+                review_id,
+                evidence=evidence,
+                symbols_by_review_id=symbols_by_review_id,
+                changed_files=changed_files,
+            )
+        role_by_review_id[review_id] = (
+            "changed_anchor"
+            if review_id in set(anchor_review_symbol_ids)
+            else role_by_review_id.get(review_id, "intermediate")
+        )
     node_path_ids: dict[str, list[str]] = {
         review_id: [] for review_id in anchor_nodes
     }
+    for review_id in nodes_by_review_id:
+        node_path_ids.setdefault(review_id, [])
     edge_ids = []
     overlay_path_relation_ids = []
-    for relation_change_id in relation_change_evidence_ids:
+    for relation_change_id in dict.fromkeys(relation_change_evidence_ids):
         relation_change = evidence.get(relation_change_id)
         if relation_change is None:
             raise ValueError(
@@ -618,7 +716,10 @@ def _structural_focus_overlay(
 
     ownership_edges = []
     ownership_edge_ids = []
-    ownership_by_child = _ownership_changes_by_child(evidence)
+    ownership_by_child = _ownership_changes_by_child(
+        evidence,
+        selected_ids=selected_ownership_change_evidence_ids,
+    )
     frontier = list(nodes_by_review_id)
     expanded.clear()
     while frontier:
@@ -692,11 +793,63 @@ def _structural_focus_overlay(
     )
 
 
+def _merge_structural_members(
+    *,
+    nodes: tuple[StructuralGraphNode, ...],
+    edges: tuple[StructuralGraphEdge, ...],
+    ownership_edges: tuple[StructuralGraphOwnershipEdge, ...],
+    placements: tuple[StructuralGraphPlacement, ...],
+    graph_node_order: list[str],
+    graph_nodes: dict[str, StructuralGraphNode],
+    graph_edge_order: list[str],
+    graph_edges: dict[str, StructuralGraphEdge],
+    graph_ownership_edge_order: list[str],
+    graph_ownership_edges: dict[str, StructuralGraphOwnershipEdge],
+    graph_placement_order: list[str],
+    graph_placements: dict[str, StructuralGraphPlacement],
+) -> None:
+    """Merge one typed selection into the one review-level graph."""
+
+    for node in nodes:
+        if node.id not in graph_nodes:
+            graph_node_order.append(node.id)
+            graph_nodes[node.id] = node
+        else:
+            graph_nodes[node.id] = _merge_node(graph_nodes[node.id], node)
+    for edge in edges:
+        if edge.id not in graph_edges:
+            graph_edge_order.append(edge.id)
+            graph_edges[edge.id] = edge
+        else:
+            graph_edges[edge.id] = _merge_edge(graph_edges[edge.id], edge)
+    for edge in ownership_edges:
+        if edge.id not in graph_ownership_edges:
+            graph_ownership_edge_order.append(edge.id)
+            graph_ownership_edges[edge.id] = edge
+        elif graph_ownership_edges[edge.id] != edge:
+            raise ValueError(
+                "canonical structural ownership edge identity is inconsistent"
+            )
+    for placement in placements:
+        if placement.id not in graph_placements:
+            graph_placement_order.append(placement.id)
+            graph_placements[placement.id] = placement
+        elif graph_placements[placement.id] != placement:
+            raise ValueError(
+                "canonical structural placement identity is inconsistent"
+            )
+
+
 def _ownership_changes_by_child(
     evidence: dict[str, EvidenceItem],
+    *,
+    selected_ids: tuple[str, ...] | None = None,
 ) -> dict[str, tuple[EvidenceItem, ...]]:
+    selected = set(selected_ids) if selected_ids is not None else None
     grouped: dict[str, list[EvidenceItem]] = {}
     for item in evidence.values():
+        if selected is not None and item.id not in selected:
+            continue
         identity = item.structural_ownership_change
         if item.kind != "structural_ownership_change" or identity is None:
             continue

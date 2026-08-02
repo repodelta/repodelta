@@ -15,6 +15,13 @@ inspector boundary over R/G subjects and typed T/CC assessments.
 Its transformation summary projects claim groups, observed Base/Head evidence
 IDs, association coverage, and assessment counts so presentation never reads
 raw contract, observation, alignment, or assessment truth.
+`TransformationStructuralClosure` is the sole T/CC structural-membership
+authority. Projection converts each closure group into a typed
+`TransformationStructuralTopologyGroup`, joins it into the same
+review-level `ReviewStructuralGraph`, and passes that overlay to the
+workspace. `TransformationAlignment` may contribute observed provenance and
+assessment evidence, but it cannot create or remove structural nodes, edges,
+ownership edges, or placements.
 
 ## Invariants
 

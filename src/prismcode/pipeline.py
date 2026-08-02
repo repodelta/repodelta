@@ -124,6 +124,7 @@ class DeterministicAnalyzer:
             focus_statements=requirements,
             transformation_contract=semantics.transformation_contract,
             observed_transformation=observed_transformation,
+            transformation_structural_closure=transformation_structural_closure,
             transformation_alignment=transformation_alignment,
             transformation_assessment=transformation_assessment,
         )
