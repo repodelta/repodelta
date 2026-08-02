@@ -15,11 +15,6 @@ from prismcode.model.contracts import (
     TransformationPredicate,
 )
 
-_NEGATIVE_COMPLETION = re.compile(
-    r"\b(?:no|not|without|absent|remove[sd]?|deleted?|eliminated?|"
-    r"must\s+not|does\s+not|do\s+not)\b",
-    re.IGNORECASE,
-)
 _WORD = re.compile(r"[A-Za-z][A-Za-z0-9_.:/-]*")
 _CLAUSE_BREAK = re.compile(
     r"\s*(?:[,;，；]|\bor\b|\band\b|\bwithout\b|\bnor\b)\s*",
@@ -45,8 +40,7 @@ def compile_closure_scan_plans(
             item
             for item in transformation_contract.by_kind("completion_condition")
             if _negative_completion_is_executable(
-                item,
-                predicates_by_claim.get(item.id, ()),
+                predicates_by_claim.get(item.id, ())
             )
         ),
     )
@@ -68,12 +62,14 @@ def compile_closure_scan_plans(
 
 
 def _negative_completion_is_executable(
-    claim: TransformationClaim,
     predicates: tuple[TransformationPredicate, ...],
 ) -> bool:
-    return bool(
-        _NEGATIVE_COMPLETION.search(claim.text)
-        and predicates
+    """Only explicit negative predicates may create absence scans."""
+
+    return any(
+        predicate.role == "target"
+        and predicate.expectation == "absent_head"
+        for predicate in predicates
     )
 
 
@@ -111,6 +107,7 @@ SelectorCandidate = tuple[
     Literal["target", "path_scope"],
     ClosureSelectorKind,
     str,
+    str | None,
 ]
 
 
@@ -119,11 +116,12 @@ def _predicates(
     candidates: list[SelectorCandidate],
 ) -> tuple[ClosureScanPredicate, ...]:
     scopes = tuple(
-        value for role, kind, value in candidates
+        value for role, kind, value, _ in candidates
         if role == "path_scope" and kind == "path"
     )
     targets = tuple(
-        (kind, value) for role, kind, value in candidates
+        (kind, value, source_predicate_id)
+        for role, kind, value, source_predicate_id in candidates
         if role == "target" and (not scopes or kind != "phrase")
     )
     unique_targets = tuple(dict.fromkeys(targets))
@@ -144,8 +142,12 @@ def _predicates(
                 )
                 for scope_index, scope in enumerate(unique_scopes, start=1)
             ),
+            source_predicate_id=source_predicate_id,
         )
-        for index, (kind, value) in enumerate(unique_targets, start=1)
+        for index, (kind, value, source_predicate_id) in enumerate(
+            unique_targets,
+            start=1,
+        )
     )
 
 
@@ -157,6 +159,7 @@ def _authored_candidates(
             predicate.role,
             "path" if predicate.selector_kind == "repository_path" else "identifier",
             predicate.values[0],
+            predicate.id,
         )
         for predicate in predicates
         if predicate.selector_kind != "ordered_path"
@@ -183,7 +186,8 @@ def _inferred_candidates(text: str) -> list[SelectorCandidate]:
         ]
         if identifiers:
             candidates.extend(
-                ("target", _selector_kind(item), item) for item in identifiers
+                ("target", _selector_kind(item), item, None)
+                for item in identifiers
             )
         elif len(words) >= 2:
             candidates.append(
@@ -191,6 +195,7 @@ def _inferred_candidates(text: str) -> list[SelectorCandidate]:
                     "target",
                     "phrase",
                     " ".join(item.casefold() for item in words[:4]),
+                    None,
                 )
             )
     return candidates

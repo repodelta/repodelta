@@ -85,6 +85,44 @@ def test_current_head_failure_contradicts_aligned_completion_condition() -> None
     assert assessment.reasons[0].kind == "current_verification_failure"
 
 
+def test_mixed_completion_preserves_each_predicate_polarity() -> None:
+    packet = _packet()
+    record = packet.source_records[0]
+    packet = replace(
+        packet,
+        source_records=(
+            replace(
+                record,
+                body=record.body.replace(
+                    "## Completion conditions\n- The `test_suite` check succeeds.",
+                    "## Completion conditions\n"
+                    "- `new_call` is active and no `legacy_writer` remains.",
+                ),
+            ),
+        ),
+    ).with_revision()
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    claim = brief.transformation_contract.by_kind("completion_condition")[0]
+    predicates = {
+        item.predicate_id: item
+        for item in brief.transformation_assessment.by_claim_id()[claim.id]
+        .predicate_assessments
+    }
+
+    assert [
+        item.expectation
+        for item in brief.transformation_contract.predicates.predicates
+        if item.claim_id == claim.id
+    ] == ["verified_head", "absent_head"]
+    assert [item.expectation for item in predicates.values()] == [
+        "verified_head",
+        "absent_head",
+    ]
+    assert brief.transformation_assessment.by_claim_id()[claim.id].status != (
+        "contradicted"
+    )
+
+
 def test_stale_verification_never_demonstrates_current_completion() -> None:
     brief = DeterministicAnalyzer().analyze(
         AnalysisInput(packet=_packet(head_sha="previous-head"))
@@ -101,7 +139,7 @@ def test_assessment_serializes_separately_from_alignment() -> None:
     serialized = brief.to_dict()
 
     assert serialized["transformation_assessment"]["schema_version"] == (
-        "transformation_assessment.v1"
+        "transformation_assessment.v2"
     )
     assert "status" not in serialized["transformation_alignment"]["bindings"][0]
 

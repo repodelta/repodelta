@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import re
-
 from prismcode.model.contracts import (
     ClosureScanPlan,
     ClosureScanPlanSet,
@@ -10,15 +9,15 @@ from prismcode.model.contracts import (
     TransformationAlignment,
     TransformationAssessment,
     TransformationAssessmentReason,
+    TransformationPredicate,
+    TransformationPredicateAssessment,
     TransformationClaim,
     TransformationClaimAssessment,
     TransformationContract,
     TransformationEvidenceBinding,
+    TransformationSubjectSelection,
 )
 
-_PRODUCTION_PROFILES = frozenset(
-    {"production", "workflow", "configuration", "dependency", "schema", "unknown"}
-)
 _GLOBAL_CLAIM_KINDS = frozenset(
     {
         "selected_region",
@@ -42,6 +41,7 @@ def assess_transformation(
     closure_scan_plans: ClosureScanPlanSet,
     *,
     head_sha: str,
+    subject_selection: TransformationSubjectSelection | None = None,
 ) -> TransformationAssessment:
     """Assess aligned facts without inferring acceptance or mergeability."""
 
@@ -55,6 +55,8 @@ def assess_transformation(
             evidence,
             plans.get(claim.id),
             head_sha=head_sha,
+            predicates=contract.predicates.by_claim_id().get(claim.id, ()),
+            subject_selection=subject_selection,
         )
         for claim in contract.claims
     )
@@ -70,6 +72,8 @@ def _assess_claim(
     closure_plan: ClosureScanPlan | None,
     *,
     head_sha: str,
+    predicates: tuple[TransformationPredicate, ...] = (),
+    subject_selection: TransformationSubjectSelection | None = None,
 ) -> TransformationClaimAssessment:
     if claim.kind == "uncertainty":
         return _result(
@@ -83,6 +87,27 @@ def _assess_claim(
                     "Authored uncertainty is review context, not a fact claim.",
                 ),
             ),
+        )
+    target_predicates = tuple(
+        item for item in predicates if item.role == "target"
+    )
+    if target_predicates:
+        predicate_assessments = tuple(
+            _assess_predicate(
+                claim,
+                predicate,
+                bindings,
+                evidence,
+                closure_plan,
+                head_sha=head_sha,
+                subject_selection=subject_selection,
+                predicate_count=len(target_predicates),
+            )
+            for predicate in target_predicates
+        )
+        return _aggregate_predicate_assessments(
+            claim,
+            predicate_assessments,
         )
     if not bindings:
         return _result(
@@ -173,7 +198,403 @@ def _assess_claim(
     )
 
 
+def _assess_predicate(
+    claim: TransformationClaim,
+    predicate: TransformationPredicate,
+    bindings: tuple[TransformationEvidenceBinding, ...],
+    evidence: dict[str, EvidenceItem],
+    closure_plan: ClosureScanPlan | None,
+    *,
+    head_sha: str,
+    subject_selection: TransformationSubjectSelection | None,
+    predicate_count: int,
+) -> TransformationPredicateAssessment:
+    predicate_bindings = _predicate_bindings(
+        predicate,
+        bindings,
+        evidence,
+        closure_plan,
+        predicate_count=predicate_count,
+        subject_selection=subject_selection,
+    )
+    closure_binding = next(
+        (item for item in predicate_bindings if item.evidence_role == "closure"),
+        None,
+    )
+    if closure_binding is not None and closure_plan is not None:
+        fact = evidence[closure_binding.evidence_id]
+        return _assess_closure_predicate(
+            claim,
+            predicate,
+            closure_binding,
+            fact,
+            closure_plan,
+        )
+
+    if predicate.expectation == "verified_head":
+        verification = tuple(
+            item
+            for item in predicate_bindings
+            if item.evidence_role == "verification"
+        )
+        if verification:
+            assessed = _assess_verification(
+                claim,
+                verification,
+                evidence,
+                head_sha,
+                require_success=True,
+            )
+            return _predicate_result(
+                claim,
+                predicate,
+                assessed.status,
+                assessed.supporting_binding_ids,
+                assessed.contradicting_binding_ids,
+                assessed.reasons,
+            )
+
+    exact = tuple(
+        item
+        for item in predicate_bindings
+        if item.association in {"provided_association", "exact_identifier"}
+    )
+    if exact:
+        status = (
+            "partial"
+            if (
+                claim.kind == "completion_condition"
+                or predicate.expectation == "absent_head"
+            )
+            else "demonstrated"
+        )
+        reason_kind = (
+            "association_only"
+            if status == "partial"
+            else "exact_fact_observed"
+        )
+        return _predicate_result(
+            claim,
+            predicate,
+            status,
+            tuple(item.id for item in exact),
+            (),
+            (
+                _reason(
+                    reason_kind,
+                    (
+                        "The exact predicate surface is observed, but a completion "
+                        "claim still requires its full consumer or execution proof."
+                        if status == "partial"
+                        else "An exact predicate surface is observed on the declared revision."
+                    ),
+                    exact,
+                ),
+            ),
+        )
+    if predicate_bindings:
+        return _predicate_result(
+            claim,
+            predicate,
+            "partial",
+            tuple(item.id for item in predicate_bindings),
+            (),
+            (
+                _reason(
+                    "association_only",
+                    "Related evidence is present, but no exact predicate binding was observed.",
+                    predicate_bindings,
+                ),
+            ),
+        )
+    return _predicate_result(
+        claim,
+        predicate,
+        "unverified",
+        (),
+        (),
+        (
+            _reason(
+                "no_binding",
+                "No observed fact was deterministically associated with this predicate.",
+            ),
+        ),
+    )
+
+
+def _predicate_bindings(
+    predicate: TransformationPredicate,
+    bindings: tuple[TransformationEvidenceBinding, ...],
+    evidence: dict[str, EvidenceItem],
+    closure_plan: ClosureScanPlan | None,
+    *,
+    predicate_count: int,
+    subject_selection: TransformationSubjectSelection | None,
+) -> tuple[TransformationEvidenceBinding, ...]:
+    selected_ids = {
+        item.evidence_id
+        for item in (subject_selection.matches if subject_selection else ())
+        if item.predicate_id == predicate.id
+    }
+    closure_ids = {
+        item.evidence_id
+        for item in bindings
+        if item.evidence_role == "closure"
+        and predicate.expectation == "absent_head"
+        and _closure_fact_has_predicate(
+            evidence[item.evidence_id],
+            predicate,
+            closure_plan,
+        )
+    }
+    selected_ids |= closure_ids
+    if selected_ids:
+        return tuple(item for item in bindings if item.evidence_id in selected_ids)
+    exact = tuple(
+        item
+        for item in bindings
+        if item.evidence_role != "closure"
+        and item.association in {"provided_association", "exact_identifier"}
+    )
+    if exact:
+        return exact
+    if predicate.expectation == "verified_head" and predicate_count == 1:
+        return tuple(item for item in bindings if item.evidence_role != "closure")
+    return ()
+
+
+def _closure_fact_has_predicate(
+    item: EvidenceItem,
+    predicate: TransformationPredicate,
+    plan: ClosureScanPlan | None,
+) -> bool:
+    if (
+        item.closure_scan_result is None
+        or plan is None
+        or item.closure_scan_result.plan_id != plan.id
+    ):
+        return False
+    return any(
+        scan_predicate.source_predicate_id == predicate.id
+        for scan_predicate in plan.predicates
+    )
+
+
+def _assess_closure_predicate(
+    claim: TransformationClaim,
+    predicate: TransformationPredicate,
+    binding: TransformationEvidenceBinding,
+    fact: EvidenceItem,
+    plan: ClosureScanPlan,
+) -> TransformationPredicateAssessment:
+    result = fact.closure_scan_result
+    if result is None:
+        return _predicate_result(
+            claim,
+            predicate,
+            "unverified",
+            (),
+            (),
+            (
+                _reason(
+                    "coverage_incomplete",
+                    "Closure evidence has no canonical scan result.",
+                    (binding,),
+                    (fact,),
+                ),
+            ),
+        )
+    observations = {item.revision_side: item for item in result.revisions}
+    if plan.expectation == "transition":
+        base = observations.get("base")
+        head = observations.get("head")
+        base_matches = _closure_matches(predicate, base, plan)
+        head_matches = _closure_matches(predicate, head, plan)
+        if (
+            base is not None
+            and base.state == "complete"
+            and head is not None
+            and head.state == "complete"
+            and base_matches
+            and not head_matches
+        ):
+            return _predicate_result(
+                claim,
+                predicate,
+                "demonstrated",
+                (binding.id,),
+                (),
+                (
+                    _reason(
+                        "closure_transition_observed",
+                        "Complete base/head scans observed this exact surface in "
+                        "base and its absence in head.",
+                        (binding,),
+                        (fact,),
+                    ),
+                ),
+            )
+        if head is not None and head.state == "complete" and head_matches:
+            return _predicate_result(
+                claim,
+                predicate,
+                "contradicted",
+                (),
+                (binding.id,),
+                (
+                    _reason(
+                        "closure_conflict_observed",
+                        "The exact removal predicate remains present in head.",
+                        (binding,),
+                        (fact,),
+                    ),
+                ),
+            )
+    elif predicate.expectation == "absent_head":
+        head = observations.get("head")
+        matches = _closure_matches(predicate, head, plan)
+        if head is not None and head.state == "complete" and matches:
+            return _predicate_result(
+                claim,
+                predicate,
+                "contradicted",
+                (),
+                (binding.id,),
+                (
+                    _reason(
+                        "closure_conflict_observed",
+                        "A complete head scan found the exact surface that this "
+                        "negative predicate requires absent.",
+                        (binding,),
+                        (fact,),
+                    ),
+                ),
+            )
+        if head is not None and head.state == "complete":
+            return _predicate_result(
+                claim,
+                predicate,
+                "demonstrated",
+                (binding.id,),
+                (),
+                (
+                    _reason(
+                        "closure_absence_observed",
+                        "A complete head scan found no exact surface selected by "
+                        "this negative predicate.",
+                        (binding,),
+                        (fact,),
+                    ),
+                ),
+            )
+    incomplete = any(item.state != "complete" for item in result.revisions)
+    return _predicate_result(
+        claim,
+        predicate,
+        "partial" if incomplete else "unverified",
+        (binding.id,),
+        (),
+        (
+            _reason(
+                "coverage_incomplete" if incomplete else "association_only",
+                "Closure coverage or the exact revision transition is insufficient "
+                "for this predicate.",
+                (binding,),
+                (fact,),
+            ),
+        ),
+    )
+
+
+def _closure_matches(
+    predicate: TransformationPredicate,
+    observation,
+    plan: ClosureScanPlan,
+) -> tuple:
+    if observation is None:
+        return ()
+    scan_predicate_ids = {
+        item.id
+        for item in plan.predicates
+        if item.source_predicate_id == predicate.id
+    }
+    surfaces = {
+        "paths" if predicate.selector_kind == "repository_path" else "symbol_names"
+    }
+    return tuple(
+        item
+        for item in observation.matches
+        if item.predicate_id in scan_predicate_ids
+        and item.surface in surfaces
+    )
+
+
+def _aggregate_predicate_assessments(
+    claim: TransformationClaim,
+    assessments: tuple[TransformationPredicateAssessment, ...],
+) -> TransformationClaimAssessment:
+    statuses = tuple(item.status for item in assessments)
+    if "contradicted" in statuses:
+        status = "contradicted"
+    elif statuses and all(item == "demonstrated" for item in statuses):
+        status = "demonstrated"
+    elif any(item in {"demonstrated", "partial"} for item in statuses):
+        status = "partial"
+    else:
+        status = "unverified"
+    supporting = tuple(
+        dict.fromkeys(
+            binding_id
+            for item in assessments
+            for binding_id in item.supporting_binding_ids
+        )
+    )
+    contradicting = tuple(
+        dict.fromkeys(
+            binding_id
+            for item in assessments
+            for binding_id in item.contradicting_binding_ids
+        )
+    )
+    reasons = tuple(
+        reason
+        for item in assessments
+        for reason in item.reasons
+    )
+    return TransformationClaimAssessment(
+        id=f"TAS:{claim.id}",
+        claim_id=claim.id,
+        status=status,
+        supporting_binding_ids=supporting,
+        contradicting_binding_ids=contradicting,
+        reasons=reasons,
+        predicate_assessments=assessments,
+    )
+
+
+def _predicate_result(
+    claim: TransformationClaim,
+    predicate: TransformationPredicate,
+    status,
+    supporting,
+    contradicting,
+    reasons,
+) -> TransformationPredicateAssessment:
+    return TransformationPredicateAssessment(
+        id=f"TAP:{claim.id}:{predicate.id}",
+        claim_id=claim.id,
+        predicate_id=predicate.id,
+        expectation=predicate.expectation,
+        status=status,
+        supporting_binding_ids=tuple(supporting),
+        contradicting_binding_ids=tuple(contradicting),
+        reasons=tuple(reasons),
+    )
+
+
 def _assess_closure(claim, binding, fact, plan):
+    """Keep selector-free closure claims conservative without a second evaluator."""
+
     result = fact.closure_scan_result
     if result is None or plan is None:
         return _result(
@@ -189,126 +610,17 @@ def _assess_closure(claim, binding, fact, plan):
                 ),
             ),
         )
-    exact_predicates = tuple(
-        item for item in plan.predicates
-        if item.target.kind in {"identifier", "path"}
-    )
-    if not exact_predicates or len(exact_predicates) != len(plan.predicates):
-        return _result(
-            claim,
-            "partial",
-            (binding,),
-            (),
-            (
-                _reason(
-                    "association_only",
-                    "Phrase-only or incomplete closure predicates cannot prove an exact "
-                    "repository-wide transition or absence.",
-                    (binding,),
-                    (fact,),
-                ),
-            ),
-        )
-    observations = {item.revision_side: item for item in result.revisions}
-
-    def strong(side: str):
-        observation = observations.get(side)
-        if observation is None:
-            return {}
-        result = {}
-        for predicate in exact_predicates:
-            surface = (
-                "paths" if predicate.target.kind == "path" else "symbol_names"
-            )
-            result[predicate.id] = tuple(
-                item for item in observation.matches
-                if item.predicate_id == predicate.id
-                and item.surface == surface
-                and (
-                    predicate.path_scopes
-                    or item.profile in _PRODUCTION_PROFILES
-                )
-            )
-        return result
-
-    head = observations.get("head")
-    base = observations.get("base")
-    head_matches = strong("head")
-    base_matches = strong("base")
-    head_conflicts = tuple(
-        item for matches in head_matches.values() for item in matches
-    )
-    base_support = tuple(
-        item for matches in base_matches.values() for item in matches
-    )
-    if head is not None and head.state == "complete" and head_conflicts:
-        return _result(
-            claim,
-            "contradicted",
-            (),
-            (binding,),
-            (
-                _reason(
-                    "closure_conflict_observed",
-                    "A complete head scan found the exact production surface "
-                    "that the claim requires absent.",
-                    (binding,),
-                    (fact,),
-                ),
-            ),
-        )
-    if result.expectation == "transition":
-        complete_transition = (
-            base is not None
-            and base.state == "complete"
-            and head is not None
-            and head.state == "complete"
-            and all(base_matches.get(item.id) for item in exact_predicates)
-            and not head_conflicts
-        )
-        if complete_transition:
-            return _result(
-                claim,
-                "demonstrated",
-                (binding,),
-                (),
-                (
-                    _reason(
-                        "closure_transition_observed",
-                        "Complete base/head scans observed the exact production "
-                        "surface in base and its absence in head.",
-                        (binding,),
-                        (fact,),
-                    ),
-                ),
-            )
-    elif head is not None and head.state == "complete" and not head_conflicts:
-        return _result(
-            claim,
-            "demonstrated",
-            (binding,),
-            (),
-            (
-                _reason(
-                    "closure_absence_observed",
-                    "A complete head scan found no exact production surface "
-                    "selected by the absence claim.",
-                    (binding,),
-                    (fact,),
-                ),
-            ),
-        )
     incomplete = any(item.state != "complete" for item in result.revisions)
     return _result(
         claim,
-        "partial" if incomplete or base_support else "unverified",
+        "partial" if incomplete else "unverified",
         (binding,),
         (),
         (
             _reason(
                 "coverage_incomplete" if incomplete else "association_only",
-                "Closure scan coverage or exact revision transition is "
-                "insufficient for a repository-wide conclusion.",
+                "Closure evidence has no explicit target predicate to evaluate "
+                "as a repository-wide conclusion.",
                 (binding,),
                 (fact,),
             ),
@@ -316,7 +628,14 @@ def _assess_closure(claim, binding, fact, plan):
     )
 
 
-def _assess_verification(claim, bindings, evidence, head_sha):
+def _assess_verification(
+    claim,
+    bindings,
+    evidence,
+    head_sha,
+    *,
+    require_success: bool = False,
+):
     current = tuple(
         item for item in bindings
         if evidence[item.evidence_id].observed_head_sha == head_sha and head_sha
@@ -341,7 +660,11 @@ def _assess_verification(claim, bindings, evidence, head_sha):
         if evidence[item.evidence_id].verification_conclusion in _FAILURE_CONCLUSIONS
     )
     if failures:
-        status = "contradicted" if _expects_success(claim.text) else "demonstrated"
+        status = (
+            "contradicted"
+            if require_success or _expects_success(claim.text)
+            else "demonstrated"
+        )
         reason = (
             _reason(
                 "current_verification_failure",

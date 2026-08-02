@@ -7,15 +7,20 @@ Conservative deterministic status for typed transformation claims.
 ## Input / output
 
 Consumes the transformation contract, typed alignment, canonical evidence catalog,
-closure plans, and reviewed head SHA. Emits one `TransformationAssessment`.
+closure plans, canonical subject selection, and reviewed head SHA. Emits one
+`TransformationAssessment` with one typed predicate assessment for every
+target predicate and one conservative aggregate claim status.
 
 ## Invariants
 
-Every authored claim receives exactly one status. Missing evidence is unverified,
-not contradicted. Repository-wide absence is demonstrated only by a complete,
-revision-aware closure scan. Verification is authoritative only for the reviewed
-head. Removal and negative conclusions evaluate complete target predicates;
-path scopes constrain targets and never become absence targets themselves.
+Every authored claim receives exactly one aggregate status and every target
+predicate receives exactly one polarity-preserving status. Missing evidence is
+unverified, not contradicted. Repository-wide absence is demonstrated only by a
+complete, revision-aware closure scan. Verification is authoritative only for
+the reviewed head. Removal and negative conclusions evaluate complete target
+predicates; path scopes constrain targets and never become absence targets
+themselves. A word such as `without` cannot change unrelated positive
+predicates in the same claim into absence assertions.
 
 ## Must not
 

@@ -15,9 +15,12 @@ Canonical G statements plus `TransformationContract` claims become
 ## Invariants
 
 Each eligible statement owns one stable plan and one result. Guardrails and
-negative completion conditions inspect head; removals preserve separate base
-and head observations. Transformation plans consume the one-pass typed
-`TransformationPredicateSet`; they never reparse normalized claim prose.
+explicitly negative completion predicates inspect head; removals preserve
+separate base and head observations. Transformation plans consume the one-pass
+typed `TransformationPredicateSet`; each scan target retains its source
+predicate identity and plans never reparse normalized claim prose. Positive
+predicates in a mixed completion condition do not become absence targets merely
+because another clause is negative.
 Plans retain source text and provenance. Every observed
 match carries its predicate, target, revision, surface, canonical path profile,
 and location. Each predicate owns one target plus an optional path-scope set;

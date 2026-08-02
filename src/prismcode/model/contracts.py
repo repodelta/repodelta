@@ -1293,6 +1293,21 @@ class TransformationClaimAssessment:
     supporting_binding_ids: tuple[str, ...] = ()
     contradicting_binding_ids: tuple[str, ...] = ()
     reasons: tuple[TransformationAssessmentReason, ...] = ()
+    predicate_assessments: tuple["TransformationPredicateAssessment", ...] = ()
+
+
+@dataclass(frozen=True)
+class TransformationPredicateAssessment:
+    """Assessment of one authored predicate without claim-wide polarity."""
+
+    id: str
+    claim_id: str
+    predicate_id: str
+    expectation: TransformationPredicateExpectation
+    status: TransformationAssessmentStatus
+    supporting_binding_ids: tuple[str, ...] = ()
+    contradicting_binding_ids: tuple[str, ...] = ()
+    reasons: tuple[TransformationAssessmentReason, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -1300,7 +1315,7 @@ class TransformationAssessment:
     """One conservative deterministic status per authored transformation claim."""
 
     claims: tuple[TransformationClaimAssessment, ...] = ()
-    schema_version: str = "transformation_assessment.v1"
+    schema_version: str = "transformation_assessment.v2"
 
     def by_claim_id(self) -> dict[str, TransformationClaimAssessment]:
         return {item.claim_id: item for item in self.claims}
@@ -1311,7 +1326,7 @@ class TransformationAssessment:
         alignment: TransformationAlignment,
         evidence_catalog: EvidenceCatalog,
     ) -> None:
-        if self.schema_version != "transformation_assessment.v1":
+        if self.schema_version != "transformation_assessment.v2":
             raise ValueError(
                 f"unsupported transformation assessment schema: {self.schema_version}"
             )
@@ -1325,6 +1340,20 @@ class TransformationAssessment:
         for item in self.claims:
             if item.id != f"TAS:{item.claim_id}":
                 raise ValueError(f"{item.id}: non-canonical assessment ID")
+            claim_predicates = tuple(
+                predicate
+                for predicate in contract.predicates.predicates
+                if predicate.claim_id == item.claim_id
+                and predicate.role == "target"
+            )
+            predicate_ids = tuple(predicate.id for predicate in claim_predicates)
+            if tuple(
+                assessment.predicate_id
+                for assessment in item.predicate_assessments
+            ) != predicate_ids:
+                raise ValueError(
+                    f"{item.id}: predicate assessments must preserve each target predicate"
+                )
             referenced = (
                 *item.supporting_binding_ids,
                 *item.contradicting_binding_ids,
@@ -1356,6 +1385,12 @@ class TransformationAssessment:
                 for reason in item.reasons
                 for evidence_id in reason.evidence_ids
             }
+            reason_evidence_ids.update(
+                evidence_id
+                for predicate_assessment in item.predicate_assessments
+                for reason in predicate_assessment.reasons
+                for evidence_id in reason.evidence_ids
+            )
             if not reason_evidence_ids <= evidence_ids:
                 raise ValueError(f"{item.id}: assessment references unknown evidence")
             if not item.reasons:
@@ -1368,6 +1403,73 @@ class TransformationAssessment:
                 raise ValueError(
                     f"{item.id}: contradicted assessment requires conflict"
                 )
+            for predicate_assessment in item.predicate_assessments:
+                predicate = next(
+                    (
+                        candidate
+                        for candidate in claim_predicates
+                        if candidate.id == predicate_assessment.predicate_id
+                    ),
+                    None,
+                )
+                if predicate is None:
+                    raise ValueError(
+                        f"{item.id}: predicate assessment references unknown predicate"
+                    )
+                if predicate_assessment.id != (
+                    f"TAP:{item.claim_id}:{predicate_assessment.predicate_id}"
+                ):
+                    raise ValueError(
+                        f"{predicate_assessment.id}: non-canonical predicate assessment ID"
+                    )
+                if predicate_assessment.claim_id != item.claim_id:
+                    raise ValueError(
+                        f"{predicate_assessment.id}: predicate assessment claim mismatch"
+                    )
+                if predicate_assessment.expectation != predicate.expectation:
+                    raise ValueError(
+                        f"{predicate_assessment.id}: predicate expectation changed"
+                    )
+                predicate_referenced = (
+                    *predicate_assessment.supporting_binding_ids,
+                    *predicate_assessment.contradicting_binding_ids,
+                    *(
+                        binding_id
+                        for reason in predicate_assessment.reasons
+                        for binding_id in reason.binding_ids
+                    ),
+                )
+                if any(
+                    binding_id not in claim_binding_ids
+                    for binding_id in predicate_referenced
+                ):
+                    raise ValueError(
+                        f"{predicate_assessment.id}: assessment references another claim's binding"
+                    )
+                if set(predicate_assessment.supporting_binding_ids) & set(
+                    predicate_assessment.contradicting_binding_ids
+                ):
+                    raise ValueError(
+                        f"{predicate_assessment.id}: one binding cannot support and contradict a predicate"
+                    )
+                if not predicate_assessment.reasons:
+                    raise ValueError(
+                        f"{predicate_assessment.id}: predicate assessment requires typed reasons"
+                    )
+                if (
+                    predicate_assessment.status == "demonstrated"
+                    and not predicate_assessment.supporting_binding_ids
+                ):
+                    raise ValueError(
+                        f"{predicate_assessment.id}: demonstrated predicate requires support"
+                    )
+                if (
+                    predicate_assessment.status == "contradicted"
+                    and not predicate_assessment.contradicting_binding_ids
+                ):
+                    raise ValueError(
+                        f"{predicate_assessment.id}: contradicted predicate requires conflict"
+                    )
 
 
 @dataclass(frozen=True)
@@ -1384,6 +1486,7 @@ class ClosureScanPredicate:
     id: str
     target: ClosureScanSelector
     path_scopes: tuple[ClosureScanSelector, ...] = ()
+    source_predicate_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -1489,6 +1592,12 @@ class ClosureScanPlanSet:
                 ):
                     raise ValueError(
                         f"{predicate.target.id}: invalid predicate target"
+                    )
+                if predicate.source_predicate_id is not None and (
+                    not predicate.source_predicate_id.startswith("TP:")
+                ):
+                    raise ValueError(
+                        f"{predicate.id}: invalid source transformation predicate"
                     )
                 if predicate.target.kind == "phrase" and predicate.path_scopes:
                     raise ValueError(
