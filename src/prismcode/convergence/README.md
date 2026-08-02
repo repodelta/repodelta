@@ -76,7 +76,9 @@ already-collected structural paths, retains complete path identities within a
 three-hop and identity safety boundary, and attaches the corresponding
 canonical relation-change and bounded ownership-change facts. It never calls a
 provider or performs another BFS. Deferred whole paths remain explicit coverage
-diagnostics rather than being partially represented.
+diagnostics rather than being partially represented. Projection consumes these
+IDs through `TransformationStructuralTopology`; alignment does not participate
+in structural membership.
 
 ## Extension points
 

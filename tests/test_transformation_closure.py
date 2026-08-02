@@ -6,9 +6,17 @@ from prismcode.convergence.transformation import (
 )
 from prismcode.model.contracts import (
     AnalysisInput,
+    CandidateConvergence,
+    DiagnosticPresentation,
     EvidenceCatalog,
     EvidenceItem,
+    ObservedTransformation,
+    ProjectionCandidateSet,
     ReviewSourcePacket,
+    TransformationAlignment,
+    TransformationAssessment,
+    TransformationAssessmentReason,
+    TransformationClaimAssessment,
     SourceRef,
     StructuralChangeIdentity,
     StructuralOwnershipChangeIdentity,
@@ -17,6 +25,7 @@ from prismcode.model.contracts import (
     TransformationSubjectSelection,
 )
 from prismcode.pipeline import DeterministicAnalyzer
+from prismcode.projection.build import build_review_projection
 from prismcode.semantics.criteria import extract_review_semantics
 
 
@@ -155,7 +164,16 @@ def _fixture():
     )
     symbols = tuple(
         _symbol(identity)
-        for identity in ("adapter", "service", "store", "one", "two", "three", "four")
+        for identity in (
+            "adapter",
+            "service",
+            "store",
+            "one",
+            "two",
+            "three",
+            "four",
+            "module",
+        )
     )
     catalog = EvidenceCatalog(
         items=(
@@ -250,3 +268,73 @@ def test_pipeline_builds_transformation_closure_once(monkeypatch) -> None:
     assert brief.transformation_structural_closure.schema_version == (
         "transformation_structural_closure.v1"
     )
+
+
+def test_closure_projection_is_the_shared_graph_authority() -> None:
+    contract, selection, catalog = _fixture()
+    closure = converge_transformation_closure(contract, selection, catalog)
+    assessment = TransformationAssessment(
+        claims=tuple(
+            TransformationClaimAssessment(
+                id=f"TAS:{claim.id}",
+                claim_id=claim.id,
+                status="unverified",
+                reasons=(
+                    TransformationAssessmentReason(
+                        kind="no_structural_match",
+                        detail="Fixture leaves assessment unresolved.",
+                    ),
+                ),
+            )
+            for claim in contract.claims
+        )
+    )
+    packet = ReviewSourcePacket(
+        repository="acme/widget",
+        pull_request=10,
+        title="Close transformation structure",
+        source_records=(),
+    ).with_revision()
+
+    projection = build_review_projection(
+        ProjectionCandidateSet(),
+        CandidateConvergence(),
+        catalog,
+        diagnostic_presentation=DiagnosticPresentation(),
+        packet=packet,
+        focus_statements=(),
+        transformation_contract=contract,
+        observed_transformation=ObservedTransformation(),
+        transformation_structural_closure=closure,
+        transformation_alignment=TransformationAlignment(),
+        transformation_assessment=assessment,
+    )
+    graph = projection.review_graph
+    topology = projection.verification_workspace.transformation_structural_topology
+    overlay = topology.by_claim_id()["T1"].structural_overlay
+
+    assert {node.review_symbol_id for node in graph.nodes} >= {
+        "adapter",
+        "service",
+        "store",
+        "module",
+    }
+    overlay_review_ids = {
+        node.review_symbol_id
+        for node in graph.nodes
+        if node.id in {item.node_id for item in overlay.nodes}
+    }
+    assert overlay_review_ids >= {
+        "adapter",
+        "service",
+        "store",
+        "module",
+    }
+    assert set(overlay.edge_ids) == {
+        "E:relation:adapter-service",
+        "E:relation:service-store",
+    }
+    assert set(overlay.ownership_edge_ids) == {"E:ownership:module-adapter"}
+    assert projection.verification_workspace.inspections_by_subject_id()[
+        "T1"
+    ].structural_overlay == overlay

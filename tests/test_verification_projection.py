@@ -19,6 +19,10 @@ from prismcode.model.contracts import (
     TransformationClaim,
     TransformationClaimAssessment,
     TransformationContract,
+    TransformationStructuralClosure,
+    TransformationStructuralClosureGroup,
+    TransformationStructuralTopology,
+    TransformationStructuralTopologyGroup,
     TransformationEvidenceBinding,
 )
 from prismcode.pipeline import DeterministicAnalyzer
@@ -78,7 +82,7 @@ def test_pipeline_projects_rg_and_transformation_claims_once() -> None:
         assert entry.inspector_id == f"VEI:{claim.id}"
 
 
-def test_transformation_binding_projects_to_shared_graph_overlay() -> None:
+def test_transformation_binding_cannot_create_structural_graph_membership() -> None:
     source = SourceRef(label="PR #12")
     claim = TransformationClaim(
         id="T1",
@@ -160,23 +164,31 @@ def test_transformation_binding_projects_to_shared_graph_overlay() -> None:
         ProjectionCandidateSet(),
         (),
         graph,
+        transformation_structural_topology=TransformationStructuralTopology(
+            groups=(
+                TransformationStructuralTopologyGroup(claim_id=claim.id),
+            )
+        ),
+        transformation_structural_closure=TransformationStructuralClosure(
+            groups=(
+                TransformationStructuralClosureGroup(claim_id=claim.id),
+            )
+        ),
     )
     inspection = workspace.inspections_by_subject_id()[claim.id]
 
     assert inspection.observed_evidence_ids == (fact.id,)
     assert inspection.supporting_evidence_ids == (fact.id,)
-    assert inspection.structural_overlay.nodes == (
-        StructuralFocusNode(node_id="SGN:workspace", role="changed_anchor"),
-    )
+    assert inspection.structural_overlay.nodes == ()
 
 
 def test_verification_workspace_is_serialized_for_renderer_consumption() -> None:
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=_mixed_packet()))
     serialized = brief.to_dict()["projection"]
 
-    assert serialized["schema_version"] == "review_projection.v22"
+    assert serialized["schema_version"] == "review_projection.v23"
     assert serialized["verification_workspace"]["schema_version"] == (
-        "verification_workspace.v1"
+        "verification_workspace.v2"
     )
     assert serialized["verification_workspace"]["matrix"]
     summary = brief.projection.verification_workspace.transformation_summary

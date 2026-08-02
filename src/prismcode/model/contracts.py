@@ -2747,6 +2747,26 @@ class StructuralFocusOverlay:
 
 
 @dataclass(frozen=True)
+class TransformationStructuralTopologyGroup:
+    """One claim's identity join into the shared structural graph."""
+
+    claim_id: str
+    structural_overlay: StructuralFocusOverlay = StructuralFocusOverlay()
+    diagnostic_ids: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class TransformationStructuralTopology:
+    """Projection-owned mapping from closure claims to shared graph members."""
+
+    groups: tuple[TransformationStructuralTopologyGroup, ...] = ()
+    schema_version: str = "transformation_structural_topology.v1"
+
+    def by_claim_id(self) -> dict[str, TransformationStructuralTopologyGroup]:
+        return {item.claim_id: item for item in self.groups}
+
+
+@dataclass(frozen=True)
 class CanonicalChangeMapEntry:
     focus_statement_id: str
     claim_relation_ids: tuple[str, ...] = ()
@@ -2831,9 +2851,12 @@ class VerificationWorkspace:
     transformation_summary: TransformationSummaryProjection = (
         TransformationSummaryProjection()
     )
+    transformation_structural_topology: TransformationStructuralTopology = (
+        TransformationStructuralTopology()
+    )
     matrix: tuple[VerificationMatrixEntry, ...] = ()
     inspections: tuple[VerificationEvidenceInspection, ...] = ()
-    schema_version: str = "verification_workspace.v1"
+    schema_version: str = "verification_workspace.v2"
 
     def by_subject_id(self) -> dict[str, VerificationMatrixEntry]:
         return {item.subject_id: item for item in self.matrix}
@@ -2849,7 +2872,7 @@ class ReviewProjection:
     slices: tuple[ReviewSlice, ...] = ()
     review_graph: ReviewStructuralGraph = ReviewStructuralGraph()
     verification_workspace: VerificationWorkspace = VerificationWorkspace()
-    schema_version: str = "review_projection.v22"
+    schema_version: str = "review_projection.v23"
 
     def validate_consistency(
         self,
