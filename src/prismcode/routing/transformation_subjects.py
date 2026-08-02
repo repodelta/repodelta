@@ -33,6 +33,8 @@ def select_transformation_subjects(
     diagnostics: list[TransformationSubjectDiagnostic] = []
 
     for predicate in contract.predicates.predicates:
+        if predicate.role != "target":
+            continue
         for selector_index, selector_value in enumerate(predicate.values, start=1):
             selected = tuple(
                 item

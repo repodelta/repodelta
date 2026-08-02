@@ -11,15 +11,15 @@ fixture or GitHub
        -> objectives (O), scope context (S)
        -> implementation/boundary (C), baseline (B), verification (V) claims
        -> PR-authored typed transformation contract (T/CC)
-       -> explicit code-selector predicates and missing-selector diagnostics
+       -> explicit target/path-scope predicates and missing-selector diagnostics
        -> intent (I)
   -> canonical closure scan planning
        -> one source-backed plan per eligible G/removal/negative CC
        -> typed base/head revision scope
-       -> canonical executable selectors + supported surfaces
+       -> canonical transformation predicates reused without prose reparsing
   -> bounded closure scanning
        -> validated clean base/head checkouts
-       -> deterministic path/content/symbol-name inspection
+       -> scoped target path/content/symbol-name inspection
        -> typed file/byte/match safety limits
        -> revision-aware coverage, path profiles, and candidate locations
   -> one canonical DiffHunkCollection
@@ -101,9 +101,10 @@ becoming alternate intake, classification, routing, or presentation paths.
    It never means implemented, verified, satisfied, or in scope.
 5. Renderers project the brief and never infer or upgrade a conclusion.
 6. Structural providers return repository facts and diagnostics only.
-7. Closure scan plans own execution intent and selectors. Observed scans
+7. Closure scan plans own execution intent and target/path-scope predicates. Observed scans
    become revision-aware closure facts; neither plans nor zero-match observations prove
-   satisfaction or repository-wide absence.
+   satisfaction or repository-wide absence. A scope is never assessed as the
+   target whose absence was claimed.
 8. `TransformationAssessment` is the only authority for deterministic T/CC
    status. Missing association is unverified, local change is not global
    absence proof, and no status implies acceptance or mergeability.

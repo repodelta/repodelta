@@ -189,8 +189,11 @@ def _assess_closure(claim, binding, fact, plan):
                 ),
             ),
         )
-    selector_kind = {item.id: item.kind for item in plan.selectors}
-    if "identifier" not in selector_kind.values():
+    exact_predicates = tuple(
+        item for item in plan.predicates
+        if item.target.kind in {"identifier", "path"}
+    )
+    if not exact_predicates or len(exact_predicates) != len(plan.predicates):
         return _result(
             claim,
             "partial",
@@ -199,7 +202,7 @@ def _assess_closure(claim, binding, fact, plan):
             (
                 _reason(
                     "association_only",
-                    "Phrase-only closure selectors cannot prove an exact "
+                    "Phrase-only or incomplete closure predicates cannot prove an exact "
                     "repository-wide transition or absence.",
                     (binding,),
                     (fact,),
@@ -211,19 +214,34 @@ def _assess_closure(claim, binding, fact, plan):
     def strong(side: str):
         observation = observations.get(side)
         if observation is None:
-            return ()
-        return tuple(
-            item for item in observation.matches
-            if selector_kind.get(item.selector_id) == "identifier"
-            and item.surface in {"paths", "symbol_names"}
-            and item.profile in _PRODUCTION_PROFILES
-        )
+            return {}
+        result = {}
+        for predicate in exact_predicates:
+            surface = (
+                "paths" if predicate.target.kind == "path" else "symbol_names"
+            )
+            result[predicate.id] = tuple(
+                item for item in observation.matches
+                if item.predicate_id == predicate.id
+                and item.surface == surface
+                and (
+                    predicate.path_scopes
+                    or item.profile in _PRODUCTION_PROFILES
+                )
+            )
+        return result
 
     head = observations.get("head")
     base = observations.get("base")
     head_matches = strong("head")
     base_matches = strong("base")
-    if head is not None and head.state == "complete" and head_matches:
+    head_conflicts = tuple(
+        item for matches in head_matches.values() for item in matches
+    )
+    base_support = tuple(
+        item for matches in base_matches.values() for item in matches
+    )
+    if head is not None and head.state == "complete" and head_conflicts:
         return _result(
             claim,
             "contradicted",
@@ -245,8 +263,8 @@ def _assess_closure(claim, binding, fact, plan):
             and base.state == "complete"
             and head is not None
             and head.state == "complete"
-            and base_matches
-            and not head_matches
+            and all(base_matches.get(item.id) for item in exact_predicates)
+            and not head_conflicts
         )
         if complete_transition:
             return _result(
@@ -264,7 +282,7 @@ def _assess_closure(claim, binding, fact, plan):
                     ),
                 ),
             )
-    elif head is not None and head.state == "complete" and not head_matches:
+    elif head is not None and head.state == "complete" and not head_conflicts:
         return _result(
             claim,
             "demonstrated",
@@ -283,7 +301,7 @@ def _assess_closure(claim, binding, fact, plan):
     incomplete = any(item.state != "complete" for item in result.revisions)
     return _result(
         claim,
-        "partial" if incomplete or base_matches else "unverified",
+        "partial" if incomplete or base_support else "unverified",
         (binding,),
         (),
         (

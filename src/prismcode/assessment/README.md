@@ -14,7 +14,8 @@ closure plans, and reviewed head SHA. Emits one `TransformationAssessment`.
 Every authored claim receives exactly one status. Missing evidence is unverified,
 not contradicted. Repository-wide absence is demonstrated only by a complete,
 revision-aware closure scan. Verification is authoritative only for the reviewed
-head.
+head. Removal and negative conclusions evaluate complete target predicates;
+path scopes constrain targets and never become absence targets themselves.
 
 ## Must not
 

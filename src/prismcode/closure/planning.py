@@ -1,17 +1,20 @@
 from __future__ import annotations
 
 import re
+from typing import Literal
 
 from prismcode.model.contracts import (
+    ClosureSelectorKind,
     ClosureScanPlan,
     ClosureScanPlanSet,
+    ClosureScanPredicate,
     ClosureScanSelector,
     Requirement,
     TransformationClaim,
     TransformationContract,
+    TransformationPredicate,
 )
 
-_EXPLICIT_SELECTOR = re.compile(r"`([^`\n]+)`|[\"“]([^\"”\n]+)[\"”]")
 _NEGATIVE_COMPLETION = re.compile(
     r"\b(?:no|not|without|absent|remove[sd]?|deleted?|eliminated?|"
     r"must\s+not|does\s+not|do\s+not)\b",
@@ -35,12 +38,16 @@ def compile_closure_scan_plans(
 ) -> ClosureScanPlanSet:
     """Compile typed scan intent without treating source claims as evidence."""
 
+    predicates_by_claim = transformation_contract.predicates.by_claim_id()
     eligible_claims = (
         *transformation_contract.by_kind("removal"),
         *(
             item
             for item in transformation_contract.by_kind("completion_condition")
-            if _negative_completion_is_executable(item)
+            if _negative_completion_is_executable(
+                item,
+                predicates_by_claim.get(item.id, ()),
+            )
         ),
     )
     statements: tuple[Requirement | TransformationClaim, ...] = (
@@ -48,20 +55,32 @@ def compile_closure_scan_plans(
         *eligible_claims,
     )
     plans = ClosureScanPlanSet(
-        plans=tuple(_plan(statement) for statement in statements)
+        plans=tuple(
+            _plan(
+                statement,
+                predicates_by_claim.get(statement.id, ()),
+            )
+            for statement in statements
+        )
     )
     plans.validate_consistency(statements)
     return plans
 
 
-def _negative_completion_is_executable(claim: TransformationClaim) -> bool:
+def _negative_completion_is_executable(
+    claim: TransformationClaim,
+    predicates: tuple[TransformationPredicate, ...],
+) -> bool:
     return bool(
         _NEGATIVE_COMPLETION.search(claim.text)
-        and _EXPLICIT_SELECTOR.search(claim.text)
+        and predicates
     )
 
 
-def _plan(statement: Requirement | TransformationClaim) -> ClosureScanPlan:
+def _plan(
+    statement: Requirement | TransformationClaim,
+    authored_predicates: tuple[TransformationPredicate, ...],
+) -> ClosureScanPlan:
     statement_kind = (
         "guardrail"
         if isinstance(statement, Requirement)
@@ -78,23 +97,75 @@ def _plan(statement: Requirement | TransformationClaim) -> ClosureScanPlan:
             ("base", "head") if statement_kind == "removal" else ("head",)
         ),
         surfaces=("paths", "file_content", "symbol_names"),
-        selectors=_selectors(plan_id, statement.text),
+        predicates=_predicates(
+            plan_id,
+            _inferred_candidates(statement.text)
+            if isinstance(statement, Requirement)
+            else _authored_candidates(authored_predicates),
+        ),
         sources=statement.sources,
     )
 
 
-def _selectors(plan_id: str, text: str) -> tuple[ClosureScanSelector, ...]:
-    candidates: list[tuple[str, str]] = []
-    for match in _EXPLICIT_SELECTOR.finditer(text):
-        value = next(item for item in match.groups() if item is not None).strip()
-        kind = (
-            "identifier"
-            if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.:/-]*", value)
-            else "phrase"
+SelectorCandidate = tuple[
+    Literal["target", "path_scope"],
+    ClosureSelectorKind,
+    str,
+]
+
+
+def _predicates(
+    plan_id: str,
+    candidates: list[SelectorCandidate],
+) -> tuple[ClosureScanPredicate, ...]:
+    scopes = tuple(
+        value for role, kind, value in candidates
+        if role == "path_scope" and kind == "path"
+    )
+    targets = tuple(
+        (kind, value) for role, kind, value in candidates
+        if role == "target" and (not scopes or kind != "phrase")
+    )
+    unique_targets = tuple(dict.fromkeys(targets))
+    unique_scopes = tuple(dict.fromkeys(scopes))
+    return tuple(
+        ClosureScanPredicate(
+            id=f"{plan_id}:predicate:{index}",
+            target=ClosureScanSelector(
+                id=f"{plan_id}:predicate:{index}:target",
+                kind=kind,
+                value=value,
+            ),
+            path_scopes=tuple(
+                ClosureScanSelector(
+                    id=f"{plan_id}:predicate:{index}:path_scope:{scope_index}",
+                    kind="path",
+                    value=scope,
+                )
+                for scope_index, scope in enumerate(unique_scopes, start=1)
+            ),
         )
-        candidates.append((kind, value))
-    without_explicit = _EXPLICIT_SELECTOR.sub(" ", text)
-    for clause in _CLAUSE_BREAK.split(without_explicit):
+        for index, (kind, value) in enumerate(unique_targets, start=1)
+    )
+
+
+def _authored_candidates(
+    predicates: tuple[TransformationPredicate, ...],
+) -> list[SelectorCandidate]:
+    return [
+        (
+            predicate.role,
+            "path" if predicate.selector_kind == "repository_path" else "identifier",
+            predicate.values[0],
+        )
+        for predicate in predicates
+        if predicate.selector_kind != "ordered_path"
+    ]
+
+
+def _inferred_candidates(text: str) -> list[SelectorCandidate]:
+    candidates: list[SelectorCandidate] = []
+    for clause in _CLAUSE_BREAK.split(text):
         words = [
             item.strip(".,;:()[]{}")
             for item in _WORD.findall(clause)
@@ -111,16 +182,23 @@ def _selectors(plan_id: str, text: str) -> tuple[ClosureScanSelector, ...]:
             or bool(re.search(r"[a-z][A-Z]", word))
         ]
         if identifiers:
-            candidates.extend(("identifier", item) for item in identifiers)
+            candidates.extend(
+                ("target", _selector_kind(item), item) for item in identifiers
+            )
         elif len(words) >= 2:
             candidates.append(
-                ("phrase", " ".join(item.casefold() for item in words[:4]))
+                (
+                    "target",
+                    "phrase",
+                    " ".join(item.casefold() for item in words[:4]),
+                )
             )
-    return tuple(
-        ClosureScanSelector(
-            id=f"{plan_id}:selector:{index}",
-            kind=kind,
-            value=value,
-        )
-        for index, (kind, value) in enumerate(dict.fromkeys(candidates), start=1)
-    )
+    return candidates
+
+
+def _selector_kind(value: str) -> ClosureSelectorKind:
+    if "/" in value or "\\" in value:
+        return "path"
+    if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.:-]*", value):
+        return "identifier"
+    return "phrase"

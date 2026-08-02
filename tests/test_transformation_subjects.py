@@ -28,7 +28,8 @@ def _contract():
         pr_body=(
             "## Selected region\n- `src/adapter.py`\n\n"
             "## After topology\n- `Adapter` → `Analyzer`\n\n"
-            "## Removed legacy paths\n- Remove `LegacyAdapter`.\n"
+            "## Removed legacy paths\n"
+            "- Remove `LegacyAdapter` from `src/legacy.py`.\n"
         ),
         pr_source=SourceRef(label="PR #9"),
         pr_title="Select structural subjects",
@@ -116,6 +117,7 @@ def test_explicit_predicates_select_revision_appropriate_structural_subjects() -
     } == {
         (predicate.id, index)
         for predicate in contract.predicates.predicates
+        if predicate.role == "target"
         for index in range(1, len(predicate.values) + 1)
     }
 
