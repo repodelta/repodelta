@@ -170,7 +170,7 @@ def test_planning_includes_removal_and_only_executable_negative_completion() -> 
                     claim_id="CC1",
                     selector_kind="symbol",
                     values=("legacy_writer",),
-                    expectation="verified_head",
+                    expectation="absent_head",
                     sources=source,
                 ),
             ),
@@ -191,6 +191,54 @@ def test_planning_includes_removal_and_only_executable_negative_completion() -> 
     ]
     assert plans.plans[1].expectation == "absence"
     assert plans.plans[1].revision_sides == ("head",)
+
+
+def test_mixed_completion_plan_preserves_predicate_identity_and_polarity() -> None:
+    source = (SourceRef(label="PR #1", url="https://example.test/pr/1"),)
+    contract = TransformationContract(
+        claims=(
+            TransformationClaim(
+                id="CC1",
+                kind="completion_condition",
+                text="`new_call` is active and no `legacy_writer` remains.",
+                sources=source,
+            ),
+        ),
+        predicates=TransformationPredicateSet(
+            predicates=(
+                TransformationPredicate(
+                    id="TP:CC1:1",
+                    claim_id="CC1",
+                    selector_kind="symbol",
+                    values=("new_call",),
+                    expectation="verified_head",
+                    sources=source,
+                ),
+                TransformationPredicate(
+                    id="TP:CC1:2",
+                    claim_id="CC1",
+                    selector_kind="symbol",
+                    values=("legacy_writer",),
+                    expectation="absent_head",
+                    sources=source,
+                ),
+            ),
+        ),
+        completion_condition_claim_ids=("CC1",),
+        source_state="available",
+    )
+    contract.validate_consistency()
+
+    plan = compile_closure_scan_plans((), contract).plans[0]
+
+    assert [item.source_predicate_id for item in plan.predicates] == [
+        "TP:CC1:1",
+        "TP:CC1:2",
+    ]
+    assert [item.target.value for item in plan.predicates] == [
+        "new_call",
+        "legacy_writer",
+    ]
 
 
 def test_unmarked_removal_does_not_reconstruct_executable_targets() -> None:

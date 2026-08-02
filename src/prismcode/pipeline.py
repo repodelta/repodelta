@@ -90,6 +90,7 @@ class DeterministicAnalyzer:
             evidence_catalog,
             closure_scan_plans,
             head_sha=packet.head_sha,
+            subject_selection=transformation_subject_selection,
         )
         projection_candidates = build_projection_candidates(
             requirements=requirements,

@@ -186,6 +186,16 @@ _PATH_SCOPE_PREFIX_RE = re.compile(
     r"\b(?:from|in|under|within)\s*$",
     re.IGNORECASE,
 )
+_NEGATED_SELECTOR_PREFIX_RE = re.compile(
+    r"(?:\bno\b|\bnot\b|\bwithout\b|\babsent\b|"
+    r"\bremove[sd]?\b|\bdeleted?\b|\beliminated?\b)\s*$",
+    re.IGNORECASE,
+)
+_NEGATED_SELECTOR_SUFFIX_RE = re.compile(
+    r"^\s*(?:\b(?:is|are|remains?|exists?)\b\s+)?"
+    r"(?:\babsent\b|\bremoved?\b|\bdeleted?\b|\beliminated?\b)",
+    re.IGNORECASE,
+)
 _REPOSITORY_PATH_PREFIXES = ("src/", "tests/", "docs/", ".github/")
 _REPOSITORY_PATH_SUFFIXES = (
     ".py", ".pyi", ".js", ".jsx", ".ts", ".tsx", ".java", ".go",
@@ -819,7 +829,7 @@ def _transformation_predicates(
         ):
             ordered_values = selectors
 
-        expectation = _predicate_expectation(claim.kind)
+        expectation = _predicate_expectation(claim.kind, raw_text)
         if ordered_values:
             predicates.append(
                 TransformationPredicate(
@@ -846,6 +856,12 @@ def _transformation_predicates(
                         is not None
                         else "target"
                     ),
+                    _predicate_expectation(
+                        claim.kind,
+                        raw_text,
+                        match.start(),
+                        match.end(),
+                    ),
                 )
                 for match in matches
                 if (value := match.group(1).strip())
@@ -857,11 +873,11 @@ def _transformation_predicates(
                 claim_id=claim.id,
                 selector_kind=selector_kind,
                 values=(value,),
-                expectation=expectation,
+                expectation=predicate_expectation,
                 role=role,
                 sources=claim.sources,
             )
-            for index, (selector_kind, value, role) in enumerate(
+            for index, (selector_kind, value, role, predicate_expectation) in enumerate(
                 selector_specs,
                 start=1,
             )
@@ -896,7 +912,21 @@ def _selector_kind(value: str) -> TransformationPredicateSelectorKind:
 
 def _predicate_expectation(
     kind: TransformationClaimKind,
+    raw_text: str = "",
+    start: int | None = None,
+    end: int | None = None,
 ) -> TransformationPredicateExpectation:
+    if (
+        kind == "completion_condition"
+        and start is not None
+        and end is not None
+        and (
+            _NEGATED_SELECTOR_PREFIX_RE.search(raw_text[max(0, start - 80):start])
+            is not None
+            or _NEGATED_SELECTOR_SUFFIX_RE.search(raw_text[end:end + 80]) is not None
+        )
+    ):
+        return "absent_head"
     if kind == "before_topology":
         return "present_base"
     if kind == "removal":
