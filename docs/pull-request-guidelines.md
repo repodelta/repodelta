@@ -1,21 +1,23 @@
-Write PR titles around the semantic responsibility transition, not only
-the implementation mechanism or modified files.
+# Pull requests
 
-In the PR description, include:
+Title the PR around its semantic responsibility transition, not files or
+mechanisms. Record:
 
-- semantic output and execution scope;
-- selected responsibility-closed region and its boundaries;
-- effective production authority before and after;
-- before/after topology;
-- migrated producers, consumers, projections, and tests;
-- removed or classified alternate paths;
-- preserved and changed external contracts;
-- completion evidence;
-- unresolved dynamic surfaces and coverage limitations.
+- parent transformation and this PR's child responsibility;
+- output, scope, sinks, and authority / admission / proof / consumption;
+- selected region, boundaries, and before/after topology;
+- migrations, removals, and classified alternate paths;
+- counterfactuals, completion evidence, and coverage limits;
+- open parent obligations and unresolved dynamic surfaces;
+- responsibility closure, abandonment safety, and parent completion separately.
 
-Classify retained alternate paths as dormant, shadow, compatibility,
-migration, rollback, experiment, annotation, or projection.
+Explain why the tree remains correct and meaningful if the parent stops.
+Unsupported semantics must fail closed. Do not depend on future wiring, call a
+non-authoritative path canonical, or claim unobserved coverage.
 
-Do not call a producer or model canonical unless it controls the
-production output in the resulting repository state. Do not claim that no
-competing path exists beyond the available evidence.
+Keep the PR Draft while discovery, scope, or either merge gate is open. Mark it
+ready only after the final candidate tree passes pre-merge census and both
+responsibility closure and abandonment safety are true.
+
+If parent completion is false, link a stable issue, plan, or design record that
+owns the remaining obligations and stop conditions.

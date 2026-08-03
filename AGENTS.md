@@ -1,37 +1,33 @@
-## Responsibility-closed changes
+## Responsibility-closed delivery
 
-Treat the repository as recursively composed responsibility pipelines.
+Treat the repository as responsibility pipelines. Change semantic
+responsibilities, not files or diffs. Start from the output and production
+sinks; identify each decision's authority, admitted inputs, proof obligation,
+consumers, and bypasses.
 
-The atomic unit of change is a semantic responsibility transition, not a
-file, function, commit, or diff.
+Every mergeable state must be responsibility-closed and abandonment-safe:
 
-Start from the semantic output and its production sinks. Identify
-observed candidate authorities, consumers, writers, projections, and
-unclassified bypasses; then select the smallest responsibility-closed
-region that can complete the transition.
+- one effective production authority owns each responsibility in scope;
+- alternate paths are removed or verifiably classified;
+- if the parent transformation stops, the state remains correct, honest,
+  maintainable, and independent of future wiring;
+- unsupported semantics fail closed instead of producing success.
 
-Within the same execution scope, every mergeable repository state must
-have one effective production authority per responsibility. Other paths
-must be verifiably classified. Canonicality follows effective production
-data flow, not names or design declarations.
+Main is not an exploration surface. Perform recursive discovery, scope
+expansion, and counterfactual testing during planning and in an unmerged branch
+or Draft PR. Expand an unsafe region before merge or stop. Tests alone do not
+prove closure.
 
-If the requested scope cannot achieve responsibility closure, expand it
-or stop implementation. Do not rely on a future PR to justify the current
-merge state.
+Treat code and structural indexes as repository facts; executed tests and
+runtime observations as bounded behavioral evidence; and unexecuted tests,
+documentation, history, names, and designs as declarations or hypotheses unless
+independently grounded. Keep facts, intent, inference, and unresolved surfaces
+distinct; report conflicts instead of silently reconciling them.
 
-Tests alone do not prove closure. Bound conclusions by available
-structural, runtime, test, and dynamic-boundary evidence.
+For non-trivial behavioral, authority, contract, data-flow, or cross-component
+changes, follow `docs/agent-change-protocol.md`.
 
-## Change workflow
+Before generating Git artifacts, follow:
 
-For non-trivial behavioral, authority, contract, data-flow, or
-cross-component changes, read and follow:
-
-- `docs/agent-change-protocol.md`
-
-## Git delivery
-
-Before generating Git artifacts, read and follow:
-
-- Commits: `docs/commit-message-guidelines.md`
-- Pull requests: `docs/pull-request-guidelines.md`
+- `docs/commit-message-guidelines.md` for commits;
+- `docs/pull-request-guidelines.md` for pull requests.
