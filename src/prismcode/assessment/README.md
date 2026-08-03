@@ -28,6 +28,11 @@ compatibility; it cannot lend one predicate's evidence to another predicate.
 These predicate-owned identity lanes form one union; a changed structural match
 cannot suppress current-head verification or closure evidence for the same
 predicate.
+Ordered-path predicates are a separate topology lane: only a path retained by
+`TransformationStructuralClosure` that contains every selector in authored order
+on the expected revision can prove topology. Scalar identifier co-occurrence is
+not ordered-path evidence. `verified_head` additionally requires exact
+current-head verification; deferred paths remain incomplete coverage.
 
 ## Must not
 

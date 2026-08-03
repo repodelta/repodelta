@@ -133,10 +133,10 @@ def test_pipeline_builds_transformation_alignment_once(monkeypatch) -> None:
     calls = 0
     real_build = pipeline.build_transformation_alignment
 
-    def counting_build(contract, observed, catalog):
+    def counting_build(contract, observed, catalog, structural_closure=None):
         nonlocal calls
         calls += 1
-        return real_build(contract, observed, catalog)
+        return real_build(contract, observed, catalog, structural_closure)
 
     monkeypatch.setattr(
         pipeline,

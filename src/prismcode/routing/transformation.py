@@ -12,6 +12,7 @@ from prismcode.model.contracts import (
     TransformationClaim,
     TransformationContract,
     TransformationEvidenceBinding,
+    TransformationStructuralClosure,
 )
 from prismcode.routing.association import (
     distinctive_signature_terms,
@@ -24,6 +25,7 @@ def build_transformation_alignment(
     contract: TransformationContract,
     observed: ObservedTransformation,
     evidence_catalog: EvidenceCatalog,
+    structural_closure: TransformationStructuralClosure | None = None,
 ) -> TransformationAlignment:
     """Bind authored T/CC claims to eligible observed facts without assessment."""
 
@@ -39,6 +41,14 @@ def build_transformation_alignment(
         if item.role == "closure_fact"
         and len(item.associated_statement_ids) == 1
     }
+    structural_paths_by_claim = (
+        {
+            group.claim_id: group.path_evidence_ids
+            for group in structural_closure.groups
+        }
+        if structural_closure is not None
+        else {}
+    )
     distinctive = distinctive_text_terms(
         tuple((item.id, item.text) for item in contract.claims)
     )
@@ -59,6 +69,26 @@ def build_transformation_alignment(
                             detail=(
                                 "The closure provider explicitly associates this "
                                 "revision-aware observation with the typed claim."
+                            ),
+                        ),
+                    ),
+                )
+            )
+
+        for path_id in structural_paths_by_claim.get(claim.id, ()):
+            path = evidence.get(path_id)
+            if path is None or path.kind != "structural_path":
+                continue
+            claim_bindings.append(
+                _binding(
+                    claim,
+                    path,
+                    (
+                        AssociationReason(
+                            kind="provided_association",
+                            detail=(
+                                "Canonical transformation closure associates "
+                                "this bounded structural path with the claim."
                             ),
                         ),
                     ),

@@ -7,15 +7,31 @@ import pytest
 from prismcode.assessment.transformation import assess_transformation
 from prismcode.model.contracts import (
     AnalysisInput,
+    AssociationReason,
+    AssociationSignature,
     ChangedFile,
+    ClosureScanPlanSet,
+    EvidenceCatalog,
+    EvidenceItem,
     ReviewSourcePacket,
     SourceRecord,
+    SourceRef,
+    StructuralChangeIdentity,
     TransformationAssessment,
+    TransformationEvidenceBinding,
     TransformationSubjectMatch,
     TransformationSubjectSelection,
     VerificationObservation,
 )
+from prismcode.convergence.transformation import (
+    TransformationClosurePolicy,
+    converge_transformation_closure,
+)
+from prismcode.facts.transformation import reconstruct_observed_transformation
 from prismcode.pipeline import DeterministicAnalyzer
+from prismcode.routing.transformation import build_transformation_alignment
+from prismcode.routing.transformation_subjects import select_transformation_subjects
+from prismcode.semantics.criteria import extract_review_semantics
 
 
 def _packet(
@@ -252,6 +268,315 @@ def test_changed_subject_does_not_hide_current_head_verification() -> None:
 
     assert assessment.status == "demonstrated"
     assert verification_binding.id in assessment.supporting_binding_ids
+
+
+def test_related_names_cannot_demonstrate_an_ordered_path() -> None:
+    packet = _packet()
+    record = packet.source_records[0]
+    packet = replace(
+        packet,
+        source_records=(
+            replace(
+                record,
+                body="## After topology\n- `old_call` → `new_call`.\n",
+            ),
+        ),
+        verification_observations=(),
+    ).with_revision()
+
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    claim = brief.transformation_contract.by_kind("after_topology")[0]
+    predicate = brief.transformation_contract.predicates.by_claim_id()[claim.id][0]
+    assessment = brief.transformation_assessment.by_claim_id()[claim.id]
+
+    assert predicate.selector_kind == "ordered_path"
+    assert assessment.status == "unverified"
+    assert assessment.predicate_assessments[0].status == "unverified"
+    assert assessment.predicate_assessments[0].supporting_binding_ids == ()
+
+
+def test_canonical_ordered_path_demonstrates_present_head_predicate() -> None:
+    contract, observed, selection, closure, alignment, catalog = (
+        _ordered_path_fixture(("Adapter", "Service"))
+    )
+
+    assessment = assess_transformation(
+        contract,
+        alignment,
+        catalog,
+        closure_scan_plans=ClosureScanPlanSet(),
+        head_sha="head123",
+        subject_selection=selection,
+        structural_closure=closure,
+    ).by_claim_id()["T1"]
+
+    assert observed.structural_path_evidence_ids == ("E:path:ordered",)
+    assert assessment.status == "demonstrated"
+    assert assessment.predicate_assessments[0].status == "demonstrated"
+    assert assessment.predicate_assessments[0].supporting_binding_ids == (
+        "TAB:T1:E:path:ordered",
+    )
+
+
+def test_canonical_ordered_path_uses_base_revision_for_before_topology() -> None:
+    contract, _, selection, closure, alignment, catalog = _ordered_path_fixture(
+        ("Adapter", "Service"),
+        section="Before topology",
+        revision="base",
+    )
+
+    assessment = assess_transformation(
+        contract,
+        alignment,
+        catalog,
+        closure_scan_plans=ClosureScanPlanSet(),
+        head_sha="head123",
+        subject_selection=selection,
+        structural_closure=closure,
+    ).by_claim_id()["T1"]
+
+    assert assessment.status == "demonstrated"
+    assert assessment.predicate_assessments[0].expectation == "present_base"
+
+
+def test_reversed_structural_path_cannot_demonstrate_authored_order() -> None:
+    contract, _, selection, closure, alignment, catalog = _ordered_path_fixture(
+        ("Service", "Adapter")
+    )
+
+    assessment = assess_transformation(
+        contract,
+        alignment,
+        catalog,
+        closure_scan_plans=ClosureScanPlanSet(),
+        head_sha="head123",
+        subject_selection=selection,
+        structural_closure=closure,
+    ).by_claim_id()["T1"]
+
+    assert assessment.status == "unverified"
+    assert assessment.predicate_assessments[0].supporting_binding_ids == ()
+
+
+def test_verified_ordered_path_requires_current_head_verification() -> None:
+    contract, _, selection, closure, alignment, catalog = _ordered_path_fixture(
+        ("Adapter", "Service"),
+        section="Completion conditions",
+    )
+    without_verification = assess_transformation(
+        contract,
+        alignment,
+        catalog,
+        closure_scan_plans=ClosureScanPlanSet(),
+        head_sha="head123",
+        subject_selection=selection,
+        structural_closure=closure,
+    ).by_claim_id()["CC1"]
+
+    assert without_verification.status == "partial"
+    assert {item.kind for item in without_verification.reasons} == {
+        "exact_fact_observed",
+        "verification_incomplete",
+    }
+
+    contract, _, selection, closure, alignment, catalog = _ordered_path_fixture(
+        ("Adapter", "Service"),
+        section="Completion conditions",
+        include_verification=True,
+    )
+    alignment = replace(
+        alignment,
+        bindings=(
+            *alignment.bindings,
+            TransformationEvidenceBinding(
+                id="TAB:CC1:E:verification:adapter",
+                claim_id="CC1",
+                evidence_id="E:verification:adapter",
+                evidence_role="verification",
+                association="provided_association",
+                reasons=(
+                    AssociationReason(
+                        kind="provided_association",
+                        detail="Fixture provides exact predicate verification.",
+                    ),
+                ),
+            ),
+        ),
+    )
+    with_verification = assess_transformation(
+        contract,
+        alignment,
+        catalog,
+        closure_scan_plans=ClosureScanPlanSet(),
+        head_sha="head123",
+        subject_selection=selection,
+        structural_closure=closure,
+    ).by_claim_id()["CC1"]
+
+    assert with_verification.status == "demonstrated"
+    assert any(
+        item.kind == "current_verification_success"
+        for item in with_verification.reasons
+    )
+
+
+def test_deferred_ordered_path_reports_incomplete_coverage() -> None:
+    contract, _, selection, _, _, catalog = _ordered_path_fixture(
+        ("Adapter", "Service")
+    )
+    closure = converge_transformation_closure(
+        contract,
+        selection,
+        catalog,
+        policy=TransformationClosurePolicy(max_path_identities=0),
+    )
+    observed = reconstruct_observed_transformation(catalog)
+    alignment = build_transformation_alignment(
+        contract,
+        observed,
+        catalog,
+        closure,
+    )
+
+    assessment = assess_transformation(
+        contract,
+        alignment,
+        catalog,
+        closure_scan_plans=ClosureScanPlanSet(),
+        head_sha="head123",
+        subject_selection=selection,
+        structural_closure=closure,
+    ).by_claim_id()["T1"]
+
+    assert assessment.status == "partial"
+    assert assessment.predicate_assessments[0].reasons[0].kind == (
+        "coverage_incomplete"
+    )
+
+
+def _ordered_path_fixture(
+    path_names: tuple[str, str],
+    *,
+    section: str = "After topology",
+    include_verification: bool = False,
+    revision: str = "head",
+):
+    contract = extract_review_semantics(
+        issue_body=None,
+        issue_source=None,
+        pr_body=f"## {section}\n- `Adapter` → `Service`.\n",
+        pr_source=SourceRef(label="PR #1"),
+        pr_title="Observe ordered topology",
+    ).transformation_contract
+    adapter = _ordered_symbol("adapter", "Adapter", revision=revision)
+    service = _ordered_symbol("service", "Service", revision=revision)
+    symbols = {"Adapter": adapter, "Service": service}
+    path = EvidenceItem(
+        id="E:path:ordered",
+        summary="ordered path",
+        kind="structural_path",
+        classification="code",
+        profile="structural_path",
+        authority="structural_provider",
+        revision_side=revision,
+        operation="observed",
+        role="structural_path",
+        structural_path_ids=("E:path:ordered",),
+        metadata={
+            "depth": 1,
+            "steps": (
+                {
+                    "source_evidence_id": symbols[path_names[0]].id,
+                    "target_evidence_id": symbols[path_names[1]].id,
+                    "relation": "calls",
+                    "direction": "outgoing",
+                },
+            ),
+        },
+    )
+    changed = EvidenceItem(
+        id="E:change:adapter",
+        summary="Modified Adapter",
+        kind="structural_change",
+        classification="code",
+        profile="production",
+        authority="structural_provider",
+        revision_side="review",
+        operation="modified",
+        role="changed_anchor",
+        changed=True,
+        head_signature=(
+            AssociationSignature(identifiers=("adapter",))
+            if revision == "head"
+            else AssociationSignature()
+        ),
+        base_signature=(
+            AssociationSignature(identifiers=("adapter",))
+            if revision == "base"
+            else AssociationSignature()
+        ),
+        structural_path_ids=(path.id,),
+        structural_change=StructuralChangeIdentity(review_symbol_id="adapter"),
+    )
+    verification = EvidenceItem(
+        id="E:verification:adapter",
+        summary="Adapter: completed/success",
+        kind="check_run",
+        classification="ci",
+        profile="verification",
+        authority="verification_provider",
+        revision_side="review",
+        operation="observed",
+        role="verification",
+        observed_head_sha="head123",
+        verification_status="completed",
+        verification_conclusion="success",
+        head_signature=AssociationSignature(identifiers=("adapter",)),
+    )
+    catalog = EvidenceCatalog(
+        items=(
+            changed,
+            adapter,
+            service,
+            path,
+            *((verification,) if include_verification else ()),
+        )
+    )
+    observed = reconstruct_observed_transformation(catalog)
+    selection = select_transformation_subjects(contract, observed, catalog)
+    closure = converge_transformation_closure(contract, selection, catalog)
+    alignment = build_transformation_alignment(
+        contract,
+        observed,
+        catalog,
+        closure,
+    )
+    return contract, observed, selection, closure, alignment, catalog
+
+
+def _ordered_symbol(identity: str, name: str, *, revision: str) -> EvidenceItem:
+    return EvidenceItem(
+        id=f"E:symbol:{identity}",
+        summary=name,
+        kind="symbol",
+        classification="code",
+        profile="production",
+        authority="structural_provider",
+        revision_side=revision,
+        operation="unchanged",
+        role="runtime_context",
+        head_signature=(
+            AssociationSignature(identifiers=(identity,))
+            if revision == "head"
+            else AssociationSignature()
+        ),
+        base_signature=(
+            AssociationSignature(identifiers=(identity,))
+            if revision == "base"
+            else AssociationSignature()
+        ),
+        metadata={"review_symbol_id": identity},
+    )
 
 
 def test_stale_verification_never_demonstrates_current_completion() -> None:

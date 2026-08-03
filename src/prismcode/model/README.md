@@ -19,6 +19,8 @@ No transformation. Other stages exchange only the contracts defined here.
   inferred identities;
 - identifier normalization and revision-aware predicate-to-fact matching have
   one shared reference authority consumed by routing and assessment;
+- structural path access preserves provider-observed symbol order so assessment
+  can compare ordered predicates without reconstructing path topology;
 - transformation subject selection partitions every predicate selector into
   exact canonical changed-structure matches or one typed no-match diagnostic;
 - transformation structural closure preserves every T/CC claim once, partitions
