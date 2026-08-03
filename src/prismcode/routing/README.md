@@ -16,9 +16,10 @@ use claim prose, traverse neighbors, or rank equally valid identities.
 The same typed selector matcher is the canonical lexical fallback boundary for
 predicate assessment when no changed structural subject is available; it never
 loans a claim-level binding from one predicate to another.
-Closure-retained structural paths receive provider-owned claim provenance for
-assessment, but alignment does not decide whether their step order satisfies an
-ordered predicate.
+Subject-selected changed identities and closure-retained structural paths
+receive provider-owned claim provenance for assessment. Predicate assessment
+still admits a seed only for the exact selector that selected it, and alignment
+does not decide whether path step order satisfies an ordered predicate.
 
 ## Input / output
 

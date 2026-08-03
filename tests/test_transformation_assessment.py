@@ -85,7 +85,7 @@ def test_pipeline_assesses_claims_conservatively_from_typed_authorities() -> Non
     assessed = brief.transformation_assessment.by_claim_id()
 
     assert assessed[claims["change"].id].status == "demonstrated"
-    assert assessed[claims["after_topology"].id].status == "demonstrated"
+    assert assessed[claims["after_topology"].id].status == "partial"
     assert assessed[claims["selected_region"].id].status == "unverified"
     assert assessed[claims["removal"].id].status == "partial"
     assert assessed[claims["completion_condition"].id].status == "demonstrated"
@@ -137,8 +137,10 @@ def test_mixed_completion_preserves_each_predicate_polarity() -> None:
         "verified_head",
         "absent_head",
     ]
-    assert brief.transformation_assessment.by_claim_id()[claim.id].status != (
-        "contradicted"
+    assert brief.transformation_assessment.by_claim_id()[claim.id].status == "partial"
+    assert tuple(item.status for item in predicates.values()) == (
+        "partial",
+        "unverified",
     )
 
 
@@ -167,13 +169,208 @@ def test_multi_predicate_claim_cannot_borrow_another_predicates_binding() -> Non
         .predicate_assessments
     }
 
-    assert assessments[predicates[0].id].status == "demonstrated"
+    assert assessments[predicates[0].id].status == "partial"
     assert assessments[predicates[0].id].supporting_binding_ids
     assert assessments[predicates[1].id].status == "unverified"
     assert assessments[predicates[1].id].supporting_binding_ids == ()
     assert brief.transformation_assessment.by_claim_id()[claim.id].status == (
         "partial"
     )
+
+
+@pytest.mark.parametrize(
+    ("body", "kind"),
+    (
+        (
+            "## Selected region\n- `new_call` is the complete region.\n",
+            "selected_region",
+        ),
+        (
+            "## Selected region\n### Inputs\n- `new_call` is the input boundary.\n",
+            "input_boundary",
+        ),
+        (
+            "## Selected region\n### Outputs\n- `new_call` is the output boundary.\n",
+            "output_boundary",
+        ),
+        (
+            "## Selected region\n### Boundaries\n- `new_call` is external.\n",
+            "boundary",
+        ),
+        (
+            "## Before topology\n- `old_call` is the canonical entry.\n",
+            "before_topology",
+        ),
+        ("## After topology\n- `new_call` is the canonical entry.\n", "after_topology"),
+        ("## Authority\n- `new_call` is the sole authority.\n", "authority"),
+        ("## Production path\n- `new_call` controls production.\n", "production_path"),
+        ("## Migration\n- Migrate production to `new_call`.\n", "migration"),
+        (
+            "## Migration\n### Producers\n- Migrate producers to `new_call`.\n",
+            "producer_migration",
+        ),
+        (
+            "## Migration\n### Consumers\n- Migrate consumers to `new_call`.\n",
+            "consumer_migration",
+        ),
+    ),
+)
+def test_exact_surface_cannot_demonstrate_role_or_closure_semantics(
+    body: str,
+    kind: str,
+) -> None:
+    packet = _packet()
+    record = packet.source_records[0]
+    packet = replace(
+        packet,
+        source_records=(replace(record, body=body),),
+        verification_observations=(),
+    ).with_revision()
+
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    claim = brief.transformation_contract.by_kind(kind)[0]
+    assessment = brief.transformation_assessment.by_claim_id()[claim.id]
+
+    assert assessment.status == "partial"
+    assert assessment.predicate_assessments[0].status == "partial"
+    assert assessment.reasons[0].kind == "association_only"
+
+
+def test_uncertainty_preserves_typed_predicates_without_assessing_them() -> None:
+    packet = _packet()
+    record = packet.source_records[0]
+    packet = replace(
+        packet,
+        source_records=(
+            replace(
+                record,
+                body="## Uncertainty\n- `new_call` ownership remains unknown.\n",
+            ),
+        ),
+        verification_observations=(),
+    ).with_revision()
+
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    claim = brief.transformation_contract.by_kind("uncertainty")[0]
+    assessment = brief.transformation_assessment.by_claim_id()[claim.id]
+
+    assert assessment.status == "unverified"
+    assert len(assessment.predicate_assessments) == 1
+    assert assessment.predicate_assessments[0].status == "unverified"
+    assert assessment.reasons[0].kind == "uncertainty_context"
+
+
+@pytest.mark.parametrize(
+    ("body", "kind", "expected_status"),
+    (
+        ("## Change\n- Replace old_call with new_call.\n", "change", "demonstrated"),
+        ("## Authority\n- new_call is the sole authority.\n", "authority", "partial"),
+        ("## Migration\n- Migrate production to new_call.\n", "migration", "partial"),
+    ),
+)
+def test_selector_free_claims_share_the_claim_aware_proof_boundary(
+    body: str,
+    kind: str,
+    expected_status: str,
+) -> None:
+    packet = _packet()
+    record = packet.source_records[0]
+    packet = replace(
+        packet,
+        source_records=(replace(record, body=body),),
+        verification_observations=(),
+    ).with_revision()
+
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    claim = brief.transformation_contract.by_kind(kind)[0]
+
+    assert brief.transformation_contract.predicates.predicates == ()
+    assert brief.transformation_assessment.by_claim_id()[claim.id].status == (
+        expected_status
+    )
+
+
+@pytest.mark.parametrize(
+    ("section", "selector", "classification", "profile", "expected_kind", "status"),
+    (
+        (
+            "Change",
+            "src/service.py",
+            "code",
+            "production",
+            "change",
+            "demonstrated",
+        ),
+        (
+            "Selected region",
+            "src/service.py",
+            "code",
+            "production",
+            "selected_region",
+            "partial",
+        ),
+        (
+            "After topology",
+            "src/service.py",
+            "code",
+            "production",
+            "after_topology",
+            "partial",
+        ),
+        (
+            "Before topology",
+            "src/service.py",
+            "code",
+            "production",
+            "before_topology",
+            "partial",
+        ),
+        (
+            "Migration\n### Tests",
+            "test_call",
+            "test",
+            "test",
+            "test_migration",
+            "partial",
+        ),
+    ),
+)
+def test_selected_scalar_structural_facts_reach_claim_aware_assessment(
+    section: str,
+    selector: str,
+    classification: str,
+    profile: str,
+    expected_kind: str,
+    status: str,
+) -> None:
+    contract, selection, alignment, assessment = _scalar_structural_fixture(
+        section,
+        selector,
+        classification=classification,
+        profile=profile,
+    )
+    claim = contract.by_kind(expected_kind)[0]
+
+    assert selection.matches
+    assert alignment.by_claim_id()[claim.id][0].association == (
+        "provided_association"
+    )
+    assert assessment.by_claim_id()[claim.id].status == status
+
+
+def test_unmatched_repository_path_fails_closed() -> None:
+    contract, selection, alignment, assessment = _scalar_structural_fixture(
+        "Authority",
+        "src/missing.py",
+        classification="code",
+        profile="production",
+    )
+    claim = contract.by_kind("authority")[0]
+
+    assert selection.matches == ()
+    assert selection.diagnostics[0].state == "no_structural_match"
+    assert alignment.by_claim_id().get(claim.id, ()) == ()
+    assert assessment.by_claim_id()[claim.id].status == "unverified"
 
 
 def test_typed_predicate_rejects_unrelated_single_claim_binding() -> None:
@@ -552,6 +749,69 @@ def _ordered_path_fixture(
         closure,
     )
     return contract, observed, selection, closure, alignment, catalog
+
+
+def _scalar_structural_fixture(
+    section: str,
+    selector: str,
+    *,
+    classification: str,
+    profile: str,
+):
+    contract = extract_review_semantics(
+        issue_body=None,
+        issue_source=None,
+        pr_body=f"## {section}\n- `{selector}` is changed.\n",
+        pr_source=SourceRef(label="PR #1"),
+        pr_title="Assess one selected structural fact",
+    ).transformation_contract
+    normalized_selector = selector.replace("_", "").casefold()
+    changed = EvidenceItem(
+        id="E:change:selected",
+        summary=f"Modified {selector}",
+        kind="structural_change",
+        classification=classification,
+        profile=profile,
+        authority="structural_provider",
+        revision_side="review",
+        operation="modified",
+        role="changed_anchor",
+        changed=True,
+        base_signature=AssociationSignature(
+            identifiers=(normalized_selector,),
+        ),
+        head_signature=AssociationSignature(
+            identifiers=(normalized_selector,),
+        ),
+        structural_change=StructuralChangeIdentity(
+            review_symbol_id="selected",
+        ),
+        metadata={
+            "path": "src/service.py",
+            "base_path": "src/service.py",
+            "head_path": "src/service.py",
+        },
+    )
+    catalog = EvidenceCatalog(items=(changed,))
+    observed = reconstruct_observed_transformation(catalog)
+    selection = select_transformation_subjects(contract, observed, catalog)
+    closure = converge_transformation_closure(contract, selection, catalog)
+    alignment = build_transformation_alignment(
+        contract,
+        observed,
+        catalog,
+        closure,
+    )
+    assessment = assess_transformation(
+        contract,
+        alignment,
+        catalog,
+        ClosureScanPlanSet(),
+        head_sha="head123",
+        subject_selection=selection,
+        structural_closure=closure,
+    )
+    return contract, selection, alignment, assessment
 
 
 def _ordered_symbol(identity: str, name: str, *, revision: str) -> EvidenceItem:

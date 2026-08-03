@@ -41,9 +41,12 @@ def build_transformation_alignment(
         if item.role == "closure_fact"
         and len(item.associated_statement_ids) == 1
     }
-    structural_paths_by_claim = (
+    selected_structural_evidence_by_claim = (
         {
-            group.claim_id: group.path_evidence_ids
+            group.claim_id: (
+                *group.seed_evidence_ids,
+                *group.path_evidence_ids,
+            )
             for group in structural_closure.groups
         }
         if structural_closure is not None
@@ -75,20 +78,24 @@ def build_transformation_alignment(
                 )
             )
 
-        for path_id in structural_paths_by_claim.get(claim.id, ()):
-            path = evidence.get(path_id)
-            if path is None or path.kind != "structural_path":
+        for evidence_id in selected_structural_evidence_by_claim.get(claim.id, ()):
+            selected = evidence.get(evidence_id)
+            if selected is None or selected.kind not in {
+                "structural_change",
+                "structural_path",
+            }:
                 continue
             claim_bindings.append(
                 _binding(
                     claim,
-                    path,
+                    selected,
                     (
                         AssociationReason(
                             kind="provided_association",
                             detail=(
-                                "Canonical transformation closure associates "
-                                "this bounded structural path with the claim."
+                                "Canonical transformation subject selection and "
+                                "closure associate this structural evidence with "
+                                "the claim."
                             ),
                         ),
                     ),
@@ -108,7 +115,12 @@ def build_transformation_alignment(
                 if signature.identifiers or signature.tokens
             )
         )
+        provider_evidence_ids = {
+            binding.evidence_id for binding in claim_bindings
+        }
         for item, signature in signatures:
+            if item.id in provider_evidence_ids:
+                continue
             reasons = evidence_reasons(
                 claim,
                 signature,
