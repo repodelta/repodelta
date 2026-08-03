@@ -1,5 +1,5 @@
 {
-  "schema_version": "evaluation_suite.v2",
+  "schema_version": "evaluation_suite.v3",
   "k": 5,
   "thresholds": {
     "precision_at_k": 1.0,
@@ -9,7 +9,8 @@
     "statement_accuracy": 1.0,
     "max_no_candidate_rate": 0.0,
     "no_match_accuracy": 1.0,
-    "max_false_positive_rate": 0.0
+    "max_false_positive_rate": 0.0,
+    "assessment_accuracy": 1.0
   },
   "cases": [
     {
@@ -322,6 +323,156 @@
           "authority": "pr_title"
         }
       ]
+    },
+    {
+      "id": "transformation-assessment-proof",
+      "fixture": "evaluation/transformation-assessment.json",
+      "expected_selections": [],
+      "expected_assessments": [
+        {
+          "claim_id": "T1",
+          "status": "demonstrated",
+          "reason_kinds": ["exact_fact_observed"],
+          "supporting_evidence_ids": ["E:structural_change:e3a262c5dc2f418b1bf4"]
+        },
+        {
+          "claim_id": "T1",
+          "predicate_id": "TP:T1:1",
+          "expectation": "reference",
+          "status": "demonstrated",
+          "reason_kinds": ["exact_fact_observed"],
+          "supporting_evidence_ids": ["E:structural_change:e3a262c5dc2f418b1bf4"]
+        },
+        {
+          "claim_id": "T2",
+          "status": "demonstrated",
+          "reason_kinds": ["exact_fact_observed"],
+          "supporting_evidence_ids": ["E:structural_path:f8d4f2c1aa143408cca8"]
+        },
+        {
+          "claim_id": "T2",
+          "predicate_id": "TP:T2:1",
+          "expectation": "present_head",
+          "status": "demonstrated",
+          "reason_kinds": ["exact_fact_observed"],
+          "supporting_evidence_ids": ["E:structural_path:f8d4f2c1aa143408cca8"]
+        },
+        {
+          "claim_id": "T3",
+          "status": "partial",
+          "reason_kinds": ["association_only"],
+          "supporting_evidence_ids": ["E:structural_change:e3a262c5dc2f418b1bf4"]
+        },
+        {
+          "claim_id": "T3",
+          "predicate_id": "TP:T3:1",
+          "expectation": "present_head",
+          "status": "partial",
+          "reason_kinds": ["association_only"],
+          "supporting_evidence_ids": ["E:structural_change:e3a262c5dc2f418b1bf4"]
+        },
+        {
+          "claim_id": "CC1",
+          "status": "demonstrated",
+          "reason_kinds": ["current_verification_success"],
+          "supporting_evidence_ids": ["E:verification:bf4efee5a9a10fe78ab9"]
+        },
+        {
+          "claim_id": "CC1",
+          "predicate_id": "TP:CC1:1",
+          "expectation": "verified_head",
+          "status": "demonstrated",
+          "reason_kinds": ["current_verification_success"],
+          "supporting_evidence_ids": ["E:verification:bf4efee5a9a10fe78ab9"]
+        },
+        {
+          "claim_id": "CC2",
+          "status": "partial",
+          "reason_kinds": ["stale_verification"],
+          "supporting_evidence_ids": ["E:verification:6092299693c776cd170c"]
+        },
+        {
+          "claim_id": "CC2",
+          "predicate_id": "TP:CC2:1",
+          "expectation": "verified_head",
+          "status": "partial",
+          "reason_kinds": ["stale_verification"],
+          "supporting_evidence_ids": ["E:verification:6092299693c776cd170c"]
+        },
+        {
+          "claim_id": "T4",
+          "status": "unverified",
+          "reason_kinds": ["uncertainty_context"]
+        },
+        {
+          "claim_id": "T4",
+          "predicate_id": "TP:T4:1",
+          "expectation": "reference",
+          "status": "unverified",
+          "reason_kinds": ["uncertainty_context"]
+        }
+      ],
+      "structural_graph": {
+        "revisions": [
+          {
+            "revision_side": "head",
+            "index": {
+              "state": "available",
+              "provider": "golden",
+              "revision_side": "head",
+              "revision": "assessment-head",
+              "database_path": "",
+              "indexed_files": 2,
+              "requested_files": 1,
+              "diagnostics": []
+            },
+            "hunk_count": 1,
+            "symbols": [
+              {
+                "id": "ADAPTER",
+                "kind": "function",
+                "name": "adapter_entrypoint",
+                "qualified_name": "src.adapter.adapter_entrypoint",
+                "file_path": "src/adapter.py",
+                "language": "python",
+                "start_line": 1,
+                "end_line": 3
+              },
+              {
+                "id": "SERVICE",
+                "kind": "function",
+                "name": "service_handler",
+                "qualified_name": "src.service.service_handler",
+                "file_path": "src/service.py",
+                "language": "python",
+                "start_line": 10,
+                "end_line": 20
+              }
+            ],
+            "overlaps": [
+              {
+                "hunk_id": "hunk:src/adapter.py:0",
+                "symbol_id": "ADAPTER",
+                "changed_lines": [1]
+              }
+            ],
+            "paths": [
+              {
+                "seed_symbol_id": "ADAPTER",
+                "classification": "runtime",
+                "steps": [
+                  {
+                    "source_id": "ADAPTER",
+                    "target_id": "SERVICE",
+                    "relation": "calls",
+                    "direction": "outgoing"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
     }
   ]
 }

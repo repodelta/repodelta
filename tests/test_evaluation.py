@@ -30,7 +30,9 @@ def test_golden_suite_covers_typed_slots_structure_and_profiles() -> None:
     assert result.metrics.no_match_accuracy == 1.0
     assert result.metrics.classification_accuracy == 1.0
     assert result.metrics.statement_accuracy == 1.0
+    assert result.metrics.assessment_accuracy == 1.0
     assert len(result.statements) == 10
+    assert len(result.assessments) == 12
 
 
 def test_evaluation_outputs_are_byte_stable(tmp_path: Path) -> None:
@@ -44,7 +46,7 @@ def test_evaluation_outputs_are_byte_stable(tmp_path: Path) -> None:
     assert first_json.read_bytes() == second_json.read_bytes()
     assert first_markdown.read_bytes() == second_markdown.read_bytes()
     payload = json.loads(first_json.read_text(encoding="utf-8"))
-    assert payload["schema_version"] == "evaluation_result.v2"
+    assert payload["schema_version"] == "evaluation_result.v3"
     assert payload["queries"][0]["case_id"] == "direct-hunk-and-no-match"
 
 
@@ -95,6 +97,7 @@ def test_evaluation_requires_declared_projection_expectations() -> None:
                 case,
                 expected_selections=(),
                 expected_no_selections=(),
+                expected_assessments=(),
             )
             for case in suite.cases
         ),
@@ -103,6 +106,48 @@ def test_evaluation_requires_declared_projection_expectations() -> None:
     result = evaluate_suite(empty, suite_path=SUITE_PATH)
 
     assert result.passed is False
-    assert "threshold_failed: no projection selection assertions were declared" in (
+    assert "threshold_failed: no projection or assessment assertions were declared" in (
         result.diagnostics
     )
+
+
+def test_wrong_assessment_expectation_fails_the_gate_and_cli(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    raw = json.loads(SUITE_PATH.read_text(encoding="utf-8"))
+    assessment_case = next(
+        case for case in raw["cases"] if case["id"] == "transformation-assessment-proof"
+    )
+    assessment_case["expected_assessments"][0]["status"] = "partial"
+    raw["cases"] = [
+        {
+            **case,
+            "fixture": str((SUITE_PATH.parent / case["fixture"]).resolve()),
+        }
+        for case in raw["cases"]
+    ]
+    suite_path = tmp_path / "failing-assessment-suite.json"
+    suite_path.write_text(json.dumps(raw), encoding="utf-8")
+
+    result = evaluate_suite(load_evaluation_suite(suite_path), suite_path=suite_path)
+
+    assert result.passed is False
+    assert result.metrics.assessment_accuracy < 1.0
+    assert any("assessment_mismatch" in item for item in result.diagnostics)
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "prismcode",
+            "evaluate",
+            "--suite",
+            str(suite_path),
+            "--json-output",
+            str(tmp_path / "assessment-result.json"),
+            "--markdown-output",
+            str(tmp_path / "assessment-result.md"),
+        ],
+    )
+    assert main() == 1

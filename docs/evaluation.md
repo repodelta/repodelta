@@ -1,8 +1,8 @@
 # Offline evaluation
 
-PrismCode evaluates typed fact routing and structural evidence behavior against
-explicit golden IDs before changing projection selection or an eventual LLM
-reranker.
+PrismCode evaluates typed fact routing, structural evidence behavior, and the
+production transformation assessment against explicit golden IDs before those
+authorities change.
 
 ```bash
 prismcode evaluate \
@@ -17,7 +17,7 @@ or an I/O error.
 
 ## Suite contract
 
-An `evaluation_suite.v2` document references ordinary
+An `evaluation_suite.v3` document references ordinary
 `analysis_fixture.v3` inputs. A case can additionally provide a serialized
 `StructuralGraphResult`, allowing exact-symbol and bounded-path behavior to be
 replayed without installing Codegraph.
@@ -31,6 +31,8 @@ Golden expectations use stable statement and evidence IDs:
   classification and fact profile;
 - `expected_statements` checks a statement's stable ID, role, purpose, and
   authority.
+- `expected_assessments` checks a transformation claim or predicate's status,
+  typed reasons, and exact supporting or contradicting evidence IDs.
 
 No path, filename, or display-text heuristic is used to decide correctness.
 
@@ -46,6 +48,7 @@ The result records:
 - negative-query false-positive rate;
 - evidence classification accuracy;
 - statement semantic accuracy;
+- transformation assessment accuracy;
 - missing and unexpected target IDs for every query;
 - per-focus/per-slot budget and threshold diagnostics.
 
@@ -62,10 +65,12 @@ projection of the same result.
 ## Safety boundary
 
 Evaluation observes the production `ProjectionCandidateSet`,
-`CandidateConvergence`, `ReviewProjection`, and `EvidenceCatalog`. It does not
-implement another retriever or convergence path, render review HTML, or turn
-candidate relevance into an implementation, verification, or acceptance
-conclusion. A suite with no projection selection assertions fails rather than
+`CandidateConvergence`, `ReviewProjection`, `EvidenceCatalog`, and
+`TransformationAssessment`. It compares the analyzer-owned status, reasons,
+and evidence bindings; it does not recompute them. It does not implement
+another retriever or convergence path, render review HTML, or turn candidate
+relevance into an implementation, verification, or acceptance conclusion. A
+suite with neither projection nor assessment assertions fails rather than
 reporting vacuous success.
 
 Future evidence-map and LLM work should add golden cases or thresholds before
