@@ -20,6 +20,16 @@ def ordered_path_review_ids(
     path: EvidenceItem,
     evidence: dict[str, EvidenceItem],
 ) -> tuple[str, ...]:
+    return tuple(
+        review_id
+        for evidence_id in ordered_path_evidence_ids(path)
+        if (review_id := review_symbol_id(evidence.get(evidence_id))) is not None
+    )
+
+
+def ordered_path_evidence_ids(path: EvidenceItem) -> tuple[str, ...]:
+    """Return path symbol evidence identities in provider-observed order."""
+
     steps = tuple(path.metadata.get("steps", ()))
     if not steps:
         return ()
@@ -28,11 +38,9 @@ def ordered_path_review_ids(
         *(step.get("target_evidence_id") for step in steps),
     )
     return tuple(
-        review_id
+        str(evidence_id)
         for evidence_id in evidence_ids
         if evidence_id is not None
-        if (review_id := review_symbol_id(evidence.get(str(evidence_id))))
-        is not None
     )
 
 

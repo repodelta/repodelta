@@ -83,6 +83,7 @@ class DeterministicAnalyzer:
             semantics.transformation_contract,
             observed_transformation,
             evidence_catalog,
+            transformation_structural_closure,
         )
         transformation_assessment = assess_transformation(
             semantics.transformation_contract,
@@ -91,6 +92,7 @@ class DeterministicAnalyzer:
             closure_scan_plans,
             head_sha=packet.head_sha,
             subject_selection=transformation_subject_selection,
+            structural_closure=transformation_structural_closure,
         )
         projection_candidates = build_projection_candidates(
             requirements=requirements,
