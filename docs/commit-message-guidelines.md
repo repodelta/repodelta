@@ -1,16 +1,21 @@
-Describe the semantic responsibility or authority transition, not only
-the files changed.
+# Commit messages
 
-Use an imperative subject:
+Commits in branches or Draft PRs are implementation checkpoints; merge
+acceptance applies to the final candidate tree. Keep commits buildable when
+repository policy requires; reorder or squash exploratory checkpoints before
+delivery.
 
-<type>(<responsibility>): <behavior or authority transition>
+Describe the responsibility transition, not only modified files:
+
+```text
+<type>(<responsibility>): <imperative behavior or authority transition>
+```
 
 Examples:
-- refactor(transformation-topology): make closure authoritative
-- fix(review-projection): prevent alignment from adding members
 
-When useful, use the body to state the completed authority or consumer
-transition, removed or classified paths, and preserved boundaries.
+- `refactor(transformation-topology): make closure authoritative`
+- `fix(review-projection): prevent alignment from adding members`
 
-Do not call an intermediate producer canonical unless it controls the
-production output in that commit.
+Use the body when useful for migrated consumers, removed paths, and preserved
+boundaries. Do not call an intermediate producer canonical or imply that an
+exploratory commit is merge-safe.
