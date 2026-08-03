@@ -48,6 +48,9 @@ def matches_transformation_selector(
     if not selector_keys:
         return False
     signature = _candidate_signature(predicate, item)
+    if item.role == "verification":
+        exact = _normalized_selector_key(selector_value)
+        return exact in {*signature.identifiers, *signature.tokens}
     return bool(selector_keys & {*signature.identifiers, *signature.tokens})
 
 
@@ -100,11 +103,16 @@ def _normalize_path(value: str) -> str:
 
 def _selector_keys(value: str) -> frozenset[str]:
     explicit = value.strip().removesuffix("()")
-    leaf = re.split(r"[.:]", explicit)[-1]
-    normalized = re.sub(r"[^A-Za-z0-9_]", "", leaf).casefold()
+    normalized = _normalized_selector_key(value)
     return frozenset(
         {
             *identifier_keys(explicit),
             *(item for item in (normalized,) if len(item) >= 3),
         }
     )
+
+
+def _normalized_selector_key(value: str) -> str:
+    explicit = value.strip().removesuffix("()")
+    leaf = re.split(r"[.:]", explicit)[-1]
+    return re.sub(r"[^A-Za-z0-9_]", "", leaf).casefold()
