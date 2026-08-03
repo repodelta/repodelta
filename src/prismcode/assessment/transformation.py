@@ -17,6 +17,7 @@ from prismcode.model.contracts import (
     TransformationEvidenceBinding,
     TransformationSubjectSelection,
 )
+from prismcode.model.predicate_refs import matches_transformation_selector
 
 _GLOBAL_CLAIM_KINDS = frozenset(
     {
@@ -101,7 +102,6 @@ def _assess_claim(
                 closure_plan,
                 head_sha=head_sha,
                 subject_selection=subject_selection,
-                predicate_count=len(target_predicates),
             )
             for predicate in target_predicates
         )
@@ -207,14 +207,12 @@ def _assess_predicate(
     *,
     head_sha: str,
     subject_selection: TransformationSubjectSelection | None,
-    predicate_count: int,
 ) -> TransformationPredicateAssessment:
     predicate_bindings = _predicate_bindings(
         predicate,
         bindings,
         evidence,
         closure_plan,
-        predicate_count=predicate_count,
         subject_selection=subject_selection,
     )
     closure_binding = next(
@@ -328,7 +326,6 @@ def _predicate_bindings(
     evidence: dict[str, EvidenceItem],
     closure_plan: ClosureScanPlan | None,
     *,
-    predicate_count: int,
     subject_selection: TransformationSubjectSelection | None,
 ) -> tuple[TransformationEvidenceBinding, ...]:
     selected_ids = {
@@ -347,20 +344,21 @@ def _predicate_bindings(
             closure_plan,
         )
     }
-    selected_ids |= closure_ids
-    if selected_ids:
-        return tuple(item for item in bindings if item.evidence_id in selected_ids)
-    exact = tuple(
-        item
+    predicate_specific_ids = {
+        item.evidence_id
         for item in bindings
         if item.evidence_role != "closure"
-        and item.association in {"provided_association", "exact_identifier"}
-    )
-    if exact:
-        return exact
-    if predicate.expectation == "verified_head" and predicate_count == 1:
-        return tuple(item for item in bindings if item.evidence_role != "closure")
-    return ()
+        and any(
+            matches_transformation_selector(
+                predicate,
+                selector_value,
+                evidence[item.evidence_id],
+            )
+            for selector_value in predicate.values
+        )
+    }
+    admitted_ids = selected_ids | closure_ids | predicate_specific_ids
+    return tuple(item for item in bindings if item.evidence_id in admitted_ids)
 
 
 def _closure_fact_has_predicate(

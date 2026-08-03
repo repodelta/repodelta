@@ -21,6 +21,13 @@ the reviewed head. Removal and negative conclusions evaluate complete target
 predicates; path scopes constrain targets and never become absence targets
 themselves. A word such as `without` cannot change unrelated positive
 predicates in the same claim into absence assertions.
+Predicate evidence is admitted only through an exact subject-selection identity,
+an exact match from the shared typed-selector authority, or the predicate-owned
+closure identity. Claim-wide alignment remains annotation and selector-free
+compatibility; it cannot lend one predicate's evidence to another predicate.
+These predicate-owned identity lanes form one union; a changed structural match
+cannot suppress current-head verification or closure evidence for the same
+predicate.
 
 ## Must not
 

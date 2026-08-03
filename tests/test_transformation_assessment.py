@@ -4,12 +4,15 @@ from dataclasses import replace
 
 import pytest
 
+from prismcode.assessment.transformation import assess_transformation
 from prismcode.model.contracts import (
     AnalysisInput,
     ChangedFile,
     ReviewSourcePacket,
     SourceRecord,
     TransformationAssessment,
+    TransformationSubjectMatch,
+    TransformationSubjectSelection,
     VerificationObservation,
 )
 from prismcode.pipeline import DeterministicAnalyzer
@@ -121,6 +124,134 @@ def test_mixed_completion_preserves_each_predicate_polarity() -> None:
     assert brief.transformation_assessment.by_claim_id()[claim.id].status != (
         "contradicted"
     )
+
+
+def test_multi_predicate_claim_cannot_borrow_another_predicates_binding() -> None:
+    packet = _packet()
+    record = packet.source_records[0]
+    packet = replace(
+        packet,
+        source_records=(
+            replace(
+                record,
+                body=(
+                    "## After topology\n"
+                    "- `new_call` and `missing_call` are canonical.\n"
+                ),
+            ),
+        ),
+        verification_observations=(),
+    ).with_revision()
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    claim = brief.transformation_contract.by_kind("after_topology")[0]
+    predicates = brief.transformation_contract.predicates.by_claim_id()[claim.id]
+    assessments = {
+        item.predicate_id: item
+        for item in brief.transformation_assessment.by_claim_id()[claim.id]
+        .predicate_assessments
+    }
+
+    assert assessments[predicates[0].id].status == "demonstrated"
+    assert assessments[predicates[0].id].supporting_binding_ids
+    assert assessments[predicates[1].id].status == "unverified"
+    assert assessments[predicates[1].id].supporting_binding_ids == ()
+    assert brief.transformation_assessment.by_claim_id()[claim.id].status == (
+        "partial"
+    )
+
+
+def test_typed_predicate_rejects_unrelated_single_claim_binding() -> None:
+    packet = _packet()
+    record = packet.source_records[0]
+    packet = replace(
+        packet,
+        source_records=(
+            replace(
+                record,
+                body=(
+                    "## After topology\n"
+                    "- new_call remains available while `missing_call` is canonical.\n"
+                ),
+            ),
+        ),
+        verification_observations=(),
+    ).with_revision()
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    claim = brief.transformation_contract.by_kind("after_topology")[0]
+    binding = brief.transformation_alignment.by_claim_id()[claim.id][0]
+    assessment = brief.transformation_assessment.by_claim_id()[claim.id]
+
+    assert binding.association == "exact_identifier"
+    assert assessment.status == "unverified"
+    assert assessment.predicate_assessments[0].supporting_binding_ids == ()
+
+
+def test_lowercase_check_name_uses_exact_predicate_match() -> None:
+    packet = _packet()
+    record = packet.source_records[0]
+    check = packet.verification_observations[0]
+    packet = replace(
+        packet,
+        source_records=(
+            replace(
+                record,
+                body="## Completion conditions\n- The `test` check succeeds.\n",
+            ),
+        ),
+        verification_observations=(replace(check, id="check:test", name="test"),),
+    ).with_revision()
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    claim = brief.transformation_contract.by_kind("completion_condition")[0]
+    assessment = brief.transformation_assessment.by_claim_id()[claim.id]
+
+    assert assessment.status == "demonstrated"
+    assert assessment.predicate_assessments[0].status == "demonstrated"
+
+
+def test_changed_subject_does_not_hide_current_head_verification() -> None:
+    packet = _packet()
+    changed = packet.changed_files[0]
+    packet = replace(
+        packet,
+        changed_files=(
+            replace(
+                changed,
+                patch="@@ -1 +1 @@\n-old_call()\n+test_suite = new_call()\n",
+            ),
+        ),
+    ).with_revision()
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    claim = brief.transformation_contract.by_kind("completion_condition")[0]
+    predicate = brief.transformation_contract.predicates.by_claim_id()[claim.id][0]
+    bindings = brief.transformation_alignment.by_claim_id()[claim.id]
+    changed_binding = next(
+        item for item in bindings if item.evidence_role != "verification"
+    )
+    verification_binding = next(
+        item for item in bindings if item.evidence_role == "verification"
+    )
+    assessment = assess_transformation(
+        brief.transformation_contract,
+        brief.transformation_alignment,
+        brief.evidence_catalog,
+        brief.closure_scan_plans,
+        head_sha=packet.head_sha,
+        subject_selection=TransformationSubjectSelection(
+            matches=(
+                TransformationSubjectMatch(
+                    id=f"TSM:{predicate.id}:1:{changed_binding.evidence_id}",
+                    claim_id=claim.id,
+                    predicate_id=predicate.id,
+                    selector_index=1,
+                    selector_value=predicate.values[0],
+                    evidence_id=changed_binding.evidence_id,
+                ),
+            ),
+        ),
+    ).by_claim_id()[claim.id]
+
+    assert assessment.status == "demonstrated"
+    assert verification_binding.id in assessment.supporting_binding_ids
 
 
 def test_stale_verification_never_demonstrates_current_completion() -> None:
