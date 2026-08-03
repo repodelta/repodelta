@@ -21,10 +21,20 @@ the reviewed head. Removal and negative conclusions evaluate complete target
 predicates; path scopes constrain targets and never become absence targets
 themselves. A word such as `without` cannot change unrelated positive
 predicates in the same claim into absence assertions.
+An exact scalar surface demonstrates only a surface-presence `change` claim.
+Presence alone cannot demonstrate region completeness, boundary role, topology,
+authority, production reachability, migration closure, removal, or completion.
+Those semantics require their typed topology, closure, or verification proof.
 Predicate evidence is admitted only through an exact subject-selection identity,
 an exact match from the shared typed-selector authority, or the predicate-owned
 closure identity. Claim-wide alignment remains annotation and selector-free
-compatibility; it cannot lend one predicate's evidence to another predicate.
+fallback; it cannot lend one predicate's evidence to another predicate. The
+selector-free fallback is the canonical conservative assessment lane for prose
+without explicit selectors: it may expose partial association but cannot promote
+role or closure semantics from an exact surface. It activates only when a claim
+has no target predicate, writes the same `TransformationAssessment` through
+`_assess_claim`, has no independent authority or runtime switch, and is retained
+as a permanent fail-closed input-form boundary for existing prose.
 These predicate-owned identity lanes form one union; a changed structural match
 cannot suppress current-head verification or closure evidence for the same
 predicate.

@@ -23,16 +23,7 @@ from prismcode.model.contracts import (
 from prismcode.model.predicate_refs import matches_transformation_selector
 from prismcode.model.structural_refs import ordered_path_evidence_ids
 
-_GLOBAL_CLAIM_KINDS = frozenset(
-    {
-        "selected_region",
-        "input_boundary",
-        "output_boundary",
-        "boundary",
-        "authority",
-        "production_path",
-    }
-)
+_SURFACE_PRESENCE_CLAIM_KINDS = frozenset({"change"})
 _SUCCESS_CONCLUSIONS = frozenset({"success"})
 _FAILURE_CONCLUSIONS = frozenset(
     {"failure", "cancelled", "timed_out", "action_required", "startup_failure"}
@@ -87,6 +78,28 @@ def _assess_claim(
     structural_group: TransformationStructuralClosureGroup | None = None,
 ) -> TransformationClaimAssessment:
     if claim.kind == "uncertainty":
+        predicate_assessments = tuple(
+            _predicate_result(
+                claim,
+                predicate,
+                "unverified",
+                (),
+                (),
+                (
+                    _reason(
+                        "uncertainty_context",
+                        "Authored uncertainty is review context, not a fact claim.",
+                    ),
+                ),
+            )
+            for predicate in predicates
+            if predicate.role == "target"
+        )
+        if predicate_assessments:
+            return _aggregate_predicate_assessments(
+                claim,
+                predicate_assessments,
+            )
         return _result(
             claim,
             "unverified",
@@ -175,8 +188,7 @@ def _assess_claim(
     )
     if (
         exact
-        and claim.kind not in _GLOBAL_CLAIM_KINDS
-        and claim.kind != "completion_condition"
+        and claim.kind in _SURFACE_PRESENCE_CLAIM_KINDS
     ):
         return _result(
             claim,
@@ -281,12 +293,10 @@ def _assess_predicate(
     )
     if exact:
         status = (
-            "partial"
-            if (
-                claim.kind == "completion_condition"
-                or predicate.expectation == "absent_head"
-            )
-            else "demonstrated"
+            "demonstrated"
+            if claim.kind in _SURFACE_PRESENCE_CLAIM_KINDS
+            and predicate.expectation == "reference"
+            else "partial"
         )
         reason_kind = (
             "association_only"
@@ -303,8 +313,9 @@ def _assess_predicate(
                 _reason(
                     reason_kind,
                     (
-                        "The exact predicate surface is observed, but a completion "
-                        "claim still requires its full consumer or execution proof."
+                        "The exact predicate surface is observed, but the claim's "
+                        "role, topology, boundary, migration, absence, or completion "
+                        "semantics require stronger typed proof."
                         if status == "partial"
                         else "An exact predicate surface is observed on the declared revision."
                     ),

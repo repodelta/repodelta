@@ -80,6 +80,9 @@ def test_pipeline_projects_rg_and_transformation_claims_once() -> None:
         assessed = brief.transformation_assessment.by_claim_id()[claim.id]
         assert entry.status == assessed.status
         assert entry.inspector_id == f"VEI:{claim.id}"
+        assert workspace.inspections_by_subject_id()[claim.id].assessment_reasons == (
+            assessed.reasons
+        )
 
 
 def test_transformation_binding_cannot_create_structural_graph_membership() -> None:
