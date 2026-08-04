@@ -71,22 +71,10 @@ fixture or GitHub
   -> HTML / CLI presentation
 ```
 
-Each stage owns one transformation and documents its local contract beside the
-code:
-
-- [`model`](../src/prismcode/model/README.md)
-- [`intake`](../src/prismcode/intake/README.md)
-- [`semantics`](../src/prismcode/semantics/README.md)
-- [`closure`](../src/prismcode/closure/README.md)
-- [`changes`](../src/prismcode/changes/README.md)
-- [`providers`](../src/prismcode/providers/README.md)
-- [`facts`](../src/prismcode/facts/README.md)
-- [`routing`](../src/prismcode/routing/README.md)
-- [`assessment`](../src/prismcode/assessment/README.md)
-- [`convergence`](../src/prismcode/convergence/README.md)
-- [`projection`](../src/prismcode/projection/README.md)
-- [`presentation`](../src/prismcode/presentation/README.md)
-- [`evaluation`](../src/prismcode/evaluation/README.md)
+Each stage owns one transformation. Typed models, boundary validation, and
+counterfactual tests define its executable local contract; this document is the
+single narrative map of how those stages compose. Stage-local prose must not
+become a parallel authority that can drift from the production pipeline.
 
 `pipeline.py` orchestrates these contracts without owning a semantic
 transformation. A dependency-boundary test prevents downstream stages from

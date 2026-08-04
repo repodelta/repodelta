@@ -41,14 +41,6 @@ ALLOWED = {
     "presentation": {"model", "presentation"},
     "evaluation": set(STAGES),
 }
-REQUIRED_README_SECTIONS = (
-    "## Owns",
-    "## Input / output",
-    "## Invariants",
-    "## Must not",
-    "## Diagnostics",
-    "## Extension points",
-)
 
 
 def test_changed_path_models_have_one_revision_aware_contract() -> None:
@@ -95,11 +87,10 @@ def test_stage_dependencies_follow_the_canonical_pipeline() -> None:
     assert violations == []
 
 
-def test_each_stage_documents_its_local_contract() -> None:
-    for stage in STAGES:
-        readme = (SOURCE / stage / "README.md").read_text(encoding="utf-8")
-        for heading in REQUIRED_README_SECTIONS:
-            assert heading in readme, f"{stage} is missing {heading}"
+def test_architecture_is_the_single_narrative_stage_map() -> None:
+    architecture = Path("docs/architecture.md").read_text(encoding="utf-8")
+    assert "single narrative map" in architecture
+    assert [stage for stage in STAGES if (SOURCE / stage / "README.md").exists()] == []
 
 
 def test_obsolete_root_modules_are_not_compatibility_paths() -> None:
