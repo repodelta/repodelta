@@ -360,16 +360,16 @@
         {
           "claim_id": "T3",
           "status": "partial",
-          "reason_kinds": ["association_only"],
-          "supporting_evidence_ids": ["E:structural_change:e3a262c5dc2f418b1bf4"]
+          "reason_kinds": ["authority_path_observed", "uncertainty_context"],
+          "supporting_evidence_ids": ["E:structural_path:f8d4f2c1aa143408cca8"]
         },
         {
           "claim_id": "T3",
           "predicate_id": "TP:T3:1",
           "expectation": "present_head",
           "status": "partial",
-          "reason_kinds": ["association_only"],
-          "supporting_evidence_ids": ["E:structural_change:e3a262c5dc2f418b1bf4"]
+          "reason_kinds": ["authority_path_observed", "uncertainty_context"],
+          "supporting_evidence_ids": ["E:structural_path:f8d4f2c1aa143408cca8"]
         },
         {
           "claim_id": "CC1",
@@ -468,6 +468,16 @@
                     "direction": "outgoing"
                   }
                 ]
+              }
+            ],
+            "traversal_coverage": [
+              {
+                "seed_symbol_id": "ADAPTER",
+                "state": "complete",
+                "node_count": 2,
+                "path_count": 1,
+                "limiting_dimensions": [],
+                "sources": []
               }
             ]
           }

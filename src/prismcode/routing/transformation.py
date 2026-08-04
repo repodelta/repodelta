@@ -13,6 +13,12 @@ from prismcode.model.contracts import (
     TransformationContract,
     TransformationEvidenceBinding,
     TransformationStructuralClosure,
+    TransformationStructuralClosureGroup,
+)
+from prismcode.model.structural_refs import (
+    is_outgoing_executable_head_path,
+    ordered_path_review_ids,
+    review_symbol_id,
 )
 from prismcode.routing.association import (
     distinctive_signature_terms,
@@ -41,17 +47,18 @@ def build_transformation_alignment(
         if item.role == "closure_fact"
         and len(item.associated_statement_ids) == 1
     }
-    selected_structural_evidence_by_claim = (
-        {
+    structural_group_by_claim = (
+        {group.claim_id: group for group in structural_closure.groups}
+        if structural_closure is not None
+        else {}
+    )
+    selected_structural_evidence_by_claim = {
             group.claim_id: (
                 *group.seed_evidence_ids,
                 *group.path_evidence_ids,
             )
-            for group in structural_closure.groups
-        }
-        if structural_closure is not None
-        else {}
-    )
+            for group in structural_group_by_claim.values()
+    }
     distinctive = distinctive_text_terms(
         tuple((item.id, item.text) for item in contract.claims)
     )
@@ -132,6 +139,17 @@ def build_transformation_alignment(
             if reasons:
                 claim_bindings.append(_binding(claim, item, reasons))
 
+        if claim.kind == "authority":
+            claim_bindings.extend(
+                _authority_bypass_bindings(
+                    claim,
+                    structural_group_by_claim.get(claim.id),
+                    claim_bindings,
+                    observed_items,
+                    evidence,
+                )
+            )
+
         claim_bindings = list(
             {item.evidence_id: item for item in claim_bindings}.values()
         )
@@ -159,6 +177,64 @@ def build_transformation_alignment(
     )
     result.validate_consistency(contract, observed, evidence_catalog)
     return result
+
+
+def _authority_bypass_bindings(
+    claim: TransformationClaim,
+    structural_group: TransformationStructuralClosureGroup | None,
+    claim_bindings: list[TransformationEvidenceBinding],
+    observed_items: tuple[EvidenceItem, ...],
+    evidence: dict[str, EvidenceItem],
+) -> tuple[TransformationEvidenceBinding, ...]:
+    """Bind observed paths that reach an authority-controlled sink without it."""
+
+    if structural_group is None:
+        return ()
+    authority_ids = {
+        review_id
+        for evidence_id in structural_group.seed_evidence_ids
+        if (review_id := review_symbol_id(evidence.get(evidence_id))) is not None
+    }
+    if not authority_ids:
+        return ()
+    controlling_paths = tuple(
+        evidence[binding.evidence_id]
+        for binding in claim_bindings
+        if binding.evidence_id in evidence
+        and evidence[binding.evidence_id].kind == "structural_path"
+        and is_outgoing_executable_head_path(evidence[binding.evidence_id])
+        and authority_ids & set(
+            ordered_path_review_ids(evidence[binding.evidence_id], evidence)[:-1]
+        )
+    )
+    sink_ids = {
+        path_ids[-1]
+        for path in controlling_paths
+        if (path_ids := ordered_path_review_ids(path, evidence))
+    }
+    existing_ids = {item.evidence_id for item in claim_bindings}
+    return tuple(
+        _binding(
+            claim,
+            item,
+            (
+                AssociationReason(
+                    kind="structural_bridge",
+                    detail=(
+                        "This observed executable path reaches the same canonical "
+                        "sink as an authority-controlled path without traversing "
+                        "the declared authority."
+                    ),
+                ),
+            ),
+        )
+        for item in observed_items
+        if item.id not in existing_ids
+        and item.kind == "structural_path"
+        and is_outgoing_executable_head_path(item)
+        and (path_ids := ordered_path_review_ids(item, evidence))
+        and path_ids[-1] in sink_ids
+    )
 
 
 def _eligible(claim: TransformationClaim, item: EvidenceItem) -> bool:
