@@ -1,23 +1,25 @@
 # Pull requests
 
-Title the PR around its semantic responsibility transition, not files or
-mechanisms. Record:
+Title the PR around the semantic responsibility or contract transition.
 
-- parent transformation and this PR's child responsibility;
-- output, scope, sinks, and authority / admission / proof / consumption;
-- selected region, boundaries, and before/after topology;
-- migrations, removals, and classified alternate paths;
-- counterfactuals, completion evidence, and coverage limits;
-- open parent obligations and unresolved dynamic surfaces;
-- responsibility closure, abandonment safety, and parent completion separately.
+Record:
 
-Explain why the tree remains correct and meaningful if the parent stops.
-Unsupported semantics must fail closed. Do not depend on future wiring, call a
-non-authoritative path canonical, or claim unobserved coverage.
+- parent transformation and this PR's responsibility;
+- semantic output and production sinks;
+- responsibility before and after;
+- selected region and boundaries;
+- affected observed producer/consumer contracts;
+- migrations, removals, and retained classified paths;
+- before/after production flow;
+- counterfactual, contract, and sink-level evidence;
+- unresolved dynamic or external surfaces;
+- responsibility closure, boundary-contract closure, abandonment safety, and
+  parent completion separately.
 
-Keep the PR Draft while discovery, scope, or either merge gate is open. Mark it
-ready only after the final candidate tree passes pre-merge census and both
-responsibility closure and abandonment safety are true.
+Explain why the resulting tree remains correct and meaningful if the parent
+stops permanently. Unsupported or incomplete semantics must fail closed.
 
-If parent completion is false, link a stable issue, plan, or design record that
-owns the remaining obligations and stop conditions.
+Keep the PR Draft while the responsibility, affected contracts, or any merge
+gate remains unsettled. Mark it ready only after the final candidate tree passes
+the pre-merge audit. If the parent remains open, link a stable record that owns
+its remaining obligations and stop conditions.

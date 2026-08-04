@@ -1,21 +1,21 @@
 # Commit messages
 
-Commits in branches or Draft PRs are implementation checkpoints; merge
-acceptance applies to the final candidate tree. Keep commits buildable when
-repository policy requires; reorder or squash exploratory checkpoints before
-delivery.
+Commits within a branch or Draft PR are implementation checkpoints. Merge
+acceptance is evaluated against the final candidate tree. Squash exploratory
+checkpoints before delivery when repository policy permits.
 
-Describe the responsibility transition, not only modified files:
+Describe the responsibility or contract transition, not only modified files:
 
 ```text
-<type>(<responsibility>): <imperative behavior or authority transition>
+<type>(<responsibility>): <imperative transition>
 ```
 
 Examples:
 
-- `refactor(transformation-topology): make closure authoritative`
-- `fix(review-projection): prevent alignment from adding members`
+- `refactor(verification-identity): unify selector and observation contracts`
+- `fix(topology-proof): require ordered edge witnesses`
+- `refactor(review-projection): consume canonical membership directly`
 
-Use the body when useful for migrated consumers, removed paths, and preserved
-boundaries. Do not call an intermediate producer canonical or imply that an
-exploratory commit is merge-safe.
+When useful, state migrated producers or consumers, updated boundaries,
+removed mappings or bypasses, and preserved external contracts. Do not call
+exploratory or unconsumed code canonical or merge-safe.
