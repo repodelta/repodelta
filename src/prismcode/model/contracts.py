@@ -2991,6 +2991,7 @@ class VerificationStatusCount:
 class TransformationSummaryProjection:
     source_state: TransformationContractSourceState = "source_absent"
     claim_ids: tuple[str, ...] = ()
+    change_claim_ids: tuple[str, ...] = ()
     selected_region_claim_ids: tuple[str, ...] = ()
     boundary_claim_ids: tuple[str, ...] = ()
     before_topology_claim_ids: tuple[str, ...] = ()
@@ -2998,6 +2999,7 @@ class TransformationSummaryProjection:
     authority_claim_ids: tuple[str, ...] = ()
     production_path_claim_ids: tuple[str, ...] = ()
     migration_claim_ids: tuple[str, ...] = ()
+    migration_component_claim_ids: tuple[str, ...] = ()
     removal_claim_ids: tuple[str, ...] = ()
     completion_condition_claim_ids: tuple[str, ...] = ()
     uncertainty_claim_ids: tuple[str, ...] = ()
@@ -3021,7 +3023,7 @@ class VerificationWorkspace:
     )
     matrix: tuple[VerificationMatrixEntry, ...] = ()
     inspections: tuple[VerificationEvidenceInspection, ...] = ()
-    schema_version: str = "verification_workspace.v2"
+    schema_version: str = "verification_workspace.v3"
 
     def by_subject_id(self) -> dict[str, VerificationMatrixEntry]:
         return {item.subject_id: item for item in self.matrix}
@@ -3037,7 +3039,7 @@ class ReviewProjection:
     slices: tuple[ReviewSlice, ...] = ()
     review_graph: ReviewStructuralGraph = ReviewStructuralGraph()
     verification_workspace: VerificationWorkspace = VerificationWorkspace()
-    schema_version: str = "review_projection.v23"
+    schema_version: str = "review_projection.v24"
 
     def validate_consistency(
         self,
@@ -3734,7 +3736,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v45"
+    schema_version: str = "review_brief.v46"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

@@ -1122,6 +1122,77 @@ def _evidence_appendix(brief: ReviewBrief, files: str) -> str:
     )
 
 
+def _transformation_summary(brief: ReviewBrief) -> str:
+    workspace = brief.projection.verification_workspace
+    summary = workspace.transformation_summary
+    if not summary.claim_ids:
+        return ""
+    entries = workspace.by_subject_id()
+
+    def stage(label: str, claim_ids: tuple[str, ...]) -> str:
+        claims = tuple(entries[item] for item in claim_ids)
+        rows = "".join(
+            '<button class="summary-claim" type="button" '
+            f'data-summary-subject="{escape(item.subject_id, quote=True)}" '
+            f'title="{escape(item.text, quote=True)}">'
+            f'<span>{escape(item.subject_id)}</span>'
+            f'<b>{escape(item.text)}</b>'
+            f'<i class="status-pill status-{escape(item.status)}">'
+            f'{escape(item.status.replace("_", " "))}</i></button>'
+            for item in claims
+        )
+        return (
+            '<div class="summary-stage">'
+            f'<span class="eyebrow">{escape(label)}</span>'
+            f'{rows or "<p class=\"empty\">Not declared.</p>"}</div>'
+        )
+
+    transition_ids = tuple(
+        dict.fromkeys(
+            (
+                *summary.change_claim_ids,
+                *summary.authority_claim_ids,
+                *summary.production_path_claim_ids,
+                *summary.migration_claim_ids,
+                *summary.removal_claim_ids,
+            )
+        )
+    )
+    result_ids = tuple(
+        dict.fromkeys(
+            (
+                *summary.after_topology_claim_ids,
+                *summary.completion_condition_claim_ids,
+            )
+        )
+    )
+    limits = (
+        f"{len(summary.selected_region_claim_ids)} region · "
+        f"{len(summary.boundary_claim_ids)} boundary · "
+        f"{len(summary.uncertainty_claim_ids)} uncertainty · "
+        f"{len(summary.migration_component_claim_ids)} migration components · "
+        f"{len(summary.unassociated_claim_ids)} unassociated · "
+        f"{len(summary.base_topology_evidence_ids)} base facts · "
+        f"{len(summary.head_topology_evidence_ids)} head facts"
+    )
+    return (
+        '<section class="section transformation-summary">'
+        '<h2>Transformation Summary</h2>'
+        '<p class="section-intro">A compact index of authored transformation '
+        'claims and their existing deterministic statuses. Select an item to '
+        'open the canonical evidence inspector.</p>'
+        '<div class="transformation-strip">'
+        f'{stage("Base", summary.before_topology_claim_ids)}'
+        '<span class="summary-arrow" aria-hidden="true">→</span>'
+        f'{stage("Change", transition_ids)}'
+        '<span class="summary-arrow" aria-hidden="true">→</span>'
+        f'{stage("Result", result_ids)}'
+        '</div>'
+        f'<span class="summary-limits">Coverage boundary · {escape(limits)}</span>'
+        '</section>'
+    )
+
+
 def render_html(brief: ReviewBrief) -> str:
     packet = brief.packet
     source_priority = {"linked_issue": 0, "ticket": 0, "pull_request": 1}
@@ -1158,6 +1229,7 @@ def render_html(brief: ReviewBrief) -> str:
         brief,
     )
     verification_accordion = _verification_accordion(brief)
+    transformation_summary = _transformation_summary(brief)
     appendix = _evidence_appendix(brief, files)
 
     return f"""<!doctype html>
@@ -1179,6 +1251,12 @@ def render_html(brief: ReviewBrief) -> str:
 .relation-member-arrow{{color:var(--muted);text-align:center}}
 .eyebrow{{display:block;margin-bottom:4px;color:var(--green);font-size:9px;font-weight:760;text-transform:uppercase;letter-spacing:.09em}}
 .section-intro{{margin:0 0 16px;color:var(--muted);font-size:10px}}
+.transformation-strip{{display:grid;grid-template-columns:minmax(0,1fr) 28px minmax(0,1.2fr) 28px minmax(0,1fr);gap:8px;align-items:stretch}}
+.summary-stage{{min-width:0;padding:13px;border:1px solid rgba(111,128,135,.2);border-radius:10px;background:rgba(3,7,9,.2)}}
+.summary-arrow{{display:grid;place-items:center;color:var(--faint);font-size:18px}}
+.summary-claim{{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:7px;align-items:center;width:100%;margin-top:7px;padding:8px;border:1px solid rgba(111,128,135,.18);border-radius:8px;background:rgba(16,24,28,.72);color:var(--text);font:inherit;text-align:left;cursor:pointer}}
+.summary-claim:hover,.summary-claim:focus{{border-color:var(--green);outline:none}}.summary-claim>span{{color:var(--blue);font:700 8px ui-monospace,SFMono-Regular,Menlo,monospace}}.summary-claim>b{{overflow:hidden;font-size:9px;font-weight:620;text-overflow:ellipsis;white-space:nowrap}}.summary-claim>i{{font-style:normal}}
+.summary-limits{{display:block;margin-top:12px;color:var(--faint);font-size:8px}}
 .verification-accordion{{display:grid;gap:7px}}
 .verification-group-label{{margin-top:8px;color:var(--faint);font-size:9px;font-weight:750;text-transform:uppercase;letter-spacing:.07em}}
 .verification-item{{border:1px solid rgba(111,128,135,.2);border-radius:10px;overflow:hidden;background:rgba(3,7,9,.2)}}
@@ -1202,10 +1280,11 @@ def render_html(brief: ReviewBrief) -> str:
 .evidence-appendix>details>summary{{display:flex;justify-content:space-between;align-items:center;cursor:pointer;list-style:none}}.evidence-appendix>details>summary b{{font-size:18px}}
 .appendix-grid{{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:20px}}.appendix-grid>div{{min-width:0}}
 .appendix-row{{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid rgba(111,128,135,.15);font-size:9px}}.appendix-context{{grid-column:1/-1}}
-@media(max-width:800px){{.verification-detail,.appendix-grid{{grid-template-columns:1fr}}.verification-item>summary{{grid-template-columns:42px minmax(0,1fr)}}.verification-authority,.verification-item>summary .status-pill{{grid-column:2}}}}
+@media(max-width:800px){{.transformation-strip{{grid-template-columns:1fr}}.summary-arrow{{transform:rotate(90deg)}}.verification-detail,.appendix-grid{{grid-template-columns:1fr}}.verification-item>summary{{grid-template-columns:42px minmax(0,1fr)}}.verification-authority,.verification-item>summary .status-pill{{grid-column:2}}}}
 </style></head><body><main class="shell">
 <div class="topbar"><span class="brand-mark"></span>PrismCode</div>
 <section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{brief.overview.changed_file_count} changed files</span><span>·</span><span>{escape(ci_copy)}</span></div><h1>{escape(packet.title)}</h1><div class="intent">{escape(brief.intent.text)}</div><span class="source-note">Source: {source_line}</span></section>
+{transformation_summary}
 <section class="section verification-workspace"><h2>Verification</h2><p class="section-intro">Expand one R/G/T/CC subject to compare its authored claim, canonical observations, deterministic assessment, and structural coverage.</p>{verification_accordion}{review_graph}</section>
 {appendix}
 <div class="footer">PrismCode · {escape(pr_label)} · Schema {escape(brief.schema_version)} · Generated by {escape(brief.generated_by)}</div>
@@ -1298,6 +1377,17 @@ document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
   if (initialItem) activateFocus(initialItem.dataset.verificationSubject);
 }}
 );
+document.querySelectorAll("[data-summary-subject]").forEach((button) => {{
+  button.addEventListener("click", () => {{
+    const subject = button.dataset.summarySubject;
+    const target = Array.from(document.querySelectorAll(
+      ".verification-item[data-verification-subject]"
+    )).find((item) => item.dataset.verificationSubject === subject);
+    if (!target) return;
+    target.open = true;
+    target.scrollIntoView({{ behavior: "smooth", block: "center" }});
+  }});
+}});
 </script></body></html>"""
 
 
