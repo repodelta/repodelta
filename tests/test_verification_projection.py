@@ -26,6 +26,7 @@ from prismcode.model.contracts import (
     TransformationEvidenceBinding,
 )
 from prismcode.pipeline import DeterministicAnalyzer
+from prismcode.presentation.html import render_html
 from prismcode.projection.verification import project_verification_workspace
 
 
@@ -189,15 +190,46 @@ def test_verification_workspace_is_serialized_for_renderer_consumption() -> None
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=_mixed_packet()))
     serialized = brief.to_dict()["projection"]
 
-    assert serialized["schema_version"] == "review_projection.v23"
+    assert serialized["schema_version"] == "review_projection.v24"
     assert serialized["verification_workspace"]["schema_version"] == (
-        "verification_workspace.v2"
+        "verification_workspace.v3"
     )
     assert serialized["verification_workspace"]["matrix"]
     summary = brief.projection.verification_workspace.transformation_summary
     assert summary.claim_ids == tuple(
         item.id for item in brief.transformation_contract.claims
     )
+    assert summary.change_claim_ids == (
+        brief.transformation_contract.change_claim_ids
+    )
+    assert summary.migration_claim_ids == (
+        brief.transformation_contract.migration.general_claim_ids
+    )
+    assert summary.migration_component_claim_ids == tuple(
+        (
+            *brief.transformation_contract.migration.producer_claim_ids,
+            *brief.transformation_contract.migration.consumer_claim_ids,
+            *brief.transformation_contract.migration.test_claim_ids,
+        )
+    )
     assert sum(item.count for item in summary.status_counts) == len(
         brief.transformation_contract.claims
     )
+
+
+def test_renderer_indexes_typed_summary_into_existing_inspectors() -> None:
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=_mixed_packet()))
+    html = render_html(brief)
+    change_id = brief.transformation_contract.change_claim_ids[0]
+    completion_id = brief.transformation_contract.completion_condition_claim_ids[0]
+
+    assert html.index("Transformation Summary") < html.index(">Verification</h2>")
+    assert '<span class="eyebrow">Base</span>' in html
+    assert '<span class="eyebrow">Change</span>' in html
+    assert '<span class="eyebrow">Result</span>' in html
+    assert f'data-summary-subject="{change_id}"' in html
+    assert f'data-summary-subject="{completion_id}"' in html
+    assert html.count(f'data-summary-subject="{change_id}"') == 1
+    assert f'data-verification-subject="{change_id}"' in html
+    assert "existing deterministic statuses" in html
+    assert "data-summary-subject" in html and "target.open = true" in html
