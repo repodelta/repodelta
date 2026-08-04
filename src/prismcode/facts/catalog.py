@@ -261,6 +261,10 @@ def _put_structural_revision(
             )
             for path in structural_graph.paths
         }
+        traversal_coverage = {
+            item.seed_symbol_id: item.state
+            for item in structural_graph.traversal_coverage
+        }
         symbol_paths: dict[str, set[str]] = {}
         for path in structural_graph.paths:
             path_id = path_ids[_path_key(path, revision_side)]
@@ -395,6 +399,10 @@ def _put_structural_revision(
                     role="structural_path",
                     sources=path.sources,
                     structural_path_ids=(path_id,),
+                    structural_traversal_coverage=traversal_coverage.get(
+                        path.seed_symbol_id,
+                        "unknown",
+                    ),
                     metadata={
                         "seed_symbol_id": path.seed_symbol_id,
                         "depth": path.depth,

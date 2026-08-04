@@ -51,3 +51,27 @@ def path_review_ids(
     if path is None:
         return frozenset()
     return frozenset(ordered_path_review_ids(path, evidence))
+
+
+def is_executable_head_path(path: EvidenceItem) -> bool:
+    """Return whether a path contains only runtime executable relations."""
+
+    return (
+        path.kind == "structural_path"
+        and path.revision_side == "head"
+        and path.classification == "runtime"
+        and bool(path.metadata.get("steps"))
+        and all(
+            step.get("relation") in {"calls", "instantiates"}
+            for step in path.metadata["steps"]
+        )
+    )
+
+
+def is_outgoing_executable_head_path(path: EvidenceItem) -> bool:
+    """Return whether traversal order is also the observed control direction."""
+
+    return is_executable_head_path(path) and all(
+        step.get("direction") == "outgoing"
+        for step in path.metadata["steps"]
+    )

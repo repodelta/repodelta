@@ -71,6 +71,7 @@ TransformationSubjectSelectionState = Literal[
     "no_structural_match",
 ]
 TransformationStructuralClosureState = Literal["budget_truncated"]
+StructuralTraversalCoverageState = Literal["complete", "truncated", "unknown"]
 TransformationEvidenceRole = Literal[
     "change",
     "relation_change",
@@ -102,6 +103,8 @@ TransformationAssessmentReasonKind = Literal[
     "coverage_incomplete",
     "no_binding",
     "uncertainty_context",
+    "authority_path_observed",
+    "authority_bypass_observed",
 ]
 VerificationSubjectKind = Literal[
     "requirement",
@@ -1919,6 +1922,7 @@ class EvidenceItem:
     sources: tuple[SourceRef, ...] = ()
     change_relation_ids: tuple[str, ...] = ()
     structural_path_ids: tuple[str, ...] = ()
+    structural_traversal_coverage: StructuralTraversalCoverageState = "unknown"
     structural_change: StructuralChangeIdentity | None = None
     structural_relation_change: StructuralRelationChangeIdentity | None = None
     structural_ownership: StructuralOwnershipIdentity | None = None
@@ -2025,6 +2029,13 @@ class EvidenceItem:
                 f"{self.id}: only structural changes may carry typed identity"
             )
         if (
+            self.kind != "structural_path"
+            and self.structural_traversal_coverage != "unknown"
+        ):
+            raise ValueError(
+                f"{self.id}: only structural paths may carry traversal coverage"
+            )
+        if (
             self.kind != "structural_relation_change"
             and self.structural_relation_change is not None
         ):
@@ -2097,7 +2108,7 @@ class EvidenceCatalog:
     ] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
     closure_scan_diagnostics: tuple[ClosureScanDiagnostic, ...] = ()
-    schema_version: str = "evidence_catalog.v17"
+    schema_version: str = "evidence_catalog.v18"
 
     def by_id(self) -> dict[str, EvidenceItem]:
         return {item.id: item for item in self.items}
@@ -3690,7 +3701,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v43"
+    schema_version: str = "review_brief.v44"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

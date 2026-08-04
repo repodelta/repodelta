@@ -28,6 +28,7 @@ from prismcode.providers.structural import (
     StructuralGraphIndexStatus,
     StructuralGraphResult,
     StructuralPath,
+    StructuralSeedCoverage,
 )
 
 
@@ -948,5 +949,15 @@ def _structural_revision(raw: dict[str, Any]) -> StructuralGraphResult:
                 classification=item["classification"],
             )
             for item in raw.get("paths", ())
+        ),
+        traversal_coverage=tuple(
+            StructuralSeedCoverage(
+                seed_symbol_id=str(item["seed_symbol_id"]),
+                state=item["state"],
+                node_count=int(item["node_count"]),
+                path_count=int(item["path_count"]),
+                limiting_dimensions=tuple(item.get("limiting_dimensions", ())),
+            )
+            for item in raw.get("traversal_coverage", ())
         ),
     )

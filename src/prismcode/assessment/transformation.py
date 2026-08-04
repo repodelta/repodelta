@@ -21,7 +21,13 @@ from prismcode.model.contracts import (
     TransformationSubjectSelection,
 )
 from prismcode.model.predicate_refs import matches_transformation_selector
-from prismcode.model.structural_refs import ordered_path_evidence_ids
+from prismcode.model.structural_refs import (
+    is_executable_head_path,
+    is_outgoing_executable_head_path,
+    ordered_path_evidence_ids,
+    ordered_path_review_ids,
+    review_symbol_id,
+)
 
 _SURFACE_PRESENCE_CLAIM_KINDS = frozenset({"change"})
 _SUCCESS_CONCLUSIONS = frozenset({"success"})
@@ -48,6 +54,16 @@ def assess_transformation(
     structural_groups = (
         structural_closure.by_claim_id() if structural_closure is not None else {}
     )
+    uncertainty_claim_ids = {
+        item.id for item in contract.claims if item.kind == "uncertainty"
+    }
+    uncertainty_evidence_ids = frozenset(
+        {
+        item.evidence_id
+        for item in (subject_selection.matches if subject_selection else ())
+        if item.claim_id in uncertainty_claim_ids
+        }
+    )
     assessments = tuple(
         _assess_claim(
             claim,
@@ -58,6 +74,7 @@ def assess_transformation(
             predicates=contract.predicates.by_claim_id().get(claim.id, ()),
             subject_selection=subject_selection,
             structural_group=structural_groups.get(claim.id),
+            uncertainty_evidence_ids=uncertainty_evidence_ids,
         )
         for claim in contract.claims
     )
@@ -76,6 +93,7 @@ def _assess_claim(
     predicates: tuple[TransformationPredicate, ...] = (),
     subject_selection: TransformationSubjectSelection | None = None,
     structural_group: TransformationStructuralClosureGroup | None = None,
+    uncertainty_evidence_ids: frozenset[str] = frozenset(),
 ) -> TransformationClaimAssessment:
     if claim.kind == "uncertainty":
         predicate_assessments = tuple(
@@ -126,6 +144,7 @@ def _assess_claim(
                 head_sha=head_sha,
                 subject_selection=subject_selection,
                 structural_group=structural_group,
+                uncertainty_evidence_ids=uncertainty_evidence_ids,
             )
             for predicate in target_predicates
         )
@@ -231,8 +250,10 @@ def _assess_predicate(
     head_sha: str,
     subject_selection: TransformationSubjectSelection | None,
     structural_group: TransformationStructuralClosureGroup | None,
+    uncertainty_evidence_ids: frozenset[str],
 ) -> TransformationPredicateAssessment:
     predicate_bindings = _predicate_bindings(
+        claim,
         predicate,
         bindings,
         evidence,
@@ -240,6 +261,16 @@ def _assess_predicate(
         subject_selection=subject_selection,
         structural_group=structural_group,
     )
+    if claim.kind == "authority":
+        return _assess_authority_predicate(
+            claim,
+            predicate,
+            predicate_bindings,
+            evidence,
+            subject_selection,
+            structural_group,
+            uncertainty_evidence_ids,
+        )
     if predicate.selector_kind == "ordered_path":
         return _assess_ordered_path_predicate(
             claim,
@@ -354,6 +385,7 @@ def _assess_predicate(
 
 
 def _predicate_bindings(
+    claim: TransformationClaim,
     predicate: TransformationPredicate,
     bindings: tuple[TransformationEvidenceBinding, ...],
     evidence: dict[str, EvidenceItem],
@@ -391,6 +423,18 @@ def _predicate_bindings(
             for selector_value in predicate.values
         )
     }
+    structural_bridge_ids = {
+        item.evidence_id
+        for item in bindings
+        if item.association == "structural_bridge"
+    }
+    authority_path_ids = {
+        item.evidence_id
+        for item in bindings
+        if claim.kind == "authority"
+        and item.evidence_role == "structural_path"
+        and item.association == "provided_association"
+    }
     ordered_path_ids = (
         set(structural_group.path_evidence_ids)
         if predicate.selector_kind == "ordered_path"
@@ -406,9 +450,255 @@ def _predicate_bindings(
     admitted_ids = (
         ordered_path_ids | ordered_verification_ids
         if predicate.selector_kind == "ordered_path"
-        else selected_ids | closure_ids | predicate_specific_ids
+        else selected_ids
+        | closure_ids
+        | predicate_specific_ids
+        | structural_bridge_ids
+        | authority_path_ids
     )
     return tuple(item for item in bindings if item.evidence_id in admitted_ids)
+
+
+def _assess_authority_predicate(
+    claim: TransformationClaim,
+    predicate: TransformationPredicate,
+    bindings: tuple[TransformationEvidenceBinding, ...],
+    evidence: dict[str, EvidenceItem],
+    subject_selection: TransformationSubjectSelection | None,
+    structural_group: TransformationStructuralClosureGroup | None,
+    uncertainty_evidence_ids: frozenset[str],
+) -> TransformationPredicateAssessment:
+    """Require an executable consumer path and reject observed shared-sink bypasses."""
+
+    authority_ids = {
+        review_id
+        for match in (subject_selection.matches if subject_selection else ())
+        if match.predicate_id == predicate.id
+        and (review_id := review_symbol_id(evidence.get(match.evidence_id)))
+        is not None
+    }
+    authority_evidence_ids = {
+        match.evidence_id
+        for match in (subject_selection.matches if subject_selection else ())
+        if match.predicate_id == predicate.id
+    }
+    uncertainty_declared = bool(
+        authority_evidence_ids & uncertainty_evidence_ids
+    )
+    controlling = tuple(
+        binding
+        for binding in bindings
+        if binding.evidence_id in evidence
+        and _authority_controls_path(
+            evidence[binding.evidence_id],
+            evidence,
+            authority_ids,
+        )
+    )
+    controlled_sink_ids = {
+        path_ids[-1]
+        for binding in controlling
+        if (
+            path_ids := ordered_path_review_ids(
+                evidence[binding.evidence_id],
+                evidence,
+            )
+        )
+    }
+    bypasses = tuple(
+        binding
+        for binding in bindings
+        if binding.evidence_id in evidence
+        and (
+            (
+                binding.association == "structural_bridge"
+                and not _authority_controls_path(
+                    evidence[binding.evidence_id],
+                    evidence,
+                    authority_ids,
+                )
+            )
+            or _path_branches_into_controlled_sink(
+                evidence[binding.evidence_id],
+                evidence,
+                authority_ids,
+                controlled_sink_ids,
+            )
+        )
+    )
+    if bypasses:
+        return _predicate_result(
+            claim,
+            predicate,
+            "contradicted",
+            tuple(item.id for item in controlling),
+            tuple(item.id for item in bypasses),
+            (
+                _reason(
+                    "authority_bypass_observed",
+                    "An observed executable path reaches an authority-controlled "
+                    "sink without traversing the declared authority.",
+                    bypasses,
+                    tuple(evidence[item.evidence_id] for item in bypasses),
+                ),
+            ),
+        )
+    if controlling:
+        path_reason = _reason(
+            "authority_path_observed",
+            "The declared authority occurs before a downstream consumer on an "
+            "observed executable head path.",
+            controlling,
+            tuple(evidence[item.evidence_id] for item in controlling),
+        )
+        deferred = (
+            structural_group.deferred_path_evidence_ids
+            if structural_group is not None
+            else ()
+        )
+        provider_incomplete = tuple(
+            item
+            for item in controlling
+            if evidence[item.evidence_id].structural_traversal_coverage
+            != "complete"
+        )
+        if deferred or provider_incomplete or uncertainty_declared:
+            return _predicate_result(
+                claim,
+                predicate,
+                "partial",
+                tuple(item.id for item in controlling),
+                (),
+                (
+                    path_reason,
+                    *(
+                        (
+                            _reason(
+                                "coverage_incomplete",
+                                "Potential authority paths were deferred by the "
+                                "structural closure or provider traversal safety "
+                                "boundary; exclusivity is not proved.",
+                                provider_incomplete,
+                                facts=tuple(
+                                    evidence[item_id]
+                                    for item_id in dict.fromkeys(
+                                        (
+                                            *(
+                                                item_id
+                                                for item_id in deferred
+                                                if item_id in evidence
+                                            ),
+                                            *(
+                                                item.evidence_id
+                                                for item in provider_incomplete
+                                            ),
+                                        )
+                                    )
+                                ),
+                            ),
+                        )
+                        if deferred or provider_incomplete
+                        else ()
+                    ),
+                    *(
+                        (
+                            _reason(
+                                "uncertainty_context",
+                                "An authored uncertainty references the same "
+                                "canonical authority subject; exclusivity remains "
+                                "unresolved.",
+                            ),
+                        )
+                        if uncertainty_declared
+                        else ()
+                    ),
+                ),
+            )
+        return _predicate_result(
+            claim,
+            predicate,
+            "demonstrated",
+            tuple(item.id for item in controlling),
+            (),
+            (path_reason,),
+        )
+    deferred = (
+        structural_group.deferred_path_evidence_ids
+        if structural_group is not None
+        else ()
+    )
+    selected = tuple(
+        item
+        for item in bindings
+        if item.association in {"provided_association", "exact_identifier"}
+    )
+    return _predicate_result(
+        claim,
+        predicate,
+        "partial" if selected or deferred else "unverified",
+        tuple(item.id for item in selected),
+        (),
+        (
+            _reason(
+                (
+                    "coverage_incomplete"
+                    if deferred
+                    else "association_only"
+                    if selected
+                    else "no_binding"
+                ),
+                (
+                    "Potential authority paths were deferred by the structural "
+                    "closure safety boundary; control is not proved."
+                    if deferred
+                    else "The authority surface is observed, but no executable "
+                    "head path proves that it controls a downstream consumer."
+                    if selected
+                    else "No canonical structural fact or executable consumer path "
+                    "was associated with the declared authority."
+                ),
+                selected,
+                tuple(
+                    evidence[item_id]
+                    for item_id in deferred
+                    if item_id in evidence
+                ),
+            ),
+        ),
+    )
+
+
+def _authority_controls_path(
+    path: EvidenceItem,
+    evidence: dict[str, EvidenceItem],
+    authority_ids: set[str],
+) -> bool:
+    if not is_outgoing_executable_head_path(path):
+        return False
+    path_ids = ordered_path_review_ids(path, evidence)
+    return bool(authority_ids & set(path_ids[:-1]))
+
+
+def _path_branches_into_controlled_sink(
+    path: EvidenceItem,
+    evidence: dict[str, EvidenceItem],
+    authority_ids: set[str],
+    controlled_sink_ids: set[str],
+) -> bool:
+    if not controlled_sink_ids or not is_executable_head_path(path):
+        return False
+    for step in path.metadata["steps"]:
+        if step.get("direction") != "incoming":
+            continue
+        source_id = review_symbol_id(evidence.get(step.get("source_evidence_id")))
+        target_id = review_symbol_id(evidence.get(step.get("target_evidence_id")))
+        if (
+            source_id in controlled_sink_ids
+            and target_id is not None
+            and target_id not in authority_ids
+        ):
+            return True
+    return False
 
 
 def _assess_ordered_path_predicate(
