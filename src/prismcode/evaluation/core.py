@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
-from typing import Any
+from typing import Any, get_args
 
 from prismcode.pipeline import DeterministicAnalyzer
 from prismcode.model.contracts import (
@@ -11,9 +11,13 @@ from prismcode.model.contracts import (
     FactProfile,
     ProjectionRelation,
     ProjectionSlot,
+    ReviewBrief,
     StatementAuthority,
     StatementPurpose,
     StatementRole,
+    TransformationAssessmentReasonKind,
+    TransformationAssessmentStatus,
+    TransformationPredicateExpectation,
 )
 from prismcode.intake.fixture import load_fixture
 from prismcode.providers.structural import (
@@ -56,6 +60,17 @@ class ExpectedStatement:
 
 
 @dataclass(frozen=True)
+class ExpectedTransformationAssessment:
+    claim_id: str
+    status: TransformationAssessmentStatus
+    reason_kinds: tuple[TransformationAssessmentReasonKind, ...]
+    predicate_id: str | None = None
+    expectation: TransformationPredicateExpectation | None = None
+    supporting_evidence_ids: tuple[str, ...] = ()
+    contradicting_evidence_ids: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
 class EvaluationCase:
     id: str
     fixture: str
@@ -63,6 +78,7 @@ class EvaluationCase:
     expected_no_selections: tuple[ExpectedNoSelection, ...] = ()
     expected_evidence: tuple[ExpectedEvidence, ...] = ()
     expected_statements: tuple[ExpectedStatement, ...] = ()
+    expected_assessments: tuple[ExpectedTransformationAssessment, ...] = ()
     structural_graph: StructuralGraphCollection | None = None
 
 
@@ -76,6 +92,7 @@ class EvaluationThresholds:
     no_match_accuracy: float = 0.0
     max_false_positive_rate: float = 1.0
     statement_accuracy: float = 0.0
+    assessment_accuracy: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -83,7 +100,7 @@ class EvaluationSuite:
     cases: tuple[EvaluationCase, ...]
     thresholds: EvaluationThresholds = EvaluationThresholds()
     k: int = 5
-    schema_version: str = "evaluation_suite.v2"
+    schema_version: str = "evaluation_suite.v3"
 
 
 @dataclass(frozen=True)
@@ -123,6 +140,24 @@ class StatementEvaluation:
 
 
 @dataclass(frozen=True)
+class TransformationAssessmentEvaluation:
+    case_id: str
+    claim_id: str
+    predicate_id: str | None
+    expected_status: TransformationAssessmentStatus
+    observed_status: str | None
+    expected_expectation: TransformationPredicateExpectation | None
+    observed_expectation: str | None
+    expected_reason_kinds: tuple[TransformationAssessmentReasonKind, ...]
+    observed_reason_kinds: tuple[str, ...]
+    expected_supporting_evidence_ids: tuple[str, ...]
+    observed_supporting_evidence_ids: tuple[str, ...]
+    expected_contradicting_evidence_ids: tuple[str, ...]
+    observed_contradicting_evidence_ids: tuple[str, ...]
+    matched: bool
+
+
+@dataclass(frozen=True)
 class EvaluationMetrics:
     query_count: int
     positive_query_count: int
@@ -135,6 +170,7 @@ class EvaluationMetrics:
     false_positive_rate: float
     classification_accuracy: float
     statement_accuracy: float
+    assessment_accuracy: float
 
 
 @dataclass(frozen=True)
@@ -146,8 +182,9 @@ class EvaluationResult:
     queries: tuple[QueryEvaluation, ...]
     classifications: tuple[ClassificationEvaluation, ...]
     statements: tuple[StatementEvaluation, ...]
+    assessments: tuple[TransformationAssessmentEvaluation, ...]
     diagnostics: tuple[str, ...] = ()
-    schema_version: str = "evaluation_result.v2"
+    schema_version: str = "evaluation_result.v3"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -156,8 +193,8 @@ class EvaluationResult:
 def load_evaluation_suite(path: str | Path) -> EvaluationSuite:
     suite_path = Path(path)
     raw = json.loads(suite_path.read_text(encoding="utf-8"))
-    if raw.get("schema_version") != "evaluation_suite.v2":
-        raise ValueError("evaluation suite must use schema_version evaluation_suite.v2")
+    if raw.get("schema_version") != "evaluation_suite.v3":
+        raise ValueError("evaluation suite must use schema_version evaluation_suite.v3")
     k = int(raw.get("k", 5))
     if k <= 0:
         raise ValueError("evaluation suite k must be positive")
@@ -197,6 +234,10 @@ def load_evaluation_suite(path: str | Path) -> EvaluationSuite:
                 )
                 for item in case.get("expected_statements", ())
             ),
+            expected_assessments=tuple(
+                _expected_assessment(item)
+                for item in case.get("expected_assessments", ())
+            ),
             structural_graph=(
                 _structural_graph(case["structural_graph"])
                 if case.get("structural_graph") is not None
@@ -209,6 +250,15 @@ def load_evaluation_suite(path: str | Path) -> EvaluationSuite:
         raise ValueError("evaluation suite must contain at least one case")
     if len({case.id for case in cases}) != len(cases):
         raise ValueError("evaluation case IDs must be unique")
+    for case in cases:
+        identities = tuple(
+            (item.claim_id, item.predicate_id)
+            for item in case.expected_assessments
+        )
+        if len(identities) != len(set(identities)):
+            raise ValueError(
+                f"evaluation case {case.id} contains duplicate assessment identities"
+            )
     thresholds = EvaluationThresholds(**raw.get("thresholds", {}))
     _validate_thresholds(thresholds)
     return EvaluationSuite(
@@ -226,6 +276,7 @@ def evaluate_suite(
     query_results: list[QueryEvaluation] = []
     classification_results: list[ClassificationEvaluation] = []
     statement_results: list[StatementEvaluation] = []
+    assessment_results: list[TransformationAssessmentEvaluation] = []
     diagnostics: list[str] = []
 
     for case in suite.cases:
@@ -310,6 +361,9 @@ def evaluate_suite(
                     ),
                 )
             )
+        assessment_results.extend(
+            _evaluate_assessments(case.id, case.expected_assessments, brief)
+        )
         diagnostics.extend(
             f"{case.id}: {item.slot}: {item.state}: {item.message}"
             for item in (
@@ -322,16 +376,18 @@ def evaluate_suite(
     diagnostics.extend(_query_diagnostics(tuple(query_results)))
     diagnostics.extend(_classification_diagnostics(tuple(classification_results)))
     diagnostics.extend(_statement_diagnostics(tuple(statement_results)))
+    diagnostics.extend(_assessment_diagnostics(tuple(assessment_results)))
     metrics = _metrics(
         tuple(query_results),
         tuple(classification_results),
         tuple(statement_results),
+        tuple(assessment_results),
     )
     threshold_diagnostics = _threshold_diagnostics(metrics, suite.thresholds)
-    if not query_results:
+    if not query_results and not assessment_results:
         threshold_diagnostics = (
             *threshold_diagnostics,
-            "threshold_failed: no projection selection assertions were declared",
+            "threshold_failed: no projection or assessment assertions were declared",
         )
     diagnostics.extend(threshold_diagnostics)
     passed = not threshold_diagnostics
@@ -343,7 +399,135 @@ def evaluate_suite(
         queries=tuple(query_results),
         classifications=tuple(classification_results),
         statements=tuple(statement_results),
+        assessments=tuple(assessment_results),
         diagnostics=tuple(diagnostics),
+    )
+
+
+def _expected_assessment(raw: dict[str, Any]) -> ExpectedTransformationAssessment:
+    predicate_id = (
+        str(raw["predicate_id"])
+        if raw.get("predicate_id") is not None
+        else None
+    )
+    expectation = raw.get("expectation")
+    if (predicate_id is None) != (expectation is None):
+        raise ValueError(
+            "predicate assessment expectations require both predicate_id and expectation"
+        )
+    status = raw["status"]
+    if status not in get_args(TransformationAssessmentStatus):
+        raise ValueError(f"unsupported transformation assessment status: {status}")
+    if (
+        expectation is not None
+        and expectation not in get_args(TransformationPredicateExpectation)
+    ):
+        raise ValueError(
+            f"unsupported transformation predicate expectation: {expectation}"
+        )
+    reason_kinds = tuple(raw.get("reason_kinds", ()))
+    unsupported_reasons = tuple(
+        item
+        for item in reason_kinds
+        if item not in get_args(TransformationAssessmentReasonKind)
+    )
+    if unsupported_reasons:
+        raise ValueError(
+            "unsupported transformation assessment reasons: "
+            + ", ".join(unsupported_reasons)
+        )
+    return ExpectedTransformationAssessment(
+        claim_id=str(raw["claim_id"]),
+        predicate_id=predicate_id,
+        expectation=expectation,
+        status=status,
+        reason_kinds=reason_kinds,
+        supporting_evidence_ids=tuple(raw.get("supporting_evidence_ids", ())),
+        contradicting_evidence_ids=tuple(
+            raw.get("contradicting_evidence_ids", ())
+        ),
+    )
+
+
+def _evaluate_assessments(
+    case_id: str,
+    expected_items: tuple[ExpectedTransformationAssessment, ...],
+    brief: ReviewBrief,
+) -> tuple[TransformationAssessmentEvaluation, ...]:
+    claims = brief.transformation_assessment.by_claim_id()
+    bindings = {
+        item.id: item for item in brief.transformation_alignment.bindings
+    }
+    results = []
+    for expected in expected_items:
+        claim = claims.get(expected.claim_id)
+        observed = claim
+        if claim is not None and expected.predicate_id is not None:
+            observed = next(
+                (
+                    item
+                    for item in claim.predicate_assessments
+                    if item.predicate_id == expected.predicate_id
+                ),
+                None,
+            )
+        observed_status = observed.status if observed is not None else None
+        observed_expectation = (
+            observed.expectation
+            if observed is not None and expected.predicate_id is not None
+            else None
+        )
+        observed_reasons = (
+            tuple(item.kind for item in observed.reasons)
+            if observed is not None
+            else ()
+        )
+        supporting = _binding_evidence_ids(
+            observed.supporting_binding_ids if observed is not None else (),
+            bindings,
+        )
+        contradicting = _binding_evidence_ids(
+            observed.contradicting_binding_ids if observed is not None else (),
+            bindings,
+        )
+        results.append(
+            TransformationAssessmentEvaluation(
+                case_id=case_id,
+                claim_id=expected.claim_id,
+                predicate_id=expected.predicate_id,
+                expected_status=expected.status,
+                observed_status=observed_status,
+                expected_expectation=expected.expectation,
+                observed_expectation=observed_expectation,
+                expected_reason_kinds=expected.reason_kinds,
+                observed_reason_kinds=observed_reasons,
+                expected_supporting_evidence_ids=(
+                    expected.supporting_evidence_ids
+                ),
+                observed_supporting_evidence_ids=supporting,
+                expected_contradicting_evidence_ids=(
+                    expected.contradicting_evidence_ids
+                ),
+                observed_contradicting_evidence_ids=contradicting,
+                matched=(
+                    observed_status == expected.status
+                    and observed_expectation == expected.expectation
+                    and observed_reasons == expected.reason_kinds
+                    and supporting == expected.supporting_evidence_ids
+                    and contradicting == expected.contradicting_evidence_ids
+                ),
+            )
+        )
+    return tuple(results)
+
+
+def _binding_evidence_ids(binding_ids, bindings) -> tuple[str, ...]:
+    return tuple(
+        dict.fromkeys(
+            bindings[binding_id].evidence_id
+            for binding_id in binding_ids
+            if binding_id in bindings
+        )
     )
 
 
@@ -382,6 +566,7 @@ def write_evaluation_markdown(
         f"- false-positive rate: {metrics.false_positive_rate:.4f}",
         f"- classification accuracy: {metrics.classification_accuracy:.4f}",
         f"- statement accuracy: {metrics.statement_accuracy:.4f}",
+        f"- transformation assessment accuracy: {metrics.assessment_accuracy:.4f}",
         "",
         "## Queries",
         "",
@@ -416,6 +601,21 @@ def write_evaluation_markdown(
                 f"`{item.observed_role or 'missing'}/"
                 f"{item.observed_purpose or 'missing'}/"
                 f"{item.observed_authority or 'missing'}`"
+            )
+    if result.assessments:
+        lines.extend(("", "## Transformation assessments", ""))
+        for item in result.assessments:
+            identity = (
+                f"{item.claim_id}/{item.predicate_id}"
+                if item.predicate_id is not None
+                else item.claim_id
+            )
+            state = "PASS" if item.matched else "MISS"
+            lines.append(
+                f"- `{item.case_id}` · `{identity}` · **{state}** · "
+                f"expected `{item.expected_status}` · observed "
+                f"`{item.observed_status or 'missing'}` · reasons "
+                f"`{', '.join(item.observed_reason_kinds) or 'none'}`"
             )
     if result.diagnostics:
         lines.extend(("", "## Diagnostics", ""))
@@ -512,12 +712,14 @@ def _metrics(
     queries: tuple[QueryEvaluation, ...],
     classifications: tuple[ClassificationEvaluation, ...],
     statements: tuple[StatementEvaluation, ...],
+    assessments: tuple[TransformationAssessmentEvaluation, ...],
 ) -> EvaluationMetrics:
     query_count = len(queries)
     positive_queries = tuple(item for item in queries if item.expected_target_ids)
     negative_queries = tuple(item for item in queries if not item.expected_target_ids)
     classification_count = len(classifications)
     statement_count = len(statements)
+    assessment_count = len(assessments)
     return EvaluationMetrics(
         query_count=query_count,
         positive_query_count=len(positive_queries),
@@ -568,6 +770,11 @@ def _metrics(
             if statement_count
             else 1.0
         ),
+        assessment_accuracy=(
+            sum(item.matched for item in assessments) / assessment_count
+            if assessment_count
+            else 1.0
+        ),
     )
 
 
@@ -597,6 +804,11 @@ def _threshold_diagnostics(
             "statement_accuracy",
             metrics.statement_accuracy,
             thresholds.statement_accuracy,
+        ),
+        (
+            "assessment_accuracy",
+            metrics.assessment_accuracy,
+            thresholds.assessment_accuracy,
         ),
     )
     for name, observed, required in minimums:
@@ -656,6 +868,22 @@ def _statement_diagnostics(
         f"{item.observed_purpose or 'missing'}/"
         f"{item.observed_authority or 'missing'}"
         for item in statements
+        if not item.matched
+    )
+
+
+def _assessment_diagnostics(
+    assessments: tuple[TransformationAssessmentEvaluation, ...],
+) -> tuple[str, ...]:
+    return tuple(
+        "assessment_mismatch: "
+        f"case={item.case_id} claim={item.claim_id} "
+        f"predicate={item.predicate_id or 'aggregate'} "
+        f"expected={item.expected_status}/"
+        f"{','.join(item.expected_reason_kinds) or 'no_reason'} "
+        f"observed={item.observed_status or 'missing'}/"
+        f"{','.join(item.observed_reason_kinds) or 'no_reason'}"
+        for item in assessments
         if not item.matched
     )
 

@@ -1,0 +1,61 @@
+{
+  "schema_version": "analysis_fixture.v3",
+  "source_packet": {
+    "schema_version": "review_source_packet.v2",
+    "repository": "acme/widget",
+    "pull_request": 17,
+    "title": "Evaluate transformation assertions",
+    "source_records": [
+      {
+        "id": "pr:17",
+        "kind": "pull_request",
+        "repository": "acme/widget",
+        "url": "https://github.com/acme/widget/pull/17",
+        "title": "Evaluate transformation assertions",
+        "body": "## Change\n- Introduce `adapter_entrypoint`.\n\n## After topology\n- `adapter_entrypoint` → `service_handler`.\n\n## Canonical authority\n- `adapter_entrypoint` is the sole production authority.\n\n## Completion conditions\n- The `test_suite` check succeeds.\n- The `stale_suite` check succeeds.\n\n## Uncertainty\n- External behavior around `adapter_entrypoint` remains unknown.\n",
+        "revision": "pr-17-v1",
+        "availability": "available"
+      }
+    ],
+    "changed_files": [
+      {
+        "base_path": "src/adapter.py",
+        "head_path": "src/adapter.py",
+        "status": "modified",
+        "additions": 1,
+        "deletions": 1,
+        "changes": 2,
+        "source_url": "https://github.com/acme/widget/blob/assessment-head/src/adapter.py",
+        "patch": "@@ -1 +1 @@\n-old_call()\n+adapter_entrypoint()\n"
+      }
+    ],
+    "verification_observations": [
+      {
+        "id": "check:test_suite",
+        "name": "test_suite",
+        "kind": "check_run",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "assessment-head",
+        "provider": "github"
+      },
+      {
+        "id": "check:stale_suite",
+        "name": "stale_suite",
+        "kind": "check_run",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "previous-head",
+        "provider": "github"
+      }
+    ],
+    "source_url": "https://github.com/acme/widget/pull/17",
+    "head_sha": "assessment-head",
+    "base_sha": "assessment-base",
+    "diagnostics": [],
+    "metadata": {},
+    "packet_revision": "sha256:7adcd8a1d9fda79b514470bedadd98b568192443f7bbab08acb431633e7921e9"
+  },
+  "requirements": [],
+  "evidence": []
+}
