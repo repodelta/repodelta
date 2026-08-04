@@ -105,6 +105,10 @@ TransformationAssessmentReasonKind = Literal[
     "uncertainty_context",
     "authority_path_observed",
     "authority_bypass_observed",
+    "migration_closure_observed",
+    "migration_component_incomplete",
+    "migration_component_conflict",
+    "migration_scope_ambiguous",
 ]
 VerificationSubjectKind = Literal[
     "requirement",
@@ -1307,6 +1311,7 @@ class TransformationClaimAssessment:
     status: TransformationAssessmentStatus
     supporting_binding_ids: tuple[str, ...] = ()
     contradicting_binding_ids: tuple[str, ...] = ()
+    component_claim_ids: tuple[str, ...] = ()
     reasons: tuple[TransformationAssessmentReason, ...] = ()
     predicate_assessments: tuple["TransformationPredicateAssessment", ...] = ()
 
@@ -1330,7 +1335,7 @@ class TransformationAssessment:
     """One conservative deterministic status per authored transformation claim."""
 
     claims: tuple[TransformationClaimAssessment, ...] = ()
-    schema_version: str = "transformation_assessment.v2"
+    schema_version: str = "transformation_assessment.v3"
 
     def by_claim_id(self) -> dict[str, TransformationClaimAssessment]:
         return {item.claim_id: item for item in self.claims}
@@ -1341,7 +1346,7 @@ class TransformationAssessment:
         alignment: TransformationAlignment,
         evidence_catalog: EvidenceCatalog,
     ) -> None:
-        if self.schema_version != "transformation_assessment.v2":
+        if self.schema_version != "transformation_assessment.v3":
             raise ValueError(
                 f"unsupported transformation assessment schema: {self.schema_version}"
             )
@@ -1351,7 +1356,21 @@ class TransformationAssessment:
                 "transformation assessment must preserve every contract claim once"
             )
         binding_ids = {item.id for item in alignment.bindings}
+        binding_claim_ids = {item.id: item.claim_id for item in alignment.bindings}
         evidence_ids = set(evidence_catalog.by_id())
+        claims_by_id = {item.id: item for item in contract.claims}
+        migration_component_ids = tuple(
+            dict.fromkeys(
+                (
+                    *contract.authority_claim_ids,
+                    *contract.migration.producer_claim_ids,
+                    *contract.migration.consumer_claim_ids,
+                    *contract.migration.test_claim_ids,
+                    *contract.removal_claim_ids,
+                    *contract.completion_condition_claim_ids,
+                )
+            )
+        )
         for item in self.claims:
             if item.id != f"TAS:{item.claim_id}":
                 raise ValueError(f"{item.id}: non-canonical assessment ID")
@@ -1380,15 +1399,24 @@ class TransformationAssessment:
             )
             if any(binding_id not in binding_ids for binding_id in referenced):
                 raise ValueError(f"{item.id}: assessment references unknown binding")
-            claim_binding_ids = {
-                binding.id
-                for binding in alignment.bindings
-                if binding.claim_id == item.claim_id
-            }
-            if any(binding_id not in claim_binding_ids for binding_id in referenced):
+            if any(
+                binding_claim_ids[binding_id]
+                not in {item.claim_id, *item.component_claim_ids}
+                for binding_id in referenced
+            ):
                 raise ValueError(
-                    f"{item.id}: assessment references another claim's binding"
+                    f"{item.id}: assessment references an undeclared component binding"
                 )
+            claim = claims_by_id[item.claim_id]
+            if item.component_claim_ids:
+                if claim.kind != "migration":
+                    raise ValueError(
+                        f"{item.id}: only migration closure may reference components"
+                    )
+                if item.component_claim_ids != migration_component_ids:
+                    raise ValueError(
+                        f"{item.id}: migration closure components are not canonical"
+                    )
             if set(item.supporting_binding_ids) & set(
                 item.contradicting_binding_ids
             ):
@@ -1418,6 +1446,11 @@ class TransformationAssessment:
                 raise ValueError(
                     f"{item.id}: contradicted assessment requires conflict"
                 )
+            claim_binding_ids = {
+                binding.id
+                for binding in alignment.bindings
+                if binding.claim_id == item.claim_id
+            }
             for predicate_assessment in item.predicate_assessments:
                 predicate = next(
                     (
@@ -3701,7 +3734,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v44"
+    schema_version: str = "review_brief.v45"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

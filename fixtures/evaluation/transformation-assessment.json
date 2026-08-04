@@ -12,7 +12,7 @@
         "repository": "acme/widget",
         "url": "https://github.com/acme/widget/pull/17",
         "title": "Evaluate transformation assertions",
-        "body": "## Change\n- Introduce `adapter_entrypoint`.\n\n## After topology\n- `adapter_entrypoint` → `service_handler`.\n\n## Canonical authority\n- `adapter_entrypoint` is the sole production authority.\n\n## Completion conditions\n- The `test_suite` check succeeds.\n- The `stale_suite` check succeeds.\n\n## Uncertainty\n- External behavior around `adapter_entrypoint` remains unknown.\n",
+        "body": "## Change\n- Introduce `adapter_entrypoint`.\n\n## After topology\n- `adapter_entrypoint` → `service_handler`.\n\n## Canonical authority\n- `adapter_entrypoint` is the sole production authority.\n\n## Completion conditions\n- The `test_suite` check succeeds.\n- The `stale_suite` check succeeds.\n\n## Uncertainty\n- External behavior around `adapter_entrypoint` remains unknown.\n\n## Migration\n- Migrate production to `adapter_entrypoint`.\n",
         "revision": "pr-17-v1",
         "availability": "available"
       }
@@ -54,7 +54,7 @@
     "base_sha": "assessment-base",
     "diagnostics": [],
     "metadata": {},
-    "packet_revision": "sha256:7adcd8a1d9fda79b514470bedadd98b568192443f7bbab08acb431633e7921e9"
+    "packet_revision": "sha256:0068a8ac9768828d9970956aec507f417e952b51028534e3e23be7e653c27f23"
   },
   "requirements": [],
   "evidence": []

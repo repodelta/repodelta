@@ -48,6 +48,7 @@ def project_verification_workspace(
         item.change_map.focus_statement_id: item for item in slices
     }
     alignment_by_claim = alignment.by_claim_id()
+    all_bindings = alignment.bindings
     assessment_by_claim = assessment.by_claim_id()
     topology_by_claim = transformation_structural_topology.by_claim_id()
     matrix: list[VerificationMatrixEntry] = []
@@ -107,22 +108,33 @@ def project_verification_workspace(
             if topology_group is not None
             else StructuralFocusOverlay()
         )
+        supporting_ids = _binding_evidence_ids(
+            claim_assessment.supporting_binding_ids,
+            all_bindings,
+        )
+        contradicting_ids = _binding_evidence_ids(
+            claim_assessment.contradicting_binding_ids,
+            all_bindings,
+        )
         observed_ids = tuple(
             dict.fromkeys(
                 (
                     *(item.evidence_id for item in claim_bindings),
+                    *supporting_ids,
+                    *contradicting_ids,
                     *_transformation_closure_evidence_ids(closure_group),
                     *_overlay_evidence_ids(structural_overlay, review_graph),
                 )
             )
         )
-        supporting_ids = _binding_evidence_ids(
-            claim_assessment.supporting_binding_ids,
-            claim_bindings,
-        )
-        contradicting_ids = _binding_evidence_ids(
-            claim_assessment.contradicting_binding_ids,
-            claim_bindings,
+        inspection_binding_ids = tuple(
+            dict.fromkeys(
+                (
+                    *(item.id for item in claim_bindings),
+                    *claim_assessment.supporting_binding_ids,
+                    *claim_assessment.contradicting_binding_ids,
+                )
+            )
         )
         inspection = VerificationEvidenceInspection(
             id=f"VEI:{claim.id}",
@@ -130,7 +142,7 @@ def project_verification_workspace(
             observed_evidence_ids=observed_ids,
             supporting_evidence_ids=supporting_ids,
             contradicting_evidence_ids=contradicting_ids,
-            transformation_binding_ids=tuple(item.id for item in claim_bindings),
+            transformation_binding_ids=inspection_binding_ids,
             diagnostic_ids=(
                 topology_group.diagnostic_ids
                 if topology_group is not None
@@ -484,9 +496,20 @@ def _validate_workspace(
         if not set(inspection.transformation_binding_ids) <= binding_ids:
             raise ValueError("verification inspector references unknown binding")
         if inspection.subject_id in assessment_by_claim:
+            claim_assessment = assessment_by_claim[inspection.subject_id]
             expected_bindings = tuple(
-                item.id
-                for item in alignment_by_claim.get(inspection.subject_id, ())
+                dict.fromkeys(
+                    (
+                        *(
+                            item.id
+                            for item in alignment_by_claim.get(
+                                inspection.subject_id, ()
+                            )
+                        ),
+                        *claim_assessment.supporting_binding_ids,
+                        *claim_assessment.contradicting_binding_ids,
+                    )
+                )
             )
             if inspection.transformation_binding_ids != expected_bindings:
                 raise ValueError(

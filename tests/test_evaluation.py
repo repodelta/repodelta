@@ -32,7 +32,7 @@ def test_golden_suite_covers_typed_slots_structure_and_profiles() -> None:
     assert result.metrics.statement_accuracy == 1.0
     assert result.metrics.assessment_accuracy == 1.0
     assert len(result.statements) == 10
-    assert len(result.assessments) == 12
+    assert len(result.assessments) == 13
 
 
 def test_evaluation_outputs_are_byte_stable(tmp_path: Path) -> None:
