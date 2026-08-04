@@ -6,6 +6,7 @@ from prismcode.model.contracts import (
     AssociationSignature,
     EvidenceItem,
     TransformationPredicate,
+    canonical_verification_name,
 )
 
 _WORD_RE = re.compile(r"[A-Za-z][A-Za-z0-9_]{2,}")
@@ -44,13 +45,18 @@ def matches_transformation_selector(
             path == selector_path or path.startswith(f"{selector_path}/")
             for path in _candidate_paths(predicate, item)
         )
+    if item.role == "verification":
+        identity = item.verification_identity
+        selector_name = canonical_verification_name(selector_value)
+        return bool(
+            selector_name
+            and identity is not None
+            and selector_name == identity.name
+        )
     selector_keys = _selector_keys(selector_value)
     if not selector_keys:
         return False
     signature = _candidate_signature(predicate, item)
-    if item.role == "verification":
-        exact = _normalized_selector_key(selector_value)
-        return exact in {*signature.identifiers, *signature.tokens}
     return bool(selector_keys & {*signature.identifiers, *signature.tokens})
 
 
@@ -103,16 +109,11 @@ def _normalize_path(value: str) -> str:
 
 def _selector_keys(value: str) -> frozenset[str]:
     explicit = value.strip().removesuffix("()")
-    normalized = _normalized_selector_key(value)
+    leaf = re.split(r"[.:]", explicit)[-1]
+    normalized = re.sub(r"[^A-Za-z0-9_]", "", leaf).casefold()
     return frozenset(
         {
             *identifier_keys(explicit),
             *(item for item in (normalized,) if len(item) >= 3),
         }
     )
-
-
-def _normalized_selector_key(value: str) -> str:
-    explicit = value.strip().removesuffix("()")
-    leaf = re.split(r"[.:]", explicit)[-1]
-    return re.sub(r"[^A-Za-z0-9_]", "", leaf).casefold()

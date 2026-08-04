@@ -12,6 +12,7 @@ from prismcode.model.contracts import (
     ProjectionRelation,
     SourceRef,
     VerificationIdentity,
+    canonical_verification_name,
 )
 
 
@@ -75,7 +76,7 @@ def _verification(
         verification_identity=VerificationIdentity(
             provider="github",
             kind=kind,
-            name=" ".join(name.split()).casefold(),
+            name=canonical_verification_name(name),
         ),
         verification_status=status,
         verification_conclusion=conclusion,

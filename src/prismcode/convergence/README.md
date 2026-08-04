@@ -49,9 +49,12 @@ Claim bridges remain reachable only through selected claims. In the remaining
 competitive claim slot, stable source order breaks ties only within one
 equivalent semantic tier and the ambiguity remains explicit.
 
-Verification identity is the first-class `(provider, kind, normalized name)`
-tuple carried by the evidence fact. Convergence does not reconstruct identity
-from metadata. Equivalent observations for one identity collapse; conflicting
+Verification identity is the first-class `(provider, kind, canonical name)`
+tuple carried by the evidence fact. The name contract preserves punctuation
+while normalizing Unicode, case, and whitespace. Authored predicates match the
+name component exactly; provider and kind continue to distinguish observations
+in convergence. Convergence does not reconstruct identity from metadata.
+Equivalent observations for one identity collapse; conflicting
 completed outcomes for that identity remain selected and produce
 `conflicting_facts`. A separate identity-count safety limit may truncate the set;
 only at that boundary are failure, pending, and success ordered for retention.
