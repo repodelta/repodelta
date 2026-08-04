@@ -1,33 +1,38 @@
 ## Responsibility-closed delivery
 
-Treat the repository as responsibility pipelines. Change semantic
-responsibilities, not files or diffs. Start from the output and production
-sinks; identify each decision's authority, admitted inputs, proof obligation,
-consumers, and bypasses.
+Treat the repository as responsibility pipelines.
 
-Every mergeable state must be responsibility-closed and abandonment-safe:
+For a semantic change:
 
-- one effective production authority owns each responsibility in scope;
-- alternate paths are removed or verifiably classified;
-- if the parent transformation stops, the state remains correct, honest,
-  maintainable, and independent of future wiring;
-- unsupported semantics fail closed instead of producing success.
+1. replace the responsibility that owns the affected output;
+2. migrate every affected observed upstream and downstream semantic contract;
+3. remove or classify stale producers, mappings, consumers, and bypasses;
+4. verify that the intended production sinks consume the new result.
 
-Main is not an exploration surface. Perform recursive discovery, scope
-expansion, and counterfactual testing during planning and in an unmerged branch
-or Draft PR. Expand an unsafe region before merge or stop. Tests alone do not
-prove closure.
+For each changed semantic boundary, define its canonical semantic contract,
+required preserved properties, permitted information loss, and failure
+behavior. Different representations are allowed when their mappings preserve
+that contract.
 
-Treat code and structural indexes as repository facts; executed tests and
-runtime observations as bounded behavioral evidence; and unexecuted tests,
-documentation, history, names, and designs as declarations or hypotheses unless
-independently grounded. Keep facts, intent, inference, and unresolved surfaces
-distinct; report conflicts instead of silently reconciling them.
+Consumers may adapt, calculate, or project results, but must not independently
+re-decide or override semantics already owned upstream.
 
-For non-trivial behavioral, authority, contract, data-flow, or cross-component
-changes, follow `docs/agent-change-protocol.md`.
+Expand the selected region only when the change invalidates a boundary contract
+outside it. Stop when the responsibility is replaced and all observed affected
+contracts are stable again.
+
+Every mergeable state must be responsibility-closed and abandonment-safe.
+Unsupported or incomplete semantics must fail closed rather than produce
+success. Main is not an exploration surface.
+
+Tests alone do not prove closure. Bound conclusions by observed structural,
+runtime, test, and declared dynamic-boundary evidence. Keep facts,
+declarations, inference, and unresolved surfaces distinct.
+
+For non-trivial behavioral, responsibility, contract, data-flow, or
+cross-component changes, follow `docs/agent-change-protocol.md`.
 
 Before generating Git artifacts, follow:
 
-- `docs/commit-message-guidelines.md` for commits;
-- `docs/pull-request-guidelines.md` for pull requests.
+- `docs/commit-message-guidelines.md`;
+- `docs/pull-request-guidelines.md`.

@@ -1,91 +1,114 @@
 # Agent Change Protocol
 
-Use this protocol for behavioral, authority, contract, data-flow, or
+Use this protocol for behavioral, responsibility, contract, data-flow, or
 cross-component changes.
 
-## 1. Define
+## 1. Fix the target
 
-Name the parent transformation, this change's semantic output and scope, and
-the production sinks. Start from observable behavior, not expected files.
+Define:
 
-## 2. Census
+- semantic output and production sinks;
+- responsibility currently producing that output;
+- intended after-state;
+- observed scope and explicit out-of-scope surfaces.
 
-Using CodeGraph and available code, test, runtime, and documentation evidence:
+Do not begin from expected files.
 
-- trace sinks backward to producers and decisions;
-- trace candidate authorities forward to production consumers;
-- search laterally for writers, overrides, reconstruction, and bypasses;
-- record unresolved dynamic and external surfaces.
+## 2. Find the affected pipeline
 
-## 3. Decompose and simulate
+Trace:
 
-For each decision define:
+- backward from production sinks to producers and decisions;
+- forward from the responsibility to observed actual consumers;
+- laterally for competing producers, writers, fallbacks, and reconstruction;
+- across boundaries that parse, normalize, map identities, aggregate, project,
+  serialize, default, reorder, or reduce coverage.
 
-- **authority:** who decides;
-- **admission:** which inputs it may use;
-- **proof:** when those inputs are sufficient;
-- **consumption:** where the result becomes production truth.
+Record unresolved dynamic and external surfaces instead of claiming coverage.
 
-Model child dependencies and the target flow. Test counterfactuals that separate
-relevance from proof: names without an edge, no match under truncated coverage,
-stale verification, or an unconsumed producer. Search the simulated state again
-for residual authorities and bypasses.
+## 3. Define changed contracts
 
-## 4. Select the merge boundary
+For each affected boundary, state:
 
-Choose the smallest responsibility-closed, abandonment-safe region. Define its
-contracts, before/after topology, migrations, removals, proof obligations, and
-coverage limits. A parent may remain open, but the current state cannot depend
-on future work for correctness or architectural meaning.
+- semantic entity being transferred;
+- canonical semantic contract and relevant equivalence rules;
+- properties that must be preserved;
+- information that may be lost;
+- behavior for incomplete, conflicting, or unsupported input.
 
-Remove alternate paths or classify them as dormant, shadow, compatibility,
-migration, rollback, experiment, annotation, or projection. Expand the region
-if no safe boundary exists. A classification must state production effect,
-activation, authority or write permission, and lifecycle; a label is
-insufficient. Temporary paths need removal or review conditions, permanent
-paths an ongoing invariant.
+Different representations may implement one contract. Analyze only properties
+relevant to this change; shared names, tokens, or proximity do not prove
+equivalence.
+
+## 4. Select the region
+
+Start with the responsibility being replaced. If an external contract remains
+valid, keep that neighbor outside the region. If the change invalidates a
+contract, include the affected producer, consumer, adapter, or boundary and
+repeat.
+
+Stop expansion when:
+
+- the responsibility is replaced;
+- all affected contract edges are migrated;
+- surrounding contracts are stable;
+- no observed unclassified bypass remains.
+
+Do not expand merely to investigate unrelated defects or eliminate all
+unknowns.
 
 ## 5. Execute unmerged
 
-Use the branch or Draft PR for recursive discovery; commits may be checkpoints.
-When a new authority, consumer, proof dependency, or boundary appears, update
-the plan and expand the region instead of merging the intermediate state.
+Use a branch or Draft PR for recursive discovery and scope adjustment. Within
+the selected region:
 
-## 6. Pre-merge audit
+- replace or reorganize the responsibility;
+- migrate affected producers and consumers;
+- remove duplicate mappings and downstream reinterpretation;
+- delete or classify stale paths;
+- preserve or explicitly update external contracts.
+
+## 6. Verify
 
 Against the final candidate tree:
 
-- synchronize CodeGraph and repeat the backward, forward, and lateral census;
-- verify the target authority controls every observed in-scope production sink
-  and all observed relevant consumers migrated;
-- verify no unclassified path can decide or rewrite the output;
-- exercise the proof matrix and counterfactual fixtures;
-- verify path classifications and external contracts;
-- make incomplete or unsupported semantics fail closed;
-- separate observed in-scope paths, classified retained paths, and unresolved
-  dynamic or external paths.
+- synchronize CodeGraph;
+- trace production sinks back to the intended responsibility;
+- verify affected producers and consumers use compatible contracts;
+- verify consumers do not reconstruct upstream semantic decisions;
+- exercise relevant positive, negative, divergence, collision,
+  information-loss, and fail-closed cases;
+- record unresolved dynamic or external surfaces.
 
-## 7. Merge checkpoint
+Tests alone are insufficient; separate observed repository structure, executed
+behavior, declarations, inference, and unknowns.
+
+## 7. Merge gate
 
 Record separately:
 
-- **responsibility closure:** this PR's transition is complete;
-- **abandonment safety:** the tree can remain indefinitely without future work;
-- **parent completion:** the larger transformation is complete or open.
+- responsibility closure;
+- boundary-contract closure;
+- abandonment safety;
+- parent transformation completion.
 
-Only the first two are merge gates.
+The first three are merge gates. The parent may remain open only when a stable
+record owns its remaining obligations and stop conditions.
 
 ## 8. Post-merge audit
 
-Confirm the merge tree, observe runtime or concurrent-integration evidence, and
-measure pre-merge misses. Do not use post-merge census as the normal place to
-discover what the transformation should have included.
+Confirm the merge tree and runtime or concurrent-integration evidence. Record
+pre-merge misses; do not use post-merge audit as normal planning.
 
 ## Planning output
 
-- Parent transformation, child dependencies, and open obligations
-- Output, scope, sinks, and authority / admission / proof / consumption
-- Current alternatives, unresolved surfaces, and selected region
-- Before/after topology, migrations, removals, and preserved contracts
-- Counterfactuals, completion evidence, and coverage limits
-- Responsibility closure / abandonment safety / parent completion
+- Semantic output and production sinks
+- Responsibility before → after
+- Selected region
+- Affected observed producers and consumers
+- Changed semantic contracts
+- Migrations, removals, and classified paths
+- Preserved external contracts
+- Counterfactual and sink-level evidence
+- Unresolved and out-of-scope surfaces
+- Responsibility closure / contract closure / abandonment safety
