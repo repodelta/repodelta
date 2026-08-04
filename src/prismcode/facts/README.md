@@ -69,9 +69,10 @@ only the changed lines they cover; uncovered lines remain canonical
 changed-anchor path.
 Verification facts carry first-class provider, kind, normalized name, status,
 conclusion, and observed head SHA; downstream stages must not recover those
-fields from presentation metadata. Their canonical association signature is
-also normalized here so transformation routing does not rebuild verification
-semantics.
+fields from presentation metadata. The model-owned canonical check-name
+contract preserves punctuation while normalizing Unicode, case, and whitespace.
+Authored verification predicates compare that typed name directly; association
+signatures remain retrieval vocabulary and never reconstruct identity.
 `ObservedTransformation` references every canonical changed anchor, structural
 delta, replacement candidate, structural path, and verification observation
 once. Its Base/Head topology membership comes only from facts-owned revision

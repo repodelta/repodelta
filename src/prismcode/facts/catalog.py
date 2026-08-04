@@ -29,6 +29,7 @@ from prismcode.model.contracts import (
     SuppliedEvidence,
     VerificationObservation,
     VerificationIdentity,
+    canonical_verification_name,
 )
 from prismcode.changes.hunks import (
     ChangedHunk,
@@ -1293,7 +1294,7 @@ def verification_evidence(observation: VerificationObservation) -> EvidenceItem:
     identity = VerificationIdentity(
         provider=observation.provider.strip().casefold() or "unknown",
         kind=observation.kind,
-        name=" ".join(observation.name.split()).casefold(),
+        name=canonical_verification_name(observation.name),
     )
     return EvidenceItem(
         id=verification_evidence_id(observation.id),

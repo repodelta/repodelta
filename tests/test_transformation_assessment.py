@@ -21,6 +21,7 @@ from prismcode.model.contracts import (
     TransformationEvidenceBinding,
     TransformationSubjectMatch,
     TransformationSubjectSelection,
+    VerificationIdentity,
     VerificationObservation,
 )
 from prismcode.convergence.transformation import (
@@ -399,7 +400,7 @@ def test_typed_predicate_rejects_unrelated_single_claim_binding() -> None:
     assert assessment.predicate_assessments[0].supporting_binding_ids == ()
 
 
-def test_lowercase_check_name_uses_exact_predicate_match() -> None:
+def _verification_name_assessment(selector: str, observation_name: str):
     packet = _packet()
     record = packet.source_records[0]
     check = packet.verification_observations[0]
@@ -408,17 +409,68 @@ def test_lowercase_check_name_uses_exact_predicate_match() -> None:
         source_records=(
             replace(
                 record,
-                body="## Completion conditions\n- The `test` check succeeds.\n",
+                body=(
+                    "## Completion conditions\n"
+                    f"- The `{selector}` check succeeds.\n"
+                ),
             ),
         ),
-        verification_observations=(replace(check, id="check:test", name="test"),),
+        verification_observations=(
+            replace(check, id="check:canonical", name=observation_name),
+        ),
     ).with_revision()
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
     claim = brief.transformation_contract.by_kind("completion_condition")[0]
-    assessment = brief.transformation_assessment.by_claim_id()[claim.id]
+    return brief.transformation_assessment.by_claim_id()[claim.id]
+
+
+def test_lowercase_check_name_uses_exact_predicate_match() -> None:
+    assessment = _verification_name_assessment("test", "test")
 
     assert assessment.status == "demonstrated"
     assert assessment.predicate_assessments[0].status == "demonstrated"
+
+
+@pytest.mark.parametrize(
+    ("selector", "observation_name"),
+    (
+        ("Unit Tests", "  UNIT   TESTS  "),
+        ("Unit Tests", "Ｕｎｉｔ Tests"),
+        ("ci/test", "CI/TEST"),
+        ("build-and-test", "BUILD-AND-TEST"),
+        ("test_suite", "TEST_SUITE"),
+    ),
+)
+def test_verification_predicate_preserves_canonical_name_equivalence(
+    selector: str,
+    observation_name: str,
+) -> None:
+    assessment = _verification_name_assessment(selector, observation_name)
+
+    assert assessment.status == "demonstrated"
+    assert assessment.reasons[0].kind == "current_verification_success"
+
+
+@pytest.mark.parametrize(
+    ("selector", "observation_name"),
+    (
+        ("ci/test", "ci test"),
+        ("build-and-test", "build and test"),
+        ("suite", "test suite"),
+        ("test_suite", "test suite"),
+    ),
+)
+def test_verification_predicate_does_not_collapse_distinct_punctuation(
+    selector: str,
+    observation_name: str,
+) -> None:
+    assessment = _verification_name_assessment(selector, observation_name)
+
+    assert assessment.status != "demonstrated"
+    assert all(
+        reason.kind != "current_verification_success"
+        for reason in assessment.reasons
+    )
 
 
 def test_verification_predicate_cannot_borrow_a_shared_name_suffix() -> None:
@@ -769,6 +821,11 @@ def _ordered_path_fixture(
         operation="observed",
         role="verification",
         observed_head_sha="head123",
+        verification_identity=VerificationIdentity(
+            provider="fixture",
+            kind="check_run",
+            name="adapter",
+        ),
         verification_status="completed",
         verification_conclusion="success",
         head_signature=AssociationSignature(identifiers=("adapter",)),

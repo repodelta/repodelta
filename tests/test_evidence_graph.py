@@ -35,6 +35,15 @@ def _head_graph(**values) -> StructuralGraphCollection:
     )
 
 
+def test_verification_identity_rejects_noncanonical_names() -> None:
+    with pytest.raises(ValueError, match="name must be canonical"):
+        VerificationIdentity(
+            provider="github",
+            kind="check_run",
+            name="Unit Tests",
+        )
+
+
 def _symbol(symbol_id: str, qualified_name: str, path: str) -> GraphSymbol:
     return GraphSymbol(
         id=symbol_id,

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import unicodedata
 from dataclasses import asdict, dataclass, field, replace
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -389,6 +390,17 @@ class VerificationIdentity:
     provider: str
     kind: Literal["check_run", "commit_status", "workflow_run", "manual"]
     name: str
+
+    def __post_init__(self) -> None:
+        if self.name != canonical_verification_name(self.name):
+            raise ValueError("verification identity name must be canonical")
+
+
+def canonical_verification_name(value: str) -> str:
+    """Preserve check-name punctuation while normalizing case and whitespace."""
+
+    normalized = unicodedata.normalize("NFKC", value)
+    return " ".join(normalized.split()).casefold()
 
 
 @dataclass(frozen=True)
