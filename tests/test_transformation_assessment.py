@@ -421,6 +421,49 @@ def test_lowercase_check_name_uses_exact_predicate_match() -> None:
     assert assessment.predicate_assessments[0].status == "demonstrated"
 
 
+def test_verification_predicate_cannot_borrow_a_shared_name_suffix() -> None:
+    packet = _packet()
+    record = packet.source_records[0]
+    successful = packet.verification_observations[0]
+    packet = replace(
+        packet,
+        source_records=(
+            replace(
+                record,
+                body=(
+                    "## Completion conditions\n"
+                    "- The `stale_suite` check succeeds.\n"
+                ),
+            ),
+        ),
+        verification_observations=(
+            replace(successful, id="check:test_suite", name="test_suite"),
+            replace(
+                successful,
+                id="check:stale_suite",
+                name="stale_suite",
+                head_sha="previous-head",
+            ),
+        ),
+    ).with_revision()
+
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    claim = brief.transformation_contract.by_kind("completion_condition")[0]
+    assessment = brief.transformation_assessment.by_claim_id()[claim.id]
+
+    assert assessment.status == "partial"
+    assert assessment.reasons[0].kind == "stale_verification"
+    assert len(assessment.supporting_binding_ids) == 1
+    binding = next(
+        item
+        for item in brief.transformation_alignment.bindings
+        if item.id == assessment.supporting_binding_ids[0]
+    )
+    evidence = brief.evidence_catalog.by_id()[binding.evidence_id]
+    assert evidence.verification_identity is not None
+    assert evidence.verification_identity.name == "stale_suite"
+
+
 def test_changed_subject_does_not_hide_current_head_verification() -> None:
     packet = _packet()
     changed = packet.changed_files[0]
