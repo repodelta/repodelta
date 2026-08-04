@@ -232,9 +232,13 @@ def test_exact_surface_cannot_demonstrate_role_or_closure_semantics(
     claim = brief.transformation_contract.by_kind(kind)[0]
     assessment = brief.transformation_assessment.by_claim_id()[claim.id]
 
-    assert assessment.status == "partial"
+    if kind == "migration":
+        assert assessment.status == "unverified"
+        assert assessment.reasons[0].kind == "migration_component_incomplete"
+    else:
+        assert assessment.status == "partial"
+        assert assessment.reasons[0].kind == "association_only"
     assert assessment.predicate_assessments[0].status == "partial"
-    assert assessment.reasons[0].kind == "association_only"
 
 
 def test_uncertainty_preserves_typed_predicates_without_assessing_them() -> None:
@@ -266,7 +270,11 @@ def test_uncertainty_preserves_typed_predicates_without_assessing_them() -> None
     (
         ("## Change\n- Replace old_call with new_call.\n", "change", "demonstrated"),
         ("## Authority\n- new_call is the sole authority.\n", "authority", "partial"),
-        ("## Migration\n- Migrate production to new_call.\n", "migration", "partial"),
+        (
+            "## Migration\n- Migrate production to new_call.\n",
+            "migration",
+            "unverified",
+        ),
     ),
 )
 def test_selector_free_claims_share_the_claim_aware_proof_boundary(
@@ -1255,7 +1263,7 @@ def test_assessment_serializes_separately_from_alignment() -> None:
     serialized = brief.to_dict()
 
     assert serialized["transformation_assessment"]["schema_version"] == (
-        "transformation_assessment.v2"
+        "transformation_assessment.v3"
     )
     assert "status" not in serialized["transformation_alignment"]["bindings"][0]
 

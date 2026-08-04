@@ -1553,7 +1553,7 @@ def test_analyzer_preserves_structural_facts_without_using_them_as_conclusions(
         AnalysisInput(packet=packet, structural_graph=structural)
     )
 
-    assert brief.schema_version == "review_brief.v44"
+    assert brief.schema_version == "review_brief.v45"
     assert brief.requirements == lexical_only.requirements == ()
     serialized = brief.to_dict()
     assert "structural_graph" not in serialized

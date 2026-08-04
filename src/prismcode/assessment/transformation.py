@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import re
 from dataclasses import replace
+
+from prismcode.assessment.migration import close_migration_assessments
 from prismcode.model.contracts import (
     ClosureScanPlan,
     ClosureScanPlanSet,
@@ -64,7 +66,7 @@ def assess_transformation(
         if item.claim_id in uncertainty_claim_ids
         }
     )
-    assessments = tuple(
+    component_assessments = tuple(
         _assess_claim(
             claim,
             bindings.get(claim.id, ()),
@@ -78,6 +80,7 @@ def assess_transformation(
         )
         for claim in contract.claims
     )
+    assessments = close_migration_assessments(contract, component_assessments)
     result = TransformationAssessment(claims=assessments)
     result.validate_consistency(contract, alignment, evidence_catalog)
     return result

@@ -410,6 +410,16 @@
           "expectation": "reference",
           "status": "unverified",
           "reason_kinds": ["uncertainty_context"]
+        },
+        {
+          "claim_id": "T5",
+          "status": "partial",
+          "reason_kinds": ["migration_component_incomplete"],
+          "supporting_evidence_ids": [
+            "E:structural_path:f8d4f2c1aa143408cca8",
+            "E:verification:bf4efee5a9a10fe78ab9",
+            "E:verification:6092299693c776cd170c"
+          ]
         }
       ],
       "structural_graph": {
