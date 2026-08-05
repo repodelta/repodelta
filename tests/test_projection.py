@@ -41,6 +41,7 @@ from prismcode.model.contracts import (
     TransformationAssessment,
     TransformationContract,
     TransformationStructuralClosure,
+    TransformationStructuralTopologyGroup,
     VerificationIdentity,
 )
 from prismcode.evaluation.core import load_evaluation_suite
@@ -56,6 +57,7 @@ from prismcode.convergence.core import (
     converge_candidates,
 )
 from prismcode.projection.build import (
+    _canonical_backbone_seed_node_ids,
     _change_backbone,
     _display_evidence_id,
     _merge_node,
@@ -905,16 +907,18 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
     assert graph.backbone_node_ids == (
         _structural_node_id("anchor"),
         _structural_node_id("anchor_2"),
+        _structural_node_id("runtime"),
         _structural_node_id("runtime_2"),
     )
     assert graph.backbone_edge_ids == (
+        "E:relation:anchor-runtime",
         "E:relation:anchor2-runtime2",
         "E:relation:anchor-anchor2",
     )
-    assert html.count('class="delta-edge operation-') == 2
+    assert html.count('class="delta-edge operation-') == 3
     assert "calls · added" in html
+    assert "calls · retained" in html
     assert "function · modified" in html
-    assert "class · context" not in html
     assert "variable · context" not in html
     assert 'data-focuses="R1 R2"' in html
 
@@ -1173,7 +1177,7 @@ def test_change_backbone_does_not_transitively_promote_changed_edges() -> None:
     assert ownership_edge_ids == ()
 
 
-def test_change_backbone_keeps_retained_edges_only_between_members() -> None:
+def test_change_backbone_keeps_one_hop_retained_support_from_direct_seed() -> None:
     nodes = tuple(
             StructuralGraphNode(
                 id=f"N:{name}",
@@ -1207,11 +1211,76 @@ def test_change_backbone_keeps_retained_edges_only_between_members() -> None:
         nodes=nodes,
         edges=edges,
         ownership_edges=(),
-        seed_node_ids=("N:left", "N:right"),
+        seed_node_ids=("N:left",),
     )
 
     assert node_ids == ("N:left", "N:right")
     assert edge_ids == ("D:backbone",)
+
+
+def test_canonical_backbone_seeds_include_rg_and_transformation_anchors() -> None:
+    relations = {
+        "P:primary": ProjectionRelation(
+            id="P:primary",
+            focus_statement_id="R1",
+            slot="changed_anchor",
+            target_type="evidence",
+            target_id="E:primary",
+            association="provided_association",
+            evidence_role="primary",
+            reasons=(),
+        ),
+        "P:test": ProjectionRelation(
+            id="P:test",
+            focus_statement_id="R1",
+            slot="changed_anchor",
+            target_type="evidence",
+            target_id="E:test",
+            association="provided_association",
+            evidence_role="test_support",
+            reasons=(),
+        ),
+    }
+    review_slice = ReviewSlice(
+        change_map=CanonicalChangeMapEntry(
+            focus_statement_id="R1",
+            structural_overlay=StructuralFocusOverlay(
+                nodes=(
+                    StructuralFocusNode(
+                        node_id="N:rg-primary",
+                        role="changed_anchor",
+                        relation_ids=("P:primary",),
+                    ),
+                    StructuralFocusNode(
+                        node_id="N:rg-test",
+                        role="changed_anchor",
+                        relation_ids=("P:test",),
+                    ),
+                )
+            ),
+        )
+    )
+    transformation_group = TransformationStructuralTopologyGroup(
+        claim_id="T1",
+        structural_overlay=StructuralFocusOverlay(
+            nodes=(
+                StructuralFocusNode(
+                    node_id="N:transformation-anchor",
+                    role="changed_anchor",
+                ),
+                StructuralFocusNode(
+                    node_id="N:transformation-context",
+                    role="intermediate",
+                ),
+            )
+        ),
+    )
+
+    assert _canonical_backbone_seed_node_ids(
+        slices=(review_slice,),
+        transformation_topology_groups=(transformation_group,),
+        relations=relations,
+    ) == ("N:rg-primary", "N:transformation-anchor")
 
 
 def test_support_node_delta_requires_exact_base_and_head_facts() -> None:
