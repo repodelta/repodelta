@@ -92,7 +92,6 @@ def build_review_projection(
     graph_placement_order: list[str] = []
     graph_placements: dict[str, StructuralGraphPlacement] = {}
     graph_path_relation_ids: list[str] = []
-    backbone_seed_node_ids: list[str] = []
     transformation_topology_groups: list[
         TransformationStructuralTopologyGroup
     ] = []
@@ -167,15 +166,6 @@ def build_review_projection(
             non_structural_relation_ids=non_structural_relation_ids,
             deferred_structural_relation_ids=deferred_structural_relation_ids,
             diagnostic_ids=structural_diagnostic_ids,
-        )
-        backbone_seed_node_ids.extend(
-            node.node_id
-            for node in overlay.nodes
-            if any(
-                relations[relation_id].slot == "changed_anchor"
-                and relations[relation_id].evidence_role == "primary"
-                for relation_id in node.relation_ids
-            )
         )
         _merge_structural_members(
             nodes=nodes,
@@ -330,6 +320,11 @@ def build_review_projection(
         graph_placements[placement_id]
         for placement_id in graph_placement_order
     )
+    backbone_seed_node_ids = _canonical_backbone_seed_node_ids(
+        slices=tuple(slices),
+        transformation_topology_groups=tuple(transformation_topology_groups),
+        relations=relations,
+    )
     (
         backbone_node_ids,
         backbone_edge_ids,
@@ -339,7 +334,7 @@ def build_review_projection(
         edges=complete_edges,
         ownership_edges=complete_ownership_edges,
         placements=complete_placements,
-        seed_node_ids=tuple(dict.fromkeys(backbone_seed_node_ids)),
+        seed_node_ids=backbone_seed_node_ids,
     )
     relation_groups = project_structural_relation_groups(
         nodes=complete_nodes,
@@ -430,6 +425,34 @@ def build_review_projection(
     return projection
 
 
+def _canonical_backbone_seed_node_ids(
+    *,
+    slices: tuple[ReviewSlice, ...],
+    transformation_topology_groups: tuple[
+        TransformationStructuralTopologyGroup, ...
+    ],
+    relations: dict[str, ProjectionRelation],
+) -> tuple[str, ...]:
+    """Map typed direct anchors onto one review-level backbone contract."""
+
+    seeds = []
+    for review_slice in slices:
+        for node in review_slice.change_map.structural_overlay.nodes:
+            if any(
+                relations[relation_id].slot == "changed_anchor"
+                and relations[relation_id].evidence_role == "primary"
+                for relation_id in node.relation_ids
+            ):
+                seeds.append(node.node_id)
+    for group in transformation_topology_groups:
+        seeds.extend(
+            node.node_id
+            for node in group.structural_overlay.nodes
+            if node.role == "changed_anchor"
+        )
+    return tuple(dict.fromkeys(seeds))
+
+
 def _is_structural_relation(
     relation: ProjectionRelation,
     evidence: dict[str, EvidenceItem],
@@ -484,14 +507,12 @@ def _change_backbone(
     node_ids = {item.id for item in nodes}
     backbone_nodes = set(seed_node_ids) & node_ids
     backbone_edges: set[str] = set()
-    changed_edge_seed_ids = set(backbone_nodes)
+    direct_seed_ids = set(backbone_nodes)
 
     for edge in edges:
-        if edge.operation not in {"added", "removed"}:
-            continue
         if (
-            edge.source_node_id not in changed_edge_seed_ids
-            and edge.target_node_id not in changed_edge_seed_ids
+            edge.source_node_id not in direct_seed_ids
+            and edge.target_node_id not in direct_seed_ids
         ):
             continue
         backbone_edges.add(edge.id)
