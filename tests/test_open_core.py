@@ -23,8 +23,8 @@ def test_fixture_to_requirement_first_html(tmp_path: Path) -> None:
     assert "What this PR is trying to do" not in html
     assert ":root{color-scheme:dark" in html
     assert "Verification" in html
-    assert "Evidence Appendix" in html
-    assert html.index("Verification") < html.index("Evidence Appendix")
+    assert "Evidence Appendix" not in html
+    assert "Coverage limits" in html
     assert "Transformation Summary" not in html
     assert "Verification Matrix" not in html
     assert "Evidence Inspector" not in html
@@ -48,7 +48,7 @@ def test_fixture_to_requirement_first_html(tmp_path: Path) -> None:
     assert "5 delivery requirements" not in html
     assert "CI/Actions observations" not in html
     assert "PR #574" in html and "Merged" in html and "CI: no run observed" in html
-    assert "Diagnostics" in html
+    assert "Diagnostics" not in html
     assert '<span class="block-title">Verification</span>' not in html
     assert '<span class="block-title">Gaps</span>' not in html
     assert "No verification evidence recorded." not in html
@@ -63,6 +63,9 @@ def test_fixture_to_requirement_first_html(tmp_path: Path) -> None:
     assert "Issue #573" in html and "PR #574" in html
     assert "Issue #573 · Acceptance criteria" in html
     assert "#acceptance-criteria" in html
+    assert '<span class="projection-heading">Claimed</span>' not in html
+    assert '<span class="verification-source">Source: ' in html
+    assert '<span class="verification-authority">' not in html
     assert ">linked issue<" not in html
     assert '<span class="block-title">Expected</span>' not in html
 

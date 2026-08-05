@@ -1894,7 +1894,7 @@ def test_selection_and_rendering_are_byte_stable() -> None:
     html = render_html(first)
     assert "candidate_binding" not in html
     assert "Issue contract" not in html
-    assert "provided" in html
+    assert '<span class="projection-heading">Claimed</span>' not in html
     assert "Observed" in html
 
 
