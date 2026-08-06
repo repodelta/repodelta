@@ -5,7 +5,7 @@ Treat the repository as responsibility pipelines. A semantic change must:
 1. replace the authority for the affected output;
 2. migrate every observed affected upstream and downstream contract;
 3. remove or classify stale producers, mappings, consumers, and bypasses;
-4. prove that intended production sinks consume the new result.
+4. verify that observed intended production sinks consume the new result.
 
 Each changed boundary has one canonical semantic contract: preserved
 properties, permitted loss, and failure behavior. Representations may differ

@@ -39,8 +39,8 @@ expand to unrelated defects or to eliminate every unknown.
 ## 5. Design top-down; implement bottom-up
 
 Fix the region's input and output contracts, then recursively decompose it into
-coherent sub-responsibilities and internal contracts. Implement leaf producers,
-compose adjacent contracts, migrate producers and consumers, switch production
+coherent sub-responsibilities and internal contracts. Implement leaf sub-responsibilities and their contracts, compose adjacent
+sub-pipelines, migrate external producers and consumers, switch production
 sinks, then remove duplicate decisions and stale paths.
 
 Use a branch or Draft PR for discovery. Do not change a production boundary to
