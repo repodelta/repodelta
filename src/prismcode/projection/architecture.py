@@ -8,8 +8,11 @@ from prismcode.model.contracts import (
     ArchitecturalComponent,
     ArchitecturalFlow,
     ArchitecturalLayer,
+    ArchitecturalOperationCount,
     EvidenceCatalog,
+    StructuralGraphNode,
     ReviewStructuralGraph,
+    architectural_flow_kind,
 )
 
 
@@ -56,6 +59,7 @@ def project_architectural_change_topology(
             domain=domain,
             layer=layer,
             node_ids=tuple(sorted(node_ids)),
+            operation_counts=_operation_counts(node_ids, nodes),
             classification_authority=(
                 "path_structure" if layer == "unclassified" else "path_convention"
             ),
@@ -67,7 +71,8 @@ def project_architectural_change_topology(
         for component in components
         for node_id in component.node_ids
     }
-    grouped_flows: dict[tuple[str, str, str], list[str]] = {}
+    components_by_id = {item.id: item for item in components}
+    grouped_flows: dict[tuple[str, str, str, str], list[str]] = {}
     for group_id in graph.backbone_relation_group_ids:
         group = relation_groups[group_id]
         source_component_id = component_by_node.get(group.source_node_id)
@@ -79,22 +84,40 @@ def project_architectural_change_topology(
         ):
             continue
         grouped_flows.setdefault(
-            (source_component_id, target_component_id, group.operation), []
+            (
+                source_component_id,
+                target_component_id,
+                architectural_flow_kind(
+                    group.relation,
+                    components_by_id[source_component_id].layer,
+                    components_by_id[target_component_id].layer,
+                ),
+                group.operation,
+            ),
+            [],
         ).append(group_id)
 
     flows = tuple(
         ArchitecturalFlow(
-            id=_flow_id(source_id, target_id, operation),
+            id=_flow_id(source_id, target_id, kind, operation),
             source_component_id=source_id,
             target_component_id=target_id,
+            kind=kind,
             operation=operation,
+            relations=tuple(
+                sorted({relation_groups[item].relation for item in group_ids})
+            ),
             relation_group_ids=tuple(sorted(group_ids)),
         )
-        for (source_id, target_id, operation), group_ids in sorted(
+        for (source_id, target_id, kind, operation), group_ids in sorted(
             grouped_flows.items()
         )
     )
-    topology = ArchitecturalChangeTopology(components=components, flows=flows)
+    topology = ArchitecturalChangeTopology(
+        components=components,
+        flows=flows,
+        display_component_ids=_display_component_ids(components, flows),
+    )
     validate_architectural_change_topology(topology, graph)
     return topology
 
@@ -142,8 +165,77 @@ def _component_id(domain: str, layer: str) -> str:
     return f"AC:{digest}"
 
 
-def _flow_id(source_id: str, target_id: str, operation: str) -> str:
+def _flow_id(source_id: str, target_id: str, kind: str, operation: str) -> str:
     digest = hashlib.sha256(
-        f"{source_id}\0{target_id}\0{operation}".encode()
+        f"{source_id}\0{target_id}\0{kind}\0{operation}".encode()
     ).hexdigest()[:20]
     return f"AF:{digest}"
+
+
+def _operation_counts(
+    node_ids: list[str],
+    nodes: dict[str, StructuralGraphNode],
+) -> tuple[ArchitecturalOperationCount, ...]:
+    counts: dict[str, int] = {}
+    for node_id in node_ids:
+        operation = nodes[node_id].delta
+        counts[operation] = counts.get(operation, 0) + 1
+    order = ("added", "modified", "renamed", "removed", "retained", "unresolved")
+    return tuple(
+        ArchitecturalOperationCount(operation=operation, count=counts[operation])
+        for operation in order
+        if operation in counts
+    )
+
+
+def _display_component_ids(
+    components: tuple[ArchitecturalComponent, ...],
+    flows: tuple[ArchitecturalFlow, ...],
+) -> tuple[str, ...]:
+    """Order executable roots before consumers; retain stable order for cycles."""
+
+    components_by_id = {item.id: item for item in components}
+    component_ids = set(components_by_id)
+    outgoing = {item: set() for item in component_ids}
+    indegree = {item: 0 for item in component_ids}
+    for flow in flows:
+        if flow.kind != "executable" or flow.target_component_id in outgoing[
+            flow.source_component_id
+        ]:
+            continue
+        outgoing[flow.source_component_id].add(flow.target_component_id)
+        indegree[flow.target_component_id] += 1
+    def order_key(component_id: str) -> tuple[int, int, str]:
+        return _component_order_key(components_by_id[component_id])
+    ready = sorted(
+        (item for item, count in indegree.items() if count == 0),
+        key=order_key,
+    )
+    ordered = []
+    while ready:
+        component_id = ready.pop(0)
+        ordered.append(component_id)
+        for target_id in sorted(outgoing[component_id], key=order_key):
+            indegree[target_id] -= 1
+            if indegree[target_id] == 0:
+                ready.append(target_id)
+                ready.sort(key=order_key)
+    ordered.extend(sorted(component_ids - set(ordered), key=order_key))
+    return tuple(ordered)
+
+
+def _component_order_key(component: ArchitecturalComponent) -> tuple[int, int, str]:
+    layer_order = {
+        "entry": 0,
+        "presentation": 1,
+        "application": 2,
+        "domain": 3,
+        "infrastructure": 4,
+        "persistence": 5,
+        "unclassified": 6,
+        "verification": 7,
+        "documentation": 8,
+        "automation": 9,
+    }
+    support = component.layer in {"verification", "documentation", "automation"}
+    return (1 if support else 0, layer_order[component.layer], component.domain)

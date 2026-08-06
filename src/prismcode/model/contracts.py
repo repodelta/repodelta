@@ -2905,6 +2905,36 @@ ArchitecturalLayer = Literal[
     "automation",
     "unclassified",
 ]
+ArchitecturalFlowKind = Literal[
+    "executable",
+    "verification_support",
+    "dependency",
+    "structural_support",
+]
+
+
+def architectural_flow_kind(
+    relation: str,
+    source_layer: ArchitecturalLayer,
+    target_layer: ArchitecturalLayer,
+) -> ArchitecturalFlowKind:
+    if "verification" in {source_layer, target_layer}:
+        return "verification_support"
+    if relation in {"calls", "instantiates"}:
+        return "executable"
+    if relation in {"imports", "references", "extends"}:
+        return "dependency"
+    return "structural_support"
+
+
+@dataclass(frozen=True)
+class ArchitecturalOperationCount:
+    operation: StructuralGraphNodeDelta
+    count: int
+
+    def __post_init__(self) -> None:
+        if self.count <= 0:
+            raise ValueError("architectural operation count must be positive")
 
 
 @dataclass(frozen=True)
@@ -2915,6 +2945,7 @@ class ArchitecturalComponent:
     domain: str
     layer: ArchitecturalLayer
     node_ids: tuple[str, ...]
+    operation_counts: tuple[ArchitecturalOperationCount, ...]
     classification_authority: Literal["path_structure", "path_convention"]
 
     def __post_init__(self) -> None:
@@ -2942,7 +2973,9 @@ class ArchitecturalFlow:
     id: str
     source_component_id: str
     target_component_id: str
+    kind: ArchitecturalFlowKind
     operation: Literal["added", "removed", "retained"]
+    relations: tuple[str, ...]
     relation_group_ids: tuple[str, ...]
 
     def __post_init__(self) -> None:
@@ -2950,6 +2983,10 @@ class ArchitecturalFlow:
             raise ValueError(f"{self.id}: architectural flow must cross components")
         if not self.relation_group_ids:
             raise ValueError(f"{self.id}: architectural flow requires provenance")
+        if self.relations != tuple(sorted(set(self.relations))) or not self.relations:
+            raise ValueError(
+                f"{self.id}: architectural flow relations must be sorted and unique"
+            )
         if self.relation_group_ids != tuple(
             sorted(set(self.relation_group_ids))
         ):
@@ -2964,12 +3001,19 @@ class ArchitecturalChangeTopology:
 
     components: tuple[ArchitecturalComponent, ...] = ()
     flows: tuple[ArchitecturalFlow, ...] = ()
-    schema_version: str = "architectural_change_topology.v1"
+    display_component_ids: tuple[str, ...] = ()
+    schema_version: str = "architectural_change_topology.v2"
 
     def validate_against(self, graph: ReviewStructuralGraph) -> None:
         component_ids = {item.id for item in self.components}
         if len(component_ids) != len(self.components):
             raise ValueError("architectural topology contains duplicate components")
+        if set(self.display_component_ids) != component_ids or len(
+            self.display_component_ids
+        ) != len(component_ids):
+            raise ValueError(
+                "architectural topology display order must preserve every component"
+            )
         flow_ids = {item.id for item in self.flows}
         if len(flow_ids) != len(self.flows):
             raise ValueError("architectural topology contains duplicate flows")
@@ -2985,6 +3029,22 @@ class ArchitecturalChangeTopology:
             for component in self.components
             for node_id in component.node_ids
         }
+        components_by_id = {item.id: item for item in self.components}
+        graph_nodes = {item.id: item for item in graph.nodes}
+        for component in self.components:
+            expected_counts: dict[str, int] = {}
+            for node_id in component.node_ids:
+                operation = graph_nodes[node_id].delta
+                expected_counts[operation] = expected_counts.get(operation, 0) + 1
+            observed_counts = {
+                item.operation: item.count for item in component.operation_counts
+            }
+            if observed_counts != expected_counts or len(observed_counts) != len(
+                component.operation_counts
+            ):
+                raise ValueError(
+                    "architectural component operation summary diverges from graph"
+                )
         graph_groups = {
             item.id: item
             for item in graph.relation_groups
@@ -3014,6 +3074,21 @@ class ArchitecturalChangeTopology:
                         "architectural flow diverges from canonical relation endpoints"
                     )
                 projected_group_ids.append(group_id)
+            expected_relations = tuple(
+                sorted({graph_groups[item].relation for item in flow.relation_group_ids})
+            )
+            if flow.relations != expected_relations or any(
+                architectural_flow_kind(
+                    relation,
+                    components_by_id[flow.source_component_id].layer,
+                    components_by_id[flow.target_component_id].layer,
+                )
+                != flow.kind
+                for relation in flow.relations
+            ):
+                raise ValueError(
+                    "architectural flow kind diverges from canonical relations"
+                )
         expected_group_ids = {
             group.id
             for group in graph_groups.values()
@@ -3177,7 +3252,7 @@ class ReviewProjection:
         ArchitecturalChangeTopology()
     )
     verification_workspace: VerificationWorkspace = VerificationWorkspace()
-    schema_version: str = "review_projection.v25"
+    schema_version: str = "review_projection.v26"
 
     def validate_consistency(
         self,
@@ -3895,7 +3970,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v49"
+    schema_version: str = "review_brief.v50"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
