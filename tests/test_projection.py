@@ -8,6 +8,9 @@ import pytest
 
 from prismcode.pipeline import DeterministicAnalyzer
 from prismcode.model.contracts import (
+    ArchitecturalChangeTopology,
+    ArchitecturalComponent,
+    ArchitecturalFlow,
     AnalysisInput,
     CandidateConvergence,
     CanonicalChangeMapEntry,
@@ -34,6 +37,7 @@ from prismcode.model.contracts import (
     StructuralGraphEdge,
     StructuralGraphNode,
     StructuralGraphPlacement,
+    StructuralRelationGroup,
     StructuralOwnershipChangeIdentity,
     StructuralOwnershipIdentity,
     StructuralRelationChangeIdentity,
@@ -43,6 +47,11 @@ from prismcode.model.contracts import (
     TransformationStructuralClosure,
     TransformationStructuralTopologyGroup,
     VerificationIdentity,
+)
+from prismcode.projection.architecture import (
+    classify_architectural_path,
+    project_architectural_change_topology,
+    validate_architectural_change_topology,
 )
 from prismcode.evaluation.core import load_evaluation_suite
 from prismcode.facts.lexical import association_signature
@@ -97,6 +106,138 @@ def _with_verification_overlays(projection: ReviewProjection) -> SimpleNamespace
 
 
 SUITE = Path("fixtures/evaluation-suite.json")
+
+
+def _architectural_node(node_id: str, evidence_id: str) -> StructuralGraphNode:
+    return StructuralGraphNode(
+        id=node_id,
+        review_symbol_id=f"RS:{node_id}",
+        delta="modified",
+        evidence_ids=(evidence_id,),
+        display_evidence_id=evidence_id,
+    )
+
+
+def test_architectural_topology_groups_canonical_nodes_and_cross_component_flow() -> None:
+    cli = _architectural_node("N:cli", "E:cli")
+    provider = _architectural_node("N:provider", "E:provider")
+    relation = StructuralRelationGroup(
+        id="RG:call",
+        source_node_id=cli.id,
+        target_node_id=provider.id,
+        relation="calls",
+        operation="added",
+        member_edge_ids=("E:edge",),
+    )
+    graph = ReviewStructuralGraph(
+        nodes=(cli, provider),
+        relation_groups=(relation,),
+        backbone_node_ids=(cli.id, provider.id),
+        backbone_relation_group_ids=(relation.id,),
+    )
+    evidence = EvidenceCatalog(
+        items=(
+            EvidenceItem(
+                id="E:cli",
+                summary="CLI",
+                kind="symbol",
+                classification="code",
+                metadata={"path": "src/prismcode/cli.py"},
+            ),
+            EvidenceItem(
+                id="E:provider",
+                summary="Provider",
+                kind="symbol",
+                classification="code",
+                metadata={"path": "src/prismcode/providers/openai.py"},
+            ),
+        )
+    )
+
+    topology = project_architectural_change_topology(graph, evidence)
+
+    assert [(item.domain, item.layer) for item in topology.components] == [
+        ("prismcode", "entry"),
+        ("prismcode/providers", "infrastructure"),
+    ]
+    assert len(topology.flows) == 1
+    assert topology.flows[0].relation_group_ids == (relation.id,)
+
+
+def test_architectural_path_keeps_unknown_semantics_unclassified() -> None:
+    assert classify_architectural_path("custom/opaque/worker.py") == (
+        "custom",
+        "unclassified",
+    )
+
+
+def test_architectural_topology_rejects_missing_backbone_membership() -> None:
+    graph = ReviewStructuralGraph(
+        nodes=(_architectural_node("N:one", "E:one"),),
+        backbone_node_ids=("N:one",),
+    )
+    invalid = ArchitecturalChangeTopology(
+        components=(
+            ArchitecturalComponent(
+                id="AC:missing",
+                domain="unknown",
+                layer="unclassified",
+                node_ids=("N:missing",),
+                classification_authority="path_structure",
+            ),
+        )
+    )
+
+    with pytest.raises(ValueError, match="complete backbone"):
+        validate_architectural_change_topology(invalid, graph)
+
+
+def test_architectural_topology_rejects_relabelled_flow_endpoints() -> None:
+    left = _architectural_node("N:left", "E:left")
+    right = _architectural_node("N:right", "E:right")
+    relation = StructuralRelationGroup(
+        id="RG:call",
+        source_node_id=left.id,
+        target_node_id=right.id,
+        relation="calls",
+        operation="added",
+        member_edge_ids=("E:edge",),
+    )
+    graph = ReviewStructuralGraph(
+        nodes=(left, right),
+        relation_groups=(relation,),
+        backbone_node_ids=(left.id, right.id),
+        backbone_relation_group_ids=(relation.id,),
+    )
+    source = ArchitecturalComponent(
+        id="AC:left",
+        domain="left",
+        layer="unclassified",
+        node_ids=(left.id,),
+        classification_authority="path_structure",
+    )
+    target = ArchitecturalComponent(
+        id="AC:right",
+        domain="right",
+        layer="unclassified",
+        node_ids=(right.id,),
+        classification_authority="path_structure",
+    )
+    invalid = ArchitecturalChangeTopology(
+        components=(source, target),
+        flows=(
+            ArchitecturalFlow(
+                id="AF:reversed",
+                source_component_id=target.id,
+                target_component_id=source.id,
+                operation="added",
+                relation_group_ids=(relation.id,),
+            ),
+        ),
+    )
+
+    with pytest.raises(ValueError, match="canonical relation endpoints"):
+        validate_architectural_change_topology(invalid, graph)
 
 
 def test_compound_layout_keeps_every_canonical_membership_for_moved_symbol() -> None:
