@@ -11,6 +11,7 @@ from prismcode.model.contracts import (
     ArchitecturalChangeTopology,
     ArchitecturalComponent,
     ArchitecturalFlow,
+    ArchitecturalOperationCount,
     AnalysisInput,
     CandidateConvergence,
     CanonicalChangeMapEntry,
@@ -47,6 +48,7 @@ from prismcode.model.contracts import (
     TransformationStructuralClosure,
     TransformationStructuralTopologyGroup,
     VerificationIdentity,
+    architectural_flow_kind,
 )
 from prismcode.projection.architecture import (
     classify_architectural_path,
@@ -79,6 +81,7 @@ from prismcode.projection.structural_groups import (
     project_structural_relation_groups,
 )
 from prismcode.presentation.html import (
+    _architectural_change_topology,
     _review_graph,
     _structural_compound_layout,
     _structural_edge_path,
@@ -129,11 +132,19 @@ def test_architectural_topology_groups_canonical_nodes_and_cross_component_flow(
         operation="added",
         member_edge_ids=("E:edge",),
     )
+    dependency = StructuralRelationGroup(
+        id="RG:import",
+        source_node_id=cli.id,
+        target_node_id=provider.id,
+        relation="imports",
+        operation="retained",
+        member_edge_ids=("E:import",),
+    )
     graph = ReviewStructuralGraph(
         nodes=(cli, provider),
-        relation_groups=(relation,),
+        relation_groups=(relation, dependency),
         backbone_node_ids=(cli.id, provider.id),
-        backbone_relation_group_ids=(relation.id,),
+        backbone_relation_group_ids=(relation.id, dependency.id),
     )
     evidence = EvidenceCatalog(
         items=(
@@ -160,14 +171,65 @@ def test_architectural_topology_groups_canonical_nodes_and_cross_component_flow(
         ("prismcode", "entry"),
         ("prismcode/providers", "infrastructure"),
     ]
-    assert len(topology.flows) == 1
-    assert topology.flows[0].relation_group_ids == (relation.id,)
+    flows = {item.kind: item for item in topology.flows}
+    assert {item: flow.relations for item, flow in flows.items()} == {
+        "executable": ("calls",),
+        "dependency": ("imports",),
+    }
+    assert flows["executable"].relation_group_ids == (relation.id,)
+    assert flows["dependency"].relation_group_ids == (dependency.id,)
+    ordered = {item.id: item.domain for item in topology.components}
+    assert tuple(ordered[item] for item in topology.display_component_ids) == (
+        "prismcode",
+        "prismcode/providers",
+    )
+    assert all(
+        item.operation_counts == (
+            ArchitecturalOperationCount(operation="modified", count=1),
+        )
+        for item in topology.components
+    )
+
+    html = _architectural_change_topology(
+        SimpleNamespace(
+            projection=SimpleNamespace(architectural_topology=topology)
+        )
+    )
+    assert html.count("<h2>Change topology</h2>") == 1
+    assert "Executable flow" in html
+    assert "Dependency and structural support · 1" in html
+    assert "calls · 1 groups · added" in html
+    assert "imports · 1 groups · retained" in html
+
+    invalid = replace(
+        topology,
+        flows=tuple(
+            replace(item, kind="executable")
+            if item.kind == "dependency"
+            else item
+            for item in topology.flows
+        ),
+    )
+    with pytest.raises(ValueError, match="flow kind"):
+        validate_architectural_change_topology(invalid, graph)
 
 
 def test_architectural_path_keeps_unknown_semantics_unclassified() -> None:
     assert classify_architectural_path("custom/opaque/worker.py") == (
         "custom",
         "unclassified",
+    )
+
+
+def test_architectural_flow_keeps_verification_out_of_production_flow() -> None:
+    assert architectural_flow_kind("calls", "verification", "domain") == (
+        "verification_support"
+    )
+    assert architectural_flow_kind("imports", "verification", "domain") == (
+        "verification_support"
+    )
+    assert architectural_flow_kind("calls", "application", "domain") == (
+        "executable"
     )
 
 
@@ -183,9 +245,13 @@ def test_architectural_topology_rejects_missing_backbone_membership() -> None:
                 domain="unknown",
                 layer="unclassified",
                 node_ids=("N:missing",),
+                operation_counts=(
+                    ArchitecturalOperationCount(operation="modified", count=1),
+                ),
                 classification_authority="path_structure",
             ),
-        )
+        ),
+        display_component_ids=("AC:missing",),
     )
 
     with pytest.raises(ValueError, match="complete backbone"):
@@ -214,6 +280,9 @@ def test_architectural_topology_rejects_relabelled_flow_endpoints() -> None:
         domain="left",
         layer="unclassified",
         node_ids=(left.id,),
+        operation_counts=(
+            ArchitecturalOperationCount(operation="modified", count=1),
+        ),
         classification_authority="path_structure",
     )
     target = ArchitecturalComponent(
@@ -221,6 +290,9 @@ def test_architectural_topology_rejects_relabelled_flow_endpoints() -> None:
         domain="right",
         layer="unclassified",
         node_ids=(right.id,),
+        operation_counts=(
+            ArchitecturalOperationCount(operation="modified", count=1),
+        ),
         classification_authority="path_structure",
     )
     invalid = ArchitecturalChangeTopology(
@@ -230,10 +302,13 @@ def test_architectural_topology_rejects_relabelled_flow_endpoints() -> None:
                 id="AF:reversed",
                 source_component_id=target.id,
                 target_component_id=source.id,
+                kind="executable",
                 operation="added",
+                relations=("calls",),
                 relation_group_ids=(relation.id,),
             ),
         ),
+        display_component_ids=(source.id, target.id),
     )
 
     with pytest.raises(ValueError, match="canonical relation endpoints"):

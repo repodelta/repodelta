@@ -1153,6 +1153,96 @@ def _transformation_summary(brief: ReviewBrief) -> str:
     )
 
 
+def _architectural_change_topology(brief: ReviewBrief) -> str:
+    topology = brief.projection.architectural_topology
+    if not topology.components:
+        return (
+            '<section class="section architectural-topology">'
+            '<h2>Change topology</h2>'
+            '<p class="empty">No canonical architectural components are available.</p>'
+            '</section>'
+        )
+    components = {item.id: item for item in topology.components}
+    operation_labels = {
+        "added": "+",
+        "modified": "~",
+        "renamed": "↝",
+        "removed": "−",
+        "retained": "=",
+        "unresolved": "?",
+    }
+    cards = []
+    for component_id in topology.display_component_ids:
+        component = components[component_id]
+        operations = "".join(
+            '<span class="topology-operation '
+            f'operation-{escape(item.operation)}">'
+            f'{escape(operation_labels[item.operation])}{item.count}</span>'
+            for item in component.operation_counts
+        )
+        cards.append(
+            '<div class="topology-component">'
+            f'<span class="eyebrow">{escape(component.layer)}</span>'
+            f'<strong>{escape(component.domain)}</strong>'
+            f'<div class="topology-operations">{operations}</div>'
+            f'<small>{len(component.node_ids)} structural members · '
+            f'{escape(component.classification_authority.replace("_", " "))}</small>'
+            '</div>'
+        )
+
+    def flow_rows(kind: str) -> str:
+        rows = []
+        for flow in topology.flows:
+            if flow.kind != kind:
+                continue
+            source = components[flow.source_component_id]
+            target = components[flow.target_component_id]
+            rows.append(
+                f'<div class="topology-flow operation-{escape(flow.operation)}">'
+                f'<span>{escape(source.domain)}</span><b>→</b>'
+                f'<span>{escape(target.domain)}</span>'
+                f'<small>{escape(" / ".join(flow.relations))} · '
+                f'{len(flow.relation_group_ids)} groups · '
+                f'{escape(flow.operation)}</small></div>'
+            )
+        return "".join(rows)
+
+    executable = flow_rows("executable")
+    verification = flow_rows("verification_support")
+    supporting = flow_rows("dependency") + flow_rows("structural_support")
+    unclassified = sum(
+        1 for item in topology.components if item.layer == "unclassified"
+    )
+    return (
+        '<section class="section architectural-topology">'
+        '<h2>Change topology</h2>'
+        '<p class="section-intro">A deterministic component-level projection '
+        'of the same canonical structural graph shown below.</p>'
+        f'<div class="topology-components">{"".join(cards)}</div>'
+        '<div class="topology-flow-section"><span class="projection-heading">'
+        'Executable flow</span>'
+        f'{executable or "<p class=\"empty\">No cross-component executable flow was observed.</p>"}'
+        '</div>'
+        + (
+            '<details class="topology-support"><summary>Verification support · '
+            f'{sum(1 for item in topology.flows if item.kind == "verification_support")}'
+            f'</summary><div>{verification}</div></details>'
+            if verification
+            else ""
+        )
+        + (
+            '<details class="topology-support"><summary>Dependency and structural '
+            f'support · {sum(1 for item in topology.flows if item.kind in {"dependency", "structural_support"})}'
+            f'</summary><div>{supporting}</div></details>'
+            if supporting
+            else ""
+        )
+        + f'<span class="summary-limits">{len(topology.components)} components · '
+        f'{len(topology.flows)} cross-component flows · '
+        f'{unclassified} unclassified layers</span></section>'
+    )
+
+
 def render_html(brief: ReviewBrief) -> str:
     packet = brief.packet
     source_priority = {"linked_issue": 0, "ticket": 0, "pull_request": 1}
@@ -1190,6 +1280,7 @@ def render_html(brief: ReviewBrief) -> str:
     )
     verification_accordion = _verification_accordion(brief)
     transformation_summary = _transformation_summary(brief)
+    architectural_topology = _architectural_change_topology(brief)
     coverage_limits = _coverage_limits(brief)
     review_context = _review_context(brief)
 
@@ -1213,6 +1304,15 @@ def render_html(brief: ReviewBrief) -> str:
 .eyebrow{{display:block;margin-bottom:4px;color:var(--green);font-size:9px;font-weight:760;text-transform:uppercase;letter-spacing:.09em}}
 .section-intro{{margin:0 0 16px;color:var(--muted);font-size:10px}}
 .brief-context{{display:grid;gap:6px;margin-top:14px}}.brief-context .context{{margin:0;padding:0;border:0}}.brief-context .context>summary{{padding:7px 0;border-top:1px solid rgba(111,128,135,.16)}}
+.topology-components{{display:flex;gap:9px;overflow-x:auto;padding:3px 0 12px}}
+.topology-component{{flex:0 0 185px;padding:12px;border:1px solid rgba(111,128,135,.22);border-radius:10px;background:rgba(3,7,9,.25)}}
+.topology-component strong{{display:block;overflow-wrap:anywhere;font-size:11px}}.topology-component small{{display:block;margin-top:7px;color:var(--faint);font-size:8px}}
+.topology-operations{{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}}.topology-operation{{padding:2px 5px;border-radius:999px;background:rgba(111,128,135,.14);color:var(--muted);font-size:8px}}
+.topology-operation.operation-added{{color:var(--green)}}.topology-operation.operation-removed{{color:var(--red)}}.topology-operation.operation-modified,.topology-operation.operation-renamed{{color:var(--amber)}}
+.topology-flow-section{{margin-top:13px;padding-top:11px;border-top:1px solid rgba(111,128,135,.16)}}
+.topology-flow{{display:grid;grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr) minmax(180px,.8fr);gap:7px;align-items:center;padding:7px 9px;border-left:2px solid #73848c;background:rgba(3,7,9,.2);font-size:9px}}
+.topology-flow+.topology-flow{{margin-top:4px}}.topology-flow b{{color:var(--muted);text-align:center}}.topology-flow small{{color:var(--faint);text-align:right}}.topology-flow.operation-added{{border-color:var(--green)}}.topology-flow.operation-removed{{border-color:var(--red)}}
+.topology-support{{margin-top:9px;border:1px solid rgba(111,128,135,.16);border-radius:8px}}.topology-support>summary{{padding:8px 10px;cursor:pointer;color:var(--muted);font-size:9px}}.topology-support>div{{padding:0 9px 9px}}
 .transformation-strip{{display:grid;grid-template-columns:minmax(0,1fr) 28px minmax(0,1.2fr) 28px minmax(0,1fr);gap:8px;align-items:stretch}}
 .summary-stage{{min-width:0;padding:13px;border:1px solid rgba(111,128,135,.2);border-radius:10px;background:rgba(3,7,9,.2)}}
 .summary-arrow{{display:grid;place-items:center;color:var(--faint);font-size:18px}}
@@ -1239,11 +1339,12 @@ def render_html(brief: ReviewBrief) -> str:
 .assessment-reasons{{margin:0;padding-left:17px;color:var(--muted);font-size:9px}}.assessment-reasons li+li{{margin-top:7px}}
 .verification-coverage,.display-boundary{{display:block;margin-top:10px;color:var(--faint);font-size:8px}}
 .coverage-limits{{margin-top:14px;padding:0 12px;border:1px solid rgba(111,128,135,.2);border-radius:9px;background:rgba(3,7,9,.2)}}.coverage-limits>summary{{padding:10px 0;cursor:pointer;color:var(--amber);font-size:10px}}
-@media(max-width:800px){{.transformation-strip{{grid-template-columns:1fr}}.summary-arrow{{transform:rotate(90deg)}}.verification-detail{{grid-template-columns:1fr}}.verification-item>summary{{grid-template-columns:42px minmax(0,1fr)}}.verification-item>summary .status-pill{{grid-column:2}}}}
+@media(max-width:800px){{.transformation-strip{{grid-template-columns:1fr}}.summary-arrow{{transform:rotate(90deg)}}.topology-flow{{grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr)}}.topology-flow small{{grid-column:1/-1;text-align:left}}.verification-detail{{grid-template-columns:1fr}}.verification-item>summary{{grid-template-columns:42px minmax(0,1fr)}}.verification-item>summary .status-pill{{grid-column:2}}}}
 </style></head><body><main class="shell">
 <div class="topbar"><span class="brand-mark"></span>PrismCode</div>
 <section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{brief.overview.changed_file_count} changed files</span><span>·</span><span>{escape(ci_copy)}</span><span>·</span><span>{escape(llm_shadow_copy)}</span></div><h1>{escape(packet.title)}</h1><div class="intent">{escape(brief.intent.text)}</div><span class="source-note">Source: {source_line}</span>{review_context}</section>
 {transformation_summary}
+{architectural_topology}
 <section class="section verification-workspace"><h2>Verification</h2><p class="section-intro">Expand one R/G/T/CC subject to compare its authored claim, canonical observations, deterministic assessment, and structural coverage.</p>{verification_accordion}{review_graph}</section>
     {coverage_limits}
 <div class="footer">PrismCode · {escape(pr_label)} · Schema {escape(brief.schema_version)} · Generated by {escape(brief.generated_by)}</div>

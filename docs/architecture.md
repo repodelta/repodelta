@@ -69,9 +69,12 @@ fixture or GitHub
        -> one architectural change topology over the complete structural backbone
        -> path-bounded components and cross-component canonical relation groups
        -> explicit classification authority and unclassified semantics
+       -> graph-derived operation summaries and executable/dependency flow kinds
   -> canonical ReviewOverview
   -> ReviewBrief
   -> HTML / CLI presentation
+       -> compact Change topology consumes only the typed architectural projection
+       -> detailed Structural delta graph retains exact canonical members
 ```
 
 An optional, dormant `llm` boundary derives one claim-kind-eligible candidate
