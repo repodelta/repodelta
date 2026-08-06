@@ -180,6 +180,26 @@ The command returns non-zero when configured thresholds fail. See
 [`docs/evaluation.md`](docs/evaluation.md) for the versioned contracts, metrics,
 and safety boundary.
 
+### Run bounded LLM shadow replay
+
+Shadow selection is opt-in and never changes deterministic review assessments:
+
+```bash
+prismcode review \
+  --fixture path/to/review.json \
+  --llm-shadow \
+  --llm-shadow-replay path/to/exact-request-replay.json \
+  --output build/review.html
+```
+
+The replay must match one canonical admitted request exactly. PrismCode records
+validated selection divergence, usage metadata, failures, and admission
+coverage in `build/review.html.llm-shadow.json`; the Brief header shows only the
+execution state. Without a configured provider, `--llm-shadow` records
+`unavailable` and still generates the deterministic HTML. Omitting the flag
+performs no provider call and writes no shadow artifact. Live OpenAI transport
+is not part of this interface yet.
+
 ### Review a live GitHub pull request
 
 #### Basic review from any directory

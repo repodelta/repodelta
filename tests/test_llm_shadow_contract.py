@@ -140,7 +140,7 @@ def test_candidate_membership_is_upstream_owned_and_bounded() -> None:
         raise AssertionError("duplicate canonical evidence identity was accepted")
 
 
-def test_shadow_contract_is_dormant_and_abandonment_safe() -> None:
+def test_shadow_contract_has_only_cli_execution_authority() -> None:
     production_importers = []
     for path in Path("src/prismcode").glob("**/*.py"):
         if "llm" in path.parts:
@@ -148,7 +148,7 @@ def test_shadow_contract_is_dormant_and_abandonment_safe() -> None:
         if "prismcode.llm" in path.read_text(encoding="utf-8"):
             production_importers.append(str(path))
 
-    assert production_importers == []
+    assert production_importers == ["src/prismcode/cli.py"]
 
 
 def _fixture_pair() -> tuple[ShadowEvidenceRequest, dict]:

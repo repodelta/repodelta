@@ -31,6 +31,12 @@ from prismcode.providers.workspace import (
 )
 from prismcode.presentation.status import format_structural_coverage
 from prismcode.changes.hunks import parse_changed_files
+from prismcode.llm import (
+    execute_shadow_review,
+    load_shadow_replay_provider,
+    unavailable_shadow_execution,
+    write_shadow_execution,
+)
 
 
 def _positive_int(value: str) -> int:
@@ -152,6 +158,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print individual collection and structural diagnostics",
     )
     review.add_argument("--output", required=True, help="Destination HTML file")
+    review.add_argument(
+        "--llm-shadow",
+        action="store_true",
+        help="Run bounded LLM shadow selection without changing review conclusions",
+    )
+    review.add_argument(
+        "--llm-shadow-replay",
+        help="Exact recorded shadow response used as the provider transport",
+    )
+    review.add_argument(
+        "--llm-shadow-output",
+        help="Destination JSON artifact (default: <output>.llm-shadow.json)",
+    )
     evaluate = subparsers.add_parser(
         "evaluate",
         help="Evaluate deterministic bindings against an offline golden suite",
@@ -283,6 +302,29 @@ def main() -> int:
                     ),
                 )
             ).analyze(analysis_input)
+            if args.llm_shadow_replay and not args.llm_shadow:
+                parser.error("--llm-shadow-replay requires --llm-shadow")
+            if args.llm_shadow_output and not args.llm_shadow:
+                parser.error("--llm-shadow-output requires --llm-shadow")
+            if args.llm_shadow:
+                shadow = (
+                    execute_shadow_review(
+                        brief,
+                        load_shadow_replay_provider(args.llm_shadow_replay),
+                    )
+                    if args.llm_shadow_replay
+                    else unavailable_shadow_execution()
+                )
+                shadow_output = args.llm_shadow_output or f"{args.output}.llm-shadow.json"
+                shadow = replace(
+                    shadow,
+                    summary=replace(shadow.summary, artifact_written=True),
+                )
+                write_shadow_execution(shadow, shadow_output)
+                brief = replace(
+                    brief,
+                    overview=replace(brief.overview, llm_shadow=shadow.summary),
+                )
             output = write_html(brief, args.output)
     except (GitHubApiError, OSError, ValueError) as exc:
         print(f"prismcode: error: {exc}", file=sys.stderr)
@@ -293,6 +335,7 @@ def main() -> int:
         format_structural_coverage(brief.overview.structural_coverage),
         file=sys.stderr,
     )
+    print(f"LLM shadow: {brief.overview.llm_shadow.state}", file=sys.stderr)
     if args.verbose:
         for diagnostic in brief.overview.attention:
             print(

@@ -16,7 +16,19 @@ from prismcode.llm.contracts import (
     ShadowSelectionValidation,
     parse_shadow_selection,
 )
-from prismcode.llm.replay import load_shadow_replay, serialize_shadow_replay
+from prismcode.llm.replay import (
+    ReplayShadowProvider,
+    load_shadow_replay,
+    load_shadow_replay_provider,
+    serialize_shadow_replay,
+)
+from prismcode.llm.execution import (
+    ShadowExecutionBundle,
+    execute_shadow_admissions,
+    execute_shadow_review,
+    unavailable_shadow_execution,
+    write_shadow_execution,
+)
 from prismcode.llm.provider import ShadowEvidenceProvider, ShadowProviderResponse
 from prismcode.llm.runner import (
     ShadowRunRecord,
@@ -26,6 +38,7 @@ from prismcode.llm.runner import (
 
 __all__ = [
     "ShadowEvidenceCandidate",
+    "ShadowExecutionBundle",
     "ShadowAdmissionDiagnostic",
     "ShadowAdmissionPolicy",
     "ShadowCandidateAdmission",
@@ -38,10 +51,16 @@ __all__ = [
     "ShadowProviderResponse",
     "ShadowRunRecord",
     "ShadowRunner",
+    "ReplayShadowProvider",
     "ShadowSelectionComparison",
     "ShadowSelectionValidation",
     "load_shadow_replay",
+    "load_shadow_replay_provider",
     "admit_shadow_candidates",
     "parse_shadow_selection",
     "serialize_shadow_replay",
+    "execute_shadow_admissions",
+    "execute_shadow_review",
+    "unavailable_shadow_execution",
+    "write_shadow_execution",
 ]

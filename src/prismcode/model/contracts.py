@@ -3664,6 +3664,22 @@ class DiagnosticPresentation:
         }
 
 
+LLMShadowExecutionState = Literal[
+    "off", "unavailable", "completed", "partial", "failed"
+]
+
+
+@dataclass(frozen=True)
+class LLMShadowExecutionSummary:
+    """Review-level execution observation with no assessment authority."""
+
+    state: LLMShadowExecutionState = "off"
+    admitted_count: int = 0
+    completed_count: int = 0
+    failed_count: int = 0
+    artifact_written: bool = False
+
+
 @dataclass(frozen=True)
 class ReviewOverview:
     pull_request_state: ReviewPullRequestState
@@ -3672,6 +3688,9 @@ class ReviewOverview:
     structural_coverage: StructuralCoverage
     attention: tuple[ReviewAttention, ...] = ()
     empty_review_message: str | None = None
+    llm_shadow: LLMShadowExecutionSummary = field(
+        default_factory=LLMShadowExecutionSummary
+    )
 
 
 @dataclass(frozen=True)
@@ -3736,7 +3755,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v46"
+    schema_version: str = "review_brief.v47"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

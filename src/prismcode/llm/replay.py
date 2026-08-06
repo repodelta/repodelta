@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -10,6 +11,30 @@ from prismcode.llm.contracts import (
     ShadowSelectionValidation,
     parse_shadow_selection,
 )
+from prismcode.llm.provider import ShadowProviderResponse
+
+
+@dataclass(frozen=True)
+class ReplayShadowProvider:
+    """Exact-request replay transport for deterministic orchestration tests."""
+
+    request: ShadowEvidenceRequest
+    output: Mapping[str, Any]
+
+    def select(self, request: ShadowEvidenceRequest) -> ShadowProviderResponse:
+        if request != self.request:
+            raise ValueError("shadow replay request does not match current admission")
+        return ShadowProviderResponse(
+            provider_id="replay",
+            model_id="recorded",
+            output=self.output,
+        )
+
+
+def load_shadow_replay_provider(path: str | Path) -> ReplayShadowProvider:
+    request, _ = load_shadow_replay(path)
+    raw = json.loads(Path(path).read_text(encoding="utf-8"))
+    return ReplayShadowProvider(request=request, output=raw["response"])
 
 
 def load_shadow_replay(

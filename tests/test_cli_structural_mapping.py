@@ -160,6 +160,35 @@ def test_cli_missing_index_uses_change_relation_fallback(
     ) in capsys.readouterr().err
 
 
+def test_cli_shadow_without_provider_is_unavailable_and_fail_closed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    fixture = _write_fixture(tmp_path)
+    output = tmp_path / "review.html"
+
+    assert _run_cli(
+        monkeypatch,
+        fixture,
+        tmp_path / "repo",
+        output,
+        "--llm-shadow",
+    ) == 0
+
+    artifact = Path(f"{output}.llm-shadow.json")
+    assert artifact.exists()
+    assert json.loads(artifact.read_text(encoding="utf-8"))["summary"] == {
+        "admitted_count": 0,
+        "artifact_written": True,
+        "completed_count": 0,
+        "failed_count": 0,
+        "state": "unavailable",
+    }
+    assert "LLM shadow: unavailable" in output.read_text(encoding="utf-8")
+    assert "LLM shadow: unavailable" in capsys.readouterr().err
+
+
 def test_cli_stale_index_is_skipped(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
