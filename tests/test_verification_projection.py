@@ -190,7 +190,7 @@ def test_verification_workspace_is_serialized_for_renderer_consumption() -> None
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=_mixed_packet()))
     serialized = brief.to_dict()["projection"]
 
-    assert serialized["schema_version"] == "review_projection.v24"
+    assert serialized["schema_version"] == "review_projection.v25"
     assert serialized["verification_workspace"]["schema_version"] == (
         "verification_workspace.v3"
     )

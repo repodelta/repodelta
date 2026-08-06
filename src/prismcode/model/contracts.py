@@ -2893,6 +2893,141 @@ class ReviewStructuralGraph:
     navigation_targets: tuple[StructuralNavigationTarget, ...] = ()
 
 
+ArchitecturalLayer = Literal[
+    "entry",
+    "presentation",
+    "application",
+    "domain",
+    "infrastructure",
+    "persistence",
+    "verification",
+    "documentation",
+    "automation",
+    "unclassified",
+]
+
+
+@dataclass(frozen=True)
+class ArchitecturalComponent:
+    """One path-bounded component over canonical structural node identities."""
+
+    id: str
+    domain: str
+    layer: ArchitecturalLayer
+    node_ids: tuple[str, ...]
+    classification_authority: Literal["path_structure", "path_convention"]
+
+    def __post_init__(self) -> None:
+        if not self.domain or not self.node_ids:
+            raise ValueError(f"{self.id}: architectural component requires members")
+        if self.node_ids != tuple(sorted(set(self.node_ids))):
+            raise ValueError(
+                f"{self.id}: architectural component members must be sorted and unique"
+            )
+        expected_authority = (
+            "path_structure"
+            if self.layer == "unclassified"
+            else "path_convention"
+        )
+        if self.classification_authority != expected_authority:
+            raise ValueError(
+                f"{self.id}: architectural classification authority mismatch"
+            )
+
+
+@dataclass(frozen=True)
+class ArchitecturalFlow:
+    """Cross-component flow backed only by canonical relation groups."""
+
+    id: str
+    source_component_id: str
+    target_component_id: str
+    operation: Literal["added", "removed", "retained"]
+    relation_group_ids: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        if self.source_component_id == self.target_component_id:
+            raise ValueError(f"{self.id}: architectural flow must cross components")
+        if not self.relation_group_ids:
+            raise ValueError(f"{self.id}: architectural flow requires provenance")
+        if self.relation_group_ids != tuple(
+            sorted(set(self.relation_group_ids))
+        ):
+            raise ValueError(
+                f"{self.id}: architectural flow provenance must be sorted and unique"
+            )
+
+
+@dataclass(frozen=True)
+class ArchitecturalChangeTopology:
+    """Canonical component-level projection of the review structural backbone."""
+
+    components: tuple[ArchitecturalComponent, ...] = ()
+    flows: tuple[ArchitecturalFlow, ...] = ()
+    schema_version: str = "architectural_change_topology.v1"
+
+    def validate_against(self, graph: ReviewStructuralGraph) -> None:
+        component_ids = {item.id for item in self.components}
+        if len(component_ids) != len(self.components):
+            raise ValueError("architectural topology contains duplicate components")
+        flow_ids = {item.id for item in self.flows}
+        if len(flow_ids) != len(self.flows):
+            raise ValueError("architectural topology contains duplicate flows")
+        projected_node_ids = tuple(
+            node_id for item in self.components for node_id in item.node_ids
+        )
+        if len(projected_node_ids) != len(set(projected_node_ids)):
+            raise ValueError("architectural topology classifies a node more than once")
+        if set(projected_node_ids) != set(graph.backbone_node_ids):
+            raise ValueError("architectural topology must classify the complete backbone")
+        component_by_node = {
+            node_id: component.id
+            for component in self.components
+            for node_id in component.node_ids
+        }
+        graph_groups = {
+            item.id: item
+            for item in graph.relation_groups
+            if item.id in graph.backbone_relation_group_ids
+        }
+        projected_group_ids: list[str] = []
+        for flow in self.flows:
+            if (
+                flow.source_component_id not in component_ids
+                or flow.target_component_id not in component_ids
+            ):
+                raise ValueError("architectural flow references a missing component")
+            if not set(flow.relation_group_ids) <= set(graph_groups):
+                raise ValueError(
+                    "architectural flow references a non-backbone relation"
+                )
+            for group_id in flow.relation_group_ids:
+                group = graph_groups[group_id]
+                if (
+                    component_by_node[group.source_node_id]
+                    != flow.source_component_id
+                    or component_by_node[group.target_node_id]
+                    != flow.target_component_id
+                    or group.operation != flow.operation
+                ):
+                    raise ValueError(
+                        "architectural flow diverges from canonical relation endpoints"
+                    )
+                projected_group_ids.append(group_id)
+        expected_group_ids = {
+            group.id
+            for group in graph_groups.values()
+            if component_by_node[group.source_node_id]
+            != component_by_node[group.target_node_id]
+        }
+        if len(projected_group_ids) != len(set(projected_group_ids)) or set(
+            projected_group_ids
+        ) != expected_group_ids:
+            raise ValueError(
+                "architectural topology must project each cross-component relation once"
+            )
+
+
 @dataclass(frozen=True)
 class StructuralFocusNode:
     node_id: str
@@ -3038,8 +3173,11 @@ class VerificationWorkspace:
 class ReviewProjection:
     slices: tuple[ReviewSlice, ...] = ()
     review_graph: ReviewStructuralGraph = ReviewStructuralGraph()
+    architectural_topology: ArchitecturalChangeTopology = (
+        ArchitecturalChangeTopology()
+    )
     verification_workspace: VerificationWorkspace = VerificationWorkspace()
-    schema_version: str = "review_projection.v24"
+    schema_version: str = "review_projection.v25"
 
     def validate_consistency(
         self,
@@ -3070,6 +3208,7 @@ class ReviewProjection:
         navigation_targets = {
             item.id: item for item in self.review_graph.navigation_targets
         }
+        self.architectural_topology.validate_against(self.review_graph)
         if len(nodes) != len(self.review_graph.nodes):
             raise ValueError("review structural graph contains duplicate nodes")
         if len(edges) != len(self.review_graph.edges):
@@ -3756,7 +3895,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v48"
+    schema_version: str = "review_brief.v49"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

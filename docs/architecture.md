@@ -66,6 +66,9 @@ fixture or GitHub
        -> one unified R/G + T/CC verification matrix
        -> one evidence-inspector record per subject
        -> shared structural graph overlays by canonical evidence identity
+       -> one architectural change topology over the complete structural backbone
+       -> path-bounded components and cross-component canonical relation groups
+       -> explicit classification authority and unclassified semantics
   -> canonical ReviewOverview
   -> ReviewBrief
   -> HTML / CLI presentation

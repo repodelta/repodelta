@@ -34,6 +34,9 @@ from prismcode.model.contracts import (
     TransformationStructuralTopologyGroup,
 )
 from prismcode.model.structural_refs import review_symbol_id
+from prismcode.projection.architecture import (
+    project_architectural_change_topology,
+)
 from prismcode.projection.structural_groups import (
     project_structural_relation_groups,
 )
@@ -399,6 +402,10 @@ def build_review_projection(
         path_relation_ids=tuple(dict.fromkeys(graph_path_relation_ids)),
         navigation_targets=navigation.targets,
     )
+    architectural_topology = project_architectural_change_topology(
+        review_graph,
+        evidence_catalog,
+    )
     verification_workspace = project_verification_workspace(
         focus_statements,
         transformation_contract,
@@ -415,6 +422,7 @@ def build_review_projection(
     projection = ReviewProjection(
         slices=tuple(slices),
         review_graph=review_graph,
+        architectural_topology=architectural_topology,
         verification_workspace=verification_workspace,
     )
     projection.validate_consistency(
