@@ -72,11 +72,12 @@ fixture or GitHub
 ```
 
 An optional, dormant `llm` boundary may consume a separately admitted bounded
-candidate set and return shadow evidence selections. Its output can cite only
-the supplied canonical evidence identities, fails closed on invalid or
-conflicting output, and carries no formal assessment status. It is not part of
-the production review path until a later authority transition explicitly
-migrates a consumer to a measured shadow result.
+candidate set and run a provider behind a transport-only port. The runner
+validates cited canonical evidence identities, records deterministic-only,
+shadow-only, and shared selections plus usage and latency, and isolates every
+provider or validation failure from deterministic output. Its result carries
+no formal assessment status and has no production consumer. A later authority
+transition must separately admit candidates and enable measured shadow runs.
 
 Each stage owns one transformation. Typed models, boundary validation, and
 counterfactual tests define its executable local contract; this document is the
