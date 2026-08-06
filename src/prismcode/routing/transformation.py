@@ -110,7 +110,9 @@ def build_transformation_alignment(
             )
 
         eligible = tuple(
-            item for item in observed_items if _eligible(claim, item)
+            item
+            for item in observed_items
+            if eligible_transformation_evidence(claim, item)
         )
         signatures = tuple(
             (item, _signature(claim, item)) for item in eligible
@@ -237,7 +239,11 @@ def _authority_bypass_bindings(
     )
 
 
-def _eligible(claim: TransformationClaim, item: EvidenceItem) -> bool:
+def eligible_transformation_evidence(
+    claim: TransformationClaim, item: EvidenceItem
+) -> bool:
+    """Canonical claim-kind eligibility shared by deterministic consumers."""
+
     role = item.transformation_evidence_role()
     if role is None or claim.kind == "uncertainty":
         return False
