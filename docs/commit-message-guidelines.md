@@ -1,10 +1,9 @@
 # Commit messages
 
-Commits within a branch or Draft PR are implementation checkpoints. Merge
-acceptance is evaluated against the final candidate tree. Squash exploratory
-checkpoints before delivery when repository policy permits.
+Commits in a branch or Draft PR are checkpoints; merge acceptance applies to
+the final tree. Squash exploratory checkpoints when policy permits.
 
-Describe the responsibility or contract transition, not only modified files:
+Name the responsibility or contract transition, not the edited files:
 
 ```text
 <type>(<responsibility>): <imperative transition>
@@ -16,6 +15,5 @@ Examples:
 - `fix(topology-proof): require ordered edge witnesses`
 - `refactor(review-projection): consume canonical membership directly`
 
-When useful, state migrated producers or consumers, updated boundaries,
-removed mappings or bypasses, and preserved external contracts. Do not call
-exploratory or unconsumed code canonical or merge-safe.
+When useful, mention migrated endpoints, changed boundaries, removed bypasses,
+and preserved contracts. Never call unconsumed or exploratory code canonical.

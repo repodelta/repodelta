@@ -1,25 +1,20 @@
 # Pull requests
 
-Title the PR around the semantic responsibility or contract transition.
-
-Record:
+Title the PR around its responsibility or contract transition. Describe:
 
 - parent transformation and this PR's responsibility;
-- semantic output and production sinks;
-- responsibility before and after;
-- selected region and boundaries;
-- affected observed producer/consumer contracts;
+- semantic output, sinks, before/after authority, and selected boundaries;
+- affected producer/consumer contracts and before/after production flow;
 - migrations, removals, and retained classified paths;
-- before/after production flow;
 - counterfactual, contract, and sink-level evidence;
-- unresolved dynamic or external surfaces;
-- responsibility closure, boundary-contract closure, abandonment safety, and
-  parent completion separately.
+- unresolved dynamic/external surfaces;
+- responsibility closure, contract closure, abandonment safety, and parent
+  completion as separate states.
 
-Explain why the resulting tree remains correct and meaningful if the parent
-stops permanently. Unsupported or incomplete semantics must fail closed.
+Explain why the resulting tree remains valid if the parent stops permanently.
+Unsupported or incomplete semantics must fail closed.
 
-Keep the PR Draft while the responsibility, affected contracts, or any merge
-gate remains unsettled. Mark it ready only after the final candidate tree passes
-the pre-merge audit. If the parent remains open, link a stable record that owns
-its remaining obligations and stop conditions.
+Keep the PR Draft while its responsibility, affected contracts, or a merge gate
+is unsettled. Mark it ready only after auditing the final candidate tree. If the
+parent remains open, link a stable record owning its remaining obligations and
+stop conditions.
