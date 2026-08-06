@@ -24,11 +24,14 @@ from prismcode.llm.replay import (
 )
 from prismcode.llm.execution import (
     ShadowExecutionBundle,
+    ShadowExecutionDiagnostic,
+    ShadowExecutionPolicy,
     execute_shadow_admissions,
     execute_shadow_review,
     unavailable_shadow_execution,
     write_shadow_execution,
 )
+from prismcode.llm.openai import OpenAIShadowConfig, OpenAIShadowProvider
 from prismcode.llm.provider import ShadowEvidenceProvider, ShadowProviderResponse
 from prismcode.llm.runner import (
     ShadowRunRecord,
@@ -39,6 +42,10 @@ from prismcode.llm.runner import (
 __all__ = [
     "ShadowEvidenceCandidate",
     "ShadowExecutionBundle",
+    "ShadowExecutionDiagnostic",
+    "ShadowExecutionPolicy",
+    "OpenAIShadowConfig",
+    "OpenAIShadowProvider",
     "ShadowAdmissionDiagnostic",
     "ShadowAdmissionPolicy",
     "ShadowCandidateAdmission",

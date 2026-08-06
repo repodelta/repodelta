@@ -165,6 +165,8 @@ def test_cli_shadow_without_provider_is_unavailable_and_fail_closed(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("PRISMCODE_LLM_MODEL", raising=False)
     fixture = _write_fixture(tmp_path)
     output = tmp_path / "review.html"
 
@@ -182,6 +184,7 @@ def test_cli_shadow_without_provider_is_unavailable_and_fail_closed(
         "admitted_count": 0,
         "artifact_written": True,
         "completed_count": 0,
+        "deferred_count": 0,
         "failed_count": 0,
         "state": "unavailable",
     }

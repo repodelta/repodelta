@@ -180,25 +180,35 @@ The command returns non-zero when configured thresholds fail. See
 [`docs/evaluation.md`](docs/evaluation.md) for the versioned contracts, metrics,
 and safety boundary.
 
-### Run bounded LLM shadow replay
+### Run bounded LLM shadow selection
 
 Shadow selection is opt-in and never changes deterministic review assessments:
 
 ```bash
+export OPENAI_API_KEY=...
+export PRISMCODE_LLM_MODEL=...
+# Optional OpenAI-compatible HTTPS API root; defaults to OpenAI.
+export OPENAI_BASE_URL=https://api.openai.com/v1
+
 prismcode review \
-  --fixture path/to/review.json \
+  --repo owner/repository \
+  --pr 123 \
   --llm-shadow \
-  --llm-shadow-replay path/to/exact-request-replay.json \
-  --output build/review.html
+  --output build/pr-123.html
 ```
 
-The replay must match one canonical admitted request exactly. PrismCode records
-validated selection divergence, usage metadata, failures, and admission
-coverage in `build/review.html.llm-shadow.json`; the Brief header shows only the
-execution state. Without a configured provider, `--llm-shadow` records
-`unavailable` and still generates the deterministic HTML. Omitting the flag
-performs no provider call and writes no shadow artifact. Live OpenAI transport
-is not part of this interface yet.
+PrismCode sends only bounded canonical evidence candidates through the
+Chat Completions API with strict Structured Outputs, `store: false`, no tools, and a
+40-candidate request limit plus three-request review limit. It records validated selection divergence, usage,
+failures, deferred requests, and admission coverage in
+`build/pr-123.html.llm-shadow.json`; the Brief header shows only the execution
+state. Missing configuration records `unavailable`; provider or validation
+failure records `partial` or `failed`; deterministic HTML still succeeds.
+Omitting `--llm-shadow` performs no provider call and writes no shadow artifact.
+
+For an exact offline transport replay, add
+`--llm-shadow-replay path/to/exact-request-replay.json`; replay explicitly
+overrides live configuration.
 
 ### Review a live GitHub pull request
 
