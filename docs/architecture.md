@@ -71,13 +71,16 @@ fixture or GitHub
   -> HTML / CLI presentation
 ```
 
-An optional, dormant `llm` boundary may consume a separately admitted bounded
-candidate set and run a provider behind a transport-only port. The runner
+An optional, dormant `llm` boundary derives one claim-kind-eligible candidate
+set from canonical observed transformation facts. Deterministic assessment
+evidence is retained first; remaining typed candidates are admitted in catalog
+order under an explicit safety budget and coverage limits. The boundary may
+then run a provider behind a transport-only port. The runner
 validates cited canonical evidence identities, records deterministic-only,
 shadow-only, and shared selections plus usage and latency, and isolates every
 provider or validation failure from deterministic output. Its result carries
-no formal assessment status and has no production consumer. A later authority
-transition must separately admit candidates and enable measured shadow runs.
+no formal assessment status and has no production consumer. A later integration
+change must connect admitted requests to measured shadow execution.
 
 Each stage owns one transformation. Typed models, boundary validation, and
 counterfactual tests define its executable local contract; this document is the

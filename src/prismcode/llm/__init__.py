@@ -1,5 +1,12 @@
 """Dormant contracts for bounded LLM shadow reasoning."""
 
+from prismcode.llm.admission import (
+    ShadowAdmissionDiagnostic,
+    ShadowAdmissionPolicy,
+    ShadowCandidateAdmission,
+    ShadowCandidateAdmissionSet,
+    admit_shadow_candidates,
+)
 from prismcode.llm.contracts import (
     ShadowEvidenceCandidate,
     ShadowEvidenceRequest,
@@ -19,6 +26,10 @@ from prismcode.llm.runner import (
 
 __all__ = [
     "ShadowEvidenceCandidate",
+    "ShadowAdmissionDiagnostic",
+    "ShadowAdmissionPolicy",
+    "ShadowCandidateAdmission",
+    "ShadowCandidateAdmissionSet",
     "ShadowEvidenceRequest",
     "ShadowEvidenceProvider",
     "ShadowEvidenceSelection",
@@ -30,6 +41,7 @@ __all__ = [
     "ShadowSelectionComparison",
     "ShadowSelectionValidation",
     "load_shadow_replay",
+    "admit_shadow_candidates",
     "parse_shadow_selection",
     "serialize_shadow_replay",
 ]
