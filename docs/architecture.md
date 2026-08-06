@@ -71,6 +71,13 @@ fixture or GitHub
   -> HTML / CLI presentation
 ```
 
+An optional, dormant `llm` boundary may consume a separately admitted bounded
+candidate set and return shadow evidence selections. Its output can cite only
+the supplied canonical evidence identities, fails closed on invalid or
+conflicting output, and carries no formal assessment status. It is not part of
+the production review path until a later authority transition explicitly
+migrates a consumer to a measured shadow result.
+
 Each stage owns one transformation. Typed models, boundary validation, and
 counterfactual tests define its executable local contract; this document is the
 single narrative map of how those stages compose. Stage-local prose must not

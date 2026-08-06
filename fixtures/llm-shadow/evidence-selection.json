@@ -1,0 +1,46 @@
+{
+  "request": {
+    "schema_version": "1",
+    "request_id": "shadow:T1",
+    "subject_id": "T1",
+    "subject_kind": "transformation_claim",
+    "authored_statement": "Move assessment authority to DeterministicAnalyzer.",
+    "candidates": [
+      {
+        "evidence_id": "symbol:analyzer",
+        "summary": "DeterministicAnalyzer constructs RequirementAssessment.",
+        "kind": "changed_symbol",
+        "revision_side": "head",
+        "operation": "added"
+      },
+      {
+        "evidence_id": "symbol:adapter",
+        "summary": "The adapter-owned status writer is removed.",
+        "kind": "changed_symbol",
+        "revision_side": "base",
+        "operation": "removed"
+      }
+    ],
+    "coverage_limits": ["Dynamic plugin writers were not observed."]
+  },
+  "response": {
+    "schema_version": "1",
+    "request_id": "shadow:T1",
+    "subject_id": "T1",
+    "selections": [
+      {
+        "evidence_id": "symbol:analyzer",
+        "role": "supporting",
+        "semantic_role": "authority",
+        "rationale": "The selected symbol is the declared target authority."
+      },
+      {
+        "evidence_id": "symbol:adapter",
+        "role": "supporting",
+        "semantic_role": "removal",
+        "rationale": "The old writer is removed on the base side."
+      }
+    ],
+    "unresolved_surfaces": ["Dynamic plugin writers remain outside observed coverage."]
+  }
+}

@@ -1,0 +1,268 @@
+from __future__ import annotations
+
+import json
+from dataclasses import asdict, dataclass
+from typing import Any, Literal, Mapping, Sequence
+
+
+SHADOW_SCHEMA_VERSION = "1"
+MAX_CANDIDATES = 100
+MAX_SELECTIONS = 30
+MAX_UNRESOLVED_SURFACES = 20
+MAX_TEXT_LENGTH = 2_000
+
+ShadowEvidenceRole = Literal["supporting", "contradicting", "context"]
+ShadowSemanticRole = Literal[
+    "authority",
+    "producer",
+    "consumer",
+    "path",
+    "test",
+    "removal",
+    "boundary",
+    "documentation",
+    "unknown",
+]
+
+_EVIDENCE_ROLES = frozenset({"supporting", "contradicting", "context"})
+_RESPONSE_FIELDS = frozenset(
+    {"schema_version", "request_id", "subject_id", "selections", "unresolved_surfaces"}
+)
+_SELECTION_FIELDS = frozenset(
+    {"evidence_id", "role", "semantic_role", "rationale"}
+)
+_SEMANTIC_ROLES = frozenset(
+    {
+        "authority",
+        "producer",
+        "consumer",
+        "path",
+        "test",
+        "removal",
+        "boundary",
+        "documentation",
+        "unknown",
+    }
+)
+
+
+@dataclass(frozen=True)
+class ShadowEvidenceCandidate:
+    """A canonical fact admitted upstream for shadow-only selection."""
+
+    evidence_id: str
+    summary: str
+    kind: str
+    revision_side: str = "none"
+    operation: str = "context"
+
+    def __post_init__(self) -> None:
+        _require_text(self.evidence_id, "evidence_id")
+        _require_text(self.summary, "summary")
+        _require_text(self.kind, "kind")
+
+
+@dataclass(frozen=True)
+class ShadowEvidenceRequest:
+    """Bounded input whose candidate membership remains deterministic."""
+
+    request_id: str
+    subject_id: str
+    subject_kind: str
+    authored_statement: str
+    candidates: tuple[ShadowEvidenceCandidate, ...]
+    coverage_limits: tuple[str, ...] = ()
+    schema_version: str = SHADOW_SCHEMA_VERSION
+
+    def __post_init__(self) -> None:
+        if self.schema_version != SHADOW_SCHEMA_VERSION:
+            raise ValueError("unsupported shadow request schema_version")
+        for name in ("request_id", "subject_id", "subject_kind", "authored_statement"):
+            _require_text(getattr(self, name), name)
+        if len(self.candidates) > MAX_CANDIDATES:
+            raise ValueError(f"candidates exceed safety limit {MAX_CANDIDATES}")
+        candidate_ids = [candidate.evidence_id for candidate in self.candidates]
+        if len(candidate_ids) != len(set(candidate_ids)):
+            raise ValueError("candidate evidence IDs must be unique")
+        for limit in self.coverage_limits:
+            _require_text(limit, "coverage_limit")
+
+    def to_dict(self) -> dict[str, Any]:
+        return _json_dict(self)
+
+
+@dataclass(frozen=True)
+class ShadowEvidenceSelectionItem:
+    evidence_id: str
+    role: ShadowEvidenceRole
+    semantic_role: ShadowSemanticRole
+    rationale: str
+
+
+@dataclass(frozen=True)
+class ShadowEvidenceSelection:
+    """Validated shadow output; deliberately carries no formal assessment."""
+
+    request_id: str
+    subject_id: str
+    selections: tuple[ShadowEvidenceSelectionItem, ...]
+    unresolved_surfaces: tuple[str, ...] = ()
+    schema_version: str = SHADOW_SCHEMA_VERSION
+
+    def to_dict(self) -> dict[str, Any]:
+        return _json_dict(self)
+
+
+@dataclass(frozen=True)
+class ShadowSelectionDiagnostic:
+    code: str
+    message: str
+
+
+@dataclass(frozen=True)
+class ShadowSelectionValidation:
+    selection: ShadowEvidenceSelection | None
+    diagnostics: tuple[ShadowSelectionDiagnostic, ...]
+
+    @property
+    def accepted(self) -> bool:
+        return self.selection is not None and not self.diagnostics
+
+
+def parse_shadow_selection(
+    raw: Mapping[str, Any], request: ShadowEvidenceRequest
+) -> ShadowSelectionValidation:
+    """Validate untrusted model output against one canonical request."""
+
+    diagnostics: list[ShadowSelectionDiagnostic] = []
+    unexpected_fields = set(raw) - _RESPONSE_FIELDS
+    if unexpected_fields:
+        diagnostics.append(
+            _diagnostic(
+                "unexpected_response_fields",
+                f"Unexpected response fields: {', '.join(sorted(unexpected_fields))}.",
+            )
+        )
+    if raw.get("schema_version") != SHADOW_SCHEMA_VERSION:
+        diagnostics.append(_diagnostic("schema_mismatch", "Unsupported schema_version."))
+    if raw.get("request_id") != request.request_id:
+        diagnostics.append(_diagnostic("request_mismatch", "request_id does not match."))
+    if raw.get("subject_id") != request.subject_id:
+        diagnostics.append(_diagnostic("subject_mismatch", "subject_id does not match."))
+
+    raw_items = raw.get("selections")
+    if not _is_sequence(raw_items):
+        diagnostics.append(_diagnostic("invalid_selections", "selections must be a list."))
+        raw_items = ()
+    if len(raw_items) > MAX_SELECTIONS:
+        diagnostics.append(
+            _diagnostic(
+                "selection_budget_exceeded",
+                f"selections exceed safety limit {MAX_SELECTIONS}.",
+            )
+        )
+
+    allowed_ids = {candidate.evidence_id for candidate in request.candidates}
+    seen_ids: set[str] = set()
+    selections: list[ShadowEvidenceSelectionItem] = []
+    for index, item in enumerate(raw_items[: MAX_SELECTIONS + 1]):
+        if not isinstance(item, Mapping):
+            diagnostics.append(_diagnostic("invalid_selection", f"selection {index} is not an object."))
+            continue
+        unexpected_item_fields = set(item) - _SELECTION_FIELDS
+        if unexpected_item_fields:
+            diagnostics.append(
+                _diagnostic(
+                    "unexpected_selection_fields",
+                    f"selection {index} contains unexpected fields.",
+                )
+            )
+            continue
+        evidence_id = item.get("evidence_id")
+        role = item.get("role")
+        semantic_role = item.get("semantic_role")
+        rationale = item.get("rationale")
+        if not isinstance(evidence_id, str) or evidence_id not in allowed_ids:
+            diagnostics.append(
+                _diagnostic("unknown_evidence_id", f"selection {index} cites an unadmitted evidence ID.")
+            )
+            continue
+        if evidence_id in seen_ids:
+            diagnostics.append(
+                _diagnostic("duplicate_evidence_id", f"evidence ID {evidence_id!r} is selected more than once.")
+            )
+            continue
+        if role not in _EVIDENCE_ROLES:
+            diagnostics.append(_diagnostic("invalid_evidence_role", f"selection {index} has an invalid role."))
+            continue
+        if semantic_role not in _SEMANTIC_ROLES:
+            diagnostics.append(_diagnostic("invalid_semantic_role", f"selection {index} has an invalid semantic role."))
+            continue
+        if not _valid_text(rationale):
+            diagnostics.append(_diagnostic("invalid_rationale", f"selection {index} has an invalid rationale."))
+            continue
+        seen_ids.add(evidence_id)
+        selections.append(
+            ShadowEvidenceSelectionItem(
+                evidence_id=evidence_id,
+                role=role,
+                semantic_role=semantic_role,
+                rationale=rationale,
+            )
+        )
+
+    raw_unresolved = raw.get("unresolved_surfaces", [])
+    unresolved: list[str] = []
+    if not _is_sequence(raw_unresolved):
+        diagnostics.append(
+            _diagnostic("invalid_unresolved_surfaces", "unresolved_surfaces must be a list.")
+        )
+    else:
+        if len(raw_unresolved) > MAX_UNRESOLVED_SURFACES:
+            diagnostics.append(
+                _diagnostic(
+                    "unresolved_surface_budget_exceeded",
+                    "unresolved_surfaces exceed the safety limit "
+                    f"{MAX_UNRESOLVED_SURFACES}.",
+                )
+            )
+        for index, value in enumerate(raw_unresolved[: MAX_UNRESOLVED_SURFACES + 1]):
+            if not _valid_text(value):
+                diagnostics.append(
+                    _diagnostic("invalid_unresolved_surface", f"unresolved surface {index} is invalid.")
+                )
+            else:
+                unresolved.append(value)
+
+    if diagnostics:
+        return ShadowSelectionValidation(selection=None, diagnostics=tuple(diagnostics))
+    return ShadowSelectionValidation(
+        selection=ShadowEvidenceSelection(
+            request_id=request.request_id,
+            subject_id=request.subject_id,
+            selections=tuple(selections),
+            unresolved_surfaces=tuple(unresolved),
+        ),
+        diagnostics=(),
+    )
+
+
+def _diagnostic(code: str, message: str) -> ShadowSelectionDiagnostic:
+    return ShadowSelectionDiagnostic(code=code, message=message)
+
+
+def _json_dict(value: object) -> dict[str, Any]:
+    return json.loads(json.dumps(asdict(value)))
+
+
+def _is_sequence(value: object) -> bool:
+    return isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray))
+
+
+def _valid_text(value: object) -> bool:
+    return isinstance(value, str) and bool(value.strip()) and len(value) <= MAX_TEXT_LENGTH
+
+
+def _require_text(value: object, name: str) -> None:
+    if not _valid_text(value):
+        raise ValueError(f"{name} must be non-empty and at most {MAX_TEXT_LENGTH} characters")
