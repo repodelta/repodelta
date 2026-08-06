@@ -1,114 +1,77 @@
-# Agent Change Protocol
+# Agent change protocol
 
 Use this protocol for behavioral, responsibility, contract, data-flow, or
 cross-component changes.
 
 ## 1. Fix the target
 
-Define:
+Define the semantic output, production sinks, current authority, intended
+after-state, observed scope, and explicit exclusions. Start from behavior, not
+expected files.
 
-- semantic output and production sinks;
-- responsibility currently producing that output;
-- intended after-state;
-- observed scope and explicit out-of-scope surfaces.
-
-Do not begin from expected files.
-
-## 2. Find the affected pipeline
+## 2. Census the pipeline
 
 Trace:
 
-- backward from production sinks to producers and decisions;
-- forward from the responsibility to observed actual consumers;
-- laterally for competing producers, writers, fallbacks, and reconstruction;
-- across boundaries that parse, normalize, map identities, aggregate, project,
-  serialize, default, reorder, or reduce coverage.
+- backward from sinks to producers and decisions;
+- forward from the authority to actual consumers;
+- laterally for competing writers, fallbacks, and reconstruction;
+- across parsing, normalization, identity, aggregation, projection,
+  serialization, defaulting, ordering, and coverage boundaries.
 
-Record unresolved dynamic and external surfaces instead of claiming coverage.
+Record dynamic and external unknowns; do not convert them into coverage.
 
-## 3. Define changed contracts
+## 3. Define affected contracts
 
-For each affected boundary, state:
+For each changed boundary, specify the semantic entity, equivalence rules,
+preserved properties, permitted information loss, and behavior for incomplete,
+conflicting, or unsupported input. Shared names or proximity do not prove
+semantic equivalence.
 
-- semantic entity being transferred;
-- canonical semantic contract and relevant equivalence rules;
-- properties that must be preserved;
-- information that may be lost;
-- behavior for incomplete, conflicting, or unsupported input.
+## 4. Close the region
 
-Different representations may implement one contract. Analyze only properties
-relevant to this change; shared names, tokens, or proximity do not prove
-equivalence.
+Begin with the responsibility being replaced. Keep a neighbor outside while
+its contract remains valid; otherwise include it and repeat. Stop when the
+responsibility and every affected contract edge are migrated, surrounding
+contracts are stable, and no observed unclassified bypass remains. Do not
+expand to unrelated defects or to eliminate every unknown.
 
-## 4. Select the region
+## 5. Design top-down; implement bottom-up
 
-Start with the responsibility being replaced. If an external contract remains
-valid, keep that neighbor outside the region. If the change invalidates a
-contract, include the affected producer, consumer, adapter, or boundary and
-repeat.
+Fix the region's input and output contracts, then recursively decompose it into
+coherent sub-responsibilities and internal contracts. Implement leaf sub-responsibilities and their contracts, compose adjacent
+sub-pipelines, migrate external producers and consumers, switch production
+sinks, then remove duplicate decisions and stale paths.
 
-Stop expansion when:
+Use a branch or Draft PR for discovery. Do not change a production boundary to
+leave an incomplete internal pipeline for later. If implementation invalidates
+an external contract, revise and expand the region before continuing.
 
-- the responsibility is replaced;
-- all affected contract edges are migrated;
-- surrounding contracts are stable;
-- no observed unclassified bypass remains.
+## 6. Verify the final tree
 
-Do not expand merely to investigate unrelated defects or eliminate all
-unknowns.
+- synchronize CodeGraph and retrace sinks to the intended authority;
+- verify producer/consumer contract compatibility and absence of downstream
+  semantic re-decision;
+- test positive, negative, divergence, collision, information-loss, and
+  fail-closed behavior relevant to the change;
+- separate declarations, structural/runtime facts, inference, and unknowns.
 
-## 5. Execute unmerged
+Record responsibility closure, contract closure, abandonment safety, and parent
+transformation completion separately. The first three are merge gates. A parent
+may remain open only when a stable record owns its obligations and stop
+conditions.
 
-Use a branch or Draft PR for recursive discovery and scope adjustment. Within
-the selected region:
+## 7. Audit after merge
 
-- replace or reorganize the responsibility;
-- migrate affected producers and consumers;
-- remove duplicate mappings and downstream reinterpretation;
-- delete or classify stale paths;
-- preserve or explicitly update external contracts.
+Confirm the merge tree and available integration/runtime evidence. Record
+pre-merge misses; post-merge audit is not deferred planning.
 
-## 6. Verify
+## Planning record
 
-Against the final candidate tree:
+Capture only what is needed to execute and review the change:
 
-- synchronize CodeGraph;
-- trace production sinks back to the intended responsibility;
-- verify affected producers and consumers use compatible contracts;
-- verify consumers do not reconstruct upstream semantic decisions;
-- exercise relevant positive, negative, divergence, collision,
-  information-loss, and fail-closed cases;
-- record unresolved dynamic or external surfaces.
-
-Tests alone are insufficient; separate observed repository structure, executed
-behavior, declarations, inference, and unknowns.
-
-## 7. Merge gate
-
-Record separately:
-
-- responsibility closure;
-- boundary-contract closure;
-- abandonment safety;
-- parent transformation completion.
-
-The first three are merge gates. The parent may remain open only when a stable
-record owns its remaining obligations and stop conditions.
-
-## 8. Post-merge audit
-
-Confirm the merge tree and runtime or concurrent-integration evidence. Record
-pre-merge misses; do not use post-merge audit as normal planning.
-
-## Planning output
-
-- Semantic output and production sinks
-- Responsibility before → after
-- Selected region
-- Affected observed producers and consumers
-- Changed semantic contracts
-- Migrations, removals, and classified paths
-- Preserved external contracts
-- Counterfactual and sink-level evidence
-- Unresolved and out-of-scope surfaces
-- Responsibility closure / contract closure / abandonment safety
+- output, sinks, before/after authority, and selected region;
+- affected producers, consumers, contracts, and internal composition order;
+- migrations, removals, classifications, and preserved boundaries;
+- counterfactual and sink-level evidence;
+- unresolved/excluded surfaces and the four completion states above.
