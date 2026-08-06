@@ -7,7 +7,6 @@ import re
 from urllib.parse import quote, urlparse, urlunparse
 
 from prismcode.model.contracts import (
-    ChangedFile,
     EvidenceItem,
     ReviewBrief,
     ReviewProjection,
@@ -107,36 +106,10 @@ def _sources(item: EvidenceItem, brief: ReviewBrief) -> str:
     )
 
 
-def _changed_file(item: ChangedFile) -> str:
-    href = _safe_href(item.source_url)
-    display_path = item.display_path
-    source = (
-        f'<a class="file-link" href="{escape(href, quote=True)}" '
-        f'target="_blank" rel="noopener">{escape(Path(display_path).name)}</a>'
-    if href
-        else escape(Path(display_path).name)
-    )
-    counts = []
-    if item.additions is not None:
-        counts.append(f"+{item.additions}")
-    if item.deletions is not None:
-        counts.append(f"-{item.deletions}")
-    return (
-        '<div class="file-row"><div class="file-name">'
-        f'{source}<span class="file-path">{escape(_changed_file_path(item))}</span></div>'
-        f'<div class="file-state">{escape(item.status)}'
-        + (f" · {' '.join(counts)}" if counts else "")
-        + "</div></div>"
-    )
-
-
-def _changed_file_path(item: ChangedFile) -> str:
-    if item.status == "renamed":
-        return f"{item.base_path} → {item.head_path}"
-    return item.display_path
-
-
-def _statement_context(label: str, statements: tuple[ReviewStatement, ...]) -> str:
+def _statement_context(
+    label: str,
+    statements: tuple[ReviewStatement, ...],
+) -> str:
     if not statements:
         return ""
     rows = []
@@ -146,7 +119,6 @@ def _statement_context(label: str, statements: tuple[ReviewStatement, ...]) -> s
             '<div class="context-row">'
             f'<span class="context-id">{escape(item.id)}</span>'
             f'<span class="context-copy">{escape(item.text)}</span>'
-            f'<span class="context-authority">{escape(item.authority.replace("_", " "))}</span>'
             + (
                 f'<span class="context-source">Source: {sources}</span>'
                 if sources
@@ -161,6 +133,21 @@ def _statement_context(label: str, statements: tuple[ReviewStatement, ...]) -> s
     )
 
 
+def _review_context(brief: ReviewBrief) -> str:
+    content = (
+        _statement_context("Goals", brief.objectives)
+        + _statement_context("Scope", brief.scope)
+        + _statement_context(
+            "Verification expectations",
+            brief.verification_expectations,
+        )
+        + (
+            _statement_context("PR claim context", brief.claims)
+            if not brief.projection.verification_workspace.transformation_summary.claim_ids
+            else ""
+        )
+    )
+    return f'<div class="brief-context">{content}</div>' if content else ""
 
 
 def _review_graph(
@@ -1034,29 +1021,32 @@ def _verification_accordion(brief: ReviewBrief) -> str:
             )
         source = " · ".join(_source(item) for item in entry.sources)
         graph_copy = (
-            f'{len(inspection.structural_overlay.nodes)} projected graph nodes'
+            f'{len(inspection.structural_overlay.nodes)} graph nodes'
             if inspection.structural_overlay.nodes
-            else "Structural focus not projected for this subject."
+            else "no structural focus"
+        )
+        contradiction_copy = (
+            f'{len(inspection.contradicting_evidence_ids)} contradicting'
+            if inspection.contradicting_evidence_ids
+            else "no contradictions"
         )
         rows.append(
             '<details class="verification-item" '
             f'data-verification-subject="{escape(entry.subject_id, quote=True)}"'
             f'{" open" if index == 0 else ""}><summary>'
             f'<span class="verification-id">{escape(entry.subject_id)}</span>'
+            '<span class="verification-claim">'
             f'<span class="verification-title">{escape(entry.text)}</span>'
-            f'<span class="verification-authority">'
-            f'{escape(entry.authority.replace("_", " "))}</span>'
-            f'<span class="status-pill status-{escape(entry.status)}">'
-            f'{escape(entry.status.replace("_", " "))}</span></summary>'
-            '<div class="verification-detail">'
-            '<div><span class="projection-heading">Claimed</span>'
-            f'<p>{escape(entry.authority.replace("_", " "))}</p>'
             + (
-                f'<span class="projection-source">Source: {source}</span>'
+                f'<span class="verification-source">Source: {source}</span>'
                 if source
                 else ""
             )
-            + '</div><div><span class="projection-heading">Observed</span>'
+            + '</span>'
+            f'<span class="status-pill status-{escape(entry.status)}">'
+            f'{escape(entry.status.replace("_", " "))}</span></summary>'
+            '<div class="verification-detail">'
+            '<div><span class="projection-heading">Observed</span>'
             + (
                 observed_rows
                 if observed_rows
@@ -1066,7 +1056,7 @@ def _verification_accordion(brief: ReviewBrief) -> str:
             f'<ul class="assessment-reasons">{reasons}</ul>'
             '<span class="verification-coverage">'
             f'{len(inspection.supporting_evidence_ids)} supporting · '
-            f'{len(inspection.contradicting_evidence_ids)} contradicting'
+            f'{escape(contradiction_copy)}'
             f' · {escape(graph_copy)}</span></div></div></details>'
         )
     empty = brief.overview.empty_review_message
@@ -1082,43 +1072,13 @@ def _verification_accordion(brief: ReviewBrief) -> str:
     )
 
 
-def _evidence_appendix(brief: ReviewBrief, files: str) -> str:
-    verification = tuple(
-        item for item in brief.evidence_catalog.items if item.role == "verification"
-    )
-    verification_rows = "".join(
-        '<div class="appendix-row"><b>'
-        f'{escape(item.verification_identity.name if item.verification_identity else item.summary)}</b>'
-        f'<span>{escape(item.verification_status)} '
-        f'{escape(item.verification_conclusion or "no conclusion")}</span></div>'
-        for item in verification
-    )
-    coverage = brief.overview.structural_coverage
-    context = (
-        _statement_context("Goals", brief.objectives)
-        + _statement_context("Scope", brief.scope)
-        + _statement_context(
-            "Verification expectations",
-            brief.verification_expectations,
-        )
-        + _statement_context("PR claim context", brief.claims)
-    )
+def _coverage_limits(brief: ReviewBrief) -> str:
+    if not brief.overview.attention:
+        return ""
     return (
-        '<section class="section evidence-appendix"><details><summary>'
-        '<span>'
-        '<b>Evidence Appendix</b></span><span>tests · coverage · changed areas · diagnostics</span>'
-        '</summary><div class="appendix-grid">'
-        '<div><h3>Verification observations</h3>'
-        f'{verification_rows or "<p class=\"empty\">No current-head verification observed.</p>"}</div>'
-        '<div><h3>Structural coverage</h3>'
-        f'<p>{escape(coverage.state)} · {coverage.mapped_hunk_count}/'
-        f'{coverage.hunk_count} head hunks · {coverage.base_mapped_hunk_count}/'
-        f'{coverage.base_hunk_count} base hunks · '
-        f'{coverage.truncated_seed_count} truncated seeds</p></div>'
-        f'<div><h3>Diagnostics</h3><div class="attention-list">{_attention(brief)}</div></div>'
-        f'<div><h3>Changed areas</h3><div class="file-list">{files or "<p class=\"empty\">Not provided.</p>"}</div></div>'
-        f'<div class="appendix-context"><h3>Review context</h3>{context or "<p class=\"empty\">Not provided.</p>"}</div>'
-        '</div></details></section>'
+        '<details class="coverage-limits"><summary>Coverage limits · '
+        f'{len(brief.overview.attention)}</summary>'
+        f'<div class="attention-list">{_attention(brief)}</div></details>'
     )
 
 
@@ -1222,7 +1182,6 @@ def render_html(brief: ReviewBrief) -> str:
         if packet.source_url
         else escape(pr_label)
     )
-    files = "".join(_changed_file(item) for item in packet.changed_files)
     review_graph = _review_graph(
         brief.projection.review_graph,
         brief.projection,
@@ -1230,7 +1189,8 @@ def render_html(brief: ReviewBrief) -> str:
     )
     verification_accordion = _verification_accordion(brief)
     transformation_summary = _transformation_summary(brief)
-    appendix = _evidence_appendix(brief, files)
+    coverage_limits = _coverage_limits(brief)
+    review_context = _review_context(brief)
 
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1251,6 +1211,7 @@ def render_html(brief: ReviewBrief) -> str:
 .relation-member-arrow{{color:var(--muted);text-align:center}}
 .eyebrow{{display:block;margin-bottom:4px;color:var(--green);font-size:9px;font-weight:760;text-transform:uppercase;letter-spacing:.09em}}
 .section-intro{{margin:0 0 16px;color:var(--muted);font-size:10px}}
+.brief-context{{display:grid;gap:6px;margin-top:14px}}.brief-context .context{{margin:0;padding:0;border:0}}.brief-context .context>summary{{padding:7px 0;border-top:1px solid rgba(111,128,135,.16)}}
 .transformation-strip{{display:grid;grid-template-columns:minmax(0,1fr) 28px minmax(0,1.2fr) 28px minmax(0,1fr);gap:8px;align-items:stretch}}
 .summary-stage{{min-width:0;padding:13px;border:1px solid rgba(111,128,135,.2);border-radius:10px;background:rgba(3,7,9,.2)}}
 .summary-arrow{{display:grid;place-items:center;color:var(--faint);font-size:18px}}
@@ -1261,32 +1222,29 @@ def render_html(brief: ReviewBrief) -> str:
 .verification-group-label{{margin-top:8px;color:var(--faint);font-size:9px;font-weight:750;text-transform:uppercase;letter-spacing:.07em}}
 .verification-item{{border:1px solid rgba(111,128,135,.2);border-radius:10px;overflow:hidden;background:rgba(3,7,9,.2)}}
 .verification-item[open]{{border-color:rgba(123,227,172,.38)}}
-.verification-item>summary{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px 105px;gap:10px;align-items:center;padding:12px;cursor:pointer;list-style:none}}
+.verification-item>summary{{display:grid;grid-template-columns:48px minmax(0,1fr) 105px;gap:10px;align-items:center;padding:12px;cursor:pointer;list-style:none}}
 .verification-item>summary::-webkit-details-marker{{display:none}}
 .verification-item>summary:hover{{background:rgba(54,118,87,.1)}}
 .verification-id{{color:var(--green);font:760 10px ui-monospace,SFMono-Regular,Menlo,monospace}}
-.verification-title{{font-size:11px;font-weight:620}}
-.verification-authority{{color:var(--faint);font-size:8px;text-transform:uppercase}}
+.verification-claim{{display:grid;gap:3px;min-width:0}}.verification-title{{font-size:11px;font-weight:620}}.verification-source{{color:var(--faint);font-size:8px}}
 .status-pill{{display:inline-flex;justify-content:center;padding:4px 7px;border-radius:999px;font-size:8px;font-weight:750;text-transform:uppercase}}
 .status-demonstrated{{background:rgba(54,118,87,.22);color:var(--green)}}.status-partial{{background:rgba(106,85,30,.2);color:var(--amber)}}
 .status-contradicted{{background:rgba(112,43,48,.22);color:var(--red)}}.status-unverified,.status-not_assessed{{background:rgba(111,128,135,.14);color:var(--muted)}}
-.verification-detail{{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.25fr) minmax(0,1fr);gap:9px;padding:0 12px 12px;border-top:1px solid rgba(111,128,135,.14)}}
+.verification-detail{{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:9px;padding:0 12px 12px;border-top:1px solid rgba(111,128,135,.14)}}
 .verification-detail>div{{min-width:0;margin-top:12px;padding:12px;border:1px solid rgba(111,128,135,.16);border-radius:9px}}
 .verification-detail p{{font-size:10px}}
 .verification-evidence{{display:grid;gap:3px;padding:7px 0;border-top:1px solid rgba(111,128,135,.12);font-size:9px}}
 .evidence-kind{{color:var(--blue);font-size:8px;text-transform:uppercase}}
 .assessment-reasons{{margin:0;padding-left:17px;color:var(--muted);font-size:9px}}.assessment-reasons li+li{{margin-top:7px}}
 .verification-coverage,.display-boundary{{display:block;margin-top:10px;color:var(--faint);font-size:8px}}
-.evidence-appendix>details>summary{{display:flex;justify-content:space-between;align-items:center;cursor:pointer;list-style:none}}.evidence-appendix>details>summary b{{font-size:18px}}
-.appendix-grid{{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:20px}}.appendix-grid>div{{min-width:0}}
-.appendix-row{{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid rgba(111,128,135,.15);font-size:9px}}.appendix-context{{grid-column:1/-1}}
-@media(max-width:800px){{.transformation-strip{{grid-template-columns:1fr}}.summary-arrow{{transform:rotate(90deg)}}.verification-detail,.appendix-grid{{grid-template-columns:1fr}}.verification-item>summary{{grid-template-columns:42px minmax(0,1fr)}}.verification-authority,.verification-item>summary .status-pill{{grid-column:2}}}}
+.coverage-limits{{margin-top:14px;padding:0 12px;border:1px solid rgba(111,128,135,.2);border-radius:9px;background:rgba(3,7,9,.2)}}.coverage-limits>summary{{padding:10px 0;cursor:pointer;color:var(--amber);font-size:10px}}
+@media(max-width:800px){{.transformation-strip{{grid-template-columns:1fr}}.summary-arrow{{transform:rotate(90deg)}}.verification-detail{{grid-template-columns:1fr}}.verification-item>summary{{grid-template-columns:42px minmax(0,1fr)}}.verification-item>summary .status-pill{{grid-column:2}}}}
 </style></head><body><main class="shell">
 <div class="topbar"><span class="brand-mark"></span>PrismCode</div>
-<section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{brief.overview.changed_file_count} changed files</span><span>·</span><span>{escape(ci_copy)}</span></div><h1>{escape(packet.title)}</h1><div class="intent">{escape(brief.intent.text)}</div><span class="source-note">Source: {source_line}</span></section>
+<section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{brief.overview.changed_file_count} changed files</span><span>·</span><span>{escape(ci_copy)}</span></div><h1>{escape(packet.title)}</h1><div class="intent">{escape(brief.intent.text)}</div><span class="source-note">Source: {source_line}</span>{review_context}</section>
 {transformation_summary}
 <section class="section verification-workspace"><h2>Verification</h2><p class="section-intro">Expand one R/G/T/CC subject to compare its authored claim, canonical observations, deterministic assessment, and structural coverage.</p>{verification_accordion}{review_graph}</section>
-{appendix}
+    {coverage_limits}
 <div class="footer">PrismCode · {escape(pr_label)} · Schema {escape(brief.schema_version)} · Generated by {escape(brief.generated_by)}</div>
 </main><script>
 document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
