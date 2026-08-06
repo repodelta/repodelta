@@ -6,6 +6,7 @@ from pathlib import Path
 
 from prismcode.llm import (
     ShadowProviderResponse,
+    ShadowExecutionPolicy,
     admit_shadow_candidates,
     execute_shadow_admissions,
     write_shadow_execution,
@@ -73,6 +74,28 @@ def test_shadow_execution_does_not_mutate_formal_assessment() -> None:
     execute_shadow_admissions(_admit(brief), BaselineProvider())
 
     assert asdict(brief.transformation_assessment) == before
+
+
+def test_execution_budget_defers_whole_requests_without_silent_loss() -> None:
+    brief = _brief()
+    admissions = _admit(brief)
+    ready_count = sum(item.request is not None for item in admissions.admissions)
+    assert ready_count > 1
+    provider = BaselineProvider()
+
+    bundle = execute_shadow_admissions(
+        admissions,
+        provider,
+        policy=ShadowExecutionPolicy(max_requests=1),
+    )
+
+    assert provider.calls == 1
+    assert bundle.summary.state == "partial"
+    assert bundle.summary.admitted_count == ready_count
+    assert bundle.summary.deferred_count == ready_count - 1
+    assert bundle.execution_diagnostics[0].code == (
+        "shadow_execution_budget_truncated"
+    )
 
 
 def _brief():

@@ -32,6 +32,8 @@ from prismcode.providers.workspace import (
 from prismcode.presentation.status import format_structural_coverage
 from prismcode.changes.hunks import parse_changed_files
 from prismcode.llm import (
+    OpenAIShadowConfig,
+    OpenAIShadowProvider,
     execute_shadow_review,
     load_shadow_replay_provider,
     unavailable_shadow_execution,
@@ -80,6 +82,21 @@ def _resolve_github_token(env_name: str | None, api_url: str) -> str | None:
     if token and token.strip():
         return token.strip()
     return _github_token_from_cli(api_url)
+
+
+def _openai_shadow_provider_from_env() -> OpenAIShadowProvider | None:
+    api_key = os.environ.get("OPENAI_API_KEY", "").strip()
+    model = os.environ.get("PRISMCODE_LLM_MODEL", "").strip()
+    if not api_key or not model:
+        return None
+    base_url = os.environ.get("OPENAI_BASE_URL", "").strip()
+    return OpenAIShadowProvider(
+        OpenAIShadowConfig(
+            api_key=api_key,
+            model=model,
+            base_url=base_url or "https://api.openai.com/v1",
+        )
+    )
 
 
 def _enrich_github_auth_error(
@@ -307,12 +324,14 @@ def main() -> int:
             if args.llm_shadow_output and not args.llm_shadow:
                 parser.error("--llm-shadow-output requires --llm-shadow")
             if args.llm_shadow:
-                shadow = (
-                    execute_shadow_review(
-                        brief,
-                        load_shadow_replay_provider(args.llm_shadow_replay),
-                    )
+                provider = (
+                    load_shadow_replay_provider(args.llm_shadow_replay)
                     if args.llm_shadow_replay
+                    else _openai_shadow_provider_from_env()
+                )
+                shadow = (
+                    execute_shadow_review(brief, provider)
+                    if provider is not None
                     else unavailable_shadow_execution()
                 )
                 shadow_output = args.llm_shadow_output or f"{args.output}.llm-shadow.json"
