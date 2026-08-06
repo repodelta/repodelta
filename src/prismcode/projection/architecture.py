@@ -9,8 +9,10 @@ from prismcode.model.contracts import (
     ArchitecturalFlow,
     ArchitecturalLayer,
     ArchitecturalOperationCount,
+    ArchitecturalSubjectOverlay,
     EvidenceCatalog,
     StructuralGraphNode,
+    StructuralFocusOverlay,
     ReviewStructuralGraph,
     architectural_flow_kind,
 )
@@ -149,6 +151,53 @@ def validate_architectural_change_topology(
     graph: ReviewStructuralGraph,
 ) -> None:
     topology.validate_against(graph)
+
+
+def project_architectural_subject_overlay(
+    topology: ArchitecturalChangeTopology,
+    structural_overlay: StructuralFocusOverlay,
+) -> ArchitecturalSubjectOverlay:
+    """Join one canonical subject overlay to existing component and flow IDs."""
+
+    component_by_node = {
+        node_id: component.id
+        for component in topology.components
+        for node_id in component.node_ids
+    }
+    direct_node_ids = {
+        item.node_id for item in structural_overlay.nodes if item.role != "intermediate"
+    }
+    context_node_ids = {
+        item.node_id for item in structural_overlay.nodes if item.role == "intermediate"
+    }
+    direct_components = {
+        component_by_node[item]
+        for item in direct_node_ids
+        if item in component_by_node
+    }
+    context_components = {
+        component_by_node[item]
+        for item in context_node_ids
+        if item in component_by_node
+    }
+    overlay_groups = set(structural_overlay.relation_group_ids)
+    flow_ids = []
+    for flow in topology.flows:
+        if not overlay_groups.intersection(flow.relation_group_ids):
+            continue
+        flow_ids.append(flow.id)
+        context_components.update(
+            (flow.source_component_id, flow.target_component_id)
+        )
+    context_components -= direct_components
+    order = {item: index for index, item in enumerate(topology.display_component_ids)}
+    return ArchitecturalSubjectOverlay(
+        component_ids=tuple(sorted(direct_components, key=order.__getitem__)),
+        context_component_ids=tuple(
+            sorted(context_components, key=order.__getitem__)
+        ),
+        flow_ids=tuple(flow_ids),
+    )
 
 
 def _domain_parts(parts: tuple[str, ...]) -> tuple[str, ...]:

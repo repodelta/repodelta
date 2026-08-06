@@ -3178,6 +3178,26 @@ class VerificationMatrixEntry:
 
 
 @dataclass(frozen=True)
+class ArchitecturalSubjectOverlay:
+    component_ids: tuple[str, ...] = ()
+    context_component_ids: tuple[str, ...] = ()
+    flow_ids: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        for name, identities in (
+            ("component_ids", self.component_ids),
+            ("context_component_ids", self.context_component_ids),
+            ("flow_ids", self.flow_ids),
+        ):
+            if len(identities) != len(set(identities)):
+                raise ValueError(f"architectural overlay {name} must be unique")
+        if set(self.component_ids) & set(self.context_component_ids):
+            raise ValueError(
+                "architectural overlay direct and context components must be disjoint"
+            )
+
+
+@dataclass(frozen=True)
 class VerificationEvidenceInspection:
     id: str
     subject_id: str
@@ -3188,6 +3208,7 @@ class VerificationEvidenceInspection:
     transformation_binding_ids: tuple[str, ...] = ()
     diagnostic_ids: tuple[str, ...] = ()
     structural_overlay: StructuralFocusOverlay = StructuralFocusOverlay()
+    architectural_overlay: ArchitecturalSubjectOverlay = ArchitecturalSubjectOverlay()
     assessment_reasons: tuple[TransformationAssessmentReason, ...] = ()
 
 
@@ -3233,7 +3254,7 @@ class VerificationWorkspace:
     )
     matrix: tuple[VerificationMatrixEntry, ...] = ()
     inspections: tuple[VerificationEvidenceInspection, ...] = ()
-    schema_version: str = "verification_workspace.v3"
+    schema_version: str = "verification_workspace.v4"
 
     def by_subject_id(self) -> dict[str, VerificationMatrixEntry]:
         return {item.subject_id: item for item in self.matrix}
@@ -3252,7 +3273,7 @@ class ReviewProjection:
         ArchitecturalChangeTopology()
     )
     verification_workspace: VerificationWorkspace = VerificationWorkspace()
-    schema_version: str = "review_projection.v26"
+    schema_version: str = "review_projection.v27"
 
     def validate_consistency(
         self,
@@ -3970,7 +3991,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v50"
+    schema_version: str = "review_brief.v51"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
