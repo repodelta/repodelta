@@ -75,6 +75,10 @@ fixture or GitHub
   -> HTML / CLI presentation
        -> compact Change topology consumes only the typed architectural projection
        -> detailed Structural delta graph retains exact canonical members
+       -> each Verification subject consumes typed component, context-component,
+          and flow identities derived from its canonical structural overlay
+       -> renderer interaction focuses both views by those identities and never
+          reclassifies paths, labels, or prose
 ```
 
 An optional, dormant `llm` boundary derives one claim-kind-eligible candidate

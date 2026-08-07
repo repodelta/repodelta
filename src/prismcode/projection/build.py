@@ -416,6 +416,7 @@ def build_review_projection(
         candidates,
         tuple(slices),
         review_graph,
+        architectural_topology=architectural_topology,
         transformation_structural_topology=transformation_topology,
         transformation_structural_closure=transformation_structural_closure,
     )

@@ -53,6 +53,7 @@ from prismcode.model.contracts import (
 from prismcode.projection.architecture import (
     classify_architectural_path,
     project_architectural_change_topology,
+    project_architectural_subject_overlay,
     validate_architectural_change_topology,
 )
 from prismcode.evaluation.core import load_evaluation_suite
@@ -192,7 +193,10 @@ def test_architectural_topology_groups_canonical_nodes_and_cross_component_flow(
 
     html = _architectural_change_topology(
         SimpleNamespace(
-            projection=SimpleNamespace(architectural_topology=topology)
+            projection=SimpleNamespace(
+                architectural_topology=topology,
+                verification_workspace=SimpleNamespace(inspections=()),
+            )
         )
     )
     assert html.count("<h2>Change topology</h2>") == 1
@@ -212,6 +216,47 @@ def test_architectural_topology_groups_canonical_nodes_and_cross_component_flow(
     )
     with pytest.raises(ValueError, match="flow kind"):
         validate_architectural_change_topology(invalid, graph)
+
+    call_flow = flows["executable"]
+    overlay = project_architectural_subject_overlay(
+        topology,
+        StructuralFocusOverlay(
+            nodes=(
+                StructuralFocusNode(node_id=cli.id, role="changed_anchor"),
+                StructuralFocusNode(node_id=provider.id, role="intermediate"),
+            ),
+            relation_group_ids=(relation.id,),
+        ),
+    )
+    component_by_domain = {item.domain: item.id for item in topology.components}
+    assert overlay.component_ids == (component_by_domain["prismcode"],)
+    assert overlay.context_component_ids == (
+        component_by_domain["prismcode/providers"],
+    )
+    assert overlay.flow_ids == (call_flow.id,)
+    focused_html = _architectural_change_topology(
+        SimpleNamespace(
+            projection=SimpleNamespace(
+                architectural_topology=topology,
+                verification_workspace=SimpleNamespace(
+                    inspections=(
+                        SimpleNamespace(
+                            subject_id="R1",
+                            architectural_overlay=overlay,
+                        ),
+                    )
+                ),
+            )
+        )
+    )
+    assert (
+        f'data-component-target="{component_by_domain["prismcode"]}"'
+        in focused_html
+    )
+    assert 'data-focuses="R1"' in focused_html
+    assert f'data-flow-target="{call_flow.id}"' in focused_html
+    assert f'data-member-group-ids="{relation.id}"' in focused_html
+    assert f'data-member-node-ids="{cli.id} {provider.id}"' in focused_html
 
 
 def test_architectural_path_keeps_unknown_semantics_unclassified() -> None:

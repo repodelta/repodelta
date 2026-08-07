@@ -300,6 +300,7 @@ def _review_graph(
         )
         container_shapes.append(
             f'<rect class="structural-container operation-{escape(parent_node.delta)}" '
+            f'data-structural-node="{escape(parent_node.id, quote=True)}" '
             f'data-focuses="{escape(" ".join(direct_focuses), quote=True)}" '
             f'data-context-focuses="{escape(" ".join(contextual_focuses), quote=True)}" '
             f'x="{container.x}" y="{container.y}" '
@@ -309,6 +310,7 @@ def _review_graph(
         )
         header = (
             f'<g class="structural-container-header operation-{escape(parent_node.delta)}" '
+            f'data-structural-node="{escape(parent_node.id, quote=True)}" '
             f'data-focuses="{escape(" ".join(direct_focuses), quote=True)}" '
             f'data-context-focuses="{escape(" ".join(contextual_focuses), quote=True)}" '
             f'transform="translate({container.x + 12} {container.y + 12})">'
@@ -502,6 +504,7 @@ def _review_graph(
                 else ""
             )
             + '" '
+            f'data-structural-node="{escape(node.id, quote=True)}" '
             f'data-focuses="{escape(direct_focuses, quote=True)}" '
             f'data-context-focuses="{escape(contextual_focuses, quote=True)}" '
             f'transform="translate({x} {y})">'
@@ -534,6 +537,7 @@ def _review_graph(
         kind = str(fact.metadata.get("symbol_kind", "symbol")).replace("_", " ")
         isolated_rows.append(
             f'<div class="isolated-anchor operation-{escape(node.delta)}" '
+            f'data-structural-node="{escape(node.id, quote=True)}" '
             f'data-focuses="{escape(" ".join(item[0] for item in node_focus.get(node.id, ())), quote=True)}">'
             f'<span class="isolated-anchor-focus">{escape(focuses)}</span>'
             f'<span class="isolated-anchor-operation">{escape(node.delta)}</span>'
@@ -1163,6 +1167,20 @@ def _architectural_change_topology(brief: ReviewBrief) -> str:
             '</section>'
         )
     components = {item.id: item for item in topology.components}
+    component_focuses: dict[str, list[str]] = {}
+    component_context_focuses: dict[str, list[str]] = {}
+    flow_focuses: dict[str, list[str]] = {}
+    for inspection in brief.projection.verification_workspace.inspections:
+        for component_id in inspection.architectural_overlay.component_ids:
+            component_focuses.setdefault(component_id, []).append(
+                inspection.subject_id
+            )
+        for component_id in inspection.architectural_overlay.context_component_ids:
+            component_context_focuses.setdefault(component_id, []).append(
+                inspection.subject_id
+            )
+        for flow_id in inspection.architectural_overlay.flow_ids:
+            flow_focuses.setdefault(flow_id, []).append(inspection.subject_id)
     operation_labels = {
         "added": "+",
         "modified": "~",
@@ -1181,13 +1199,17 @@ def _architectural_change_topology(brief: ReviewBrief) -> str:
             for item in component.operation_counts
         )
         cards.append(
-            '<div class="topology-component">'
+            '<button class="topology-component" type="button" '
+            f'data-component-target="{escape(component.id, quote=True)}" '
+            f'data-member-node-ids="{escape(" ".join(component.node_ids), quote=True)}" '
+            f'data-focuses="{escape(" ".join(component_focuses.get(component.id, ())), quote=True)}" '
+            f'data-context-focuses="{escape(" ".join(component_context_focuses.get(component.id, ())), quote=True)}">'
             f'<span class="eyebrow">{escape(component.layer)}</span>'
             f'<strong>{escape(component.domain)}</strong>'
-            f'<div class="topology-operations">{operations}</div>'
+            f'<span class="topology-operations">{operations}</span>'
             f'<small>{len(component.node_ids)} structural members · '
             f'{escape(component.classification_authority.replace("_", " "))}</small>'
-            '</div>'
+            '</button>'
         )
 
     def flow_rows(kind: str) -> str:
@@ -1197,13 +1219,20 @@ def _architectural_change_topology(brief: ReviewBrief) -> str:
                 continue
             source = components[flow.source_component_id]
             target = components[flow.target_component_id]
+            member_node_ids = tuple(
+                dict.fromkeys((*source.node_ids, *target.node_ids))
+            )
             rows.append(
-                f'<div class="topology-flow operation-{escape(flow.operation)}">'
+                f'<button class="topology-flow operation-{escape(flow.operation)}" '
+                f'type="button" data-flow-target="{escape(flow.id, quote=True)}" '
+                f'data-member-node-ids="{escape(" ".join(member_node_ids), quote=True)}" '
+                f'data-member-group-ids="{escape(" ".join(flow.relation_group_ids), quote=True)}" '
+                f'data-focuses="{escape(" ".join(flow_focuses.get(flow.id, ())), quote=True)}">'
                 f'<span>{escape(source.domain)}</span><b>→</b>'
                 f'<span>{escape(target.domain)}</span>'
                 f'<small>{escape(" / ".join(flow.relations))} · '
                 f'{len(flow.relation_group_ids)} groups · '
-                f'{escape(flow.operation)}</small></div>'
+                f'{escape(flow.operation)}</small></button>'
             )
         return "".join(rows)
 
@@ -1219,6 +1248,7 @@ def _architectural_change_topology(brief: ReviewBrief) -> str:
         '<p class="section-intro">A deterministic component-level projection '
         'of the same canonical structural graph shown below.</p>'
         f'<div class="topology-components">{"".join(cards)}</div>'
+        '<p class="topology-focus-empty" hidden></p>'
         '<div class="topology-flow-section"><span class="projection-heading">'
         'Executable flow</span>'
         f'{executable or "<p class=\"empty\">No cross-component executable flow was observed.</p>"}'
@@ -1305,14 +1335,18 @@ def render_html(brief: ReviewBrief) -> str:
 .section-intro{{margin:0 0 16px;color:var(--muted);font-size:10px}}
 .brief-context{{display:grid;gap:6px;margin-top:14px}}.brief-context .context{{margin:0;padding:0;border:0}}.brief-context .context>summary{{padding:7px 0;border-top:1px solid rgba(111,128,135,.16)}}
 .topology-components{{display:flex;gap:9px;overflow-x:auto;padding:3px 0 12px}}
-.topology-component{{flex:0 0 185px;padding:12px;border:1px solid rgba(111,128,135,.22);border-radius:10px;background:rgba(3,7,9,.25)}}
+.topology-component{{flex:0 0 185px;padding:12px;border:1px solid rgba(111,128,135,.22);border-radius:10px;background:rgba(3,7,9,.25);color:var(--text);font:inherit;text-align:left;cursor:pointer}}
+.topology-component:hover,.topology-component:focus,.topology-component.member-active{{border-color:var(--green);outline:none}}
 .topology-component strong{{display:block;overflow-wrap:anywhere;font-size:11px}}.topology-component small{{display:block;margin-top:7px;color:var(--faint);font-size:8px}}
 .topology-operations{{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}}.topology-operation{{padding:2px 5px;border-radius:999px;background:rgba(111,128,135,.14);color:var(--muted);font-size:8px}}
 .topology-operation.operation-added{{color:var(--green)}}.topology-operation.operation-removed{{color:var(--red)}}.topology-operation.operation-modified,.topology-operation.operation-renamed{{color:var(--amber)}}
 .topology-flow-section{{margin-top:13px;padding-top:11px;border-top:1px solid rgba(111,128,135,.16)}}
-.topology-flow{{display:grid;grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr) minmax(180px,.8fr);gap:7px;align-items:center;padding:7px 9px;border-left:2px solid #73848c;background:rgba(3,7,9,.2);font-size:9px}}
+.topology-flow{{display:grid;width:100%;grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr) minmax(180px,.8fr);gap:7px;align-items:center;padding:7px 9px;border:0;border-left:2px solid #73848c;background:rgba(3,7,9,.2);color:var(--text);font:inherit;font-size:9px;text-align:left;cursor:pointer}}
+.topology-flow:hover,.topology-flow:focus,.topology-flow.member-active{{background:rgba(54,118,87,.12);outline:none}}
 .topology-flow+.topology-flow{{margin-top:4px}}.topology-flow b{{color:var(--muted);text-align:center}}.topology-flow small{{color:var(--faint);text-align:right}}.topology-flow.operation-added{{border-color:var(--green)}}.topology-flow.operation-removed{{border-color:var(--red)}}
 .topology-support{{margin-top:9px;border:1px solid rgba(111,128,135,.16);border-radius:8px}}.topology-support>summary{{padding:8px 10px;cursor:pointer;color:var(--muted);font-size:9px}}.topology-support>div{{padding:0 9px 9px}}
+.topology-focus-empty{{margin:8px 0;padding:8px 10px;border:1px dashed rgba(111,128,135,.28);border-radius:8px;color:var(--muted);font-size:9px}}
+.member-muted{{opacity:.13}}.member-active{{opacity:1;filter:drop-shadow(0 0 5px rgba(123,227,172,.35))}}
 .transformation-strip{{display:grid;grid-template-columns:minmax(0,1fr) 28px minmax(0,1.2fr) 28px minmax(0,1fr);gap:8px;align-items:stretch}}
 .summary-stage{{min-width:0;padding:13px;border:1px solid rgba(111,128,135,.2);border-radius:10px;background:rgba(3,7,9,.2)}}
 .summary-arrow{{display:grid;place-items:center;color:var(--faint);font-size:18px}}
@@ -1349,17 +1383,22 @@ def render_html(brief: ReviewBrief) -> str:
     {coverage_limits}
 <div class="footer">PrismCode · {escape(pr_label)} · Schema {escape(brief.schema_version)} · Generated by {escape(brief.generated_by)}</div>
 </main><script>
-document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
-  const interaction = {{ focus: "all", expandedGroup: null }};
-  const activateFocus = (focus) => {{
-    interaction.focus = focus;
-    graph.querySelectorAll(".delta-focus").forEach((item) => {{
-      const active = item.dataset.focusTarget === focus;
-      item.classList.toggle("active", active);
-    }}
+const focusSurfaces = document.querySelectorAll(
+  ".architectural-topology, .review-structural-graph"
 );
+const clearMemberFocus = () => {{
+  document.querySelectorAll(".member-muted, .member-active").forEach((item) => {{
+    item.classList.remove("member-muted", "member-active");
+  }});
+}};
+const activateFocus = (focus) => {{
+  clearMemberFocus();
+  document.querySelectorAll(".delta-focus").forEach((item) => {{
+    item.classList.toggle("active", item.dataset.focusTarget === focus);
+  }});
+  focusSurfaces.forEach((surface) => {{
     let matched = false;
-    graph.querySelectorAll("[data-focuses], [data-context-focuses]").forEach((item) => {{
+    surface.querySelectorAll("[data-focuses], [data-context-focuses]").forEach((item) => {{
       const direct = focus === "all" ||
         (item.dataset.focuses || "").split(/\\s+/).includes(focus);
       const contextual = focus !== "all" && !direct &&
@@ -1368,19 +1407,49 @@ document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
       item.classList.toggle("focus-muted", !direct && !contextual);
       item.classList.toggle("focus-context", contextual);
       item.classList.toggle("focus-active", focus !== "all" && direct);
-    }}
-);
-    const empty = graph.querySelector(".delta-focus-empty");
+    }});
+    const empty = surface.querySelector(
+      surface.classList.contains("architectural-topology")
+        ? ".topology-focus-empty"
+        : ".delta-focus-empty"
+    );
     if (empty) {{
       const show = focus !== "all" && !matched;
       empty.hidden = !show;
       empty.textContent = show
-        ? `${{focus}} has no structural evidence in the default change backbone.`
+        ? (surface.classList.contains("architectural-topology")
+          ? `${{focus}} has no architectural membership in the canonical change backbone.`
+          : `${{focus}} has no structural evidence in the default change backbone.`)
         : "";
     }}
-
-  }}
-;
+  }});
+}};
+const activateMembers = (trigger) => {{
+  activateFocus("all");
+  const nodeIds = new Set((trigger.dataset.memberNodeIds || "").split(/\\s+/).filter(Boolean));
+  const groupIds = new Set((trigger.dataset.memberGroupIds || "").split(/\\s+/).filter(Boolean));
+  document.querySelectorAll("[data-component-target], [data-flow-target]").forEach((item) => {{
+    item.classList.toggle("member-active", item === trigger);
+    item.classList.toggle("member-muted", item !== trigger);
+  }});
+  document.querySelectorAll("[data-structural-node]").forEach((item) => {{
+    const active = nodeIds.has(item.dataset.structuralNode);
+    item.classList.toggle("member-active", active);
+    item.classList.toggle("member-muted", !active);
+  }});
+  document.querySelectorAll("[data-group-target]").forEach((item) => {{
+    const active = groupIds.has(item.dataset.groupTarget);
+    item.classList.toggle("member-active", active);
+    item.classList.toggle("member-muted", !active && groupIds.size > 0);
+  }});
+  const graph = document.querySelector(".review-structural-graph");
+  if (graph) graph.scrollIntoView({{ behavior: "smooth", block: "center" }});
+}};
+document.querySelectorAll("[data-component-target], [data-flow-target]").forEach((item) => {{
+  item.addEventListener("click", () => activateMembers(item));
+}});
+document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
+  const interaction = {{ expandedGroup: null }};
   graph.querySelectorAll(".delta-focus").forEach((button) => {{
     button.addEventListener("click", () =>
       activateFocus(button.dataset.focusTarget));
@@ -1419,24 +1488,24 @@ document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
       }}
     }});
   }});
-  const verificationItems = document.querySelectorAll(
-    ".verification-item[data-verification-subject]"
-  );
-  verificationItems.forEach((item) => {{
-    item.addEventListener("toggle", () => {{
-      if (!item.open) return;
-      verificationItems.forEach((other) => {{
-        if (other !== item) other.open = false;
-      }});
-      activateFocus(item.dataset.verificationSubject);
-    }});
-  }});
-  const initialItem = document.querySelector(
-    ".verification-item[open][data-verification-subject]"
-  );
-  if (initialItem) activateFocus(initialItem.dataset.verificationSubject);
 }}
 );
+const verificationItems = document.querySelectorAll(
+  ".verification-item[data-verification-subject]"
+);
+verificationItems.forEach((item) => {{
+  item.addEventListener("toggle", () => {{
+    if (!item.open) return;
+    verificationItems.forEach((other) => {{
+      if (other !== item) other.open = false;
+    }});
+    activateFocus(item.dataset.verificationSubject);
+  }});
+}});
+const initialItem = document.querySelector(
+  ".verification-item[open][data-verification-subject]"
+);
+if (initialItem) activateFocus(initialItem.dataset.verificationSubject);
 document.querySelectorAll("[data-summary-subject]").forEach((button) => {{
   button.addEventListener("click", () => {{
     const subject = button.dataset.summarySubject;
