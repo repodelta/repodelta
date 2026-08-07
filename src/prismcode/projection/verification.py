@@ -226,6 +226,8 @@ def _transformation_summary(
         source_state=contract.source_state,
         claim_ids=tuple(item.id for item in contract.claims),
         change_claim_ids=contract.change_claim_ids,
+        before_state_claim_ids=contract.state_transition.before_claim_ids,
+        after_state_claim_ids=contract.state_transition.after_claim_ids,
         selected_region_claim_ids=contract.region.selected_claim_ids,
         boundary_claim_ids=tuple(
             dict.fromkeys(
@@ -392,7 +394,7 @@ def _validate_workspace(
     transformation_structural_topology: TransformationStructuralTopology,
     transformation_structural_closure: TransformationStructuralClosure,
 ) -> None:
-    if workspace.schema_version != "verification_workspace.v4":
+    if workspace.schema_version != "verification_workspace.v5":
         raise ValueError("unsupported verification workspace schema")
     if workspace.transformation_structural_topology != (
         transformation_structural_topology

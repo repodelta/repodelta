@@ -98,6 +98,20 @@ def _assess_claim(
     structural_group: TransformationStructuralClosureGroup | None = None,
     uncertainty_evidence_ids: frozenset[str] = frozenset(),
 ) -> TransformationClaimAssessment:
+    if claim.kind in {"before_state", "after_state"}:
+        return _result(
+            claim,
+            "unverified",
+            (),
+            (),
+            (
+                _reason(
+                    "generic_transition_context",
+                    "Authored before/after state is preserved without inferring "
+                    "topology, authority, migration, or completion semantics.",
+                ),
+            ),
+        )
     if claim.kind == "uncertainty":
         predicate_assessments = tuple(
             _predicate_result(

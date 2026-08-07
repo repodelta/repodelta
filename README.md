@@ -81,6 +81,9 @@ exact Markdown headings:
 ```markdown
 ## Change
 
+## Before
+## After
+
 ## Selected region
 ### Inputs
 ### Outputs
@@ -101,9 +104,11 @@ exact Markdown headings:
 ## Uncertainty
 ```
 
-These fields remain PR-authored claims. The current analyzer serializes them
+Generic Before/After fields remain unclassified state context; the topology
+variants are explicit structural claims. All fields remain PR-authored claims.
+The current analyzer serializes them
 once in `ReviewBrief.transformation_contract`; it does not treat them as
-repository observations, assessment results, or merge approval. Contract v2
+repository observations, assessment results, or merge approval. Contract v4
 also records deterministic selector predicates only when the author uses
 explicit Markdown code spans such as `` `DeterministicAnalyzer` ``,
 `` `src/prismcode/pipeline.py` ``, or an ordered
