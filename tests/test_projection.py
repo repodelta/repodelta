@@ -10,8 +10,6 @@ from prismcode.pipeline import DeterministicAnalyzer
 from prismcode.model.contracts import (
     ArchitecturalChangeTopology,
     ArchitecturalComponent,
-    ArchitecturalFlow,
-    ArchitecturalOperationCount,
     AnalysisInput,
     CandidateConvergence,
     CanonicalChangeMapEntry,
@@ -48,12 +46,10 @@ from prismcode.model.contracts import (
     TransformationStructuralClosure,
     TransformationStructuralTopologyGroup,
     VerificationIdentity,
-    architectural_flow_kind,
 )
 from prismcode.projection.architecture import (
     classify_architectural_path,
     project_architectural_change_topology,
-    project_architectural_subject_overlay,
     validate_architectural_change_topology,
 )
 from prismcode.evaluation.core import load_evaluation_suite
@@ -82,7 +78,7 @@ from prismcode.projection.structural_groups import (
     project_structural_relation_groups,
 )
 from prismcode.presentation.html import (
-    _architectural_change_topology,
+    _architectural_chip,
     _review_graph,
     _structural_compound_layout,
     _structural_edge_path,
@@ -95,8 +91,18 @@ from prismcode.providers.structural import (
 )
 
 
-def _with_verification_overlays(projection: ReviewProjection) -> SimpleNamespace:
+def _with_verification_overlays(
+    projection: ReviewProjection,
+    evidence: EvidenceCatalog,
+) -> SimpleNamespace:
+    topology = projection.architectural_topology
+    if not topology.components and projection.review_graph.nodes:
+        topology = project_architectural_change_topology(
+            projection.review_graph,
+            evidence,
+        )
     return SimpleNamespace(
+        architectural_topology=topology,
         verification_workspace=SimpleNamespace(
             inspections=tuple(
                 SimpleNamespace(
@@ -172,110 +178,72 @@ def test_architectural_topology_groups_canonical_nodes_and_cross_component_flow(
         ("prismcode", "entry"),
         ("prismcode/providers", "infrastructure"),
     ]
-    flows = {item.kind: item for item in topology.flows}
-    assert {item: flow.relations for item, flow in flows.items()} == {
-        "executable": ("calls",),
-        "dependency": ("imports",),
-    }
-    assert flows["executable"].relation_group_ids == (relation.id,)
-    assert flows["dependency"].relation_group_ids == (dependency.id,)
-    ordered = {item.id: item.domain for item in topology.components}
-    assert tuple(ordered[item] for item in topology.display_component_ids) == (
-        "prismcode",
-        "prismcode/providers",
+    cli_component = next(
+        item for item in topology.components if item.domain == "prismcode"
     )
-    assert all(
-        item.operation_counts == (
-            ArchitecturalOperationCount(operation="modified", count=1),
-        )
-        for item in topology.components
-    )
-
-    html = _architectural_change_topology(
-        SimpleNamespace(
-            projection=SimpleNamespace(
-                architectural_topology=topology,
-                verification_workspace=SimpleNamespace(inspections=()),
-            )
-        )
-    )
-    assert html.count("<h2>Change topology</h2>") == 1
-    assert "Executable flow" in html
-    assert "Dependency and structural support · 1" in html
-    assert "calls · 1 groups · added" in html
-    assert "imports · 1 groups · retained" in html
-
-    invalid = replace(
-        topology,
-        flows=tuple(
-            replace(item, kind="executable")
-            if item.kind == "dependency"
-            else item
-            for item in topology.flows
-        ),
-    )
-    with pytest.raises(ValueError, match="flow kind"):
-        validate_architectural_change_topology(invalid, graph)
-
-    call_flow = flows["executable"]
-    overlay = project_architectural_subject_overlay(
-        topology,
-        StructuralFocusOverlay(
-            nodes=(
-                StructuralFocusNode(node_id=cli.id, role="changed_anchor"),
-                StructuralFocusNode(node_id=provider.id, role="intermediate"),
-            ),
-            relation_group_ids=(relation.id,),
-        ),
-    )
-    component_by_domain = {item.domain: item.id for item in topology.components}
-    assert overlay.component_ids == (component_by_domain["prismcode"],)
-    assert overlay.context_component_ids == (
-        component_by_domain["prismcode/providers"],
-    )
-    assert overlay.flow_ids == (call_flow.id,)
-    focused_html = _architectural_change_topology(
-        SimpleNamespace(
-            projection=SimpleNamespace(
-                architectural_topology=topology,
-                verification_workspace=SimpleNamespace(
-                    inspections=(
-                        SimpleNamespace(
-                            subject_id="R1",
-                            architectural_overlay=overlay,
-                        ),
-                    )
-                ),
-            )
-        )
-    )
-    assert (
-        f'data-component-target="{component_by_domain["prismcode"]}"'
-        in focused_html
-    )
-    assert 'data-focuses="R1"' in focused_html
-    assert f'data-flow-target="{call_flow.id}"' in focused_html
-    assert f'data-member-group-ids="{relation.id}"' in focused_html
-    assert f'data-member-node-ids="{cli.id} {provider.id}"' in focused_html
-
+    assert cli_component.internal_relation_group_ids == ()
+    assert cli_component.context_node_ids == (provider.id,)
+    assert cli_component.context_relation_group_ids == (relation.id, dependency.id)
+    chip = _architectural_chip(cli_component, 210)
+    assert ">entry</text>" in chip
+    assert f'data-component-target="{cli_component.id}"' in chip
+    assert f'data-member-node-ids="{cli.id}"' in chip
+    assert f'data-context-node-ids="{provider.id}"' in chip
+    assert f'data-context-group-ids="{relation.id} {dependency.id}"' in chip
 
 def test_architectural_path_keeps_unknown_semantics_unclassified() -> None:
     assert classify_architectural_path("custom/opaque/worker.py") == (
         "custom",
         "unclassified",
     )
+    assert classify_architectural_path("src/widget/services/orders.py") == (
+        "widget/services",
+        "application",
+    )
+    assert classify_architectural_path("src/widget/storage/orders.py") == (
+        "widget/storage",
+        "persistence",
+    )
 
 
-def test_architectural_flow_keeps_verification_out_of_production_flow() -> None:
-    assert architectural_flow_kind("calls", "verification", "domain") == (
-        "verification_support"
+def test_architectural_component_owns_internal_graph_relation_membership() -> None:
+    first = _architectural_node("N:first", "E:first")
+    second = _architectural_node("N:second", "E:second")
+    relation = StructuralRelationGroup(
+        id="RG:internal",
+        source_node_id=first.id,
+        target_node_id=second.id,
+        relation="calls",
+        operation="retained",
+        member_edge_ids=("E:edge",),
     )
-    assert architectural_flow_kind("imports", "verification", "domain") == (
-        "verification_support"
+    graph = ReviewStructuralGraph(
+        nodes=(first, second),
+        relation_groups=(relation,),
+        backbone_node_ids=(first.id, second.id),
+        backbone_relation_group_ids=(relation.id,),
     )
-    assert architectural_flow_kind("calls", "application", "domain") == (
-        "executable"
+    evidence = EvidenceCatalog(
+        items=tuple(
+            EvidenceItem(
+                id=f"E:{name}",
+                summary=name,
+                kind="symbol",
+                classification="code",
+                metadata={"path": f"src/prismcode/presentation/{name}.py"},
+            )
+            for name in ("first", "second")
+        )
     )
+
+    topology = project_architectural_change_topology(graph, evidence)
+
+    assert len(topology.components) == 1
+    component = topology.components[0]
+    assert component.layer == "presentation"
+    assert component.internal_relation_group_ids == (relation.id,)
+    assert component.context_node_ids == ()
+    assert component.context_relation_group_ids == ()
 
 
 def test_architectural_topology_rejects_missing_backbone_membership() -> None:
@@ -290,20 +258,16 @@ def test_architectural_topology_rejects_missing_backbone_membership() -> None:
                 domain="unknown",
                 layer="unclassified",
                 node_ids=("N:missing",),
-                operation_counts=(
-                    ArchitecturalOperationCount(operation="modified", count=1),
-                ),
                 classification_authority="path_structure",
             ),
         ),
-        display_component_ids=("AC:missing",),
     )
 
     with pytest.raises(ValueError, match="complete backbone"):
         validate_architectural_change_topology(invalid, graph)
 
 
-def test_architectural_topology_rejects_relabelled_flow_endpoints() -> None:
+def test_architectural_topology_rejects_incomplete_context_membership() -> None:
     left = _architectural_node("N:left", "E:left")
     right = _architectural_node("N:right", "E:right")
     relation = StructuralRelationGroup(
@@ -325,9 +289,6 @@ def test_architectural_topology_rejects_relabelled_flow_endpoints() -> None:
         domain="left",
         layer="unclassified",
         node_ids=(left.id,),
-        operation_counts=(
-            ArchitecturalOperationCount(operation="modified", count=1),
-        ),
         classification_authority="path_structure",
     )
     target = ArchitecturalComponent(
@@ -335,28 +296,13 @@ def test_architectural_topology_rejects_relabelled_flow_endpoints() -> None:
         domain="right",
         layer="unclassified",
         node_ids=(right.id,),
-        operation_counts=(
-            ArchitecturalOperationCount(operation="modified", count=1),
-        ),
         classification_authority="path_structure",
     )
     invalid = ArchitecturalChangeTopology(
         components=(source, target),
-        flows=(
-            ArchitecturalFlow(
-                id="AF:reversed",
-                source_component_id=target.id,
-                target_component_id=source.id,
-                kind="executable",
-                operation="added",
-                relations=("calls",),
-                relation_group_ids=(relation.id,),
-            ),
-        ),
-        display_component_ids=(source.id, target.id),
     )
 
-    with pytest.raises(ValueError, match="canonical relation endpoints"):
+    with pytest.raises(ValueError, match="context relations"):
         validate_architectural_change_topology(invalid, graph)
 
 
@@ -535,6 +481,9 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
     )
     html = render_html(brief)
     assert html.count("Structural delta graph") == 1
+    assert "Change topology" not in html
+    assert 'class="architectural-chip-html ' in html
+    assert 'data-component-target="' in html
     assert html.index("Verification") < html.index("Structural delta graph")
     assert (
             "1 backbone nodes · 0 support nodes · "
@@ -773,7 +722,7 @@ def test_canonical_ownership_projects_recursive_shared_focus_hierarchy() -> None
     assert len(projection.review_graph.placements) == 2
     html = _review_graph(
         projection.review_graph,
-        _with_verification_overlays(projection),
+        _with_verification_overlays(projection, evidence),
         SimpleNamespace(
             evidence_catalog=evidence,
             overview=SimpleNamespace(
@@ -1156,7 +1105,7 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
     }
     html = _review_graph(
         graph,
-        _with_verification_overlays(projection),
+        _with_verification_overlays(projection, evidence),
         SimpleNamespace(
             evidence_catalog=evidence,
             overview=SimpleNamespace(
@@ -1330,6 +1279,10 @@ def test_review_graph_renders_complete_focus_union() -> None:
     html = _review_graph(
         projection.review_graph,
         SimpleNamespace(
+            architectural_topology=project_architectural_change_topology(
+                projection.review_graph,
+                evidence,
+            ),
             verification_workspace=SimpleNamespace(
                 inspections=tuple(
                     SimpleNamespace(
@@ -1697,7 +1650,7 @@ def test_review_graph_preserves_renamed_node_operation() -> None:
 
     html = _review_graph(
         projection.review_graph,
-        _with_verification_overlays(projection),
+        _with_verification_overlays(projection, evidence),
         SimpleNamespace(
             evidence_catalog=evidence,
             overview=SimpleNamespace(
@@ -1921,7 +1874,7 @@ def test_isolated_symbol_and_standalone_document_keep_distinct_canonical_forms()
     )
     graph_html = _review_graph(
         projection.review_graph,
-        _with_verification_overlays(projection),
+        _with_verification_overlays(projection, evidence),
         SimpleNamespace(
             evidence_catalog=evidence,
             overview=SimpleNamespace(

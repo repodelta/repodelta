@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from prismcode.model.contracts import (
-    ArchitecturalChangeTopology,
     AnalysisInput,
     AssociationReason,
     EvidenceCatalog,
@@ -169,7 +168,6 @@ def test_transformation_binding_cannot_create_structural_graph_membership() -> N
         ProjectionCandidateSet(),
         (),
         graph,
-        architectural_topology=ArchitecturalChangeTopology(),
         transformation_structural_topology=TransformationStructuralTopology(
             groups=(
                 TransformationStructuralTopologyGroup(claim_id=claim.id),
@@ -192,9 +190,9 @@ def test_verification_workspace_is_serialized_for_renderer_consumption() -> None
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=_mixed_packet()))
     serialized = brief.to_dict()["projection"]
 
-    assert serialized["schema_version"] == "review_projection.v28"
+    assert serialized["schema_version"] == "review_projection.v29"
     assert serialized["verification_workspace"]["schema_version"] == (
-        "verification_workspace.v5"
+        "verification_workspace.v6"
     )
     assert serialized["verification_workspace"]["matrix"]
     summary = brief.projection.verification_workspace.transformation_summary

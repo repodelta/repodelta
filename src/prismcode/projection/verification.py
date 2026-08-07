@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from prismcode.model.contracts import (
-    ArchitecturalChangeTopology,
     EvidenceCatalog,
     EvidenceItem,
     ProjectionRelation,
@@ -25,9 +24,6 @@ from prismcode.model.contracts import (
     VerificationStatusCount,
     VerificationWorkspace,
 )
-from prismcode.projection.architecture import project_architectural_subject_overlay
-
-
 def project_verification_workspace(
     focus_statements: tuple[Requirement, ...],
     contract: TransformationContract,
@@ -39,7 +35,6 @@ def project_verification_workspace(
     slices: tuple[ReviewSlice, ...],
     review_graph: ReviewStructuralGraph,
     *,
-    architectural_topology: ArchitecturalChangeTopology,
     transformation_structural_topology: TransformationStructuralTopology,
     transformation_structural_closure: TransformationStructuralClosure,
 ) -> VerificationWorkspace:
@@ -82,10 +77,6 @@ def project_verification_workspace(
             projection_relation_ids=relation_ids,
             diagnostic_ids=review_slice.diagnostic_ids,
             structural_overlay=review_slice.change_map.structural_overlay,
-            architectural_overlay=project_architectural_subject_overlay(
-                architectural_topology,
-                review_slice.change_map.structural_overlay,
-            ),
         )
         inspections.append(inspection)
         matrix.append(
@@ -156,10 +147,6 @@ def project_verification_workspace(
                 else ()
             ),
             structural_overlay=structural_overlay,
-            architectural_overlay=project_architectural_subject_overlay(
-                architectural_topology,
-                structural_overlay,
-            ),
             assessment_reasons=claim_assessment.reasons,
         )
         inspections.append(inspection)
@@ -201,7 +188,6 @@ def project_verification_workspace(
         evidence,
         relations,
         review_graph,
-        architectural_topology,
         transformation_structural_topology,
         transformation_structural_closure,
     )
@@ -390,11 +376,10 @@ def _validate_workspace(
     evidence: dict[str, EvidenceItem],
     relations: dict[str, ProjectionRelation],
     graph: ReviewStructuralGraph,
-    architectural_topology: ArchitecturalChangeTopology,
     transformation_structural_topology: TransformationStructuralTopology,
     transformation_structural_closure: TransformationStructuralClosure,
 ) -> None:
-    if workspace.schema_version != "verification_workspace.v5":
+    if workspace.schema_version != "verification_workspace.v6":
         raise ValueError("unsupported verification workspace schema")
     if workspace.transformation_structural_topology != (
         transformation_structural_topology
@@ -565,13 +550,6 @@ def _validate_workspace(
         ):
             raise ValueError("verification inspector relation belongs to another focus")
         overlay = inspection.structural_overlay
-        if inspection.architectural_overlay != project_architectural_subject_overlay(
-            architectural_topology,
-            overlay,
-        ):
-            raise ValueError(
-                "verification inspector changed architectural subject membership"
-            )
         if not {item.node_id for item in overlay.nodes} <= graph_node_ids:
             raise ValueError("verification inspector references unknown graph node")
         if not set(overlay.edge_ids) <= graph_edge_ids:

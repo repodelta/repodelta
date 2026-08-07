@@ -2919,36 +2919,6 @@ ArchitecturalLayer = Literal[
     "automation",
     "unclassified",
 ]
-ArchitecturalFlowKind = Literal[
-    "executable",
-    "verification_support",
-    "dependency",
-    "structural_support",
-]
-
-
-def architectural_flow_kind(
-    relation: str,
-    source_layer: ArchitecturalLayer,
-    target_layer: ArchitecturalLayer,
-) -> ArchitecturalFlowKind:
-    if "verification" in {source_layer, target_layer}:
-        return "verification_support"
-    if relation in {"calls", "instantiates"}:
-        return "executable"
-    if relation in {"imports", "references", "extends"}:
-        return "dependency"
-    return "structural_support"
-
-
-@dataclass(frozen=True)
-class ArchitecturalOperationCount:
-    operation: StructuralGraphNodeDelta
-    count: int
-
-    def __post_init__(self) -> None:
-        if self.count <= 0:
-            raise ValueError("architectural operation count must be positive")
 
 
 @dataclass(frozen=True)
@@ -2959,8 +2929,10 @@ class ArchitecturalComponent:
     domain: str
     layer: ArchitecturalLayer
     node_ids: tuple[str, ...]
-    operation_counts: tuple[ArchitecturalOperationCount, ...]
     classification_authority: Literal["path_structure", "path_convention"]
+    internal_relation_group_ids: tuple[str, ...] = ()
+    context_node_ids: tuple[str, ...] = ()
+    context_relation_group_ids: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.domain or not self.node_ids:
@@ -2978,59 +2950,29 @@ class ArchitecturalComponent:
             raise ValueError(
                 f"{self.id}: architectural classification authority mismatch"
             )
-
-
-@dataclass(frozen=True)
-class ArchitecturalFlow:
-    """Cross-component flow backed only by canonical relation groups."""
-
-    id: str
-    source_component_id: str
-    target_component_id: str
-    kind: ArchitecturalFlowKind
-    operation: Literal["added", "removed", "retained"]
-    relations: tuple[str, ...]
-    relation_group_ids: tuple[str, ...]
-
-    def __post_init__(self) -> None:
-        if self.source_component_id == self.target_component_id:
-            raise ValueError(f"{self.id}: architectural flow must cross components")
-        if not self.relation_group_ids:
-            raise ValueError(f"{self.id}: architectural flow requires provenance")
-        if self.relations != tuple(sorted(set(self.relations))) or not self.relations:
-            raise ValueError(
-                f"{self.id}: architectural flow relations must be sorted and unique"
-            )
-        if self.relation_group_ids != tuple(
-            sorted(set(self.relation_group_ids))
+        for label, identities in (
+            ("internal relations", self.internal_relation_group_ids),
+            ("context nodes", self.context_node_ids),
+            ("context relations", self.context_relation_group_ids),
         ):
-            raise ValueError(
-                f"{self.id}: architectural flow provenance must be sorted and unique"
-            )
+            if identities != tuple(sorted(set(identities))):
+                raise ValueError(
+                    f"{self.id}: architectural component {label} must be "
+                    "sorted and unique"
+                )
 
 
 @dataclass(frozen=True)
 class ArchitecturalChangeTopology:
-    """Canonical component-level projection of the review structural backbone."""
+    """Architectural classifications over the canonical structural backbone."""
 
     components: tuple[ArchitecturalComponent, ...] = ()
-    flows: tuple[ArchitecturalFlow, ...] = ()
-    display_component_ids: tuple[str, ...] = ()
-    schema_version: str = "architectural_change_topology.v2"
+    schema_version: str = "architectural_change_topology.v3"
 
     def validate_against(self, graph: ReviewStructuralGraph) -> None:
         component_ids = {item.id for item in self.components}
         if len(component_ids) != len(self.components):
             raise ValueError("architectural topology contains duplicate components")
-        if set(self.display_component_ids) != component_ids or len(
-            self.display_component_ids
-        ) != len(component_ids):
-            raise ValueError(
-                "architectural topology display order must preserve every component"
-            )
-        flow_ids = {item.id for item in self.flows}
-        if len(flow_ids) != len(self.flows):
-            raise ValueError("architectural topology contains duplicate flows")
         projected_node_ids = tuple(
             node_id for item in self.components for node_id in item.node_ids
         )
@@ -3038,83 +2980,43 @@ class ArchitecturalChangeTopology:
             raise ValueError("architectural topology classifies a node more than once")
         if set(projected_node_ids) != set(graph.backbone_node_ids):
             raise ValueError("architectural topology must classify the complete backbone")
-        component_by_node = {
-            node_id: component.id
-            for component in self.components
-            for node_id in component.node_ids
-        }
-        components_by_id = {item.id: item for item in self.components}
-        graph_nodes = {item.id: item for item in graph.nodes}
-        for component in self.components:
-            expected_counts: dict[str, int] = {}
-            for node_id in component.node_ids:
-                operation = graph_nodes[node_id].delta
-                expected_counts[operation] = expected_counts.get(operation, 0) + 1
-            observed_counts = {
-                item.operation: item.count for item in component.operation_counts
-            }
-            if observed_counts != expected_counts or len(observed_counts) != len(
-                component.operation_counts
-            ):
-                raise ValueError(
-                    "architectural component operation summary diverges from graph"
-                )
         graph_groups = {
             item.id: item
             for item in graph.relation_groups
             if item.id in graph.backbone_relation_group_ids
         }
-        projected_group_ids: list[str] = []
-        for flow in self.flows:
-            if (
-                flow.source_component_id not in component_ids
-                or flow.target_component_id not in component_ids
-            ):
-                raise ValueError("architectural flow references a missing component")
-            if not set(flow.relation_group_ids) <= set(graph_groups):
+        for component in self.components:
+            members = set(component.node_ids)
+            expected_internal = {
+                group.id
+                for group in graph_groups.values()
+                if group.source_node_id in members and group.target_node_id in members
+            }
+            expected_context_groups = {
+                group.id
+                for group in graph_groups.values()
+                if (group.source_node_id in members)
+                != (group.target_node_id in members)
+            }
+            expected_context_nodes = {
+                node_id
+                for group in graph_groups.values()
+                if group.id in expected_context_groups
+                for node_id in (group.source_node_id, group.target_node_id)
+                if node_id not in members
+            }
+            if set(component.internal_relation_group_ids) != expected_internal:
                 raise ValueError(
-                    "architectural flow references a non-backbone relation"
+                    "architectural component internal relations diverge from graph"
                 )
-            for group_id in flow.relation_group_ids:
-                group = graph_groups[group_id]
-                if (
-                    component_by_node[group.source_node_id]
-                    != flow.source_component_id
-                    or component_by_node[group.target_node_id]
-                    != flow.target_component_id
-                    or group.operation != flow.operation
-                ):
-                    raise ValueError(
-                        "architectural flow diverges from canonical relation endpoints"
-                    )
-                projected_group_ids.append(group_id)
-            expected_relations = tuple(
-                sorted({graph_groups[item].relation for item in flow.relation_group_ids})
-            )
-            if flow.relations != expected_relations or any(
-                architectural_flow_kind(
-                    relation,
-                    components_by_id[flow.source_component_id].layer,
-                    components_by_id[flow.target_component_id].layer,
-                )
-                != flow.kind
-                for relation in flow.relations
-            ):
+            if set(component.context_relation_group_ids) != expected_context_groups:
                 raise ValueError(
-                    "architectural flow kind diverges from canonical relations"
+                    "architectural component context relations diverge from graph"
                 )
-        expected_group_ids = {
-            group.id
-            for group in graph_groups.values()
-            if component_by_node[group.source_node_id]
-            != component_by_node[group.target_node_id]
-        }
-        if len(projected_group_ids) != len(set(projected_group_ids)) or set(
-            projected_group_ids
-        ) != expected_group_ids:
-            raise ValueError(
-                "architectural topology must project each cross-component relation once"
-            )
+            if set(component.context_node_ids) != expected_context_nodes:
+                raise ValueError(
+                    "architectural component context nodes diverge from graph"
+                )
 
 
 @dataclass(frozen=True)
@@ -3192,26 +3094,6 @@ class VerificationMatrixEntry:
 
 
 @dataclass(frozen=True)
-class ArchitecturalSubjectOverlay:
-    component_ids: tuple[str, ...] = ()
-    context_component_ids: tuple[str, ...] = ()
-    flow_ids: tuple[str, ...] = ()
-
-    def __post_init__(self) -> None:
-        for name, identities in (
-            ("component_ids", self.component_ids),
-            ("context_component_ids", self.context_component_ids),
-            ("flow_ids", self.flow_ids),
-        ):
-            if len(identities) != len(set(identities)):
-                raise ValueError(f"architectural overlay {name} must be unique")
-        if set(self.component_ids) & set(self.context_component_ids):
-            raise ValueError(
-                "architectural overlay direct and context components must be disjoint"
-            )
-
-
-@dataclass(frozen=True)
 class VerificationEvidenceInspection:
     id: str
     subject_id: str
@@ -3222,7 +3104,6 @@ class VerificationEvidenceInspection:
     transformation_binding_ids: tuple[str, ...] = ()
     diagnostic_ids: tuple[str, ...] = ()
     structural_overlay: StructuralFocusOverlay = StructuralFocusOverlay()
-    architectural_overlay: ArchitecturalSubjectOverlay = ArchitecturalSubjectOverlay()
     assessment_reasons: tuple[TransformationAssessmentReason, ...] = ()
 
 
@@ -3270,7 +3151,7 @@ class VerificationWorkspace:
     )
     matrix: tuple[VerificationMatrixEntry, ...] = ()
     inspections: tuple[VerificationEvidenceInspection, ...] = ()
-    schema_version: str = "verification_workspace.v5"
+    schema_version: str = "verification_workspace.v6"
 
     def by_subject_id(self) -> dict[str, VerificationMatrixEntry]:
         return {item.subject_id: item for item in self.matrix}
@@ -3289,7 +3170,7 @@ class ReviewProjection:
         ArchitecturalChangeTopology()
     )
     verification_workspace: VerificationWorkspace = VerificationWorkspace()
-    schema_version: str = "review_projection.v28"
+    schema_version: str = "review_projection.v29"
 
     def validate_consistency(
         self,
@@ -4007,7 +3888,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v52"
+    schema_version: str = "review_brief.v53"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
