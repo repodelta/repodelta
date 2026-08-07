@@ -20,6 +20,7 @@ from prismcode.model.contracts import (
     TransformationPredicateSelectorKind,
     TransformationPredicateSet,
     TransformationRegion,
+    TransformationStateTransition,
     TransformationTopology,
 )
 
@@ -216,6 +217,8 @@ _FENCE_RE = re.compile(r"^\s*(```+|~~~+)")
 _HEADING_DECORATION_RE = re.compile(r"^[^a-z0-9]+|[^a-z0-9]+$")
 _TRANSFORMATION_HEADINGS: dict[str, TransformationClaimKind] = {
     "change": "change",
+    "before": "before_state",
+    "after": "after_state",
     "selected region": "selected_region",
     "change region": "selected_region",
     "transformation region": "selected_region",
@@ -775,6 +778,10 @@ def _transformation_contract(
             tuple(item.raw_text for item in items),
         ),
         change_claim_ids=ids("change"),
+        state_transition=TransformationStateTransition(
+            before_claim_ids=ids("before_state"),
+            after_claim_ids=ids("after_state"),
+        ),
         region=TransformationRegion(
             selected_claim_ids=ids("selected_region"),
             input_boundary_claim_ids=ids("input_boundary"),
@@ -806,6 +813,8 @@ def _transformation_predicates(
     predicates = []
     diagnostics = []
     for claim, raw_text in zip(claims, raw_texts, strict=True):
+        if claim.kind in {"before_state", "after_state"}:
+            continue
         matches = tuple(_INLINE_CODE_RE.finditer(raw_text))
         selectors = tuple(
             value

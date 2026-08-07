@@ -114,6 +114,18 @@ def test_uncertainty_does_not_create_a_model_request() -> None:
     assert admission.diagnostics[0].code == "shadow_admission_not_applicable"
 
 
+def test_generic_transition_states_do_not_enter_evidence_selection() -> None:
+    brief = _brief(
+        "## Before\n- `old_call` controlled the result.\n\n"
+        "## After\n- `new_call` controls the result.\n"
+    )
+    admissions = _admit(brief).by_claim_id()
+
+    assert set(admissions) == {"T1", "T2"}
+    assert all(item.state == "empty" for item in admissions.values())
+    assert all(item.request is None for item in admissions.values())
+
+
 def test_admission_truncates_only_after_preserving_baseline() -> None:
     brief = _brief()
     claim = brief.transformation_contract.by_kind("change")[0]

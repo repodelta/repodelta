@@ -1122,9 +1122,15 @@ def _transformation_summary(brief: ReviewBrief) -> str:
             )
         )
     )
+    base_ids = tuple(
+        dict.fromkeys(
+            (*summary.before_state_claim_ids, *summary.before_topology_claim_ids)
+        )
+    )
     result_ids = tuple(
         dict.fromkeys(
             (
+                *summary.after_state_claim_ids,
                 *summary.after_topology_claim_ids,
                 *summary.completion_condition_claim_ids,
             )
@@ -1146,7 +1152,7 @@ def _transformation_summary(brief: ReviewBrief) -> str:
         'claims and their existing deterministic statuses. Select an item to '
         'open the canonical evidence inspector.</p>'
         '<div class="transformation-strip">'
-        f'{stage("Base", summary.before_topology_claim_ids)}'
+        f'{stage("Base", base_ids)}'
         '<span class="summary-arrow" aria-hidden="true">→</span>'
         f'{stage("Change", transition_ids)}'
         '<span class="summary-arrow" aria-hidden="true">→</span>'

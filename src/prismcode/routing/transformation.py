@@ -245,7 +245,11 @@ def eligible_transformation_evidence(
     """Canonical claim-kind eligibility shared by deterministic consumers."""
 
     role = item.transformation_evidence_role()
-    if role is None or claim.kind == "uncertainty":
+    if role is None or claim.kind in {
+        "before_state",
+        "after_state",
+        "uncertainty",
+    }:
         return False
     if claim.kind == "test_migration":
         return item.profile == "test" and role in {"change", "structural_path"}

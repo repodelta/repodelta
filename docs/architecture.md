@@ -140,13 +140,14 @@ Each Issue or PR Markdown body is parsed once into canonical
 7. Summary, Implementation, Changes, What Changed, and Approach are
    implementation claims. Baseline/Results are typed baseline claims.
 8. The PR introduction and title are intent only.
-9. Structured Change, Selected region, Before/After topology, Canonical
-   authority, Production path, Migration, Removed legacy paths, Completion
-   conditions, and Uncertainty sections form one PR-authored
-   `TransformationContract`. Routing may bind these claims to observed facts,
-   and the assessment stage evaluates those bindings without changing either
-   the authored claims or observed facts.
-10. Transformation selector predicates come only from explicit Markdown code
+9. Generic Before/After sections form typed before/after state context without
+   implying topology, authority, migration, or completion. Structured Change,
+   Selected region, Before/After topology, Canonical authority, Production
+   path, Migration, Removed legacy paths, Completion conditions, and
+   Uncertainty sections form the explicitly classified portion of the same
+   PR-authored `TransformationContract`.
+10. Routing and assessment fail closed for generic state context. For explicit
+    transformation kinds, selector predicates come only from Markdown code
     spans and arrow paths in those sections. They are authored lookup intent,
     not repository observations. Unmarked prose produces a typed diagnostic;
     semantics never guesses an identifier, and downstream consumption remains

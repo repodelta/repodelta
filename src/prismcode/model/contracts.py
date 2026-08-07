@@ -33,6 +33,8 @@ StatementAuthority = Literal[
 ]
 TransformationClaimKind = Literal[
     "change",
+    "before_state",
+    "after_state",
     "selected_region",
     "input_boundary",
     "output_boundary",
@@ -102,6 +104,7 @@ TransformationAssessmentReasonKind = Literal[
     "stale_verification",
     "coverage_incomplete",
     "no_binding",
+    "generic_transition_context",
     "uncertainty_context",
     "authority_path_observed",
     "authority_bypass_observed",
@@ -909,6 +912,14 @@ class TransformationTopology:
 
 
 @dataclass(frozen=True)
+class TransformationStateTransition:
+    """Authored before/after state without an inferred semantic subtype."""
+
+    before_claim_ids: tuple[str, ...] = ()
+    after_claim_ids: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
 class TransformationMigration:
     general_claim_ids: tuple[str, ...] = ()
     producer_claim_ids: tuple[str, ...] = ()
@@ -923,6 +934,7 @@ class TransformationContract:
     claims: tuple[TransformationClaim, ...] = ()
     predicates: TransformationPredicateSet = TransformationPredicateSet()
     change_claim_ids: tuple[str, ...] = ()
+    state_transition: TransformationStateTransition = TransformationStateTransition()
     region: TransformationRegion = TransformationRegion()
     topology: TransformationTopology = TransformationTopology()
     authority_claim_ids: tuple[str, ...] = ()
@@ -932,7 +944,7 @@ class TransformationContract:
     completion_condition_claim_ids: tuple[str, ...] = ()
     uncertainty_claim_ids: tuple[str, ...] = ()
     source_state: TransformationContractSourceState = "source_absent"
-    schema_version: str = "transformation_contract.v3"
+    schema_version: str = "transformation_contract.v4"
 
     def by_kind(
         self,
@@ -941,7 +953,7 @@ class TransformationContract:
         return tuple(item for item in self.claims if item.kind == kind)
 
     def validate_consistency(self) -> None:
-        if self.schema_version != "transformation_contract.v3":
+        if self.schema_version != "transformation_contract.v4":
             raise ValueError(
                 f"unsupported transformation contract schema: {self.schema_version}"
             )
@@ -957,6 +969,8 @@ class TransformationContract:
             )
         references_by_kind = {
             "change": self.change_claim_ids,
+            "before_state": self.state_transition.before_claim_ids,
+            "after_state": self.state_transition.after_claim_ids,
             "selected_region": self.region.selected_claim_ids,
             "input_boundary": self.region.input_boundary_claim_ids,
             "output_boundary": self.region.output_boundary_claim_ids,
@@ -3223,6 +3237,8 @@ class TransformationSummaryProjection:
     source_state: TransformationContractSourceState = "source_absent"
     claim_ids: tuple[str, ...] = ()
     change_claim_ids: tuple[str, ...] = ()
+    before_state_claim_ids: tuple[str, ...] = ()
+    after_state_claim_ids: tuple[str, ...] = ()
     selected_region_claim_ids: tuple[str, ...] = ()
     boundary_claim_ids: tuple[str, ...] = ()
     before_topology_claim_ids: tuple[str, ...] = ()
@@ -3254,7 +3270,7 @@ class VerificationWorkspace:
     )
     matrix: tuple[VerificationMatrixEntry, ...] = ()
     inspections: tuple[VerificationEvidenceInspection, ...] = ()
-    schema_version: str = "verification_workspace.v4"
+    schema_version: str = "verification_workspace.v5"
 
     def by_subject_id(self) -> dict[str, VerificationMatrixEntry]:
         return {item.subject_id: item for item in self.matrix}
@@ -3273,7 +3289,7 @@ class ReviewProjection:
         ArchitecturalChangeTopology()
     )
     verification_workspace: VerificationWorkspace = VerificationWorkspace()
-    schema_version: str = "review_projection.v27"
+    schema_version: str = "review_projection.v28"
 
     def validate_consistency(
         self,
@@ -3991,7 +4007,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v51"
+    schema_version: str = "review_brief.v52"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

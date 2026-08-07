@@ -814,7 +814,7 @@ def test_pr_transformation_contract_preserves_typed_structure_once() -> None:
         "Transformation assessment remains a later change."
     ]
     serialized = brief.to_dict()["transformation_contract"]
-    assert serialized["schema_version"] == "transformation_contract.v3"
+    assert serialized["schema_version"] == "transformation_contract.v4"
     assert serialized["claims"][8]["text"] == (
         "extract_packet_semantics() produces the contract once."
     )
@@ -846,6 +846,82 @@ def test_pr_transformation_contract_preserves_typed_structure_once() -> None:
         "T1", "T3", "T5", "T6", "T7", "T8", "T10", "T12", "T13",
         "CC1", "CC2", "T14",
     }
+
+
+def test_generic_transition_states_are_preserved_without_topology_inference() -> None:
+    brief = DeterministicAnalyzer().analyze(
+        AnalysisInput(
+            packet=_packet(
+                pr_body=(
+                    "## Before\n"
+                    "- `LegacyWriter` controlled the visible result.\n\n"
+                    "## After\n"
+                    "- `CanonicalWriter` controls the visible result.\n\n"
+                    "## Before topology\n"
+                    "- `Adapter` → `LegacyWriter`.\n\n"
+                    "## After topology\n"
+                    "- `Adapter` → `CanonicalWriter`.\n"
+                )
+            )
+        )
+    )
+    contract = brief.transformation_contract
+
+    assert [(item.id, item.kind) for item in contract.claims] == [
+        ("T1", "before_state"),
+        ("T2", "after_state"),
+        ("T3", "before_topology"),
+        ("T4", "after_topology"),
+    ]
+    assert contract.state_transition.before_claim_ids == ("T1",)
+    assert contract.state_transition.after_claim_ids == ("T2",)
+    assert contract.topology.before_claim_ids == ("T3",)
+    assert contract.topology.after_claim_ids == ("T4",)
+    assert {item.claim_id for item in contract.predicates.predicates} == {
+        "T3",
+        "T4",
+    }
+    assert not any(
+        item.claim_id in {"T1", "T2"}
+        for item in brief.transformation_alignment.bindings
+    )
+    assert {
+        item.claim_id: item.state
+        for item in brief.transformation_alignment.diagnostics
+        if item.claim_id in {"T1", "T2"}
+    } == {"T1": "no_eligible_fact", "T2": "no_eligible_fact"}
+    assessments = brief.transformation_assessment.by_claim_id()
+    assert assessments["T1"].status == "unverified"
+    assert assessments["T2"].status == "unverified"
+    assert assessments["T1"].reasons[0].kind == "generic_transition_context"
+    summary = brief.projection.verification_workspace.transformation_summary
+    assert summary.before_state_claim_ids == ("T1",)
+    assert summary.after_state_claim_ids == ("T2",)
+    assert {
+        item.subject_id
+        for item in brief.projection.verification_workspace.matrix
+    } == {"T1", "T2", "T3", "T4"}
+
+
+def test_empty_generic_transition_sections_do_not_manufacture_claims() -> None:
+    brief = DeterministicAnalyzer().analyze(
+        AnalysisInput(
+            packet=_packet(
+                pr_body=(
+                    "## Before\n\n"
+                    "## After\n\n"
+                    "## Change\n"
+                    "- Preserve the only authored statement.\n"
+                )
+            )
+        )
+    )
+
+    assert [(item.id, item.kind) for item in brief.transformation_contract.claims] == [
+        ("T1", "change"),
+    ]
+    assert brief.transformation_contract.state_transition.before_claim_ids == ()
+    assert brief.transformation_contract.state_transition.after_claim_ids == ()
 
 
 def test_transformation_predicates_require_explicit_code_selectors() -> None:
