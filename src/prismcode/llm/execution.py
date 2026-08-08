@@ -15,9 +15,8 @@ from prismcode.llm.admission import (
 )
 from prismcode.llm.contracts import (
     ShadowEvidenceRequest,
-    ShadowEvidenceSelection,
-    ShadowEvidenceSelectionItem,
     ShadowSelectionDiagnostic,
+    parse_shadow_selection,
     shadow_candidate_from_mapping,
 )
 from prismcode.llm.provider import ShadowEvidenceProvider
@@ -25,6 +24,8 @@ from prismcode.llm.runner import (
     ShadowRunRecord,
     ShadowRunner,
     ShadowSelectionComparison,
+    build_shadow_selection_comparison,
+    canonical_shadow_evidence_ids,
 )
 from prismcode.model.contracts import LLMShadowExecutionSummary, ReviewBrief
 
@@ -35,12 +36,14 @@ class ShadowExecutionBundle:
 
     summary: LLMShadowExecutionSummary
     observations: tuple["ShadowExecutionObservation", ...] = ()
-    schema_version: str = "llm_shadow_execution.v2"
+    schema_version: str = "llm_shadow_execution.v3"
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
 
     def __post_init__(self) -> None:
+        if self.schema_version != "llm_shadow_execution.v3":
+            raise ValueError("unsupported shadow execution schema_version")
         claim_ids = tuple(item.claim_id for item in self.observations)
         if len(claim_ids) != len(set(claim_ids)):
             raise ValueError("shadow observations must contain each claim at most once")
@@ -91,6 +94,8 @@ class ShadowExecutionObservation:
     diagnostics: tuple[ShadowAdmissionDiagnostic, ...] = ()
 
     def __post_init__(self) -> None:
+        if self.eligible_count < 0:
+            raise ValueError("shadow observation eligible_count cannot be negative")
         executed = self.execution_state in {
             "accepted",
             "invalid_output",
@@ -104,8 +109,40 @@ class ShadowExecutionObservation:
             raise ValueError("only admitted shadow observations carry a request")
         if self.request is not None and self.request.subject_id != self.claim_id:
             raise ValueError("shadow observation request must match its claim")
-        if self.run is not None and self.run.subject_id != self.claim_id:
-            raise ValueError("shadow observation run must match its claim")
+        if self.request is not None:
+            canonical_ids = canonical_shadow_evidence_ids(
+                self.request, self.deterministic_evidence_ids
+            )
+            if canonical_ids != self.deterministic_evidence_ids:
+                raise ValueError(
+                    "shadow observation deterministic evidence must be canonical"
+                )
+            if self.eligible_count < len(self.request.candidates):
+                raise ValueError(
+                    "shadow observation eligible_count cannot omit request candidates"
+                )
+        elif self.deterministic_evidence_ids:
+            raise ValueError(
+                "shadow observation without a request cannot carry evidence IDs"
+            )
+        if self.run is not None:
+            if self.run.subject_id != self.claim_id:
+                raise ValueError("shadow observation run must match its claim")
+            if self.request is None or (
+                self.run.request_id != self.request.request_id
+                or self.run.candidate_count != len(self.request.candidates)
+            ):
+                raise ValueError("shadow observation run must match its request")
+            if self.run.selection is not None:
+                expected = build_shadow_selection_comparison(
+                    self.request,
+                    self.deterministic_evidence_ids,
+                    self.run.selection,
+                )
+                if self.run.comparison != expected:
+                    raise ValueError(
+                        "shadow observation comparison must derive from canonical inputs"
+                    )
         if self.admission_state in {"ready", "ready_truncated"} and (
             self.execution_state in {"blocked", "empty"}
         ):
@@ -275,8 +312,8 @@ def load_shadow_execution(path: str | Path) -> ShadowExecutionBundle:
     """Load one canonical shadow artifact without replaying provider output."""
 
     raw = json.loads(Path(path).read_text(encoding="utf-8"))
-    if raw.get("schema_version") != "llm_shadow_execution.v2":
-        raise ValueError("shadow artifact must use schema_version llm_shadow_execution.v2")
+    if raw.get("schema_version") != "llm_shadow_execution.v3":
+        raise ValueError("shadow artifact must use schema_version llm_shadow_execution.v3")
     summary = LLMShadowExecutionSummary(**raw["summary"])
     observations = tuple(
         _load_observation(item) for item in raw.get("observations", ())
@@ -290,13 +327,20 @@ def load_shadow_execution(path: str | Path) -> ShadowExecutionBundle:
 
 def _load_observation(raw: dict) -> ShadowExecutionObservation:
     request = _load_request(raw.get("request"))
-    run = _load_run(raw.get("run"))
+    deterministic_evidence_ids = tuple(
+        raw.get("deterministic_evidence_ids", ())
+    )
+    run = _load_run(
+        raw.get("run"),
+        request,
+        deterministic_evidence_ids,
+    )
     return ShadowExecutionObservation(
         claim_id=str(raw["claim_id"]),
         admission_state=raw["admission_state"],
         execution_state=raw["execution_state"],
         eligible_count=int(raw["eligible_count"]),
-        deterministic_evidence_ids=tuple(raw.get("deterministic_evidence_ids", ())),
+        deterministic_evidence_ids=deterministic_evidence_ids,
         request=request,
         run=run,
         diagnostics=tuple(
@@ -323,11 +367,37 @@ def _load_request(raw: dict | None) -> ShadowEvidenceRequest | None:
     )
 
 
-def _load_run(raw: dict | None) -> ShadowRunRecord | None:
+def _load_run(
+    raw: dict | None,
+    request: ShadowEvidenceRequest | None,
+    deterministic_evidence_ids: tuple[str, ...],
+) -> ShadowRunRecord | None:
     if raw is None:
         return None
     selection_raw = raw.get("selection")
-    comparison_raw = raw.get("comparison")
+    selection = None
+    if selection_raw is not None:
+        if request is None:
+            raise ValueError("shadow run selection requires its canonical request")
+        validation = parse_shadow_selection(selection_raw, request)
+        if not validation.accepted or validation.selection is None:
+            raise ValueError("shadow artifact contains an invalid selection contract")
+        selection = validation.selection
+    comparison = None
+    if selection is not None:
+        if request is None:
+            raise ValueError("shadow run comparison requires its canonical request")
+        comparison = build_shadow_selection_comparison(
+            request,
+            deterministic_evidence_ids,
+            selection,
+        )
+        if not _matches_comparison(raw.get("comparison"), comparison):
+            raise ValueError(
+                "shadow artifact comparison does not derive from canonical inputs"
+            )
+    elif raw.get("comparison") is not None:
+        raise ValueError("shadow artifact comparison requires a validated selection")
     return ShadowRunRecord(
         request_id=str(raw["request_id"]),
         subject_id=str(raw["subject_id"]),
@@ -338,37 +408,19 @@ def _load_run(raw: dict | None) -> ShadowRunRecord | None:
         model_id=raw.get("model_id"),
         input_tokens=raw.get("input_tokens"),
         output_tokens=raw.get("output_tokens"),
-        selection=(
-            ShadowEvidenceSelection(
-                request_id=str(selection_raw["request_id"]),
-                subject_id=str(selection_raw["subject_id"]),
-                selections=tuple(
-                    ShadowEvidenceSelectionItem(**item)
-                    for item in selection_raw.get("selections", ())
-                ),
-                unresolved_surfaces=tuple(
-                    selection_raw.get("unresolved_surfaces", ())
-                ),
-                schema_version=str(selection_raw["schema_version"]),
-            )
-            if selection_raw is not None
-            else None
-        ),
-        comparison=(
-            ShadowSelectionComparison(
-                deterministic_ids=tuple(comparison_raw["deterministic_ids"]),
-                shadow_ids=tuple(comparison_raw["shadow_ids"]),
-                shared_ids=tuple(comparison_raw["shared_ids"]),
-                deterministic_only_ids=tuple(
-                    comparison_raw["deterministic_only_ids"]
-                ),
-                shadow_only_ids=tuple(comparison_raw["shadow_only_ids"]),
-            )
-            if comparison_raw is not None
-            else None
-        ),
+        selection=selection,
+        comparison=comparison,
         diagnostics=tuple(
             ShadowSelectionDiagnostic(**item)
             for item in raw.get("diagnostics", ())
         ),
+    )
+
+
+def _matches_comparison(
+    raw: object,
+    expected: ShadowSelectionComparison,
+) -> bool:
+    return isinstance(raw, dict) and raw == json.loads(
+        json.dumps(asdict(expected))
     )

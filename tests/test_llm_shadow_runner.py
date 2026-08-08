@@ -67,7 +67,7 @@ def test_runner_rejects_model_output_without_changing_deterministic_ids() -> Non
     assert record.state == "invalid_output"
     assert record.selection is None
     assert record.comparison is None
-    assert {item.code for item in record.diagnostics} == {"unknown_evidence_id"}
+    assert "unknown_evidence_id" in {item.code for item in record.diagnostics}
 
 
 def test_runner_isolates_provider_failure_and_sensitive_error_text() -> None:

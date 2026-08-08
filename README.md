@@ -211,6 +211,10 @@ membership converges per claim through baseline, aligned, same-hunk, and typed
 fallback tiers before the safety limit is applied. Candidates
 carry catalog-owned file/symbol context, directional changed lines, and bounded
 structural-path summaries; packet truncation is recorded as a coverage limit.
+The strict shadow output partitions every admitted identity exactly once as
+selected, rejected, or insufficient. Selected evidence receives only an
+evidence relationship and semantic role, never an acceptance conclusion;
+uncertain relevance must remain insufficient instead of being rejected.
 It records one
 typed observation per claim, including the bounded request, admission and
 execution fate, validated selection divergence, usage, failures, deferrals,

@@ -5,7 +5,7 @@ from dataclasses import asdict, dataclass
 from typing import Any, Literal, Mapping, Sequence
 
 
-SHADOW_SCHEMA_VERSION = "1"
+SHADOW_SCHEMA_VERSION = "2"
 MAX_CANDIDATES = 100
 MAX_SELECTIONS = 30
 MAX_UNRESOLVED_SURFACES = 20
@@ -26,7 +26,15 @@ ShadowSemanticRole = Literal[
 
 _EVIDENCE_ROLES = frozenset({"supporting", "contradicting", "context"})
 _RESPONSE_FIELDS = frozenset(
-    {"schema_version", "request_id", "subject_id", "selections", "unresolved_surfaces"}
+    {
+        "schema_version",
+        "request_id",
+        "subject_id",
+        "selections",
+        "rejected_evidence_ids",
+        "insufficient_evidence_ids",
+        "unresolved_surfaces",
+    }
 )
 _SELECTION_FIELDS = frozenset(
     {"evidence_id", "role", "semantic_role", "rationale"}
@@ -177,6 +185,8 @@ class ShadowEvidenceSelection:
     request_id: str
     subject_id: str
     selections: tuple[ShadowEvidenceSelectionItem, ...]
+    rejected_evidence_ids: tuple[str, ...] = ()
+    insufficient_evidence_ids: tuple[str, ...] = ()
     unresolved_surfaces: tuple[str, ...] = ()
     schema_version: str = SHADOW_SCHEMA_VERSION
 
@@ -238,7 +248,12 @@ def parse_shadow_selection(
     selections: list[ShadowEvidenceSelectionItem] = []
     for index, item in enumerate(raw_items[: MAX_SELECTIONS + 1]):
         if not isinstance(item, Mapping):
-            diagnostics.append(_diagnostic("invalid_selection", f"selection {index} is not an object."))
+            diagnostics.append(
+                _diagnostic(
+                    "invalid_selection",
+                    f"selection {index} is not an object.",
+                )
+            )
             continue
         unexpected_item_fields = set(item) - _SELECTION_FIELDS
         if unexpected_item_fields:
@@ -255,22 +270,43 @@ def parse_shadow_selection(
         rationale = item.get("rationale")
         if not isinstance(evidence_id, str) or evidence_id not in allowed_ids:
             diagnostics.append(
-                _diagnostic("unknown_evidence_id", f"selection {index} cites an unadmitted evidence ID.")
+                _diagnostic(
+                    "unknown_evidence_id",
+                    f"selection {index} cites an unadmitted evidence ID.",
+                )
             )
             continue
         if evidence_id in seen_ids:
             diagnostics.append(
-                _diagnostic("duplicate_evidence_id", f"evidence ID {evidence_id!r} is selected more than once.")
+                _diagnostic(
+                    "duplicate_evidence_id",
+                    f"evidence ID {evidence_id!r} is selected more than once.",
+                )
             )
             continue
         if role not in _EVIDENCE_ROLES:
-            diagnostics.append(_diagnostic("invalid_evidence_role", f"selection {index} has an invalid role."))
+            diagnostics.append(
+                _diagnostic(
+                    "invalid_evidence_role",
+                    f"selection {index} has an invalid role.",
+                )
+            )
             continue
         if semantic_role not in _SEMANTIC_ROLES:
-            diagnostics.append(_diagnostic("invalid_semantic_role", f"selection {index} has an invalid semantic role."))
+            diagnostics.append(
+                _diagnostic(
+                    "invalid_semantic_role",
+                    f"selection {index} has an invalid semantic role.",
+                )
+            )
             continue
         if not _valid_text(rationale):
-            diagnostics.append(_diagnostic("invalid_rationale", f"selection {index} has an invalid rationale."))
+            diagnostics.append(
+                _diagnostic(
+                    "invalid_rationale",
+                    f"selection {index} has an invalid rationale.",
+                )
+            )
             continue
         seen_ids.add(evidence_id)
         selections.append(
@@ -279,6 +315,73 @@ def parse_shadow_selection(
                 role=role,
                 semantic_role=semantic_role,
                 rationale=rationale,
+            )
+        )
+
+    disposition_ids: dict[str, tuple[str, ...]] = {}
+    for field in ("rejected_evidence_ids", "insufficient_evidence_ids"):
+        raw_ids = raw.get(field)
+        parsed_ids: list[str] = []
+        if not _is_sequence(raw_ids):
+            diagnostics.append(
+                _diagnostic(
+                    f"invalid_{field}",
+                    f"{field} must be a list.",
+                )
+            )
+        else:
+            if len(raw_ids) > MAX_CANDIDATES:
+                diagnostics.append(
+                    _diagnostic(
+                        "candidate_disposition_budget_exceeded",
+                        f"{field} exceeds safety limit {MAX_CANDIDATES}.",
+                    )
+                )
+            for index, evidence_id in enumerate(raw_ids[: MAX_CANDIDATES + 1]):
+                if not isinstance(evidence_id, str) or evidence_id not in allowed_ids:
+                    diagnostics.append(
+                        _diagnostic(
+                            "unknown_evidence_id",
+                            f"{field} {index} cites an unadmitted evidence ID.",
+                        )
+                    )
+                    continue
+                if evidence_id in parsed_ids:
+                    diagnostics.append(
+                        _diagnostic(
+                            "duplicate_evidence_id",
+                            f"evidence ID {evidence_id!r} occurs twice in {field}.",
+                        )
+                    )
+                    continue
+                parsed_ids.append(evidence_id)
+        disposition_ids[field] = tuple(parsed_ids)
+
+    rejected_ids = disposition_ids["rejected_evidence_ids"]
+    insufficient_ids = disposition_ids["insufficient_evidence_ids"]
+    selected_ids = {item.evidence_id for item in selections}
+    rejected_set = set(rejected_ids)
+    insufficient_set = set(insufficient_ids)
+    overlap = (
+        (selected_ids & rejected_set)
+        | (selected_ids & insufficient_set)
+        | (rejected_set & insufficient_set)
+    )
+    if overlap:
+        diagnostics.append(
+            _diagnostic(
+                "overlapping_candidate_disposition",
+                "Candidate dispositions overlap for: "
+                f"{', '.join(sorted(overlap))}.",
+            )
+        )
+    missing = allowed_ids - selected_ids - rejected_set - insufficient_set
+    if missing:
+        diagnostics.append(
+            _diagnostic(
+                "incomplete_candidate_partition",
+                "Every admitted candidate must be selected, rejected, or "
+                f"insufficient; missing: {', '.join(sorted(missing))}.",
             )
         )
 
@@ -300,7 +403,10 @@ def parse_shadow_selection(
         for index, value in enumerate(raw_unresolved[: MAX_UNRESOLVED_SURFACES + 1]):
             if not _valid_text(value):
                 diagnostics.append(
-                    _diagnostic("invalid_unresolved_surface", f"unresolved surface {index} is invalid.")
+                    _diagnostic(
+                        "invalid_unresolved_surface",
+                        f"unresolved surface {index} is invalid.",
+                    )
                 )
             else:
                 unresolved.append(value)
@@ -312,6 +418,8 @@ def parse_shadow_selection(
             request_id=request.request_id,
             subject_id=request.subject_id,
             selections=tuple(selections),
+            rejected_evidence_ids=_candidate_order(request, rejected_ids),
+            insufficient_evidence_ids=_candidate_order(request, insufficient_ids),
             unresolved_surfaces=tuple(unresolved),
         ),
         diagnostics=(),
@@ -320,6 +428,18 @@ def parse_shadow_selection(
 
 def _diagnostic(code: str, message: str) -> ShadowSelectionDiagnostic:
     return ShadowSelectionDiagnostic(code=code, message=message)
+
+
+def _candidate_order(
+    request: ShadowEvidenceRequest,
+    evidence_ids: tuple[str, ...],
+) -> tuple[str, ...]:
+    selected = set(evidence_ids)
+    return tuple(
+        candidate.evidence_id
+        for candidate in request.candidates
+        if candidate.evidence_id in selected
+    )
 
 
 def _json_dict(value: object) -> dict[str, Any]:
