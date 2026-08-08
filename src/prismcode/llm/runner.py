@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
-from collections.abc import Iterable
 from typing import Callable, Literal
 
 from prismcode.llm.contracts import (
@@ -43,6 +42,22 @@ class ShadowRunRecord:
     comparison: ShadowSelectionComparison | None = None
     diagnostics: tuple[ShadowSelectionDiagnostic, ...] = ()
 
+    def __post_init__(self) -> None:
+        accepted = self.state == "accepted"
+        if (self.selection is not None) != accepted or (
+            (self.comparison is not None) != accepted
+        ):
+            raise ValueError("only accepted shadow runs carry selection semantics")
+        if self.selection is not None and (
+            self.selection.request_id != self.request_id
+            or self.selection.subject_id != self.subject_id
+        ):
+            raise ValueError("shadow run selection must match its run identity")
+        if self.candidate_count < 0:
+            raise ValueError("shadow run candidate_count cannot be negative")
+        if self.duration_ms < 0:
+            raise ValueError("shadow run duration_ms cannot be negative")
+
 
 class ShadowRunner:
     """Invoke one provider and isolate every failure from deterministic output."""
@@ -62,7 +77,9 @@ class ShadowRunner:
         *,
         deterministic_evidence_ids: tuple[str, ...],
     ) -> ShadowRunRecord:
-        deterministic_ids = _canonical_ids(request, deterministic_evidence_ids)
+        deterministic_ids = canonical_shadow_evidence_ids(
+            request, deterministic_evidence_ids
+        )
         started = self._clock()
         try:
             response = self._provider.select(request)
@@ -99,18 +116,19 @@ class ShadowRunner:
                 **common,
             )
 
-        shadow_ids = _ordered_unique(
-            item.evidence_id for item in validation.selection.selections
-        )
         return ShadowRunRecord(
             state="accepted",
             selection=validation.selection,
-            comparison=_compare(deterministic_ids, shadow_ids),
+            comparison=build_shadow_selection_comparison(
+                request,
+                deterministic_ids,
+                validation.selection,
+            ),
             **common,
         )
 
 
-def _canonical_ids(
+def canonical_shadow_evidence_ids(
     request: ShadowEvidenceRequest, evidence_ids: tuple[str, ...]
 ) -> tuple[str, ...]:
     admitted_order = {
@@ -122,13 +140,21 @@ def _canonical_ids(
     return tuple(sorted(set(evidence_ids), key=admitted_order.__getitem__))
 
 
-def _ordered_unique(evidence_ids: Iterable[str]) -> tuple[str, ...]:
-    return tuple(dict.fromkeys(evidence_ids))
-
-
-def _compare(
-    deterministic_ids: tuple[str, ...], shadow_ids: tuple[str, ...]
+def build_shadow_selection_comparison(
+    request: ShadowEvidenceRequest,
+    deterministic_evidence_ids: tuple[str, ...],
+    selection: ShadowEvidenceSelection,
 ) -> ShadowSelectionComparison:
+    """Derive the only comparison truth from one request and validated output."""
+
+    deterministic_ids = canonical_shadow_evidence_ids(
+        request, deterministic_evidence_ids
+    )
+    shadow_ids = tuple(item.evidence_id for item in selection.selections)
+    canonical_shadow_evidence_ids(
+        request,
+        shadow_ids,
+    )
     deterministic = set(deterministic_ids)
     shadow = set(shadow_ids)
     return ShadowSelectionComparison(

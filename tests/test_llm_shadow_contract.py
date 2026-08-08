@@ -39,7 +39,9 @@ def test_shadow_output_cannot_invent_evidence_identity() -> None:
     validation = parse_shadow_selection(raw, request)
 
     assert not validation.accepted
-    assert {item.code for item in validation.diagnostics} == {"unknown_evidence_id"}
+    assert "unknown_evidence_id" in {
+        item.code for item in validation.diagnostics
+    }
 
 
 def test_shadow_output_fails_closed_on_duplicate_or_conflicting_selection() -> None:
@@ -94,6 +96,9 @@ def test_shadow_output_rejects_invalid_roles_and_selection_budget() -> None:
             }
             for index in range(MAX_SELECTIONS + 1)
         ],
+        "rejected_evidence_ids": [],
+        "insufficient_evidence_ids": [],
+        "unresolved_surfaces": [],
     }
 
     validation = parse_shadow_selection(raw, request)
@@ -103,6 +108,61 @@ def test_shadow_output_rejects_invalid_roles_and_selection_budget() -> None:
         "invalid_evidence_role",
         "selection_budget_exceeded",
     }
+
+
+def test_shadow_output_partitions_every_candidate_once() -> None:
+    request, raw = _fixture_pair()
+    moved = raw["selections"].pop()
+    raw["rejected_evidence_ids"] = [moved["evidence_id"]]
+
+    validation = parse_shadow_selection(raw, request)
+
+    assert validation.accepted
+    assert validation.selection is not None
+    assert validation.selection.rejected_evidence_ids == (moved["evidence_id"],)
+
+
+def test_shadow_output_preserves_insufficient_identity_in_candidate_order() -> None:
+    request, raw = _fixture_pair()
+    moved = raw["selections"].pop(0)
+    raw["insufficient_evidence_ids"] = [moved["evidence_id"]]
+
+    validation = parse_shadow_selection(raw, request)
+
+    assert validation.accepted
+    assert validation.selection is not None
+    assert validation.selection.insufficient_evidence_ids == (
+        moved["evidence_id"],
+    )
+
+
+def test_shadow_output_fails_closed_on_incomplete_or_overlapping_partition() -> None:
+    request, raw = _fixture_pair()
+    missing_id = raw["selections"].pop()["evidence_id"]
+
+    incomplete = parse_shadow_selection(raw, request)
+    raw["rejected_evidence_ids"] = [missing_id]
+    raw["insufficient_evidence_ids"] = [missing_id]
+    overlapping = parse_shadow_selection(raw, request)
+
+    assert "incomplete_candidate_partition" in {
+        item.code for item in incomplete.diagnostics
+    }
+    assert "overlapping_candidate_disposition" in {
+        item.code for item in overlapping.diagnostics
+    }
+
+
+def test_shadow_output_rejects_the_ambiguous_v1_contract() -> None:
+    request, raw = _fixture_pair()
+    raw["schema_version"] = "1"
+    raw.pop("rejected_evidence_ids")
+    raw.pop("insufficient_evidence_ids")
+
+    validation = parse_shadow_selection(raw, request)
+
+    assert not validation.accepted
+    assert "schema_mismatch" in {item.code for item in validation.diagnostics}
 
 
 def test_shadow_contract_rejects_formal_assessment_output() -> None:

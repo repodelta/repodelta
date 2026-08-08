@@ -97,14 +97,20 @@ referenced structural-path summaries. It neither reparses provider output nor
 changes candidate membership; unavailable and truncated context remains an
 explicit coverage limit. The boundary may
 then run a provider behind a transport-only port. The runner
-validates cited canonical evidence identities, records deterministic-only,
-shadow-only, and shared selections plus usage and latency, and isolates every
-provider or validation failure from deterministic output. The execution stage
+validates a complete selected/rejected/insufficient partition of the admitted
+canonical identities. Admission provenance is not evidence strength;
+directional code is not interchangeable; structural context is not execution
+or coverage proof. Selected roles express evidence-to-claim relation without
+becoming acceptance status. The runner records deterministic-only, shadow-only,
+and shared selections plus usage and latency, and isolates every provider or
+validation failure from deterministic output. The execution stage
 joins each admission to exactly one accepted, invalid, failed, deferred,
 blocked, or empty observation. That observation is the detailed artifact truth;
-the review-level state is derived from it. The artifact preserves the bounded
-request and coverage limits but never raw unvalidated output or provider error
-text. It carries no formal assessment status and has no production consumer.
+the review-level state is derived from it. Loading revalidates selection and
+identity contracts and checks persisted comparisons against their canonical
+inputs. The artifact preserves the bounded request and coverage limits but
+never raw unvalidated output or provider error text. It carries no formal
+assessment status and has no production consumer.
 
 Each stage owns one transformation. Typed models, boundary validation, and
 counterfactual tests define its executable local contract; this document is the

@@ -1,5 +1,5 @@
 {
-  "schema_version": "llm_shadow_execution.v2",
+  "schema_version": "llm_shadow_execution.v3",
   "summary": {
     "state": "partial",
     "admitted_count": 3,
@@ -16,7 +16,7 @@
       "eligible_count": 3,
       "deterministic_evidence_ids": ["E:authority"],
       "request": {
-        "schema_version": "1",
+        "schema_version": "2",
         "request_id": "shadow:T1:golden",
         "subject_id": "T1",
         "subject_kind": "authority",
@@ -39,13 +39,15 @@
         "input_tokens": 100,
         "output_tokens": 20,
         "selection": {
-          "schema_version": "1",
+          "schema_version": "2",
           "request_id": "shadow:T1:golden",
           "subject_id": "T1",
           "selections": [
             {"evidence_id": "E:authority", "role": "supporting", "semantic_role": "authority", "rationale": "Observed controlling writer."},
             {"evidence_id": "E:removal", "role": "contradicting", "semantic_role": "removal", "rationale": "Removal evidence must be reviewed separately."}
           ],
+          "rejected_evidence_ids": ["E:context"],
+          "insufficient_evidence_ids": [],
           "unresolved_surfaces": ["Dynamic plugin writers were not observed."]
         },
         "comparison": {
@@ -66,7 +68,7 @@
       "eligible_count": 1,
       "deterministic_evidence_ids": ["E:path"],
       "request": {
-        "schema_version": "1",
+        "schema_version": "2",
         "request_id": "shadow:T2:golden",
         "subject_id": "T2",
         "subject_kind": "production_path",
@@ -101,7 +103,7 @@
       "eligible_count": 1,
       "deterministic_evidence_ids": [],
       "request": {
-        "schema_version": "1",
+        "schema_version": "2",
         "request_id": "shadow:T3:golden",
         "subject_id": "T3",
         "subject_kind": "migration",

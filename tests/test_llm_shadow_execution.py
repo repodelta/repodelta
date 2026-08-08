@@ -33,6 +33,9 @@ class BaselineProvider:
     def select(self, request):
         self.calls += 1
         evidence_id = request.candidates[0].evidence_id
+        rejected_ids = [
+            item.evidence_id for item in request.candidates[1:]
+        ]
         return ShadowProviderResponse(
             provider_id="test",
             model_id="recorded",
@@ -48,6 +51,8 @@ class BaselineProvider:
                         "rationale": "Recorded bounded selection.",
                     }
                 ],
+                "rejected_evidence_ids": rejected_ids,
+                "insufficient_evidence_ids": [],
                 "unresolved_surfaces": [],
             },
         )
@@ -82,10 +87,59 @@ def test_execution_runs_ready_admissions_once_and_writes_stable_artifact(
     assert first.read_bytes() == second.read_bytes()
     artifact = json.loads(first.read_text(encoding="utf-8"))
     assert "assessment" not in json.dumps(artifact)
-    assert artifact["schema_version"] == "llm_shadow_execution.v2"
+    assert artifact["schema_version"] == "llm_shadow_execution.v3"
     assert artifact["observations"][0]["request"]["candidates"]
     assert artifact["observations"][0]["run"]["comparison"] is not None
     assert load_shadow_execution(first) == bundle
+
+    first_selection = artifact["observations"][0]["run"]["selection"]
+    first_selection["rejected_evidence_ids"].append(
+        first_selection["selections"][0]["evidence_id"]
+    )
+    invalid = tmp_path / "invalid.json"
+    invalid.write_text(json.dumps(artifact), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid selection contract"):
+        load_shadow_execution(invalid)
+
+
+def test_execution_artifact_rejects_tampered_derived_and_identity_fields(
+    tmp_path: Path,
+) -> None:
+    artifact_path = write_shadow_execution(
+        execute_shadow_admissions(_admit(_brief()), BaselineProvider()),
+        tmp_path / "canonical.json",
+    )
+    canonical = json.loads(artifact_path.read_text(encoding="utf-8"))
+
+    comparison = json.loads(json.dumps(canonical))
+    comparison["observations"][0]["run"]["comparison"]["shadow_ids"] = []
+    _assert_invalid_artifact(
+        tmp_path,
+        comparison,
+        "comparison does not derive from canonical inputs",
+    )
+
+    evidence = json.loads(json.dumps(canonical))
+    evidence["observations"][0]["deterministic_evidence_ids"].append(
+        "invented:baseline"
+    )
+    _assert_invalid_artifact(tmp_path, evidence, "must be admitted candidates")
+
+    candidate_count = json.loads(json.dumps(canonical))
+    candidate_count["observations"][0]["run"]["candidate_count"] += 1
+    _assert_invalid_artifact(
+        tmp_path,
+        candidate_count,
+        "run must match its request",
+    )
+
+    run_identity = json.loads(json.dumps(canonical))
+    run_identity["observations"][0]["run"]["request_id"] = "tampered:request"
+    _assert_invalid_artifact(
+        tmp_path,
+        run_identity,
+        "selection must match its run identity",
+    )
 
 
 def test_shadow_execution_does_not_mutate_formal_assessment() -> None:
@@ -222,3 +276,14 @@ def _admit(brief):
         brief.transformation_alignment,
         brief.transformation_assessment,
     )
+
+
+def _assert_invalid_artifact(
+    tmp_path: Path,
+    artifact: dict,
+    message: str,
+) -> None:
+    path = tmp_path / f"invalid-{len(tuple(tmp_path.iterdir()))}.json"
+    path.write_text(json.dumps(artifact), encoding="utf-8")
+    with pytest.raises(ValueError, match=message):
+        load_shadow_execution(path)

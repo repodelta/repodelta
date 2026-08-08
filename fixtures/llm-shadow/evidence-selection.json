@@ -1,6 +1,6 @@
 {
   "request": {
-    "schema_version": "1",
+    "schema_version": "2",
     "request_id": "shadow:T1",
     "subject_id": "T1",
     "subject_kind": "transformation_claim",
@@ -24,7 +24,7 @@
     "coverage_limits": ["Dynamic plugin writers were not observed."]
   },
   "response": {
-    "schema_version": "1",
+    "schema_version": "2",
     "request_id": "shadow:T1",
     "subject_id": "T1",
     "selections": [
@@ -41,6 +41,8 @@
         "rationale": "The old writer is removed on the base side."
       }
     ],
+    "rejected_evidence_ids": [],
+    "insufficient_evidence_ids": [],
     "unresolved_surfaces": ["Dynamic plugin writers remain outside observed coverage."]
   }
 }

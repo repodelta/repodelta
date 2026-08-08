@@ -49,6 +49,8 @@ def _api_response(request: ShadowEvidenceRequest) -> dict:
                 "rationale": "The changed authority symbol is relevant.",
             }
         ],
+        "rejected_evidence_ids": [],
+        "insufficient_evidence_ids": [],
         "unresolved_surfaces": [],
     }
     return {
@@ -102,6 +104,14 @@ def test_openai_provider_uses_bounded_strict_responses_contract() -> None:
     assert request_payload["candidates"][0]["structural_context"] == [
         "entry →[calls] Analyzer"
     ]
+    required = captured["payload"]["response_format"]["json_schema"]["schema"][
+        "required"
+    ]
+    assert "rejected_evidence_ids" in required
+    assert "insufficient_evidence_ids" in required
+    system_prompt = captured["payload"]["messages"][0]["content"]
+    assert "Partition every admitted evidence ID exactly once" in system_prompt
+    assert "Prefer insufficient over rejection when uncertain" in system_prompt
     assert "secret-test-key" not in json.dumps(captured["payload"])
     assert response.output["request_id"] == request.request_id
     assert response.input_tokens == 120

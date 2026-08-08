@@ -6,13 +6,43 @@ from typing import Any, Callable, Mapping
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
-from prismcode.llm.contracts import SHADOW_SCHEMA_VERSION, ShadowEvidenceRequest
+from prismcode.llm.contracts import (
+    MAX_CANDIDATES,
+    MAX_SELECTIONS,
+    MAX_TEXT_LENGTH,
+    MAX_UNRESOLVED_SURFACES,
+    SHADOW_SCHEMA_VERSION,
+    ShadowEvidenceRequest,
+)
 from prismcode.llm.provider import ShadowProviderResponse
 
 
 DEFAULT_OPENAI_BASE_URL = "https://api.openai.com/v1"
 DEFAULT_TIMEOUT_SECONDS = 180.0
 DEFAULT_MAX_OUTPUT_TOKENS = 1_200
+
+SHADOW_SELECTION_SYSTEM_PROMPT = """\
+Map the authored statement to the admitted repository evidence packet. Treat
+candidate admission_tier and association as provenance, not as proof of
+relevance or correctness. added_code and removed_code are directional diff
+facts; structural_context is bounded reachability context, not proof that a
+flow executes or that repository coverage is complete.
+
+Partition every admitted evidence ID exactly once:
+- selections: directly relevant evidence. Classify its relationship as
+  supporting, contradicting, or context and its semantic role. These roles
+  describe evidence-to-claim relation only; they never assess acceptance,
+  completion, or mergeability.
+- rejected_evidence_ids: evidence demonstrably unrelated to the authored
+  statement within the supplied packet.
+- insufficient_evidence_ids: evidence whose relevance cannot be determined
+  safely because content, identity, direction, or coverage is incomplete or
+  ambiguous. Prefer insufficient over rejection when uncertain.
+
+Use only supplied evidence IDs. Do not invent repository facts, infer absence
+from missing evidence, or claim coverage beyond coverage_limits. Record missing
+dynamic or external surfaces in unresolved_surfaces.
+"""
 
 JsonTransport = Callable[
     [str, Mapping[str, str], Mapping[str, Any], float], Mapping[str, Any]
@@ -34,7 +64,9 @@ class OpenAIShadowConfig:
         if parsed.scheme != "https" or not parsed.hostname:
             raise ValueError("OpenAI shadow base_url must be an absolute HTTPS URL")
         if parsed.username or parsed.password or parsed.query or parsed.fragment:
-            raise ValueError("OpenAI shadow base_url must not contain credentials or query data")
+            raise ValueError(
+                "OpenAI shadow base_url must not contain credentials or query data"
+            )
         if self.timeout_seconds <= 0:
             raise ValueError("OpenAI shadow timeout_seconds must be positive")
         if self.max_output_tokens <= 0:
@@ -90,12 +122,7 @@ def _response_payload(
         "messages": [
             {
                 "role": "system",
-                "content": (
-                    "Select only evidence IDs supplied in the request. Classify "
-                    "their relationship to the authored statement. Do not assess "
-                    "acceptance, invent repository facts, or claim coverage beyond "
-                    "coverage_limits."
-                ),
+                "content": SHADOW_SELECTION_SYSTEM_PROMPT,
             },
             {
                 "role": "user",
@@ -128,6 +155,7 @@ def _selection_schema(request: ShadowEvidenceRequest) -> dict[str, Any]:
             "subject_id": {"type": "string"},
             "selections": {
                 "type": "array",
+                "maxItems": MAX_SELECTIONS,
                 "items": {
                     "type": "object",
                     "additionalProperties": False,
@@ -156,7 +184,11 @@ def _selection_schema(request: ShadowEvidenceRequest) -> dict[str, Any]:
                                 "unknown",
                             ],
                         },
-                        "rationale": {"type": "string"},
+                        "rationale": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": MAX_TEXT_LENGTH,
+                        },
                     },
                     "required": [
                         "evidence_id",
@@ -166,9 +198,16 @@ def _selection_schema(request: ShadowEvidenceRequest) -> dict[str, Any]:
                     ],
                 },
             },
+            "rejected_evidence_ids": _identity_array_schema(request),
+            "insufficient_evidence_ids": _identity_array_schema(request),
             "unresolved_surfaces": {
                 "type": "array",
-                "items": {"type": "string"},
+                "maxItems": MAX_UNRESOLVED_SURFACES,
+                "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": MAX_TEXT_LENGTH,
+                },
             },
         },
         "required": [
@@ -176,8 +215,22 @@ def _selection_schema(request: ShadowEvidenceRequest) -> dict[str, Any]:
             "request_id",
             "subject_id",
             "selections",
+            "rejected_evidence_ids",
+            "insufficient_evidence_ids",
             "unresolved_surfaces",
         ],
+    }
+
+
+def _identity_array_schema(request: ShadowEvidenceRequest) -> dict[str, Any]:
+    return {
+        "type": "array",
+        "maxItems": MAX_CANDIDATES,
+        "uniqueItems": True,
+        "items": {
+            "type": "string",
+            "enum": [item.evidence_id for item in request.candidates],
+        },
     }
 
 
