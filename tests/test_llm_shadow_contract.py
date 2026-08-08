@@ -11,7 +11,11 @@ from prismcode.llm import (
     parse_shadow_selection,
     serialize_shadow_replay,
 )
-from prismcode.llm.contracts import MAX_SELECTIONS, MAX_UNRESOLVED_SURFACES
+from prismcode.llm.contracts import (
+    MAX_SELECTIONS,
+    MAX_UNRESOLVED_SURFACES,
+    SHADOW_SCHEMA_VERSION,
+)
 
 
 FIXTURE = "fixtures/llm-shadow/evidence-selection.json"
@@ -78,7 +82,7 @@ def test_shadow_output_rejects_invalid_roles_and_selection_budget() -> None:
         ),
     )
     raw = {
-        "schema_version": "1",
+        "schema_version": SHADOW_SCHEMA_VERSION,
         "request_id": request.request_id,
         "subject_id": request.subject_id,
         "selections": [

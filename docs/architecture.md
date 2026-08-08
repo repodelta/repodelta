@@ -87,7 +87,12 @@ fixture or GitHub
 An optional, dormant `llm` boundary derives one claim-kind-eligible candidate
 set from canonical observed transformation facts. Deterministic assessment
 evidence is retained first; remaining typed candidates are admitted in catalog
-order under an explicit safety budget and coverage limits. The boundary may
+order under an explicit safety budget and coverage limits. One canonical code
+packet projection enriches those same identities with catalog-owned
+classification, path and symbol metadata, directional changed lines, and
+referenced structural-path summaries. It neither reparses provider output nor
+changes candidate membership; unavailable and truncated context remains an
+explicit coverage limit. The boundary may
 then run a provider behind a transport-only port. The runner
 validates cited canonical evidence identities, records deterministic-only,
 shadow-only, and shared selections plus usage and latency, and isolates every
