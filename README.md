@@ -205,9 +205,11 @@ prismcode review \
 ```
 
 PrismCode sends only bounded canonical evidence candidates through the
-Chat Completions API with strict Structured Outputs, `store: false`, no tools, and a
-40-candidate request limit plus three-request review limit. It records validated selection divergence, usage,
-failures, deferred requests, and admission coverage in
+Chat Completions API with strict Structured Outputs, `store: false`, no tools,
+and a 40-candidate request limit plus three-request review limit. It records one
+typed observation per claim, including the bounded request, admission and
+execution fate, validated selection divergence, usage, failures, deferrals,
+and coverage limits, in
 `build/pr-123.html.llm-shadow.json`; the Brief header shows only the execution
 state. Missing configuration records `unavailable`; provider or validation
 failure records `partial` or `failed`; deterministic HTML still succeeds.
