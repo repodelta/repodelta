@@ -7,6 +7,7 @@ import re
 from urllib.parse import quote, urlparse, urlunparse
 
 from prismcode.model.contracts import (
+    ArchitecturalComponent,
     EvidenceItem,
     ReviewBrief,
     ReviewProjection,
@@ -162,6 +163,11 @@ def _review_graph(
             "</div>"
         )
     evidence = brief.evidence_catalog.by_id()
+    architectural_components = {
+        node_id: component
+        for component in projection.architectural_topology.components
+        for node_id in component.node_ids
+    }
     nodes = {item.id: item for item in graph.nodes}
     edges = {item.id: item for item in graph.edges}
     relation_groups = {item.id: item for item in graph.relation_groups}
@@ -319,6 +325,7 @@ def _review_graph(
             f'{escape(kind)} · {escape(parent_node.delta)}</text>'
             f'<text class="delta-node-name" x="11" y="32">'
             f'{escape(name_label or path_label)}</text>'
+            f'{_architectural_chip(architectural_components[parent_node.id], container.width - 24)}'
             f"<title>{escape(full_name)}</title></g>"
         )
         href = _structural_node_href(
@@ -515,6 +522,7 @@ def _review_graph(
             f'{escape(name_label)}</text>'
             f'<text class="delta-node-path" x="12" y="57">'
             f'{escape(path_label)}</text>'
+            f'{_architectural_chip(architectural_components[node.id], 210)}'
             f"<title>{escape(full_name)}</title></g>"
         )
         href = _structural_node_href(node, graph.navigation_targets)
@@ -543,6 +551,7 @@ def _review_graph(
             f'<span class="isolated-anchor-operation">{escape(node.delta)}</span>'
             f'<span class="isolated-anchor-name">{escape(_structural_name(fact))}</span>'
             f'<span class="isolated-anchor-kind">{escape(kind)}</span>'
+            f'{_architectural_chip_html(architectural_components[node.id])}'
             + (
                 f'<span class="projection-source">Source: {sources}</span>'
                 if sources
@@ -615,6 +624,56 @@ def _review_graph(
         f'<div class="relation-group-inspector">{"".join(relation_group_details)}</div>'
         f'{isolated}'
         "</div>"
+    )
+
+
+def _architectural_membership_attributes(
+    component: ArchitecturalComponent,
+) -> str:
+    return (
+        f'data-component-target="{escape(component.id, quote=True)}" '
+        f'data-member-node-ids="{escape(" ".join(component.node_ids), quote=True)}" '
+        f'data-context-node-ids="{escape(" ".join(component.context_node_ids), quote=True)}" '
+        f'data-member-group-ids="{escape(" ".join(component.internal_relation_group_ids), quote=True)}" '
+        f'data-context-group-ids="{escape(" ".join(component.context_relation_group_ids), quote=True)}"'
+    )
+
+
+def _architectural_chip_label(component: ArchitecturalComponent) -> str:
+    if component.layer != "unclassified":
+        return component.layer
+    return component.domain.rsplit("/", 1)[-1] + "?"
+
+
+def _architectural_chip(
+    component: ArchitecturalComponent,
+    cell_width: int,
+) -> str:
+    label = _truncate_label(_architectural_chip_label(component), 16)
+    width = max(38, min(88, len(label) * 5 + 14))
+    x = cell_width - width - 8
+    return (
+        '<g class="architectural-chip '
+        f'layer-{escape(component.layer)}" tabindex="0" role="button" '
+        f'{_architectural_membership_attributes(component)} '
+        f'transform="translate({x} 7)">'
+        f'<rect width="{width}" height="16" rx="8"/>'
+        f'<text x="{width // 2}" y="11">{escape(label)}</text>'
+        f'<title>{escape(component.domain)} · {escape(component.layer)} · '
+        f'{escape(component.classification_authority.replace("_", " "))}</title>'
+        '</g>'
+    )
+
+
+def _architectural_chip_html(component: ArchitecturalComponent) -> str:
+    label = _architectural_chip_label(component)
+    return (
+        '<button class="architectural-chip-html '
+        f'layer-{escape(component.layer)}" type="button" '
+        f'{_architectural_membership_attributes(component)} '
+        f'title="{escape(component.domain, quote=True)} · '
+        f'{escape(component.classification_authority.replace("_", " "), quote=True)}">'
+        f'{escape(label)}</button>'
     )
 
 
@@ -1163,122 +1222,6 @@ def _transformation_summary(brief: ReviewBrief) -> str:
     )
 
 
-def _architectural_change_topology(brief: ReviewBrief) -> str:
-    topology = brief.projection.architectural_topology
-    if not topology.components:
-        return (
-            '<section class="section architectural-topology">'
-            '<h2>Change topology</h2>'
-            '<p class="empty">No canonical architectural components are available.</p>'
-            '</section>'
-        )
-    components = {item.id: item for item in topology.components}
-    component_focuses: dict[str, list[str]] = {}
-    component_context_focuses: dict[str, list[str]] = {}
-    flow_focuses: dict[str, list[str]] = {}
-    for inspection in brief.projection.verification_workspace.inspections:
-        for component_id in inspection.architectural_overlay.component_ids:
-            component_focuses.setdefault(component_id, []).append(
-                inspection.subject_id
-            )
-        for component_id in inspection.architectural_overlay.context_component_ids:
-            component_context_focuses.setdefault(component_id, []).append(
-                inspection.subject_id
-            )
-        for flow_id in inspection.architectural_overlay.flow_ids:
-            flow_focuses.setdefault(flow_id, []).append(inspection.subject_id)
-    operation_labels = {
-        "added": "+",
-        "modified": "~",
-        "renamed": "↝",
-        "removed": "−",
-        "retained": "=",
-        "unresolved": "?",
-    }
-    cards = []
-    for component_id in topology.display_component_ids:
-        component = components[component_id]
-        operations = "".join(
-            '<span class="topology-operation '
-            f'operation-{escape(item.operation)}">'
-            f'{escape(operation_labels[item.operation])}{item.count}</span>'
-            for item in component.operation_counts
-        )
-        cards.append(
-            '<button class="topology-component" type="button" '
-            f'data-component-target="{escape(component.id, quote=True)}" '
-            f'data-member-node-ids="{escape(" ".join(component.node_ids), quote=True)}" '
-            f'data-focuses="{escape(" ".join(component_focuses.get(component.id, ())), quote=True)}" '
-            f'data-context-focuses="{escape(" ".join(component_context_focuses.get(component.id, ())), quote=True)}">'
-            f'<span class="eyebrow">{escape(component.layer)}</span>'
-            f'<strong>{escape(component.domain)}</strong>'
-            f'<span class="topology-operations">{operations}</span>'
-            f'<small>{len(component.node_ids)} structural members · '
-            f'{escape(component.classification_authority.replace("_", " "))}</small>'
-            '</button>'
-        )
-
-    def flow_rows(kind: str) -> str:
-        rows = []
-        for flow in topology.flows:
-            if flow.kind != kind:
-                continue
-            source = components[flow.source_component_id]
-            target = components[flow.target_component_id]
-            member_node_ids = tuple(
-                dict.fromkeys((*source.node_ids, *target.node_ids))
-            )
-            rows.append(
-                f'<button class="topology-flow operation-{escape(flow.operation)}" '
-                f'type="button" data-flow-target="{escape(flow.id, quote=True)}" '
-                f'data-member-node-ids="{escape(" ".join(member_node_ids), quote=True)}" '
-                f'data-member-group-ids="{escape(" ".join(flow.relation_group_ids), quote=True)}" '
-                f'data-focuses="{escape(" ".join(flow_focuses.get(flow.id, ())), quote=True)}">'
-                f'<span>{escape(source.domain)}</span><b>→</b>'
-                f'<span>{escape(target.domain)}</span>'
-                f'<small>{escape(" / ".join(flow.relations))} · '
-                f'{len(flow.relation_group_ids)} groups · '
-                f'{escape(flow.operation)}</small></button>'
-            )
-        return "".join(rows)
-
-    executable = flow_rows("executable")
-    verification = flow_rows("verification_support")
-    supporting = flow_rows("dependency") + flow_rows("structural_support")
-    unclassified = sum(
-        1 for item in topology.components if item.layer == "unclassified"
-    )
-    return (
-        '<section class="section architectural-topology">'
-        '<h2>Change topology</h2>'
-        '<p class="section-intro">A deterministic component-level projection '
-        'of the same canonical structural graph shown below.</p>'
-        f'<div class="topology-components">{"".join(cards)}</div>'
-        '<p class="topology-focus-empty" hidden></p>'
-        '<div class="topology-flow-section"><span class="projection-heading">'
-        'Executable flow</span>'
-        f'{executable or "<p class=\"empty\">No cross-component executable flow was observed.</p>"}'
-        '</div>'
-        + (
-            '<details class="topology-support"><summary>Verification support · '
-            f'{sum(1 for item in topology.flows if item.kind == "verification_support")}'
-            f'</summary><div>{verification}</div></details>'
-            if verification
-            else ""
-        )
-        + (
-            '<details class="topology-support"><summary>Dependency and structural '
-            f'support · {sum(1 for item in topology.flows if item.kind in {"dependency", "structural_support"})}'
-            f'</summary><div>{supporting}</div></details>'
-            if supporting
-            else ""
-        )
-        + f'<span class="summary-limits">{len(topology.components)} components · '
-        f'{len(topology.flows)} cross-component flows · '
-        f'{unclassified} unclassified layers</span></section>'
-    )
-
-
 def render_html(brief: ReviewBrief) -> str:
     packet = brief.packet
     source_priority = {"linked_issue": 0, "ticket": 0, "pull_request": 1}
@@ -1316,7 +1259,6 @@ def render_html(brief: ReviewBrief) -> str:
     )
     verification_accordion = _verification_accordion(brief)
     transformation_summary = _transformation_summary(brief)
-    architectural_topology = _architectural_change_topology(brief)
     coverage_limits = _coverage_limits(brief)
     review_context = _review_context(brief)
 
@@ -1340,19 +1282,14 @@ def render_html(brief: ReviewBrief) -> str:
 .eyebrow{{display:block;margin-bottom:4px;color:var(--green);font-size:9px;font-weight:760;text-transform:uppercase;letter-spacing:.09em}}
 .section-intro{{margin:0 0 16px;color:var(--muted);font-size:10px}}
 .brief-context{{display:grid;gap:6px;margin-top:14px}}.brief-context .context{{margin:0;padding:0;border:0}}.brief-context .context>summary{{padding:7px 0;border-top:1px solid rgba(111,128,135,.16)}}
-.topology-components{{display:flex;gap:9px;overflow-x:auto;padding:3px 0 12px}}
-.topology-component{{flex:0 0 185px;padding:12px;border:1px solid rgba(111,128,135,.22);border-radius:10px;background:rgba(3,7,9,.25);color:var(--text);font:inherit;text-align:left;cursor:pointer}}
-.topology-component:hover,.topology-component:focus,.topology-component.member-active{{border-color:var(--green);outline:none}}
-.topology-component strong{{display:block;overflow-wrap:anywhere;font-size:11px}}.topology-component small{{display:block;margin-top:7px;color:var(--faint);font-size:8px}}
-.topology-operations{{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}}.topology-operation{{padding:2px 5px;border-radius:999px;background:rgba(111,128,135,.14);color:var(--muted);font-size:8px}}
-.topology-operation.operation-added{{color:var(--green)}}.topology-operation.operation-removed{{color:var(--red)}}.topology-operation.operation-modified,.topology-operation.operation-renamed{{color:var(--amber)}}
-.topology-flow-section{{margin-top:13px;padding-top:11px;border-top:1px solid rgba(111,128,135,.16)}}
-.topology-flow{{display:grid;width:100%;grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr) minmax(180px,.8fr);gap:7px;align-items:center;padding:7px 9px;border:0;border-left:2px solid #73848c;background:rgba(3,7,9,.2);color:var(--text);font:inherit;font-size:9px;text-align:left;cursor:pointer}}
-.topology-flow:hover,.topology-flow:focus,.topology-flow.member-active{{background:rgba(54,118,87,.12);outline:none}}
-.topology-flow+.topology-flow{{margin-top:4px}}.topology-flow b{{color:var(--muted);text-align:center}}.topology-flow small{{color:var(--faint);text-align:right}}.topology-flow.operation-added{{border-color:var(--green)}}.topology-flow.operation-removed{{border-color:var(--red)}}
-.topology-support{{margin-top:9px;border:1px solid rgba(111,128,135,.16);border-radius:8px}}.topology-support>summary{{padding:8px 10px;cursor:pointer;color:var(--muted);font-size:9px}}.topology-support>div{{padding:0 9px 9px}}
-.topology-focus-empty{{margin:8px 0;padding:8px 10px;border:1px dashed rgba(111,128,135,.28);border-radius:8px;color:var(--muted);font-size:9px}}
-.member-muted{{opacity:.13}}.member-active{{opacity:1;filter:drop-shadow(0 0 5px rgba(123,227,172,.35))}}
+.architectural-chip{{cursor:pointer;outline:none}}
+.architectural-chip rect{{fill:rgba(48,83,110,.8);stroke:rgba(159,205,240,.65);stroke-width:.8}}
+.architectural-chip text{{fill:#c9e8ff;font-size:7px;font-weight:760;text-anchor:middle;text-transform:uppercase}}
+.architectural-chip:hover rect,.architectural-chip:focus rect,.architectural-chip.member-active rect{{stroke:var(--green);fill:rgba(54,118,87,.55)}}
+.architectural-chip.layer-unclassified rect{{stroke-dasharray:3 2;fill:rgba(111,128,135,.24)}}
+.architectural-chip-html{{grid-column:1/-1;justify-self:start;border:1px solid rgba(159,205,240,.45);border-radius:999px;padding:2px 7px;background:rgba(48,83,110,.32);color:#c9e8ff;font:760 8px inherit;text-transform:uppercase;cursor:pointer}}
+.architectural-chip-html.layer-unclassified{{border-style:dashed;color:var(--muted)}}
+.member-muted{{opacity:.13}}.member-context{{opacity:.65}}.member-active{{opacity:1;filter:drop-shadow(0 0 5px rgba(123,227,172,.35))}}
 .transformation-strip{{display:grid;grid-template-columns:minmax(0,1fr) 28px minmax(0,1.2fr) 28px minmax(0,1fr);gap:8px;align-items:stretch}}
 .summary-stage{{min-width:0;padding:13px;border:1px solid rgba(111,128,135,.2);border-radius:10px;background:rgba(3,7,9,.2)}}
 .summary-arrow{{display:grid;place-items:center;color:var(--faint);font-size:18px}}
@@ -1379,22 +1316,19 @@ def render_html(brief: ReviewBrief) -> str:
 .assessment-reasons{{margin:0;padding-left:17px;color:var(--muted);font-size:9px}}.assessment-reasons li+li{{margin-top:7px}}
 .verification-coverage,.display-boundary{{display:block;margin-top:10px;color:var(--faint);font-size:8px}}
 .coverage-limits{{margin-top:14px;padding:0 12px;border:1px solid rgba(111,128,135,.2);border-radius:9px;background:rgba(3,7,9,.2)}}.coverage-limits>summary{{padding:10px 0;cursor:pointer;color:var(--amber);font-size:10px}}
-@media(max-width:800px){{.transformation-strip{{grid-template-columns:1fr}}.summary-arrow{{transform:rotate(90deg)}}.topology-flow{{grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr)}}.topology-flow small{{grid-column:1/-1;text-align:left}}.verification-detail{{grid-template-columns:1fr}}.verification-item>summary{{grid-template-columns:42px minmax(0,1fr)}}.verification-item>summary .status-pill{{grid-column:2}}}}
+@media(max-width:800px){{.transformation-strip{{grid-template-columns:1fr}}.summary-arrow{{transform:rotate(90deg)}}.verification-detail{{grid-template-columns:1fr}}.verification-item>summary{{grid-template-columns:42px minmax(0,1fr)}}.verification-item>summary .status-pill{{grid-column:2}}}}
 </style></head><body><main class="shell">
 <div class="topbar"><span class="brand-mark"></span>PrismCode</div>
 <section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{brief.overview.changed_file_count} changed files</span><span>·</span><span>{escape(ci_copy)}</span><span>·</span><span>{escape(llm_shadow_copy)}</span></div><h1>{escape(packet.title)}</h1><div class="intent">{escape(brief.intent.text)}</div><span class="source-note">Source: {source_line}</span>{review_context}</section>
 {transformation_summary}
-{architectural_topology}
 <section class="section verification-workspace"><h2>Verification</h2><p class="section-intro">Expand one R/G/T/CC subject to compare its authored claim, canonical observations, deterministic assessment, and structural coverage.</p>{verification_accordion}{review_graph}</section>
     {coverage_limits}
 <div class="footer">PrismCode · {escape(pr_label)} · Schema {escape(brief.schema_version)} · Generated by {escape(brief.generated_by)}</div>
 </main><script>
-const focusSurfaces = document.querySelectorAll(
-  ".architectural-topology, .review-structural-graph"
-);
+const focusSurfaces = document.querySelectorAll(".review-structural-graph");
 const clearMemberFocus = () => {{
-  document.querySelectorAll(".member-muted, .member-active").forEach((item) => {{
-    item.classList.remove("member-muted", "member-active");
+  document.querySelectorAll(".member-muted, .member-context, .member-active").forEach((item) => {{
+    item.classList.remove("member-muted", "member-context", "member-active");
   }});
 }};
 const activateFocus = (focus) => {{
@@ -1414,18 +1348,12 @@ const activateFocus = (focus) => {{
       item.classList.toggle("focus-context", contextual);
       item.classList.toggle("focus-active", focus !== "all" && direct);
     }});
-    const empty = surface.querySelector(
-      surface.classList.contains("architectural-topology")
-        ? ".topology-focus-empty"
-        : ".delta-focus-empty"
-    );
+    const empty = surface.querySelector(".delta-focus-empty");
     if (empty) {{
       const show = focus !== "all" && !matched;
       empty.hidden = !show;
       empty.textContent = show
-        ? (surface.classList.contains("architectural-topology")
-          ? `${{focus}} has no architectural membership in the canonical change backbone.`
-          : `${{focus}} has no structural evidence in the default change backbone.`)
+        ? `${{focus}} has no structural evidence in the default change backbone.`
         : "";
     }}
   }});
@@ -1433,26 +1361,42 @@ const activateFocus = (focus) => {{
 const activateMembers = (trigger) => {{
   activateFocus("all");
   const nodeIds = new Set((trigger.dataset.memberNodeIds || "").split(/\\s+/).filter(Boolean));
+  const contextNodeIds = new Set((trigger.dataset.contextNodeIds || "").split(/\\s+/).filter(Boolean));
   const groupIds = new Set((trigger.dataset.memberGroupIds || "").split(/\\s+/).filter(Boolean));
-  document.querySelectorAll("[data-component-target], [data-flow-target]").forEach((item) => {{
-    item.classList.toggle("member-active", item === trigger);
-    item.classList.toggle("member-muted", item !== trigger);
-  }});
-  document.querySelectorAll("[data-structural-node]").forEach((item) => {{
-    const active = nodeIds.has(item.dataset.structuralNode);
+  const contextGroupIds = new Set((trigger.dataset.contextGroupIds || "").split(/\\s+/).filter(Boolean));
+  document.querySelectorAll("[data-component-target]").forEach((item) => {{
+    const active = item.dataset.componentTarget === trigger.dataset.componentTarget;
     item.classList.toggle("member-active", active);
     item.classList.toggle("member-muted", !active);
   }});
+  document.querySelectorAll("[data-structural-node]").forEach((item) => {{
+    const active = nodeIds.has(item.dataset.structuralNode);
+    const contextual = !active && contextNodeIds.has(item.dataset.structuralNode);
+    item.classList.toggle("member-active", active);
+    item.classList.toggle("member-context", contextual);
+    item.classList.toggle("member-muted", !active && !contextual);
+  }});
   document.querySelectorAll("[data-group-target]").forEach((item) => {{
     const active = groupIds.has(item.dataset.groupTarget);
+    const contextual = !active && contextGroupIds.has(item.dataset.groupTarget);
     item.classList.toggle("member-active", active);
-    item.classList.toggle("member-muted", !active && groupIds.size > 0);
+    item.classList.toggle("member-context", contextual);
+    item.classList.toggle("member-muted", !active && !contextual);
   }});
   const graph = document.querySelector(".review-structural-graph");
   if (graph) graph.scrollIntoView({{ behavior: "smooth", block: "center" }});
 }};
-document.querySelectorAll("[data-component-target], [data-flow-target]").forEach((item) => {{
-  item.addEventListener("click", () => activateMembers(item));
+document.querySelectorAll("[data-component-target]").forEach((item) => {{
+  item.addEventListener("click", (event) => {{
+    event.preventDefault();
+    event.stopPropagation();
+    activateMembers(item);
+  }});
+  item.addEventListener("keydown", (event) => {{
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    activateMembers(item);
+  }});
 }});
 document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
   const interaction = {{ expandedGroup: null }};
