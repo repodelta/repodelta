@@ -141,8 +141,10 @@ coverage only; it does not select evidence, assess a claim, or approve merge.
 The assessment stage then assigns exactly one conservative
 `demonstrated` / `partial` / `contradicted` / `unverified` status to each typed
 transformation claim. It uses only aligned canonical facts, complete closure
-observations, and current-head verification; it still does not decide whether
-the PR may merge.
+observations, and current-head verification. Predicate-level roles remain
+visible; when one binding has different roles across a conjunctive claim,
+contradiction controls the claim-level binding role. Assessment still does not
+decide whether the PR may merge.
 The canonical `ReviewProjection` then exposes one verification workspace for
 R/G and T/CC subjects. Matrix rows and evidence-inspector records reference the
 same selected relations, bindings, evidence, diagnostics, and structural graph;

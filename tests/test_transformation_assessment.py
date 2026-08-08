@@ -4,7 +4,10 @@ from dataclasses import replace
 
 import pytest
 
-from prismcode.assessment.transformation import assess_transformation
+from prismcode.assessment.transformation import (
+    _aggregate_predicate_assessments,
+    assess_transformation,
+)
 from prismcode.model.contracts import (
     AnalysisInput,
     AssociationReason,
@@ -18,7 +21,10 @@ from prismcode.model.contracts import (
     SourceRef,
     StructuralChangeIdentity,
     TransformationAssessment,
+    TransformationAssessmentReason,
+    TransformationClaim,
     TransformationEvidenceBinding,
+    TransformationPredicateAssessment,
     TransformationSubjectMatch,
     TransformationSubjectSelection,
     VerificationIdentity,
@@ -177,6 +183,57 @@ def test_multi_predicate_claim_cannot_borrow_another_predicates_binding() -> Non
     assert brief.transformation_assessment.by_claim_id()[claim.id].status == (
         "partial"
     )
+
+
+def test_claim_aggregation_converges_cross_predicate_binding_roles() -> None:
+    claim = TransformationClaim(
+        id="T8",
+        kind="authority",
+        text=(
+            "The ordered ShadowExecutionObservation sequence is the detailed "
+            "shadow artifact authority."
+        ),
+    )
+    supporting = TransformationPredicateAssessment(
+        id="TAP:T8:TP1",
+        claim_id="T8",
+        predicate_id="TP1",
+        expectation="present_head",
+        status="demonstrated",
+        supporting_binding_ids=("TAB:T8:E:path",),
+        reasons=(
+            TransformationAssessmentReason(
+                kind="authority_path_observed",
+                detail="The target path is observed.",
+                binding_ids=("TAB:T8:E:path",),
+            ),
+        ),
+    )
+    contradicting = TransformationPredicateAssessment(
+        id="TAP:T8:TP2",
+        claim_id="T8",
+        predicate_id="TP2",
+        expectation="absent_head",
+        status="contradicted",
+        contradicting_binding_ids=("TAB:T8:E:path",),
+        reasons=(
+            TransformationAssessmentReason(
+                kind="authority_bypass_observed",
+                detail="The same path contradicts the competing-path predicate.",
+                binding_ids=("TAB:T8:E:path",),
+            ),
+        ),
+    )
+
+    assessment = _aggregate_predicate_assessments(
+        claim,
+        (supporting, contradicting),
+    )
+
+    assert assessment.status == "contradicted"
+    assert assessment.supporting_binding_ids == ()
+    assert assessment.contradicting_binding_ids == ("TAB:T8:E:path",)
+    assert assessment.predicate_assessments == (supporting, contradicting)
 
 
 @pytest.mark.parametrize(

@@ -154,7 +154,9 @@ Each Issue or PR Markdown body is parsed once into canonical
     spans and arrow paths in those sections. They are authored lookup intent,
     not repository observations. Unmarked prose produces a typed diagnostic;
     semantics never guesses an identifier, and downstream consumption remains
-    a separate pipeline change.
+    a separate pipeline change. Predicate assessments preserve their own
+    evidence roles; claim aggregation removes any supporting role also observed
+    as contradicting, so one binding cannot become two claim-level truths.
 
 Deliverables use stable IDs (`R1`, `R2`, ...), negative scope constraints use
 `G1`, objectives use `O1`, scope uses `S1`, and Issue verification expectations
