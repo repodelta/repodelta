@@ -66,6 +66,8 @@ class ShadowEvidenceCandidate:
     added_code: str = ""
     removed_code: str = ""
     structural_context: tuple[str, ...] = ()
+    admission_tier: str = "unspecified"
+    association: str = "none"
 
     def __post_init__(self) -> None:
         _require_text(self.evidence_id, "evidence_id")
@@ -75,6 +77,8 @@ class ShadowEvidenceCandidate:
             "classification",
             "profile",
             "authority",
+            "admission_tier",
+            "association",
         ):
             _require_text(getattr(self, name), name)
         for name in (
@@ -153,6 +157,8 @@ def shadow_candidate_from_mapping(
         added_code=str(raw.get("added_code", "")),
         removed_code=str(raw.get("removed_code", "")),
         structural_context=tuple(raw.get("structural_context", ())),
+        admission_tier=str(raw.get("admission_tier", "unspecified")),
+        association=str(raw.get("association", "none")),
     )
 
 

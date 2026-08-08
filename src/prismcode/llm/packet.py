@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 
 from prismcode.llm.contracts import ShadowEvidenceCandidate
@@ -31,10 +32,12 @@ def build_shadow_code_packet(
     catalog: EvidenceCatalog,
     *,
     policy: ShadowCodePacketPolicy = ShadowCodePacketPolicy(),
+    provenance: Mapping[str, tuple[str, str]] | None = None,
 ) -> tuple[tuple[ShadowEvidenceCandidate, ...], tuple[str, ...]]:
     """Project catalog-owned facts into one bounded LLM input packet."""
 
     relations = {item.id: item for item in catalog.change_relations}
+    provenance = provenance or {}
     evidence = catalog.by_id()
     remaining = policy.max_request_code_chars
     candidates = []
@@ -77,6 +80,8 @@ def build_shadow_code_packet(
                 added_code=bounded_added,
                 removed_code=bounded_removed,
                 structural_context=structural[: policy.max_structural_contexts],
+                admission_tier=provenance.get(item.id, ("unspecified", "none"))[0],
+                association=provenance.get(item.id, ("unspecified", "none"))[1],
             )
         )
     limits = []
