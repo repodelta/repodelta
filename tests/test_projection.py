@@ -484,7 +484,9 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
     assert "Change topology" not in html
     assert 'class="architectural-chip-html ' in html
     assert 'data-component-target="' in html
-    assert html.index("Verification") < html.index("Structural delta graph")
+    assert html.index("Structural delta graph") < html.index("Verification")
+    assert 'data-focus-target="all">All</button>' in html
+    assert '.verification-item[open][data-verification-subject]' not in html
     assert (
             "1 backbone nodes · 0 support nodes · "
             "0 backbone relation groups · 0 canonical executable edges · "

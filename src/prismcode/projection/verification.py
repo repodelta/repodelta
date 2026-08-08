@@ -9,15 +9,18 @@ from prismcode.model.contracts import (
     Requirement,
     ReviewSlice,
     ReviewStructuralGraph,
+    StructuralFocusDisposition,
     StructuralFocusNode,
     StructuralFocusOverlay,
     TransformationAlignment,
     TransformationAssessment,
+    TransformationClaim,
     TransformationEvidenceBinding,
     TransformationContract,
     TransformationStructuralClosure,
     TransformationStructuralClosureGroup,
     TransformationStructuralTopology,
+    TransformationStructuralTopologyGroup,
     TransformationSummaryProjection,
     VerificationEvidenceInspection,
     VerificationMatrixEntry,
@@ -77,6 +80,9 @@ def project_verification_workspace(
             projection_relation_ids=relation_ids,
             diagnostic_ids=review_slice.diagnostic_ids,
             structural_overlay=review_slice.change_map.structural_overlay,
+            structural_disposition=(
+                review_slice.change_map.structural_disposition
+            ),
         )
         inspections.append(inspection)
         matrix.append(
@@ -147,6 +153,12 @@ def project_verification_workspace(
                 else ()
             ),
             structural_overlay=structural_overlay,
+            structural_disposition=_transformation_structural_disposition(
+                claim,
+                contract,
+                closure_group,
+                topology_group,
+            ),
             assessment_reasons=claim_assessment.reasons,
         )
         inspections.append(inspection)
@@ -187,6 +199,7 @@ def project_verification_workspace(
         assessment,
         evidence,
         relations,
+        slices,
         review_graph,
         transformation_structural_topology,
         transformation_structural_closure,
@@ -274,6 +287,39 @@ def _transformation_summary(
             for status in status_order
         ),
     )
+
+
+def _transformation_structural_disposition(
+    claim: TransformationClaim,
+    contract: TransformationContract,
+    closure_group: TransformationStructuralClosureGroup | None,
+    topology_group: TransformationStructuralTopologyGroup | None,
+) -> StructuralFocusDisposition:
+    """Expose existing T/CC closure applicability without new retrieval."""
+
+    overlay = (
+        topology_group.structural_overlay
+        if topology_group is not None
+        else StructuralFocusOverlay()
+    )
+    if overlay.nodes:
+        return StructuralFocusDisposition(state="projected")
+    diagnostic_ids = (
+        topology_group.diagnostic_ids if topology_group is not None else ()
+    )
+    if diagnostic_ids:
+        return StructuralFocusDisposition(
+            state="deferred",
+            diagnostic_ids=diagnostic_ids,
+        )
+    if claim.kind in {"before_state", "after_state", "uncertainty"}:
+        return StructuralFocusDisposition(state="not_applicable")
+    predicates = contract.predicates.by_claim_id().get(claim.id, ())
+    if predicates and (
+        closure_group is None or not closure_group.seed_evidence_ids
+    ):
+        return StructuralFocusDisposition(state="unassociated")
+    return StructuralFocusDisposition(state="no_structural_evidence")
 
 
 def _slice_relation_ids(review_slice: ReviewSlice) -> tuple[str, ...]:
@@ -375,11 +421,12 @@ def _validate_workspace(
     assessment: TransformationAssessment,
     evidence: dict[str, EvidenceItem],
     relations: dict[str, ProjectionRelation],
+    slices: tuple[ReviewSlice, ...],
     graph: ReviewStructuralGraph,
     transformation_structural_topology: TransformationStructuralTopology,
     transformation_structural_closure: TransformationStructuralClosure,
 ) -> None:
-    if workspace.schema_version != "verification_workspace.v6":
+    if workspace.schema_version != "verification_workspace.v7":
         raise ValueError("unsupported verification workspace schema")
     if workspace.transformation_structural_topology != (
         transformation_structural_topology
@@ -415,6 +462,9 @@ def _validate_workspace(
     graph_placement_ids = {item.id for item in graph.placements}
     closure_by_claim = transformation_structural_closure.by_claim_id()
     topology_by_claim = transformation_structural_topology.by_claim_id()
+    slices_by_focus = {
+        item.change_map.focus_statement_id: item for item in slices
+    }
     if transformation_structural_topology.schema_version != (
         "transformation_structural_topology.v1"
     ):
@@ -485,8 +535,28 @@ def _validate_workspace(
                 raise ValueError("verification projection changed assessment status")
             if inspection.assessment_reasons != claim_assessment.reasons:
                 raise ValueError("verification projection changed assessment reasons")
+            claim = next(
+                item for item in contract.claims if item.id == entry.subject_id
+            )
+            expected_disposition = _transformation_structural_disposition(
+                claim,
+                contract,
+                closure_by_claim.get(entry.subject_id),
+                topology_by_claim.get(entry.subject_id),
+            )
+            if inspection.structural_disposition != expected_disposition:
+                raise ValueError(
+                    "verification projection changed transformation structural disposition"
+                )
         elif entry.status != "not_assessed":
             raise ValueError("R/G projection cannot invent an assessment")
+        elif inspection.structural_disposition != (
+            slices_by_focus[entry.subject_id]
+            .change_map.structural_disposition
+        ):
+            raise ValueError(
+                "verification projection changed R/G structural disposition"
+            )
     for inspection in workspace.inspections:
         if inspection.id != f"VEI:{inspection.subject_id}":
             raise ValueError("verification inspection has non-canonical ID")

@@ -76,6 +76,12 @@ def test_pipeline_projects_rg_and_transformation_claims_once() -> None:
     requirement = workspace.by_subject_id()[brief.requirements[0].id]
     assert requirement.subject_kind == "requirement"
     assert requirement.status == "not_assessed"
+    requirement_inspection = workspace.inspections_by_subject_id()[
+        brief.requirements[0].id
+    ]
+    assert requirement_inspection.structural_disposition == (
+        brief.projection.slices[0].change_map.structural_disposition
+    )
     for claim in brief.transformation_contract.claims:
         entry = workspace.by_subject_id()[claim.id]
         assessed = brief.transformation_assessment.by_claim_id()[claim.id]
@@ -184,15 +190,48 @@ def test_transformation_binding_cannot_create_structural_graph_membership() -> N
     assert inspection.observed_evidence_ids == (fact.id,)
     assert inspection.supporting_evidence_ids == (fact.id,)
     assert inspection.structural_overlay.nodes == ()
+    assert inspection.structural_disposition.state == "no_structural_evidence"
+
+
+def test_generic_transition_context_is_explicitly_not_graph_applicable() -> None:
+    packet = ReviewSourcePacket(
+        repository="acme/widget",
+        pull_request=13,
+        title="Describe state transition",
+        source_records=(
+            SourceRecord(
+                id="pr:13",
+                kind="pull_request",
+                repository="acme/widget",
+                title="Describe state transition",
+                body="## Before\nLegacy behavior.\n\n## After\nCanonical behavior.\n",
+            ),
+        ),
+    ).with_revision()
+
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    workspace = brief.projection.verification_workspace
+    transition_claims = tuple(
+        item
+        for item in brief.transformation_contract.claims
+        if item.kind in {"before_state", "after_state"}
+    )
+
+    assert len(transition_claims) == 2
+    for claim in transition_claims:
+        inspection = workspace.inspections_by_subject_id()[claim.id]
+        assert inspection.structural_disposition.state == "not_applicable"
+    html = render_html(brief)
+    assert html.count("Not applicable to the structural graph.") == 2
 
 
 def test_verification_workspace_is_serialized_for_renderer_consumption() -> None:
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=_mixed_packet()))
     serialized = brief.to_dict()["projection"]
 
-    assert serialized["schema_version"] == "review_projection.v29"
+    assert serialized["schema_version"] == "review_projection.v30"
     assert serialized["verification_workspace"]["schema_version"] == (
-        "verification_workspace.v6"
+        "verification_workspace.v7"
     )
     assert serialized["verification_workspace"]["matrix"]
     summary = brief.projection.verification_workspace.transformation_summary

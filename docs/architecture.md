@@ -77,7 +77,9 @@ fixture or GitHub
        -> component focus consumes exact internal and contextual node/relation IDs
           from the architectural projection
        -> each Verification subject focuses the same graph through its canonical
-          structural overlay; no second architectural subject overlay is produced
+          structural overlay and carries one projection-owned structural
+          disposition when no graph focus applies; no second architectural
+          subject overlay is produced
        -> renderer interaction focuses the one graph workspace and never
           reclassifies paths, relations, labels, or prose
 ```
