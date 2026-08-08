@@ -2717,6 +2717,7 @@ StructuralFocusNodeRole = Literal[
 
 StructuralFocusDispositionState = Literal[
     "projected",
+    "not_applicable",
     "non_structural_only",
     "deferred",
     "unassociated",
@@ -3104,6 +3105,9 @@ class VerificationEvidenceInspection:
     transformation_binding_ids: tuple[str, ...] = ()
     diagnostic_ids: tuple[str, ...] = ()
     structural_overlay: StructuralFocusOverlay = StructuralFocusOverlay()
+    structural_disposition: StructuralFocusDisposition = (
+        StructuralFocusDisposition()
+    )
     assessment_reasons: tuple[TransformationAssessmentReason, ...] = ()
 
 
@@ -3151,7 +3155,7 @@ class VerificationWorkspace:
     )
     matrix: tuple[VerificationMatrixEntry, ...] = ()
     inspections: tuple[VerificationEvidenceInspection, ...] = ()
-    schema_version: str = "verification_workspace.v6"
+    schema_version: str = "verification_workspace.v7"
 
     def by_subject_id(self) -> dict[str, VerificationMatrixEntry]:
         return {item.subject_id: item for item in self.matrix}
@@ -3170,7 +3174,7 @@ class ReviewProjection:
         ArchitecturalChangeTopology()
     )
     verification_workspace: VerificationWorkspace = VerificationWorkspace()
-    schema_version: str = "review_projection.v29"
+    schema_version: str = "review_projection.v30"
 
     def validate_consistency(
         self,
@@ -3888,7 +3892,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v53"
+    schema_version: str = "review_brief.v54"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
