@@ -1,0 +1,132 @@
+{
+  "schema_version": "llm_shadow_execution.v2",
+  "summary": {
+    "state": "partial",
+    "admitted_count": 3,
+    "completed_count": 1,
+    "failed_count": 1,
+    "deferred_count": 1,
+    "artifact_written": true
+  },
+  "observations": [
+    {
+      "claim_id": "T1",
+      "admission_state": "ready",
+      "execution_state": "accepted",
+      "eligible_count": 3,
+      "deterministic_evidence_ids": ["E:authority"],
+      "request": {
+        "schema_version": "1",
+        "request_id": "shadow:T1:golden",
+        "subject_id": "T1",
+        "subject_kind": "authority",
+        "authored_statement": "Analyzer is the canonical authority.",
+        "candidates": [
+          {"evidence_id": "E:authority", "summary": "Analyzer writes the result.", "kind": "structural_path", "revision_side": "head", "operation": "added"},
+          {"evidence_id": "E:removal", "summary": "Legacy writer is removed.", "kind": "structural_change", "revision_side": "base", "operation": "removed"},
+          {"evidence_id": "E:context", "summary": "Documentation mentions the transition.", "kind": "changed_hunk", "revision_side": "head", "operation": "added"}
+        ],
+        "coverage_limits": ["Dynamic plugin writers were not observed."]
+      },
+      "run": {
+        "request_id": "shadow:T1:golden",
+        "subject_id": "T1",
+        "state": "accepted",
+        "candidate_count": 3,
+        "duration_ms": 12.5,
+        "provider_id": "replay",
+        "model_id": "golden-v1",
+        "input_tokens": 100,
+        "output_tokens": 20,
+        "selection": {
+          "schema_version": "1",
+          "request_id": "shadow:T1:golden",
+          "subject_id": "T1",
+          "selections": [
+            {"evidence_id": "E:authority", "role": "supporting", "semantic_role": "authority", "rationale": "Observed controlling writer."},
+            {"evidence_id": "E:removal", "role": "contradicting", "semantic_role": "removal", "rationale": "Removal evidence must be reviewed separately."}
+          ],
+          "unresolved_surfaces": ["Dynamic plugin writers were not observed."]
+        },
+        "comparison": {
+          "deterministic_ids": ["E:authority"],
+          "shadow_ids": ["E:authority", "E:removal"],
+          "shared_ids": ["E:authority"],
+          "deterministic_only_ids": [],
+          "shadow_only_ids": ["E:removal"]
+        },
+        "diagnostics": []
+      },
+      "diagnostics": []
+    },
+    {
+      "claim_id": "T2",
+      "admission_state": "ready",
+      "execution_state": "invalid_output",
+      "eligible_count": 1,
+      "deterministic_evidence_ids": ["E:path"],
+      "request": {
+        "schema_version": "1",
+        "request_id": "shadow:T2:golden",
+        "subject_id": "T2",
+        "subject_kind": "production_path",
+        "authored_statement": "The production path reaches the sink.",
+        "candidates": [
+          {"evidence_id": "E:path", "summary": "Observed production path.", "kind": "structural_path", "revision_side": "head", "operation": "retained"}
+        ],
+        "coverage_limits": []
+      },
+      "run": {
+        "request_id": "shadow:T2:golden",
+        "subject_id": "T2",
+        "state": "invalid_output",
+        "candidate_count": 1,
+        "duration_ms": 8.0,
+        "provider_id": "replay",
+        "model_id": "golden-v1",
+        "input_tokens": 60,
+        "output_tokens": 10,
+        "selection": null,
+        "comparison": null,
+        "diagnostics": [
+          {"code": "unknown_evidence_id", "message": "A selection cited an unadmitted evidence ID."}
+        ]
+      },
+      "diagnostics": []
+    },
+    {
+      "claim_id": "T3",
+      "admission_state": "ready",
+      "execution_state": "deferred",
+      "eligible_count": 1,
+      "deterministic_evidence_ids": [],
+      "request": {
+        "schema_version": "1",
+        "request_id": "shadow:T3:golden",
+        "subject_id": "T3",
+        "subject_kind": "migration",
+        "authored_statement": "Consumers migrate to the new result.",
+        "candidates": [
+          {"evidence_id": "E:consumer", "summary": "Consumer reads the new result.", "kind": "structural_path", "revision_side": "head", "operation": "added"}
+        ],
+        "coverage_limits": []
+      },
+      "run": null,
+      "diagnostics": [
+        {"code": "shadow_execution_budget_deferred", "message": "Admitted request was deferred by the review budget."}
+      ]
+    },
+    {
+      "claim_id": "T4",
+      "admission_state": "empty",
+      "execution_state": "empty",
+      "eligible_count": 0,
+      "deterministic_evidence_ids": [],
+      "request": null,
+      "run": null,
+      "diagnostics": [
+        {"code": "shadow_admission_no_eligible_fact", "message": "No typed observed fact is eligible."}
+      ]
+    }
+  ]
+}

@@ -13,9 +13,19 @@ from prismcode.llm.admission import (
     ShadowCandidateAdmissionSet,
     admit_shadow_candidates,
 )
-from prismcode.llm.contracts import ShadowEvidenceRequest
+from prismcode.llm.contracts import (
+    ShadowEvidenceCandidate,
+    ShadowEvidenceRequest,
+    ShadowEvidenceSelection,
+    ShadowEvidenceSelectionItem,
+    ShadowSelectionDiagnostic,
+)
 from prismcode.llm.provider import ShadowEvidenceProvider
-from prismcode.llm.runner import ShadowRunRecord, ShadowRunner
+from prismcode.llm.runner import (
+    ShadowRunRecord,
+    ShadowRunner,
+    ShadowSelectionComparison,
+)
 from prismcode.model.contracts import LLMShadowExecutionSummary, ReviewBrief
 
 
@@ -259,3 +269,105 @@ def write_shadow_execution(
         encoding="utf-8",
     )
     return path
+
+
+def load_shadow_execution(path: str | Path) -> ShadowExecutionBundle:
+    """Load one canonical shadow artifact without replaying provider output."""
+
+    raw = json.loads(Path(path).read_text(encoding="utf-8"))
+    if raw.get("schema_version") != "llm_shadow_execution.v2":
+        raise ValueError("shadow artifact must use schema_version llm_shadow_execution.v2")
+    summary = LLMShadowExecutionSummary(**raw["summary"])
+    observations = tuple(
+        _load_observation(item) for item in raw.get("observations", ())
+    )
+    return ShadowExecutionBundle(
+        summary=summary,
+        observations=observations,
+        schema_version=raw["schema_version"],
+    )
+
+
+def _load_observation(raw: dict) -> ShadowExecutionObservation:
+    request = _load_request(raw.get("request"))
+    run = _load_run(raw.get("run"))
+    return ShadowExecutionObservation(
+        claim_id=str(raw["claim_id"]),
+        admission_state=raw["admission_state"],
+        execution_state=raw["execution_state"],
+        eligible_count=int(raw["eligible_count"]),
+        deterministic_evidence_ids=tuple(raw.get("deterministic_evidence_ids", ())),
+        request=request,
+        run=run,
+        diagnostics=tuple(
+            ShadowAdmissionDiagnostic(**item)
+            for item in raw.get("diagnostics", ())
+        ),
+    )
+
+
+def _load_request(raw: dict | None) -> ShadowEvidenceRequest | None:
+    if raw is None:
+        return None
+    return ShadowEvidenceRequest(
+        request_id=str(raw["request_id"]),
+        subject_id=str(raw["subject_id"]),
+        subject_kind=str(raw["subject_kind"]),
+        authored_statement=str(raw["authored_statement"]),
+        candidates=tuple(
+            ShadowEvidenceCandidate(**item) for item in raw.get("candidates", ())
+        ),
+        coverage_limits=tuple(raw.get("coverage_limits", ())),
+        schema_version=str(raw["schema_version"]),
+    )
+
+
+def _load_run(raw: dict | None) -> ShadowRunRecord | None:
+    if raw is None:
+        return None
+    selection_raw = raw.get("selection")
+    comparison_raw = raw.get("comparison")
+    return ShadowRunRecord(
+        request_id=str(raw["request_id"]),
+        subject_id=str(raw["subject_id"]),
+        state=raw["state"],
+        candidate_count=int(raw["candidate_count"]),
+        duration_ms=float(raw["duration_ms"]),
+        provider_id=raw.get("provider_id"),
+        model_id=raw.get("model_id"),
+        input_tokens=raw.get("input_tokens"),
+        output_tokens=raw.get("output_tokens"),
+        selection=(
+            ShadowEvidenceSelection(
+                request_id=str(selection_raw["request_id"]),
+                subject_id=str(selection_raw["subject_id"]),
+                selections=tuple(
+                    ShadowEvidenceSelectionItem(**item)
+                    for item in selection_raw.get("selections", ())
+                ),
+                unresolved_surfaces=tuple(
+                    selection_raw.get("unresolved_surfaces", ())
+                ),
+                schema_version=str(selection_raw["schema_version"]),
+            )
+            if selection_raw is not None
+            else None
+        ),
+        comparison=(
+            ShadowSelectionComparison(
+                deterministic_ids=tuple(comparison_raw["deterministic_ids"]),
+                shadow_ids=tuple(comparison_raw["shadow_ids"]),
+                shared_ids=tuple(comparison_raw["shared_ids"]),
+                deterministic_only_ids=tuple(
+                    comparison_raw["deterministic_only_ids"]
+                ),
+                shadow_only_ids=tuple(comparison_raw["shadow_only_ids"]),
+            )
+            if comparison_raw is not None
+            else None
+        ),
+        diagnostics=tuple(
+            ShadowSelectionDiagnostic(**item)
+            for item in raw.get("diagnostics", ())
+        ),
+    )
