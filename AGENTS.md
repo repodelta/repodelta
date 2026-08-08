@@ -22,6 +22,7 @@ facts, inference, and unresolved surfaces distinct; bound conclusions by
 observed coverage.
 
 For non-trivial behavioral, responsibility, contract, data-flow, or
-cross-component changes, follow `docs/agent-change-protocol.md`. Before
-creating Git artifacts, follow `docs/commit-message-guidelines.md` and
+cross-component changes, follow `docs/agent-change-protocol.md`. Before creating
+an Issue, follow `docs/issue-guidelines.md`; before committing or opening a PR,
+follow `docs/commit-message-guidelines.md` and
 `docs/pull-request-guidelines.md`.
