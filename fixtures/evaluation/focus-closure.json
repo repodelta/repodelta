@@ -1,0 +1,72 @@
+{
+  "schema_version": "analysis_fixture.v3",
+  "source_packet": {
+    "schema_version": "review_source_packet.v2",
+    "packet_revision": "sha256:34e381250d3177db745d9ab4f21f33d2e248add8c30daf631ee2a4be8c036979",
+    "repository": "acme/widget",
+    "pull_request": 18,
+    "title": "Evaluate structural focus and closure",
+    "source_records": [
+      {
+        "id": "pr:18",
+        "kind": "pull_request",
+        "repository": "acme/widget",
+        "url": "https://github.com/acme/widget/pull/18",
+        "title": "Evaluate structural focus and closure",
+        "body": "## Before\nLegacy state.\n\n## After\nCanonical state.\n",
+        "revision": "pr-18-v1",
+        "availability": "available"
+      }
+    ],
+    "changed_files": [],
+    "verification_observations": [],
+    "source_url": "https://github.com/acme/widget/pull/18",
+    "head_sha": "focus-head",
+    "base_sha": "focus-base",
+    "diagnostics": [],
+    "metadata": {}
+  },
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "Manual approval is recorded.",
+      "role": "obligation",
+      "purpose": "acceptance",
+      "authority": "provided",
+      "kind": "manual_acceptance"
+    },
+    {
+      "id": "G1",
+      "text": "No legacy_writer remains.",
+      "role": "obligation",
+      "purpose": "guardrail",
+      "authority": "provided",
+      "kind": "guardrail"
+    },
+    {
+      "id": "G2",
+      "text": "No compatibility_branch remains.",
+      "role": "obligation",
+      "purpose": "guardrail",
+      "authority": "provided",
+      "kind": "guardrail"
+    },
+    {
+      "id": "G3",
+      "text": "No dual_writer remains.",
+      "role": "obligation",
+      "purpose": "guardrail",
+      "authority": "provided",
+      "kind": "guardrail"
+    },
+    {
+      "id": "G4",
+      "text": "No dynamic_writer remains.",
+      "role": "obligation",
+      "purpose": "guardrail",
+      "authority": "provided",
+      "kind": "guardrail"
+    }
+  ],
+  "evidence": []
+}

@@ -1,5 +1,5 @@
 {
-  "schema_version": "evaluation_suite.v3",
+  "schema_version": "evaluation_suite.v4",
   "k": 5,
   "thresholds": {
     "precision_at_k": 1.0,
@@ -10,7 +10,8 @@
     "max_no_candidate_rate": 0.0,
     "no_match_accuracy": 1.0,
     "max_false_positive_rate": 0.0,
-    "assessment_accuracy": 1.0
+    "assessment_accuracy": 1.0,
+    "focus_accuracy": 1.0
   },
   "cases": [
     {
@@ -107,6 +108,13 @@
           "evidence_id": "E:structural_path:25dab9624b35bb9d49bd",
           "classification": "runtime",
           "profile": "structural_path"
+        }
+      ],
+      "expected_focus_outcomes": [
+        {
+          "subject_id": "R1",
+          "disposition": "projected",
+          "graph_node_count": 1
         }
       ],
       "structural_graph": {
@@ -488,6 +496,151 @@
                 "path_count": 1,
                 "limiting_dimensions": [],
                 "sources": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "focus-and-closure-outcomes",
+      "fixture": "evaluation/focus-closure.json",
+      "expected_selections": [],
+      "expected_focus_outcomes": [
+        {
+          "subject_id": "R1",
+          "disposition": "no_structural_evidence"
+        },
+        {
+          "subject_id": "G1",
+          "disposition": "non_structural_only",
+          "closure_fact_count": 1,
+          "closure_revision_states": ["complete"]
+        },
+        {
+          "subject_id": "G2",
+          "disposition": "non_structural_only",
+          "closure_fact_count": 1,
+          "closure_revision_states": ["partial"]
+        },
+        {
+          "subject_id": "G3",
+          "disposition": "non_structural_only",
+          "closure_fact_count": 1,
+          "closure_revision_states": ["complete"],
+          "closure_match_count": 1
+        },
+        {
+          "subject_id": "G4",
+          "disposition": "no_structural_evidence"
+        },
+        {
+          "subject_id": "T1",
+          "disposition": "not_applicable"
+        },
+        {
+          "subject_id": "T2",
+          "disposition": "not_applicable"
+        }
+      ],
+      "closure_scan_results": {
+        "schema_version": "closure_scan_result_set.v2",
+        "results": [
+          {
+            "id": "CSR:G1",
+            "plan_id": "CSP:G1",
+            "statement_id": "G1",
+            "statement_kind": "guardrail",
+            "expectation": "absence",
+            "revisions": [
+              {
+                "revision_side": "head",
+                "revision": "focus-head",
+                "root_path": ".",
+                "state": "complete",
+                "coverages": [
+                  {"surface": "paths", "state": "complete", "inspected_count": 4},
+                  {"surface": "file_content", "state": "complete", "inspected_count": 4, "inspected_bytes": 200},
+                  {"surface": "symbol_names", "state": "complete", "inspected_count": 4}
+                ]
+              }
+            ]
+          },
+          {
+            "id": "CSR:G2",
+            "plan_id": "CSP:G2",
+            "statement_id": "G2",
+            "statement_kind": "guardrail",
+            "expectation": "absence",
+            "revisions": [
+              {
+                "revision_side": "head",
+                "revision": "focus-head",
+                "root_path": ".",
+                "state": "partial",
+                "coverages": [
+                  {"surface": "paths", "state": "complete", "inspected_count": 4},
+                  {"surface": "file_content", "state": "partial", "inspected_count": 2, "inspected_bytes": 100},
+                  {"surface": "symbol_names", "state": "complete", "inspected_count": 4}
+                ],
+                "truncations": [
+                  {"kind": "byte_limit", "surface": "file_content", "limit": 100, "observed": 200}
+                ]
+              }
+            ]
+          },
+          {
+            "id": "CSR:G3",
+            "plan_id": "CSP:G3",
+            "statement_id": "G3",
+            "statement_kind": "guardrail",
+            "expectation": "absence",
+            "revisions": [
+              {
+                "revision_side": "head",
+                "revision": "focus-head",
+                "root_path": ".",
+                "state": "complete",
+                "coverages": [
+                  {"surface": "paths", "state": "complete", "inspected_count": 4},
+                  {"surface": "file_content", "state": "complete", "inspected_count": 4, "inspected_bytes": 200},
+                  {"surface": "symbol_names", "state": "complete", "inspected_count": 4}
+                ],
+                "matches": [
+                  {
+                    "id": "CSM:G3:head:1",
+                    "plan_id": "CSP:G3",
+                    "statement_id": "G3",
+                    "predicate_id": "CSP:G3:predicate:1",
+                    "selector_id": "CSP:G3:predicate:1:target",
+                    "revision_side": "head",
+                    "surface": "symbol_names",
+                    "profile": "production",
+                    "path": "src/service.py",
+                    "line": 10,
+                    "excerpt": "dual_writer"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "CSR:G4",
+            "plan_id": "CSP:G4",
+            "statement_id": "G4",
+            "statement_kind": "guardrail",
+            "expectation": "absence",
+            "revisions": [
+              {
+                "revision_side": "head",
+                "revision": "",
+                "root_path": ".",
+                "state": "unavailable",
+                "coverages": [
+                  {"surface": "paths", "state": "unavailable"},
+                  {"surface": "file_content", "state": "unavailable"},
+                  {"surface": "symbol_names", "state": "unavailable"}
+                ]
               }
             ]
           }

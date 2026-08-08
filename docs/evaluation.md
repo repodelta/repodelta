@@ -17,7 +17,7 @@ or an I/O error.
 
 ## Suite contract
 
-An `evaluation_suite.v3` document references ordinary
+An `evaluation_suite.v4` document references ordinary
 `analysis_fixture.v3` inputs. A case can additionally provide a serialized
 `StructuralGraphResult`, allowing exact-symbol and bounded-path behavior to be
 replayed without installing Codegraph.
@@ -33,6 +33,10 @@ Golden expectations use stable statement and evidence IDs:
   authority.
 - `expected_assessments` checks a transformation claim or predicate's status,
   typed reasons, and exact supporting or contradicting evidence IDs.
+- `expected_focus_outcomes` checks the final structural disposition, exact
+  overlay size, and subject-visible closure coverage and matches.
+- `closure_scan_results` injects recorded scanner observations through the
+  production `ClosureScanner` port; it does not bypass closure planning.
 
 No path, filename, or display-text heuristic is used to decide correctness.
 
@@ -49,6 +53,7 @@ The result records:
 - evidence classification accuracy;
 - statement semantic accuracy;
 - transformation assessment accuracy;
+- structural focus and closure accuracy;
 - missing and unexpected target IDs for every query;
 - per-focus/per-slot budget and threshold diagnostics.
 
@@ -66,12 +71,15 @@ projection of the same result.
 
 Evaluation observes the production `ProjectionCandidateSet`,
 `CandidateConvergence`, `ReviewProjection`, `EvidenceCatalog`, and
-`TransformationAssessment`. It compares the analyzer-owned status, reasons,
-and evidence bindings; it does not recompute them. It does not implement
+`TransformationAssessment`, and final verification inspection. It compares
+the analyzer-owned status, reasons, evidence bindings, and projected focus
+outcomes; it does not recompute them. It does not implement
 another retriever or convergence path, render review HTML, or turn candidate
 relevance into an implementation, verification, or acceptance conclusion. A
-suite with neither projection nor assessment assertions fails rather than
-reporting vacuous success.
+suite with neither projection, assessment, nor focus assertions fails rather
+than reporting vacuous success. Scanner-unavailable observations that do not
+produce subject evidence remain `no_structural_evidence`; evaluation does not
+upgrade that final state from provider input alone.
 
 Future evidence-map and LLM work should add golden cases or thresholds before
 changing production behavior.
