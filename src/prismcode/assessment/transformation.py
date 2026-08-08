@@ -1087,7 +1087,7 @@ def _aggregate_predicate_assessments(
         status = "partial"
     else:
         status = "unverified"
-    supporting = tuple(
+    supporting_candidates = tuple(
         dict.fromkeys(
             binding_id
             for item in assessments
@@ -1100,6 +1100,12 @@ def _aggregate_predicate_assessments(
             for item in assessments
             for binding_id in item.contradicting_binding_ids
         )
+    )
+    contradicting_set = set(contradicting)
+    supporting = tuple(
+        binding_id
+        for binding_id in supporting_candidates
+        if binding_id not in contradicting_set
     )
     reasons = tuple(
         reason
