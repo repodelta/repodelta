@@ -7,6 +7,13 @@ from typing import Any, get_args
 
 from prismcode.pipeline import DeterministicAnalyzer
 from prismcode.model.contracts import (
+    ClosureRevisionObservation,
+    ClosureScanCoverage,
+    ClosureScanMatch,
+    ClosureScanPlanSet,
+    ClosureScanResult,
+    ClosureScanResultSet,
+    ClosureScanTruncation,
     EvidenceClassification,
     FactProfile,
     ProjectionRelation,
@@ -15,6 +22,7 @@ from prismcode.model.contracts import (
     StatementAuthority,
     StatementPurpose,
     StatementRole,
+    StructuralFocusDispositionState,
     TransformationAssessmentReasonKind,
     TransformationAssessmentStatus,
     TransformationPredicateExpectation,
@@ -72,6 +80,16 @@ class ExpectedTransformationAssessment:
 
 
 @dataclass(frozen=True)
+class ExpectedFocusOutcome:
+    subject_id: str
+    disposition: StructuralFocusDispositionState
+    graph_node_count: int = 0
+    closure_fact_count: int = 0
+    closure_revision_states: tuple[str, ...] = ()
+    closure_match_count: int = 0
+
+
+@dataclass(frozen=True)
 class EvaluationCase:
     id: str
     fixture: str
@@ -80,7 +98,9 @@ class EvaluationCase:
     expected_evidence: tuple[ExpectedEvidence, ...] = ()
     expected_statements: tuple[ExpectedStatement, ...] = ()
     expected_assessments: tuple[ExpectedTransformationAssessment, ...] = ()
+    expected_focus_outcomes: tuple[ExpectedFocusOutcome, ...] = ()
     structural_graph: StructuralGraphCollection | None = None
+    closure_scan_results: ClosureScanResultSet | None = None
 
 
 @dataclass(frozen=True)
@@ -94,6 +114,7 @@ class EvaluationThresholds:
     max_false_positive_rate: float = 1.0
     statement_accuracy: float = 0.0
     assessment_accuracy: float = 0.0
+    focus_accuracy: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -101,7 +122,7 @@ class EvaluationSuite:
     cases: tuple[EvaluationCase, ...]
     thresholds: EvaluationThresholds = EvaluationThresholds()
     k: int = 5
-    schema_version: str = "evaluation_suite.v3"
+    schema_version: str = "evaluation_suite.v4"
 
 
 @dataclass(frozen=True)
@@ -159,6 +180,23 @@ class TransformationAssessmentEvaluation:
 
 
 @dataclass(frozen=True)
+class FocusOutcomeEvaluation:
+    case_id: str
+    subject_id: str
+    expected_disposition: StructuralFocusDispositionState
+    observed_disposition: str | None
+    expected_graph_node_count: int
+    observed_graph_node_count: int | None
+    expected_closure_fact_count: int
+    observed_closure_fact_count: int | None
+    expected_closure_revision_states: tuple[str, ...]
+    observed_closure_revision_states: tuple[str, ...]
+    expected_closure_match_count: int
+    observed_closure_match_count: int | None
+    matched: bool
+
+
+@dataclass(frozen=True)
 class EvaluationMetrics:
     query_count: int
     positive_query_count: int
@@ -172,6 +210,7 @@ class EvaluationMetrics:
     classification_accuracy: float
     statement_accuracy: float
     assessment_accuracy: float
+    focus_accuracy: float
 
 
 @dataclass(frozen=True)
@@ -184,18 +223,30 @@ class EvaluationResult:
     classifications: tuple[ClassificationEvaluation, ...]
     statements: tuple[StatementEvaluation, ...]
     assessments: tuple[TransformationAssessmentEvaluation, ...]
+    focus_outcomes: tuple[FocusOutcomeEvaluation, ...]
     diagnostics: tuple[str, ...] = ()
-    schema_version: str = "evaluation_result.v3"
+    schema_version: str = "evaluation_result.v4"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 
+@dataclass(frozen=True)
+class _RecordedClosureScanner:
+    """Replay typed provider observations through the production scanner port."""
+
+    results: ClosureScanResultSet
+
+    def scan(self, plans: ClosureScanPlanSet) -> ClosureScanResultSet:
+        self.results.validate_consistency(plans)
+        return self.results
+
+
 def load_evaluation_suite(path: str | Path) -> EvaluationSuite:
     suite_path = Path(path)
     raw = json.loads(suite_path.read_text(encoding="utf-8"))
-    if raw.get("schema_version") != "evaluation_suite.v3":
-        raise ValueError("evaluation suite must use schema_version evaluation_suite.v3")
+    if raw.get("schema_version") != "evaluation_suite.v4":
+        raise ValueError("evaluation suite must use schema_version evaluation_suite.v4")
     k = int(raw.get("k", 5))
     if k <= 0:
         raise ValueError("evaluation suite k must be positive")
@@ -239,9 +290,18 @@ def load_evaluation_suite(path: str | Path) -> EvaluationSuite:
                 _expected_assessment(item)
                 for item in case.get("expected_assessments", ())
             ),
+            expected_focus_outcomes=tuple(
+                _expected_focus_outcome(item)
+                for item in case.get("expected_focus_outcomes", ())
+            ),
             structural_graph=(
                 _structural_graph(case["structural_graph"])
                 if case.get("structural_graph") is not None
+                else None
+            ),
+            closure_scan_results=(
+                _closure_scan_results(case["closure_scan_results"])
+                if case.get("closure_scan_results") is not None
                 else None
             ),
         )
@@ -259,6 +319,11 @@ def load_evaluation_suite(path: str | Path) -> EvaluationSuite:
         if len(identities) != len(set(identities)):
             raise ValueError(
                 f"evaluation case {case.id} contains duplicate assessment identities"
+            )
+        focus_ids = tuple(item.subject_id for item in case.expected_focus_outcomes)
+        if len(focus_ids) != len(set(focus_ids)):
+            raise ValueError(
+                f"evaluation case {case.id} contains duplicate focus identities"
             )
     thresholds = EvaluationThresholds(**raw.get("thresholds", {}))
     _validate_thresholds(thresholds)
@@ -278,6 +343,7 @@ def evaluate_suite(
     classification_results: list[ClassificationEvaluation] = []
     statement_results: list[StatementEvaluation] = []
     assessment_results: list[TransformationAssessmentEvaluation] = []
+    focus_results: list[FocusOutcomeEvaluation] = []
     diagnostics: list[str] = []
 
     for case in suite.cases:
@@ -287,7 +353,14 @@ def evaluate_suite(
                 analysis_input,
                 structural_graph=case.structural_graph,
             )
-        brief = DeterministicAnalyzer().analyze(analysis_input)
+        analyzer = DeterministicAnalyzer(
+            closure_scanner=(
+                _RecordedClosureScanner(case.closure_scan_results)
+                if case.closure_scan_results is not None
+                else None
+            )
+        )
+        brief = analyzer.analyze(analysis_input)
         grouped = _expected_queries(
             case.expected_selections,
             case.expected_no_selections,
@@ -365,6 +438,13 @@ def evaluate_suite(
         assessment_results.extend(
             _evaluate_assessments(case.id, case.expected_assessments, brief)
         )
+        focus_results.extend(
+            _evaluate_focus_outcomes(
+                case.id,
+                case.expected_focus_outcomes,
+                brief,
+            )
+        )
         diagnostics.extend(
             f"{case.id}: {item.slot}: {item.state}: {item.message}"
             for item in (
@@ -378,17 +458,19 @@ def evaluate_suite(
     diagnostics.extend(_classification_diagnostics(tuple(classification_results)))
     diagnostics.extend(_statement_diagnostics(tuple(statement_results)))
     diagnostics.extend(_assessment_diagnostics(tuple(assessment_results)))
+    diagnostics.extend(_focus_diagnostics(tuple(focus_results)))
     metrics = _metrics(
         tuple(query_results),
         tuple(classification_results),
         tuple(statement_results),
         tuple(assessment_results),
+        tuple(focus_results),
     )
     threshold_diagnostics = _threshold_diagnostics(metrics, suite.thresholds)
-    if not query_results and not assessment_results:
+    if not query_results and not assessment_results and not focus_results:
         threshold_diagnostics = (
             *threshold_diagnostics,
-            "threshold_failed: no projection or assessment assertions were declared",
+            "threshold_failed: no projection, assessment, or focus assertions were declared",
         )
     diagnostics.extend(threshold_diagnostics)
     passed = not threshold_diagnostics
@@ -401,6 +483,7 @@ def evaluate_suite(
         classifications=tuple(classification_results),
         statements=tuple(statement_results),
         assessments=tuple(assessment_results),
+        focus_outcomes=tuple(focus_results),
         diagnostics=tuple(diagnostics),
     )
 
@@ -446,6 +529,69 @@ def _expected_assessment(raw: dict[str, Any]) -> ExpectedTransformationAssessmen
         supporting_evidence_ids=tuple(raw.get("supporting_evidence_ids", ())),
         contradicting_evidence_ids=tuple(
             raw.get("contradicting_evidence_ids", ())
+        ),
+    )
+
+
+def _expected_focus_outcome(raw: dict[str, Any]) -> ExpectedFocusOutcome:
+    disposition = raw["disposition"]
+    if disposition not in get_args(StructuralFocusDispositionState):
+        raise ValueError(f"unsupported structural focus disposition: {disposition}")
+    counts = {
+        name: int(raw.get(name, 0))
+        for name in (
+            "graph_node_count",
+            "closure_fact_count",
+            "closure_match_count",
+        )
+    }
+    if any(value < 0 for value in counts.values()):
+        raise ValueError("focus outcome counts must be non-negative")
+    return ExpectedFocusOutcome(
+        subject_id=str(raw["subject_id"]),
+        disposition=disposition,
+        closure_revision_states=tuple(
+            str(item) for item in raw.get("closure_revision_states", ())
+        ),
+        **counts,
+    )
+
+
+def _closure_scan_results(raw: dict[str, Any]) -> ClosureScanResultSet:
+    return ClosureScanResultSet(
+        results=tuple(
+            ClosureScanResult(
+                id=str(result["id"]),
+                plan_id=str(result["plan_id"]),
+                statement_id=str(result["statement_id"]),
+                statement_kind=result["statement_kind"],
+                expectation=result["expectation"],
+                revisions=tuple(
+                    ClosureRevisionObservation(
+                        revision_side=revision["revision_side"],
+                        revision=str(revision.get("revision", "")),
+                        root_path=str(revision.get("root_path", ".")),
+                        state=revision["state"],
+                        coverages=tuple(
+                            ClosureScanCoverage(**item)
+                            for item in revision.get("coverages", ())
+                        ),
+                        truncations=tuple(
+                            ClosureScanTruncation(**item)
+                            for item in revision.get("truncations", ())
+                        ),
+                        matches=tuple(
+                            ClosureScanMatch(**item)
+                            for item in revision.get("matches", ())
+                        ),
+                    )
+                    for revision in result.get("revisions", ())
+                ),
+            )
+            for result in raw.get("results", ())
+        ),
+        schema_version=str(
+            raw.get("schema_version", "closure_scan_result_set.v2")
         ),
     )
 
@@ -522,6 +668,75 @@ def _evaluate_assessments(
     return tuple(results)
 
 
+def _evaluate_focus_outcomes(
+    case_id: str,
+    expected_items: tuple[ExpectedFocusOutcome, ...],
+    brief: ReviewBrief,
+) -> tuple[FocusOutcomeEvaluation, ...]:
+    inspections = brief.projection.verification_workspace.inspections_by_subject_id()
+    evidence = brief.evidence_catalog.by_id()
+    results = []
+    for expected in expected_items:
+        inspection = inspections.get(expected.subject_id)
+        closure_facts = tuple(
+            evidence[evidence_id]
+            for evidence_id in (
+                inspection.observed_evidence_ids if inspection is not None else ()
+            )
+            if evidence_id in evidence
+            and evidence[evidence_id].kind == "closure_fact"
+            and evidence[evidence_id].closure_scan_result is not None
+        )
+        revision_states = tuple(
+            revision.state
+            for fact in closure_facts
+            for revision in fact.closure_scan_result.revisions
+        )
+        match_count = sum(
+            len(revision.matches)
+            for fact in closure_facts
+            for revision in fact.closure_scan_result.revisions
+        )
+        observed_disposition = (
+            inspection.structural_disposition.state
+            if inspection is not None
+            else None
+        )
+        graph_node_count = (
+            len(inspection.structural_overlay.nodes)
+            if inspection is not None
+            else None
+        )
+        closure_fact_count = len(closure_facts) if inspection is not None else None
+        observed_match_count = match_count if inspection is not None else None
+        results.append(
+            FocusOutcomeEvaluation(
+                case_id=case_id,
+                subject_id=expected.subject_id,
+                expected_disposition=expected.disposition,
+                observed_disposition=observed_disposition,
+                expected_graph_node_count=expected.graph_node_count,
+                observed_graph_node_count=graph_node_count,
+                expected_closure_fact_count=expected.closure_fact_count,
+                observed_closure_fact_count=closure_fact_count,
+                expected_closure_revision_states=(
+                    expected.closure_revision_states
+                ),
+                observed_closure_revision_states=revision_states,
+                expected_closure_match_count=expected.closure_match_count,
+                observed_closure_match_count=observed_match_count,
+                matched=(
+                    observed_disposition == expected.disposition
+                    and graph_node_count == expected.graph_node_count
+                    and closure_fact_count == expected.closure_fact_count
+                    and revision_states == expected.closure_revision_states
+                    and observed_match_count == expected.closure_match_count
+                ),
+            )
+        )
+    return tuple(results)
+
+
 def _binding_evidence_ids(binding_ids, bindings) -> tuple[str, ...]:
     return tuple(
         dict.fromkeys(
@@ -568,6 +783,7 @@ def write_evaluation_markdown(
         f"- classification accuracy: {metrics.classification_accuracy:.4f}",
         f"- statement accuracy: {metrics.statement_accuracy:.4f}",
         f"- transformation assessment accuracy: {metrics.assessment_accuracy:.4f}",
+        f"- structural focus accuracy: {metrics.focus_accuracy:.4f}",
         "",
         "## Queries",
         "",
@@ -617,6 +833,18 @@ def write_evaluation_markdown(
                 f"expected `{item.expected_status}` · observed "
                 f"`{item.observed_status or 'missing'}` · reasons "
                 f"`{', '.join(item.observed_reason_kinds) or 'none'}`"
+            )
+    if result.focus_outcomes:
+        lines.extend(("", "## Structural focus and closure", ""))
+        for item in result.focus_outcomes:
+            lines.append(
+                f"- `{item.case_id}` · `{item.subject_id}` · "
+                f"expected `{item.expected_disposition}`/"
+                f"{item.expected_graph_node_count} nodes/"
+                f"{item.expected_closure_fact_count} closure facts · observed "
+                f"`{item.observed_disposition or 'missing'}`/"
+                f"{item.observed_graph_node_count if item.observed_graph_node_count is not None else 'missing'} nodes/"
+                f"{item.observed_closure_fact_count if item.observed_closure_fact_count is not None else 'missing'} closure facts"
             )
     if result.diagnostics:
         lines.extend(("", "## Diagnostics", ""))
@@ -714,6 +942,7 @@ def _metrics(
     classifications: tuple[ClassificationEvaluation, ...],
     statements: tuple[StatementEvaluation, ...],
     assessments: tuple[TransformationAssessmentEvaluation, ...],
+    focus_outcomes: tuple[FocusOutcomeEvaluation, ...],
 ) -> EvaluationMetrics:
     query_count = len(queries)
     positive_queries = tuple(item for item in queries if item.expected_target_ids)
@@ -721,6 +950,7 @@ def _metrics(
     classification_count = len(classifications)
     statement_count = len(statements)
     assessment_count = len(assessments)
+    focus_count = len(focus_outcomes)
     return EvaluationMetrics(
         query_count=query_count,
         positive_query_count=len(positive_queries),
@@ -776,6 +1006,11 @@ def _metrics(
             if assessment_count
             else 1.0
         ),
+        focus_accuracy=(
+            sum(item.matched for item in focus_outcomes) / focus_count
+            if focus_count
+            else 1.0
+        ),
     )
 
 
@@ -810,6 +1045,11 @@ def _threshold_diagnostics(
             "assessment_accuracy",
             metrics.assessment_accuracy,
             thresholds.assessment_accuracy,
+        ),
+        (
+            "focus_accuracy",
+            metrics.focus_accuracy,
+            thresholds.focus_accuracy,
         ),
     )
     for name, observed, required in minimums:
@@ -885,6 +1125,27 @@ def _assessment_diagnostics(
         f"observed={item.observed_status or 'missing'}/"
         f"{','.join(item.observed_reason_kinds) or 'no_reason'}"
         for item in assessments
+        if not item.matched
+    )
+
+
+def _focus_diagnostics(
+    outcomes: tuple[FocusOutcomeEvaluation, ...],
+) -> tuple[str, ...]:
+    return tuple(
+        "focus_mismatch: "
+        f"case={item.case_id} subject={item.subject_id} "
+        f"expected={item.expected_disposition}/"
+        f"{item.expected_graph_node_count}/"
+        f"{item.expected_closure_fact_count}/"
+        f"{','.join(item.expected_closure_revision_states) or 'none'}/"
+        f"{item.expected_closure_match_count} "
+        f"observed={item.observed_disposition or 'missing'}/"
+        f"{item.observed_graph_node_count}/"
+        f"{item.observed_closure_fact_count}/"
+        f"{','.join(item.observed_closure_revision_states) or 'none'}/"
+        f"{item.observed_closure_match_count}"
+        for item in outcomes
         if not item.matched
     )
 
