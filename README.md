@@ -206,7 +206,10 @@ prismcode review \
 
 PrismCode sends only bounded canonical evidence candidates through the
 Chat Completions API with strict Structured Outputs, `store: false`, no tools,
-and a 40-candidate request limit plus three-request review limit. It records one
+and a 40-candidate request limit plus three-request review limit. Candidates
+carry catalog-owned file/symbol context, directional changed lines, and bounded
+structural-path summaries; packet truncation is recorded as a coverage limit.
+It records one
 typed observation per claim, including the bounded request, admission and
 execution fate, validated selection divergence, usage, failures, deferrals,
 and coverage limits, in

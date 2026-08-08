@@ -26,6 +26,11 @@ def _request() -> ShadowEvidenceRequest:
                 kind="changed_symbol",
                 revision_side="head",
                 operation="added",
+                path="src/analyzer.py",
+                symbol_kind="function",
+                qualified_name="Analyzer",
+                added_code="def Analyzer(): ...",
+                structural_context=("entry →[calls] Analyzer",),
             ),
         ),
     )
@@ -92,6 +97,11 @@ def test_openai_provider_uses_bounded_strict_responses_contract() -> None:
         "schema"
     ]["properties"]["selections"]["items"]["properties"]["evidence_id"]
     assert evidence_schema["enum"] == ["symbol:analyzer"]
+    request_payload = json.loads(captured["payload"]["messages"][1]["content"])
+    assert request_payload["candidates"][0]["added_code"] == "def Analyzer(): ..."
+    assert request_payload["candidates"][0]["structural_context"] == [
+        "entry →[calls] Analyzer"
+    ]
     assert "secret-test-key" not in json.dumps(captured["payload"])
     assert response.output["request_id"] == request.request_id
     assert response.input_tokens == 120

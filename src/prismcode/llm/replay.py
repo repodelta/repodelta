@@ -6,10 +6,10 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from prismcode.llm.contracts import (
-    ShadowEvidenceCandidate,
     ShadowEvidenceRequest,
     ShadowSelectionValidation,
     parse_shadow_selection,
+    shadow_candidate_from_mapping,
 )
 from prismcode.llm.provider import ShadowProviderResponse
 
@@ -64,13 +64,7 @@ def _parse_request(raw: Mapping[str, Any]) -> ShadowEvidenceRequest:
         subject_kind=raw.get("subject_kind", ""),
         authored_statement=raw.get("authored_statement", ""),
         candidates=tuple(
-            ShadowEvidenceCandidate(
-                evidence_id=candidate.get("evidence_id", ""),
-                summary=candidate.get("summary", ""),
-                kind=candidate.get("kind", ""),
-                revision_side=candidate.get("revision_side", "none"),
-                operation=candidate.get("operation", "context"),
-            )
+            shadow_candidate_from_mapping(candidate)
             for candidate in raw.get("candidates", ())
         ),
         coverage_limits=tuple(raw.get("coverage_limits", ())),

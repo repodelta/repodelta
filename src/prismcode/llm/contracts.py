@@ -55,11 +55,51 @@ class ShadowEvidenceCandidate:
     kind: str
     revision_side: str = "none"
     operation: str = "context"
+    classification: str = "unknown"
+    profile: str = "unknown"
+    authority: str = "unknown"
+    path: str = ""
+    line_start: int | None = None
+    line_end: int | None = None
+    symbol_kind: str = ""
+    qualified_name: str = ""
+    added_code: str = ""
+    removed_code: str = ""
+    structural_context: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         _require_text(self.evidence_id, "evidence_id")
         _require_text(self.summary, "summary")
         _require_text(self.kind, "kind")
+        for name in (
+            "classification",
+            "profile",
+            "authority",
+        ):
+            _require_text(getattr(self, name), name)
+        for name in (
+            "path",
+            "symbol_kind",
+            "qualified_name",
+            "added_code",
+            "removed_code",
+        ):
+            value = getattr(self, name)
+            if value:
+                _require_text(value, name)
+        if (self.line_start is None) != (self.line_end is None):
+            raise ValueError("candidate line range must be complete")
+        if (
+            self.line_start is not None
+            and self.line_end is not None
+            and (self.line_start < 0 or self.line_end < self.line_start)
+        ):
+            raise ValueError("candidate line range is invalid")
+        for context in self.structural_context:
+            _require_text(context, "structural_context")
+
+    def to_dict(self) -> dict[str, Any]:
+        return _json_dict(self)
 
 
 @dataclass(frozen=True)
@@ -89,6 +129,31 @@ class ShadowEvidenceRequest:
 
     def to_dict(self) -> dict[str, Any]:
         return _json_dict(self)
+
+
+def shadow_candidate_from_mapping(
+    raw: Mapping[str, Any],
+) -> ShadowEvidenceCandidate:
+    """Load the canonical additive candidate contract at serialization edges."""
+
+    return ShadowEvidenceCandidate(
+        evidence_id=str(raw.get("evidence_id", "")),
+        summary=str(raw.get("summary", "")),
+        kind=str(raw.get("kind", "")),
+        revision_side=str(raw.get("revision_side", "none")),
+        operation=str(raw.get("operation", "context")),
+        classification=str(raw.get("classification", "unknown")),
+        profile=str(raw.get("profile", "unknown")),
+        authority=str(raw.get("authority", "unknown")),
+        path=str(raw.get("path", "")),
+        line_start=raw.get("line_start"),
+        line_end=raw.get("line_end"),
+        symbol_kind=str(raw.get("symbol_kind", "")),
+        qualified_name=str(raw.get("qualified_name", "")),
+        added_code=str(raw.get("added_code", "")),
+        removed_code=str(raw.get("removed_code", "")),
+        structural_context=tuple(raw.get("structural_context", ())),
+    )
 
 
 @dataclass(frozen=True)

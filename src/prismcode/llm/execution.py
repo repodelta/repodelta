@@ -14,11 +14,11 @@ from prismcode.llm.admission import (
     admit_shadow_candidates,
 )
 from prismcode.llm.contracts import (
-    ShadowEvidenceCandidate,
     ShadowEvidenceRequest,
     ShadowEvidenceSelection,
     ShadowEvidenceSelectionItem,
     ShadowSelectionDiagnostic,
+    shadow_candidate_from_mapping,
 )
 from prismcode.llm.provider import ShadowEvidenceProvider
 from prismcode.llm.runner import (
@@ -315,7 +315,8 @@ def _load_request(raw: dict | None) -> ShadowEvidenceRequest | None:
         subject_kind=str(raw["subject_kind"]),
         authored_statement=str(raw["authored_statement"]),
         candidates=tuple(
-            ShadowEvidenceCandidate(**item) for item in raw.get("candidates", ())
+            shadow_candidate_from_mapping(item)
+            for item in raw.get("candidates", ())
         ),
         coverage_limits=tuple(raw.get("coverage_limits", ())),
         schema_version=str(raw["schema_version"]),

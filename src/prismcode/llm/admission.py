@@ -10,6 +10,7 @@ from prismcode.llm.contracts import (
     ShadowEvidenceCandidate,
     ShadowEvidenceRequest,
 )
+from prismcode.llm.packet import build_shadow_code_packet
 from prismcode.model.contracts import (
     EvidenceCatalog,
     EvidenceItem,
@@ -80,7 +81,7 @@ def admit_shadow_candidates(
     admissions = tuple(
         _admit_claim(
             claim,
-            evidence_catalog.items,
+            evidence_catalog,
             evidence,
             observed_ids,
             bindings,
@@ -96,7 +97,7 @@ def admit_shadow_candidates(
 
 def _admit_claim(
     claim: TransformationClaim,
-    catalog_items: tuple[EvidenceItem, ...],
+    evidence_catalog: EvidenceCatalog,
     evidence: dict[str, EvidenceItem],
     observed_ids: set[str],
     bindings: dict[str, TransformationEvidenceBinding],
@@ -129,7 +130,7 @@ def _admit_claim(
     )
     eligible_ids = tuple(
         item.id
-        for item in catalog_items
+        for item in evidence_catalog.items
         if (
             item.id in observed_ids
             and eligible_transformation_evidence(claim, item)
@@ -198,9 +199,13 @@ def _admit_claim(
             "Structural traversal coverage is incomplete for eligible evidence."
         )
 
-    candidates = tuple(_candidate(evidence[item]) for item in selected_ids)
+    candidates, packet_limits = build_shadow_code_packet(
+        tuple(evidence[item] for item in selected_ids),
+        evidence_catalog,
+    )
+    coverage_limits.extend(packet_limits)
     request = ShadowEvidenceRequest(
-        request_id=_request_id(claim, selected_ids, coverage_limits),
+        request_id=_request_id(claim, candidates, coverage_limits),
         subject_id=claim.id,
         subject_kind=claim.kind,
         authored_statement=claim.text,
@@ -217,19 +222,9 @@ def _admit_claim(
     )
 
 
-def _candidate(item: EvidenceItem) -> ShadowEvidenceCandidate:
-    return ShadowEvidenceCandidate(
-        evidence_id=item.id,
-        summary=item.summary,
-        kind=item.kind,
-        revision_side=item.revision_side,
-        operation=item.operation,
-    )
-
-
 def _request_id(
     claim: TransformationClaim,
-    evidence_ids: tuple[str, ...],
+    candidates: tuple[ShadowEvidenceCandidate, ...],
     coverage_limits: list[str],
 ) -> str:
     canonical = json.dumps(
@@ -237,7 +232,7 @@ def _request_id(
             "claim_id": claim.id,
             "claim_kind": claim.kind,
             "claim_text": claim.text,
-            "evidence_ids": evidence_ids,
+            "candidates": [item.to_dict() for item in candidates],
             "coverage_limits": coverage_limits,
         },
         ensure_ascii=False,

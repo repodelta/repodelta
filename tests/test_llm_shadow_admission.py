@@ -86,6 +86,17 @@ def test_admission_is_stable_and_wider_than_deterministic_association() -> None:
     assert set(admission.deterministic_evidence_ids) <= set(candidate_ids)
     assert len(candidate_ids) > len(admission.deterministic_evidence_ids)
     assert admission.request.request_id.startswith(f"shadow:{claim.id}:")
+    changed = next(
+        item
+        for item in admission.request.candidates
+        if item.kind == "change_relation"
+    )
+    assert changed.path == "src/service.py"
+    assert changed.classification == "code"
+    assert changed.profile == "production"
+    assert changed.authority == "github_diff"
+    assert changed.added_code == "new_call()"
+    assert changed.removed_code == "old_call()"
 
 
 def test_completion_admission_includes_typed_verification_baseline() -> None:
