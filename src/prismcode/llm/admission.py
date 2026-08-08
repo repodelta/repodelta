@@ -10,6 +10,7 @@ from prismcode.llm.contracts import (
     ShadowEvidenceCandidate,
     ShadowEvidenceRequest,
 )
+from prismcode.llm.convergence import converge_shadow_candidate_identities
 from prismcode.llm.packet import build_shadow_code_packet
 from prismcode.model.contracts import (
     EvidenceCatalog,
@@ -22,7 +23,6 @@ from prismcode.model.contracts import (
     TransformationContract,
     TransformationEvidenceBinding,
 )
-from prismcode.routing.transformation import eligible_transformation_evidence
 
 
 ShadowAdmissionState = Literal["ready", "ready_truncated", "empty", "blocked"]
@@ -128,24 +128,23 @@ def _admit_claim(
     baseline_ids = tuple(
         dict.fromkeys(bindings[item].evidence_id for item in baseline_binding_ids)
     )
-    eligible_ids = tuple(
-        item.id
-        for item in evidence_catalog.items
-        if (
-            item.id in observed_ids
-            and eligible_transformation_evidence(claim, item)
-        )
-        or (
-            item.role == "closure_fact"
-            and claim.id in item.associated_statement_ids
-        )
-        or item.id in baseline_ids
+    claim_bindings = tuple(
+        item for item in bindings.values() if item.claim_id == claim.id
     )
-    if not eligible_ids:
+    convergence = converge_shadow_candidate_identities(
+        claim,
+        evidence_catalog,
+        observed_ids,
+        claim_bindings,
+        baseline_ids,
+        max_candidates=policy.max_candidates,
+    )
+    selected_ids = tuple(item.evidence_id for item in convergence.identities)
+    if not selected_ids:
         return ShadowCandidateAdmission(
             claim_id=claim.id,
             state="empty",
-            eligible_count=0,
+            eligible_count=convergence.eligible_count,
             diagnostics=(
                 ShadowAdmissionDiagnostic(
                     code="shadow_admission_no_eligible_fact",
@@ -158,7 +157,7 @@ def _admit_claim(
         return ShadowCandidateAdmission(
             claim_id=claim.id,
             state="blocked",
-            eligible_count=len(eligible_ids),
+            eligible_count=convergence.eligible_count,
             deterministic_evidence_ids=baseline_ids,
             diagnostics=(
                 ShadowAdmissionDiagnostic(
@@ -171,17 +170,15 @@ def _admit_claim(
             ),
         )
 
-    ordered_ids = tuple(
-        dict.fromkeys((*baseline_ids, *eligible_ids))
-    )
-    selected_ids = ordered_ids[: policy.max_candidates]
-    truncated = len(ordered_ids) > len(selected_ids)
+    truncated = convergence.deferred_count > 0
     coverage_limits: list[str] = []
     diagnostics: list[ShadowAdmissionDiagnostic] = []
     if truncated:
         detail = (
-            f"Candidate admission retained {len(selected_ids)}/{len(ordered_ids)} "
-            "typed evidence identities within the safety budget."
+            f"Claim-scoped convergence retained {len(selected_ids)}/"
+            f"{convergence.eligible_count} canonical evidence identities; "
+            f"{convergence.deferred_count} {convergence.deferred_tier or 'unknown'} "
+            "tier identities were deferred by the safety boundary."
         )
         coverage_limits.append(detail)
         diagnostics.append(
@@ -193,7 +190,7 @@ def _admit_claim(
     if any(
         evidence[item].kind == "structural_path"
         and evidence[item].structural_traversal_coverage != "complete"
-        for item in eligible_ids
+        for item in selected_ids
     ):
         coverage_limits.append(
             "Structural traversal coverage is incomplete for eligible evidence."
@@ -202,6 +199,10 @@ def _admit_claim(
     candidates, packet_limits = build_shadow_code_packet(
         tuple(evidence[item] for item in selected_ids),
         evidence_catalog,
+        provenance={
+            item.evidence_id: (item.tier, item.association)
+            for item in convergence.identities
+        },
     )
     coverage_limits.extend(packet_limits)
     request = ShadowEvidenceRequest(
@@ -215,7 +216,7 @@ def _admit_claim(
     return ShadowCandidateAdmission(
         claim_id=claim.id,
         state="ready_truncated" if truncated else "ready",
-        eligible_count=len(eligible_ids),
+        eligible_count=convergence.eligible_count,
         deterministic_evidence_ids=baseline_ids,
         request=request,
         diagnostics=tuple(diagnostics),

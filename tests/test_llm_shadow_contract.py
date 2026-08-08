@@ -156,6 +156,19 @@ def test_shadow_contract_has_only_cli_execution_authority() -> None:
     assert execution_callers == ["src/prismcode/cli.py"]
 
 
+def test_shadow_candidate_membership_has_one_production_authority() -> None:
+    callers = []
+    for path in Path("src/prismcode").glob("**/*.py"):
+        source = path.read_text(encoding="utf-8")
+        if "converge_shadow_candidate_identities(" not in source:
+            continue
+        if path.name == "convergence.py":
+            continue
+        callers.append(str(path))
+
+    assert callers == ["src/prismcode/llm/admission.py"]
+
+
 def _fixture_pair() -> tuple[ShadowEvidenceRequest, dict]:
     request, validation = load_shadow_replay(FIXTURE)
     assert validation.selection is not None

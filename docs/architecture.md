@@ -84,10 +84,13 @@ fixture or GitHub
           reclassifies paths, relations, labels, or prose
 ```
 
-An optional, dormant `llm` boundary derives one claim-kind-eligible candidate
-set from canonical observed transformation facts. Deterministic assessment
-evidence is retained first; remaining typed candidates are admitted in catalog
-order under an explicit safety budget and coverage limits. One canonical code
+An optional, dormant `llm` boundary converges one claim-scoped candidate set
+from canonical observed transformation facts. It retains deterministic
+baselines, claim-aligned identities, and same-hunk canonical anchors in typed
+authority tiers. With no association it falls back only to typed changed
+anchors; structural paths remain packet context instead of becoming a global
+candidate dump. An explicit safety boundary reports deferred identity count
+and tier. One canonical code
 packet projection enriches those same identities with catalog-owned
 classification, path and symbol metadata, directional changed lines, and
 referenced structural-path summaries. It neither reparses provider output nor

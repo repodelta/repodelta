@@ -71,7 +71,7 @@ def _admit(brief, *, policy=ShadowAdmissionPolicy()):
     )
 
 
-def test_admission_is_stable_and_wider_than_deterministic_association() -> None:
+def test_admission_is_stable_and_excludes_unrelated_changed_anchors() -> None:
     brief = _brief()
 
     first = _admit(brief)
@@ -84,13 +84,15 @@ def test_admission_is_stable_and_wider_than_deterministic_association() -> None:
     assert admission.request is not None
     candidate_ids = tuple(item.evidence_id for item in admission.request.candidates)
     assert set(admission.deterministic_evidence_ids) <= set(candidate_ids)
-    assert len(candidate_ids) > len(admission.deterministic_evidence_ids)
+    assert candidate_ids == admission.deterministic_evidence_ids
     assert admission.request.request_id.startswith(f"shadow:{claim.id}:")
     changed = next(
         item
         for item in admission.request.candidates
         if item.kind == "change_relation"
     )
+    assert changed.admission_tier == "baseline"
+    assert changed.association == "deterministic_baseline"
     assert changed.path == "src/service.py"
     assert changed.classification == "code"
     assert changed.profile == "production"
@@ -138,7 +140,7 @@ def test_generic_transition_states_do_not_enter_evidence_selection() -> None:
 
 
 def test_admission_truncates_only_after_preserving_baseline() -> None:
-    brief = _brief()
+    brief = _brief("## Change\n- Update service behavior.\n")
     claim = brief.transformation_contract.by_kind("change")[0]
     admission = _admit(
         brief, policy=ShadowAdmissionPolicy(max_candidates=1)
@@ -146,10 +148,23 @@ def test_admission_truncates_only_after_preserving_baseline() -> None:
 
     assert admission.state == "ready_truncated"
     assert admission.request is not None
+    assert admission.deterministic_evidence_ids == ()
+    assert len(admission.request.candidates) == 1
+    assert admission.request.candidates[0].admission_tier == "fallback"
+    assert admission.request.coverage_limits
+
+
+def test_multiple_direct_anchors_survive_without_competing() -> None:
+    brief = _brief("## Change\n- Update `old_call` and `old_extra`.\n")
+    claim = brief.transformation_contract.by_kind("change")[0]
+
+    admission = _admit(brief).by_claim_id()[claim.id]
+
+    assert admission.request is not None
     assert tuple(
         item.evidence_id for item in admission.request.candidates
     ) == admission.deterministic_evidence_ids
-    assert admission.request.coverage_limits
+    assert len(admission.deterministic_evidence_ids) == 2
 
 
 def test_admission_blocks_when_baseline_itself_exceeds_budget() -> None:
