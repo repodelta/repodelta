@@ -14,6 +14,7 @@ from prismcode.llm import (
     ShadowExecutionPolicy,
     admit_shadow_candidates,
     execute_shadow_admissions,
+    load_shadow_execution,
     write_shadow_execution,
 )
 from prismcode.model.contracts import (
@@ -84,6 +85,7 @@ def test_execution_runs_ready_admissions_once_and_writes_stable_artifact(
     assert artifact["schema_version"] == "llm_shadow_execution.v2"
     assert artifact["observations"][0]["request"]["candidates"]
     assert artifact["observations"][0]["run"]["comparison"] is not None
+    assert load_shadow_execution(first) == bundle
 
 
 def test_shadow_execution_does_not_mutate_formal_assessment() -> None:

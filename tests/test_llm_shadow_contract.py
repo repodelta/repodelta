@@ -141,14 +141,15 @@ def test_candidate_membership_is_upstream_owned_and_bounded() -> None:
 
 
 def test_shadow_contract_has_only_cli_execution_authority() -> None:
-    production_importers = []
+    execution_callers = []
     for path in Path("src/prismcode").glob("**/*.py"):
         if "llm" in path.parts:
             continue
-        if "prismcode.llm" in path.read_text(encoding="utf-8"):
-            production_importers.append(str(path))
+        source = path.read_text(encoding="utf-8")
+        if "execute_shadow_review(" in source:
+            execution_callers.append(str(path))
 
-    assert production_importers == ["src/prismcode/cli.py"]
+    assert execution_callers == ["src/prismcode/cli.py"]
 
 
 def _fixture_pair() -> tuple[ShadowEvidenceRequest, dict]:

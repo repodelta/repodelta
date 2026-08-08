@@ -28,6 +28,7 @@ from prismcode.llm.execution import (
     ShadowExecutionPolicy,
     execute_shadow_admissions,
     execute_shadow_review,
+    load_shadow_execution,
     unavailable_shadow_execution,
     write_shadow_execution,
 )
@@ -68,6 +69,7 @@ __all__ = [
     "serialize_shadow_replay",
     "execute_shadow_admissions",
     "execute_shadow_review",
+    "load_shadow_execution",
     "unavailable_shadow_execution",
     "write_shadow_execution",
 ]

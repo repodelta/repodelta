@@ -46,8 +46,8 @@ The open core provides:
   source links, and vertically aggregated coverage gaps;
 - an Actions workflow for automatic PR reports and manually targeted reviews;
 - clean-install CI with network-free tests.
-- a deterministic offline evaluation suite for binding, structural-path, and
-  evidence-classification baselines.
+- a deterministic offline evaluation suite for binding, structural-path,
+  evidence-classification, and recorded LLM-shadow semantic-mapping baselines.
 
 The GitHub adapter intentionally emits source facts only. Linked Issues come
 from GitHub's `closingIssuesReferences` GraphQL field, not Issue numbers typed

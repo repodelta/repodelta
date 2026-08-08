@@ -17,7 +17,7 @@ or an I/O error.
 
 ## Suite contract
 
-An `evaluation_suite.v4` document references ordinary
+An `evaluation_suite.v5` document references ordinary
 `analysis_fixture.v3` inputs. A case can additionally provide a serialized
 `StructuralGraphResult`, allowing exact-symbol and bounded-path behavior to be
 replayed without installing Codegraph.
@@ -37,6 +37,10 @@ Golden expectations use stable statement and evidence IDs:
   overlay size, and subject-visible closure coverage and matches.
 - `closure_scan_results` injects recorded scanner observations through the
   production `ClosureScanner` port; it does not bypass closure planning.
+- `shadow_execution` references a canonical `llm_shadow_execution.v2`
+  artifact, while `expected_shadow_outcomes` declares the expected execution
+  state, selected evidence roles, unresolved surfaces, and rejection
+  diagnostics for each claim.
 
 No path, filename, or display-text heuristic is used to decide correctness.
 
@@ -54,6 +58,10 @@ The result records:
 - statement semantic accuracy;
 - transformation assessment accuracy;
 - structural focus and closure accuracy;
+- LLM-shadow selection precision/recall, semantic-role accuracy,
+  deterministic-baseline retention, unresolved-surface precision/recall,
+  execution-state accuracy, and rejection-diagnostic accuracy;
+- replay/live observation counts and raw token and latency totals;
 - missing and unexpected target IDs for every query;
 - per-focus/per-slot budget and threshold diagnostics.
 
@@ -73,13 +81,17 @@ Evaluation observes the production `ProjectionCandidateSet`,
 `CandidateConvergence`, `ReviewProjection`, `EvidenceCatalog`, and
 `TransformationAssessment`, and final verification inspection. It compares
 the analyzer-owned status, reasons, evidence bindings, and projected focus
-outcomes; it does not recompute them. It does not implement
+outcomes; it does not recompute them. Shadow evaluation loads already-recorded
+typed observations and never calls an LLM provider. Replay and live artifacts
+use the same scoring contract but remain separately counted. It does not implement
 another retriever or convergence path, render review HTML, or turn candidate
 relevance into an implementation, verification, or acceptance conclusion. A
-suite with neither projection, assessment, nor focus assertions fails rather
+suite with neither projection, assessment, focus, nor shadow assertions fails rather
 than reporting vacuous success. Scanner-unavailable observations that do not
 produce subject evidence remain `no_structural_evidence`; evaluation does not
 upgrade that final state from provider input alone.
 
-Future evidence-map and LLM work should add golden cases or thresholds before
-changing production behavior.
+Live shadow observations remain non-authoritative measurements. Their raw token
+usage and latency are reported without defining pass/fail budgets; monetary
+cost requires an explicit provider/model pricing policy and representative live
+samples before becoming a gate.

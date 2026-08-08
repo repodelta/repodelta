@@ -17,6 +17,18 @@ from prismcode.evaluation.core import (
 SUITE_PATH = Path("fixtures/evaluation-suite.json")
 
 
+def _absolute_case_paths(case: dict[str, object]) -> dict[str, object]:
+    resolved = {
+        **case,
+        "fixture": str((SUITE_PATH.parent / str(case["fixture"])).resolve()),
+    }
+    if case.get("shadow_execution") is not None:
+        resolved["shadow_execution"] = str(
+            (SUITE_PATH.parent / str(case["shadow_execution"])).resolve()
+        )
+    return resolved
+
+
 def test_golden_suite_covers_typed_slots_structure_and_profiles() -> None:
     suite = load_evaluation_suite(SUITE_PATH)
     result = evaluate_suite(suite, suite_path=SUITE_PATH)
@@ -35,6 +47,20 @@ def test_golden_suite_covers_typed_slots_structure_and_profiles() -> None:
     assert len(result.statements) == 10
     assert len(result.assessments) == 13
     assert len(result.focus_outcomes) == 8
+    assert result.shadow_metrics.outcome_count == 4
+    assert result.shadow_metrics.selection_precision == 1.0
+    assert result.shadow_metrics.selection_recall == 1.0
+    assert result.shadow_metrics.role_accuracy == 1.0
+    assert result.shadow_metrics.baseline_retention == 1.0
+    assert result.shadow_metrics.unresolved_precision == 1.0
+    assert result.shadow_metrics.unresolved_recall == 1.0
+    assert result.shadow_metrics.state_accuracy == 1.0
+    assert result.shadow_metrics.diagnostic_accuracy == 1.0
+    assert result.shadow_metrics.replay_count == 2
+    assert result.shadow_metrics.live_count == 0
+    assert result.shadow_metrics.total_input_tokens == 160
+    assert result.shadow_metrics.total_output_tokens == 30
+    assert result.shadow_metrics.total_duration_ms == 20.5
 
 
 def test_evaluation_outputs_are_byte_stable(tmp_path: Path) -> None:
@@ -48,7 +74,7 @@ def test_evaluation_outputs_are_byte_stable(tmp_path: Path) -> None:
     assert first_json.read_bytes() == second_json.read_bytes()
     assert first_markdown.read_bytes() == second_markdown.read_bytes()
     payload = json.loads(first_json.read_text(encoding="utf-8"))
-    assert payload["schema_version"] == "evaluation_result.v4"
+    assert payload["schema_version"] == "evaluation_result.v5"
     assert payload["queries"][0]["case_id"] == "direct-hunk-and-no-match"
 
 
@@ -58,13 +84,7 @@ def test_wrong_slot_expectation_fails_the_gate_and_cli(
 ) -> None:
     raw = json.loads(SUITE_PATH.read_text(encoding="utf-8"))
     raw["cases"][0]["expected_selections"][0]["target_id"] = "E:not-present"
-    raw["cases"] = [
-        {
-            **case,
-            "fixture": str((SUITE_PATH.parent / case["fixture"]).resolve()),
-        }
-        for case in raw["cases"]
-    ]
+    raw["cases"] = [_absolute_case_paths(case) for case in raw["cases"]]
     suite_path = tmp_path / "failing-suite.json"
     suite_path.write_text(json.dumps(raw), encoding="utf-8")
     suite = load_evaluation_suite(suite_path)
@@ -101,6 +121,8 @@ def test_evaluation_requires_declared_projection_expectations() -> None:
                 expected_no_selections=(),
                 expected_assessments=(),
                 expected_focus_outcomes=(),
+                shadow_execution=None,
+                expected_shadow_outcomes=(),
             )
             for case in suite.cases
         ),
@@ -110,9 +132,28 @@ def test_evaluation_requires_declared_projection_expectations() -> None:
 
     assert result.passed is False
     assert (
-        "threshold_failed: no projection, assessment, or focus assertions were declared"
+        "threshold_failed: no projection, assessment, focus, or shadow assertions were declared"
         in result.diagnostics
     )
+
+
+def test_wrong_shadow_mapping_fails_the_gate(tmp_path: Path) -> None:
+    raw = json.loads(SUITE_PATH.read_text(encoding="utf-8"))
+    shadow_case = next(
+        case for case in raw["cases"] if case["id"] == "llm-shadow-semantic-mapping"
+    )
+    shadow_case["expected_shadow_outcomes"][0]["selections"][0][
+        "semantic_role"
+    ] = "consumer"
+    raw["cases"] = [_absolute_case_paths(case) for case in raw["cases"]]
+    suite_path = tmp_path / "failing-shadow-suite.json"
+    suite_path.write_text(json.dumps(raw), encoding="utf-8")
+
+    result = evaluate_suite(load_evaluation_suite(suite_path), suite_path=suite_path)
+
+    assert result.passed is False
+    assert result.shadow_metrics.role_accuracy < 1.0
+    assert any("shadow_role_mismatch" in item for item in result.diagnostics)
 
 
 def test_wrong_assessment_expectation_fails_the_gate_and_cli(
@@ -124,13 +165,7 @@ def test_wrong_assessment_expectation_fails_the_gate_and_cli(
         case for case in raw["cases"] if case["id"] == "transformation-assessment-proof"
     )
     assessment_case["expected_assessments"][0]["status"] = "partial"
-    raw["cases"] = [
-        {
-            **case,
-            "fixture": str((SUITE_PATH.parent / case["fixture"]).resolve()),
-        }
-        for case in raw["cases"]
-    ]
+    raw["cases"] = [_absolute_case_paths(case) for case in raw["cases"]]
     suite_path = tmp_path / "failing-assessment-suite.json"
     suite_path.write_text(json.dumps(raw), encoding="utf-8")
 
@@ -166,13 +201,7 @@ def test_wrong_focus_expectation_fails_the_gate_and_cli(
         case for case in raw["cases"] if case["id"] == "focus-and-closure-outcomes"
     )
     focus_case["expected_focus_outcomes"][0]["disposition"] = "projected"
-    raw["cases"] = [
-        {
-            **case,
-            "fixture": str((SUITE_PATH.parent / case["fixture"]).resolve()),
-        }
-        for case in raw["cases"]
-    ]
+    raw["cases"] = [_absolute_case_paths(case) for case in raw["cases"]]
     suite_path = tmp_path / "failing-focus-suite.json"
     suite_path.write_text(json.dumps(raw), encoding="utf-8")
 

@@ -1,5 +1,5 @@
 {
-  "schema_version": "evaluation_suite.v4",
+  "schema_version": "evaluation_suite.v5",
   "k": 5,
   "thresholds": {
     "precision_at_k": 1.0,
@@ -12,6 +12,16 @@
     "max_false_positive_rate": 0.0,
     "assessment_accuracy": 1.0,
     "focus_accuracy": 1.0
+  },
+  "shadow_thresholds": {
+    "selection_precision": 1.0,
+    "selection_recall": 1.0,
+    "role_accuracy": 1.0,
+    "baseline_retention": 1.0,
+    "unresolved_precision": 1.0,
+    "unresolved_recall": 1.0,
+    "state_accuracy": 1.0,
+    "diagnostic_accuracy": 1.0
   },
   "cases": [
     {
@@ -646,6 +656,47 @@
           }
         ]
       }
+    },
+    {
+      "id": "llm-shadow-semantic-mapping",
+      "fixture": "evaluation/direct-hunk.json",
+      "shadow_execution": "llm-shadow/evaluation-observations.json",
+      "expected_shadow_outcomes": [
+        {
+          "claim_id": "T1",
+          "execution_state": "accepted",
+          "selections": [
+            {
+              "evidence_id": "E:authority",
+              "role": "supporting",
+              "semantic_role": "authority"
+            },
+            {
+              "evidence_id": "E:removal",
+              "role": "contradicting",
+              "semantic_role": "removal"
+            }
+          ],
+          "unresolved_surfaces": [
+            "Dynamic plugin writers were not observed."
+          ]
+        },
+        {
+          "claim_id": "T2",
+          "execution_state": "invalid_output",
+          "diagnostic_codes": ["unknown_evidence_id"]
+        },
+        {
+          "claim_id": "T3",
+          "execution_state": "deferred",
+          "diagnostic_codes": ["shadow_execution_budget_deferred"]
+        },
+        {
+          "claim_id": "T4",
+          "execution_state": "empty",
+          "diagnostic_codes": ["shadow_admission_no_eligible_fact"]
+        }
+      ]
     }
   ]
 }

@@ -5,6 +5,18 @@ from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from typing import Any, get_args
 
+from prismcode.evaluation.shadow import (
+    ExpectedShadowOutcome,
+    ExpectedShadowSelection,
+    ShadowEvaluationMetrics,
+    ShadowEvaluationThresholds,
+    ShadowOutcomeEvaluation,
+    evaluate_shadow_outcomes,
+    shadow_diagnostics,
+    shadow_metrics,
+    shadow_threshold_diagnostics,
+)
+from prismcode.llm.execution import load_shadow_execution
 from prismcode.pipeline import DeterministicAnalyzer
 from prismcode.model.contracts import (
     ClosureRevisionObservation,
@@ -101,6 +113,8 @@ class EvaluationCase:
     expected_focus_outcomes: tuple[ExpectedFocusOutcome, ...] = ()
     structural_graph: StructuralGraphCollection | None = None
     closure_scan_results: ClosureScanResultSet | None = None
+    shadow_execution: str | None = None
+    expected_shadow_outcomes: tuple[ExpectedShadowOutcome, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -121,8 +135,9 @@ class EvaluationThresholds:
 class EvaluationSuite:
     cases: tuple[EvaluationCase, ...]
     thresholds: EvaluationThresholds = EvaluationThresholds()
+    shadow_thresholds: ShadowEvaluationThresholds = ShadowEvaluationThresholds()
     k: int = 5
-    schema_version: str = "evaluation_suite.v4"
+    schema_version: str = "evaluation_suite.v5"
 
 
 @dataclass(frozen=True)
@@ -224,8 +239,10 @@ class EvaluationResult:
     statements: tuple[StatementEvaluation, ...]
     assessments: tuple[TransformationAssessmentEvaluation, ...]
     focus_outcomes: tuple[FocusOutcomeEvaluation, ...]
+    shadow_metrics: ShadowEvaluationMetrics
+    shadow_outcomes: tuple[ShadowOutcomeEvaluation, ...]
     diagnostics: tuple[str, ...] = ()
-    schema_version: str = "evaluation_result.v4"
+    schema_version: str = "evaluation_result.v5"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -245,8 +262,8 @@ class _RecordedClosureScanner:
 def load_evaluation_suite(path: str | Path) -> EvaluationSuite:
     suite_path = Path(path)
     raw = json.loads(suite_path.read_text(encoding="utf-8"))
-    if raw.get("schema_version") != "evaluation_suite.v4":
-        raise ValueError("evaluation suite must use schema_version evaluation_suite.v4")
+    if raw.get("schema_version") != "evaluation_suite.v5":
+        raise ValueError("evaluation suite must use schema_version evaluation_suite.v5")
     k = int(raw.get("k", 5))
     if k <= 0:
         raise ValueError("evaluation suite k must be positive")
@@ -304,6 +321,15 @@ def load_evaluation_suite(path: str | Path) -> EvaluationSuite:
                 if case.get("closure_scan_results") is not None
                 else None
             ),
+            shadow_execution=(
+                str((suite_path.parent / case["shadow_execution"]).resolve())
+                if case.get("shadow_execution") is not None
+                else None
+            ),
+            expected_shadow_outcomes=tuple(
+                _expected_shadow_outcome(item)
+                for item in case.get("expected_shadow_outcomes", ())
+            ),
         )
         for case in raw.get("cases", ())
     )
@@ -325,11 +351,25 @@ def load_evaluation_suite(path: str | Path) -> EvaluationSuite:
             raise ValueError(
                 f"evaluation case {case.id} contains duplicate focus identities"
             )
+        shadow_ids = tuple(item.claim_id for item in case.expected_shadow_outcomes)
+        if len(shadow_ids) != len(set(shadow_ids)):
+            raise ValueError(
+                f"evaluation case {case.id} contains duplicate shadow identities"
+            )
+        if bool(case.shadow_execution) != bool(case.expected_shadow_outcomes):
+            raise ValueError(
+                f"evaluation case {case.id} requires both shadow artifact and expectations"
+            )
     thresholds = EvaluationThresholds(**raw.get("thresholds", {}))
     _validate_thresholds(thresholds)
+    shadow_thresholds = ShadowEvaluationThresholds(
+        **raw.get("shadow_thresholds", {})
+    )
+    _validate_thresholds(shadow_thresholds)
     return EvaluationSuite(
         cases=cases,
         thresholds=thresholds,
+        shadow_thresholds=shadow_thresholds,
         k=k,
     )
 
@@ -344,6 +384,7 @@ def evaluate_suite(
     statement_results: list[StatementEvaluation] = []
     assessment_results: list[TransformationAssessmentEvaluation] = []
     focus_results: list[FocusOutcomeEvaluation] = []
+    shadow_results: list[ShadowOutcomeEvaluation] = []
     diagnostics: list[str] = []
 
     for case in suite.cases:
@@ -445,6 +486,14 @@ def evaluate_suite(
                 brief,
             )
         )
+        if case.shadow_execution is not None:
+            shadow_results.extend(
+                evaluate_shadow_outcomes(
+                    case.id,
+                    case.expected_shadow_outcomes,
+                    load_shadow_execution(case.shadow_execution),
+                )
+            )
         diagnostics.extend(
             f"{case.id}: {item.slot}: {item.state}: {item.message}"
             for item in (
@@ -459,6 +508,8 @@ def evaluate_suite(
     diagnostics.extend(_statement_diagnostics(tuple(statement_results)))
     diagnostics.extend(_assessment_diagnostics(tuple(assessment_results)))
     diagnostics.extend(_focus_diagnostics(tuple(focus_results)))
+    diagnostics.extend(shadow_diagnostics(tuple(shadow_results)))
+    measured_shadow = shadow_metrics(tuple(shadow_results))
     metrics = _metrics(
         tuple(query_results),
         tuple(classification_results),
@@ -467,10 +518,22 @@ def evaluate_suite(
         tuple(focus_results),
     )
     threshold_diagnostics = _threshold_diagnostics(metrics, suite.thresholds)
-    if not query_results and not assessment_results and not focus_results:
+    threshold_diagnostics = (
+        *threshold_diagnostics,
+        *shadow_threshold_diagnostics(
+            measured_shadow,
+            suite.shadow_thresholds,
+        ),
+    )
+    if (
+        not query_results
+        and not assessment_results
+        and not focus_results
+        and not shadow_results
+    ):
         threshold_diagnostics = (
             *threshold_diagnostics,
-            "threshold_failed: no projection, assessment, or focus assertions were declared",
+            "threshold_failed: no projection, assessment, focus, or shadow assertions were declared",
         )
     diagnostics.extend(threshold_diagnostics)
     passed = not threshold_diagnostics
@@ -484,6 +547,8 @@ def evaluate_suite(
         statements=tuple(statement_results),
         assessments=tuple(assessment_results),
         focus_outcomes=tuple(focus_results),
+        shadow_metrics=measured_shadow,
+        shadow_outcomes=tuple(shadow_results),
         diagnostics=tuple(diagnostics),
     )
 
@@ -554,6 +619,23 @@ def _expected_focus_outcome(raw: dict[str, Any]) -> ExpectedFocusOutcome:
             str(item) for item in raw.get("closure_revision_states", ())
         ),
         **counts,
+    )
+
+
+def _expected_shadow_outcome(raw: dict[str, Any]) -> ExpectedShadowOutcome:
+    return ExpectedShadowOutcome(
+        claim_id=str(raw["claim_id"]),
+        execution_state=raw["execution_state"],
+        selections=tuple(
+            ExpectedShadowSelection(
+                evidence_id=str(item["evidence_id"]),
+                role=item["role"],
+                semantic_role=item["semantic_role"],
+            )
+            for item in raw.get("selections", ())
+        ),
+        unresolved_surfaces=tuple(raw.get("unresolved_surfaces", ())),
+        diagnostic_codes=tuple(raw.get("diagnostic_codes", ())),
     )
 
 
@@ -784,6 +866,17 @@ def write_evaluation_markdown(
         f"- statement accuracy: {metrics.statement_accuracy:.4f}",
         f"- transformation assessment accuracy: {metrics.assessment_accuracy:.4f}",
         f"- structural focus accuracy: {metrics.focus_accuracy:.4f}",
+        f"- shadow selection precision: {result.shadow_metrics.selection_precision:.4f}",
+        f"- shadow selection recall: {result.shadow_metrics.selection_recall:.4f}",
+        f"- shadow role accuracy: {result.shadow_metrics.role_accuracy:.4f}",
+        f"- shadow baseline retention: {result.shadow_metrics.baseline_retention:.4f}",
+        f"- shadow unresolved precision: {result.shadow_metrics.unresolved_precision:.4f}",
+        f"- shadow unresolved recall: {result.shadow_metrics.unresolved_recall:.4f}",
+        f"- shadow state accuracy: {result.shadow_metrics.state_accuracy:.4f}",
+        f"- shadow diagnostic accuracy: {result.shadow_metrics.diagnostic_accuracy:.4f}",
+        f"- shadow usage: {result.shadow_metrics.total_input_tokens} input / "
+        f"{result.shadow_metrics.total_output_tokens} output tokens",
+        f"- shadow duration: {result.shadow_metrics.total_duration_ms:.2f} ms",
         "",
         "## Queries",
         "",
@@ -845,6 +938,15 @@ def write_evaluation_markdown(
                 f"`{item.observed_disposition or 'missing'}`/"
                 f"{item.observed_graph_node_count if item.observed_graph_node_count is not None else 'missing'} nodes/"
                 f"{item.observed_closure_fact_count if item.observed_closure_fact_count is not None else 'missing'} closure facts"
+            )
+    if result.shadow_outcomes:
+        lines.extend(("", "## LLM shadow observations", ""))
+        for item in result.shadow_outcomes:
+            lines.append(
+                f"- `{item.case_id}` · `{item.claim_id}` · `{item.profile}` · "
+                f"expected `{item.expected_execution_state}` · observed "
+                f"`{item.observed_execution_state or 'missing'}` · selected "
+                f"`{', '.join(item.observed_selection_ids) or 'none'}`"
             )
     if result.diagnostics:
         lines.extend(("", "## Diagnostics", ""))
