@@ -17,7 +17,8 @@ Trace:
 - forward from the authority to actual consumers;
 - laterally for competing writers, fallbacks, and reconstruction;
 - across parsing, normalization, identity, aggregation, projection,
-  serialization, defaulting, ordering, and coverage boundaries.
+  serialization, deserialization, validation, persisted derivation, defaulting,
+  ordering, and coverage boundaries.
 
 Record dynamic and external unknowns; do not convert them into coverage.
 
@@ -26,7 +27,10 @@ Record dynamic and external unknowns; do not convert them into coverage.
 For each changed boundary, specify the semantic entity, equivalence rules,
 preserved properties, permitted information loss, and behavior for incomplete,
 conflicting, or unsupported input. Shared names or proximity do not prove
-semantic equivalence.
+semantic equivalence. Define counterexamples that distinguish contract
+preservation from accidental agreement. Every deserialization edge must
+revalidate the canonical semantic contract before constructing a validated
+domain object.
 
 ## 4. Close the region
 
@@ -54,6 +58,11 @@ an external contract, revise and expand the region before continuing.
   semantic re-decision;
 - test positive, negative, divergence, collision, information-loss, and
   fail-closed behavior relevant to the change;
+- for each changed serialized contract, enumerate its writers, readers,
+  deserializers, validators, and persisted derived fields; test tampered input
+  at each changed deserialization boundary;
+- recompute persisted derived state from canonical inputs or check it against
+  them; loading it must not create another authority;
 - separate declarations, structural/runtime facts, inference, and unknowns.
 
 Record responsibility closure, contract closure, abandonment safety, and parent
