@@ -210,6 +210,9 @@ The same directional lines define revision-applicable coverage: head requests
 only files with added structural lines and base requests only files with
 removed structural lines. Added-only and removed-only files are not missing
 from the opposite revision; they are explicitly not applicable there.
+Provider-applicable source and resolver formats form the structural coverage
+denominator. Documents and generic configuration or fixture data remain change
+evidence but are explicitly not applicable to Codegraph coverage.
 The narrowest containing symbol wins. Module-level changes may map to the
 indexed file symbol, which owns Codegraph import edges. Exact changed symbols
 are the only traversal seeds.
