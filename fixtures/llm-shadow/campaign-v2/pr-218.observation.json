@@ -1,0 +1,284 @@
+{
+  "observations": [
+    {
+      "admission_state": "ready",
+      "claim_id": "T1",
+      "deterministic_evidence_ids": [],
+      "diagnostics": [],
+      "eligible_count": 2,
+      "execution_state": "accepted",
+      "request": {
+        "authored_statement": "Admission correctly blocked a claim when its deterministic baseline exceeded the candidate limit and preserved those baseline IDs without constructing a request. Execution then rejected every no-request observation carrying evidence IDs, aborting the entire shadow artifact and HTML generation before other claims could be observed.",
+        "candidates": [
+          {
+            "added_code": "            if self.admission_state != \"blocked\" or self.execution_state != \"blocked\":\n                raise ValueError(\n                    \"only blocked shadow observations may preserve evidence IDs \"\n                    \"without a request\"\n                )\n            if (\n                any(not item for item in self.deterministic_evidence_ids)\n                or len(self.deterministic_evidence_ids)\n                != len(set(self.deterministic_evidence_ids))\n            ):\n                raise ValueError(\n                    \"blocked shadow evidence IDs must be non-empty and unique\"\n                )\n            if self.eligible_count < len(self.deterministic_evidence_ids):\n                raise ValueError(\n                    \"blocked shadow evidence cannot exceed eligible evidence\"\n                )",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "code",
+            "evidence_id": "E:structural_change:4626118b1bf027548057",
+            "kind": "structural_change",
+            "line_end": 156,
+            "line_start": 99,
+            "operation": "modified",
+            "path": "src/prismcode/llm/execution.py",
+            "profile": "production",
+            "qualified_name": "ShadowExecutionObservation::__post_init__",
+            "removed_code": "            raise ValueError(\n                \"shadow observation without a request cannot carry evidence IDs\"\n            )",
+            "revision_side": "review",
+            "structural_context": [
+              "ShadowExecutionObservation::__post_init__ \u2192[calls] build_shadow_selection_comparison \u2190[imports] src/prismcode/llm/execution.py",
+              "ShadowExecutionObservation::__post_init__ \u2192[calls] canonical_shadow_evidence_ids \u2190[calls] build_shadow_selection_comparison",
+              "ShadowExecutionObservation::__post_init__ \u2192[calls] canonical_shadow_evidence_ids \u2190[imports] src/prismcode/llm/execution.py",
+              "ShadowExecutionObservation::__post_init__ \u2192[calls] build_shadow_selection_comparison",
+              "ShadowExecutionObservation::__post_init__ \u2192[calls] build_shadow_selection_comparison \u2190[calls] _load_run",
+              "ShadowExecutionObservation::__post_init__ \u2192[calls] build_shadow_selection_comparison \u2190[calls] _load_run"
+            ],
+            "summary": "Modified method: ShadowExecutionObservation::__post_init__",
+            "symbol_kind": "method"
+          },
+          {
+            "added_code": "def test_blocked_and_empty_admissions_remain_typed_observations(\n    tmp_path: Path,\n) -> None:\n                deterministic_evidence_ids=(\"E:baseline:1\", \"E:baseline:2\"),\n    assert bundle.observations[0].deterministic_evidence_ids == (\n        \"E:baseline:1\",\n        \"E:baseline:2\",\n    )\n\n    artifact_path = write_shadow_execution(bundle, tmp_path / \"blocked.json\")\n    assert load_shadow_execution(artifact_path) == bundle\n\n    artifact = json.loads(artifact_path.read_text(encoding=\"utf-8\"))\n    artifact[\"observations\"][0][\"deterministic_evidence_ids\"].append(\n        \"E:baseline:1\"\n    )\n    _assert_invalid_artifact(\n        tmp_path,\n        artifact,\n        \"blocked shadow evidence IDs must be non-empty and unique\",\n    )\n\n    with pytest.raises(\n        ValueError,\n        match=\"only blocked shadow observations may preserve evidence IDs\",\n    ):\n        replace(\n            bundle.observations[1],\n            deterministic_evidence_ids=(\"E:invented\",),\n        )",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:d5713f37f7dbca319764",
+            "kind": "structural_change",
+            "line_end": 259,
+            "line_start": 212,
+            "operation": "modified",
+            "path": "tests/test_llm_shadow_execution.py",
+            "profile": "test",
+            "qualified_name": "test_blocked_and_empty_admissions_remain_typed_observations",
+            "removed_code": "def test_blocked_and_empty_admissions_remain_typed_observations() -> None:",
+            "revision_side": "review",
+            "structural_context": [
+              "test_blocked_and_empty_admissions_remain_typed_observations \u2192[instantiates] BaselineProvider",
+              "test_blocked_and_empty_admissions_remain_typed_observations \u2192[calls] load_shadow_execution \u2192[instantiates] LLMShadowExecutionSummary",
+              "test_blocked_and_empty_admissions_remain_typed_observations \u2192[calls] execute_shadow_admissions \u2190[calls] test_shadow_execution_does_not_mutate_formal_assessment",
+              "test_blocked_and_empty_admissions_remain_typed_observations \u2192[instantiates] ShadowCandidateAdmission \u2190[imports] tests/test_llm_shadow_execution.py",
+              "test_blocked_and_empty_admissions_remain_typed_observations \u2192[calls] execute_shadow_admissions \u2192[instantiates] ShadowRunner",
+              "test_blocked_and_empty_admissions_remain_typed_observations \u2192[calls] execute_shadow_admissions \u2192[calls] ShadowRunner::measure_selection \u2190[calls] test_deterministic_baseline_must_use_admitted_identity"
+            ],
+            "summary": "Modified function: test_blocked_and_empty_admissions_remain_typed_observations",
+            "symbol_kind": "function"
+          }
+        ],
+        "coverage_limits": [
+          "Structural context was truncated for 2 evidence candidates at 6 paths each."
+        ],
+        "request_id": "shadow:T1:684396888b09ac83",
+        "schema_version": "2",
+        "subject_id": "T1",
+        "subject_kind": "before_state"
+      },
+      "run": {
+        "candidate_count": 2,
+        "comparison": {
+          "deterministic_ids": [],
+          "deterministic_only_ids": [],
+          "shadow_ids": [
+            "E:structural_change:4626118b1bf027548057",
+            "E:structural_change:d5713f37f7dbca319764"
+          ],
+          "shadow_only_ids": [
+            "E:structural_change:4626118b1bf027548057",
+            "E:structural_change:d5713f37f7dbca319764"
+          ],
+          "shared_ids": []
+        },
+        "diagnostics": [],
+        "duration_ms": 4257.566999993287,
+        "execution_policy": {
+          "adapter_id": "openai-chat-completions",
+          "api_profile": "deepseek",
+          "endpoint": "https://api.deepseek.com/chat/completions",
+          "identity": "shadow-policy:f49ded2093e7837149c4",
+          "max_output_tokens": 4000,
+          "model_id": "deepseek-v4-flash",
+          "reasoning_effort": "default",
+          "thinking_budget": null,
+          "thinking_mode": "disabled",
+          "timeout_seconds": 180.0
+        },
+        "input_tokens": 1999,
+        "model_id": "deepseek-v4-flash",
+        "output_tokens": 411,
+        "provider_id": "openai-chat-completions",
+        "request_id": "shadow:T1:684396888b09ac83",
+        "selection": {
+          "insufficient_evidence_ids": [],
+          "rejected_evidence_ids": [],
+          "request_id": "shadow:T1:684396888b09ac83",
+          "schema_version": "2",
+          "selections": [
+            {
+              "evidence_id": "E:structural_change:4626118b1bf027548057",
+              "rationale": "The modified __post_init__ code directly implements the admission block rule: raises errors when admission_state is not 'blocked' or execution_state is not 'blocked', requires non-empty unique deterministic_evidence_ids, and enforces eligible_count >= len(deterministic_evidence_ids). The old code raised an error whenever evidence IDs were present without a request, which the statement says was replaced to allow blocked observations to preserve baseline IDs.",
+              "role": "supporting",
+              "semantic_role": "authority"
+            },
+            {
+              "evidence_id": "E:structural_change:d5713f37f7dbca319764",
+              "rationale": "The updated test explicitly exercises the blocked admission path with deterministic_evidence_ids=('E:baseline:1','E:baseline:2'), asserts preservation on roundtrip, and verifies the new validation error messages about uniqueness and blocking conditions. This matches the statement's claim that no-request observations were rejected and that the artifact and HTML generation aborted on invalid evidence IDs.",
+              "role": "supporting",
+              "semantic_role": "test"
+            }
+          ],
+          "subject_id": "T1",
+          "unresolved_surfaces": [
+            "Execution-level rejection of no-request observations at runtime (the exact abort point and HTML generation failure path) is not directly evidenced in the supplied structural context; it is inferred from the test behavior.",
+            "The exact error message and stack trace for the abort condition at runtime are not present in the supplied evidence; only the existing validation message is shown."
+          ]
+        },
+        "state": "accepted",
+        "subject_id": "T1"
+      }
+    },
+    {
+      "admission_state": "ready",
+      "claim_id": "T2",
+      "deterministic_evidence_ids": [],
+      "diagnostics": [],
+      "eligible_count": 2,
+      "execution_state": "accepted",
+      "request": {
+        "authored_statement": "A blocked admission may preserve its deterministic baseline IDs without representing them as request candidates. The exception is limited to matching blocked admission/execution states; IDs must be non-empty, unique, and no more numerous than eligible evidence. Empty and every other no-request observation continue to reject evidence IDs. Serialization and loading enforce the same contract.",
+        "candidates": [
+          {
+            "added_code": "            if self.admission_state != \"blocked\" or self.execution_state != \"blocked\":\n                raise ValueError(\n                    \"only blocked shadow observations may preserve evidence IDs \"\n                    \"without a request\"\n                )\n            if (\n                any(not item for item in self.deterministic_evidence_ids)\n                or len(self.deterministic_evidence_ids)\n                != len(set(self.deterministic_evidence_ids))\n            ):\n                raise ValueError(\n                    \"blocked shadow evidence IDs must be non-empty and unique\"\n                )\n            if self.eligible_count < len(self.deterministic_evidence_ids):\n                raise ValueError(\n                    \"blocked shadow evidence cannot exceed eligible evidence\"\n                )",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "code",
+            "evidence_id": "E:structural_change:4626118b1bf027548057",
+            "kind": "structural_change",
+            "line_end": 156,
+            "line_start": 99,
+            "operation": "modified",
+            "path": "src/prismcode/llm/execution.py",
+            "profile": "production",
+            "qualified_name": "ShadowExecutionObservation::__post_init__",
+            "removed_code": "            raise ValueError(\n                \"shadow observation without a request cannot carry evidence IDs\"\n            )",
+            "revision_side": "review",
+            "structural_context": [
+              "ShadowExecutionObservation::__post_init__ \u2192[calls] build_shadow_selection_comparison \u2190[imports] src/prismcode/llm/execution.py",
+              "ShadowExecutionObservation::__post_init__ \u2192[calls] canonical_shadow_evidence_ids \u2190[calls] build_shadow_selection_comparison",
+              "ShadowExecutionObservation::__post_init__ \u2192[calls] canonical_shadow_evidence_ids \u2190[imports] src/prismcode/llm/execution.py",
+              "ShadowExecutionObservation::__post_init__ \u2192[calls] build_shadow_selection_comparison",
+              "ShadowExecutionObservation::__post_init__ \u2192[calls] build_shadow_selection_comparison \u2190[calls] _load_run",
+              "ShadowExecutionObservation::__post_init__ \u2192[calls] build_shadow_selection_comparison \u2190[calls] _load_run"
+            ],
+            "summary": "Modified method: ShadowExecutionObservation::__post_init__",
+            "symbol_kind": "method"
+          },
+          {
+            "added_code": "def test_blocked_and_empty_admissions_remain_typed_observations(\n    tmp_path: Path,\n) -> None:\n                deterministic_evidence_ids=(\"E:baseline:1\", \"E:baseline:2\"),\n    assert bundle.observations[0].deterministic_evidence_ids == (\n        \"E:baseline:1\",\n        \"E:baseline:2\",\n    )\n\n    artifact_path = write_shadow_execution(bundle, tmp_path / \"blocked.json\")\n    assert load_shadow_execution(artifact_path) == bundle\n\n    artifact = json.loads(artifact_path.read_text(encoding=\"utf-8\"))\n    artifact[\"observations\"][0][\"deterministic_evidence_ids\"].append(\n        \"E:baseline:1\"\n    )\n    _assert_invalid_artifact(\n        tmp_path,\n        artifact,\n        \"blocked shadow evidence IDs must be non-empty and unique\",\n    )\n\n    with pytest.raises(\n        ValueError,\n        match=\"only blocked shadow observations may preserve evidence IDs\",\n    ):\n        replace(\n            bundle.observations[1],\n            deterministic_evidence_ids=(\"E:invented\",),\n        )",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:d5713f37f7dbca319764",
+            "kind": "structural_change",
+            "line_end": 259,
+            "line_start": 212,
+            "operation": "modified",
+            "path": "tests/test_llm_shadow_execution.py",
+            "profile": "test",
+            "qualified_name": "test_blocked_and_empty_admissions_remain_typed_observations",
+            "removed_code": "def test_blocked_and_empty_admissions_remain_typed_observations() -> None:",
+            "revision_side": "review",
+            "structural_context": [
+              "test_blocked_and_empty_admissions_remain_typed_observations \u2192[instantiates] BaselineProvider",
+              "test_blocked_and_empty_admissions_remain_typed_observations \u2192[calls] load_shadow_execution \u2192[instantiates] LLMShadowExecutionSummary",
+              "test_blocked_and_empty_admissions_remain_typed_observations \u2192[calls] execute_shadow_admissions \u2190[calls] test_shadow_execution_does_not_mutate_formal_assessment",
+              "test_blocked_and_empty_admissions_remain_typed_observations \u2192[instantiates] ShadowCandidateAdmission \u2190[imports] tests/test_llm_shadow_execution.py",
+              "test_blocked_and_empty_admissions_remain_typed_observations \u2192[calls] execute_shadow_admissions \u2192[instantiates] ShadowRunner",
+              "test_blocked_and_empty_admissions_remain_typed_observations \u2192[calls] execute_shadow_admissions \u2192[calls] ShadowRunner::measure_selection \u2190[calls] test_deterministic_baseline_must_use_admitted_identity"
+            ],
+            "summary": "Modified function: test_blocked_and_empty_admissions_remain_typed_observations",
+            "symbol_kind": "function"
+          }
+        ],
+        "coverage_limits": [
+          "Structural context was truncated for 2 evidence candidates at 6 paths each."
+        ],
+        "request_id": "shadow:T2:1301a8f704389314",
+        "schema_version": "2",
+        "subject_id": "T2",
+        "subject_kind": "after_state"
+      },
+      "run": {
+        "candidate_count": 2,
+        "comparison": {
+          "deterministic_ids": [],
+          "deterministic_only_ids": [],
+          "shadow_ids": [
+            "E:structural_change:4626118b1bf027548057",
+            "E:structural_change:d5713f37f7dbca319764"
+          ],
+          "shadow_only_ids": [
+            "E:structural_change:4626118b1bf027548057",
+            "E:structural_change:d5713f37f7dbca319764"
+          ],
+          "shared_ids": []
+        },
+        "diagnostics": [],
+        "duration_ms": 3033.606624987442,
+        "execution_policy": {
+          "adapter_id": "openai-chat-completions",
+          "api_profile": "deepseek",
+          "endpoint": "https://api.deepseek.com/chat/completions",
+          "identity": "shadow-policy:f49ded2093e7837149c4",
+          "max_output_tokens": 4000,
+          "model_id": "deepseek-v4-flash",
+          "reasoning_effort": "default",
+          "thinking_budget": null,
+          "thinking_mode": "disabled",
+          "timeout_seconds": 180.0
+        },
+        "input_tokens": 2016,
+        "model_id": "deepseek-v4-flash",
+        "output_tokens": 279,
+        "provider_id": "openai-chat-completions",
+        "request_id": "shadow:T2:1301a8f704389314",
+        "selection": {
+          "insufficient_evidence_ids": [],
+          "rejected_evidence_ids": [],
+          "request_id": "shadow:T2:1301a8f704389314",
+          "schema_version": "2",
+          "selections": [
+            {
+              "evidence_id": "E:structural_change:4626118b1bf027548057",
+              "rationale": "Directly implements the contract allowing blocked admission/execution states to preserve deterministic baseline IDs without a request, enforcing non-empty, unique, and eligibility-bound constraints, and rejecting other no-request observations.",
+              "role": "supporting",
+              "semantic_role": "authority"
+            },
+            {
+              "evidence_id": "E:structural_change:d5713f37f7dbca319764",
+              "rationale": "Verifies the blocked admission preserves baseline IDs, serialization roundtrip, and validation errors for duplicates and non-blocked use, confirming the behavior stated in the claim.",
+              "role": "supporting",
+              "semantic_role": "test"
+            }
+          ],
+          "subject_id": "T2",
+          "unresolved_surfaces": [
+            "Serialization/loading behavior is evidenced only through the test and code diff; no runtime or integration evidence confirms end-to-end persistence across all environments."
+          ]
+        },
+        "state": "accepted",
+        "subject_id": "T2"
+      }
+    }
+  ],
+  "schema_version": "llm_shadow_execution.v5",
+  "summary": {
+    "admitted_count": 2,
+    "artifact_written": true,
+    "completed_count": 2,
+    "deferred_count": 0,
+    "failed_count": 0,
+    "state": "completed"
+  }
+}

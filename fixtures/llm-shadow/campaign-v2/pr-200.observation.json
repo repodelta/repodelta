@@ -1,0 +1,616 @@
+{
+  "observations": [
+    {
+      "admission_state": "ready",
+      "claim_id": "T1",
+      "deterministic_evidence_ids": [],
+      "diagnostics": [],
+      "eligible_count": 1,
+      "execution_state": "accepted",
+      "request": {
+        "authored_statement": "The repository defined change execution, commit, and PR conventions, but no Issue authoring convention. Requirements and PR completion claims could be copied into both artifacts, producing duplicate review statements or silently unrecognized headings.",
+        "candidates": [
+          {
+            "added_code": "cross-component changes, follow `docs/agent-change-protocol.md`. Before creating\nan Issue, follow `docs/issue-guidelines.md`; before committing or opening a PR,\nfollow `docs/commit-message-guidelines.md` and",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:9291cb67524009f9673c",
+            "kind": "change_relation",
+            "line_end": 27,
+            "line_start": 25,
+            "operation": "replaced",
+            "path": "AGENTS.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "cross-component changes, follow `docs/agent-change-protocol.md`. Before\ncreating Git artifacts, follow `docs/commit-message-guidelines.md` and",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Replaced change: AGENTS.md:25-27",
+            "symbol_kind": ""
+          }
+        ],
+        "coverage_limits": [],
+        "request_id": "shadow:T1:83036dde02c74f7a",
+        "schema_version": "2",
+        "subject_id": "T1",
+        "subject_kind": "before_state"
+      },
+      "run": {
+        "candidate_count": 1,
+        "comparison": {
+          "deterministic_ids": [],
+          "deterministic_only_ids": [],
+          "shadow_ids": [
+            "E:change_relation:9291cb67524009f9673c"
+          ],
+          "shadow_only_ids": [
+            "E:change_relation:9291cb67524009f9673c"
+          ],
+          "shared_ids": []
+        },
+        "diagnostics": [],
+        "duration_ms": 2969.557792006526,
+        "execution_policy": {
+          "adapter_id": "openai-chat-completions",
+          "api_profile": "deepseek",
+          "endpoint": "https://api.deepseek.com/chat/completions",
+          "identity": "shadow-policy:f49ded2093e7837149c4",
+          "max_output_tokens": 4000,
+          "model_id": "deepseek-v4-flash",
+          "reasoning_effort": "default",
+          "thinking_budget": null,
+          "thinking_mode": "disabled",
+          "timeout_seconds": 180.0
+        },
+        "input_tokens": 927,
+        "model_id": "deepseek-v4-flash",
+        "output_tokens": 226,
+        "provider_id": "openai-chat-completions",
+        "request_id": "shadow:T1:83036dde02c74f7a",
+        "selection": {
+          "insufficient_evidence_ids": [],
+          "rejected_evidence_ids": [],
+          "request_id": "shadow:T1:83036dde02c74f7a",
+          "schema_version": "2",
+          "selections": [
+            {
+              "evidence_id": "E:change_relation:9291cb67524009f9673c",
+              "rationale": "The evidence shows a direct edit to AGENTS.md that rephrases the text to explicitly mention 'Before creating an Issue, follow docs/issue-guidelines.md' and separate commit/PR guidance. This supports the statement that the repository defines change execution, commit, and PR conventions, and introduces an Issue authoring convention reference, which is relevant to whether an Issue convention exists. The change clarifies the distinction, supporting the claim about the existence of conventions and the potential for duplicate review statements.",
+              "role": "supporting",
+              "semantic_role": "documentation"
+            }
+          ],
+          "subject_id": "T1",
+          "unresolved_surfaces": []
+        },
+        "state": "accepted",
+        "subject_id": "T1"
+      }
+    },
+    {
+      "admission_state": "ready",
+      "claim_id": "T2",
+      "deterministic_evidence_ids": [],
+      "diagnostics": [],
+      "eligible_count": 1,
+      "execution_state": "accepted",
+      "request": {
+        "authored_statement": "docs/issue-guidelines.md owns Issue authoring conventions. docs/pull-request-guidelines.md continues to own implemented transition records, and AGENTS.md routes authors to each lifecycle-specific contract.",
+        "candidates": [
+          {
+            "added_code": "cross-component changes, follow `docs/agent-change-protocol.md`. Before creating\nan Issue, follow `docs/issue-guidelines.md`; before committing or opening a PR,\nfollow `docs/commit-message-guidelines.md` and",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:9291cb67524009f9673c",
+            "kind": "change_relation",
+            "line_end": 27,
+            "line_start": 25,
+            "operation": "replaced",
+            "path": "AGENTS.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "cross-component changes, follow `docs/agent-change-protocol.md`. Before\ncreating Git artifacts, follow `docs/commit-message-guidelines.md` and",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Replaced change: AGENTS.md:25-27",
+            "symbol_kind": ""
+          }
+        ],
+        "coverage_limits": [],
+        "request_id": "shadow:T2:f362a7a7b538d90c",
+        "schema_version": "2",
+        "subject_id": "T2",
+        "subject_kind": "after_state"
+      },
+      "run": {
+        "candidate_count": 1,
+        "comparison": {
+          "deterministic_ids": [],
+          "deterministic_only_ids": [],
+          "shadow_ids": [
+            "E:change_relation:9291cb67524009f9673c"
+          ],
+          "shadow_only_ids": [
+            "E:change_relation:9291cb67524009f9673c"
+          ],
+          "shared_ids": []
+        },
+        "diagnostics": [],
+        "duration_ms": 2782.9051250009798,
+        "execution_policy": {
+          "adapter_id": "openai-chat-completions",
+          "api_profile": "deepseek",
+          "endpoint": "https://api.deepseek.com/chat/completions",
+          "identity": "shadow-policy:f49ded2093e7837149c4",
+          "max_output_tokens": 4000,
+          "model_id": "deepseek-v4-flash",
+          "reasoning_effort": "default",
+          "thinking_budget": null,
+          "thinking_mode": "disabled",
+          "timeout_seconds": 180.0
+        },
+        "input_tokens": 927,
+        "model_id": "deepseek-v4-flash",
+        "output_tokens": 216,
+        "provider_id": "openai-chat-completions",
+        "request_id": "shadow:T2:f362a7a7b538d90c",
+        "selection": {
+          "insufficient_evidence_ids": [],
+          "rejected_evidence_ids": [],
+          "request_id": "shadow:T2:f362a7a7b538d90c",
+          "schema_version": "2",
+          "selections": [
+            {
+              "evidence_id": "E:change_relation:9291cb67524009f9673c",
+              "rationale": "The change to AGENTS.md adds a direct reference to docs/issue-guidelines.md for Issue creation, and retains references to docs/commit-message-guidelines.md. The statement claims AGENTS.md routes authors to lifecycle-specific contracts, which this edit demonstrates. It also does not remove references to PR guidelines; however, the statement mentions PR guidelines owning transition records, which is not directly evidenced but not contradicted by this edit. The evidence supports the routing claim and does not contradict it.",
+              "role": "supporting",
+              "semantic_role": "documentation"
+            }
+          ],
+          "subject_id": "T2",
+          "unresolved_surfaces": [
+            "docs/pull-request-guidelines.md content and references are not provided in the evidence packet."
+          ]
+        },
+        "state": "accepted",
+        "subject_id": "T2"
+      }
+    },
+    {
+      "admission_state": "ready",
+      "claim_id": "T3",
+      "deterministic_evidence_ids": [],
+      "diagnostics": [],
+      "eligible_count": 1,
+      "execution_state": "accepted",
+      "request": {
+        "authored_statement": "Add docs/issue-guidelines.md with canonical Issue sections and requirement aliases.",
+        "candidates": [
+          {
+            "added_code": "cross-component changes, follow `docs/agent-change-protocol.md`. Before creating\nan Issue, follow `docs/issue-guidelines.md`; before committing or opening a PR,\nfollow `docs/commit-message-guidelines.md` and",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:9291cb67524009f9673c",
+            "kind": "change_relation",
+            "line_end": 27,
+            "line_start": 25,
+            "operation": "replaced",
+            "path": "AGENTS.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "cross-component changes, follow `docs/agent-change-protocol.md`. Before\ncreating Git artifacts, follow `docs/commit-message-guidelines.md` and",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Replaced change: AGENTS.md:25-27",
+            "symbol_kind": ""
+          }
+        ],
+        "coverage_limits": [],
+        "request_id": "shadow:T3:b83265e0ffd32533",
+        "schema_version": "2",
+        "subject_id": "T3",
+        "subject_kind": "change"
+      },
+      "run": {
+        "candidate_count": 1,
+        "comparison": {
+          "deterministic_ids": [],
+          "deterministic_only_ids": [],
+          "shadow_ids": [
+            "E:change_relation:9291cb67524009f9673c"
+          ],
+          "shadow_only_ids": [
+            "E:change_relation:9291cb67524009f9673c"
+          ],
+          "shared_ids": []
+        },
+        "diagnostics": [],
+        "duration_ms": 2251.461208012188,
+        "execution_policy": {
+          "adapter_id": "openai-chat-completions",
+          "api_profile": "deepseek",
+          "endpoint": "https://api.deepseek.com/chat/completions",
+          "identity": "shadow-policy:f49ded2093e7837149c4",
+          "max_output_tokens": 4000,
+          "model_id": "deepseek-v4-flash",
+          "reasoning_effort": "default",
+          "thinking_budget": null,
+          "thinking_mode": "disabled",
+          "timeout_seconds": 180.0
+        },
+        "input_tokens": 900,
+        "model_id": "deepseek-v4-flash",
+        "output_tokens": 161,
+        "provider_id": "openai-chat-completions",
+        "request_id": "shadow:T3:b83265e0ffd32533",
+        "selection": {
+          "insufficient_evidence_ids": [],
+          "rejected_evidence_ids": [],
+          "request_id": "shadow:T3:b83265e0ffd32533",
+          "schema_version": "2",
+          "selections": [
+            {
+              "evidence_id": "E:change_relation:9291cb67524009f9673c",
+              "rationale": "The added lines introduce a reference to `docs/issue-guidelines.md` in AGENTS.md, stating that before creating an Issue one should follow these guidelines. This directly supports the authored statement that a docs/issue-guidelines.md file is added with canonical Issue sections. The change relation shows the modification that mentions this documentation.",
+              "role": "supporting",
+              "semantic_role": "documentation"
+            }
+          ],
+          "subject_id": "T3",
+          "unresolved_surfaces": []
+        },
+        "state": "accepted",
+        "subject_id": "T3"
+      }
+    },
+    {
+      "admission_state": "ready",
+      "claim_id": "T4",
+      "deterministic_evidence_ids": [],
+      "diagnostics": [
+        {
+          "code": "shadow_execution_budget_deferred",
+          "message": "Admitted shadow request was deferred by the review safety limit of 3."
+        }
+      ],
+      "eligible_count": 1,
+      "execution_state": "deferred",
+      "request": {
+        "authored_statement": "Reserve Issue content for goals, requirements, guardrails, verification expectations, scope, exclusions, and uncertainties.",
+        "candidates": [
+          {
+            "added_code": "cross-component changes, follow `docs/agent-change-protocol.md`. Before creating\nan Issue, follow `docs/issue-guidelines.md`; before committing or opening a PR,\nfollow `docs/commit-message-guidelines.md` and",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:9291cb67524009f9673c",
+            "kind": "change_relation",
+            "line_end": 27,
+            "line_start": 25,
+            "operation": "replaced",
+            "path": "AGENTS.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "cross-component changes, follow `docs/agent-change-protocol.md`. Before\ncreating Git artifacts, follow `docs/commit-message-guidelines.md` and",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Replaced change: AGENTS.md:25-27",
+            "symbol_kind": ""
+          }
+        ],
+        "coverage_limits": [],
+        "request_id": "shadow:T4:1b79313c4b32b950",
+        "schema_version": "2",
+        "subject_id": "T4",
+        "subject_kind": "change"
+      },
+      "run": null
+    },
+    {
+      "admission_state": "ready",
+      "claim_id": "T5",
+      "deterministic_evidence_ids": [],
+      "diagnostics": [
+        {
+          "code": "shadow_execution_budget_deferred",
+          "message": "Admitted shadow request was deferred by the review safety limit of 3."
+        }
+      ],
+      "eligible_count": 1,
+      "execution_state": "deferred",
+      "request": {
+        "authored_statement": "Reserve PR transition, migration, evidence, completion, and closure statements for the PR contract.",
+        "candidates": [
+          {
+            "added_code": "cross-component changes, follow `docs/agent-change-protocol.md`. Before creating\nan Issue, follow `docs/issue-guidelines.md`; before committing or opening a PR,\nfollow `docs/commit-message-guidelines.md` and",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:9291cb67524009f9673c",
+            "kind": "change_relation",
+            "line_end": 27,
+            "line_start": 25,
+            "operation": "replaced",
+            "path": "AGENTS.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "cross-component changes, follow `docs/agent-change-protocol.md`. Before\ncreating Git artifacts, follow `docs/commit-message-guidelines.md` and",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Replaced change: AGENTS.md:25-27",
+            "symbol_kind": ""
+          }
+        ],
+        "coverage_limits": [],
+        "request_id": "shadow:T5:586b47751505fcc8",
+        "schema_version": "2",
+        "subject_id": "T5",
+        "subject_kind": "change"
+      },
+      "run": null
+    },
+    {
+      "admission_state": "ready",
+      "claim_id": "T6",
+      "deterministic_evidence_ids": [
+        "E:change_relation:9291cb67524009f9673c"
+      ],
+      "diagnostics": [
+        {
+          "code": "shadow_execution_budget_deferred",
+          "message": "Admitted shadow request was deferred by the review safety limit of 3."
+        }
+      ],
+      "eligible_count": 1,
+      "execution_state": "deferred",
+      "request": {
+        "authored_statement": "Link the Issue convention from AGENTS.md without changing the other guideline authorities.",
+        "candidates": [
+          {
+            "added_code": "cross-component changes, follow `docs/agent-change-protocol.md`. Before creating\nan Issue, follow `docs/issue-guidelines.md`; before committing or opening a PR,\nfollow `docs/commit-message-guidelines.md` and",
+            "admission_tier": "baseline",
+            "association": "deterministic_baseline",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:9291cb67524009f9673c",
+            "kind": "change_relation",
+            "line_end": 27,
+            "line_start": 25,
+            "operation": "replaced",
+            "path": "AGENTS.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "cross-component changes, follow `docs/agent-change-protocol.md`. Before\ncreating Git artifacts, follow `docs/commit-message-guidelines.md` and",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Replaced change: AGENTS.md:25-27",
+            "symbol_kind": ""
+          }
+        ],
+        "coverage_limits": [],
+        "request_id": "shadow:T6:62db222b97c05759",
+        "schema_version": "2",
+        "subject_id": "T6",
+        "subject_kind": "change"
+      },
+      "run": null
+    },
+    {
+      "admission_state": "ready",
+      "claim_id": "CC1",
+      "deterministic_evidence_ids": [
+        "E:changed_file:71d6ef3c1531ac94a400"
+      ],
+      "diagnostics": [
+        {
+          "code": "shadow_execution_budget_deferred",
+          "message": "Admitted shadow request was deferred by the review safety limit of 3."
+        }
+      ],
+      "eligible_count": 2,
+      "execution_state": "deferred",
+      "request": {
+        "authored_statement": "docs/issue-guidelines.md is the sole Issue-authoring convention.",
+        "candidates": [
+          {
+            "added_code": "",
+            "admission_tier": "baseline",
+            "association": "deterministic_baseline",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:changed_file:71d6ef3c1531ac94a400",
+            "kind": "changed_file",
+            "line_end": null,
+            "line_start": null,
+            "operation": "added",
+            "path": "docs/issue-guidelines.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Added file: docs/issue-guidelines.md",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "cross-component changes, follow `docs/agent-change-protocol.md`. Before creating\nan Issue, follow `docs/issue-guidelines.md`; before committing or opening a PR,\nfollow `docs/commit-message-guidelines.md` and",
+            "admission_tier": "phrase",
+            "association": "distinctive_phrase",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:9291cb67524009f9673c",
+            "kind": "change_relation",
+            "line_end": 27,
+            "line_start": 25,
+            "operation": "replaced",
+            "path": "AGENTS.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "cross-component changes, follow `docs/agent-change-protocol.md`. Before\ncreating Git artifacts, follow `docs/commit-message-guidelines.md` and",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Replaced change: AGENTS.md:25-27",
+            "symbol_kind": ""
+          }
+        ],
+        "coverage_limits": [],
+        "request_id": "shadow:CC1:748326f467965632",
+        "schema_version": "2",
+        "subject_id": "CC1",
+        "subject_kind": "completion_condition"
+      },
+      "run": null
+    },
+    {
+      "admission_state": "ready",
+      "claim_id": "CC2",
+      "deterministic_evidence_ids": [],
+      "diagnostics": [
+        {
+          "code": "shadow_execution_budget_deferred",
+          "message": "Admitted shadow request was deferred by the review safety limit of 3."
+        }
+      ],
+      "eligible_count": 1,
+      "execution_state": "deferred",
+      "request": {
+        "authored_statement": "Requirements and PR completion claims have distinct documented authorities.",
+        "candidates": [
+          {
+            "added_code": "cross-component changes, follow `docs/agent-change-protocol.md`. Before creating\nan Issue, follow `docs/issue-guidelines.md`; before committing or opening a PR,\nfollow `docs/commit-message-guidelines.md` and",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:9291cb67524009f9673c",
+            "kind": "change_relation",
+            "line_end": 27,
+            "line_start": 25,
+            "operation": "replaced",
+            "path": "AGENTS.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "cross-component changes, follow `docs/agent-change-protocol.md`. Before\ncreating Git artifacts, follow `docs/commit-message-guidelines.md` and",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Replaced change: AGENTS.md:25-27",
+            "symbol_kind": ""
+          }
+        ],
+        "coverage_limits": [],
+        "request_id": "shadow:CC2:d32297e9ca1ff177",
+        "schema_version": "2",
+        "subject_id": "CC2",
+        "subject_kind": "completion_condition"
+      },
+      "run": null
+    },
+    {
+      "admission_state": "ready",
+      "claim_id": "CC3",
+      "deterministic_evidence_ids": [
+        "E:change_relation:9291cb67524009f9673c"
+      ],
+      "diagnostics": [
+        {
+          "code": "shadow_execution_budget_deferred",
+          "message": "Admitted shadow request was deferred by the review safety limit of 3."
+        }
+      ],
+      "eligible_count": 1,
+      "execution_state": "deferred",
+      "request": {
+        "authored_statement": "AGENTS.md links each Git artifact to its matching guideline.",
+        "candidates": [
+          {
+            "added_code": "cross-component changes, follow `docs/agent-change-protocol.md`. Before creating\nan Issue, follow `docs/issue-guidelines.md`; before committing or opening a PR,\nfollow `docs/commit-message-guidelines.md` and",
+            "admission_tier": "baseline",
+            "association": "deterministic_baseline",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:9291cb67524009f9673c",
+            "kind": "change_relation",
+            "line_end": 27,
+            "line_start": 25,
+            "operation": "replaced",
+            "path": "AGENTS.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "cross-component changes, follow `docs/agent-change-protocol.md`. Before\ncreating Git artifacts, follow `docs/commit-message-guidelines.md` and",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Replaced change: AGENTS.md:25-27",
+            "symbol_kind": ""
+          }
+        ],
+        "coverage_limits": [],
+        "request_id": "shadow:CC3:48201983be26e8bd",
+        "schema_version": "2",
+        "subject_id": "CC3",
+        "subject_kind": "completion_condition"
+      },
+      "run": null
+    },
+    {
+      "admission_state": "ready",
+      "claim_id": "CC4",
+      "deterministic_evidence_ids": [],
+      "diagnostics": [
+        {
+          "code": "shadow_execution_budget_deferred",
+          "message": "Admitted shadow request was deferred by the review safety limit of 3."
+        }
+      ],
+      "eligible_count": 1,
+      "execution_state": "deferred",
+      "request": {
+        "authored_statement": "Existing parser and report behavior remain unchanged.",
+        "candidates": [
+          {
+            "added_code": "cross-component changes, follow `docs/agent-change-protocol.md`. Before creating\nan Issue, follow `docs/issue-guidelines.md`; before committing or opening a PR,\nfollow `docs/commit-message-guidelines.md` and",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:9291cb67524009f9673c",
+            "kind": "change_relation",
+            "line_end": 27,
+            "line_start": 25,
+            "operation": "replaced",
+            "path": "AGENTS.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "cross-component changes, follow `docs/agent-change-protocol.md`. Before\ncreating Git artifacts, follow `docs/commit-message-guidelines.md` and",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Replaced change: AGENTS.md:25-27",
+            "symbol_kind": ""
+          }
+        ],
+        "coverage_limits": [],
+        "request_id": "shadow:CC4:14bd5996e4494f06",
+        "schema_version": "2",
+        "subject_id": "CC4",
+        "subject_kind": "completion_condition"
+      },
+      "run": null
+    }
+  ],
+  "schema_version": "llm_shadow_execution.v5",
+  "summary": {
+    "admitted_count": 10,
+    "artifact_written": true,
+    "completed_count": 3,
+    "deferred_count": 7,
+    "failed_count": 0,
+    "state": "partial"
+  }
+}

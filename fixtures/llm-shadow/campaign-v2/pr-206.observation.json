@@ -1,0 +1,626 @@
+{
+  "observations": [
+    {
+      "admission_state": "ready",
+      "claim_id": "T1",
+      "deterministic_evidence_ids": [],
+      "diagnostics": [],
+      "eligible_count": 6,
+      "execution_state": "accepted",
+      "request": {
+        "authored_statement": "The protocol required counterexamples, sink evidence, typed contracts, and architecture auditing, but did not require an explicit decision about whether a newly exposed invariant should remain conventional or move into repository-level enforcement. An agent could therefore stop at a prompt/test convention or over-harden an uncertain hypothesis.",
+        "candidates": [
+          {
+            "added_code": "Treat enforcement as part of the contract. First establish the invariant with\ncounterfactual and sink evidence, then choose the smallest sufficient boundary:\ndocumentation for exploratory semantics, behavioral tests for established\nbehavior, distinct types or immutable state for stable domain distinctions,\ncontrolled validators or derivation APIs for stable construction rules, and\nmodule or static gates for stable architecture boundaries. Combine mechanisms\nwhen they prevent different invalid transitions. Do not harden an uncertain\nhypothesis or add a stronger mechanism that excludes no concrete invalid state.\n",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:3459aa6b2b721e9a0cb0",
+            "kind": "change_relation",
+            "line_end": 43,
+            "line_start": 35,
+            "operation": "added",
+            "path": "docs/agent-change-protocol.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Added change: docs/agent-change-protocol.md:35-43",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "When hardening an invariant, name the invalid semantic transition being\nprevented rather than only the type, factory, test, or gate used to prevent it.",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:60bea9d6989c82f3a34e",
+            "kind": "change_relation",
+            "line_end": 21,
+            "line_start": 20,
+            "operation": "added",
+            "path": "docs/commit-message-guidelines.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Added change: docs/commit-message-guidelines.md:20-21",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "- stable invariants, their current and target enforcement, and the concrete\n  invalid transitions the target prevents;",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:7cbd784a6c24614b06c5",
+            "kind": "change_relation",
+            "line_end": 98,
+            "line_start": 97,
+            "operation": "added",
+            "path": "docs/agent-change-protocol.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Added change: docs/agent-change-protocol.md:97-98",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "When a change reveals a stable semantic invariant, establish it with a\ncounterexample and sink-level evidence, then encode it at the smallest\nsufficient machine-enforceable boundary. Prefer types, controlled construction,\nmodule boundaries, or automated gates when they exclude a concrete invalid\ntransition. Do not harden exploratory semantics or add constraints that only\nincrease abstraction.\n",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:bb67f1bd30990235143f",
+            "kind": "change_relation",
+            "line_end": 30,
+            "line_start": 24,
+            "operation": "added",
+            "path": "AGENTS.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Added change: AGENTS.md:24-30",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "- verify hardened invariants at their production sinks; type, dependency, and\n  static gates do not replace behavioral proof;",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:d4d63dfb89c8c436ac3d",
+            "kind": "change_relation",
+            "line_end": 71,
+            "line_start": 70,
+            "operation": "added",
+            "path": "docs/agent-change-protocol.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Added change: docs/agent-change-protocol.md:70-71",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "- stable invariants affected by the PR, their current and target enforcement,\n  and why that enforcement is sufficient without freezing uncertain semantics;",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:f2bdf39b41e8b932147a",
+            "kind": "change_relation",
+            "line_end": 11,
+            "line_start": 10,
+            "operation": "added",
+            "path": "docs/pull-request-guidelines.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Added change: docs/pull-request-guidelines.md:10-11",
+            "symbol_kind": ""
+          }
+        ],
+        "coverage_limits": [],
+        "request_id": "shadow:T1:5cce913b89e6188c",
+        "schema_version": "2",
+        "subject_id": "T1",
+        "subject_kind": "before_state"
+      },
+      "run": {
+        "candidate_count": 6,
+        "comparison": {
+          "deterministic_ids": [],
+          "deterministic_only_ids": [],
+          "shadow_ids": [
+            "E:change_relation:3459aa6b2b721e9a0cb0",
+            "E:change_relation:60bea9d6989c82f3a34e",
+            "E:change_relation:7cbd784a6c24614b06c5",
+            "E:change_relation:bb67f1bd30990235143f",
+            "E:change_relation:d4d63dfb89c8c436ac3d",
+            "E:change_relation:f2bdf39b41e8b932147a"
+          ],
+          "shadow_only_ids": [
+            "E:change_relation:3459aa6b2b721e9a0cb0",
+            "E:change_relation:60bea9d6989c82f3a34e",
+            "E:change_relation:7cbd784a6c24614b06c5",
+            "E:change_relation:bb67f1bd30990235143f",
+            "E:change_relation:d4d63dfb89c8c436ac3d",
+            "E:change_relation:f2bdf39b41e8b932147a"
+          ],
+          "shared_ids": []
+        },
+        "diagnostics": [],
+        "duration_ms": 6360.712833004072,
+        "execution_policy": {
+          "adapter_id": "openai-chat-completions",
+          "api_profile": "deepseek",
+          "endpoint": "https://api.deepseek.com/chat/completions",
+          "identity": "shadow-policy:f49ded2093e7837149c4",
+          "max_output_tokens": 4000,
+          "model_id": "deepseek-v4-flash",
+          "reasoning_effort": "default",
+          "thinking_budget": null,
+          "thinking_mode": "disabled",
+          "timeout_seconds": 180.0
+        },
+        "input_tokens": 2124,
+        "model_id": "deepseek-v4-flash",
+        "output_tokens": 741,
+        "provider_id": "openai-chat-completions",
+        "request_id": "shadow:T1:5cce913b89e6188c",
+        "selection": {
+          "insufficient_evidence_ids": [],
+          "rejected_evidence_ids": [],
+          "request_id": "shadow:T1:5cce913b89e6188c",
+          "schema_version": "2",
+          "selections": [
+            {
+              "evidence_id": "E:change_relation:3459aa6b2b721e9a0cb0",
+              "rationale": "The added protocol text explicitly discusses choosing the smallest sufficient enforcement boundary after establishing invariants with counterfactual and sink evidence, and warns against hardening uncertain hypotheses. This directly supports the authored statement that the protocol requires counterexamples, sink evidence, typed contracts, and architecture auditing but does not mandate a decision on conventional vs repository-level enforcement.",
+              "role": "supporting",
+              "semantic_role": "documentation"
+            },
+            {
+              "evidence_id": "E:change_relation:60bea9d6989c82f3a34e",
+              "rationale": "This guideline instructs naming the invalid semantic transition when hardening an invariant, which implies the protocol addresses hardening practice but does not itself mandate an explicit choice between conventional and repository-level enforcement. It supports the claim of a gap in explicit decision requirements.",
+              "role": "supporting",
+              "semantic_role": "documentation"
+            },
+            {
+              "evidence_id": "E:change_relation:7cbd784a6c24614b06c5",
+              "rationale": "The added line requires listing stable invariants, current/target enforcement, and invalid transitions in change documentation. This shows the protocol demands enforcement planning but does not prescribe an explicit decision step about whether to keep an invariant conventional or move it to repository-level enforcement.",
+              "role": "supporting",
+              "semantic_role": "documentation"
+            },
+            {
+              "evidence_id": "E:change_relation:bb67f1bd30990235143f",
+              "rationale": "AGENTS.md states to establish invariants with counterexample and sink evidence, then encode at the smallest sufficient machine-enforceable boundary. This supports that the protocol requires the cited evidence types but does not require an explicit decision about conventional vs repository-level enforcement.",
+              "role": "supporting",
+              "semantic_role": "documentation"
+            },
+            {
+              "evidence_id": "E:change_relation:d4d63dfb89c8c436ac3d",
+              "rationale": "This line requires verifying hardened invariants at production sinks and notes that type/dependency/static gates do not replace behavioral proof. It reinforces the requirement for sink evidence but does not introduce an explicit decision about enforcement level, supporting the gap.",
+              "role": "supporting",
+              "semantic_role": "documentation"
+            },
+            {
+              "evidence_id": "E:change_relation:f2bdf39b41e8b932147a",
+              "rationale": "The PR guidelines require documenting affected stable invariants, current/target enforcement, and sufficiency without freezing uncertain semantics. This supports that the protocol requires enforcement planning but lacks an explicit decision requirement about conventional vs repository-level enforcement.",
+              "role": "supporting",
+              "semantic_role": "documentation"
+            }
+          ],
+          "subject_id": "T1",
+          "unresolved_surfaces": [
+            "No evidence in the packet covers whether an explicit decision step exists in the protocol for choosing between conventional and repository-level enforcement; only documentation of enforcement choices is present."
+          ]
+        },
+        "state": "accepted",
+        "subject_id": "T1"
+      }
+    },
+    {
+      "admission_state": "ready",
+      "claim_id": "T2",
+      "deterministic_evidence_ids": [
+        "E:change_relation:3459aa6b2b721e9a0cb0",
+        "E:change_relation:60bea9d6989c82f3a34e",
+        "E:change_relation:bb67f1bd30990235143f"
+      ],
+      "diagnostics": [],
+      "eligible_count": 3,
+      "execution_state": "accepted",
+      "request": {
+        "authored_statement": "Make semantic confidence precede enforcement strength across the four canonical delivery guides, and require every stronger mechanism to exclude a concrete invalid transition.",
+        "candidates": [
+          {
+            "added_code": "Treat enforcement as part of the contract. First establish the invariant with\ncounterfactual and sink evidence, then choose the smallest sufficient boundary:\ndocumentation for exploratory semantics, behavioral tests for established\nbehavior, distinct types or immutable state for stable domain distinctions,\ncontrolled validators or derivation APIs for stable construction rules, and\nmodule or static gates for stable architecture boundaries. Combine mechanisms\nwhen they prevent different invalid transitions. Do not harden an uncertain\nhypothesis or add a stronger mechanism that excludes no concrete invalid state.\n",
+            "admission_tier": "baseline",
+            "association": "deterministic_baseline",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:3459aa6b2b721e9a0cb0",
+            "kind": "change_relation",
+            "line_end": 43,
+            "line_start": 35,
+            "operation": "added",
+            "path": "docs/agent-change-protocol.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Added change: docs/agent-change-protocol.md:35-43",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "When hardening an invariant, name the invalid semantic transition being\nprevented rather than only the type, factory, test, or gate used to prevent it.",
+            "admission_tier": "baseline",
+            "association": "deterministic_baseline",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:60bea9d6989c82f3a34e",
+            "kind": "change_relation",
+            "line_end": 21,
+            "line_start": 20,
+            "operation": "added",
+            "path": "docs/commit-message-guidelines.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Added change: docs/commit-message-guidelines.md:20-21",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "When a change reveals a stable semantic invariant, establish it with a\ncounterexample and sink-level evidence, then encode it at the smallest\nsufficient machine-enforceable boundary. Prefer types, controlled construction,\nmodule boundaries, or automated gates when they exclude a concrete invalid\ntransition. Do not harden exploratory semantics or add constraints that only\nincrease abstraction.\n",
+            "admission_tier": "baseline",
+            "association": "deterministic_baseline",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:bb67f1bd30990235143f",
+            "kind": "change_relation",
+            "line_end": 30,
+            "line_start": 24,
+            "operation": "added",
+            "path": "AGENTS.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Added change: AGENTS.md:24-30",
+            "symbol_kind": ""
+          }
+        ],
+        "coverage_limits": [],
+        "request_id": "shadow:T2:94f57cf172979031",
+        "schema_version": "2",
+        "subject_id": "T2",
+        "subject_kind": "change"
+      },
+      "run": {
+        "candidate_count": 3,
+        "comparison": {
+          "deterministic_ids": [
+            "E:change_relation:3459aa6b2b721e9a0cb0",
+            "E:change_relation:60bea9d6989c82f3a34e",
+            "E:change_relation:bb67f1bd30990235143f"
+          ],
+          "deterministic_only_ids": [],
+          "shadow_ids": [
+            "E:change_relation:3459aa6b2b721e9a0cb0",
+            "E:change_relation:60bea9d6989c82f3a34e",
+            "E:change_relation:bb67f1bd30990235143f"
+          ],
+          "shadow_only_ids": [],
+          "shared_ids": [
+            "E:change_relation:3459aa6b2b721e9a0cb0",
+            "E:change_relation:60bea9d6989c82f3a34e",
+            "E:change_relation:bb67f1bd30990235143f"
+          ]
+        },
+        "diagnostics": [],
+        "duration_ms": 3060.5935829808004,
+        "execution_policy": {
+          "adapter_id": "openai-chat-completions",
+          "api_profile": "deepseek",
+          "endpoint": "https://api.deepseek.com/chat/completions",
+          "identity": "shadow-policy:f49ded2093e7837149c4",
+          "max_output_tokens": 4000,
+          "model_id": "deepseek-v4-flash",
+          "reasoning_effort": "default",
+          "thinking_budget": null,
+          "thinking_mode": "disabled",
+          "timeout_seconds": 180.0
+        },
+        "input_tokens": 1431,
+        "model_id": "deepseek-v4-flash",
+        "output_tokens": 306,
+        "provider_id": "openai-chat-completions",
+        "request_id": "shadow:T2:94f57cf172979031",
+        "selection": {
+          "insufficient_evidence_ids": [],
+          "rejected_evidence_ids": [],
+          "request_id": "shadow:T2:94f57cf172979031",
+          "schema_version": "2",
+          "selections": [
+            {
+              "evidence_id": "E:change_relation:3459aa6b2b721e9a0cb0",
+              "rationale": "Directly states that semantic confidence should be established before enforcement strength, and that stronger mechanisms must exclude a concrete invalid transition.",
+              "role": "supporting",
+              "semantic_role": "documentation"
+            },
+            {
+              "evidence_id": "E:change_relation:60bea9d6989c82f3a34e",
+              "rationale": "Emphasizes naming the invalid semantic transition being prevented, reinforcing the requirement that stronger mechanisms exclude a concrete invalid transition.",
+              "role": "supporting",
+              "semantic_role": "documentation"
+            },
+            {
+              "evidence_id": "E:change_relation:bb67f1bd30990235143f",
+              "rationale": "States semantic confidence should precede machine-enforceable boundaries and that constraints should only be added when they exclude a concrete invalid transition.",
+              "role": "supporting",
+              "semantic_role": "documentation"
+            }
+          ],
+          "subject_id": "T2",
+          "unresolved_surfaces": []
+        },
+        "state": "accepted",
+        "subject_id": "T2"
+      }
+    },
+    {
+      "admission_state": "ready",
+      "claim_id": "T3",
+      "deterministic_evidence_ids": [],
+      "diagnostics": [],
+      "eligible_count": 6,
+      "execution_state": "accepted",
+      "request": {
+        "authored_statement": "A stable invariant is first established with counterfactual and sink evidence, then encoded at the smallest sufficient machine-enforceable boundary. Types, controlled construction, module boundaries, and automated gates are justified only when they prevent a concrete invalid transition without freezing uncertain semantics.",
+        "candidates": [
+          {
+            "added_code": "Treat enforcement as part of the contract. First establish the invariant with\ncounterfactual and sink evidence, then choose the smallest sufficient boundary:\ndocumentation for exploratory semantics, behavioral tests for established\nbehavior, distinct types or immutable state for stable domain distinctions,\ncontrolled validators or derivation APIs for stable construction rules, and\nmodule or static gates for stable architecture boundaries. Combine mechanisms\nwhen they prevent different invalid transitions. Do not harden an uncertain\nhypothesis or add a stronger mechanism that excludes no concrete invalid state.\n",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:3459aa6b2b721e9a0cb0",
+            "kind": "change_relation",
+            "line_end": 43,
+            "line_start": 35,
+            "operation": "added",
+            "path": "docs/agent-change-protocol.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Added change: docs/agent-change-protocol.md:35-43",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "When hardening an invariant, name the invalid semantic transition being\nprevented rather than only the type, factory, test, or gate used to prevent it.",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:60bea9d6989c82f3a34e",
+            "kind": "change_relation",
+            "line_end": 21,
+            "line_start": 20,
+            "operation": "added",
+            "path": "docs/commit-message-guidelines.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Added change: docs/commit-message-guidelines.md:20-21",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "- stable invariants, their current and target enforcement, and the concrete\n  invalid transitions the target prevents;",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:7cbd784a6c24614b06c5",
+            "kind": "change_relation",
+            "line_end": 98,
+            "line_start": 97,
+            "operation": "added",
+            "path": "docs/agent-change-protocol.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Added change: docs/agent-change-protocol.md:97-98",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "When a change reveals a stable semantic invariant, establish it with a\ncounterexample and sink-level evidence, then encode it at the smallest\nsufficient machine-enforceable boundary. Prefer types, controlled construction,\nmodule boundaries, or automated gates when they exclude a concrete invalid\ntransition. Do not harden exploratory semantics or add constraints that only\nincrease abstraction.\n",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:bb67f1bd30990235143f",
+            "kind": "change_relation",
+            "line_end": 30,
+            "line_start": 24,
+            "operation": "added",
+            "path": "AGENTS.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Added change: AGENTS.md:24-30",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "- verify hardened invariants at their production sinks; type, dependency, and\n  static gates do not replace behavioral proof;",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:d4d63dfb89c8c436ac3d",
+            "kind": "change_relation",
+            "line_end": 71,
+            "line_start": 70,
+            "operation": "added",
+            "path": "docs/agent-change-protocol.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Added change: docs/agent-change-protocol.md:70-71",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "- stable invariants affected by the PR, their current and target enforcement,\n  and why that enforcement is sufficient without freezing uncertain semantics;",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:f2bdf39b41e8b932147a",
+            "kind": "change_relation",
+            "line_end": 11,
+            "line_start": 10,
+            "operation": "added",
+            "path": "docs/pull-request-guidelines.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Added change: docs/pull-request-guidelines.md:10-11",
+            "symbol_kind": ""
+          }
+        ],
+        "coverage_limits": [],
+        "request_id": "shadow:T3:5fb4b3c4cf3469f0",
+        "schema_version": "2",
+        "subject_id": "T3",
+        "subject_kind": "after_state"
+      },
+      "run": {
+        "candidate_count": 6,
+        "comparison": {
+          "deterministic_ids": [],
+          "deterministic_only_ids": [],
+          "shadow_ids": [
+            "E:change_relation:3459aa6b2b721e9a0cb0",
+            "E:change_relation:60bea9d6989c82f3a34e",
+            "E:change_relation:7cbd784a6c24614b06c5",
+            "E:change_relation:bb67f1bd30990235143f",
+            "E:change_relation:d4d63dfb89c8c436ac3d",
+            "E:change_relation:f2bdf39b41e8b932147a"
+          ],
+          "shadow_only_ids": [
+            "E:change_relation:3459aa6b2b721e9a0cb0",
+            "E:change_relation:60bea9d6989c82f3a34e",
+            "E:change_relation:7cbd784a6c24614b06c5",
+            "E:change_relation:bb67f1bd30990235143f",
+            "E:change_relation:d4d63dfb89c8c436ac3d",
+            "E:change_relation:f2bdf39b41e8b932147a"
+          ],
+          "shared_ids": []
+        },
+        "diagnostics": [],
+        "duration_ms": 4894.003583001904,
+        "execution_policy": {
+          "adapter_id": "openai-chat-completions",
+          "api_profile": "deepseek",
+          "endpoint": "https://api.deepseek.com/chat/completions",
+          "identity": "shadow-policy:f49ded2093e7837149c4",
+          "max_output_tokens": 4000,
+          "model_id": "deepseek-v4-flash",
+          "reasoning_effort": "default",
+          "thinking_budget": null,
+          "thinking_mode": "disabled",
+          "timeout_seconds": 180.0
+        },
+        "input_tokens": 2121,
+        "model_id": "deepseek-v4-flash",
+        "output_tokens": 502,
+        "provider_id": "openai-chat-completions",
+        "request_id": "shadow:T3:5fb4b3c4cf3469f0",
+        "selection": {
+          "insufficient_evidence_ids": [],
+          "rejected_evidence_ids": [],
+          "request_id": "shadow:T3:5fb4b3c4cf3469f0",
+          "schema_version": "2",
+          "selections": [
+            {
+              "evidence_id": "E:change_relation:3459aa6b2b721e9a0cb0",
+              "rationale": "Directly describes the invariant establishment and smallest sufficient boundary principle, matching the statement.",
+              "role": "supporting",
+              "semantic_role": "documentation"
+            },
+            {
+              "evidence_id": "E:change_relation:60bea9d6989c82f3a34e",
+              "rationale": "Emphasizes naming the invalid semantic transition, aligning with 'prevent a concrete invalid transition'.",
+              "role": "supporting",
+              "semantic_role": "documentation"
+            },
+            {
+              "evidence_id": "E:change_relation:7cbd784a6c24614b06c5",
+              "rationale": "References stable invariants and concrete invalid transitions, supporting the principle.",
+              "role": "supporting",
+              "semantic_role": "documentation"
+            },
+            {
+              "evidence_id": "E:change_relation:bb67f1bd30990235143f",
+              "rationale": "Directly states establishing invariants with counterexample and sink evidence, and smallest sufficient boundary, matching the statement.",
+              "role": "supporting",
+              "semantic_role": "documentation"
+            },
+            {
+              "evidence_id": "E:change_relation:d4d63dfb89c8c436ac3d",
+              "rationale": "Notes behavioral proof at sinks, supplementing the statement's 'sink evidence'.",
+              "role": "supporting",
+              "semantic_role": "documentation"
+            },
+            {
+              "evidence_id": "E:change_relation:f2bdf39b41e8b932147a",
+              "rationale": "Discusses sufficient enforcement without freezing uncertain semantics, aligning with the condition.",
+              "role": "supporting",
+              "semantic_role": "documentation"
+            }
+          ],
+          "subject_id": "T3",
+          "unresolved_surfaces": []
+        },
+        "state": "accepted",
+        "subject_id": "T3"
+      }
+    }
+  ],
+  "schema_version": "llm_shadow_execution.v5",
+  "summary": {
+    "admitted_count": 3,
+    "artifact_written": true,
+    "completed_count": 3,
+    "deferred_count": 0,
+    "failed_count": 0,
+    "state": "completed"
+  }
+}

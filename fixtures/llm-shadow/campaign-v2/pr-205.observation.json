@@ -1,0 +1,558 @@
+{
+  "observations": [
+    {
+      "admission_state": "ready",
+      "claim_id": "T1",
+      "deterministic_evidence_ids": [],
+      "diagnostics": [],
+      "eligible_count": 5,
+      "execution_state": "accepted",
+      "request": {
+        "authored_statement": "A suffix blacklist treated every unknown format as structural. Generic JSON/configuration fixtures therefore became missing Codegraph files and changed otherwise complete source coverage to partial.",
+        "candidates": [
+          {
+            "added_code": "# Formats for which this adapter consumes Codegraph symbol or resolver structure.\n# Generic configuration remains evidence but is not structural coverage input.\n_STRUCTURAL_SUFFIXES = frozenset(\n    \"\"\"\n    .astro .c .cc .cbl .cob .cobol .cfc .cfm .cfs .cpp .cpy .cs .cshtml\n    .cjs .cts .cu .cuh .cxx .dart .dfm .dpk .dpr .erl .escript .ets .fmx .go .h\n    .hpp .hrl .hxx .inc .install .java .js .jsx .kt .kts .liquid .lpr .lua\n    .luau .m .metal .mjs .mm .module .mts .nix .pas .php .properties .py .pyw\n    .r .rake .razor .rb .rs .scala .sc .sol .svelte .swift .tf .tfvars .theme\n    .tofu .ts .tsx .vb .vue .xsjs .xsjslib .xml\n    \"\"\".split()\n)",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "code",
+            "evidence_id": "E:structural_change:44df055d67a962ab8c3c",
+            "kind": "structural_change",
+            "line_end": 51,
+            "line_start": 42,
+            "operation": "added",
+            "path": "src/prismcode/providers/codegraph.py",
+            "profile": "production",
+            "qualified_name": "_STRUCTURAL_SUFFIXES",
+            "removed_code": "_NON_STRUCTURAL_SUFFIXES = {\n    \".md\",\n    \".mdx\",\n    \".rst\",\n    \".txt\",\n    \".pdf\",\n    \".doc\",\n    \".docx\",\n}",
+            "revision_side": "review",
+            "structural_context": [
+              "_STRUCTURAL_SUFFIXES \u2190[references] _is_structural_candidate \u2190[calls] CodegraphProvider::symbols_overlapping",
+              "_STRUCTURAL_SUFFIXES \u2190[references] _is_structural_candidate",
+              "_is_structural_candidate \u2192[references] _STRUCTURAL_SUFFIXES"
+            ],
+            "summary": "Added variable: _STRUCTURAL_SUFFIXES",
+            "symbol_kind": "variable"
+          },
+          {
+            "added_code": "    normalized = path.casefold().replace(\"\\\\\", \"/\")\n    name = Path(normalized).name\n    if normalized == \"conf/routes\" or name.endswith(\".routes\"):\n        return True\n    if name.endswith((\".app\", \".app.src\")):\n        return True\n    if name.endswith((\".routing.yml\", \".routing.yaml\")):\n        return True\n    if name.startswith(\"application\") and Path(name).suffix in {\".yml\", \".yaml\"}:\n        return True\n    if Path(normalized).suffix == \".json\":\n        parts = normalized.split(\"/\")\n        return any(\n            part in {\"templates\", \"sections\"}\n            for part in parts[:-1]\n        )\n    return Path(normalized).suffix in _STRUCTURAL_SUFFIXES",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "code",
+            "evidence_id": "E:structural_change:4ad5864c1b09b6f38b95",
+            "kind": "structural_change",
+            "line_end": 1164,
+            "line_start": 1163,
+            "operation": "modified",
+            "path": "src/prismcode/providers/codegraph.py",
+            "profile": "production",
+            "qualified_name": "_is_structural_candidate",
+            "removed_code": "    return Path(path).suffix.casefold() not in _NON_STRUCTURAL_SUFFIXES",
+            "revision_side": "review",
+            "structural_context": [
+              "_is_structural_candidate \u2190[calls] CodegraphProvider::symbols_overlapping \u2192[calls] CodegraphProvider::_connect \u2190[calls] CodegraphProvider::expand_structure",
+              "_NON_STRUCTURAL_SUFFIXES \u2190[references] _is_structural_candidate \u2190[calls] CodegraphProvider::symbols_overlapping \u2190[calls] test_file_with_one_applicable_hunk_is_not_labeled_inapplicable",
+              "_NON_STRUCTURAL_SUFFIXES \u2190[references] _is_structural_candidate \u2190[calls] CodegraphProvider::symbols_overlapping \u2190[calls] test_added_only_file_is_not_applicable_to_base_coverage",
+              "_is_structural_candidate \u2190[calls] CodegraphProvider::symbols_overlapping \u2192[instantiates] Diagnostic",
+              "_is_structural_candidate \u2190[calls] CodegraphProvider::symbols_overlapping \u2190[calls] test_document_hunks_do_not_reduce_codegraph_coverage",
+              "_is_structural_candidate \u2190[calls] CodegraphProvider::symbols_overlapping \u2192[calls] CodegraphProvider::inspect_index"
+            ],
+            "summary": "Modified function: _is_structural_candidate",
+            "symbol_kind": "function"
+          },
+          {
+            "added_code": "@pytest.mark.parametrize(\n    \"path\",\n    (\"fixtures/review/input.json\", \"fixtures/review/input.yaml\", \"pyproject.toml\"),\n)\ndef test_configuration_input_does_not_reduce_codegraph_coverage(\n    tmp_path: Path,\n    path: str,\n) -> None:\n    _create_index(tmp_path)\n    code_hunks = parse_unified_patch(\n        \"src/service.py\",\n        \"@@ -3 +3 @@\\n-        return 1\\n+        return 2\\n\",\n    )\n    configuration_hunks = parse_unified_patch(\n        path,\n        '@@ -1 +1 @@\\n-{\"state\":\"old\"}\\n+{\"state\":\"new\"}\\n',\n    )\n\n    result = CodegraphProvider(tmp_path).symbols_overlapping(\n        (*code_hunks, *configuration_hunks)\n    )\n\n    assert result.index.state == \"available\"\n    assert (result.index.requested_files, result.index.indexed_files) == (1, 1)\n    assert result.hunk_count == 1\n    diagnostic = next(\n        item\n        for item in result.diagnostics\n        if item.code == \"structural_graph_file_not_applicable\"\n    )\n    assert diagnostic.sources[0].path == path\n\n\n@pytest.mark.parametrize(\n    \"path\",\n    (\"src/unindexed.py\", \"templates/product.json\"),\n)\ndef test_unindexed_structural_input_remains_in_coverage(\n    tmp_path: Path,\n    path: str,\n) -> None:\n    _create_index(tmp_path)\n    code_hunks = parse_unified_patch(\n        \"src/service.py\",\n        \"@@ -3 +3 @@\\n-        return 1\\n+        return 2\\n\",\n    )\n    unindexed_hunks = parse_unified_patch(\n        path,\n        \"@@ -0,0 +1 @@\\n+structural input\\n\",\n    )\n\n    result = CodegraphProvider(tmp_path).symbols_overlapping(\n        (*code_hunks, *unindexed_hunks)\n    )\n\n    assert result.index.state == \"partial\"\n    assert (result.index.requested_files, result.index.indexed_files) == (2, 1)\n    assert result.hunk_count == 2\n    assert any(\n        item.code == \"codegraph_file_not_indexed\"\n        and item.sources[0].path == path\n        for item in result.diagnostics\n    )\n\n",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:62bd488fe518cd433bd0",
+            "kind": "structural_change",
+            "line_end": 2114,
+            "line_start": 1,
+            "operation": "modified",
+            "path": "tests/test_structural_graph.py",
+            "profile": "test",
+            "qualified_name": "tests/test_structural_graph.py",
+            "removed_code": "",
+            "revision_side": "review",
+            "structural_context": [
+              "tests/test_structural_graph.py \u2192[imports] Requirement",
+              "tests/test_structural_graph.py \u2192[imports] AnalysisInput \u2190[imports] tests/test_observed_transformation.py",
+              "tests/test_structural_graph.py \u2192[imports] src/prismcode/providers/structural.py",
+              "tests/test_structural_graph.py \u2192[imports] src/prismcode/changes/hunks.py",
+              "tests/test_structural_graph.py \u2192[imports] AnalysisInput \u2190[imports] tests/test_github_adapter.py",
+              "tests/test_structural_graph.py \u2192[imports] StructuralGraphIndexStatus"
+            ],
+            "summary": "Modified file: tests/test_structural_graph.py",
+            "symbol_kind": "file"
+          },
+          {
+            "added_code": "# Formats for which this adapter consumes Codegraph symbol or resolver structure.\n# Generic configuration remains evidence but is not structural coverage input.\n_STRUCTURAL_SUFFIXES = frozenset(\n    \"\"\"\n    .astro .c .cc .cbl .cob .cobol .cfc .cfm .cfs .cpp .cpy .cs .cshtml\n    .cjs .cts .cu .cuh .cxx .dart .dfm .dpk .dpr .erl .escript .ets .fmx .go .h\n    .hpp .hrl .hxx .inc .install .java .js .jsx .kt .kts .liquid .lpr .lua\n    .luau .m .metal .mjs .mm .module .mts .nix .pas .php .properties .py .pyw\n    .r .rake .razor .rb .rs .scala .sc .sol .svelte .swift .tf .tfvars .theme\n    .tofu .ts .tsx .vb .vue .xsjs .xsjslib .xml\n    \"\"\".split()\n)",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "code",
+            "evidence_id": "E:structural_change:a507cf579cd59df9a0bd",
+            "kind": "structural_change",
+            "line_end": 48,
+            "line_start": 40,
+            "operation": "removed",
+            "path": "src/prismcode/providers/codegraph.py",
+            "profile": "production",
+            "qualified_name": "_NON_STRUCTURAL_SUFFIXES",
+            "removed_code": "_NON_STRUCTURAL_SUFFIXES = {\n    \".md\",\n    \".mdx\",\n    \".rst\",\n    \".txt\",\n    \".pdf\",\n    \".doc\",\n    \".docx\",\n}",
+            "revision_side": "review",
+            "structural_context": [
+              "_NON_STRUCTURAL_SUFFIXES \u2190[references] _is_structural_candidate \u2190[calls] CodegraphProvider::symbols_overlapping \u2190[calls] test_file_with_one_applicable_hunk_is_not_labeled_inapplicable",
+              "_NON_STRUCTURAL_SUFFIXES \u2190[references] _is_structural_candidate \u2190[calls] CodegraphProvider::symbols_overlapping \u2190[calls] test_added_only_file_is_not_applicable_to_base_coverage",
+              "_NON_STRUCTURAL_SUFFIXES \u2190[references] _is_structural_candidate \u2190[calls] CodegraphProvider::symbols_overlapping \u2192[calls] CodegraphProvider::_connect",
+              "_NON_STRUCTURAL_SUFFIXES \u2190[references] _is_structural_candidate \u2190[calls] CodegraphProvider::symbols_overlapping \u2192[calls] CodegraphProvider::_changed_lines",
+              "_NON_STRUCTURAL_SUFFIXES \u2190[references] _is_structural_candidate \u2190[calls] CodegraphProvider::symbols_overlapping \u2192[calls] CodegraphProvider::_symbols_for_hunk",
+              "_is_structural_candidate \u2192[references] _NON_STRUCTURAL_SUFFIXES"
+            ],
+            "summary": "Removed variable: _NON_STRUCTURAL_SUFFIXES",
+            "symbol_kind": "variable"
+          },
+          {
+            "added_code": "# Formats for which this adapter consumes Codegraph symbol or resolver structure.\n# Generic configuration remains evidence but is not structural coverage input.\n_STRUCTURAL_SUFFIXES = frozenset(\n    \"\"\"\n    .astro .c .cc .cbl .cob .cobol .cfc .cfm .cfs .cpp .cpy .cs .cshtml\n    .cjs .cts .cu .cuh .cxx .dart .dfm .dpk .dpr .erl .escript .ets .fmx .go .h\n    .hpp .hrl .hxx .inc .install .java .js .jsx .kt .kts .liquid .lpr .lua\n    .luau .m .metal .mjs .mm .module .mts .nix .pas .php .properties .py .pyw\n    .r .rake .razor .rb .rs .scala .sc .sol .svelte .swift .tf .tfvars .theme\n    .tofu .ts .tsx .vb .vue .xsjs .xsjslib .xml\n    \"\"\".split()\n)",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "code",
+            "evidence_id": "E:structural_change:b986a0e9c127e16e7133",
+            "kind": "structural_change",
+            "line_end": 1188,
+            "line_start": 1,
+            "operation": "modified",
+            "path": "src/prismcode/providers/codegraph.py",
+            "profile": "production",
+            "qualified_name": "src/prismcode/providers/codegraph.py",
+            "removed_code": "_NON_STRUCTURAL_SUFFIXES = {\n    \".md\",\n    \".mdx\",\n    \".rst\",\n    \".txt\",\n    \".pdf\",\n    \".doc\",\n    \".docx\",\n}",
+            "revision_side": "review",
+            "structural_context": [
+              "src/prismcode/providers/codegraph.py \u2192[imports] StructuralPath",
+              "src/prismcode/providers/codegraph.py \u2192[imports] src/prismcode/changes/hunks.py",
+              "src/prismcode/providers/codegraph.py \u2192[imports] TraversalLimit",
+              "src/prismcode/providers/codegraph.py \u2190[imports] tests/test_structural_graph.py",
+              "src/prismcode/providers/codegraph.py \u2192[imports] StructuralSeedCoverage",
+              "src/prismcode/providers/codegraph.py \u2192[imports] StructuralGraphResult"
+            ],
+            "summary": "Modified file: src/prismcode/providers/codegraph.py",
+            "symbol_kind": "file"
+          }
+        ],
+        "coverage_limits": [
+          "Structural context was truncated for 4 evidence candidates at 6 paths each."
+        ],
+        "request_id": "shadow:T1:8c9f28f6c0eb090e",
+        "schema_version": "2",
+        "subject_id": "T1",
+        "subject_kind": "before_state"
+      },
+      "run": {
+        "candidate_count": 5,
+        "comparison": {
+          "deterministic_ids": [],
+          "deterministic_only_ids": [],
+          "shadow_ids": [
+            "E:structural_change:44df055d67a962ab8c3c",
+            "E:structural_change:a507cf579cd59df9a0bd",
+            "E:structural_change:4ad5864c1b09b6f38b95",
+            "E:structural_change:62bd488fe518cd433bd0",
+            "E:structural_change:b986a0e9c127e16e7133"
+          ],
+          "shadow_only_ids": [
+            "E:structural_change:44df055d67a962ab8c3c",
+            "E:structural_change:a507cf579cd59df9a0bd",
+            "E:structural_change:4ad5864c1b09b6f38b95",
+            "E:structural_change:62bd488fe518cd433bd0",
+            "E:structural_change:b986a0e9c127e16e7133"
+          ],
+          "shared_ids": []
+        },
+        "diagnostics": [],
+        "duration_ms": 6191.977125010453,
+        "execution_policy": {
+          "adapter_id": "openai-chat-completions",
+          "api_profile": "deepseek",
+          "endpoint": "https://api.deepseek.com/chat/completions",
+          "identity": "shadow-policy:f49ded2093e7837149c4",
+          "max_output_tokens": 4000,
+          "model_id": "deepseek-v4-flash",
+          "reasoning_effort": "default",
+          "thinking_budget": null,
+          "thinking_mode": "disabled",
+          "timeout_seconds": 180.0
+        },
+        "input_tokens": 4294,
+        "model_id": "deepseek-v4-flash",
+        "output_tokens": 639,
+        "provider_id": "openai-chat-completions",
+        "request_id": "shadow:T1:8c9f28f6c0eb090e",
+        "selection": {
+          "insufficient_evidence_ids": [],
+          "rejected_evidence_ids": [],
+          "request_id": "shadow:T1:8c9f28f6c0eb090e",
+          "schema_version": "2",
+          "selections": [
+            {
+              "evidence_id": "E:structural_change:44df055d67a962ab8c3c",
+              "rationale": "Introduces the explicit _STRUCTURAL_SUFFIXES allowlist, replacing the previous blacklist. This change directly supports the claim by establishing that only specific structural extensions are recognized as coverage-relevant, preventing generic configuration from being counted as structural files.",
+              "role": "supporting",
+              "semantic_role": "producer"
+            },
+            {
+              "evidence_id": "E:structural_change:a507cf579cd59df9a0bd",
+              "rationale": "Removes the _NON_STRUCTURAL_SUFFIXES blacklist. This elimination is the core of the fix, ensuring unknown formats are no longer implicitly treated as structural, which aligns with the claim that the blacklist caused generic configuration to be misclassified.",
+              "role": "supporting",
+              "semantic_role": "removal"
+            },
+            {
+              "evidence_id": "E:structural_change:4ad5864c1b09b6f38b95",
+              "rationale": "Modifies _is_structural_candidate to check membership in _STRUCTURAL_SUFFIXES instead of the removed blacklist, and adds special cases for JSON templates/sections. This directly implements the behavior change described in the statement: generic JSON/configuration files are no longer automatically structural unless specific context applies.",
+              "role": "supporting",
+              "semantic_role": "consumer"
+            },
+            {
+              "evidence_id": "E:structural_change:62bd488fe518cd433bd0",
+              "rationale": "Adds tests verifying that configuration inputs (JSON, YAML, pyproject.toml) do not reduce codegraph coverage, and that unindexed structural files still produce partial coverage. This directly validates the fix and supports the claim by demonstrating the corrected behavior.",
+              "role": "supporting",
+              "semantic_role": "test"
+            },
+            {
+              "evidence_id": "E:structural_change:b986a0e9c127e16e7133",
+              "rationale": "Documents the file-level change as a whole, including the new allowlist and the removed blacklist. While it aggregates the other evidence, it provides the direct context that the file is the location of the change, supporting the assertion that the fix was applied.",
+              "role": "supporting",
+              "semantic_role": "path"
+            }
+          ],
+          "subject_id": "T1",
+          "unresolved_surfaces": [
+            "Dynamic behavior of suffix classification for edge cases such as case sensitivity and path normalization appears partially covered by tests but not exhaustive; coverage limits were noted for structural context truncation."
+          ]
+        },
+        "state": "accepted",
+        "subject_id": "T1"
+      }
+    },
+    {
+      "admission_state": "ready",
+      "claim_id": "T2",
+      "deterministic_evidence_ids": [],
+      "diagnostics": [],
+      "eligible_count": 7,
+      "execution_state": "accepted",
+      "request": {
+        "authored_statement": "One provider applicability authority admits supported source/resolver formats and excludes generic configuration, fixture, document, and unknown formats. Special resolver-backed JSON/YAML surfaces remain explicit. Non-structural changes still enter the evidence catalog.",
+        "candidates": [
+          {
+            "added_code": "# Formats for which this adapter consumes Codegraph symbol or resolver structure.\n# Generic configuration remains evidence but is not structural coverage input.\n_STRUCTURAL_SUFFIXES = frozenset(\n    \"\"\"\n    .astro .c .cc .cbl .cob .cobol .cfc .cfm .cfs .cpp .cpy .cs .cshtml\n    .cjs .cts .cu .cuh .cxx .dart .dfm .dpk .dpr .erl .escript .ets .fmx .go .h\n    .hpp .hrl .hxx .inc .install .java .js .jsx .kt .kts .liquid .lpr .lua\n    .luau .m .metal .mjs .mm .module .mts .nix .pas .php .properties .py .pyw\n    .r .rake .razor .rb .rs .scala .sc .sol .svelte .swift .tf .tfvars .theme\n    .tofu .ts .tsx .vb .vue .xsjs .xsjslib .xml\n    \"\"\".split()\n)",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "code",
+            "evidence_id": "E:structural_change:44df055d67a962ab8c3c",
+            "kind": "structural_change",
+            "line_end": 51,
+            "line_start": 42,
+            "operation": "added",
+            "path": "src/prismcode/providers/codegraph.py",
+            "profile": "production",
+            "qualified_name": "_STRUCTURAL_SUFFIXES",
+            "removed_code": "_NON_STRUCTURAL_SUFFIXES = {\n    \".md\",\n    \".mdx\",\n    \".rst\",\n    \".txt\",\n    \".pdf\",\n    \".doc\",\n    \".docx\",\n}",
+            "revision_side": "review",
+            "structural_context": [
+              "_STRUCTURAL_SUFFIXES \u2190[references] _is_structural_candidate \u2190[calls] CodegraphProvider::symbols_overlapping",
+              "_STRUCTURAL_SUFFIXES \u2190[references] _is_structural_candidate",
+              "_is_structural_candidate \u2192[references] _STRUCTURAL_SUFFIXES"
+            ],
+            "summary": "Added variable: _STRUCTURAL_SUFFIXES",
+            "symbol_kind": "variable"
+          },
+          {
+            "added_code": "    normalized = path.casefold().replace(\"\\\\\", \"/\")\n    name = Path(normalized).name\n    if normalized == \"conf/routes\" or name.endswith(\".routes\"):\n        return True\n    if name.endswith((\".app\", \".app.src\")):\n        return True\n    if name.endswith((\".routing.yml\", \".routing.yaml\")):\n        return True\n    if name.startswith(\"application\") and Path(name).suffix in {\".yml\", \".yaml\"}:\n        return True\n    if Path(normalized).suffix == \".json\":\n        parts = normalized.split(\"/\")\n        return any(\n            part in {\"templates\", \"sections\"}\n            for part in parts[:-1]\n        )\n    return Path(normalized).suffix in _STRUCTURAL_SUFFIXES",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "code",
+            "evidence_id": "E:structural_change:4ad5864c1b09b6f38b95",
+            "kind": "structural_change",
+            "line_end": 1164,
+            "line_start": 1163,
+            "operation": "modified",
+            "path": "src/prismcode/providers/codegraph.py",
+            "profile": "production",
+            "qualified_name": "_is_structural_candidate",
+            "removed_code": "    return Path(path).suffix.casefold() not in _NON_STRUCTURAL_SUFFIXES",
+            "revision_side": "review",
+            "structural_context": [
+              "_is_structural_candidate \u2190[calls] CodegraphProvider::symbols_overlapping \u2192[calls] CodegraphProvider::_connect \u2190[calls] CodegraphProvider::expand_structure",
+              "_NON_STRUCTURAL_SUFFIXES \u2190[references] _is_structural_candidate \u2190[calls] CodegraphProvider::symbols_overlapping \u2190[calls] test_file_with_one_applicable_hunk_is_not_labeled_inapplicable",
+              "_NON_STRUCTURAL_SUFFIXES \u2190[references] _is_structural_candidate \u2190[calls] CodegraphProvider::symbols_overlapping \u2190[calls] test_added_only_file_is_not_applicable_to_base_coverage",
+              "_is_structural_candidate \u2190[calls] CodegraphProvider::symbols_overlapping \u2192[instantiates] Diagnostic",
+              "_is_structural_candidate \u2190[calls] CodegraphProvider::symbols_overlapping \u2190[calls] test_document_hunks_do_not_reduce_codegraph_coverage",
+              "_is_structural_candidate \u2190[calls] CodegraphProvider::symbols_overlapping \u2192[calls] CodegraphProvider::inspect_index"
+            ],
+            "summary": "Modified function: _is_structural_candidate",
+            "symbol_kind": "function"
+          },
+          {
+            "added_code": "@pytest.mark.parametrize(\n    \"path\",\n    (\"fixtures/review/input.json\", \"fixtures/review/input.yaml\", \"pyproject.toml\"),\n)\ndef test_configuration_input_does_not_reduce_codegraph_coverage(\n    tmp_path: Path,\n    path: str,\n) -> None:\n    _create_index(tmp_path)\n    code_hunks = parse_unified_patch(\n        \"src/service.py\",\n        \"@@ -3 +3 @@\\n-        return 1\\n+        return 2\\n\",\n    )\n    configuration_hunks = parse_unified_patch(\n        path,\n        '@@ -1 +1 @@\\n-{\"state\":\"old\"}\\n+{\"state\":\"new\"}\\n',\n    )\n\n    result = CodegraphProvider(tmp_path).symbols_overlapping(\n        (*code_hunks, *configuration_hunks)\n    )\n\n    assert result.index.state == \"available\"\n    assert (result.index.requested_files, result.index.indexed_files) == (1, 1)\n    assert result.hunk_count == 1\n    diagnostic = next(\n        item\n        for item in result.diagnostics\n        if item.code == \"structural_graph_file_not_applicable\"\n    )\n    assert diagnostic.sources[0].path == path\n\n\n@pytest.mark.parametrize(\n    \"path\",\n    (\"src/unindexed.py\", \"templates/product.json\"),\n)\ndef test_unindexed_structural_input_remains_in_coverage(\n    tmp_path: Path,\n    path: str,\n) -> None:\n    _create_index(tmp_path)\n    code_hunks = parse_unified_patch(\n        \"src/service.py\",\n        \"@@ -3 +3 @@\\n-        return 1\\n+        return 2\\n\",\n    )\n    unindexed_hunks = parse_unified_patch(\n        path,\n        \"@@ -0,0 +1 @@\\n+structural input\\n\",\n    )\n\n    result = CodegraphProvider(tmp_path).symbols_overlapping(\n        (*code_hunks, *unindexed_hunks)\n    )\n\n    assert result.index.state == \"partial\"\n    assert (result.index.requested_files, result.index.indexed_files) == (2, 1)\n    assert result.hunk_count == 2\n    assert any(\n        item.code == \"codegraph_file_not_indexed\"\n        and item.sources[0].path == path\n        for item in result.diagnostics\n    )\n\n",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:62bd488fe518cd433bd0",
+            "kind": "structural_change",
+            "line_end": 2114,
+            "line_start": 1,
+            "operation": "modified",
+            "path": "tests/test_structural_graph.py",
+            "profile": "test",
+            "qualified_name": "tests/test_structural_graph.py",
+            "removed_code": "",
+            "revision_side": "review",
+            "structural_context": [
+              "tests/test_structural_graph.py \u2192[imports] Requirement",
+              "tests/test_structural_graph.py \u2192[imports] AnalysisInput \u2190[imports] tests/test_observed_transformation.py",
+              "tests/test_structural_graph.py \u2192[imports] src/prismcode/providers/structural.py",
+              "tests/test_structural_graph.py \u2192[imports] src/prismcode/changes/hunks.py",
+              "tests/test_structural_graph.py \u2192[imports] AnalysisInput \u2190[imports] tests/test_github_adapter.py",
+              "tests/test_structural_graph.py \u2192[imports] StructuralGraphIndexStatus"
+            ],
+            "summary": "Modified file: tests/test_structural_graph.py",
+            "symbol_kind": "file"
+          },
+          {
+            "added_code": "@pytest.mark.parametrize(\n    \"path\",\n    (\"fixtures/review/input.json\", \"fixtures/review/input.yaml\", \"pyproject.toml\"),\n)\ndef test_configuration_input_does_not_reduce_codegraph_coverage(\n    tmp_path: Path,\n    path: str,\n) -> None:\n    _create_index(tmp_path)\n    code_hunks = parse_unified_patch(\n        \"src/service.py\",\n        \"@@ -3 +3 @@\\n-        return 1\\n+        return 2\\n\",\n    )\n    configuration_hunks = parse_unified_patch(\n        path,\n        '@@ -1 +1 @@\\n-{\"state\":\"old\"}\\n+{\"state\":\"new\"}\\n',\n    )\n\n    result = CodegraphProvider(tmp_path).symbols_overlapping(\n        (*code_hunks, *configuration_hunks)\n    )\n\n    assert result.index.state == \"available\"\n    assert (result.index.requested_files, result.index.indexed_files) == (1, 1)\n    assert result.hunk_count == 1\n    diagnostic = next(\n        item\n        for item in result.diagnostics\n        if item.code == \"structural_graph_file_not_applicable\"\n    )\n    assert diagnostic.sources[0].path == path\n\n\n@pytest.mark.parametrize(\n    \"path\",\n    (\"src/unindexed.py\", \"templates/product.json\"),\n)\ndef test_unindexed_structural_input_remains_in_coverage(\n    tmp_path: Path,\n    path: str,\n) -> None:\n    _create_index(tmp_path)\n    code_hunks = parse_unified_patch(\n        \"src/service.py\",\n        \"@@ -3 +3 @@\\n-        return 1\\n+        return 2\\n\",\n    )\n    unindexed_hunks = parse_unified_patch(\n        path,\n        \"@@ -0,0 +1 @@\\n+structural input\\n\",\n    )\n\n    result = CodegraphProvider(tmp_path).symbols_overlapping(\n        (*code_hunks, *unindexed_hunks)\n    )\n\n    assert result.index.state == \"partial\"\n    assert (result.index.requested_files, result.index.indexed_files) == (2, 1)\n    assert result.hunk_count == 2\n    assert any(\n        item.code == \"codegraph_file_not_indexed\"\n        and item.sources[0].path == path\n        for item in result.diagnostics\n    )\n\n",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:985fc533423eb57d8b8c",
+            "kind": "structural_change",
+            "line_end": 1298,
+            "line_start": 1272,
+            "operation": "added",
+            "path": "tests/test_structural_graph.py",
+            "profile": "test",
+            "qualified_name": "test_configuration_input_does_not_reduce_codegraph_coverage",
+            "removed_code": "",
+            "revision_side": "review",
+            "structural_context": [
+              "test_configuration_input_does_not_reduce_codegraph_coverage \u2192[instantiates] CodegraphProvider",
+              "test_configuration_input_does_not_reduce_codegraph_coverage \u2192[calls] parse_unified_patch",
+              "test_configuration_input_does_not_reduce_codegraph_coverage \u2192[calls] CodegraphProvider::symbols_overlapping \u2192[calls] ChangedHunk::path_for_revision",
+              "test_configuration_input_does_not_reduce_codegraph_coverage \u2192[calls] CodegraphProvider::symbols_overlapping \u2192[calls] CodegraphProvider::_connect",
+              "test_configuration_input_does_not_reduce_codegraph_coverage \u2192[calls] CodegraphProvider::symbols_overlapping \u2192[calls] CodegraphProvider::_changed_lines",
+              "test_configuration_input_does_not_reduce_codegraph_coverage \u2192[calls] _create_index"
+            ],
+            "summary": "Added function: test_configuration_input_does_not_reduce_codegraph_coverage",
+            "symbol_kind": "function"
+          },
+          {
+            "added_code": "# Formats for which this adapter consumes Codegraph symbol or resolver structure.\n# Generic configuration remains evidence but is not structural coverage input.\n_STRUCTURAL_SUFFIXES = frozenset(\n    \"\"\"\n    .astro .c .cc .cbl .cob .cobol .cfc .cfm .cfs .cpp .cpy .cs .cshtml\n    .cjs .cts .cu .cuh .cxx .dart .dfm .dpk .dpr .erl .escript .ets .fmx .go .h\n    .hpp .hrl .hxx .inc .install .java .js .jsx .kt .kts .liquid .lpr .lua\n    .luau .m .metal .mjs .mm .module .mts .nix .pas .php .properties .py .pyw\n    .r .rake .razor .rb .rs .scala .sc .sol .svelte .swift .tf .tfvars .theme\n    .tofu .ts .tsx .vb .vue .xsjs .xsjslib .xml\n    \"\"\".split()\n)",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "code",
+            "evidence_id": "E:structural_change:a507cf579cd59df9a0bd",
+            "kind": "structural_change",
+            "line_end": 48,
+            "line_start": 40,
+            "operation": "removed",
+            "path": "src/prismcode/providers/codegraph.py",
+            "profile": "production",
+            "qualified_name": "_NON_STRUCTURAL_SUFFIXES",
+            "removed_code": "_NON_STRUCTURAL_SUFFIXES = {\n    \".md\",\n    \".mdx\",\n    \".rst\",\n    \".txt\",\n    \".pdf\",\n    \".doc\",\n    \".docx\",\n}",
+            "revision_side": "review",
+            "structural_context": [
+              "_NON_STRUCTURAL_SUFFIXES \u2190[references] _is_structural_candidate \u2190[calls] CodegraphProvider::symbols_overlapping \u2190[calls] test_file_with_one_applicable_hunk_is_not_labeled_inapplicable",
+              "_NON_STRUCTURAL_SUFFIXES \u2190[references] _is_structural_candidate \u2190[calls] CodegraphProvider::symbols_overlapping \u2190[calls] test_added_only_file_is_not_applicable_to_base_coverage",
+              "_NON_STRUCTURAL_SUFFIXES \u2190[references] _is_structural_candidate \u2190[calls] CodegraphProvider::symbols_overlapping \u2192[calls] CodegraphProvider::_connect",
+              "_NON_STRUCTURAL_SUFFIXES \u2190[references] _is_structural_candidate \u2190[calls] CodegraphProvider::symbols_overlapping \u2192[calls] CodegraphProvider::_changed_lines",
+              "_NON_STRUCTURAL_SUFFIXES \u2190[references] _is_structural_candidate \u2190[calls] CodegraphProvider::symbols_overlapping \u2192[calls] CodegraphProvider::_symbols_for_hunk",
+              "_is_structural_candidate \u2192[references] _NON_STRUCTURAL_SUFFIXES"
+            ],
+            "summary": "Removed variable: _NON_STRUCTURAL_SUFFIXES",
+            "symbol_kind": "variable"
+          },
+          {
+            "added_code": "# Formats for which this adapter consumes Codegraph symbol or resolver structure.\n# Generic configuration remains evidence but is not structural coverage input.\n_STRUCTURAL_SUFFIXES = frozenset(\n    \"\"\"\n    .astro .c .cc .cbl .cob .cobol .cfc .cfm .cfs .cpp .cpy .cs .cshtml\n    .cjs .cts .cu .cuh .cxx .dart .dfm .dpk .dpr .erl .escript .ets .fmx .go .h\n    .hpp .hrl .hxx .inc .install .java .js .jsx .kt .kts .liquid .lpr .lua\n    .luau .m .metal .mjs .mm .module .mts .nix .pas .php .properties .py .pyw\n    .r .rake .razor .rb .rs .scala .sc .sol .svelte .swift .tf .tfvars .theme\n    .tofu .ts .tsx .vb .vue .xsjs .xsjslib .xml\n    \"\"\".split()\n)",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "code",
+            "evidence_id": "E:structural_change:b986a0e9c127e16e7133",
+            "kind": "structural_change",
+            "line_end": 1188,
+            "line_start": 1,
+            "operation": "modified",
+            "path": "src/prismcode/providers/codegraph.py",
+            "profile": "production",
+            "qualified_name": "src/prismcode/providers/codegraph.py",
+            "removed_code": "_NON_STRUCTURAL_SUFFIXES = {\n    \".md\",\n    \".mdx\",\n    \".rst\",\n    \".txt\",\n    \".pdf\",\n    \".doc\",\n    \".docx\",\n}",
+            "revision_side": "review",
+            "structural_context": [
+              "src/prismcode/providers/codegraph.py \u2192[imports] StructuralPath",
+              "src/prismcode/providers/codegraph.py \u2192[imports] src/prismcode/changes/hunks.py",
+              "src/prismcode/providers/codegraph.py \u2192[imports] TraversalLimit",
+              "src/prismcode/providers/codegraph.py \u2190[imports] tests/test_structural_graph.py",
+              "src/prismcode/providers/codegraph.py \u2192[imports] StructuralSeedCoverage",
+              "src/prismcode/providers/codegraph.py \u2192[imports] StructuralGraphResult"
+            ],
+            "summary": "Modified file: src/prismcode/providers/codegraph.py",
+            "symbol_kind": "file"
+          },
+          {
+            "added_code": "@pytest.mark.parametrize(\n    \"path\",\n    (\"fixtures/review/input.json\", \"fixtures/review/input.yaml\", \"pyproject.toml\"),\n)\ndef test_configuration_input_does_not_reduce_codegraph_coverage(\n    tmp_path: Path,\n    path: str,\n) -> None:\n    _create_index(tmp_path)\n    code_hunks = parse_unified_patch(\n        \"src/service.py\",\n        \"@@ -3 +3 @@\\n-        return 1\\n+        return 2\\n\",\n    )\n    configuration_hunks = parse_unified_patch(\n        path,\n        '@@ -1 +1 @@\\n-{\"state\":\"old\"}\\n+{\"state\":\"new\"}\\n',\n    )\n\n    result = CodegraphProvider(tmp_path).symbols_overlapping(\n        (*code_hunks, *configuration_hunks)\n    )\n\n    assert result.index.state == \"available\"\n    assert (result.index.requested_files, result.index.indexed_files) == (1, 1)\n    assert result.hunk_count == 1\n    diagnostic = next(\n        item\n        for item in result.diagnostics\n        if item.code == \"structural_graph_file_not_applicable\"\n    )\n    assert diagnostic.sources[0].path == path\n\n\n@pytest.mark.parametrize(\n    \"path\",\n    (\"src/unindexed.py\", \"templates/product.json\"),\n)\ndef test_unindexed_structural_input_remains_in_coverage(\n    tmp_path: Path,\n    path: str,\n) -> None:\n    _create_index(tmp_path)\n    code_hunks = parse_unified_patch(\n        \"src/service.py\",\n        \"@@ -3 +3 @@\\n-        return 1\\n+        return 2\\n\",\n    )\n    unindexed_hunks = parse_unified_patch(\n        path,\n        \"@@ -0,0 +1 @@\\n+structural input\\n\",\n    )\n\n    result = CodegraphProvider(tmp_path).symbols_overlapping(\n        (*code_hunks, *unindexed_hunks)\n    )\n\n    assert result.index.state == \"partial\"\n    assert (result.index.requested_files, result.index.indexed_files) == (2, 1)\n    assert result.hunk_count == 2\n    assert any(\n        item.code == \"codegraph_file_not_indexed\"\n        and item.sources[0].path == path\n        for item in result.diagnostics\n    )\n\n",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:f7ad97c4d233dd2cba03",
+            "kind": "structural_change",
+            "line_end": 1330,
+            "line_start": 1305,
+            "operation": "added",
+            "path": "tests/test_structural_graph.py",
+            "profile": "test",
+            "qualified_name": "test_unindexed_structural_input_remains_in_coverage",
+            "removed_code": "",
+            "revision_side": "review",
+            "structural_context": [
+              "test_unindexed_structural_input_remains_in_coverage \u2192[calls] _create_index",
+              "test_unindexed_structural_input_remains_in_coverage \u2192[instantiates] CodegraphProvider",
+              "test_unindexed_structural_input_remains_in_coverage \u2192[calls] CodegraphProvider::symbols_overlapping \u2192[calls] CodegraphProvider::_connect",
+              "test_unindexed_structural_input_remains_in_coverage \u2192[calls] parse_unified_patch",
+              "test_unindexed_structural_input_remains_in_coverage \u2192[calls] CodegraphProvider::symbols_overlapping \u2192[calls] CodegraphProvider::_changed_lines",
+              "test_unindexed_structural_input_remains_in_coverage \u2192[calls] CodegraphProvider::symbols_overlapping"
+            ],
+            "summary": "Added function: test_unindexed_structural_input_remains_in_coverage",
+            "symbol_kind": "function"
+          }
+        ],
+        "coverage_limits": [
+          "Structural context was truncated for 6 evidence candidates at 6 paths each."
+        ],
+        "request_id": "shadow:T2:30a3a09edb60d43a",
+        "schema_version": "2",
+        "subject_id": "T2",
+        "subject_kind": "after_state"
+      },
+      "run": {
+        "candidate_count": 7,
+        "comparison": {
+          "deterministic_ids": [],
+          "deterministic_only_ids": [],
+          "shadow_ids": [
+            "E:structural_change:44df055d67a962ab8c3c",
+            "E:structural_change:4ad5864c1b09b6f38b95",
+            "E:structural_change:a507cf579cd59df9a0bd",
+            "E:structural_change:b986a0e9c127e16e7133",
+            "E:structural_change:985fc533423eb57d8b8c",
+            "E:structural_change:f7ad97c4d233dd2cba03",
+            "E:structural_change:62bd488fe518cd433bd0"
+          ],
+          "shadow_only_ids": [
+            "E:structural_change:44df055d67a962ab8c3c",
+            "E:structural_change:4ad5864c1b09b6f38b95",
+            "E:structural_change:a507cf579cd59df9a0bd",
+            "E:structural_change:b986a0e9c127e16e7133",
+            "E:structural_change:985fc533423eb57d8b8c",
+            "E:structural_change:f7ad97c4d233dd2cba03",
+            "E:structural_change:62bd488fe518cd433bd0"
+          ],
+          "shared_ids": []
+        },
+        "diagnostics": [],
+        "duration_ms": 8079.743749985937,
+        "execution_policy": {
+          "adapter_id": "openai-chat-completions",
+          "api_profile": "deepseek",
+          "endpoint": "https://api.deepseek.com/chat/completions",
+          "identity": "shadow-policy:f49ded2093e7837149c4",
+          "max_output_tokens": 4000,
+          "model_id": "deepseek-v4-flash",
+          "reasoning_effort": "default",
+          "thinking_budget": null,
+          "thinking_mode": "disabled",
+          "timeout_seconds": 180.0
+        },
+        "input_tokens": 6290,
+        "model_id": "deepseek-v4-flash",
+        "output_tokens": 947,
+        "provider_id": "openai-chat-completions",
+        "request_id": "shadow:T2:30a3a09edb60d43a",
+        "selection": {
+          "insufficient_evidence_ids": [],
+          "rejected_evidence_ids": [],
+          "request_id": "shadow:T2:30a3a09edb60d43a",
+          "schema_version": "2",
+          "selections": [
+            {
+              "evidence_id": "E:structural_change:44df055d67a962ab8c3c",
+              "rationale": "This evidence directly defines the new _STRUCTURAL_SUFFIXES set, which establishes the list of supported source/resolver formats that the provider authority admits as structural coverage input. It corresponds to the statement's claim that supported formats are explicitly enumerated, and it excludes generic configuration formats by not including them in the set.",
+              "role": "supporting",
+              "semantic_role": "authority"
+            },
+            {
+              "evidence_id": "E:structural_change:4ad5864c1b09b6f38b95",
+              "rationale": "This modification to _is_structural_candidate implements the logic that determines whether a path is structural by checking against the new _STRUCTURAL_SUFFIXES set and special-casing JSON/YAML surfaces under templates/sections, while generic configuration like pyproject.toml falls back to false. This directly supports the statement's claim that generic configuration is excluded and special resolver-backed JSON/YAML surfaces remain explicit.",
+              "role": "supporting",
+              "semantic_role": "producer"
+            },
+            {
+              "evidence_id": "E:structural_change:a507cf579cd59df9a0bd",
+              "rationale": "The removal of the _NON_STRUCTURAL_SUFFIXES set is the inverse of introducing a positive allowlist. It confirms the shift from a deny-list approach to an explicit allowlist, which supports the statement's assertion that generic fixture/document formats are excluded by authority rather than being considered structural.",
+              "role": "supporting",
+              "semantic_role": "removal"
+            },
+            {
+              "evidence_id": "E:structural_change:b986a0e9c127e16e7133",
+              "rationale": "This file-level evidence shows the net change to codegraph.py, incorporating both the new _STRUCTURAL_SUFFIXES variable and the removal of _NON_STRUCTURAL_SUFFIXES. It substantiates the provider authority's adoption of supported formats and exclusion of generic configs as part of the same code modification.",
+              "role": "supporting",
+              "semantic_role": "authority"
+            },
+            {
+              "evidence_id": "E:structural_change:985fc533423eb57d8b8c",
+              "rationale": "This test function verifies that configuration files (input.json, input.yaml, pyproject.toml) do not reduce codegraph coverage, i.e., they are not considered structural. It validates the claim that generic configuration formats are excluded from the structural authority while still remaining as evidence (since the diagnostic source is the configuration path).",
+              "role": "supporting",
+              "semantic_role": "test"
+            },
+            {
+              "evidence_id": "E:structural_change:f7ad97c4d233dd2cba03",
+              "rationale": "This test verifies that unindexed structural input (e.g., templates/product.json) remains in coverage, explicitly confirming that resolver-backed JSON/YAML surfaces under templates/sections are treated as structural despite not being indexed. This directly supports the statement that special resolver-backed JSON/YAML surfaces remain explicit.",
+              "role": "supporting",
+              "semantic_role": "test"
+            },
+            {
+              "evidence_id": "E:structural_change:62bd488fe518cd433bd0",
+              "rationale": "This file-level evidence for test_structural_graph.py contains both new tests and the overall test file context. It provides supporting context that the behavioral changes are covered by tests, but the file-level diff alone does not add further direct detail beyond the individual test functions.",
+              "role": "context",
+              "semantic_role": "test"
+            }
+          ],
+          "subject_id": "T2",
+          "unresolved_surfaces": [
+            "Dynamic resolution of JSON/YAML surfaces outside templates/sections is not fully specified by the evidence; the exact set of resolver-backed surfaces is implied but not exhaustively enumerated.",
+            "Behavior of unknown file extensions not present in _STRUCTURAL_SUFFIXES is not explicitly tested in the provided evidence."
+          ]
+        },
+        "state": "accepted",
+        "subject_id": "T2"
+      }
+    }
+  ],
+  "schema_version": "llm_shadow_execution.v5",
+  "summary": {
+    "admitted_count": 2,
+    "artifact_written": true,
+    "completed_count": 2,
+    "deferred_count": 0,
+    "failed_count": 0,
+    "state": "completed"
+  }
+}
