@@ -19,7 +19,10 @@ from prismcode.llm.contracts import (
     parse_shadow_selection,
     shadow_candidate_from_mapping,
 )
-from prismcode.llm.provider import ShadowEvidenceProvider
+from prismcode.llm.provider import (
+    ShadowEvidenceProvider,
+    ShadowProviderExecutionPolicy,
+)
 from prismcode.llm.runner import (
     ShadowRunRecord,
     ShadowRunner,
@@ -36,13 +39,13 @@ class ShadowExecutionBundle:
 
     summary: LLMShadowExecutionSummary
     observations: tuple["ShadowExecutionObservation", ...] = ()
-    schema_version: str = "llm_shadow_execution.v4"
+    schema_version: str = "llm_shadow_execution.v5"
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
 
     def __post_init__(self) -> None:
-        if self.schema_version != "llm_shadow_execution.v4":
+        if self.schema_version != "llm_shadow_execution.v5":
             raise ValueError("unsupported shadow execution schema_version")
         claim_ids = tuple(item.claim_id for item in self.observations)
         if len(claim_ids) != len(set(claim_ids)):
@@ -314,8 +317,8 @@ def load_shadow_execution(path: str | Path) -> ShadowExecutionBundle:
     """Load one canonical shadow artifact without replaying provider output."""
 
     raw = json.loads(Path(path).read_text(encoding="utf-8"))
-    if raw.get("schema_version") != "llm_shadow_execution.v4":
-        raise ValueError("shadow artifact must use schema_version llm_shadow_execution.v4")
+    if raw.get("schema_version") != "llm_shadow_execution.v5":
+        raise ValueError("shadow artifact must use schema_version llm_shadow_execution.v5")
     summary = LLMShadowExecutionSummary(**raw["summary"])
     observations = tuple(
         _load_observation(item) for item in raw.get("observations", ())
@@ -406,6 +409,9 @@ def _load_run(
         state=raw["state"],
         candidate_count=int(raw["candidate_count"]),
         duration_ms=float(raw["duration_ms"]),
+        execution_policy=ShadowProviderExecutionPolicy(
+            **raw["execution_policy"]
+        ),
         provider_id=raw.get("provider_id"),
         model_id=raw.get("model_id"),
         input_tokens=raw.get("input_tokens"),

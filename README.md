@@ -196,6 +196,12 @@ export OPENAI_API_KEY=...
 export PRISMCODE_LLM_MODEL=...
 # Optional OpenAI-compatible HTTPS API root; defaults to OpenAI.
 export OPENAI_BASE_URL=https://api.openai.com/v1
+# Optional validated execution policy. Thinking fields are sent only when set.
+export PRISMCODE_LLM_TIMEOUT_SECONDS=180
+export PRISMCODE_LLM_MAX_OUTPUT_TOKENS=1200
+export PRISMCODE_LLM_ENABLE_THINKING=false
+# Valid only when PRISMCODE_LLM_ENABLE_THINKING=true.
+# export PRISMCODE_LLM_THINKING_BUDGET=1024
 
 prismcode review \
   --repo owner/repository \
@@ -218,7 +224,7 @@ uncertain relevance must remain insufficient instead of being rejected.
 It records one
 typed observation per claim, including the bounded request, admission and
 execution fate, validated selection divergence, usage, failures, deferrals,
-and coverage limits, in
+coverage limits, and a non-secret execution-policy identity in
 `build/pr-123.html.llm-shadow.json`; the Brief header shows only the execution
 state. A run with no admitted request records `empty`; missing configuration
 records `unavailable`; provider or validation

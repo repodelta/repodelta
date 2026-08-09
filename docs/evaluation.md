@@ -37,7 +37,7 @@ Golden expectations use stable statement and evidence IDs:
   overlay size, and subject-visible closure coverage and matches.
 - `closure_scan_results` injects recorded scanner observations through the
   production `ClosureScanner` port; it does not bypass closure planning.
-- `shadow_execution` references a canonical `llm_shadow_execution.v4`
+- `shadow_execution` references a canonical `llm_shadow_execution.v5`
   observation artifact;
 - `expected_shadow_outcomes` declares only execution state and diagnostic
   expectations;
@@ -70,6 +70,8 @@ The result records:
 - execution-state accuracy and rejection-diagnostic accuracy across labeled and
   operational replay cases;
 - replay/live observation counts and raw token and latency totals;
+- non-secret execution-policy identities for stratifying model, endpoint,
+  timeout, output-budget, and explicitly configured thinking behavior;
 - missing and unexpected target IDs for every query;
 - per-focus/per-slot budget and threshold diagnostics.
 

@@ -95,8 +95,58 @@ def _openai_shadow_provider_from_env() -> OpenAIShadowProvider | None:
             api_key=api_key,
             model=model,
             base_url=base_url or "https://api.openai.com/v1",
+            timeout_seconds=_float_env(
+                "PRISMCODE_LLM_TIMEOUT_SECONDS",
+                180.0,
+            ),
+            max_output_tokens=_int_env(
+                "PRISMCODE_LLM_MAX_OUTPUT_TOKENS",
+                1_200,
+            ),
+            enable_thinking=_optional_bool_env(
+                "PRISMCODE_LLM_ENABLE_THINKING"
+            ),
+            thinking_budget=_optional_int_env(
+                "PRISMCODE_LLM_THINKING_BUDGET"
+            ),
         )
     )
+
+
+def _float_env(name: str, default: float) -> float:
+    raw = os.environ.get(name, "").strip()
+    if not raw:
+        return default
+    try:
+        return float(raw)
+    except ValueError as exc:
+        raise ValueError(f"{name} must be numeric") from exc
+
+
+def _int_env(name: str, default: int) -> int:
+    value = _optional_int_env(name)
+    return default if value is None else value
+
+
+def _optional_int_env(name: str) -> int | None:
+    raw = os.environ.get(name, "").strip()
+    if not raw:
+        return None
+    try:
+        return int(raw)
+    except ValueError as exc:
+        raise ValueError(f"{name} must be an integer") from exc
+
+
+def _optional_bool_env(name: str) -> bool | None:
+    raw = os.environ.get(name, "").strip().casefold()
+    if not raw:
+        return None
+    if raw == "true":
+        return True
+    if raw == "false":
+        return False
+    raise ValueError(f"{name} must be true or false")
 
 
 def _enrich_github_auth_error(

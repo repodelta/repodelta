@@ -68,6 +68,7 @@ class ShadowOutcomeEvaluation:
     input_tokens: int
     output_tokens: int
     duration_ms: float
+    execution_policy_id: str | None
     label_authority: str | None = None
     rubric_version: str | None = None
 
@@ -107,6 +108,7 @@ class ShadowEvaluationMetrics:
     total_input_tokens: int
     total_output_tokens: int
     total_duration_ms: float
+    execution_policy_ids: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -303,6 +305,9 @@ def evaluate_shadow_outcomes(
                 input_tokens=(run.input_tokens or 0) if run is not None else 0,
                 output_tokens=(run.output_tokens or 0) if run is not None else 0,
                 duration_ms=run.duration_ms if run is not None else 0.0,
+                execution_policy_id=(
+                    run.execution_policy.identity if run is not None else None
+                ),
                 label_authority=(
                     human_label.authority if human_label is not None else None
                 ),
@@ -443,6 +448,15 @@ def shadow_metrics(
         total_input_tokens=sum(item.input_tokens for item in outcomes),
         total_output_tokens=sum(item.output_tokens for item in outcomes),
         total_duration_ms=sum(item.duration_ms for item in outcomes),
+        execution_policy_ids=tuple(
+            sorted(
+                {
+                    item.execution_policy_id
+                    for item in outcomes
+                    if item.execution_policy_id is not None
+                }
+            )
+        ),
     )
 
 

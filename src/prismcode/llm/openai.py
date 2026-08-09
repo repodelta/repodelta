@@ -14,7 +14,10 @@ from prismcode.llm.contracts import (
     SHADOW_SCHEMA_VERSION,
     ShadowEvidenceRequest,
 )
-from prismcode.llm.provider import ShadowProviderResponse
+from prismcode.llm.provider import (
+    ShadowProviderExecutionPolicy,
+    ShadowProviderResponse,
+)
 
 
 DEFAULT_OPENAI_BASE_URL = "https://api.openai.com/v1"
@@ -56,6 +59,8 @@ class OpenAIShadowConfig:
     base_url: str = DEFAULT_OPENAI_BASE_URL
     timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS
     max_output_tokens: int = DEFAULT_MAX_OUTPUT_TOKENS
+    enable_thinking: bool | None = None
+    thinking_budget: int | None = None
 
     def __post_init__(self) -> None:
         if not self.api_key.strip() or not self.model.strip():
@@ -67,14 +72,23 @@ class OpenAIShadowConfig:
             raise ValueError(
                 "OpenAI shadow base_url must not contain credentials or query data"
             )
-        if self.timeout_seconds <= 0:
-            raise ValueError("OpenAI shadow timeout_seconds must be positive")
-        if self.max_output_tokens <= 0:
-            raise ValueError("OpenAI shadow max_output_tokens must be positive")
+        self.execution_policy
 
     @property
     def chat_completions_url(self) -> str:
         return f"{self.base_url.rstrip('/')}/chat/completions"
+
+    @property
+    def execution_policy(self) -> ShadowProviderExecutionPolicy:
+        return ShadowProviderExecutionPolicy(
+            adapter_id="openai-chat-completions",
+            model_id=self.model,
+            endpoint=self.chat_completions_url,
+            timeout_seconds=self.timeout_seconds,
+            max_output_tokens=self.max_output_tokens,
+            enable_thinking=self.enable_thinking,
+            thinking_budget=self.thinking_budget,
+        )
 
 
 class OpenAIShadowProvider:
@@ -88,6 +102,10 @@ class OpenAIShadowProvider:
     ) -> None:
         self._config = config
         self._transport = transport or _post_json
+
+    @property
+    def execution_policy(self) -> ShadowProviderExecutionPolicy:
+        return self._config.execution_policy
 
     def select(self, request: ShadowEvidenceRequest) -> ShadowProviderResponse:
         response = self._transport(
@@ -115,7 +133,7 @@ def _response_payload(
     request: ShadowEvidenceRequest,
     config: OpenAIShadowConfig,
 ) -> dict[str, Any]:
-    return {
+    payload = {
         "model": config.model,
         "store": False,
         "max_completion_tokens": config.max_output_tokens,
@@ -140,6 +158,11 @@ def _response_payload(
             },
         },
     }
+    if config.enable_thinking is not None:
+        payload["enable_thinking"] = config.enable_thinking
+    if config.thinking_budget is not None:
+        payload["thinking_budget"] = config.thinking_budget
+    return payload
 
 
 def _selection_schema(request: ShadowEvidenceRequest) -> dict[str, Any]:
