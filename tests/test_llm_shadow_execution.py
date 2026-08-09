@@ -87,7 +87,7 @@ def test_execution_runs_ready_admissions_once_and_writes_stable_artifact(
     assert first.read_bytes() == second.read_bytes()
     artifact = json.loads(first.read_text(encoding="utf-8"))
     assert "assessment" not in json.dumps(artifact)
-    assert artifact["schema_version"] == "llm_shadow_execution.v3"
+    assert artifact["schema_version"] == "llm_shadow_execution.v4"
     assert artifact["observations"][0]["request"]["candidates"]
     assert artifact["observations"][0]["run"]["comparison"] is not None
     assert load_shadow_execution(first) == bundle
@@ -238,6 +238,37 @@ def test_blocked_and_empty_admissions_remain_typed_observations() -> None:
             bundle,
             summary=replace(bundle.summary, completed_count=1),
         )
+
+
+def test_only_empty_admissions_report_empty_in_every_sink(tmp_path: Path) -> None:
+    admissions = ShadowCandidateAdmissionSet(
+        admissions=(
+            ShadowCandidateAdmission(
+                claim_id="T1",
+                state="empty",
+                eligible_count=0,
+                diagnostics=(
+                    ShadowAdmissionDiagnostic(
+                        code="shadow_admission_no_eligible_fact",
+                        message="No eligible fact.",
+                    ),
+                ),
+            ),
+        )
+    )
+
+    bundle = execute_shadow_admissions(admissions, BaselineProvider())
+    artifact_path = write_shadow_execution(bundle, tmp_path / "empty.json")
+
+    assert bundle.summary.state == "empty"
+    assert load_shadow_execution(artifact_path) == bundle
+
+    artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+    artifact["summary"]["state"] = "completed"
+    tampered = tmp_path / "tampered-empty.json"
+    tampered.write_text(json.dumps(artifact), encoding="utf-8")
+    with pytest.raises(ValueError, match="derive from observations"):
+        load_shadow_execution(tampered)
 
 
 def _brief():

@@ -3801,7 +3801,7 @@ class DiagnosticPresentation:
 
 
 LLMShadowExecutionState = Literal[
-    "off", "unavailable", "completed", "partial", "failed"
+    "off", "unavailable", "empty", "completed", "partial", "failed"
 ]
 
 

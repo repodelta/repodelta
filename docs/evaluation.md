@@ -37,7 +37,7 @@ Golden expectations use stable statement and evidence IDs:
   overlay size, and subject-visible closure coverage and matches.
 - `closure_scan_results` injects recorded scanner observations through the
   production `ClosureScanner` port; it does not bypass closure planning.
-- `shadow_execution` references a canonical `llm_shadow_execution.v3`
+- `shadow_execution` references a canonical `llm_shadow_execution.v4`
   observation artifact;
 - `expected_shadow_outcomes` declares only execution state and diagnostic
   expectations;

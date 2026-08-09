@@ -9,6 +9,7 @@ from prismcode.model.contracts import (
     VerificationObservation,
 )
 from prismcode.pipeline import DeterministicAnalyzer
+from prismcode.routing.transformation import eligible_transformation_evidence
 
 
 def _brief(body: str | None = None):
@@ -127,7 +128,7 @@ def test_uncertainty_does_not_create_a_model_request() -> None:
     assert admission.diagnostics[0].code == "shadow_admission_not_applicable"
 
 
-def test_generic_transition_states_do_not_enter_evidence_selection() -> None:
+def test_generic_transition_states_enter_only_shadow_evidence_selection() -> None:
     brief = _brief(
         "## Before\n- `old_call` controlled the result.\n\n"
         "## After\n- `new_call` controls the result.\n"
@@ -135,8 +136,20 @@ def test_generic_transition_states_do_not_enter_evidence_selection() -> None:
     admissions = _admit(brief).by_claim_id()
 
     assert set(admissions) == {"T1", "T2"}
-    assert all(item.state == "empty" for item in admissions.values())
-    assert all(item.request is None for item in admissions.values())
+    assert all(item.state == "ready" for item in admissions.values())
+    assert all(item.request is not None for item in admissions.values())
+    assert all(not item.deterministic_evidence_ids for item in admissions.values())
+    assert all(item.request.candidates for item in admissions.values())
+
+    evidence = brief.evidence_catalog.by_id()
+    for claim in brief.transformation_contract.claims:
+        assert all(
+            not eligible_transformation_evidence(
+                claim,
+                evidence[candidate.evidence_id],
+            )
+            for candidate in admissions[claim.id].request.candidates
+        )
 
 
 def test_admission_truncates_only_after_preserving_baseline() -> None:

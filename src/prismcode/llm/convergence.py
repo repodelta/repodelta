@@ -5,6 +5,7 @@ from typing import Literal
 
 from prismcode.model.contracts import (
     EvidenceCatalog,
+    EvidenceItem,
     TransformationClaim,
     TransformationEvidenceBinding,
 )
@@ -110,7 +111,7 @@ def converge_shadow_candidate_identities(
             if (
                 item.id in observed_ids
                 and item.kind in _CANONICAL_ANCHOR_KINDS
-                and eligible_transformation_evidence(claim, item)
+                and _eligible_shadow_candidate(claim, item)
                 and direct_relation_ids.intersection(item.change_relation_ids)
             ):
                 retain(item.id, "same_hunk", "shared_change_relation")
@@ -120,7 +121,7 @@ def converge_shadow_candidate_identities(
             for item in evidence_catalog.items
             if item.id in observed_ids
             and item.kind in _CANONICAL_ANCHOR_KINDS
-            and eligible_transformation_evidence(claim, item)
+            and _eligible_shadow_candidate(claim, item)
         )
         preferred_kind = (
             "structural_change"
@@ -149,3 +150,16 @@ def converge_shadow_candidate_identities(
         deferred_count=len(deferred),
         deferred_tier=deferred[0].tier if deferred else None,
     )
+
+
+def _eligible_shadow_candidate(
+    claim: TransformationClaim,
+    item: EvidenceItem,
+) -> bool:
+    """Extend only shadow admission for generic state measurement."""
+
+    if claim.kind == "before_state":
+        return bool(item.base_signature.identifiers or item.base_signature.tokens)
+    if claim.kind == "after_state":
+        return bool(item.head_signature.identifiers or item.head_signature.tokens)
+    return eligible_transformation_evidence(claim, item)
