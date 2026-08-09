@@ -32,6 +32,15 @@ preservation from accidental agreement. Every deserialization edge must
 revalidate the canonical semantic contract before constructing a validated
 domain object.
 
+Treat enforcement as part of the contract. First establish the invariant with
+counterfactual and sink evidence, then choose the smallest sufficient boundary:
+documentation for exploratory semantics, behavioral tests for established
+behavior, distinct types or immutable state for stable domain distinctions,
+controlled validators or derivation APIs for stable construction rules, and
+module or static gates for stable architecture boundaries. Combine mechanisms
+when they prevent different invalid transitions. Do not harden an uncertain
+hypothesis or add a stronger mechanism that excludes no concrete invalid state.
+
 ## 4. Close the region
 
 Begin with the responsibility being replaced. Keep a neighbor outside while
@@ -58,6 +67,8 @@ an external contract, revise and expand the region before continuing.
   semantic re-decision;
 - test positive, negative, divergence, collision, information-loss, and
   fail-closed behavior relevant to the change;
+- verify hardened invariants at their production sinks; type, dependency, and
+  static gates do not replace behavioral proof;
 - for each changed serialized contract, enumerate its writers, readers,
   deserializers, validators, and persisted derived fields; test tampered input
   at each changed deserialization boundary;
@@ -83,4 +94,6 @@ Capture only what is needed to execute and review the change:
 - affected producers, consumers, contracts, and internal composition order;
 - migrations, removals, classifications, and preserved boundaries;
 - counterfactual and sink-level evidence;
+- stable invariants, their current and target enforcement, and the concrete
+  invalid transitions the target prevents;
 - unresolved/excluded surfaces and the four completion states above.
