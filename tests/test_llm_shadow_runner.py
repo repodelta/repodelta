@@ -8,6 +8,7 @@ import pytest
 
 from prismcode.llm import (
     ShadowEvidenceRequest,
+    ShadowProviderExecutionPolicy,
     ShadowProviderResponse,
     ShadowRunner,
     load_shadow_replay,
@@ -21,6 +22,10 @@ FIXTURE = "fixtures/llm-shadow/evidence-selection.json"
 class ReplayProvider:
     output: dict
 
+    @property
+    def execution_policy(self) -> ShadowProviderExecutionPolicy:
+        return _test_policy()
+
     def select(self, request: ShadowEvidenceRequest) -> ShadowProviderResponse:
         return ShadowProviderResponse(
             provider_id="replay",
@@ -32,6 +37,10 @@ class ReplayProvider:
 
 
 class FailingProvider:
+    @property
+    def execution_policy(self) -> ShadowProviderExecutionPolicy:
+        return _test_policy()
+
     def select(self, request: ShadowEvidenceRequest) -> ShadowProviderResponse:
         raise RuntimeError("credential and response details remain private")
 
@@ -50,6 +59,7 @@ def test_runner_measures_deterministic_shadow_divergence() -> None:
     assert record.input_tokens == 120
     assert record.output_tokens == 40
     assert record.duration_ms == pytest.approx(25)
+    assert record.execution_policy.identity.startswith("shadow-policy:")
     assert record.comparison is not None
     assert record.comparison.shared_ids == ("symbol:analyzer",)
     assert record.comparison.deterministic_only_ids == ()
@@ -109,3 +119,13 @@ def _fixture_pair() -> tuple[ShadowEvidenceRequest, dict]:
     assert validation.accepted
     raw = json.loads(Path(FIXTURE).read_text(encoding="utf-8"))
     return request, raw["response"]
+
+
+def _test_policy() -> ShadowProviderExecutionPolicy:
+    return ShadowProviderExecutionPolicy(
+        adapter_id="test-replay",
+        model_id="fixture-v1",
+        endpoint="test:local",
+        timeout_seconds=1.0,
+        max_output_tokens=1,
+    )

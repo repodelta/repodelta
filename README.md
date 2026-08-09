@@ -196,6 +196,15 @@ export OPENAI_API_KEY=...
 export PRISMCODE_LLM_MODEL=...
 # Optional OpenAI-compatible HTTPS API root; defaults to OpenAI.
 export OPENAI_BASE_URL=https://api.openai.com/v1
+# Select the explicit OpenAI-compatible transport profile.
+export PRISMCODE_LLM_API_PROFILE=deepseek  # openai | siliconflow | deepseek
+# Optional validated, provider-neutral execution policy.
+export PRISMCODE_LLM_TIMEOUT_SECONDS=180
+export PRISMCODE_LLM_MAX_OUTPUT_TOKENS=1200
+export PRISMCODE_LLM_THINKING_MODE=disabled  # default | enabled | disabled
+export PRISMCODE_LLM_REASONING_EFFORT=default  # default | high | max
+# SiliconFlow-only and valid only with thinking enabled.
+# export PRISMCODE_LLM_THINKING_BUDGET=1024
 
 prismcode review \
   --repo owner/repository \
@@ -205,8 +214,11 @@ prismcode review \
 ```
 
 PrismCode sends only bounded canonical evidence candidates through the
-Chat Completions API with strict Structured Outputs, `store: false`, no tools,
-and a 40-candidate request limit plus three-request review limit. Candidate
+Chat Completions API with the selected explicit transport profile, structured
+JSON output, `store: false`, no tools, and a 40-candidate request limit plus
+three-request review limit. OpenAI and SiliconFlow use strict JSON Schema;
+DeepSeek uses JSON Object mode followed by the same fail-closed canonical
+selection validator. Candidate
 membership converges per claim through baseline, aligned, same-hunk, and typed
 fallback tiers before the safety limit is applied. Candidates
 carry catalog-owned file/symbol context, directional changed lines, and bounded
@@ -218,7 +230,7 @@ uncertain relevance must remain insufficient instead of being rejected.
 It records one
 typed observation per claim, including the bounded request, admission and
 execution fate, validated selection divergence, usage, failures, deferrals,
-and coverage limits, in
+coverage limits, and a non-secret execution-policy identity in
 `build/pr-123.html.llm-shadow.json`; the Brief header shows only the execution
 state. A run with no admitted request records `empty`; missing configuration
 records `unavailable`; provider or validation

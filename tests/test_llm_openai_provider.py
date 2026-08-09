@@ -91,6 +91,8 @@ def test_openai_provider_uses_bounded_strict_responses_contract() -> None:
     assert captured["url"] == "https://models.example/v1/chat/completions"
     assert captured["headers"]["Authorization"] == "Bearer secret-test-key"
     assert captured["payload"]["store"] is False
+    assert "enable_thinking" not in captured["payload"]
+    assert "thinking_budget" not in captured["payload"]
     assert captured["payload"]["response_format"]["json_schema"]["strict"] is True
     assert captured["payload"]["response_format"]["json_schema"]["schema"][
         "additionalProperties"
@@ -118,6 +120,81 @@ def test_openai_provider_uses_bounded_strict_responses_contract() -> None:
     assert response.output_tokens == 40
 
 
+def test_openai_provider_records_and_sends_explicit_execution_policy() -> None:
+    captured = {}
+    request = _request()
+
+    def transport(url, headers, payload, timeout):
+        captured.update(payload=payload, timeout=timeout)
+        return _api_response(request)
+
+    provider = OpenAIShadowProvider(
+        OpenAIShadowConfig(
+            api_key="secret-test-key",
+            model="configured-model",
+            base_url="https://models.example/v1",
+            timeout_seconds=45.0,
+            max_output_tokens=4_096,
+            api_profile="siliconflow",
+            thinking_mode="enabled",
+            thinking_budget=1_024,
+        ),
+        transport=transport,
+    )
+
+    provider.select(request)
+
+    assert captured["timeout"] == 45.0
+    assert captured["payload"]["max_completion_tokens"] == 4_096
+    assert captured["payload"]["enable_thinking"] is True
+    assert captured["payload"]["thinking_budget"] == 1_024
+    assert provider.execution_policy.identity.startswith("shadow-policy:")
+    assert "secret-test-key" not in json.dumps(
+        provider.execution_policy.__dict__
+    )
+
+
+def test_deepseek_profile_maps_neutral_policy_to_provider_payload() -> None:
+    captured = {}
+    request = _request()
+
+    def transport(url, headers, payload, timeout):
+        captured.update(payload=payload)
+        return _api_response(request)
+
+    provider = OpenAIShadowProvider(
+        OpenAIShadowConfig(
+            api_key="secret-test-key",
+            model="deepseek-v4-flash",
+            base_url="https://api.deepseek.com/v1",
+            max_output_tokens=4_096,
+            api_profile="deepseek",
+            thinking_mode="disabled",
+            reasoning_effort="high",
+        ),
+        transport=transport,
+    )
+
+    provider.select(request)
+
+    assert captured["payload"]["max_tokens"] == 4_096
+    assert "max_completion_tokens" not in captured["payload"]
+    assert captured["payload"]["response_format"] == {"type": "json_object"}
+    assert captured["payload"]["thinking"] == {"type": "disabled"}
+    assert captured["payload"]["reasoning_effort"] == "high"
+    assert "enable_thinking" not in captured["payload"]
+    assert "thinking_budget" not in captured["payload"]
+    assert "JSON object" in captured["payload"]["messages"][0]["content"]
+    user_content = json.loads(captured["payload"]["messages"][1]["content"])
+    assert user_content["request"]["request_id"] == request.request_id
+    assert user_content["required_response_json_schema"]["properties"][
+        "request_id"
+    ]["type"] == "string"
+    assert user_content["required_response_json_schema"]["properties"][
+        "selections"
+    ]["items"]["additionalProperties"] is False
+
+
 def test_openai_provider_rejects_incomplete_or_missing_output() -> None:
     request = _request()
     provider = OpenAIShadowProvider(
@@ -137,10 +214,28 @@ def test_openai_config_rejects_unsafe_base_url() -> None:
             base_url="http://models.example/v1",
         )
 
+    with pytest.raises(ValueError, match="requires api_profile=siliconflow"):
+        OpenAIShadowConfig(
+            api_key="key",
+            model="model",
+            api_profile="deepseek",
+            thinking_mode="enabled",
+            thinking_budget=1_024,
+        )
+
 
 def test_cli_config_requires_explicit_key_and_model(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    for name in (
+        "PRISMCODE_LLM_TIMEOUT_SECONDS",
+        "PRISMCODE_LLM_MAX_OUTPUT_TOKENS",
+        "PRISMCODE_LLM_API_PROFILE",
+        "PRISMCODE_LLM_THINKING_MODE",
+        "PRISMCODE_LLM_REASONING_EFFORT",
+        "PRISMCODE_LLM_THINKING_BUDGET",
+    ):
+        monkeypatch.delenv(name, raising=False)
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.setenv("PRISMCODE_LLM_MODEL", "configured-model")
     assert _openai_shadow_provider_from_env() is None
@@ -148,3 +243,34 @@ def test_cli_config_requires_explicit_key_and_model(
     monkeypatch.setenv("OPENAI_API_KEY", "secret")
     monkeypatch.setenv("OPENAI_BASE_URL", "")
     assert _openai_shadow_provider_from_env() is not None
+
+
+def test_cli_config_rejects_invalid_execution_policy_env(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", "secret")
+    monkeypatch.setenv("PRISMCODE_LLM_MODEL", "configured-model")
+    monkeypatch.setenv("PRISMCODE_LLM_API_PROFILE", "universal")
+
+    with pytest.raises(ValueError, match="must be one of"):
+        _openai_shadow_provider_from_env()
+
+    monkeypatch.setenv("PRISMCODE_LLM_API_PROFILE", "deepseek")
+    monkeypatch.setenv("PRISMCODE_LLM_THINKING_MODE", "enabled")
+    monkeypatch.setenv("PRISMCODE_LLM_THINKING_BUDGET", "1024")
+    with pytest.raises(ValueError, match="requires api_profile=siliconflow"):
+        _openai_shadow_provider_from_env()
+
+    monkeypatch.delenv("PRISMCODE_LLM_THINKING_BUDGET")
+    monkeypatch.setenv("PRISMCODE_LLM_TIMEOUT_SECONDS", "eventually")
+    with pytest.raises(ValueError, match="must be numeric"):
+        _openai_shadow_provider_from_env()
+
+    monkeypatch.setenv("PRISMCODE_LLM_TIMEOUT_SECONDS", "0")
+    with pytest.raises(ValueError, match="between 0 and 3600"):
+        _openai_shadow_provider_from_env()
+
+    monkeypatch.setenv("PRISMCODE_LLM_TIMEOUT_SECONDS", "120")
+    monkeypatch.setenv("PRISMCODE_LLM_MAX_OUTPUT_TOKENS", "1.5")
+    with pytest.raises(ValueError, match="must be an integer"):
+        _openai_shadow_provider_from_env()

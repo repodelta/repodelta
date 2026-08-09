@@ -10,7 +10,10 @@ from prismcode.llm.contracts import (
     ShadowSelectionDiagnostic,
     parse_shadow_selection,
 )
-from prismcode.llm.provider import ShadowEvidenceProvider
+from prismcode.llm.provider import (
+    ShadowEvidenceProvider,
+    ShadowProviderExecutionPolicy,
+)
 
 
 ShadowRunState = Literal["accepted", "invalid_output", "provider_error"]
@@ -34,6 +37,7 @@ class ShadowRunRecord:
     state: ShadowRunState
     candidate_count: int
     duration_ms: float
+    execution_policy: ShadowProviderExecutionPolicy
     provider_id: str | None = None
     model_id: str | None = None
     input_tokens: int | None = None
@@ -90,6 +94,7 @@ class ShadowRunner:
                 state="provider_error",
                 candidate_count=len(request.candidates),
                 duration_ms=_elapsed_ms(started, self._clock()),
+                execution_policy=self._provider.execution_policy,
                 diagnostics=(
                     ShadowSelectionDiagnostic(
                         code="shadow_provider_error",
@@ -108,6 +113,7 @@ class ShadowRunner:
             model_id=response.model_id,
             input_tokens=response.input_tokens,
             output_tokens=response.output_tokens,
+            execution_policy=self._provider.execution_policy,
         )
         if not validation.accepted or validation.selection is None:
             return ShadowRunRecord(

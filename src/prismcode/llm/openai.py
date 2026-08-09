@@ -14,7 +14,10 @@ from prismcode.llm.contracts import (
     SHADOW_SCHEMA_VERSION,
     ShadowEvidenceRequest,
 )
-from prismcode.llm.provider import ShadowProviderResponse
+from prismcode.llm.provider import (
+    ShadowProviderExecutionPolicy,
+    ShadowProviderResponse,
+)
 
 
 DEFAULT_OPENAI_BASE_URL = "https://api.openai.com/v1"
@@ -42,6 +45,8 @@ Partition every admitted evidence ID exactly once:
 Use only supplied evidence IDs. Do not invent repository facts, infer absence
 from missing evidence, or claim coverage beyond coverage_limits. Record missing
 dynamic or external surfaces in unresolved_surfaces.
+
+Return exactly one JSON object matching the requested response contract.
 """
 
 JsonTransport = Callable[
@@ -56,6 +61,10 @@ class OpenAIShadowConfig:
     base_url: str = DEFAULT_OPENAI_BASE_URL
     timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS
     max_output_tokens: int = DEFAULT_MAX_OUTPUT_TOKENS
+    api_profile: str = "openai"
+    thinking_mode: str = "default"
+    reasoning_effort: str = "default"
+    thinking_budget: int | None = None
 
     def __post_init__(self) -> None:
         if not self.api_key.strip() or not self.model.strip():
@@ -67,14 +76,25 @@ class OpenAIShadowConfig:
             raise ValueError(
                 "OpenAI shadow base_url must not contain credentials or query data"
             )
-        if self.timeout_seconds <= 0:
-            raise ValueError("OpenAI shadow timeout_seconds must be positive")
-        if self.max_output_tokens <= 0:
-            raise ValueError("OpenAI shadow max_output_tokens must be positive")
+        self.execution_policy
 
     @property
     def chat_completions_url(self) -> str:
         return f"{self.base_url.rstrip('/')}/chat/completions"
+
+    @property
+    def execution_policy(self) -> ShadowProviderExecutionPolicy:
+        return ShadowProviderExecutionPolicy(
+            adapter_id="openai-chat-completions",
+            model_id=self.model,
+            endpoint=self.chat_completions_url,
+            timeout_seconds=self.timeout_seconds,
+            max_output_tokens=self.max_output_tokens,
+            api_profile=self.api_profile,
+            thinking_mode=self.thinking_mode,
+            reasoning_effort=self.reasoning_effort,
+            thinking_budget=self.thinking_budget,
+        )
 
 
 class OpenAIShadowProvider:
@@ -88,6 +108,10 @@ class OpenAIShadowProvider:
     ) -> None:
         self._config = config
         self._transport = transport or _post_json
+
+    @property
+    def execution_policy(self) -> ShadowProviderExecutionPolicy:
+        return self._config.execution_policy
 
     def select(self, request: ShadowEvidenceRequest) -> ShadowProviderResponse:
         response = self._transport(
@@ -115,10 +139,10 @@ def _response_payload(
     request: ShadowEvidenceRequest,
     config: OpenAIShadowConfig,
 ) -> dict[str, Any]:
-    return {
+    payload = {
         "model": config.model,
         "store": False,
-        "max_completion_tokens": config.max_output_tokens,
+        _max_tokens_field(config): config.max_output_tokens,
         "messages": [
             {
                 "role": "system",
@@ -126,18 +150,55 @@ def _response_payload(
             },
             {
                 "role": "user",
-                "content": json.dumps(
-                    request.to_dict(), ensure_ascii=False, separators=(",", ":")
-                ),
+                "content": _user_content(request, config),
             },
         ],
-        "response_format": {
-            "type": "json_schema",
-            "json_schema": {
-                "name": "prismcode_shadow_evidence_selection",
-                "strict": True,
-                "schema": _selection_schema(request),
-            },
+        "response_format": _response_format(request, config),
+    }
+    if config.api_profile == "siliconflow" and config.thinking_mode != "default":
+        payload["enable_thinking"] = config.thinking_mode == "enabled"
+    if config.api_profile == "deepseek" and config.thinking_mode != "default":
+        payload["thinking"] = {"type": config.thinking_mode}
+    if config.reasoning_effort != "default":
+        payload["reasoning_effort"] = config.reasoning_effort
+    if config.thinking_budget is not None:
+        payload["thinking_budget"] = config.thinking_budget
+    return payload
+
+
+def _user_content(
+    request: ShadowEvidenceRequest,
+    config: OpenAIShadowConfig,
+) -> str:
+    content: dict[str, Any] = request.to_dict()
+    if config.api_profile == "deepseek":
+        content = {
+            "request": content,
+            "required_response_json_schema": _selection_schema(request),
+        }
+    return json.dumps(content, ensure_ascii=False, separators=(",", ":"))
+
+
+def _max_tokens_field(config: OpenAIShadowConfig) -> str:
+    return (
+        "max_tokens"
+        if config.api_profile == "deepseek"
+        else "max_completion_tokens"
+    )
+
+
+def _response_format(
+    request: ShadowEvidenceRequest,
+    config: OpenAIShadowConfig,
+) -> dict[str, Any]:
+    if config.api_profile == "deepseek":
+        return {"type": "json_object"}
+    return {
+        "type": "json_schema",
+        "json_schema": {
+            "name": "prismcode_shadow_evidence_selection",
+            "strict": True,
+            "schema": _selection_schema(request),
         },
     }
 

@@ -72,6 +72,9 @@ def test_golden_suite_covers_typed_slots_structure_and_profiles() -> None:
     assert result.shadow_metrics.live_count == 0
     assert result.shadow_metrics.total_input_tokens == 160
     assert result.shadow_metrics.total_output_tokens == 30
+    assert result.shadow_metrics.execution_policy_ids == (
+        "shadow-policy:badbc1042b1272a1c09f",
+    )
     assert result.shadow_metrics.total_duration_ms == 20.5
 
 

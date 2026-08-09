@@ -1,5 +1,5 @@
 {
-  "schema_version": "llm_shadow_execution.v4",
+  "schema_version": "llm_shadow_execution.v5",
   "summary": {
     "state": "partial",
     "admitted_count": 3,
@@ -35,6 +35,18 @@
         "state": "accepted",
         "candidate_count": 4,
         "duration_ms": 12.5,
+        "execution_policy": {
+          "adapter_id": "replay",
+          "model_id": "golden-v1",
+          "endpoint": "replay:recorded",
+          "timeout_seconds": 1.0,
+          "max_output_tokens": 1,
+          "api_profile": "openai",
+          "thinking_mode": "default",
+          "reasoning_effort": "default",
+          "thinking_budget": null,
+          "identity": "shadow-policy:badbc1042b1272a1c09f"
+        },
         "provider_id": "replay",
         "model_id": "golden-v1",
         "input_tokens": 100,
@@ -85,6 +97,18 @@
         "state": "invalid_output",
         "candidate_count": 1,
         "duration_ms": 8.0,
+        "execution_policy": {
+          "adapter_id": "replay",
+          "model_id": "golden-v1",
+          "endpoint": "replay:recorded",
+          "timeout_seconds": 1.0,
+          "max_output_tokens": 1,
+          "api_profile": "openai",
+          "thinking_mode": "default",
+          "reasoning_effort": "default",
+          "thinking_budget": null,
+          "identity": "shadow-policy:badbc1042b1272a1c09f"
+        },
         "provider_id": "replay",
         "model_id": "golden-v1",
         "input_tokens": 60,

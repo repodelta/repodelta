@@ -33,7 +33,11 @@ from prismcode.llm.execution import (
     write_shadow_execution,
 )
 from prismcode.llm.openai import OpenAIShadowConfig, OpenAIShadowProvider
-from prismcode.llm.provider import ShadowEvidenceProvider, ShadowProviderResponse
+from prismcode.llm.provider import (
+    ShadowEvidenceProvider,
+    ShadowProviderExecutionPolicy,
+    ShadowProviderResponse,
+)
 from prismcode.llm.runner import (
     ShadowRunRecord,
     ShadowRunner,
@@ -53,6 +57,7 @@ __all__ = [
     "ShadowCandidateAdmissionSet",
     "ShadowEvidenceRequest",
     "ShadowEvidenceProvider",
+    "ShadowProviderExecutionPolicy",
     "ShadowEvidenceSelection",
     "ShadowEvidenceSelectionItem",
     "ShadowSelectionDiagnostic",

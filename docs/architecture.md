@@ -102,13 +102,15 @@ canonical identities. Admission provenance is not evidence strength;
 directional code is not interchangeable; structural context is not execution
 or coverage proof. Selected roles express evidence-to-claim relation without
 becoming acceptance status. The runner records deterministic-only, shadow-only,
-and shared selections plus usage and latency, and isolates every provider or
-validation failure from deterministic output. The execution stage
+and shared selections plus usage, latency, and one non-secret effective
+execution-policy identity, and isolates every provider or validation failure
+from deterministic output. The execution stage
 joins each admission to exactly one accepted, invalid, failed, deferred,
 blocked, or empty observation. That observation is the detailed artifact truth;
 the review-level state is derived from it. Loading revalidates selection and
-identity contracts and checks persisted comparisons against their canonical
-inputs. The artifact preserves the bounded request and coverage limits but
+identity contracts, recomputes execution-policy identity, and checks persisted
+comparisons against their canonical inputs. The artifact preserves the bounded
+request and coverage limits but
 never raw unvalidated output or provider error text. It carries no formal
 assessment status and has no production consumer.
 

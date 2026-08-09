@@ -11,6 +11,7 @@ from prismcode.llm import (
     ShadowCandidateAdmission,
     ShadowCandidateAdmissionSet,
     ShadowProviderResponse,
+    ShadowProviderExecutionPolicy,
     ShadowExecutionPolicy,
     admit_shadow_candidates,
     execute_shadow_admissions,
@@ -29,6 +30,10 @@ from prismcode.pipeline import DeterministicAnalyzer
 @dataclass
 class BaselineProvider:
     calls: int = 0
+
+    @property
+    def execution_policy(self) -> ShadowProviderExecutionPolicy:
+        return _test_policy()
 
     def select(self, request):
         self.calls += 1
@@ -59,6 +64,10 @@ class BaselineProvider:
 
 
 class FailingProvider:
+    @property
+    def execution_policy(self) -> ShadowProviderExecutionPolicy:
+        return _test_policy()
+
     def select(self, request):
         raise RuntimeError("secret provider detail")
 
@@ -87,7 +96,7 @@ def test_execution_runs_ready_admissions_once_and_writes_stable_artifact(
     assert first.read_bytes() == second.read_bytes()
     artifact = json.loads(first.read_text(encoding="utf-8"))
     assert "assessment" not in json.dumps(artifact)
-    assert artifact["schema_version"] == "llm_shadow_execution.v4"
+    assert artifact["schema_version"] == "llm_shadow_execution.v5"
     assert artifact["observations"][0]["request"]["candidates"]
     assert artifact["observations"][0]["run"]["comparison"] is not None
     assert load_shadow_execution(first) == bundle
@@ -139,6 +148,16 @@ def test_execution_artifact_rejects_tampered_derived_and_identity_fields(
         tmp_path,
         run_identity,
         "selection must match its run identity",
+    )
+
+    policy_identity = json.loads(json.dumps(canonical))
+    policy_identity["observations"][0]["run"]["execution_policy"][
+        "identity"
+    ] = "shadow-policy:tampered"
+    _assert_invalid_artifact(
+        tmp_path,
+        policy_identity,
+        "policy identity must derive from settings",
     )
 
 
@@ -306,6 +325,16 @@ def _admit(brief):
         brief.evidence_catalog,
         brief.transformation_alignment,
         brief.transformation_assessment,
+    )
+
+
+def _test_policy() -> ShadowProviderExecutionPolicy:
+    return ShadowProviderExecutionPolicy(
+        adapter_id="test-provider",
+        model_id="recorded",
+        endpoint="test:local",
+        timeout_seconds=1.0,
+        max_output_tokens=1,
     )
 
 

@@ -11,7 +11,10 @@ from prismcode.llm.contracts import (
     parse_shadow_selection,
     shadow_candidate_from_mapping,
 )
-from prismcode.llm.provider import ShadowProviderResponse
+from prismcode.llm.provider import (
+    ShadowProviderExecutionPolicy,
+    ShadowProviderResponse,
+)
 
 
 @dataclass(frozen=True)
@@ -20,6 +23,16 @@ class ReplayShadowProvider:
 
     request: ShadowEvidenceRequest
     output: Mapping[str, Any]
+
+    @property
+    def execution_policy(self) -> ShadowProviderExecutionPolicy:
+        return ShadowProviderExecutionPolicy(
+            adapter_id="replay",
+            model_id="recorded",
+            endpoint="replay:exact-request",
+            timeout_seconds=1.0,
+            max_output_tokens=1,
+        )
 
     def select(self, request: ShadowEvidenceRequest) -> ShadowProviderResponse:
         if request != self.request:

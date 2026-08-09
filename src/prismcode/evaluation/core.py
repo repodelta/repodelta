@@ -908,6 +908,8 @@ def write_evaluation_markdown(
         f"- shadow usage: {result.shadow_metrics.total_input_tokens} input / "
         f"{result.shadow_metrics.total_output_tokens} output tokens",
         f"- shadow duration: {result.shadow_metrics.total_duration_ms:.2f} ms",
+        f"- shadow execution policies: "
+        f"{', '.join(result.shadow_metrics.execution_policy_ids) or 'none'}",
         "",
         "## Queries",
         "",
