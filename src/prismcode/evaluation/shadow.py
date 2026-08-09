@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Literal, Mapping
 
 from prismcode.llm.contracts import (
+    ShadowEvidenceRequest,
     ShadowEvidenceSelection,
     parse_shadow_selection,
 )
@@ -13,6 +14,7 @@ from prismcode.llm.execution import (
     ShadowExecutionBundle,
     ShadowExecutionState,
 )
+from prismcode.llm.labeling import ShadowLabelingPacket
 
 
 ShadowEvaluationProfile = Literal["replay", "live", "none"]
@@ -132,6 +134,37 @@ def load_human_shadow_labels(
 ) -> HumanShadowLabelSet:
     """Validate independent human labels against recorded bounded requests."""
 
+    return _load_human_shadow_labels(
+        path,
+        {
+            item.claim_id: item.request
+            for item in bundle.observations
+            if item.request is not None
+        },
+        require_complete=False,
+    )
+
+
+def load_human_shadow_labels_from_packet(
+    path: str | Path,
+    packet: ShadowLabelingPacket,
+) -> HumanShadowLabelSet:
+    """Validate a complete label set before any provider execution."""
+
+    return _load_human_shadow_labels(
+        path,
+        packet.requests_by_claim_id,
+        require_complete=True,
+    )
+
+
+def _load_human_shadow_labels(
+    path: str | Path,
+    requests: Mapping[str, ShadowEvidenceRequest],
+    *,
+    require_complete: bool,
+) -> HumanShadowLabelSet:
+
     raw = json.loads(Path(path).read_text(encoding="utf-8"))
     unexpected_fields = set(raw) - {
         "schema_version",
@@ -158,7 +191,6 @@ def load_human_shadow_labels(
     if not isinstance(raw_labels, list) or not raw_labels:
         raise ValueError("human shadow labels require a non-empty labels list")
 
-    observations = {item.claim_id: item for item in bundle.observations}
     labels = []
     seen_claim_ids: set[str] = set()
     for index, raw_label in enumerate(raw_labels):
@@ -175,8 +207,8 @@ def load_human_shadow_labels(
             raise ValueError(f"human shadow label {index} requires claim_id")
         if claim_id in seen_claim_ids:
             raise ValueError(f"duplicate human shadow label claim_id: {claim_id}")
-        observation = observations.get(claim_id)
-        if observation is None or observation.request is None:
+        request = requests.get(claim_id)
+        if request is None:
             raise ValueError(
                 f"human shadow label {claim_id} has no recorded bounded request"
             )
@@ -185,7 +217,7 @@ def load_human_shadow_labels(
             raise ValueError(
                 f"human shadow label {claim_id} requires a response object"
             )
-        validation = parse_shadow_selection(response, observation.request)
+        validation = parse_shadow_selection(response, request)
         if not validation.accepted or validation.selection is None:
             codes = ", ".join(item.code for item in validation.diagnostics)
             raise ValueError(
@@ -199,6 +231,12 @@ def load_human_shadow_labels(
             )
         )
         seen_claim_ids.add(claim_id)
+    if require_complete and seen_claim_ids != set(requests):
+        missing = set(requests) - seen_claim_ids
+        raise ValueError(
+            "pre-execution human shadow labels must cover every request; missing: "
+            + ", ".join(sorted(missing))
+        )
     return HumanShadowLabelSet(labels=tuple(labels))
 
 

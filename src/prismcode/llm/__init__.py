@@ -32,6 +32,13 @@ from prismcode.llm.execution import (
     unavailable_shadow_execution,
     write_shadow_execution,
 )
+from prismcode.llm.labeling import (
+    SHADOW_LABELING_PACKET_SCHEMA_VERSION,
+    ShadowLabelingPacket,
+    load_shadow_labeling_packet,
+    prepare_shadow_labeling_packet,
+    write_shadow_labeling_packet,
+)
 from prismcode.llm.openai import OpenAIShadowConfig, OpenAIShadowProvider
 from prismcode.llm.provider import (
     ShadowEvidenceProvider,
@@ -51,6 +58,7 @@ __all__ = [
     "ShadowExecutionBundle",
     "ShadowExecutionObservation",
     "ShadowExecutionPolicy",
+    "ShadowLabelingPacket",
     "OpenAIShadowConfig",
     "OpenAIShadowProvider",
     "ShadowAdmissionDiagnostic",
@@ -81,4 +89,8 @@ __all__ = [
     "load_shadow_execution",
     "unavailable_shadow_execution",
     "write_shadow_execution",
+    "SHADOW_LABELING_PACKET_SCHEMA_VERSION",
+    "load_shadow_labeling_packet",
+    "prepare_shadow_labeling_packet",
+    "write_shadow_labeling_packet",
 ]

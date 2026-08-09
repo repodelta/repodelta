@@ -213,6 +213,36 @@ prismcode review \
   --output build/pr-123.html
 ```
 
+For a blinded campaign, freeze the exact model-independent requests before any
+provider call:
+
+```bash
+prismcode review \
+  --repo owner/repository \
+  --pr 123 \
+  --llm-shadow-labeling-output build/pr-123.labeling.json \
+  --output build/pr-123-deterministic.html
+```
+
+After an independent reviewer completes every disposition in a human-label
+artifact, execute only if the regenerated review admissions still match the
+frozen packet exactly:
+
+```bash
+prismcode review \
+  --repo owner/repository \
+  --pr 123 \
+  --llm-shadow \
+  --llm-shadow-labeling-input build/pr-123.labeling.json \
+  --llm-shadow-human-labels build/pr-123.human-labels.json \
+  --output build/pr-123-shadow.html
+```
+
+The prepare command cannot invoke a model. A blinded execution fails before
+provider invocation when source revision, admission, request identity,
+candidate membership, coverage limits, or complete human-label coverage
+differs from the frozen `llm_shadow_labeling_packet.v1` artifact.
+
 PrismCode sends only bounded canonical evidence candidates through the
 Chat Completions API with the selected explicit transport profile, structured
 JSON output, `store: false`, no tools, and a 40-candidate request limit plus

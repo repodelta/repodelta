@@ -122,6 +122,13 @@ request and coverage limits but
 never raw unvalidated output or provider error text. It carries no formal
 assessment status and has no production consumer.
 
+Blinded evaluation first serializes the same canonical admissions as an
+`llm_shadow_labeling_packet.v1` artifact containing code revisions, requests,
+baseline identities, and coverage limits but no provider result. Human labels
+must completely partition every request in that packet. A later execution
+regenerates admissions and requires exact packet equality before validating the
+complete labels and invoking a provider; drift fails before external execution.
+
 Each stage owns one transformation. Typed models, boundary validation, and
 counterfactual tests define its executable local contract; this document is the
 single narrative map of how those stages compose. Stage-local prose must not

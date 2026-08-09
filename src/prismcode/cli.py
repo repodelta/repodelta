@@ -19,6 +19,7 @@ from prismcode.evaluation.core import (
     write_evaluation_json,
     write_evaluation_markdown,
 )
+from prismcode.evaluation.shadow import load_human_shadow_labels_from_packet
 from prismcode.intake.fixture import load_fixture
 from prismcode.intake.github import GitHubApiError, GitHubClient, GitHubPullRequestAdapter
 from prismcode.presentation.html import write_html
@@ -35,8 +36,12 @@ from prismcode.llm import (
     OpenAIShadowConfig,
     OpenAIShadowProvider,
     execute_shadow_review,
+    execute_shadow_admissions,
+    load_shadow_labeling_packet,
     load_shadow_replay_provider,
     unavailable_shadow_execution,
+    prepare_shadow_labeling_packet,
+    write_shadow_labeling_packet,
     write_shadow_execution,
 )
 
@@ -248,6 +253,20 @@ def build_parser() -> argparse.ArgumentParser:
         "--llm-shadow-output",
         help="Destination JSON artifact (default: <output>.llm-shadow.json)",
     )
+    review.add_argument(
+        "--llm-shadow-labeling-output",
+        help=(
+            "Prepare a pre-execution labeling packet without invoking a model"
+        ),
+    )
+    review.add_argument(
+        "--llm-shadow-labeling-input",
+        help="Frozen pre-execution packet required for a blinded shadow run",
+    )
+    review.add_argument(
+        "--llm-shadow-human-labels",
+        help="Complete human labels frozen against the labeling packet",
+    )
     evaluate = subparsers.add_parser(
         "evaluate",
         help="Evaluate deterministic bindings against an offline golden suite",
@@ -383,6 +402,51 @@ def main() -> int:
                 parser.error("--llm-shadow-replay requires --llm-shadow")
             if args.llm_shadow_output and not args.llm_shadow:
                 parser.error("--llm-shadow-output requires --llm-shadow")
+            if args.llm_shadow_labeling_output and args.llm_shadow:
+                parser.error(
+                    "--llm-shadow-labeling-output must run before --llm-shadow"
+                )
+            if (
+                args.llm_shadow_labeling_output
+                and args.llm_shadow_labeling_input
+            ):
+                parser.error(
+                    "--llm-shadow-labeling-output and input are mutually exclusive"
+                )
+            if args.llm_shadow_labeling_input and not args.llm_shadow:
+                parser.error("--llm-shadow-labeling-input requires --llm-shadow")
+            if args.llm_shadow_labeling_input and not args.llm_shadow_human_labels:
+                parser.error(
+                    "--llm-shadow-labeling-input requires --llm-shadow-human-labels"
+                )
+            if (
+                args.llm_shadow_human_labels
+                and not args.llm_shadow_labeling_input
+            ):
+                parser.error(
+                    "--llm-shadow-human-labels requires --llm-shadow-labeling-input"
+                )
+            labeling_packet = None
+            labeling_output = None
+            if args.llm_shadow_labeling_output:
+                labeling_packet = prepare_shadow_labeling_packet(brief)
+                labeling_output = write_shadow_labeling_packet(
+                    labeling_packet,
+                    args.llm_shadow_labeling_output,
+                )
+            elif args.llm_shadow_labeling_input:
+                current_packet = prepare_shadow_labeling_packet(brief)
+                labeling_packet = load_shadow_labeling_packet(
+                    args.llm_shadow_labeling_input
+                )
+                if labeling_packet != current_packet:
+                    raise ValueError(
+                        "shadow labeling packet does not match current review admissions"
+                    )
+                load_human_shadow_labels_from_packet(
+                    args.llm_shadow_human_labels,
+                    labeling_packet,
+                )
             if args.llm_shadow:
                 provider = (
                     load_shadow_replay_provider(args.llm_shadow_replay)
@@ -390,7 +454,14 @@ def main() -> int:
                     else _openai_shadow_provider_from_env()
                 )
                 shadow = (
-                    execute_shadow_review(brief, provider)
+                    (
+                        execute_shadow_admissions(
+                            labeling_packet.admission_set,
+                            provider,
+                        )
+                        if labeling_packet is not None
+                        else execute_shadow_review(brief, provider)
+                    )
                     if provider is not None
                     else unavailable_shadow_execution()
                 )
@@ -410,6 +481,8 @@ def main() -> int:
         return 2
 
     print(output)
+    if labeling_output is not None:
+        print(labeling_output)
     print(
         format_structural_coverage(brief.overview.structural_coverage),
         file=sys.stderr,
