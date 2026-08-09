@@ -13,7 +13,7 @@
       "claim_id": "T1",
       "admission_state": "ready",
       "execution_state": "accepted",
-      "eligible_count": 3,
+      "eligible_count": 4,
       "deterministic_evidence_ids": ["E:authority"],
       "request": {
         "schema_version": "2",
@@ -24,7 +24,8 @@
         "candidates": [
           {"evidence_id": "E:authority", "summary": "Analyzer writes the result.", "kind": "structural_path", "revision_side": "head", "operation": "added"},
           {"evidence_id": "E:removal", "summary": "Legacy writer is removed.", "kind": "structural_change", "revision_side": "base", "operation": "removed"},
-          {"evidence_id": "E:context", "summary": "Documentation mentions the transition.", "kind": "changed_hunk", "revision_side": "head", "operation": "added"}
+          {"evidence_id": "E:context", "summary": "Documentation mentions the transition.", "kind": "changed_hunk", "revision_side": "head", "operation": "added"},
+          {"evidence_id": "E:uncertain", "summary": "A generated registry may participate, but no path was observed.", "kind": "changed_hunk", "revision_side": "head", "operation": "added"}
         ],
         "coverage_limits": ["Dynamic plugin writers were not observed."]
       },
@@ -32,7 +33,7 @@
         "request_id": "shadow:T1:golden",
         "subject_id": "T1",
         "state": "accepted",
-        "candidate_count": 3,
+        "candidate_count": 4,
         "duration_ms": 12.5,
         "provider_id": "replay",
         "model_id": "golden-v1",
@@ -47,7 +48,7 @@
             {"evidence_id": "E:removal", "role": "contradicting", "semantic_role": "removal", "rationale": "Removal evidence must be reviewed separately."}
           ],
           "rejected_evidence_ids": ["E:context"],
-          "insufficient_evidence_ids": [],
+          "insufficient_evidence_ids": ["E:uncertain"],
           "unresolved_surfaces": ["Dynamic plugin writers were not observed."]
         },
         "comparison": {

@@ -17,7 +17,7 @@ or an I/O error.
 
 ## Suite contract
 
-An `evaluation_suite.v5` document references ordinary
+An `evaluation_suite.v6` document references ordinary
 `analysis_fixture.v3` inputs. A case can additionally provide a serialized
 `StructuralGraphResult`, allowing exact-symbol and bounded-path behavior to be
 replayed without installing Codegraph.
@@ -38,9 +38,15 @@ Golden expectations use stable statement and evidence IDs:
 - `closure_scan_results` injects recorded scanner observations through the
   production `ClosureScanner` port; it does not bypass closure planning.
 - `shadow_execution` references a canonical `llm_shadow_execution.v3`
-  artifact, while `expected_shadow_outcomes` declares the expected execution
-  state, selected evidence roles, unresolved surfaces, and rejection
-  diagnostics for each claim.
+  observation artifact;
+- `expected_shadow_outcomes` declares only execution state and diagnostic
+  expectations;
+- `human_shadow_labels` references an independent
+  `llm_shadow_human_labels.v1` artifact. Each label is validated against the
+  recorded bounded request through the production selection validator and must
+  partition every admitted candidate as selected, rejected, or insufficient.
+  Selected labels also carry evidence and semantic roles; the label artifact
+  carries `human_review` authority and a rubric version.
 
 No path, filename, or display-text heuristic is used to decide correctness.
 
@@ -58,9 +64,11 @@ The result records:
 - statement semantic accuracy;
 - transformation assessment accuracy;
 - structural focus and closure accuracy;
-- LLM-shadow selection precision/recall, semantic-role accuracy,
-  deterministic-baseline retention, unresolved-surface precision/recall,
-  execution-state accuracy, and rejection-diagnostic accuracy;
+- human-labeled LLM-shadow selection precision/recall, semantic-role accuracy,
+  complete-disposition accuracy, false-rejection rate, insufficient recall,
+  deterministic-baseline retention, and unresolved-surface precision/recall;
+- execution-state accuracy and rejection-diagnostic accuracy across labeled and
+  operational replay cases;
 - replay/live observation counts and raw token and latency totals;
 - missing and unexpected target IDs for every query;
 - per-focus/per-slot budget and threshold diagnostics.
@@ -82,8 +90,11 @@ Evaluation observes the production `ProjectionCandidateSet`,
 `TransformationAssessment`, and final verification inspection. It compares
 the analyzer-owned status, reasons, evidence bindings, and projected focus
 outcomes; it does not recompute them. Shadow evaluation loads already-recorded
-typed observations and never calls an LLM provider. Replay and live artifacts
-use the same scoring contract but remain separately counted. It does not implement
+typed observations and independent human labels; it never calls an LLM
+provider. Human labels are not reconstructed from model selections, and invalid
+request identity or incomplete candidate coverage fails before scoring. Replay
+and live artifacts use the same scoring contract but remain separately counted.
+It does not implement
 another retriever or convergence path, render review HTML, or turn candidate
 relevance into an implementation, verification, or acceptance conclusion. A
 suite with neither projection, assessment, focus, nor shadow assertions fails rather
