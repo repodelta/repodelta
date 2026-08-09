@@ -125,9 +125,23 @@ class ShadowExecutionObservation:
                     "shadow observation eligible_count cannot omit request candidates"
                 )
         elif self.deterministic_evidence_ids:
-            raise ValueError(
-                "shadow observation without a request cannot carry evidence IDs"
-            )
+            if self.admission_state != "blocked" or self.execution_state != "blocked":
+                raise ValueError(
+                    "only blocked shadow observations may preserve evidence IDs "
+                    "without a request"
+                )
+            if (
+                any(not item for item in self.deterministic_evidence_ids)
+                or len(self.deterministic_evidence_ids)
+                != len(set(self.deterministic_evidence_ids))
+            ):
+                raise ValueError(
+                    "blocked shadow evidence IDs must be non-empty and unique"
+                )
+            if self.eligible_count < len(self.deterministic_evidence_ids):
+                raise ValueError(
+                    "blocked shadow evidence cannot exceed eligible evidence"
+                )
         if self.run is not None:
             if self.run.subject_id != self.claim_id:
                 raise ValueError("shadow observation run must match its claim")

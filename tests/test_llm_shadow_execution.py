@@ -209,13 +209,16 @@ def test_execution_budget_defers_whole_requests_without_silent_loss() -> None:
     )
 
 
-def test_blocked_and_empty_admissions_remain_typed_observations() -> None:
+def test_blocked_and_empty_admissions_remain_typed_observations(
+    tmp_path: Path,
+) -> None:
     admissions = ShadowCandidateAdmissionSet(
         admissions=(
             ShadowCandidateAdmission(
                 claim_id="T1",
                 state="blocked",
                 eligible_count=101,
+                deterministic_evidence_ids=("E:baseline:1", "E:baseline:2"),
                 diagnostics=(
                     ShadowAdmissionDiagnostic(
                         code="shadow_admission_baseline_over_budget",
@@ -251,6 +254,32 @@ def test_blocked_and_empty_admissions_remain_typed_observations() -> None:
         "shadow_admission_baseline_over_budget",
         "shadow_admission_no_eligible_fact",
     )
+    assert bundle.observations[0].deterministic_evidence_ids == (
+        "E:baseline:1",
+        "E:baseline:2",
+    )
+
+    artifact_path = write_shadow_execution(bundle, tmp_path / "blocked.json")
+    assert load_shadow_execution(artifact_path) == bundle
+
+    artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+    artifact["observations"][0]["deterministic_evidence_ids"].append(
+        "E:baseline:1"
+    )
+    _assert_invalid_artifact(
+        tmp_path,
+        artifact,
+        "blocked shadow evidence IDs must be non-empty and unique",
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="only blocked shadow observations may preserve evidence IDs",
+    ):
+        replace(
+            bundle.observations[1],
+            deterministic_evidence_ids=("E:invented",),
+        )
 
     with pytest.raises(ValueError, match="derive from observations"):
         replace(
