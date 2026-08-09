@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import replace
+
 from prismcode.llm import ShadowAdmissionPolicy, admit_shadow_candidates
 from prismcode.model.contracts import (
     AnalysisInput,
@@ -178,6 +180,38 @@ def test_multiple_direct_anchors_survive_without_competing() -> None:
         item.evidence_id for item in admission.request.candidates
     ) == admission.deterministic_evidence_ids
     assert len(admission.deterministic_evidence_ids) == 2
+
+
+def test_admission_canonicalizes_baseline_to_request_candidate_order() -> None:
+    brief = _brief("## Change\n- Update `old_call` and `old_extra`.\n")
+    claim = brief.transformation_contract.by_kind("change")[0]
+    assessment = brief.transformation_assessment.by_claim_id()[claim.id]
+    assert len(assessment.supporting_binding_ids) == 2
+    reversed_assessment = replace(
+        brief.transformation_assessment,
+        claims=tuple(
+            replace(
+                item,
+                supporting_binding_ids=tuple(
+                    reversed(item.supporting_binding_ids)
+                ),
+            )
+            if item.claim_id == claim.id
+            else item
+            for item in brief.transformation_assessment.claims
+        ),
+    )
+    brief = replace(
+        brief,
+        transformation_assessment=reversed_assessment,
+    )
+
+    admission = _admit(brief).by_claim_id()[claim.id]
+
+    assert admission.request is not None
+    assert admission.deterministic_evidence_ids == tuple(
+        item.evidence_id for item in admission.request.candidates
+    )
 
 
 def test_admission_blocks_when_baseline_itself_exceeds_budget() -> None:

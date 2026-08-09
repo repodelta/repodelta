@@ -173,6 +173,15 @@ def _admit_claim(
             ),
         )
 
+    baseline_set = set(baseline_ids)
+    canonical_baseline_ids = tuple(
+        evidence_id for evidence_id in selected_ids if evidence_id in baseline_set
+    )
+    if set(canonical_baseline_ids) != baseline_set:
+        raise ValueError(
+            "shadow convergence must retain every deterministic baseline identity"
+        )
+
     truncated = convergence.deferred_count > 0
     coverage_limits: list[str] = []
     diagnostics: list[ShadowAdmissionDiagnostic] = []
@@ -220,7 +229,7 @@ def _admit_claim(
         claim_id=claim.id,
         state="ready_truncated" if truncated else "ready",
         eligible_count=convergence.eligible_count,
-        deterministic_evidence_ids=baseline_ids,
+        deterministic_evidence_ids=canonical_baseline_ids,
         request=request,
         diagnostics=tuple(diagnostics),
     )
