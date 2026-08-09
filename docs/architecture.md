@@ -104,7 +104,12 @@ or coverage proof. Selected roles express evidence-to-claim relation without
 becoming acceptance status. The runner records deterministic-only, shadow-only,
 and shared selections plus usage, latency, and one non-secret effective
 execution-policy identity, and isolates every provider or validation failure
-from deterministic output. The execution stage
+from deterministic output. Provider failures retain only a sanitized transport
+category: timeout, network failure, rate limit, HTTP request rejection, HTTP
+server failure, HTTP-response decoding, structured-output decoding, or missing
+structured output. Unknown provider exceptions remain a generic failure;
+response bodies, exception text,
+credentials, headers, and request URLs are never persisted. The execution stage
 joins each admission to exactly one accepted, invalid, failed, deferred,
 blocked, or empty observation. A blocked observation preserves the exact
 deterministic baseline identities that exceeded admission policy without

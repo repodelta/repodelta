@@ -3,9 +3,43 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import dataclass
-from typing import Any, Mapping, Protocol
+from typing import Any, Literal, Mapping, Protocol
 
 from prismcode.llm.contracts import ShadowEvidenceRequest
+
+
+ShadowProviderFailureKind = Literal[
+    "timeout",
+    "network_failure",
+    "rate_limited",
+    "request_rejected",
+    "server_failure",
+    "transport_response_decode_failure",
+    "structured_output_decode_failure",
+    "structured_output_missing",
+]
+_SHADOW_PROVIDER_FAILURE_KINDS = frozenset(
+    {
+        "timeout",
+        "network_failure",
+        "rate_limited",
+        "request_rejected",
+        "server_failure",
+        "transport_response_decode_failure",
+        "structured_output_decode_failure",
+        "structured_output_missing",
+    }
+)
+
+
+class ShadowProviderFailure(Exception):
+    """Sanitized provider failure whose category is safe to persist."""
+
+    def __init__(self, kind: ShadowProviderFailureKind) -> None:
+        if kind not in _SHADOW_PROVIDER_FAILURE_KINDS:
+            raise ValueError("unsupported shadow provider failure kind")
+        self.kind = kind
+        super().__init__(f"shadow provider failure: {kind}")
 
 
 @dataclass(frozen=True)

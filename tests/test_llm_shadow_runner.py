@@ -9,6 +9,7 @@ import pytest
 from prismcode.llm import (
     ShadowEvidenceRequest,
     ShadowProviderExecutionPolicy,
+    ShadowProviderFailure,
     ShadowProviderResponse,
     ShadowRunner,
     load_shadow_replay,
@@ -43,6 +44,18 @@ class FailingProvider:
 
     def select(self, request: ShadowEvidenceRequest) -> ShadowProviderResponse:
         raise RuntimeError("credential and response details remain private")
+
+
+@dataclass
+class ClassifiedFailingProvider:
+    kind: str
+
+    @property
+    def execution_policy(self) -> ShadowProviderExecutionPolicy:
+        return _test_policy()
+
+    def select(self, request: ShadowEvidenceRequest) -> ShadowProviderResponse:
+        raise ShadowProviderFailure(self.kind)
 
 
 def test_runner_measures_deterministic_shadow_divergence() -> None:
@@ -92,6 +105,38 @@ def test_runner_isolates_provider_failure_and_sensitive_error_text() -> None:
     assert record.comparison is None
     assert record.provider_id is None
     assert "credential" not in record.diagnostics[0].message
+
+
+@pytest.mark.parametrize(
+    "kind",
+    (
+        "timeout",
+        "network_failure",
+        "rate_limited",
+        "request_rejected",
+        "server_failure",
+        "transport_response_decode_failure",
+        "structured_output_decode_failure",
+        "structured_output_missing",
+    ),
+)
+def test_runner_persists_only_sanitized_provider_failure_category(
+    kind: str,
+) -> None:
+    request, _ = load_shadow_replay(FIXTURE)
+
+    record = ShadowRunner(ClassifiedFailingProvider(kind)).measure_selection(
+        request, deterministic_evidence_ids=("symbol:analyzer",)
+    )
+
+    assert record.state == "provider_error"
+    assert record.diagnostics[0].code == f"shadow_provider_{kind}"
+    assert "secret" not in record.diagnostics[0].message.lower()
+
+
+def test_provider_failure_rejects_unknown_persisted_category() -> None:
+    with pytest.raises(ValueError, match="unsupported"):
+        ShadowProviderFailure("provider_secret_detail")
 
 
 def test_deterministic_baseline_must_use_admitted_identity() -> None:
