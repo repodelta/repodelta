@@ -829,6 +829,7 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
         *,
         bridges: tuple[str, ...] = (),
         ordinal: int = 0,
+        evidence_role: str = "primary",
     ) -> ProjectionRelation:
         return ProjectionRelation(
             id=relation_id,
@@ -844,6 +845,7 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
             reasons=(),
             bridge_ids=bridges,
             source_ordinal=ordinal,
+            evidence_role=evidence_role,
         )
 
     evidence = EvidenceCatalog(
@@ -853,6 +855,18 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
             symbol("E:test", "test", profile="test", kind="variable"),
             symbol("E:detour", "detour"),
             symbol("E:anchor_2", "anchor_2", changed=True),
+            symbol(
+                "E:test_anchor_one",
+                "test_anchor_one",
+                changed=True,
+                profile="test",
+            ),
+            symbol(
+                "E:test_anchor_two",
+                "test_anchor_two",
+                changed=True,
+                profile="test",
+            ),
             symbol("E:runtime_2", "runtime_2"),
             symbol("E:peripheral", "peripheral"),
             path("E:path:runtime", ("anchor", "runtime")),
@@ -996,6 +1010,20 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
         ),
         relation("A-2", "changed_anchor", "E:anchor_2", ordinal=1),
         relation(
+            "A-test-one",
+            "changed_anchor",
+            "E:test_anchor_one",
+            ordinal=2,
+            evidence_role="test_support",
+        ),
+        relation(
+            "A-test-two",
+            "changed_anchor",
+            "E:test_anchor_two",
+            ordinal=3,
+            evidence_role="test_support",
+        ),
+        relation(
             "P-independent",
             "structural_path",
             "E:path:independent",
@@ -1070,6 +1098,8 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
         "runtime",
         "test",
         "anchor_2",
+        "test_anchor_one",
+        "test_anchor_two",
         "runtime_2",
     }
     assert len(graph.edges) == 4
@@ -1103,6 +1133,8 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
         "runtime": ("P-runtime", "P-test"),
         "test": ("P-test",),
         "anchor_2": ("P-independent", "P-anchor-link"),
+        "test_anchor_one": (),
+        "test_anchor_two": (),
         "runtime_2": ("P-independent",),
     }
     html = _review_graph(
@@ -1119,6 +1151,8 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
     assert graph.backbone_node_ids == (
         _structural_node_id("anchor"),
         _structural_node_id("anchor_2"),
+        _structural_node_id("test_anchor_one"),
+        _structural_node_id("test_anchor_two"),
         _structural_node_id("runtime"),
         _structural_node_id("runtime_2"),
     )
@@ -1131,6 +1165,8 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
     assert "calls · added" in html
     assert "calls · retained" in html
     assert "function · modified" in html
+    assert "test_anchor_one" in html
+    assert "test_anchor_two" in html
     assert "variable · context" not in html
     assert 'data-focuses="R1 R2"' in html
 
@@ -1434,29 +1470,7 @@ def test_change_backbone_keeps_one_hop_retained_support_from_direct_seed() -> No
     assert edge_ids == ("D:backbone",)
 
 
-def test_canonical_backbone_seeds_include_rg_and_transformation_anchors() -> None:
-    relations = {
-        "P:primary": ProjectionRelation(
-            id="P:primary",
-            focus_statement_id="R1",
-            slot="changed_anchor",
-            target_type="evidence",
-            target_id="E:primary",
-            association="provided_association",
-            evidence_role="primary",
-            reasons=(),
-        ),
-        "P:test": ProjectionRelation(
-            id="P:test",
-            focus_statement_id="R1",
-            slot="changed_anchor",
-            target_type="evidence",
-            target_id="E:test",
-            association="provided_association",
-            evidence_role="test_support",
-            reasons=(),
-        ),
-    }
+def test_canonical_backbone_seeds_include_all_direct_changed_anchors() -> None:
     review_slice = ReviewSlice(
         change_map=CanonicalChangeMapEntry(
             focus_statement_id="R1",
@@ -1465,12 +1479,14 @@ def test_canonical_backbone_seeds_include_rg_and_transformation_anchors() -> Non
                     StructuralFocusNode(
                         node_id="N:rg-primary",
                         role="changed_anchor",
-                        relation_ids=("P:primary",),
                     ),
                     StructuralFocusNode(
                         node_id="N:rg-test",
                         role="changed_anchor",
-                        relation_ids=("P:test",),
+                    ),
+                    StructuralFocusNode(
+                        node_id="N:rg-primary-context",
+                        role="intermediate",
                     ),
                 )
             ),
@@ -1495,8 +1511,7 @@ def test_canonical_backbone_seeds_include_rg_and_transformation_anchors() -> Non
     assert _canonical_backbone_seed_node_ids(
         slices=(review_slice,),
         transformation_topology_groups=(transformation_group,),
-        relations=relations,
-    ) == ("N:rg-primary", "N:transformation-anchor")
+    ) == ("N:rg-primary", "N:rg-test", "N:transformation-anchor")
 
 
 def test_support_node_delta_requires_exact_base_and_head_facts() -> None:

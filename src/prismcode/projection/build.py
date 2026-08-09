@@ -326,7 +326,6 @@ def build_review_projection(
     backbone_seed_node_ids = _canonical_backbone_seed_node_ids(
         slices=tuple(slices),
         transformation_topology_groups=tuple(transformation_topology_groups),
-        relations=relations,
     )
     (
         backbone_node_ids,
@@ -439,19 +438,16 @@ def _canonical_backbone_seed_node_ids(
     transformation_topology_groups: tuple[
         TransformationStructuralTopologyGroup, ...
     ],
-    relations: dict[str, ProjectionRelation],
 ) -> tuple[str, ...]:
-    """Map typed direct anchors onto one review-level backbone contract."""
+    """Map selected direct changed structural anchors onto one backbone."""
 
     seeds = []
     for review_slice in slices:
-        for node in review_slice.change_map.structural_overlay.nodes:
-            if any(
-                relations[relation_id].slot == "changed_anchor"
-                and relations[relation_id].evidence_role == "primary"
-                for relation_id in node.relation_ids
-            ):
-                seeds.append(node.node_id)
+        seeds.extend(
+            node.node_id
+            for node in review_slice.change_map.structural_overlay.nodes
+            if node.role == "changed_anchor"
+        )
     for group in transformation_topology_groups:
         seeds.extend(
             node.node_id
