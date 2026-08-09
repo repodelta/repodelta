@@ -39,6 +39,9 @@ class ShadowAdmissionPolicy:
             )
 
 
+DEFAULT_REVIEW_SHADOW_ADMISSION_POLICY = ShadowAdmissionPolicy(max_candidates=40)
+
+
 @dataclass(frozen=True)
 class ShadowAdmissionDiagnostic:
     code: str

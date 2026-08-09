@@ -10,15 +10,27 @@ from pathlib import Path
 import pytest
 
 from prismcode.cli import main
-from prismcode.model.contracts import ChangedFile, ReviewSourcePacket
+from prismcode.model.contracts import ChangedFile, ReviewSourcePacket, SourceRecord
 
 
-def _write_fixture(tmp_path: Path) -> Path:
+def _write_fixture(tmp_path: Path, *, body: str | None = None) -> Path:
     packet = ReviewSourcePacket(
         repository="acme/widget",
         pull_request=12,
         title="Update service",
-        source_records=(),
+        source_records=(
+            (
+                SourceRecord(
+                    id="pr:12",
+                    kind="pull_request",
+                    repository="acme/widget",
+                    title="Update service",
+                    body=body,
+                ),
+            )
+            if body is not None
+            else ()
+        ),
         changed_files=(
             ChangedFile(
                 base_path="src/service.py",
@@ -190,6 +202,150 @@ def test_cli_shadow_without_provider_is_unavailable_and_fail_closed(
     }
     assert "LLM shadow: unavailable" in output.read_text(encoding="utf-8")
     assert "LLM shadow: unavailable" in capsys.readouterr().err
+
+
+def test_cli_prepares_labeling_packet_without_invoking_provider(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("PRISMCODE_LLM_MODEL", raising=False)
+    fixture = _write_fixture(tmp_path)
+    output = tmp_path / "review.html"
+    packet = tmp_path / "labeling.json"
+
+    assert _run_cli(
+        monkeypatch,
+        fixture,
+        tmp_path / "repo",
+        output,
+        "--llm-shadow-labeling-output",
+        str(packet),
+    ) == 0
+
+    raw = json.loads(packet.read_text(encoding="utf-8"))
+    assert raw["schema_version"] == "llm_shadow_labeling_packet.v1"
+    assert raw["admissions"] == []
+    assert "LLM shadow: off" in output.read_text(encoding="utf-8")
+    assert str(packet) in capsys.readouterr().out
+
+
+def test_cli_blinded_run_requires_exact_packet_and_complete_labels_before_replay(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fixture = _write_fixture(
+        tmp_path,
+        body="## Change\n- Update service behavior.\n",
+    )
+    packet_path = tmp_path / "labeling.json"
+    assert _run_cli(
+        monkeypatch,
+        fixture,
+        tmp_path / "repo",
+        tmp_path / "prepare.html",
+        "--llm-shadow-labeling-output",
+        str(packet_path),
+    ) == 0
+    packet = json.loads(packet_path.read_text(encoding="utf-8"))
+    request = packet["admissions"][0]["request"]
+    assert request is not None
+    selections = [
+        {
+            "evidence_id": item["evidence_id"],
+            "role": "supporting",
+            "semantic_role": "unknown",
+            "rationale": "Test-only frozen disposition.",
+        }
+        for item in request["candidates"]
+    ]
+    response = {
+        "schema_version": request["schema_version"],
+        "request_id": request["request_id"],
+        "subject_id": request["subject_id"],
+        "selections": selections,
+        "rejected_evidence_ids": [],
+        "insufficient_evidence_ids": [],
+        "unresolved_surfaces": request["coverage_limits"],
+    }
+    labels_path = tmp_path / "labels.json"
+    labels_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "llm_shadow_human_labels.v1",
+                "authority": "human_review",
+                "rubric_version": "test.v1",
+                "labels": [
+                    {"claim_id": request["subject_id"], "response": response}
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    replay_path = tmp_path / "replay.json"
+    replay_path.write_text(
+        json.dumps({"request": request, "response": response}),
+        encoding="utf-8",
+    )
+    output = tmp_path / "executed.html"
+
+    assert _run_cli(
+        monkeypatch,
+        fixture,
+        tmp_path / "repo",
+        output,
+        "--llm-shadow",
+        "--llm-shadow-labeling-input",
+        str(packet_path),
+        "--llm-shadow-human-labels",
+        str(labels_path),
+        "--llm-shadow-replay",
+        str(replay_path),
+    ) == 0
+
+    execution = json.loads(
+        Path(f"{output}.llm-shadow.json").read_text(encoding="utf-8")
+    )
+    assert execution["summary"]["completed_count"] == 1
+    assert execution["observations"][0]["request"] == request
+
+
+def test_cli_blinded_run_rejects_packet_drift_before_provider_execution(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fixture = _write_fixture(
+        tmp_path,
+        body="## Change\n- Update service behavior.\n",
+    )
+    packet_path = tmp_path / "labeling.json"
+    assert _run_cli(
+        monkeypatch,
+        fixture,
+        tmp_path / "repo",
+        tmp_path / "prepare.html",
+        "--llm-shadow-labeling-output",
+        str(packet_path),
+    ) == 0
+    packet = json.loads(packet_path.read_text(encoding="utf-8"))
+    packet["head_sha"] = "different-head"
+    packet_path.write_text(json.dumps(packet), encoding="utf-8")
+    output = tmp_path / "drifted.html"
+
+    assert _run_cli(
+        monkeypatch,
+        fixture,
+        tmp_path / "repo",
+        output,
+        "--llm-shadow",
+        "--llm-shadow-labeling-input",
+        str(packet_path),
+        "--llm-shadow-human-labels",
+        str(tmp_path / "must-not-be-read.json"),
+    ) == 2
+
+    assert not Path(f"{output}.llm-shadow.json").exists()
 
 
 def test_cli_stale_index_is_skipped(

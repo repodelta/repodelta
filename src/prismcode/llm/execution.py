@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Literal
 
 from prismcode.llm.admission import (
+    DEFAULT_REVIEW_SHADOW_ADMISSION_POLICY,
     ShadowAdmissionDiagnostic,
     ShadowAdmissionPolicy,
     ShadowAdmissionState,
@@ -297,9 +298,7 @@ def execute_shadow_review(
     brief: ReviewBrief,
     provider: ShadowEvidenceProvider,
     *,
-    admission_policy: ShadowAdmissionPolicy = ShadowAdmissionPolicy(
-        max_candidates=40
-    ),
+    admission_policy: ShadowAdmissionPolicy = DEFAULT_REVIEW_SHADOW_ADMISSION_POLICY,
     policy: ShadowExecutionPolicy = ShadowExecutionPolicy(),
 ) -> ShadowExecutionBundle:
     """Run the canonical admission and measurement pipeline for one brief."""

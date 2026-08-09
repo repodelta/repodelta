@@ -115,6 +115,13 @@ decode, structured-output decode, and missing-structured-output categories.
 Unknown exceptions remain generic.
 Provider response bodies and raw exception text are not evaluation inputs.
 
+Representative live campaigns use a pre-execution
+`llm_shadow_labeling_packet.v1`. It freezes head/base code revisions and exact
+admissions without model output, while allowing unrelated dynamic CI snapshots
+to advance. Pre-execution human labels must cover every request and validate
+against this packet. Live execution regenerates and compares the complete
+packet before reading labels or invoking the provider.
+
 The first blinded real-PR sample, its human disposition rubric, raw validated
 observations, independent labels, bounded conclusions, and offline regression
 command are recorded in
