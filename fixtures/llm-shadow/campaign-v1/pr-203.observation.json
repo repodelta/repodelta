@@ -1,0 +1,305 @@
+{
+  "observations": [
+    {
+      "admission_state": "ready",
+      "claim_id": "T1",
+      "deterministic_evidence_ids": [],
+      "diagnostics": [],
+      "eligible_count": 3,
+      "execution_state": "accepted",
+      "request": {
+        "authored_statement": "The protocol requested counterfactual evidence, but did not operationally require census and validation of deserializers or persisted derived state.",
+        "candidates": [
+          {
+            "added_code": "semantic equivalence. Define counterexamples that distinguish contract\npreservation from accidental agreement. Every deserialization edge must\nrevalidate the canonical semantic contract before constructing a validated\ndomain object.",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:15a05ab411a43a56a0b3",
+            "kind": "change_relation",
+            "line_end": 33,
+            "line_start": 30,
+            "operation": "replaced",
+            "path": "docs/agent-change-protocol.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "semantic equivalence.",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Replaced change: docs/agent-change-protocol.md:30-33",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "- for each changed serialized contract, enumerate its writers, readers,\n  deserializers, validators, and persisted derived fields; test tampered input\n  at each changed deserialization boundary;\n- recompute persisted derived state from canonical inputs or check it against\n  them; loading it must not create another authority;",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:d220357c0f5152a9e653",
+            "kind": "change_relation",
+            "line_end": 65,
+            "line_start": 61,
+            "operation": "added",
+            "path": "docs/agent-change-protocol.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Added change: docs/agent-change-protocol.md:61-65",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "  serialization, deserialization, validation, persisted derivation, defaulting,\n  ordering, and coverage boundaries.",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:e07e05be75610acdc157",
+            "kind": "change_relation",
+            "line_end": 21,
+            "line_start": 20,
+            "operation": "replaced",
+            "path": "docs/agent-change-protocol.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "  serialization, defaulting, ordering, and coverage boundaries.",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Replaced change: docs/agent-change-protocol.md:20-21",
+            "symbol_kind": ""
+          }
+        ],
+        "coverage_limits": [],
+        "request_id": "shadow:T1:d07104f0948f6ded",
+        "schema_version": "2",
+        "subject_id": "T1",
+        "subject_kind": "before_state"
+      },
+      "run": {
+        "candidate_count": 3,
+        "comparison": {
+          "deterministic_ids": [],
+          "deterministic_only_ids": [],
+          "shadow_ids": [
+            "E:change_relation:d220357c0f5152a9e653",
+            "E:change_relation:e07e05be75610acdc157",
+            "E:change_relation:15a05ab411a43a56a0b3"
+          ],
+          "shadow_only_ids": [
+            "E:change_relation:d220357c0f5152a9e653",
+            "E:change_relation:e07e05be75610acdc157",
+            "E:change_relation:15a05ab411a43a56a0b3"
+          ],
+          "shared_ids": []
+        },
+        "diagnostics": [],
+        "duration_ms": 3652.1672910021152,
+        "execution_policy": {
+          "adapter_id": "openai-chat-completions",
+          "api_profile": "deepseek",
+          "endpoint": "https://api.deepseek.com/chat/completions",
+          "identity": "shadow-policy:f5d9af55c704e40e04a6",
+          "max_output_tokens": 1200,
+          "model_id": "deepseek-v4-flash",
+          "reasoning_effort": "default",
+          "thinking_budget": null,
+          "thinking_mode": "disabled",
+          "timeout_seconds": 180.0
+        },
+        "input_tokens": 1357,
+        "model_id": "deepseek-v4-flash",
+        "output_tokens": 393,
+        "provider_id": "openai-chat-completions",
+        "request_id": "shadow:T1:d07104f0948f6ded",
+        "selection": {
+          "insufficient_evidence_ids": [],
+          "rejected_evidence_ids": [],
+          "request_id": "shadow:T1:d07104f0948f6ded",
+          "schema_version": "2",
+          "selections": [
+            {
+              "evidence_id": "E:change_relation:d220357c0f5152a9e653",
+              "rationale": "Explicitly requires enumerating deserializers and validators for changed serialized contracts, and recomputing persisted derived state, directly addressing the gap stated: the protocol did not operationally require census/validation of deserializers or persisted derived state.",
+              "role": "supporting",
+              "semantic_role": "documentation"
+            },
+            {
+              "evidence_id": "E:change_relation:e07e05be75610acdc157",
+              "rationale": "Expands the coverage boundaries to include deserialization, validation, and persisted derivation, indicating that the protocol now addresses those aspects, contradicting the claim that they were not operationally required.",
+              "role": "supporting",
+              "semantic_role": "boundary"
+            },
+            {
+              "evidence_id": "E:change_relation:15a05ab411a43a56a0b3",
+              "rationale": "Adds a requirement that every deserialization edge revalidate the canonical semantic contract before constructing a validated domain object, directly supporting the claim by demonstrating that the protocol now mandates validation of deserializers.",
+              "role": "supporting",
+              "semantic_role": "documentation"
+            }
+          ],
+          "subject_id": "T1",
+          "unresolved_surfaces": [
+            "No evidence of dynamic execution or external system behavior; coverage limited to documentation diff. Actual runtime validation of deserializers and persisted derived state not demonstrated."
+          ]
+        },
+        "state": "accepted",
+        "subject_id": "T1"
+      }
+    },
+    {
+      "admission_state": "ready",
+      "claim_id": "T2",
+      "deterministic_evidence_ids": [],
+      "diagnostics": [],
+      "eligible_count": 3,
+      "execution_state": "accepted",
+      "request": {
+        "authored_statement": "Pipeline census includes deserialization, validation, and persisted derivation. Changed contracts define distinguishing counterexamples and revalidate canonical semantics before constructing validated objects. Final-tree verification tests tampered inputs and recomputes or checks persisted derived state.",
+        "candidates": [
+          {
+            "added_code": "semantic equivalence. Define counterexamples that distinguish contract\npreservation from accidental agreement. Every deserialization edge must\nrevalidate the canonical semantic contract before constructing a validated\ndomain object.",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:15a05ab411a43a56a0b3",
+            "kind": "change_relation",
+            "line_end": 33,
+            "line_start": 30,
+            "operation": "replaced",
+            "path": "docs/agent-change-protocol.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "semantic equivalence.",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Replaced change: docs/agent-change-protocol.md:30-33",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "- for each changed serialized contract, enumerate its writers, readers,\n  deserializers, validators, and persisted derived fields; test tampered input\n  at each changed deserialization boundary;\n- recompute persisted derived state from canonical inputs or check it against\n  them; loading it must not create another authority;",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:d220357c0f5152a9e653",
+            "kind": "change_relation",
+            "line_end": 65,
+            "line_start": 61,
+            "operation": "added",
+            "path": "docs/agent-change-protocol.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Added change: docs/agent-change-protocol.md:61-65",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "  serialization, deserialization, validation, persisted derivation, defaulting,\n  ordering, and coverage boundaries.",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:e07e05be75610acdc157",
+            "kind": "change_relation",
+            "line_end": 21,
+            "line_start": 20,
+            "operation": "replaced",
+            "path": "docs/agent-change-protocol.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "  serialization, defaulting, ordering, and coverage boundaries.",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Replaced change: docs/agent-change-protocol.md:20-21",
+            "symbol_kind": ""
+          }
+        ],
+        "coverage_limits": [],
+        "request_id": "shadow:T2:1a8f100c02ae0b91",
+        "schema_version": "2",
+        "subject_id": "T2",
+        "subject_kind": "after_state"
+      },
+      "run": {
+        "candidate_count": 3,
+        "comparison": {
+          "deterministic_ids": [],
+          "deterministic_only_ids": [],
+          "shadow_ids": [
+            "E:change_relation:15a05ab411a43a56a0b3",
+            "E:change_relation:d220357c0f5152a9e653",
+            "E:change_relation:e07e05be75610acdc157"
+          ],
+          "shadow_only_ids": [
+            "E:change_relation:15a05ab411a43a56a0b3",
+            "E:change_relation:d220357c0f5152a9e653",
+            "E:change_relation:e07e05be75610acdc157"
+          ],
+          "shared_ids": []
+        },
+        "diagnostics": [],
+        "duration_ms": 3649.8351669870317,
+        "execution_policy": {
+          "adapter_id": "openai-chat-completions",
+          "api_profile": "deepseek",
+          "endpoint": "https://api.deepseek.com/chat/completions",
+          "identity": "shadow-policy:f5d9af55c704e40e04a6",
+          "max_output_tokens": 1200,
+          "model_id": "deepseek-v4-flash",
+          "reasoning_effort": "default",
+          "thinking_budget": null,
+          "thinking_mode": "disabled",
+          "timeout_seconds": 180.0
+        },
+        "input_tokens": 1380,
+        "model_id": "deepseek-v4-flash",
+        "output_tokens": 389,
+        "provider_id": "openai-chat-completions",
+        "request_id": "shadow:T2:1a8f100c02ae0b91",
+        "selection": {
+          "insufficient_evidence_ids": [],
+          "rejected_evidence_ids": [],
+          "request_id": "shadow:T2:1a8f100c02ae0b91",
+          "schema_version": "2",
+          "selections": [
+            {
+              "evidence_id": "E:change_relation:15a05ab411a43a56a0b3",
+              "rationale": "The added text explicitly describes defining counterexamples that distinguish contract preservation from accidental agreement, and requiring revalidation of the canonical semantic contract before constructing a validated domain object. This directly supports the authored statement's claim about changed contracts defining distinguishing counterexamples and revalidating canonical semantics before constructing validated objects.",
+              "role": "supporting",
+              "semantic_role": "documentation"
+            },
+            {
+              "evidence_id": "E:change_relation:d220357c0f5152a9e653",
+              "rationale": "The added checklist item mandates testing tampered input at each changed deserialization boundary and recomputing or checking persisted derived state from canonical inputs, aligning with the statement's final-tree verification component and persisted derivation coverage.",
+              "role": "supporting",
+              "semantic_role": "test"
+            },
+            {
+              "evidence_id": "E:change_relation:e07e05be75610acdc157",
+              "rationale": "This change expands the pipeline census to include deserialization, validation, and persisted derivation among the listed coverage boundaries. It provides context for the statement's first sentence but does not explicitly mention counterexamples or tampered inputs; thus, it is contextual rather than directly supporting those specific claims.",
+              "role": "context",
+              "semantic_role": "boundary"
+            }
+          ],
+          "subject_id": "T2",
+          "unresolved_surfaces": []
+        },
+        "state": "accepted",
+        "subject_id": "T2"
+      }
+    }
+  ],
+  "schema_version": "llm_shadow_execution.v5",
+  "summary": {
+    "admitted_count": 2,
+    "artifact_written": true,
+    "completed_count": 2,
+    "deferred_count": 0,
+    "failed_count": 0,
+    "state": "completed"
+  }
+}

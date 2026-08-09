@@ -1,0 +1,572 @@
+{
+  "observations": [
+    {
+      "admission_state": "ready",
+      "claim_id": "T1",
+      "deterministic_evidence_ids": [
+        "E:structural_change:4fbcf96b02d19017c2c9",
+        "E:structural_change:5d2be31cc60dea3d2f3b",
+        "E:structural_change:d0cf036a1010c1207bc5"
+      ],
+      "diagnostics": [],
+      "eligible_count": 3,
+      "execution_state": "accepted",
+      "request": {
+        "authored_statement": "R/G selected structural overlays \u2192 inspect primary evidence role \u2192 backbone seed",
+        "candidates": [
+          {
+            "added_code": "    ) == (\"N:rg-primary\", \"N:rg-test\", \"N:transformation-anchor\")\ndef test_canonical_backbone_seeds_include_all_direct_changed_anchors() -> None:\n                    ),\n                    StructuralFocusNode(\n                        node_id=\"N:rg-primary-context\",\n                        role=\"intermediate\",",
+            "admission_tier": "baseline",
+            "association": "deterministic_baseline",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+            "kind": "structural_change",
+            "line_end": 1499,
+            "line_start": 1437,
+            "operation": "unresolved",
+            "path": "tests/test_projection.py",
+            "profile": "test",
+            "qualified_name": "test_canonical_backbone_seeds_include_rg_and_transformation_anchors",
+            "removed_code": "        relations=relations,\n    ) == (\"N:rg-primary\", \"N:transformation-anchor\")\ndef test_canonical_backbone_seeds_include_rg_and_transformation_anchors() -> None:\n    relations = {\n        \"P:primary\": ProjectionRelation(\n            id=\"P:primary\",\n            focus_statement_id=\"R1\",\n            slot=\"changed_anchor\",\n            target_type=\"evidence\",\n            target_id=\"E:primary\",\n            association=\"provided_association\",\n            evidence_role=\"primary\",\n            reasons=(),\n        ),\n        \"P:test\": ProjectionRelation(\n            id=\"P:test\",\n            focus_statement_id=\"R1\",\n            slot=\"changed_anchor\",\n            target_type=\"evidence\",\n            target_id=\"E:test\",\n            association=\"provided_association\",\n            evidence_role=\"test_support\",\n            reasons=(),\n        ),\n    }\n                        relation_ids=(\"P:primary\",),\n                        relation_ids=(\"P:test\",),",
+            "revision_side": "review",
+            "structural_context": [
+              "test_canonical_backbone_seeds_include_rg_and_transformation_anchors \u2192[instantiates] ProjectionRelation \u2190[imports] src/prismcode/convergence/core.py",
+              "test_canonical_backbone_seeds_include_rg_and_transformation_anchors \u2192[instantiates] CanonicalChangeMapEntry \u2192[instantiates] StructuralFocusOverlay",
+              "test_canonical_backbone_seeds_include_rg_and_transformation_anchors \u2192[calls] _canonical_backbone_seed_node_ids",
+              "test_canonical_backbone_seeds_include_rg_and_transformation_anchors \u2192[instantiates] CanonicalChangeMapEntry \u2192[instantiates] StructuralFocusDisposition",
+              "test_canonical_backbone_seeds_include_rg_and_transformation_anchors \u2192[instantiates] ProjectionRelation \u2190[instantiates] projection_relation",
+              "test_canonical_backbone_seeds_include_rg_and_transformation_anchors \u2192[instantiates] TransformationStructuralTopologyGroup"
+            ],
+            "summary": "Unresolved function: test_canonical_backbone_seeds_include_rg_and_transformation_anchors",
+            "symbol_kind": "function"
+          },
+          {
+            "added_code": "    ) == (\"N:rg-primary\", \"N:rg-test\", \"N:transformation-anchor\")\ndef test_canonical_backbone_seeds_include_all_direct_changed_anchors() -> None:\n                    ),\n                    StructuralFocusNode(\n                        node_id=\"N:rg-primary-context\",\n                        role=\"intermediate\",",
+            "admission_tier": "baseline",
+            "association": "deterministic_baseline",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+            "kind": "structural_change",
+            "line_end": 1514,
+            "line_start": 1473,
+            "operation": "added",
+            "path": "tests/test_projection.py",
+            "profile": "test",
+            "qualified_name": "test_canonical_backbone_seeds_include_all_direct_changed_anchors",
+            "removed_code": "        relations=relations,\n    ) == (\"N:rg-primary\", \"N:transformation-anchor\")\ndef test_canonical_backbone_seeds_include_rg_and_transformation_anchors() -> None:\n    relations = {\n        \"P:primary\": ProjectionRelation(\n            id=\"P:primary\",\n            focus_statement_id=\"R1\",\n            slot=\"changed_anchor\",\n            target_type=\"evidence\",\n            target_id=\"E:primary\",\n            association=\"provided_association\",\n            evidence_role=\"primary\",\n            reasons=(),\n        ),\n        \"P:test\": ProjectionRelation(\n            id=\"P:test\",\n            focus_statement_id=\"R1\",\n            slot=\"changed_anchor\",\n            target_type=\"evidence\",\n            target_id=\"E:test\",\n            association=\"provided_association\",\n            evidence_role=\"test_support\",\n            reasons=(),\n        ),\n    }\n                        relation_ids=(\"P:test\",),",
+            "revision_side": "review",
+            "structural_context": [
+              "test_canonical_backbone_seeds_include_all_direct_changed_anchors \u2192[instantiates] StructuralFocusOverlay",
+              "test_canonical_backbone_seeds_include_all_direct_changed_anchors \u2192[instantiates] StructuralFocusNode",
+              "_canonical_backbone_seed_node_ids \u2190[calls] test_canonical_backbone_seeds_include_all_direct_changed_anchors",
+              "test_canonical_backbone_seeds_include_all_direct_changed_anchors \u2192[instantiates] CanonicalChangeMapEntry \u2190[instantiates] test_review_graph_renders_complete_focus_union::overlay",
+              "test_canonical_backbone_seeds_include_all_direct_changed_anchors \u2192[instantiates] ReviewSlice \u2190[imports] src/prismcode/projection/build.py",
+              "test_canonical_backbone_seeds_include_all_direct_changed_anchors \u2192[instantiates] ReviewSlice"
+            ],
+            "summary": "Added function: test_canonical_backbone_seeds_include_all_direct_changed_anchors",
+            "symbol_kind": "function"
+          },
+          {
+            "added_code": "    \"\"\"Map selected direct changed structural anchors onto one backbone.\"\"\"\n        seeds.extend(\n            node.node_id\n            for node in review_slice.change_map.structural_overlay.nodes\n            if node.role == \"changed_anchor\"\n        )",
+            "admission_tier": "baseline",
+            "association": "deterministic_baseline",
+            "authority": "structural_provider",
+            "classification": "code",
+            "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+            "kind": "structural_change",
+            "line_end": 461,
+            "line_start": 436,
+            "operation": "modified",
+            "path": "src/prismcode/projection/build.py",
+            "profile": "production",
+            "qualified_name": "_canonical_backbone_seed_node_ids",
+            "removed_code": "    relations: dict[str, ProjectionRelation],\n    \"\"\"Map typed direct anchors onto one review-level backbone contract.\"\"\"\n        for node in review_slice.change_map.structural_overlay.nodes:\n            if any(\n                relations[relation_id].slot == \"changed_anchor\"\n                and relations[relation_id].evidence_role == \"primary\"\n                for relation_id in node.relation_ids\n            ):\n                seeds.append(node.node_id)",
+            "revision_side": "review",
+            "structural_context": [
+              "_canonical_backbone_seed_node_ids \u2190[calls] build_review_projection \u2190[calls] DeterministicAnalyzer::analyze",
+              "_canonical_backbone_seed_node_ids \u2190[calls] build_review_projection \u2192[calls] ReviewProjection::validate_consistency",
+              "_canonical_backbone_seed_node_ids \u2190[calls] build_review_projection \u2192[calls] DiagnosticPresentation::ids_by_focus",
+              "_canonical_backbone_seed_node_ids \u2190[calls] build_review_projection \u2190[imports] tests/test_transformation_closure.py",
+              "_canonical_backbone_seed_node_ids \u2190[calls] build_review_projection \u2192[calls] project_verification_workspace",
+              "_canonical_backbone_seed_node_ids \u2190[calls] build_review_projection \u2190[calls] _build_projection"
+            ],
+            "summary": "Modified function: _canonical_backbone_seed_node_ids",
+            "symbol_kind": "function"
+          }
+        ],
+        "coverage_limits": [
+          "Structural context was truncated for 3 evidence candidates at 6 paths each."
+        ],
+        "request_id": "shadow:T1:81bf07c48138c57c",
+        "schema_version": "2",
+        "subject_id": "T1",
+        "subject_kind": "before_topology"
+      },
+      "run": {
+        "candidate_count": 3,
+        "comparison": {
+          "deterministic_ids": [
+            "E:structural_change:4fbcf96b02d19017c2c9",
+            "E:structural_change:5d2be31cc60dea3d2f3b",
+            "E:structural_change:d0cf036a1010c1207bc5"
+          ],
+          "deterministic_only_ids": [],
+          "shadow_ids": [
+            "E:structural_change:4fbcf96b02d19017c2c9",
+            "E:structural_change:5d2be31cc60dea3d2f3b",
+            "E:structural_change:d0cf036a1010c1207bc5"
+          ],
+          "shadow_only_ids": [],
+          "shared_ids": [
+            "E:structural_change:4fbcf96b02d19017c2c9",
+            "E:structural_change:5d2be31cc60dea3d2f3b",
+            "E:structural_change:d0cf036a1010c1207bc5"
+          ]
+        },
+        "diagnostics": [],
+        "duration_ms": 3803.6291250027716,
+        "execution_policy": {
+          "adapter_id": "openai-chat-completions",
+          "api_profile": "deepseek",
+          "endpoint": "https://api.deepseek.com/chat/completions",
+          "identity": "shadow-policy:f5d9af55c704e40e04a6",
+          "max_output_tokens": 1200,
+          "model_id": "deepseek-v4-flash",
+          "reasoning_effort": "default",
+          "thinking_budget": null,
+          "thinking_mode": "disabled",
+          "timeout_seconds": 180.0
+        },
+        "input_tokens": 2722,
+        "model_id": "deepseek-v4-flash",
+        "output_tokens": 396,
+        "provider_id": "openai-chat-completions",
+        "request_id": "shadow:T1:81bf07c48138c57c",
+        "selection": {
+          "insufficient_evidence_ids": [],
+          "rejected_evidence_ids": [],
+          "request_id": "shadow:T1:81bf07c48138c57c",
+          "schema_version": "2",
+          "selections": [
+            {
+              "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+              "rationale": "Shows the previous test state removed/renamed, illustrating that the prior behavior focused on R/G primary anchor and transformation anchor. Supports understanding the change but is not the primary modification.",
+              "role": "context",
+              "semantic_role": "test"
+            },
+            {
+              "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+              "rationale": "Added test reflects expected new behavior: all direct changed anchors are included in backbone seeds, including N:rg-primary and N:rg-test, aligning with the authored statement about R/G selected overlays.",
+              "role": "supporting",
+              "semantic_role": "test"
+            },
+            {
+              "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+              "rationale": "Modification in _canonical_backbone_seed_node_ids changes seed selection from primary-only to all changed_anchor nodes, directly implementing the 'R/G selected structural overlays' behavior described in the statement.",
+              "role": "supporting",
+              "semantic_role": "producer"
+            }
+          ],
+          "subject_id": "T1",
+          "unresolved_surfaces": [
+            "Existing test coverage for other direct changed anchors beyond N:rg-primary and N:rg-test not provided; only test additions shown.",
+            "Static structural context truncated; dynamic execution behavior not observable from provided evidence."
+          ]
+        },
+        "state": "accepted",
+        "subject_id": "T1"
+      }
+    },
+    {
+      "admission_state": "ready",
+      "claim_id": "T2",
+      "deterministic_evidence_ids": [
+        "E:structural_change:d0cf036a1010c1207bc5"
+      ],
+      "diagnostics": [],
+      "eligible_count": 1,
+      "execution_state": "accepted",
+      "request": {
+        "authored_statement": "T/CC selected structural overlays \u2192 inspect changed-anchor node role \u2192 backbone seed",
+        "candidates": [
+          {
+            "added_code": "    \"\"\"Map selected direct changed structural anchors onto one backbone.\"\"\"\n        seeds.extend(\n            node.node_id\n            for node in review_slice.change_map.structural_overlay.nodes\n            if node.role == \"changed_anchor\"\n        )",
+            "admission_tier": "baseline",
+            "association": "deterministic_baseline",
+            "authority": "structural_provider",
+            "classification": "code",
+            "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+            "kind": "structural_change",
+            "line_end": 461,
+            "line_start": 436,
+            "operation": "modified",
+            "path": "src/prismcode/projection/build.py",
+            "profile": "production",
+            "qualified_name": "_canonical_backbone_seed_node_ids",
+            "removed_code": "    relations: dict[str, ProjectionRelation],\n    \"\"\"Map typed direct anchors onto one review-level backbone contract.\"\"\"\n        for node in review_slice.change_map.structural_overlay.nodes:\n            if any(\n                relations[relation_id].slot == \"changed_anchor\"\n                and relations[relation_id].evidence_role == \"primary\"\n                for relation_id in node.relation_ids\n            ):\n                seeds.append(node.node_id)",
+            "revision_side": "review",
+            "structural_context": [
+              "_canonical_backbone_seed_node_ids \u2190[calls] build_review_projection \u2190[calls] DeterministicAnalyzer::analyze",
+              "_canonical_backbone_seed_node_ids \u2190[calls] build_review_projection \u2192[calls] ReviewProjection::validate_consistency",
+              "_canonical_backbone_seed_node_ids \u2190[calls] build_review_projection \u2192[calls] DiagnosticPresentation::ids_by_focus",
+              "_canonical_backbone_seed_node_ids \u2190[calls] build_review_projection \u2190[imports] tests/test_transformation_closure.py",
+              "_canonical_backbone_seed_node_ids \u2190[calls] build_review_projection \u2192[calls] project_verification_workspace",
+              "_canonical_backbone_seed_node_ids \u2190[calls] build_review_projection \u2190[calls] _build_projection"
+            ],
+            "summary": "Modified function: _canonical_backbone_seed_node_ids",
+            "symbol_kind": "function"
+          }
+        ],
+        "coverage_limits": [
+          "Structural context was truncated for 1 evidence candidates at 6 paths each."
+        ],
+        "request_id": "shadow:T2:b22bb75413932d7c",
+        "schema_version": "2",
+        "subject_id": "T2",
+        "subject_kind": "before_topology"
+      },
+      "run": {
+        "candidate_count": 1,
+        "comparison": {
+          "deterministic_ids": [
+            "E:structural_change:d0cf036a1010c1207bc5"
+          ],
+          "deterministic_only_ids": [],
+          "shadow_ids": [
+            "E:structural_change:d0cf036a1010c1207bc5"
+          ],
+          "shadow_only_ids": [],
+          "shared_ids": [
+            "E:structural_change:d0cf036a1010c1207bc5"
+          ]
+        },
+        "diagnostics": [],
+        "duration_ms": 2054.25399998785,
+        "execution_policy": {
+          "adapter_id": "openai-chat-completions",
+          "api_profile": "deepseek",
+          "endpoint": "https://api.deepseek.com/chat/completions",
+          "identity": "shadow-policy:f5d9af55c704e40e04a6",
+          "max_output_tokens": 1200,
+          "model_id": "deepseek-v4-flash",
+          "reasoning_effort": "default",
+          "thinking_budget": null,
+          "thinking_mode": "disabled",
+          "timeout_seconds": 180.0
+        },
+        "input_tokens": 1207,
+        "model_id": "deepseek-v4-flash",
+        "output_tokens": 137,
+        "provider_id": "openai-chat-completions",
+        "request_id": "shadow:T2:b22bb75413932d7c",
+        "selection": {
+          "insufficient_evidence_ids": [],
+          "rejected_evidence_ids": [],
+          "request_id": "shadow:T2:b22bb75413932d7c",
+          "schema_version": "2",
+          "selections": [
+            {
+              "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+              "rationale": "Evidence is the modified function _canonical_backbone_seed_node_ids whose added code directly implements the selection of structural overlays with changed_anchor role as backbone seeds, matching the authored statement's described flow.",
+              "role": "supporting",
+              "semantic_role": "producer"
+            }
+          ],
+          "subject_id": "T2",
+          "unresolved_surfaces": []
+        },
+        "state": "accepted",
+        "subject_id": "T2"
+      }
+    },
+    {
+      "admission_state": "ready",
+      "claim_id": "T3",
+      "deterministic_evidence_ids": [
+        "E:structural_change:4fbcf96b02d19017c2c9",
+        "E:structural_change:5d2be31cc60dea3d2f3b"
+      ],
+      "diagnostics": [],
+      "eligible_count": 2,
+      "execution_state": "accepted",
+      "request": {
+        "authored_statement": "A directly changed test anchor was classified as test support and therefore omitted from the R/G backbone despite being selected and structurally mapped.",
+        "candidates": [
+          {
+            "added_code": "    ) == (\"N:rg-primary\", \"N:rg-test\", \"N:transformation-anchor\")\ndef test_canonical_backbone_seeds_include_all_direct_changed_anchors() -> None:\n                    ),\n                    StructuralFocusNode(\n                        node_id=\"N:rg-primary-context\",\n                        role=\"intermediate\",",
+            "admission_tier": "baseline",
+            "association": "deterministic_baseline",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+            "kind": "structural_change",
+            "line_end": 1499,
+            "line_start": 1437,
+            "operation": "unresolved",
+            "path": "tests/test_projection.py",
+            "profile": "test",
+            "qualified_name": "test_canonical_backbone_seeds_include_rg_and_transformation_anchors",
+            "removed_code": "        relations=relations,\n    ) == (\"N:rg-primary\", \"N:transformation-anchor\")\ndef test_canonical_backbone_seeds_include_rg_and_transformation_anchors() -> None:\n    relations = {\n        \"P:primary\": ProjectionRelation(\n            id=\"P:primary\",\n            focus_statement_id=\"R1\",\n            slot=\"changed_anchor\",\n            target_type=\"evidence\",\n            target_id=\"E:primary\",\n            association=\"provided_association\",\n            evidence_role=\"primary\",\n            reasons=(),\n        ),\n        \"P:test\": ProjectionRelation(\n            id=\"P:test\",\n            focus_statement_id=\"R1\",\n            slot=\"changed_anchor\",\n            target_type=\"evidence\",\n            target_id=\"E:test\",\n            association=\"provided_association\",\n            evidence_role=\"test_support\",\n            reasons=(),\n        ),\n    }\n                        relation_ids=(\"P:primary\",),\n                        relation_ids=(\"P:test\",),",
+            "revision_side": "review",
+            "structural_context": [
+              "test_canonical_backbone_seeds_include_rg_and_transformation_anchors \u2192[instantiates] ProjectionRelation \u2190[imports] src/prismcode/convergence/core.py",
+              "test_canonical_backbone_seeds_include_rg_and_transformation_anchors \u2192[instantiates] CanonicalChangeMapEntry \u2192[instantiates] StructuralFocusOverlay",
+              "test_canonical_backbone_seeds_include_rg_and_transformation_anchors \u2192[calls] _canonical_backbone_seed_node_ids",
+              "test_canonical_backbone_seeds_include_rg_and_transformation_anchors \u2192[instantiates] CanonicalChangeMapEntry \u2192[instantiates] StructuralFocusDisposition",
+              "test_canonical_backbone_seeds_include_rg_and_transformation_anchors \u2192[instantiates] ProjectionRelation \u2190[instantiates] projection_relation",
+              "test_canonical_backbone_seeds_include_rg_and_transformation_anchors \u2192[instantiates] TransformationStructuralTopologyGroup"
+            ],
+            "summary": "Unresolved function: test_canonical_backbone_seeds_include_rg_and_transformation_anchors",
+            "symbol_kind": "function"
+          },
+          {
+            "added_code": "    ) == (\"N:rg-primary\", \"N:rg-test\", \"N:transformation-anchor\")\ndef test_canonical_backbone_seeds_include_all_direct_changed_anchors() -> None:\n                    ),\n                    StructuralFocusNode(\n                        node_id=\"N:rg-primary-context\",\n                        role=\"intermediate\",",
+            "admission_tier": "baseline",
+            "association": "deterministic_baseline",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+            "kind": "structural_change",
+            "line_end": 1514,
+            "line_start": 1473,
+            "operation": "added",
+            "path": "tests/test_projection.py",
+            "profile": "test",
+            "qualified_name": "test_canonical_backbone_seeds_include_all_direct_changed_anchors",
+            "removed_code": "        relations=relations,\n    ) == (\"N:rg-primary\", \"N:transformation-anchor\")\ndef test_canonical_backbone_seeds_include_rg_and_transformation_anchors() -> None:\n    relations = {\n        \"P:primary\": ProjectionRelation(\n            id=\"P:primary\",\n            focus_statement_id=\"R1\",\n            slot=\"changed_anchor\",\n            target_type=\"evidence\",\n            target_id=\"E:primary\",\n            association=\"provided_association\",\n            evidence_role=\"primary\",\n            reasons=(),\n        ),\n        \"P:test\": ProjectionRelation(\n            id=\"P:test\",\n            focus_statement_id=\"R1\",\n            slot=\"changed_anchor\",\n            target_type=\"evidence\",\n            target_id=\"E:test\",\n            association=\"provided_association\",\n            evidence_role=\"test_support\",\n            reasons=(),\n        ),\n    }\n                        relation_ids=(\"P:test\",),",
+            "revision_side": "review",
+            "structural_context": [
+              "test_canonical_backbone_seeds_include_all_direct_changed_anchors \u2192[instantiates] StructuralFocusOverlay",
+              "test_canonical_backbone_seeds_include_all_direct_changed_anchors \u2192[instantiates] StructuralFocusNode",
+              "_canonical_backbone_seed_node_ids \u2190[calls] test_canonical_backbone_seeds_include_all_direct_changed_anchors",
+              "test_canonical_backbone_seeds_include_all_direct_changed_anchors \u2192[instantiates] CanonicalChangeMapEntry \u2190[instantiates] test_review_graph_renders_complete_focus_union::overlay",
+              "test_canonical_backbone_seeds_include_all_direct_changed_anchors \u2192[instantiates] ReviewSlice \u2190[imports] src/prismcode/projection/build.py",
+              "test_canonical_backbone_seeds_include_all_direct_changed_anchors \u2192[instantiates] ReviewSlice"
+            ],
+            "summary": "Added function: test_canonical_backbone_seeds_include_all_direct_changed_anchors",
+            "symbol_kind": "function"
+          }
+        ],
+        "coverage_limits": [
+          "Structural context was truncated for 2 evidence candidates at 6 paths each."
+        ],
+        "request_id": "shadow:T3:9f5b34abab9a2cde",
+        "schema_version": "2",
+        "subject_id": "T3",
+        "subject_kind": "before_topology"
+      },
+      "run": {
+        "candidate_count": 2,
+        "comparison": {
+          "deterministic_ids": [
+            "E:structural_change:4fbcf96b02d19017c2c9",
+            "E:structural_change:5d2be31cc60dea3d2f3b"
+          ],
+          "deterministic_only_ids": [],
+          "shadow_ids": [
+            "E:structural_change:4fbcf96b02d19017c2c9",
+            "E:structural_change:5d2be31cc60dea3d2f3b"
+          ],
+          "shadow_only_ids": [],
+          "shared_ids": [
+            "E:structural_change:4fbcf96b02d19017c2c9",
+            "E:structural_change:5d2be31cc60dea3d2f3b"
+          ]
+        },
+        "diagnostics": [],
+        "duration_ms": 3712.7502920047846,
+        "execution_policy": {
+          "adapter_id": "openai-chat-completions",
+          "api_profile": "deepseek",
+          "endpoint": "https://api.deepseek.com/chat/completions",
+          "identity": "shadow-policy:f5d9af55c704e40e04a6",
+          "max_output_tokens": 1200,
+          "model_id": "deepseek-v4-flash",
+          "reasoning_effort": "default",
+          "thinking_budget": null,
+          "thinking_mode": "disabled",
+          "timeout_seconds": 180.0
+        },
+        "input_tokens": 2186,
+        "model_id": "deepseek-v4-flash",
+        "output_tokens": 339,
+        "provider_id": "openai-chat-completions",
+        "request_id": "shadow:T3:9f5b34abab9a2cde",
+        "selection": {
+          "insufficient_evidence_ids": [],
+          "rejected_evidence_ids": [],
+          "request_id": "shadow:T3:9f5b34abab9a2cde",
+          "schema_version": "2",
+          "selections": [
+            {
+              "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+              "rationale": "The evidence directly shows a changed test anchor (test_canonical_backbone_seeds_include_rg_and_transformation_anchors) that was classified as test support and omitted from the R/G backbone, exactly as the statement claims. The removed code includes an evidence_role of 'test_support' for the anchor, and the structural context confirms it was selected and structurally mapped.",
+              "role": "supporting",
+              "semantic_role": "test"
+            },
+            {
+              "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+              "rationale": "This added test (test_canonical_backbone_seeds_include_all_direct_changed_anchors) replaces the old test and includes the test anchor as a direct changed anchor (N:rg-test) in the expected backbone, confirming the omission was due to classification as test support. The structural context shows the test is involved in the relevant topology and directly asserts inclusion of the anchor.",
+              "role": "supporting",
+              "semantic_role": "test"
+            }
+          ],
+          "subject_id": "T3",
+          "unresolved_surfaces": []
+        },
+        "state": "accepted",
+        "subject_id": "T3"
+      }
+    },
+    {
+      "admission_state": "ready",
+      "claim_id": "T4",
+      "deterministic_evidence_ids": [
+        "E:structural_change:4fbcf96b02d19017c2c9",
+        "E:structural_change:5d2be31cc60dea3d2f3b",
+        "E:structural_change:7c4162e02e623fea377f",
+        "E:structural_change:d0cf036a1010c1207bc5"
+      ],
+      "diagnostics": [
+        {
+          "code": "shadow_execution_budget_deferred",
+          "message": "Admitted shadow request was deferred by the review safety limit of 3."
+        }
+      ],
+      "eligible_count": 4,
+      "execution_state": "deferred",
+      "request": {
+        "authored_statement": "R/G and T/CC selected structural overlays \u2192 changed-anchor node role \u2192 canonical seed derivation \u2192 _change_backbone \u2192 ReviewStructuralGraph \u2192 renderer",
+        "candidates": [
+          {
+            "added_code": "    ) == (\"N:rg-primary\", \"N:rg-test\", \"N:transformation-anchor\")\ndef test_canonical_backbone_seeds_include_all_direct_changed_anchors() -> None:\n                    ),\n                    StructuralFocusNode(\n                        node_id=\"N:rg-primary-context\",\n                        role=\"intermediate\",",
+            "admission_tier": "baseline",
+            "association": "deterministic_baseline",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+            "kind": "structural_change",
+            "line_end": 1499,
+            "line_start": 1437,
+            "operation": "unresolved",
+            "path": "tests/test_projection.py",
+            "profile": "test",
+            "qualified_name": "test_canonical_backbone_seeds_include_rg_and_transformation_anchors",
+            "removed_code": "        relations=relations,\n    ) == (\"N:rg-primary\", \"N:transformation-anchor\")\ndef test_canonical_backbone_seeds_include_rg_and_transformation_anchors() -> None:\n    relations = {\n        \"P:primary\": ProjectionRelation(\n            id=\"P:primary\",\n            focus_statement_id=\"R1\",\n            slot=\"changed_anchor\",\n            target_type=\"evidence\",\n            target_id=\"E:primary\",\n            association=\"provided_association\",\n            evidence_role=\"primary\",\n            reasons=(),\n        ),\n        \"P:test\": ProjectionRelation(\n            id=\"P:test\",\n            focus_statement_id=\"R1\",\n            slot=\"changed_anchor\",\n            target_type=\"evidence\",\n            target_id=\"E:test\",\n            association=\"provided_association\",\n            evidence_role=\"test_support\",\n            reasons=(),\n        ),\n    }\n                        relation_ids=(\"P:primary\",),\n                        relation_ids=(\"P:test\",),",
+            "revision_side": "review",
+            "structural_context": [
+              "test_canonical_backbone_seeds_include_rg_and_transformation_anchors \u2192[instantiates] ProjectionRelation \u2190[imports] src/prismcode/convergence/core.py",
+              "test_canonical_backbone_seeds_include_rg_and_transformation_anchors \u2192[instantiates] CanonicalChangeMapEntry \u2192[instantiates] StructuralFocusOverlay",
+              "test_canonical_backbone_seeds_include_rg_and_transformation_anchors \u2192[calls] _canonical_backbone_seed_node_ids",
+              "test_canonical_backbone_seeds_include_rg_and_transformation_anchors \u2192[instantiates] CanonicalChangeMapEntry \u2192[instantiates] StructuralFocusDisposition",
+              "test_canonical_backbone_seeds_include_rg_and_transformation_anchors \u2192[instantiates] ProjectionRelation \u2190[instantiates] projection_relation",
+              "test_canonical_backbone_seeds_include_rg_and_transformation_anchors \u2192[instantiates] TransformationStructuralTopologyGroup"
+            ],
+            "summary": "Unresolved function: test_canonical_backbone_seeds_include_rg_and_transformation_anchors",
+            "symbol_kind": "function"
+          },
+          {
+            "added_code": "    ) == (\"N:rg-primary\", \"N:rg-test\", \"N:transformation-anchor\")\ndef test_canonical_backbone_seeds_include_all_direct_changed_anchors() -> None:\n                    ),\n                    StructuralFocusNode(\n                        node_id=\"N:rg-primary-context\",\n                        role=\"intermediate\",",
+            "admission_tier": "baseline",
+            "association": "deterministic_baseline",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+            "kind": "structural_change",
+            "line_end": 1514,
+            "line_start": 1473,
+            "operation": "added",
+            "path": "tests/test_projection.py",
+            "profile": "test",
+            "qualified_name": "test_canonical_backbone_seeds_include_all_direct_changed_anchors",
+            "removed_code": "        relations=relations,\n    ) == (\"N:rg-primary\", \"N:transformation-anchor\")\ndef test_canonical_backbone_seeds_include_rg_and_transformation_anchors() -> None:\n    relations = {\n        \"P:primary\": ProjectionRelation(\n            id=\"P:primary\",\n            focus_statement_id=\"R1\",\n            slot=\"changed_anchor\",\n            target_type=\"evidence\",\n            target_id=\"E:primary\",\n            association=\"provided_association\",\n            evidence_role=\"primary\",\n            reasons=(),\n        ),\n        \"P:test\": ProjectionRelation(\n            id=\"P:test\",\n            focus_statement_id=\"R1\",\n            slot=\"changed_anchor\",\n            target_type=\"evidence\",\n            target_id=\"E:test\",\n            association=\"provided_association\",\n            evidence_role=\"test_support\",\n            reasons=(),\n        ),\n    }\n                        relation_ids=(\"P:test\",),",
+            "revision_side": "review",
+            "structural_context": [
+              "test_canonical_backbone_seeds_include_all_direct_changed_anchors \u2192[instantiates] StructuralFocusOverlay",
+              "test_canonical_backbone_seeds_include_all_direct_changed_anchors \u2192[instantiates] StructuralFocusNode",
+              "_canonical_backbone_seed_node_ids \u2190[calls] test_canonical_backbone_seeds_include_all_direct_changed_anchors",
+              "test_canonical_backbone_seeds_include_all_direct_changed_anchors \u2192[instantiates] CanonicalChangeMapEntry \u2190[instantiates] test_review_graph_renders_complete_focus_union::overlay",
+              "test_canonical_backbone_seeds_include_all_direct_changed_anchors \u2192[instantiates] ReviewSlice \u2190[imports] src/prismcode/projection/build.py",
+              "test_canonical_backbone_seeds_include_all_direct_changed_anchors \u2192[instantiates] ReviewSlice"
+            ],
+            "summary": "Added function: test_canonical_backbone_seeds_include_all_direct_changed_anchors",
+            "symbol_kind": "function"
+          },
+          {
+            "added_code": "            symbol(\n                \"E:test_anchor_one\",\n                \"test_anchor_one\",\n                changed=True,\n                profile=\"test\",\n            ),\n            symbol(\n                \"E:test_anchor_two\",\n                \"test_anchor_two\",\n                changed=True,\n                profile=\"test\",\n            ),\n        relation(\n            \"A-test-one\",\n            \"changed_anchor\",\n            \"E:test_anchor_one\",\n            ordinal=2,\n            evidence_role=\"test_support\",\n        ),\n        relation(\n            \"A-test-two\",\n            \"changed_anchor\",\n            \"E:test_anchor_two\",\n            ordinal=3,\n            evidence_role=\"test_support\",\n        ),\n        \"test_anchor_one\",\n        \"test_anchor_two\",\n        \"test_anchor_one\": (),\n        \"test_anchor_two\": (),\n        _structural_node_id(\"test_anchor_one\"),\n        _structural_node_id(\"test_anchor_two\"),\n    assert \"test_anchor_one\" in html\n    assert \"test_anchor_two\" in html",
+            "admission_tier": "baseline",
+            "association": "deterministic_baseline",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+            "kind": "structural_change",
+            "line_end": 1135,
+            "line_start": 766,
+            "operation": "modified",
+            "path": "tests/test_projection.py",
+            "profile": "test",
+            "qualified_name": "test_projection_uses_review_relevant_structural_closure",
+            "removed_code": "",
+            "revision_side": "review",
+            "structural_context": [
+              "test_projection_uses_review_relevant_structural_closure \u2192[instantiates] ProjectionCandidateGroup",
+              "test_projection_uses_review_relevant_structural_closure \u2192[instantiates] ProjectionCandidateSet",
+              "test_projection_uses_review_relevant_structural_closure \u2192[instantiates] EvidenceCatalog",
+              "test_projection_uses_review_relevant_structural_closure \u2192[calls] test_projection_uses_review_relevant_structural_closure::path",
+              "test_projection_uses_review_relevant_structural_closure \u2192[calls] _build_projection",
+              "test_projection_uses_review_relevant_structural_closure::relation \u2190[calls] test_projection_uses_review_relevant_structural_closure \u2192[calls] _structural_node_id"
+            ],
+            "summary": "Modified function: test_projection_uses_review_relevant_structural_closure",
+            "symbol_kind": "function"
+          },
+          {
+            "added_code": "    \"\"\"Map selected direct changed structural anchors onto one backbone.\"\"\"\n        seeds.extend(\n            node.node_id\n            for node in review_slice.change_map.structural_overlay.nodes\n            if node.role == \"changed_anchor\"\n        )",
+            "admission_tier": "baseline",
+            "association": "deterministic_baseline",
+            "authority": "structural_provider",
+            "classification": "code",
+            "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+            "kind": "structural_change",
+            "line_end": 461,
+            "line_start": 436,
+            "operation": "modified",
+            "path": "src/prismcode/projection/build.py",
+            "profile": "production",
+            "qualified_name": "_canonical_backbone_seed_node_ids",
+            "removed_code": "    relations: dict[str, ProjectionRelation],\n    \"\"\"Map typed direct anchors onto one review-level backbone contract.\"\"\"\n        for node in review_slice.change_map.structural_overlay.nodes:\n            if any(\n                relations[relation_id].slot == \"changed_anchor\"\n                and relations[relation_id].evidence_role == \"primary\"\n                for relation_id in node.relation_ids\n            ):\n                seeds.append(node.node_id)",
+            "revision_side": "review",
+            "structural_context": [
+              "_canonical_backbone_seed_node_ids \u2190[calls] build_review_projection \u2190[calls] DeterministicAnalyzer::analyze",
+              "_canonical_backbone_seed_node_ids \u2190[calls] build_review_projection \u2192[calls] ReviewProjection::validate_consistency",
+              "_canonical_backbone_seed_node_ids \u2190[calls] build_review_projection \u2192[calls] DiagnosticPresentation::ids_by_focus",
+              "_canonical_backbone_seed_node_ids \u2190[calls] build_review_projection \u2190[imports] tests/test_transformation_closure.py",
+              "_canonical_backbone_seed_node_ids \u2190[calls] build_review_projection \u2192[calls] project_verification_workspace",
+              "_canonical_backbone_seed_node_ids \u2190[calls] build_review_projection \u2190[calls] _build_projection"
+            ],
+            "summary": "Modified function: _canonical_backbone_seed_node_ids",
+            "symbol_kind": "function"
+          }
+        ],
+        "coverage_limits": [
+          "Structural context was truncated for 4 evidence candidates at 6 paths each."
+        ],
+        "request_id": "shadow:T4:a27f92bcb157f2a6",
+        "schema_version": "2",
+        "subject_id": "T4",
+        "subject_kind": "after_topology"
+      },
+      "run": null
+    }
+  ],
+  "schema_version": "llm_shadow_execution.v5",
+  "summary": {
+    "admitted_count": 4,
+    "artifact_written": true,
+    "completed_count": 3,
+    "deferred_count": 1,
+    "failed_count": 0,
+    "state": "partial"
+  }
+}
