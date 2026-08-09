@@ -2,6 +2,12 @@
 
 PrismCode generates requirement-first, evidence-linked pull request review briefs.
 
+The supported launch path is deterministic. A normal `prismcode review` run
+requires no model, sends no repository content to an LLM provider, and keeps
+canonical facts, structural graphs, evidence routing, assessment, and HTML
+conclusions under deterministic authority. LLM support is an opt-in shadow
+research surface, not part of the launch acceptance claim.
+
 Its core workflow connects explicit Issue/Ticket acceptance criteria to pull-request code
 evidence and requirement-specific CI/Actions observations:
 
@@ -48,6 +54,30 @@ The open core provides:
 - clean-install CI with network-free tests.
 - a deterministic offline evaluation suite for binding, structural-path,
   evidence-classification, and recorded LLM-shadow semantic-mapping baselines.
+
+## LLM opportunity map
+
+PrismCode uses LLMs only where semantic interpretation may add value after
+canonical repository facts and bounded candidate identities already exist. A
+check mark means the capability exists in the opt-in shadow path; it does not
+mean that model output is enabled by default or authoritative.
+
+| Pipeline position | Suitable LLM responsibility | Required boundary | Status |
+| --- | --- | --- | --- |
+| T/CC claim → admitted evidence | Select directly relevant canonical candidates and describe supporting, contradicting, or contextual roles. | The model may cite only deterministic candidate IDs and cannot change assessment. | ✅ Implemented in shadow |
+| Bounded structural context → claim relevance | Use supplied path summaries, symbols, and directional diff excerpts to interpret why an existing candidate may matter. | The model cannot create graph nodes or edges; the value of structural context still needs an ablation test. | ✅ Implemented in shadow |
+| Candidate rejection and uncertainty | Separate unrelated evidence from incomplete or ambiguous evidence and record unresolved surfaces. | Negative and `insufficient` discrimination must improve on frozen human labels before product use. | 🧪 Implemented; not product-ready |
+| Free-form Issue/PR → proposed typed semantics | Suggest R/G/T/CC statements when external repositories do not follow PrismCode headings. | Suggestions must remain beside the deterministic parse and preserve source spans; no silent promotion to requirements. | 🔭 To explore |
+| R/G → canonical structural subgraph | Match requirements and guardrails to existing changed anchors, nodes, edges, and bounded paths using semantic context. | Canonical graph membership remains deterministic; LLM-only matches are review suggestions, never verification. | 🔭 To explore |
+| Architectural component semantics | Suggest semantic overlays for path-convention labels such as `presentation`, `persistence`, `application`, or `unclassified`. | Show deterministic and suggested labels side by side; never rewrite canonical graph topology from prose. | 🔭 To explore |
+| Evidence-grounded explanation | Summarize why selected evidence may support or contradict a claim, with exact evidence and source links. | Every statement must cite supplied IDs and retain coverage limits and unresolved surfaces. | 🔭 To explore |
+| Canonical diff, symbols, calls/imports, ownership, and structural paths | No generative responsibility; these are repository facts. | Missing or unsupported structure must remain unavailable, partial, or unclassified. | 🚫 Intentionally deterministic |
+| Assessment, verification status, mergeability, or approval | No LLM authority. | Only validated deterministic contracts may affect formal conclusions. | 🚫 Intentionally deterministic |
+
+The first shadow campaigns show that model selection can recover semantic
+evidence missed by deterministic matching, but can also over-select ambiguous
+candidates. Until the exploratory rows above have blinded external-repository
+evidence, the open-source product boundary remains the deterministic workflow.
 
 The GitHub adapter intentionally emits source facts only. Linked Issues come
 from GitHub's `closingIssuesReferences` GraphQL field, not Issue numbers typed
@@ -187,7 +217,7 @@ The command returns non-zero when configured thresholds fail. See
 [`docs/evaluation.md`](docs/evaluation.md) for the versioned contracts, metrics,
 and safety boundary.
 
-### Run bounded LLM shadow selection
+### Experimental: run bounded LLM shadow selection
 
 Shadow selection is opt-in and never changes deterministic review assessments:
 
