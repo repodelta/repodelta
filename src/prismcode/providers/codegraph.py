@@ -37,15 +37,18 @@ _SUPPORTED_KINDS = (
     "variable",
     "constant",
 )
-_NON_STRUCTURAL_SUFFIXES = {
-    ".md",
-    ".mdx",
-    ".rst",
-    ".txt",
-    ".pdf",
-    ".doc",
-    ".docx",
-}
+# Formats for which this adapter consumes Codegraph symbol or resolver structure.
+# Generic configuration remains evidence but is not structural coverage input.
+_STRUCTURAL_SUFFIXES = frozenset(
+    """
+    .astro .c .cc .cbl .cob .cobol .cfc .cfm .cfs .cpp .cpy .cs .cshtml
+    .cjs .cts .cu .cuh .cxx .dart .dfm .dpk .dpr .erl .escript .ets .fmx .go .h
+    .hpp .hrl .hxx .inc .install .java .js .jsx .kt .kts .liquid .lpr .lua
+    .luau .m .metal .mjs .mm .module .mts .nix .pas .php .properties .py .pyw
+    .r .rake .razor .rb .rs .scala .sc .sol .svelte .swift .tf .tfvars .theme
+    .tofu .ts .tsx .vb .vue .xsjs .xsjslib .xml
+    """.split()
+)
 _REQUIRED_COLUMNS = {
     "nodes": {
         "id",
@@ -1161,7 +1164,23 @@ def _repo_path(path: str) -> str:
 
 
 def _is_structural_candidate(path: str) -> bool:
-    return Path(path).suffix.casefold() not in _NON_STRUCTURAL_SUFFIXES
+    normalized = path.casefold().replace("\\", "/")
+    name = Path(normalized).name
+    if normalized == "conf/routes" or name.endswith(".routes"):
+        return True
+    if name.endswith((".app", ".app.src")):
+        return True
+    if name.endswith((".routing.yml", ".routing.yaml")):
+        return True
+    if name.startswith("application") and Path(name).suffix in {".yml", ".yaml"}:
+        return True
+    if Path(normalized).suffix == ".json":
+        parts = normalized.split("/")
+        return any(
+            part in {"templates", "sections"}
+            for part in parts[:-1]
+        )
+    return Path(normalized).suffix in _STRUCTURAL_SUFFIXES
 
 
 def _sha256(path: Path) -> str:

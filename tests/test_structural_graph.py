@@ -1265,6 +1265,71 @@ def test_document_hunks_do_not_reduce_codegraph_coverage(tmp_path: Path) -> None
     }
 
 
+@pytest.mark.parametrize(
+    "path",
+    ("fixtures/review/input.json", "fixtures/review/input.yaml", "pyproject.toml"),
+)
+def test_configuration_input_does_not_reduce_codegraph_coverage(
+    tmp_path: Path,
+    path: str,
+) -> None:
+    _create_index(tmp_path)
+    code_hunks = parse_unified_patch(
+        "src/service.py",
+        "@@ -3 +3 @@\n-        return 1\n+        return 2\n",
+    )
+    configuration_hunks = parse_unified_patch(
+        path,
+        '@@ -1 +1 @@\n-{"state":"old"}\n+{"state":"new"}\n',
+    )
+
+    result = CodegraphProvider(tmp_path).symbols_overlapping(
+        (*code_hunks, *configuration_hunks)
+    )
+
+    assert result.index.state == "available"
+    assert (result.index.requested_files, result.index.indexed_files) == (1, 1)
+    assert result.hunk_count == 1
+    diagnostic = next(
+        item
+        for item in result.diagnostics
+        if item.code == "structural_graph_file_not_applicable"
+    )
+    assert diagnostic.sources[0].path == path
+
+
+@pytest.mark.parametrize(
+    "path",
+    ("src/unindexed.py", "templates/product.json"),
+)
+def test_unindexed_structural_input_remains_in_coverage(
+    tmp_path: Path,
+    path: str,
+) -> None:
+    _create_index(tmp_path)
+    code_hunks = parse_unified_patch(
+        "src/service.py",
+        "@@ -3 +3 @@\n-        return 1\n+        return 2\n",
+    )
+    unindexed_hunks = parse_unified_patch(
+        path,
+        "@@ -0,0 +1 @@\n+structural input\n",
+    )
+
+    result = CodegraphProvider(tmp_path).symbols_overlapping(
+        (*code_hunks, *unindexed_hunks)
+    )
+
+    assert result.index.state == "partial"
+    assert (result.index.requested_files, result.index.indexed_files) == (2, 1)
+    assert result.hunk_count == 2
+    assert any(
+        item.code == "codegraph_file_not_indexed"
+        and item.sources[0].path == path
+        for item in result.diagnostics
+    )
+
+
 def test_added_only_file_is_not_applicable_to_base_coverage(
     tmp_path: Path,
 ) -> None:
