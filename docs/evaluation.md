@@ -108,3 +108,10 @@ Live shadow observations remain non-authoritative measurements. Their raw token
 usage and latency are reported without defining pass/fail budgets; monetary
 cost requires an explicit provider/model pricing policy and representative live
 samples before becoming a gate.
+
+The first blinded real-PR sample, its human disposition rubric, raw validated
+observations, independent labels, bounded conclusions, and offline regression
+command are recorded in
+[`fixtures/llm-shadow/campaign-v1/README.md`](../fixtures/llm-shadow/campaign-v1/README.md).
+The sample is measurement evidence rather than a production-enablement
+threshold.

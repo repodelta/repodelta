@@ -1,0 +1,69 @@
+{
+  "schema_version": "llm_shadow_human_labels.v1",
+  "authority": "human_review",
+  "rubric_version": "shadow-evidence-disposition.v1",
+  "labels": [
+    {
+      "claim_id": "T1",
+      "response": {
+        "schema_version": "2",
+        "request_id": "shadow:T1:d07104f0948f6ded",
+        "subject_id": "T1",
+        "selections": [
+          {
+            "evidence_id": "E:change_relation:15a05ab411a43a56a0b3",
+            "role": "supporting",
+            "semantic_role": "documentation",
+            "rationale": "The replacement adds the previously absent deserialization revalidation obligation."
+          },
+          {
+            "evidence_id": "E:change_relation:d220357c0f5152a9e653",
+            "role": "supporting",
+            "semantic_role": "documentation",
+            "rationale": "The added final-tree checks operationalize deserializer census, tamper tests, and persisted derivation validation."
+          },
+          {
+            "evidence_id": "E:change_relation:e07e05be75610acdc157",
+            "role": "supporting",
+            "semantic_role": "documentation",
+            "rationale": "The census list changes from serialization-only coverage to explicitly include deserialization, validation, and persisted derivation."
+          }
+        ],
+        "rejected_evidence_ids": [],
+        "insufficient_evidence_ids": [],
+        "unresolved_surfaces": []
+      }
+    },
+    {
+      "claim_id": "T2",
+      "response": {
+        "schema_version": "2",
+        "request_id": "shadow:T2:1a8f100c02ae0b91",
+        "subject_id": "T2",
+        "selections": [
+          {
+            "evidence_id": "E:change_relation:15a05ab411a43a56a0b3",
+            "role": "supporting",
+            "semantic_role": "documentation",
+            "rationale": "The changed contract section explicitly requires counterexamples and deserialization revalidation."
+          },
+          {
+            "evidence_id": "E:change_relation:d220357c0f5152a9e653",
+            "role": "supporting",
+            "semantic_role": "documentation",
+            "rationale": "The final-tree section explicitly requires tampered-input tests and canonical recomputation or checking."
+          },
+          {
+            "evidence_id": "E:change_relation:e07e05be75610acdc157",
+            "role": "supporting",
+            "semantic_role": "documentation",
+            "rationale": "The pipeline census now explicitly includes all three stated serialized-boundary responsibilities."
+          }
+        ],
+        "rejected_evidence_ids": [],
+        "insufficient_evidence_ids": [],
+        "unresolved_surfaces": []
+      }
+    }
+  ]
+}

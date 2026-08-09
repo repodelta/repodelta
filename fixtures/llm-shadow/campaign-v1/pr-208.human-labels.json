@@ -1,0 +1,127 @@
+{
+  "schema_version": "llm_shadow_human_labels.v1",
+  "authority": "human_review",
+  "rubric_version": "shadow-evidence-disposition.v1",
+  "labels": [
+    {
+      "claim_id": "T1",
+      "response": {
+        "schema_version": "2",
+        "request_id": "shadow:T1:81bf07c48138c57c",
+        "subject_id": "T1",
+        "selections": [
+          {
+            "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+            "role": "supporting",
+            "semantic_role": "test",
+            "rationale": "The changed test records the former primary-role-filtered seed behavior and its replacement."
+          },
+          {
+            "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+            "role": "supporting",
+            "semantic_role": "test",
+            "rationale": "The replacement test directly distinguishes all changed anchors from primary-only anchors."
+          },
+          {
+            "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+            "role": "supporting",
+            "semantic_role": "producer",
+            "rationale": "The seed producer removes evidence-role inspection and derives seeds from changed-anchor node roles."
+          }
+        ],
+        "rejected_evidence_ids": [],
+        "insufficient_evidence_ids": [],
+        "unresolved_surfaces": [
+          "Structural context was truncated for 3 evidence candidates at 6 paths each."
+        ]
+      }
+    },
+    {
+      "claim_id": "T2",
+      "response": {
+        "schema_version": "2",
+        "request_id": "shadow:T2:b22bb75413932d7c",
+        "subject_id": "T2",
+        "selections": [
+          {
+            "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+            "role": "supporting",
+            "semantic_role": "producer",
+            "rationale": "The canonical seed producer now consumes changed-anchor node roles without consulting evidence roles."
+          }
+        ],
+        "rejected_evidence_ids": [],
+        "insufficient_evidence_ids": [],
+        "unresolved_surfaces": [
+          "Structural context was truncated for 1 evidence candidates at 6 paths each."
+        ]
+      }
+    },
+    {
+      "claim_id": "T3",
+      "response": {
+        "schema_version": "2",
+        "request_id": "shadow:T3:9f5b34abab9a2cde",
+        "subject_id": "T3",
+        "selections": [
+          {
+            "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+            "role": "supporting",
+            "semantic_role": "test",
+            "rationale": "The former test fixture contains a test-support anchor while its expected seeds omit that anchor."
+          },
+          {
+            "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+            "role": "supporting",
+            "semantic_role": "test",
+            "rationale": "The replacement expectation adds the formerly omitted test anchor and directly captures the counterexample."
+          }
+        ],
+        "rejected_evidence_ids": [],
+        "insufficient_evidence_ids": [],
+        "unresolved_surfaces": [
+          "Structural context was truncated for 2 evidence candidates at 6 paths each."
+        ]
+      }
+    },
+    {
+      "claim_id": "T4",
+      "response": {
+        "schema_version": "2",
+        "request_id": "shadow:T4:a27f92bcb157f2a6",
+        "subject_id": "T4",
+        "selections": [
+          {
+            "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+            "role": "supporting",
+            "semantic_role": "test",
+            "rationale": "The changed unit test exercises canonical seed derivation across R/G and transformation anchors."
+          },
+          {
+            "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+            "role": "supporting",
+            "semantic_role": "test",
+            "rationale": "The replacement test verifies that every directly changed anchor reaches canonical seed derivation."
+          },
+          {
+            "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+            "role": "supporting",
+            "semantic_role": "test",
+            "rationale": "The projection test verifies the added test anchors survive into the graph and rendered HTML."
+          },
+          {
+            "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+            "role": "supporting",
+            "semantic_role": "producer",
+            "rationale": "The production seed derivation is the changed producer on the stated path to the graph and renderer."
+          }
+        ],
+        "rejected_evidence_ids": [],
+        "insufficient_evidence_ids": [],
+        "unresolved_surfaces": [
+          "Structural context was truncated for 4 evidence candidates at 6 paths each."
+        ]
+      }
+    }
+  ]
+}
