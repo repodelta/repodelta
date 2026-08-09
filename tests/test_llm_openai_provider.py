@@ -135,7 +135,8 @@ def test_openai_provider_records_and_sends_explicit_execution_policy() -> None:
             base_url="https://models.example/v1",
             timeout_seconds=45.0,
             max_output_tokens=4_096,
-            enable_thinking=True,
+            api_profile="siliconflow",
+            thinking_mode="enabled",
             thinking_budget=1_024,
         ),
         transport=transport,
@@ -151,6 +152,39 @@ def test_openai_provider_records_and_sends_explicit_execution_policy() -> None:
     assert "secret-test-key" not in json.dumps(
         provider.execution_policy.__dict__
     )
+
+
+def test_deepseek_profile_maps_neutral_policy_to_provider_payload() -> None:
+    captured = {}
+    request = _request()
+
+    def transport(url, headers, payload, timeout):
+        captured.update(payload=payload)
+        return _api_response(request)
+
+    provider = OpenAIShadowProvider(
+        OpenAIShadowConfig(
+            api_key="secret-test-key",
+            model="deepseek-v4-flash",
+            base_url="https://api.deepseek.com/v1",
+            max_output_tokens=4_096,
+            api_profile="deepseek",
+            thinking_mode="disabled",
+            reasoning_effort="high",
+        ),
+        transport=transport,
+    )
+
+    provider.select(request)
+
+    assert captured["payload"]["max_tokens"] == 4_096
+    assert "max_completion_tokens" not in captured["payload"]
+    assert captured["payload"]["response_format"] == {"type": "json_object"}
+    assert captured["payload"]["thinking"] == {"type": "disabled"}
+    assert captured["payload"]["reasoning_effort"] == "high"
+    assert "enable_thinking" not in captured["payload"]
+    assert "thinking_budget" not in captured["payload"]
+    assert "JSON object" in captured["payload"]["messages"][0]["content"]
 
 
 def test_openai_provider_rejects_incomplete_or_missing_output() -> None:
@@ -172,11 +206,12 @@ def test_openai_config_rejects_unsafe_base_url() -> None:
             base_url="http://models.example/v1",
         )
 
-    with pytest.raises(ValueError, match="requires enable_thinking=true"):
+    with pytest.raises(ValueError, match="requires api_profile=siliconflow"):
         OpenAIShadowConfig(
             api_key="key",
             model="model",
-            enable_thinking=False,
+            api_profile="deepseek",
+            thinking_mode="enabled",
             thinking_budget=1_024,
         )
 
@@ -187,7 +222,9 @@ def test_cli_config_requires_explicit_key_and_model(
     for name in (
         "PRISMCODE_LLM_TIMEOUT_SECONDS",
         "PRISMCODE_LLM_MAX_OUTPUT_TOKENS",
-        "PRISMCODE_LLM_ENABLE_THINKING",
+        "PRISMCODE_LLM_API_PROFILE",
+        "PRISMCODE_LLM_THINKING_MODE",
+        "PRISMCODE_LLM_REASONING_EFFORT",
         "PRISMCODE_LLM_THINKING_BUDGET",
     ):
         monkeypatch.delenv(name, raising=False)
@@ -205,14 +242,15 @@ def test_cli_config_rejects_invalid_execution_policy_env(
 ) -> None:
     monkeypatch.setenv("OPENAI_API_KEY", "secret")
     monkeypatch.setenv("PRISMCODE_LLM_MODEL", "configured-model")
-    monkeypatch.setenv("PRISMCODE_LLM_ENABLE_THINKING", "sometimes")
+    monkeypatch.setenv("PRISMCODE_LLM_API_PROFILE", "universal")
 
-    with pytest.raises(ValueError, match="must be true or false"):
+    with pytest.raises(ValueError, match="must be one of"):
         _openai_shadow_provider_from_env()
 
-    monkeypatch.setenv("PRISMCODE_LLM_ENABLE_THINKING", "false")
+    monkeypatch.setenv("PRISMCODE_LLM_API_PROFILE", "deepseek")
+    monkeypatch.setenv("PRISMCODE_LLM_THINKING_MODE", "enabled")
     monkeypatch.setenv("PRISMCODE_LLM_THINKING_BUDGET", "1024")
-    with pytest.raises(ValueError, match="requires enable_thinking=true"):
+    with pytest.raises(ValueError, match="requires api_profile=siliconflow"):
         _openai_shadow_provider_from_env()
 
     monkeypatch.delenv("PRISMCODE_LLM_THINKING_BUDGET")

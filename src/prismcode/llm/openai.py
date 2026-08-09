@@ -45,6 +45,8 @@ Partition every admitted evidence ID exactly once:
 Use only supplied evidence IDs. Do not invent repository facts, infer absence
 from missing evidence, or claim coverage beyond coverage_limits. Record missing
 dynamic or external surfaces in unresolved_surfaces.
+
+Return exactly one JSON object matching the requested response contract.
 """
 
 JsonTransport = Callable[
@@ -59,7 +61,9 @@ class OpenAIShadowConfig:
     base_url: str = DEFAULT_OPENAI_BASE_URL
     timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS
     max_output_tokens: int = DEFAULT_MAX_OUTPUT_TOKENS
-    enable_thinking: bool | None = None
+    api_profile: str = "openai"
+    thinking_mode: str = "default"
+    reasoning_effort: str = "default"
     thinking_budget: int | None = None
 
     def __post_init__(self) -> None:
@@ -86,7 +90,9 @@ class OpenAIShadowConfig:
             endpoint=self.chat_completions_url,
             timeout_seconds=self.timeout_seconds,
             max_output_tokens=self.max_output_tokens,
-            enable_thinking=self.enable_thinking,
+            api_profile=self.api_profile,
+            thinking_mode=self.thinking_mode,
+            reasoning_effort=self.reasoning_effort,
             thinking_budget=self.thinking_budget,
         )
 
@@ -136,7 +142,7 @@ def _response_payload(
     payload = {
         "model": config.model,
         "store": False,
-        "max_completion_tokens": config.max_output_tokens,
+        _max_tokens_field(config): config.max_output_tokens,
         "messages": [
             {
                 "role": "system",
@@ -149,20 +155,41 @@ def _response_payload(
                 ),
             },
         ],
-        "response_format": {
-            "type": "json_schema",
-            "json_schema": {
-                "name": "prismcode_shadow_evidence_selection",
-                "strict": True,
-                "schema": _selection_schema(request),
-            },
-        },
+        "response_format": _response_format(request, config),
     }
-    if config.enable_thinking is not None:
-        payload["enable_thinking"] = config.enable_thinking
+    if config.api_profile == "siliconflow" and config.thinking_mode != "default":
+        payload["enable_thinking"] = config.thinking_mode == "enabled"
+    if config.api_profile == "deepseek" and config.thinking_mode != "default":
+        payload["thinking"] = {"type": config.thinking_mode}
+    if config.reasoning_effort != "default":
+        payload["reasoning_effort"] = config.reasoning_effort
     if config.thinking_budget is not None:
         payload["thinking_budget"] = config.thinking_budget
     return payload
+
+
+def _max_tokens_field(config: OpenAIShadowConfig) -> str:
+    return (
+        "max_tokens"
+        if config.api_profile == "deepseek"
+        else "max_completion_tokens"
+    )
+
+
+def _response_format(
+    request: ShadowEvidenceRequest,
+    config: OpenAIShadowConfig,
+) -> dict[str, Any]:
+    if config.api_profile == "deepseek":
+        return {"type": "json_object"}
+    return {
+        "type": "json_schema",
+        "json_schema": {
+            "name": "prismcode_shadow_evidence_selection",
+            "strict": True,
+            "schema": _selection_schema(request),
+        },
+    }
 
 
 def _selection_schema(request: ShadowEvidenceRequest) -> dict[str, Any]:

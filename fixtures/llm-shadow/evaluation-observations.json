@@ -41,9 +41,11 @@
           "endpoint": "replay:recorded",
           "timeout_seconds": 1.0,
           "max_output_tokens": 1,
-          "enable_thinking": null,
+          "api_profile": "openai",
+          "thinking_mode": "default",
+          "reasoning_effort": "default",
           "thinking_budget": null,
-          "identity": "shadow-policy:47e3c8427289b932d231"
+          "identity": "shadow-policy:badbc1042b1272a1c09f"
         },
         "provider_id": "replay",
         "model_id": "golden-v1",
@@ -101,9 +103,11 @@
           "endpoint": "replay:recorded",
           "timeout_seconds": 1.0,
           "max_output_tokens": 1,
-          "enable_thinking": null,
+          "api_profile": "openai",
+          "thinking_mode": "default",
+          "reasoning_effort": "default",
           "thinking_budget": null,
-          "identity": "shadow-policy:47e3c8427289b932d231"
+          "identity": "shadow-policy:badbc1042b1272a1c09f"
         },
         "provider_id": "replay",
         "model_id": "golden-v1",

@@ -17,7 +17,9 @@ class ShadowProviderExecutionPolicy:
     endpoint: str
     timeout_seconds: float
     max_output_tokens: int
-    enable_thinking: bool | None = None
+    api_profile: str = "openai"
+    thinking_mode: str = "default"
+    reasoning_effort: str = "default"
     thinking_budget: int | None = None
     identity: str = ""
 
@@ -34,15 +36,31 @@ class ShadowProviderExecutionPolicy:
             raise ValueError(
                 "shadow execution policy max_output_tokens must be between 1 and 100000"
             )
-        if (
-            self.enable_thinking is not None
-            and type(self.enable_thinking) is not bool
-        ):
-            raise ValueError("shadow execution policy enable_thinking must be boolean")
+        if self.api_profile not in {"openai", "siliconflow", "deepseek"}:
+            raise ValueError(
+                "shadow execution policy api_profile must be openai, "
+                "siliconflow, or deepseek"
+            )
+        if self.thinking_mode not in {"default", "enabled", "disabled"}:
+            raise ValueError(
+                "shadow execution policy thinking_mode must be default, "
+                "enabled, or disabled"
+            )
+        if self.reasoning_effort not in {"default", "high", "max"}:
+            raise ValueError(
+                "shadow execution policy reasoning_effort must be default, "
+                "high, or max"
+            )
         if self.thinking_budget is not None:
-            if self.enable_thinking is not True:
+            if self.api_profile != "siliconflow":
                 raise ValueError(
-                    "shadow execution policy thinking_budget requires enable_thinking=true"
+                    "shadow execution policy thinking_budget requires "
+                    "api_profile=siliconflow"
+                )
+            if self.thinking_mode != "enabled":
+                raise ValueError(
+                    "shadow execution policy thinking_budget requires "
+                    "thinking_mode=enabled"
                 )
             if not 128 <= self.thinking_budget <= 32_768:
                 raise ValueError(
@@ -62,7 +80,9 @@ class ShadowProviderExecutionPolicy:
             "endpoint": self.endpoint,
             "timeout_seconds": self.timeout_seconds,
             "max_output_tokens": self.max_output_tokens,
-            "enable_thinking": self.enable_thinking,
+            "api_profile": self.api_profile,
+            "thinking_mode": self.thinking_mode,
+            "reasoning_effort": self.reasoning_effort,
             "thinking_budget": self.thinking_budget,
         }
         digest = hashlib.sha256(
