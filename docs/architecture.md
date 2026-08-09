@@ -106,7 +106,10 @@ and shared selections plus usage, latency, and one non-secret effective
 execution-policy identity, and isolates every provider or validation failure
 from deterministic output. The execution stage
 joins each admission to exactly one accepted, invalid, failed, deferred,
-blocked, or empty observation. That observation is the detailed artifact truth;
+blocked, or empty observation. A blocked observation preserves the exact
+deterministic baseline identities that exceeded admission policy without
+misrepresenting them as request candidates; other observations without a
+request cannot carry evidence identities. That observation is the detailed artifact truth;
 the review-level state is derived from it. Loading revalidates selection and
 identity contracts, recomputes execution-policy identity, and checks persisted
 comparisons against their canonical inputs. The artifact preserves the bounded
