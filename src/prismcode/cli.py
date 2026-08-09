@@ -19,6 +19,7 @@ from prismcode.evaluation.core import (
     write_evaluation_json,
     write_evaluation_markdown,
 )
+from prismcode.evaluation.comparison import write_shadow_comparison_html
 from prismcode.evaluation.shadow import load_human_shadow_labels_from_packet
 from prismcode.intake.fixture import load_fixture
 from prismcode.intake.github import GitHubApiError, GitHubClient, GitHubPullRequestAdapter
@@ -282,6 +283,22 @@ def build_parser() -> argparse.ArgumentParser:
         required=True,
         help="Destination Markdown evaluation summary",
     )
+    compare_shadow = subparsers.add_parser(
+        "compare-shadow",
+        help="Render a non-authoritative offline LLM shadow comparison",
+    )
+    compare_shadow.add_argument(
+        "--labeling-packet", required=True, help="Frozen labeling packet JSON"
+    )
+    compare_shadow.add_argument(
+        "--execution", required=True, help="Validated shadow execution JSON"
+    )
+    compare_shadow.add_argument(
+        "--human-labels", required=True, help="Complete human labels JSON"
+    )
+    compare_shadow.add_argument(
+        "--output", required=True, help="Destination comparison HTML"
+    )
     return parser
 
 
@@ -302,6 +319,19 @@ def main() -> int:
         print(json_output)
         print(markdown_output)
         return 0 if result.passed else 1
+    if args.command == "compare-shadow":
+        try:
+            output = write_shadow_comparison_html(
+                args.labeling_packet,
+                args.execution,
+                args.human_labels,
+                args.output,
+            )
+        except (OSError, ValueError) as exc:
+            print(f"prismcode: error: {exc}", file=sys.stderr)
+            return 2
+        print(output)
+        return 0
     if args.command != "review":
         return 2
     try:

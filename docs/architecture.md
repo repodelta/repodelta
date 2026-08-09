@@ -128,6 +128,11 @@ baseline identities, and coverage limits but no provider result. Human labels
 must completely partition every request in that packet. A later execution
 regenerates admissions and requires exact packet equality before validating the
 complete labels and invoking a provider; drift fails before external execution.
+An independent evaluation-only consumer then joins that frozen packet, the
+validated execution artifact, and complete human labels into a standalone
+comparison HTML. It exposes deterministic-only, shadow-only, shared, human
+disposition, role agreement, diagnostics, and unresolved surfaces without
+feeding `ReviewBrief`, production HTML, or transformation assessment.
 
 Each stage owns one transformation. Typed models, boundary validation, and
 counterfactual tests define its executable local contract; this document is the
