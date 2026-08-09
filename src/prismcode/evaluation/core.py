@@ -7,11 +7,12 @@ from typing import Any, get_args
 
 from prismcode.evaluation.shadow import (
     ExpectedShadowOutcome,
-    ExpectedShadowSelection,
+    HumanShadowLabelSet,
     ShadowEvaluationMetrics,
     ShadowEvaluationThresholds,
     ShadowOutcomeEvaluation,
     evaluate_shadow_outcomes,
+    load_human_shadow_labels,
     shadow_diagnostics,
     shadow_metrics,
     shadow_threshold_diagnostics,
@@ -114,6 +115,7 @@ class EvaluationCase:
     structural_graph: StructuralGraphCollection | None = None
     closure_scan_results: ClosureScanResultSet | None = None
     shadow_execution: str | None = None
+    human_shadow_labels: str | None = None
     expected_shadow_outcomes: tuple[ExpectedShadowOutcome, ...] = ()
 
 
@@ -137,7 +139,7 @@ class EvaluationSuite:
     thresholds: EvaluationThresholds = EvaluationThresholds()
     shadow_thresholds: ShadowEvaluationThresholds = ShadowEvaluationThresholds()
     k: int = 5
-    schema_version: str = "evaluation_suite.v5"
+    schema_version: str = "evaluation_suite.v6"
 
 
 @dataclass(frozen=True)
@@ -242,7 +244,7 @@ class EvaluationResult:
     shadow_metrics: ShadowEvaluationMetrics
     shadow_outcomes: tuple[ShadowOutcomeEvaluation, ...]
     diagnostics: tuple[str, ...] = ()
-    schema_version: str = "evaluation_result.v5"
+    schema_version: str = "evaluation_result.v6"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -262,8 +264,8 @@ class _RecordedClosureScanner:
 def load_evaluation_suite(path: str | Path) -> EvaluationSuite:
     suite_path = Path(path)
     raw = json.loads(suite_path.read_text(encoding="utf-8"))
-    if raw.get("schema_version") != "evaluation_suite.v5":
-        raise ValueError("evaluation suite must use schema_version evaluation_suite.v5")
+    if raw.get("schema_version") != "evaluation_suite.v6":
+        raise ValueError("evaluation suite must use schema_version evaluation_suite.v6")
     k = int(raw.get("k", 5))
     if k <= 0:
         raise ValueError("evaluation suite k must be positive")
@@ -326,6 +328,11 @@ def load_evaluation_suite(path: str | Path) -> EvaluationSuite:
                 if case.get("shadow_execution") is not None
                 else None
             ),
+            human_shadow_labels=(
+                str((suite_path.parent / case["human_shadow_labels"]).resolve())
+                if case.get("human_shadow_labels") is not None
+                else None
+            ),
             expected_shadow_outcomes=tuple(
                 _expected_shadow_outcome(item)
                 for item in case.get("expected_shadow_outcomes", ())
@@ -359,6 +366,10 @@ def load_evaluation_suite(path: str | Path) -> EvaluationSuite:
         if bool(case.shadow_execution) != bool(case.expected_shadow_outcomes):
             raise ValueError(
                 f"evaluation case {case.id} requires both shadow artifact and expectations"
+            )
+        if case.human_shadow_labels is not None and case.shadow_execution is None:
+            raise ValueError(
+                f"evaluation case {case.id} human labels require a shadow artifact"
             )
     thresholds = EvaluationThresholds(**raw.get("thresholds", {}))
     _validate_thresholds(thresholds)
@@ -487,11 +498,21 @@ def evaluate_suite(
             )
         )
         if case.shadow_execution is not None:
+            shadow_bundle = load_shadow_execution(case.shadow_execution)
+            human_labels = (
+                load_human_shadow_labels(
+                    case.human_shadow_labels,
+                    shadow_bundle,
+                )
+                if case.human_shadow_labels is not None
+                else HumanShadowLabelSet(labels=())
+            )
             shadow_results.extend(
                 evaluate_shadow_outcomes(
                     case.id,
                     case.expected_shadow_outcomes,
-                    load_shadow_execution(case.shadow_execution),
+                    human_labels,
+                    shadow_bundle,
                 )
             )
         diagnostics.extend(
@@ -623,18 +644,19 @@ def _expected_focus_outcome(raw: dict[str, Any]) -> ExpectedFocusOutcome:
 
 
 def _expected_shadow_outcome(raw: dict[str, Any]) -> ExpectedShadowOutcome:
+    unexpected = set(raw) - {
+        "claim_id",
+        "execution_state",
+        "diagnostic_codes",
+    }
+    if unexpected:
+        raise ValueError(
+            "shadow execution expectations contain unsupported fields: "
+            + ", ".join(sorted(unexpected))
+        )
     return ExpectedShadowOutcome(
         claim_id=str(raw["claim_id"]),
         execution_state=raw["execution_state"],
-        selections=tuple(
-            ExpectedShadowSelection(
-                evidence_id=str(item["evidence_id"]),
-                role=item["role"],
-                semantic_role=item["semantic_role"],
-            )
-            for item in raw.get("selections", ())
-        ),
-        unresolved_surfaces=tuple(raw.get("unresolved_surfaces", ())),
         diagnostic_codes=tuple(raw.get("diagnostic_codes", ())),
     )
 
@@ -869,6 +891,15 @@ def write_evaluation_markdown(
         f"- shadow selection precision: {result.shadow_metrics.selection_precision:.4f}",
         f"- shadow selection recall: {result.shadow_metrics.selection_recall:.4f}",
         f"- shadow role accuracy: {result.shadow_metrics.role_accuracy:.4f}",
+        f"- shadow human-labeled outcomes: "
+        f"{result.shadow_metrics.human_labeled_outcome_count}",
+        f"- shadow candidate labels: {result.shadow_metrics.candidate_label_count}",
+        f"- shadow disposition accuracy: "
+        f"{result.shadow_metrics.disposition_accuracy:.4f}",
+        f"- shadow false-rejection rate: "
+        f"{result.shadow_metrics.false_rejection_rate:.4f}",
+        f"- shadow insufficient recall: "
+        f"{result.shadow_metrics.insufficient_recall:.4f}",
         f"- shadow baseline retention: {result.shadow_metrics.baseline_retention:.4f}",
         f"- shadow unresolved precision: {result.shadow_metrics.unresolved_precision:.4f}",
         f"- shadow unresolved recall: {result.shadow_metrics.unresolved_recall:.4f}",

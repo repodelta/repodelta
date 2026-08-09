@@ -1,5 +1,5 @@
 {
-  "schema_version": "evaluation_suite.v5",
+  "schema_version": "evaluation_suite.v6",
   "k": 5,
   "thresholds": {
     "precision_at_k": 1.0,
@@ -17,6 +17,9 @@
     "selection_precision": 1.0,
     "selection_recall": 1.0,
     "role_accuracy": 1.0,
+    "disposition_accuracy": 1.0,
+    "max_false_rejection_rate": 0.0,
+    "insufficient_recall": 1.0,
     "baseline_retention": 1.0,
     "unresolved_precision": 1.0,
     "unresolved_recall": 1.0,
@@ -661,25 +664,11 @@
       "id": "llm-shadow-semantic-mapping",
       "fixture": "evaluation/direct-hunk.json",
       "shadow_execution": "llm-shadow/evaluation-observations.json",
+      "human_shadow_labels": "llm-shadow/human-labels.json",
       "expected_shadow_outcomes": [
         {
           "claim_id": "T1",
-          "execution_state": "accepted",
-          "selections": [
-            {
-              "evidence_id": "E:authority",
-              "role": "supporting",
-              "semantic_role": "authority"
-            },
-            {
-              "evidence_id": "E:removal",
-              "role": "contradicting",
-              "semantic_role": "removal"
-            }
-          ],
-          "unresolved_surfaces": [
-            "Dynamic plugin writers were not observed."
-          ]
+          "execution_state": "accepted"
         },
         {
           "claim_id": "T2",

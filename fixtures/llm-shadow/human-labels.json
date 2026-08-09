@@ -1,0 +1,34 @@
+{
+  "schema_version": "llm_shadow_human_labels.v1",
+  "authority": "human_review",
+  "rubric_version": "shadow-evidence-disposition.v1",
+  "labels": [
+    {
+      "claim_id": "T1",
+      "response": {
+        "schema_version": "2",
+        "request_id": "shadow:T1:golden",
+        "subject_id": "T1",
+        "selections": [
+          {
+            "evidence_id": "E:authority",
+            "role": "supporting",
+            "semantic_role": "authority",
+            "rationale": "The observed writer directly supports the authority claim."
+          },
+          {
+            "evidence_id": "E:removal",
+            "role": "contradicting",
+            "semantic_role": "removal",
+            "rationale": "Removal evidence has distinct polarity and must remain explicit."
+          }
+        ],
+        "rejected_evidence_ids": ["E:context"],
+        "insufficient_evidence_ids": ["E:uncertain"],
+        "unresolved_surfaces": [
+          "Dynamic plugin writers were not observed."
+        ]
+      }
+    }
+  ]
+}
