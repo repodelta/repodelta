@@ -36,6 +36,8 @@ from prismcode.llm.openai import OpenAIShadowConfig, OpenAIShadowProvider
 from prismcode.llm.provider import (
     ShadowEvidenceProvider,
     ShadowProviderExecutionPolicy,
+    ShadowProviderFailure,
+    ShadowProviderFailureKind,
     ShadowProviderResponse,
 )
 from prismcode.llm.runner import (
@@ -58,6 +60,8 @@ __all__ = [
     "ShadowEvidenceRequest",
     "ShadowEvidenceProvider",
     "ShadowProviderExecutionPolicy",
+    "ShadowProviderFailure",
+    "ShadowProviderFailureKind",
     "ShadowEvidenceSelection",
     "ShadowEvidenceSelectionItem",
     "ShadowSelectionDiagnostic",

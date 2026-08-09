@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from urllib.error import HTTPError, URLError
 
 import pytest
 
@@ -10,6 +11,7 @@ from prismcode.llm import (
     OpenAIShadowProvider,
     ShadowEvidenceCandidate,
     ShadowEvidenceRequest,
+    ShadowProviderFailure,
 )
 
 
@@ -202,8 +204,113 @@ def test_openai_provider_rejects_incomplete_or_missing_output() -> None:
         transport=lambda *_: {"choices": []},
     )
 
-    with pytest.raises(ValueError, match="no structured output"):
+    with pytest.raises(ShadowProviderFailure) as exc_info:
         provider.select(request)
+
+    assert exc_info.value.kind == "structured_output_missing"
+
+
+def test_openai_provider_classifies_structured_message_decode_failure() -> None:
+    provider = OpenAIShadowProvider(
+        OpenAIShadowConfig(api_key="key", model="model"),
+        transport=lambda *_: {
+            "choices": [{"message": {"content": "{truncated-json"}}]
+        },
+    )
+
+    with pytest.raises(ShadowProviderFailure) as exc_info:
+        provider.select(_request())
+
+    assert exc_info.value.kind == "structured_output_decode_failure"
+
+
+@pytest.mark.parametrize(
+    ("status_code", "expected_kind"),
+    (
+        (408, "timeout"),
+        (413, "request_rejected"),
+        (429, "rate_limited"),
+        (503, "server_failure"),
+    ),
+)
+def test_openai_transport_classifies_http_failures_without_response_text(
+    monkeypatch: pytest.MonkeyPatch,
+    status_code: int,
+    expected_kind: str,
+) -> None:
+    def fail(*_args, **_kwargs):
+        raise HTTPError(
+            "https://models.example/v1/chat/completions",
+            status_code,
+            "secret provider response text",
+            None,
+            None,
+        )
+
+    monkeypatch.setattr("prismcode.llm.openai.urlopen", fail)
+    provider = OpenAIShadowProvider(
+        OpenAIShadowConfig(api_key="secret-key", model="model")
+    )
+
+    with pytest.raises(ShadowProviderFailure) as exc_info:
+        provider.select(_request())
+
+    assert exc_info.value.kind == expected_kind
+    assert "secret provider response text" not in str(exc_info.value)
+
+
+@pytest.mark.parametrize(
+    ("reason", "expected_kind"),
+    (
+        (TimeoutError("secret timeout"), "timeout"),
+        (OSError("secret dns"), "network_failure"),
+    ),
+)
+def test_openai_transport_classifies_url_failures_without_reason_text(
+    monkeypatch: pytest.MonkeyPatch,
+    reason: BaseException,
+    expected_kind: str,
+) -> None:
+    def fail(*_args, **_kwargs):
+        raise URLError(reason)
+
+    monkeypatch.setattr("prismcode.llm.openai.urlopen", fail)
+    provider = OpenAIShadowProvider(
+        OpenAIShadowConfig(api_key="secret-key", model="model")
+    )
+
+    with pytest.raises(ShadowProviderFailure) as exc_info:
+        provider.select(_request())
+
+    assert exc_info.value.kind == expected_kind
+    assert "secret" not in str(exc_info.value)
+
+
+def test_openai_transport_classifies_response_decode_without_body_text(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class InvalidResponse:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+        def read(self):
+            return b"secret non-json provider body"
+
+    monkeypatch.setattr(
+        "prismcode.llm.openai.urlopen", lambda *_args, **_kwargs: InvalidResponse()
+    )
+    provider = OpenAIShadowProvider(
+        OpenAIShadowConfig(api_key="secret-key", model="model")
+    )
+
+    with pytest.raises(ShadowProviderFailure) as exc_info:
+        provider.select(_request())
+
+    assert exc_info.value.kind == "transport_response_decode_failure"
+    assert "secret non-json provider body" not in str(exc_info.value)
 
 
 def test_openai_config_rejects_unsafe_base_url() -> None:

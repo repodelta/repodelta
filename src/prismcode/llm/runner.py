@@ -13,6 +13,7 @@ from prismcode.llm.contracts import (
 from prismcode.llm.provider import (
     ShadowEvidenceProvider,
     ShadowProviderExecutionPolicy,
+    ShadowProviderFailure,
 )
 
 
@@ -87,6 +88,21 @@ class ShadowRunner:
         started = self._clock()
         try:
             response = self._provider.select(request)
+        except ShadowProviderFailure as exc:
+            return ShadowRunRecord(
+                request_id=request.request_id,
+                subject_id=request.subject_id,
+                state="provider_error",
+                candidate_count=len(request.candidates),
+                duration_ms=_elapsed_ms(started, self._clock()),
+                execution_policy=self._provider.execution_policy,
+                diagnostics=(
+                    ShadowSelectionDiagnostic(
+                        code=f"shadow_provider_{exc.kind}",
+                        message=_PROVIDER_FAILURE_MESSAGES[exc.kind],
+                    ),
+                ),
+            )
         except Exception:
             return ShadowRunRecord(
                 request_id=request.request_id,
@@ -176,3 +192,21 @@ def build_shadow_selection_comparison(
 
 def _elapsed_ms(started: float, finished: float) -> float:
     return max(0.0, (finished - started) * 1_000)
+
+
+_PROVIDER_FAILURE_MESSAGES = {
+    "timeout": "Shadow provider timed out without validated output.",
+    "network_failure": "Shadow provider transport failed without validated output.",
+    "rate_limited": "Shadow provider returned an HTTP rate-limit response.",
+    "request_rejected": "Shadow provider returned an HTTP 4xx request response.",
+    "server_failure": "Shadow provider returned an HTTP 5xx server response.",
+    "transport_response_decode_failure": (
+        "Shadow provider HTTP response could not be decoded as the transport contract."
+    ),
+    "structured_output_decode_failure": (
+        "Shadow provider message content could not be decoded as structured output."
+    ),
+    "structured_output_missing": (
+        "Shadow provider response contained no usable structured output."
+    ),
+}

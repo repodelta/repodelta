@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+import socket
 from dataclasses import dataclass
 from typing import Any, Callable, Mapping
+from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
@@ -16,6 +18,8 @@ from prismcode.llm.contracts import (
 )
 from prismcode.llm.provider import (
     ShadowProviderExecutionPolicy,
+    ShadowProviderFailure,
+    ShadowProviderFailureKind,
     ShadowProviderResponse,
 )
 
@@ -123,7 +127,12 @@ class OpenAIShadowProvider:
             _response_payload(request, self._config),
             self._config.timeout_seconds,
         )
-        output = _structured_output(response)
+        try:
+            output = _structured_output(response)
+        except json.JSONDecodeError:
+            raise ShadowProviderFailure("structured_output_decode_failure") from None
+        except (TypeError, ValueError):
+            raise ShadowProviderFailure("structured_output_missing") from None
         usage = response.get("usage")
         usage = usage if isinstance(usage, Mapping) else {}
         return ShadowProviderResponse(
@@ -330,8 +339,38 @@ def _post_json(
         headers=dict(headers),
         method="POST",
     )
-    with urlopen(request, timeout=timeout_seconds) as response:
-        parsed = json.loads(response.read().decode("utf-8"))
+    try:
+        with urlopen(request, timeout=timeout_seconds) as response:
+            body = response.read()
+    except HTTPError as exc:
+        raise ShadowProviderFailure(_http_failure_kind(exc.code)) from None
+    except (TimeoutError, socket.timeout):
+        raise ShadowProviderFailure("timeout") from None
+    except URLError as exc:
+        kind: ShadowProviderFailureKind = (
+            "timeout"
+            if isinstance(exc.reason, (TimeoutError, socket.timeout))
+            else "network_failure"
+        )
+        raise ShadowProviderFailure(kind) from None
+    except OSError:
+        raise ShadowProviderFailure("network_failure") from None
+    try:
+        parsed = json.loads(body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        raise ShadowProviderFailure("transport_response_decode_failure") from None
     if not isinstance(parsed, Mapping):
-        raise ValueError("OpenAI shadow API response must be an object")
+        raise ShadowProviderFailure("transport_response_decode_failure")
     return parsed
+
+
+def _http_failure_kind(status_code: int) -> ShadowProviderFailureKind:
+    if status_code == 408:
+        return "timeout"
+    if status_code == 429:
+        return "rate_limited"
+    if 400 <= status_code < 500:
+        return "request_rejected"
+    if 500 <= status_code < 600:
+        return "server_failure"
+    return "network_failure"

@@ -109,6 +109,12 @@ usage and latency are reported without defining pass/fail budgets; monetary
 cost requires an explicit provider/model pricing policy and representative live
 samples before becoming a gate.
 
+Operational failure observations distinguish sanitized provider timeout,
+network, rate-limit, HTTP 4xx request, HTTP 5xx server, transport-response
+decode, structured-output decode, and missing-structured-output categories.
+Unknown exceptions remain generic.
+Provider response bodies and raw exception text are not evaluation inputs.
+
 The first blinded real-PR sample, its human disposition rubric, raw validated
 observations, independent labels, bounded conclusions, and offline regression
 command are recorded in
