@@ -1,0 +1,110 @@
+{
+  "authority": "human_review",
+  "labels": [
+    {
+      "claim_id": "T1",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:T1:cf8712160b1d6ce1",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:change_relation:2ad1a7e28bd20c96c019",
+            "rationale": "This directional change is confined to one of the four declared governance documents and contributes to the complete documentation-only region.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:3c96588b3cef65d4b392",
+            "rationale": "This directional change is confined to one of the four declared governance documents and contributes to the complete documentation-only region.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:45441a497bed776918db",
+            "rationale": "This directional change is confined to one of the four declared governance documents and contributes to the complete documentation-only region.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:52cbb6e80e7997052c8e",
+            "rationale": "This directional change is confined to one of the four declared governance documents and contributes to the complete documentation-only region.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:54c46870cccf526b5731",
+            "rationale": "This directional change is confined to one of the four declared governance documents and contributes to the complete documentation-only region.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:5638d56217153b4a96d8",
+            "rationale": "This directional change is confined to one of the four declared governance documents and contributes to the complete documentation-only region.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:59655a4679c7a67ac25a",
+            "rationale": "This directional change is confined to one of the four declared governance documents and contributes to the complete documentation-only region.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:5fa3170b384e650b5c3b",
+            "rationale": "This directional change is confined to one of the four declared governance documents and contributes to the complete documentation-only region.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:66a224c9c16e99b9ea61",
+            "rationale": "This directional change is confined to one of the four declared governance documents and contributes to the complete documentation-only region.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:7982c90639140e7ed27e",
+            "rationale": "This directional change is confined to one of the four declared governance documents and contributes to the complete documentation-only region.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:89be52707e6e47556306",
+            "rationale": "This directional change is confined to one of the four declared governance documents and contributes to the complete documentation-only region.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:90c2805ca4af05ce40c7",
+            "rationale": "This directional change is confined to one of the four declared governance documents and contributes to the complete documentation-only region.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:a6e24b60789b581b6eb4",
+            "rationale": "This directional change is confined to one of the four declared governance documents and contributes to the complete documentation-only region.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:a937cac2b086bdbb1d96",
+            "rationale": "This directional change is confined to one of the four declared governance documents and contributes to the complete documentation-only region.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:cb55dd47180d252c80c2",
+            "rationale": "This directional change is confined to one of the four declared governance documents and contributes to the complete documentation-only region.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          }
+        ],
+        "subject_id": "T1",
+        "unresolved_surfaces": []
+      }
+    }
+  ],
+  "rubric_version": "shadow-evidence-disposition.v1",
+  "schema_version": "llm_shadow_human_labels.v1"
+}

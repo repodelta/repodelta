@@ -1,0 +1,334 @@
+{
+  "authority": "human_review",
+  "labels": [
+    {
+      "claim_id": "T1",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:T1:72daf23047d4238f",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:change_relation:723edcbc2567646fdabc",
+            "rationale": "The governance change directly moves discovery and scope expansion into planning, branches, and Draft PRs before merge readiness.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:84d40383b0f29adbc868",
+            "rationale": "The governance change directly moves discovery and scope expansion into planning, branches, and Draft PRs before merge readiness.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:d1bdcc15f18127c12245",
+            "rationale": "The governance change directly moves discovery and scope expansion into planning, branches, and Draft PRs before merge readiness.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          }
+        ],
+        "subject_id": "T1",
+        "unresolved_surfaces": []
+      }
+    },
+    {
+      "claim_id": "T2",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:T2:9aec9326d754f4f3",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:change_relation:22029727e75e3891c6c4",
+            "rationale": "The change introduces or consumes the authority, admission, proof, and consumption decomposition in a canonical governance surface.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:2e707fe9d16610ae1929",
+            "rationale": "The change introduces or consumes the authority, admission, proof, and consumption decomposition in a canonical governance surface.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:4cff3155a6fd015da7d2",
+            "rationale": "The change introduces or consumes the authority, admission, proof, and consumption decomposition in a canonical governance surface.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:664d132b54adfafd1e31",
+            "rationale": "The change introduces or consumes the authority, admission, proof, and consumption decomposition in a canonical governance surface.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:6e148db20377e838547b",
+            "rationale": "The change introduces or consumes the authority, admission, proof, and consumption decomposition in a canonical governance surface.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:84d40383b0f29adbc868",
+            "rationale": "The discovery rule uses authority, consumer, and proof dependencies as triggers for expanding the planned region.",
+            "role": "context",
+            "semantic_role": "documentation"
+          }
+        ],
+        "subject_id": "T2",
+        "unresolved_surfaces": []
+      }
+    },
+    {
+      "claim_id": "T3",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [
+          "E:change_relation:d1bdcc15f18127c12245"
+        ],
+        "request_id": "shadow:T3:33a1857fc84ec685",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:change_relation:99dc599476ff088d4b2f",
+            "rationale": "The protocol directly requires effect, activation, permission, and lifecycle for every retained-path classification.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:4cff3155a6fd015da7d2",
+            "rationale": "The directional change removes label-only classification guidance and places retained-path safety in the surrounding closure contract.",
+            "role": "context",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:590b213975db8c964791",
+            "rationale": "The directional change removes label-only classification guidance and places retained-path safety in the surrounding closure contract.",
+            "role": "context",
+            "semantic_role": "documentation"
+          }
+        ],
+        "subject_id": "T3",
+        "unresolved_surfaces": []
+      }
+    },
+    {
+      "claim_id": "T4",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [
+          "E:change_relation:723edcbc2567646fdabc",
+          "E:change_relation:ca26d76b509a1d467664",
+          "E:change_relation:d99ac8a6412609ba4a54",
+          "E:change_relation:fd67ab42b688c767e2e2"
+        ],
+        "request_id": "shadow:T4:44840d85b4e90208",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:change_relation:0b3b49b242e618efba49",
+            "rationale": "The governance hunk defines or applies separate responsibility-closure, abandonment-safety, and parent-completion states.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:22029727e75e3891c6c4",
+            "rationale": "The governance hunk defines or applies separate responsibility-closure, abandonment-safety, and parent-completion states.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:277584a8f1d6b83f94fb",
+            "rationale": "The governance hunk defines or applies separate responsibility-closure, abandonment-safety, and parent-completion states.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:4cff3155a6fd015da7d2",
+            "rationale": "The governance hunk defines or applies separate responsibility-closure, abandonment-safety, and parent-completion states.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:4d4a9dc974881d15dddc",
+            "rationale": "The governance hunk defines or applies separate responsibility-closure, abandonment-safety, and parent-completion states.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:664d132b54adfafd1e31",
+            "rationale": "The governance hunk defines or applies separate responsibility-closure, abandonment-safety, and parent-completion states.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:d1bdcc15f18127c12245",
+            "rationale": "The governance hunk defines or applies separate responsibility-closure, abandonment-safety, and parent-completion states.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          }
+        ],
+        "subject_id": "T4",
+        "unresolved_surfaces": []
+      }
+    },
+    {
+      "claim_id": "T5",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [
+          "E:change_relation:d1bdcc15f18127c12245"
+        ],
+        "request_id": "shadow:T5:f809580d083aad63",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:change_relation:22029727e75e3891c6c4",
+            "rationale": "The hunk bounds planning or verification to declared scope, observed sinks, actual consumers, and explicit coverage limitations.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:4cff3155a6fd015da7d2",
+            "rationale": "The hunk bounds planning or verification to declared scope, observed sinks, actual consumers, and explicit coverage limitations.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:4d4a9dc974881d15dddc",
+            "rationale": "The hunk bounds planning or verification to declared scope, observed sinks, actual consumers, and explicit coverage limitations.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:664d132b54adfafd1e31",
+            "rationale": "The hunk bounds planning or verification to declared scope, observed sinks, actual consumers, and explicit coverage limitations.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:67ee545d475286b5df24",
+            "rationale": "The hunk bounds planning or verification to declared scope, observed sinks, actual consumers, and explicit coverage limitations.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:6e148db20377e838547b",
+            "rationale": "The hunk bounds planning or verification to declared scope, observed sinks, actual consumers, and explicit coverage limitations.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:b3d216a71a96eb9d0e4a",
+            "rationale": "The hunk bounds planning or verification to declared scope, observed sinks, actual consumers, and explicit coverage limitations.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:fd67ab42b688c767e2e2",
+            "rationale": "The hunk bounds planning or verification to declared scope, observed sinks, actual consumers, and explicit coverage limitations.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          }
+        ],
+        "subject_id": "T5",
+        "unresolved_surfaces": []
+      }
+    },
+    {
+      "claim_id": "T6",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [
+          "E:change_relation:d1bdcc15f18127c12245",
+          "E:change_relation:d99ac8a6412609ba4a54"
+        ],
+        "request_id": "shadow:T6:4cb685667e2c97f8",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:change_relation:6fc43371cd7d0c4f9627",
+            "rationale": "The commit guideline directly preserves buildability where policy requires it while allowing exploratory checkpoints before delivery.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:4cff3155a6fd015da7d2",
+            "rationale": "The post-merge audit is explicitly confirmation and miss measurement rather than normal transformation discovery.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          }
+        ],
+        "subject_id": "T6",
+        "unresolved_surfaces": []
+      }
+    },
+    {
+      "claim_id": "T7",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [
+          "E:change_relation:107411044b49729d1dab"
+        ],
+        "request_id": "shadow:T7:4d95f57ebf53625a",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:change_relation:d1bdcc15f18127c12245",
+            "rationale": "The PR rule directly requires a stable issue, plan, or design record to own remaining parent obligations and stop conditions.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:22029727e75e3891c6c4",
+            "rationale": "The surrounding governance contract defines how an open parent remains explicit and abandonment-safe without depending on future wiring.",
+            "role": "context",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:277584a8f1d6b83f94fb",
+            "rationale": "The surrounding governance contract defines how an open parent remains explicit and abandonment-safe without depending on future wiring.",
+            "role": "context",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:4cff3155a6fd015da7d2",
+            "rationale": "The surrounding governance contract defines how an open parent remains explicit and abandonment-safe without depending on future wiring.",
+            "role": "context",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:4d4a9dc974881d15dddc",
+            "rationale": "The surrounding governance contract defines how an open parent remains explicit and abandonment-safe without depending on future wiring.",
+            "role": "context",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:590b213975db8c964791",
+            "rationale": "The surrounding governance contract defines how an open parent remains explicit and abandonment-safe without depending on future wiring.",
+            "role": "context",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:664d132b54adfafd1e31",
+            "rationale": "The surrounding governance contract defines how an open parent remains explicit and abandonment-safe without depending on future wiring.",
+            "role": "context",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:fd67ab42b688c767e2e2",
+            "rationale": "The surrounding governance contract defines how an open parent remains explicit and abandonment-safe without depending on future wiring.",
+            "role": "context",
+            "semantic_role": "documentation"
+          }
+        ],
+        "subject_id": "T7",
+        "unresolved_surfaces": []
+      }
+    }
+  ],
+  "rubric_version": "shadow-evidence-disposition.v1",
+  "schema_version": "llm_shadow_human_labels.v1"
+}

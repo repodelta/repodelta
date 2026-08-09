@@ -1,0 +1,105 @@
+{
+  "authority": "human_review",
+  "labels": [
+    {
+      "claim_id": "T1",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:T1:8c9f28f6c0eb090e",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:structural_change:44df055d67a962ab8c3c",
+            "rationale": "The change replaces an exclusion blacklist with the explicit set of formats the provider structurally consumes.",
+            "role": "supporting",
+            "semantic_role": "authority"
+          },
+          {
+            "evidence_id": "E:structural_change:4ad5864c1b09b6f38b95",
+            "rationale": "The applicability function changes from accepting every unknown suffix to an allowlist plus explicit resolver formats.",
+            "role": "supporting",
+            "semantic_role": "boundary"
+          },
+          {
+            "evidence_id": "E:structural_change:62bd488fe518cd433bd0",
+            "rationale": "The test-file change demonstrates that generic configuration no longer reduces source coverage while structural inputs still do.",
+            "role": "supporting",
+            "semantic_role": "test"
+          },
+          {
+            "evidence_id": "E:structural_change:a507cf579cd59df9a0bd",
+            "rationale": "Removing the non-structural blacklist eliminates the former unknown-format-is-structural default.",
+            "role": "supporting",
+            "semantic_role": "removal"
+          },
+          {
+            "evidence_id": "E:structural_change:b986a0e9c127e16e7133",
+            "rationale": "The provider-file delta contains the controlling applicability authority replacement.",
+            "role": "supporting",
+            "semantic_role": "producer"
+          }
+        ],
+        "subject_id": "T1",
+        "unresolved_surfaces": []
+      }
+    },
+    {
+      "claim_id": "T2",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:T2:30a3a09edb60d43a",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:structural_change:44df055d67a962ab8c3c",
+            "rationale": "The allowlist is the single declared source-format authority and explicitly excludes generic configuration by omission.",
+            "role": "supporting",
+            "semantic_role": "authority"
+          },
+          {
+            "evidence_id": "E:structural_change:4ad5864c1b09b6f38b95",
+            "rationale": "The predicate explicitly admits resolver-backed route, application, JSON, and YAML surfaces before consulting the source allowlist.",
+            "role": "supporting",
+            "semantic_role": "boundary"
+          },
+          {
+            "evidence_id": "E:structural_change:62bd488fe518cd433bd0",
+            "rationale": "The combined tests cover both non-applicable configuration and missing applicable structural inputs.",
+            "role": "supporting",
+            "semantic_role": "test"
+          },
+          {
+            "evidence_id": "E:structural_change:985fc533423eb57d8b8c",
+            "rationale": "This test proves generic JSON, YAML, and TOML changes are excluded from Codegraph coverage accounting.",
+            "role": "supporting",
+            "semantic_role": "test"
+          },
+          {
+            "evidence_id": "E:structural_change:a507cf579cd59df9a0bd",
+            "rationale": "The old blacklist authority is removed rather than retained as a competing decision path.",
+            "role": "supporting",
+            "semantic_role": "removal"
+          },
+          {
+            "evidence_id": "E:structural_change:b986a0e9c127e16e7133",
+            "rationale": "The provider module contains the complete applicability replacement consumed by coverage collection.",
+            "role": "supporting",
+            "semantic_role": "producer"
+          },
+          {
+            "evidence_id": "E:structural_change:f7ad97c4d233dd2cba03",
+            "rationale": "This counterexample preserves partial coverage for unindexed source and resolver-backed structural inputs.",
+            "role": "supporting",
+            "semantic_role": "test"
+          }
+        ],
+        "subject_id": "T2",
+        "unresolved_surfaces": []
+      }
+    }
+  ],
+  "rubric_version": "shadow-evidence-disposition.v1",
+  "schema_version": "llm_shadow_human_labels.v1"
+}

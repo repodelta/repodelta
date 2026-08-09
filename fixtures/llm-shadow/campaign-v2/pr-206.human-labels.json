@@ -1,0 +1,136 @@
+{
+  "authority": "human_review",
+  "labels": [
+    {
+      "claim_id": "T1",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:T1:5cce913b89e6188c",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:change_relation:3459aa6b2b721e9a0cb0",
+            "rationale": "The added protocol section introduces the previously absent confidence-to-enforcement decision rule.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:60bea9d6989c82f3a34e",
+            "rationale": "The commit rule requires naming a concrete invalid transition when hardening an invariant.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:7cbd784a6c24614b06c5",
+            "rationale": "The planning output now records current and target enforcement and the invalid transition prevented.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:bb67f1bd30990235143f",
+            "rationale": "The root agent guide adds stability evidence, smallest-boundary selection, and anti-over-hardening rules.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:d4d63dfb89c8c436ac3d",
+            "rationale": "The verification rule distinguishes production-sink behavioral proof from static enforcement.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:f2bdf39b41e8b932147a",
+            "rationale": "The PR guide now requires an explicit sufficiency justification that does not freeze uncertain semantics.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          }
+        ],
+        "subject_id": "T1",
+        "unresolved_surfaces": []
+      }
+    },
+    {
+      "claim_id": "T2",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:T2:94f57cf172979031",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:change_relation:3459aa6b2b721e9a0cb0",
+            "rationale": "The detailed protocol orders semantic evidence before enforcement strength and requires concrete exclusion value.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:60bea9d6989c82f3a34e",
+            "rationale": "The commit convention requires the concrete invalid transition instead of mechanism-only naming.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:bb67f1bd30990235143f",
+            "rationale": "The root guide carries the same stable-versus-exploratory invariant rule into the canonical entry point.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          }
+        ],
+        "subject_id": "T2",
+        "unresolved_surfaces": []
+      }
+    },
+    {
+      "claim_id": "T3",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:T3:5fb4b3c4cf3469f0",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:change_relation:3459aa6b2b721e9a0cb0",
+            "rationale": "The protocol directly states the complete after-state sequence and mechanism ladder.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:60bea9d6989c82f3a34e",
+            "rationale": "The commit rule carries the concrete-transition justification into change history.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:7cbd784a6c24614b06c5",
+            "rationale": "The planning contract makes the invariant and enforcement transition reviewable.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:bb67f1bd30990235143f",
+            "rationale": "The root guide explicitly prefers machine boundaries only for stable distinctions and concrete exclusions.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:d4d63dfb89c8c436ac3d",
+            "rationale": "The sink-proof rule prevents static mechanisms from substituting for behavioral evidence.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          },
+          {
+            "evidence_id": "E:change_relation:f2bdf39b41e8b932147a",
+            "rationale": "The PR record must explain sufficient enforcement without freezing uncertain semantics.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          }
+        ],
+        "subject_id": "T3",
+        "unresolved_surfaces": []
+      }
+    }
+  ],
+  "rubric_version": "shadow-evidence-disposition.v1",
+  "schema_version": "llm_shadow_human_labels.v1"
+}
