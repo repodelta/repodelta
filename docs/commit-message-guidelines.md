@@ -17,3 +17,5 @@ Examples:
 
 When useful, mention migrated endpoints, changed boundaries, removed bypasses,
 and preserved contracts. Never call unconsumed or exploratory code canonical.
+When hardening an invariant, name the invalid semantic transition being
+prevented rather than only the type, factory, test, or gate used to prevent it.

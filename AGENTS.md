@@ -21,6 +21,13 @@ Tests alone do not prove closure. Keep declarations, repository and runtime
 facts, inference, and unresolved surfaces distinct; bound conclusions by
 observed coverage.
 
+When a change reveals a stable semantic invariant, establish it with a
+counterexample and sink-level evidence, then encode it at the smallest
+sufficient machine-enforceable boundary. Prefer types, controlled construction,
+module boundaries, or automated gates when they exclude a concrete invalid
+transition. Do not harden exploratory semantics or add constraints that only
+increase abstraction.
+
 For non-trivial behavioral, responsibility, contract, data-flow, or
 cross-component changes, follow `docs/agent-change-protocol.md`. Before creating
 an Issue, follow `docs/issue-guidelines.md`; before committing or opening a PR,

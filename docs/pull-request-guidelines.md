@@ -7,6 +7,8 @@ Title the PR around its responsibility or contract transition. Describe:
 - affected producer/consumer contracts and before/after production flow;
 - migrations, removals, and retained classified paths;
 - counterfactual, contract, and sink-level evidence;
+- stable invariants affected by the PR, their current and target enforcement,
+  and why that enforcement is sufficient without freezing uncertain semantics;
 - unresolved dynamic/external surfaces;
 - responsibility closure, contract closure, abandonment safety, and parent
   completion as separate states.
