@@ -36,13 +36,13 @@ class ShadowExecutionBundle:
 
     summary: LLMShadowExecutionSummary
     observations: tuple["ShadowExecutionObservation", ...] = ()
-    schema_version: str = "llm_shadow_execution.v3"
+    schema_version: str = "llm_shadow_execution.v4"
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
 
     def __post_init__(self) -> None:
-        if self.schema_version != "llm_shadow_execution.v3":
+        if self.schema_version != "llm_shadow_execution.v4":
             raise ValueError("unsupported shadow execution schema_version")
         claim_ids = tuple(item.claim_id for item in self.observations)
         if len(claim_ids) != len(set(claim_ids)):
@@ -259,7 +259,9 @@ def _summary_for_observations(
     truncated = any(
         item.admission_state == "ready_truncated" for item in observations
     )
-    if admitted_count and failed_count == admitted_count:
+    if not admitted_count and not blocked:
+        state = "empty"
+    elif admitted_count and failed_count == admitted_count:
         state = "failed"
     elif failed_count or blocked or truncated or deferred_count:
         state = "partial"
@@ -312,8 +314,8 @@ def load_shadow_execution(path: str | Path) -> ShadowExecutionBundle:
     """Load one canonical shadow artifact without replaying provider output."""
 
     raw = json.loads(Path(path).read_text(encoding="utf-8"))
-    if raw.get("schema_version") != "llm_shadow_execution.v3":
-        raise ValueError("shadow artifact must use schema_version llm_shadow_execution.v3")
+    if raw.get("schema_version") != "llm_shadow_execution.v4":
+        raise ValueError("shadow artifact must use schema_version llm_shadow_execution.v4")
     summary = LLMShadowExecutionSummary(**raw["summary"])
     observations = tuple(
         _load_observation(item) for item in raw.get("observations", ())

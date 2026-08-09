@@ -220,7 +220,8 @@ typed observation per claim, including the bounded request, admission and
 execution fate, validated selection divergence, usage, failures, deferrals,
 and coverage limits, in
 `build/pr-123.html.llm-shadow.json`; the Brief header shows only the execution
-state. Missing configuration records `unavailable`; provider or validation
+state. A run with no admitted request records `empty`; missing configuration
+records `unavailable`; provider or validation
 failure records `partial` or `failed`; deterministic HTML still succeeds.
 Omitting `--llm-shadow` performs no provider call and writes no shadow artifact.
 

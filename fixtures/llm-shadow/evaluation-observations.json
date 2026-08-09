@@ -1,5 +1,5 @@
 {
-  "schema_version": "llm_shadow_execution.v3",
+  "schema_version": "llm_shadow_execution.v4",
   "summary": {
     "state": "partial",
     "admitted_count": 3,
