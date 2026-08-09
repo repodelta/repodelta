@@ -185,6 +185,14 @@ def test_deepseek_profile_maps_neutral_policy_to_provider_payload() -> None:
     assert "enable_thinking" not in captured["payload"]
     assert "thinking_budget" not in captured["payload"]
     assert "JSON object" in captured["payload"]["messages"][0]["content"]
+    user_content = json.loads(captured["payload"]["messages"][1]["content"])
+    assert user_content["request"]["request_id"] == request.request_id
+    assert user_content["required_response_json_schema"]["properties"][
+        "request_id"
+    ]["type"] == "string"
+    assert user_content["required_response_json_schema"]["properties"][
+        "selections"
+    ]["items"]["additionalProperties"] is False
 
 
 def test_openai_provider_rejects_incomplete_or_missing_output() -> None:

@@ -150,9 +150,7 @@ def _response_payload(
             },
             {
                 "role": "user",
-                "content": json.dumps(
-                    request.to_dict(), ensure_ascii=False, separators=(",", ":")
-                ),
+                "content": _user_content(request, config),
             },
         ],
         "response_format": _response_format(request, config),
@@ -166,6 +164,19 @@ def _response_payload(
     if config.thinking_budget is not None:
         payload["thinking_budget"] = config.thinking_budget
     return payload
+
+
+def _user_content(
+    request: ShadowEvidenceRequest,
+    config: OpenAIShadowConfig,
+) -> str:
+    content: dict[str, Any] = request.to_dict()
+    if config.api_profile == "deepseek":
+        content = {
+            "request": content,
+            "required_response_json_schema": _selection_schema(request),
+        }
+    return json.dumps(content, ensure_ascii=False, separators=(",", ":"))
 
 
 def _max_tokens_field(config: OpenAIShadowConfig) -> str:
