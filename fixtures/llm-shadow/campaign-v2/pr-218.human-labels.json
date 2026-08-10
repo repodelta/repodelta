@@ -1,0 +1,57 @@
+{
+  "authority": "human_review",
+  "labels": [
+    {
+      "claim_id": "T1",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:T1:684396888b09ac83",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:structural_change:4626118b1bf027548057",
+            "rationale": "The validator replacement shows the former unconditional rejection and the new blocked-only exception.",
+            "role": "supporting",
+            "semantic_role": "boundary"
+          },
+          {
+            "evidence_id": "E:structural_change:d5713f37f7dbca319764",
+            "rationale": "The test change preserves blocked baseline IDs and adds serialized tamper counterexamples for invalid no-request cases.",
+            "role": "supporting",
+            "semantic_role": "test"
+          }
+        ],
+        "subject_id": "T1",
+        "unresolved_surfaces": []
+      }
+    },
+    {
+      "claim_id": "T2",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:T2:1301a8f704389314",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:structural_change:4626118b1bf027548057",
+            "rationale": "The construction guard limits preserved IDs to matching blocked states and enforces uniqueness and eligible-count bounds.",
+            "role": "supporting",
+            "semantic_role": "boundary"
+          },
+          {
+            "evidence_id": "E:structural_change:d5713f37f7dbca319764",
+            "rationale": "Round-trip and tampered-artifact assertions exercise the stated serialization and loading contract.",
+            "role": "supporting",
+            "semantic_role": "test"
+          }
+        ],
+        "subject_id": "T2",
+        "unresolved_surfaces": []
+      }
+    }
+  ],
+  "rubric_version": "shadow-evidence-disposition.v1",
+  "schema_version": "llm_shadow_human_labels.v1"
+}

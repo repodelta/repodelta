@@ -1,0 +1,304 @@
+{
+  "authority": "human_review",
+  "labels": [
+    {
+      "claim_id": "T1",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:T1:c63a9f2a2e066bee",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:structural_change:3ebadfc34250f335d1a2",
+            "rationale": "The counterexample constructs one binding with opposing predicate roles and shows the valid claim-level result.",
+            "role": "supporting",
+            "semantic_role": "test"
+          },
+          {
+            "evidence_id": "E:structural_change:7f6ee5dc76a147396f78",
+            "rationale": "The aggregation change exposes the former independent union and removes support when the same binding contradicts another predicate.",
+            "role": "supporting",
+            "semantic_role": "authority"
+          }
+        ],
+        "subject_id": "T1",
+        "unresolved_surfaces": []
+      }
+    },
+    {
+      "claim_id": "T2",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:T2:d5476165d404a04f",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:structural_change:3ebadfc34250f335d1a2",
+            "rationale": "The test preserves the complete predicate assessment objects, roles, and reasons through claim aggregation.",
+            "role": "supporting",
+            "semantic_role": "test"
+          },
+          {
+            "evidence_id": "E:structural_change:c2791c858bfc8ed77f72",
+            "rationale": "The test preserves the complete predicate assessment objects, roles, and reasons through claim aggregation.",
+            "role": "supporting",
+            "semantic_role": "test"
+          },
+          {
+            "evidence_id": "E:structural_change:7f6ee5dc76a147396f78",
+            "rationale": "The aggregator changes only the claim-level supporting set and leaves predicate assessments intact.",
+            "role": "supporting",
+            "semantic_role": "authority"
+          }
+        ],
+        "subject_id": "T2",
+        "unresolved_surfaces": []
+      }
+    },
+    {
+      "claim_id": "T3",
+      "response": {
+        "insufficient_evidence_ids": [
+          "E:structural_change:3ebadfc34250f335d1a2",
+          "E:structural_change:7f6ee5dc76a147396f78",
+          "E:structural_change:c2791c858bfc8ed77f72"
+        ],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:T3:2a3ce84e1067006f",
+        "schema_version": "2",
+        "selections": [],
+        "subject_id": "T3",
+        "unresolved_surfaces": [
+          "The authored statement ends at a colon and does not state the conjunctive-boundary behavior needed to judge candidate relevance."
+        ]
+      }
+    },
+    {
+      "claim_id": "T4",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:T4:437eab7ffa94b124",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:structural_change:3ebadfc34250f335d1a2",
+            "rationale": "The counterexample proves contradiction controls the claim while both predicate-level assessments remain unchanged.",
+            "role": "supporting",
+            "semantic_role": "test"
+          },
+          {
+            "evidence_id": "E:structural_change:c2791c858bfc8ed77f72",
+            "rationale": "The counterexample proves contradiction controls the claim while both predicate-level assessments remain unchanged.",
+            "role": "supporting",
+            "semantic_role": "test"
+          },
+          {
+            "evidence_id": "E:structural_change:7f6ee5dc76a147396f78",
+            "rationale": "The aggregator subtracts contradicting IDs from aggregate support without rewriting predicate-level evidence.",
+            "role": "supporting",
+            "semantic_role": "authority"
+          }
+        ],
+        "subject_id": "T4",
+        "unresolved_surfaces": []
+      }
+    },
+    {
+      "claim_id": "T5",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [
+          "E:structural_path:038141a3493c40e49239",
+          "E:structural_path:06581bef92c8c6385a1b",
+          "E:structural_path:071a971ac7c66f2d4e7a",
+          "E:structural_path:106f09ba923a222991f7",
+          "E:structural_path:1142584ef67752f56631",
+          "E:structural_path:11e275c92dc5dcf08e5a",
+          "E:structural_path:14fcb536aca188405c88",
+          "E:structural_path:1ddf24e43364758c9246",
+          "E:structural_path:2205534e3a4887357fe8",
+          "E:structural_path:2542e195e24bcc52539e",
+          "E:structural_path:258f4845a8b216001ee0",
+          "E:structural_path:2b667b3ea722e3df29b7",
+          "E:structural_path:2da0962230f7edd55d42",
+          "E:structural_path:37ad4e8e65d827197c82",
+          "E:structural_path:3e3e632aabf8ffa9eae0",
+          "E:structural_path:4065e3e485706a2d1ada",
+          "E:structural_path:455822745475477b12d9",
+          "E:structural_path:4c5af105f2e8c49b83af",
+          "E:structural_path:50e718987772a6738b98",
+          "E:structural_path:531cbefe9a802b0bcf1e",
+          "E:structural_path:537146c324891759ae62",
+          "E:structural_path:57c6430f002dc9a165a5",
+          "E:structural_path:5b1352a4696639ba40b9",
+          "E:structural_path:5cc684dc3c398278ec7c",
+          "E:structural_path:5e349bc8b22ae3a615ae",
+          "E:structural_path:5eb02cbc4cab09ef10cd",
+          "E:structural_path:5fd76db78f0059233757",
+          "E:structural_path:62d7563250090405d940"
+        ],
+        "request_id": "shadow:T5:c96666f4f24b9af3",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:structural_change:3ebadfc34250f335d1a2",
+            "rationale": "The changed test surface constructs the canonical predicate-assessment sequence that enters aggregation.",
+            "role": "supporting",
+            "semantic_role": "test"
+          },
+          {
+            "evidence_id": "E:structural_change:c2791c858bfc8ed77f72",
+            "rationale": "The changed test surface constructs the canonical predicate-assessment sequence that enters aggregation.",
+            "role": "supporting",
+            "semantic_role": "test"
+          },
+          {
+            "evidence_id": "E:structural_path:1844b83e68b58f50d96f",
+            "rationale": "The structural path connects predicate-assessment construction to the aggregate boundary.",
+            "role": "context",
+            "semantic_role": "path"
+          },
+          {
+            "evidence_id": "E:structural_path:51cd3589d9ca29df8154",
+            "rationale": "The structural path connects predicate-assessment construction to the aggregate boundary.",
+            "role": "context",
+            "semantic_role": "path"
+          }
+        ],
+        "subject_id": "T5",
+        "unresolved_surfaces": []
+      }
+    },
+    {
+      "claim_id": "T6",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [
+          "E:structural_path:038141a3493c40e49239",
+          "E:structural_path:06581bef92c8c6385a1b",
+          "E:structural_path:071a971ac7c66f2d4e7a",
+          "E:structural_path:106f09ba923a222991f7",
+          "E:structural_path:1142584ef67752f56631",
+          "E:structural_path:11e275c92dc5dcf08e5a",
+          "E:structural_path:14fcb536aca188405c88",
+          "E:structural_path:1ddf24e43364758c9246",
+          "E:structural_path:2205534e3a4887357fe8",
+          "E:structural_path:2542e195e24bcc52539e",
+          "E:structural_path:258f4845a8b216001ee0",
+          "E:structural_path:2b667b3ea722e3df29b7",
+          "E:structural_path:37ad4e8e65d827197c82",
+          "E:structural_path:3e3e632aabf8ffa9eae0",
+          "E:structural_path:4065e3e485706a2d1ada",
+          "E:structural_path:455822745475477b12d9",
+          "E:structural_path:50e718987772a6738b98",
+          "E:structural_path:51cd3589d9ca29df8154",
+          "E:structural_path:531cbefe9a802b0bcf1e",
+          "E:structural_path:537146c324891759ae62",
+          "E:structural_path:57c6430f002dc9a165a5",
+          "E:structural_path:5b1352a4696639ba40b9",
+          "E:structural_path:5cc684dc3c398278ec7c",
+          "E:structural_path:5e349bc8b22ae3a615ae",
+          "E:structural_path:5eb02cbc4cab09ef10cd",
+          "E:structural_path:5fd76db78f0059233757",
+          "E:structural_path:62d7563250090405d940"
+        ],
+        "request_id": "shadow:T6:3632c296ed38a70f",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:structural_change:3ebadfc34250f335d1a2",
+            "rationale": "The focused counterexample directly exercises the declared aggregation authority.",
+            "role": "supporting",
+            "semantic_role": "test"
+          },
+          {
+            "evidence_id": "E:structural_change:c2791c858bfc8ed77f72",
+            "rationale": "The focused counterexample directly exercises the declared aggregation authority.",
+            "role": "supporting",
+            "semantic_role": "test"
+          },
+          {
+            "evidence_id": "E:structural_change:7f6ee5dc76a147396f78",
+            "rationale": "This is the controlling function that decides the claim-level binding roles.",
+            "role": "supporting",
+            "semantic_role": "authority"
+          },
+          {
+            "evidence_id": "E:structural_path:1844b83e68b58f50d96f",
+            "rationale": "The structural relation directly connects the focused test consumer to the aggregation authority.",
+            "role": "context",
+            "semantic_role": "path"
+          },
+          {
+            "evidence_id": "E:structural_path:2da0962230f7edd55d42",
+            "rationale": "The structural relation directly connects the focused test consumer to the aggregation authority.",
+            "role": "context",
+            "semantic_role": "path"
+          },
+          {
+            "evidence_id": "E:structural_path:4c5af105f2e8c49b83af",
+            "rationale": "The structural relation directly connects the focused test consumer to the aggregation authority.",
+            "role": "context",
+            "semantic_role": "path"
+          }
+        ],
+        "subject_id": "T6",
+        "unresolved_surfaces": []
+      }
+    },
+    {
+      "claim_id": "T7",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:T7:9687371a0bf1180a",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:structural_change:3ebadfc34250f335d1a2",
+            "rationale": "The test verifies the validated claim assessment emitted by the aggregate boundary.",
+            "role": "supporting",
+            "semantic_role": "test"
+          },
+          {
+            "evidence_id": "E:structural_change:c2791c858bfc8ed77f72",
+            "rationale": "The test verifies the validated claim assessment emitted by the aggregate boundary.",
+            "role": "supporting",
+            "semantic_role": "test"
+          },
+          {
+            "evidence_id": "E:structural_change:7f6ee5dc76a147396f78",
+            "rationale": "The aggregator constructs the claim-level output after converging cross-predicate roles.",
+            "role": "supporting",
+            "semantic_role": "producer"
+          }
+        ],
+        "subject_id": "T7",
+        "unresolved_surfaces": []
+      }
+    },
+    {
+      "claim_id": "T8",
+      "response": {
+        "insufficient_evidence_ids": [
+          "E:change_relation:dd491c53650ce524c64d",
+          "E:structural_change:c2791c858bfc8ed77f72",
+          "E:structural_change:3ebadfc34250f335d1a2"
+        ],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:T8:daad6562761c1f45",
+        "schema_version": "2",
+        "selections": [],
+        "subject_id": "T8",
+        "unresolved_surfaces": [
+          "The admitted documentation and local unit test do not demonstrate that alignment, routing, projection, renderer, and shadow consumers remain unchanged."
+        ]
+      }
+    }
+  ],
+  "rubric_version": "shadow-evidence-disposition.v1",
+  "schema_version": "llm_shadow_human_labels.v1"
+}

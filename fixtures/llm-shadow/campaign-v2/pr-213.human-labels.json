@@ -1,0 +1,277 @@
+{
+  "authority": "human_review",
+  "labels": [
+    {
+      "claim_id": "T1",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [
+          "E:structural_change:070c9eaeb1eb141523ba",
+          "E:structural_change:42fcd3a6b5db8e5eef96",
+          "E:structural_change:4af883b0a1daca67bede",
+          "E:structural_change:936ae20778bf6e5bb8c4",
+          "E:structural_change:f7521f7029b75d4df73c"
+        ],
+        "request_id": "shadow:T1:7b57c1f85beffe7b",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:structural_change:78e737d8bcc59fa9b00d",
+            "rationale": "The convergence change replaces deterministic-only eligibility with the generic-state shadow extension that was previously missing.",
+            "role": "supporting",
+            "semantic_role": "boundary"
+          },
+          {
+            "evidence_id": "E:structural_change:a6b973204ddcc9904c39",
+            "rationale": "The convergence change replaces deterministic-only eligibility with the generic-state shadow extension that was previously missing.",
+            "role": "supporting",
+            "semantic_role": "boundary"
+          },
+          {
+            "evidence_id": "E:structural_change:b48de356ce4358c540fa",
+            "rationale": "The directional tests expose the old empty-admission behavior and the corrected empty execution-state derivation.",
+            "role": "supporting",
+            "semantic_role": "test"
+          },
+          {
+            "evidence_id": "E:structural_change:ea3c3ba6834264a4216f",
+            "rationale": "The directional tests expose the old empty-admission behavior and the corrected empty execution-state derivation.",
+            "role": "supporting",
+            "semantic_role": "test"
+          },
+          {
+            "evidence_id": "E:structural_change:6fd5a5946ad69fbd277c",
+            "rationale": "The directional tests expose the old empty-admission behavior and the corrected empty execution-state derivation.",
+            "role": "supporting",
+            "semantic_role": "test"
+          },
+          {
+            "evidence_id": "E:structural_change:b9f2a918c42207a35ecb",
+            "rationale": "The review-level state contract adds and derives empty instead of reporting completed when no request was admitted.",
+            "role": "supporting",
+            "semantic_role": "producer"
+          },
+          {
+            "evidence_id": "E:structural_change:c94bfac8625c3309efd4",
+            "rationale": "The review-level state contract adds and derives empty instead of reporting completed when no request was admitted.",
+            "role": "supporting",
+            "semantic_role": "producer"
+          }
+        ],
+        "subject_id": "T1",
+        "unresolved_surfaces": []
+      }
+    },
+    {
+      "claim_id": "T2",
+      "response": {
+        "insufficient_evidence_ids": [
+          "E:structural_change:070c9eaeb1eb141523ba",
+          "E:structural_change:42fcd3a6b5db8e5eef96",
+          "E:structural_change:4af883b0a1daca67bede",
+          "E:structural_change:6fd5a5946ad69fbd277c",
+          "E:structural_change:78e737d8bcc59fa9b00d",
+          "E:structural_change:936ae20778bf6e5bb8c4",
+          "E:structural_change:a6b973204ddcc9904c39",
+          "E:structural_change:b48de356ce4358c540fa",
+          "E:structural_change:b9f2a918c42207a35ecb",
+          "E:structural_change:c94bfac8625c3309efd4",
+          "E:structural_change:ea3c3ba6834264a4216f",
+          "E:structural_change:f7521f7029b75d4df73c"
+        ],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:T2:42a39dce7f09009d",
+        "schema_version": "2",
+        "selections": [],
+        "subject_id": "T2",
+        "unresolved_surfaces": [
+          "No admitted candidate contains the referenced PR #210 artifact or proves its exact eight observations and rendered completed state."
+        ]
+      }
+    },
+    {
+      "claim_id": "T3",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [
+          "E:structural_change:070c9eaeb1eb141523ba",
+          "E:structural_change:16aa03f8e513d093ed43",
+          "E:structural_change:42fcd3a6b5db8e5eef96",
+          "E:structural_change:6fd5a5946ad69fbd277c",
+          "E:structural_change:936ae20778bf6e5bb8c4",
+          "E:structural_change:b9f2a918c42207a35ecb",
+          "E:structural_change:c94bfac8625c3309efd4",
+          "E:structural_change:f7521f7029b75d4df73c"
+        ],
+        "request_id": "shadow:T3:d4ed86631d4cd585",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:structural_change:746f3032b60248e62b36",
+            "rationale": "The new shadow-only eligibility boundary distinguishes base-signature and head-signature generic states and delegates typed claims unchanged.",
+            "role": "supporting",
+            "semantic_role": "boundary"
+          },
+          {
+            "evidence_id": "E:structural_change:78e737d8bcc59fa9b00d",
+            "rationale": "The new shadow-only eligibility boundary distinguishes base-signature and head-signature generic states and delegates typed claims unchanged.",
+            "role": "supporting",
+            "semantic_role": "boundary"
+          },
+          {
+            "evidence_id": "E:structural_change:a6b973204ddcc9904c39",
+            "rationale": "The new shadow-only eligibility boundary distinguishes base-signature and head-signature generic states and delegates typed claims unchanged.",
+            "role": "supporting",
+            "semantic_role": "boundary"
+          },
+          {
+            "evidence_id": "E:structural_change:4af883b0a1daca67bede",
+            "rationale": "The admission test transition proves generic states enter only shadow selection rather than deterministic transformation eligibility.",
+            "role": "supporting",
+            "semantic_role": "test"
+          },
+          {
+            "evidence_id": "E:structural_change:b48de356ce4358c540fa",
+            "rationale": "The admission test transition proves generic states enter only shadow selection rather than deterministic transformation eligibility.",
+            "role": "supporting",
+            "semantic_role": "test"
+          },
+          {
+            "evidence_id": "E:structural_change:ea3c3ba6834264a4216f",
+            "rationale": "The admission test transition proves generic states enter only shadow selection rather than deterministic transformation eligibility.",
+            "role": "supporting",
+            "semantic_role": "test"
+          }
+        ],
+        "subject_id": "T3",
+        "unresolved_surfaces": []
+      }
+    },
+    {
+      "claim_id": "T4",
+      "response": {
+        "insufficient_evidence_ids": [
+          "E:structural_change:4af883b0a1daca67bede"
+        ],
+        "rejected_evidence_ids": [
+          "E:structural_change:070c9eaeb1eb141523ba",
+          "E:structural_change:16aa03f8e513d093ed43",
+          "E:structural_change:42fcd3a6b5db8e5eef96",
+          "E:structural_change:6fd5a5946ad69fbd277c",
+          "E:structural_change:936ae20778bf6e5bb8c4",
+          "E:structural_change:b9f2a918c42207a35ecb",
+          "E:structural_change:c94bfac8625c3309efd4",
+          "E:structural_change:f7521f7029b75d4df73c"
+        ],
+        "request_id": "shadow:T4:815cf98d3b38df73",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:structural_change:746f3032b60248e62b36",
+            "rationale": "The extension changes only generic-state shadow eligibility and continues delegating typed claims to deterministic eligibility.",
+            "role": "supporting",
+            "semantic_role": "boundary"
+          },
+          {
+            "evidence_id": "E:structural_change:78e737d8bcc59fa9b00d",
+            "rationale": "The extension changes only generic-state shadow eligibility and continues delegating typed claims to deterministic eligibility.",
+            "role": "supporting",
+            "semantic_role": "boundary"
+          },
+          {
+            "evidence_id": "E:structural_change:a6b973204ddcc9904c39",
+            "rationale": "The extension changes only generic-state shadow eligibility and continues delegating typed claims to deterministic eligibility.",
+            "role": "supporting",
+            "semantic_role": "boundary"
+          },
+          {
+            "evidence_id": "E:structural_change:b48de356ce4358c540fa",
+            "rationale": "The counterexample explicitly requires generic-state requests to retain no deterministic evidence IDs.",
+            "role": "supporting",
+            "semantic_role": "test"
+          },
+          {
+            "evidence_id": "E:structural_change:ea3c3ba6834264a4216f",
+            "rationale": "The counterexample explicitly requires generic-state requests to retain no deterministic evidence IDs.",
+            "role": "supporting",
+            "semantic_role": "test"
+          }
+        ],
+        "subject_id": "T4",
+        "unresolved_surfaces": [
+          "The broad test-file candidate contains only an import, and no admitted evidence demonstrates every claimed unchanged downstream shadow contract."
+        ]
+      }
+    },
+    {
+      "claim_id": "T5",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [
+          "E:structural_change:4af883b0a1daca67bede",
+          "E:structural_change:746f3032b60248e62b36",
+          "E:structural_change:78e737d8bcc59fa9b00d",
+          "E:structural_change:a6b973204ddcc9904c39",
+          "E:structural_change:b48de356ce4358c540fa",
+          "E:structural_change:ea3c3ba6834264a4216f"
+        ],
+        "request_id": "shadow:T5:b64fc51f479e4265",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:structural_change:b9f2a918c42207a35ecb",
+            "rationale": "The state type and summary derivation add the explicit empty result when no request is admitted.",
+            "role": "supporting",
+            "semantic_role": "producer"
+          },
+          {
+            "evidence_id": "E:structural_change:c94bfac8625c3309efd4",
+            "rationale": "The state type and summary derivation add the explicit empty result when no request is admitted.",
+            "role": "supporting",
+            "semantic_role": "producer"
+          },
+          {
+            "evidence_id": "E:structural_change:936ae20778bf6e5bb8c4",
+            "rationale": "The bundle contract advances to v4 and validates that schema at construction.",
+            "role": "supporting",
+            "semantic_role": "boundary"
+          },
+          {
+            "evidence_id": "E:structural_change:f7521f7029b75d4df73c",
+            "rationale": "The bundle contract advances to v4 and validates that schema at construction.",
+            "role": "supporting",
+            "semantic_role": "boundary"
+          },
+          {
+            "evidence_id": "E:structural_change:42fcd3a6b5db8e5eef96",
+            "rationale": "The loader requires the v4 artifact and reconstructs the validated bundle boundary.",
+            "role": "supporting",
+            "semantic_role": "consumer"
+          },
+          {
+            "evidence_id": "E:structural_change:070c9eaeb1eb141523ba",
+            "rationale": "The tests verify v4 serialization, empty-state round trip, and rejection of a tampered completed summary.",
+            "role": "supporting",
+            "semantic_role": "test"
+          },
+          {
+            "evidence_id": "E:structural_change:16aa03f8e513d093ed43",
+            "rationale": "The tests verify v4 serialization, empty-state round trip, and rejection of a tampered completed summary.",
+            "role": "supporting",
+            "semantic_role": "test"
+          },
+          {
+            "evidence_id": "E:structural_change:6fd5a5946ad69fbd277c",
+            "rationale": "The tests verify v4 serialization, empty-state round trip, and rejection of a tampered completed summary.",
+            "role": "supporting",
+            "semantic_role": "test"
+          }
+        ],
+        "subject_id": "T5",
+        "unresolved_surfaces": []
+      }
+    }
+  ],
+  "rubric_version": "shadow-evidence-disposition.v1",
+  "schema_version": "llm_shadow_human_labels.v1"
+}

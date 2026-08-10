@@ -1,0 +1,2320 @@
+{
+  "observations": [
+    {
+      "admission_state": "ready",
+      "claim_id": "T1",
+      "deterministic_evidence_ids": [],
+      "diagnostics": [],
+      "eligible_count": 2,
+      "execution_state": "accepted",
+      "request": {
+        "authored_statement": "Predicate assessments could legitimately assign one binding different roles for different predicates. Claim aggregation independently unioned supporting and contradicting IDs, producing an invalid dual-role claim rejected by TransformationAssessment.",
+        "candidates": [
+          {
+            "added_code": "from prismcode.assessment.transformation import (\n    _aggregate_predicate_assessments,\n    assess_transformation,\n)\n    TransformationAssessmentReason,\n    TransformationClaim,\n    TransformationPredicateAssessment,\ndef test_claim_aggregation_converges_cross_predicate_binding_roles() -> None:\n    claim = TransformationClaim(\n        id=\"T8\",\n        kind=\"authority\",\n        text=(\n            \"The ordered ShadowExecutionObservation sequence is the detailed \"\n            \"shadow artifact authority.\"\n        ),\n    )\n    supporting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP1\",\n        claim_id=\"T8\",\n        predicate_id=\"TP1\",\n        expectation=\"present_head\",\n        status=\"demonstrated\",\n        supporting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_path_observed\",\n                detail=\"The target path is observed.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n    contradicting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP2\",\n        claim_id=\"T8\",\n        predicate_id=\"TP2\",\n        expectation=\"absent_head\",\n        status=\"contradicted\",\n        contradicting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_bypass_observed\",\n                detail=\"The same path contradicts the competing-path predicate.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n\n    assessment = _aggregate_predicate_assessments(\n        claim,\n        (supporting, contradicting),\n    )\n\n    assert assessment.status == \"contradicted\"\n    assert assessment.supporting_binding_ids == ()\n    assert assessment.contradicting_binding_ids == (\"TAB:T8:E:path\",)\n    assert assessment.predicate_assessments == (supporting, contradicting)\n\n",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:3ebadfc34250f335d1a2",
+            "kind": "structural_change",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "modified",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "test",
+            "qualified_name": "tests/test_transformation_assessment.py",
+            "removed_code": "from prismcode.assessment.transformation import assess_transformation",
+            "revision_side": "review",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput \u2190[instantiates] test_alignment_is_serialized_but_carries_no_assessment_state",
+              "tests/test_transformation_assessment.py \u2192[imports] extract_review_semantics",
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput \u2190[imports] tests/test_verification_projection.py",
+              "tests/test_transformation_assessment.py \u2192[imports] EvidenceItem",
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput",
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput \u2190[instantiates] _brief"
+            ],
+            "summary": "Modified file: tests/test_transformation_assessment.py",
+            "symbol_kind": "file"
+          },
+          {
+            "added_code": "    supporting_candidates = tuple(\n    contradicting_set = set(contradicting)\n    supporting = tuple(\n        binding_id\n        for binding_id in supporting_candidates\n        if binding_id not in contradicting_set\n    )",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "code",
+            "evidence_id": "E:structural_change:7f6ee5dc76a147396f78",
+            "kind": "structural_change",
+            "line_end": 1117,
+            "line_start": 1077,
+            "operation": "modified",
+            "path": "src/prismcode/assessment/transformation.py",
+            "profile": "production",
+            "qualified_name": "_aggregate_predicate_assessments",
+            "removed_code": "    supporting = tuple(",
+            "revision_side": "review",
+            "structural_context": [
+              "_aggregate_predicate_assessments \u2190[calls] _assess_claim \u2192[calls] _predicate_result",
+              "_aggregate_predicate_assessments \u2192[instantiates] TransformationClaimAssessment \u2190[imports] tests/test_verification_projection.py",
+              "_aggregate_predicate_assessments \u2190[calls] _assess_claim \u2192[calls] _assess_closure",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[calls] _aggregate_predicate_assessments",
+              "_aggregate_predicate_assessments \u2192[instantiates] TransformationClaimAssessment \u2190[instantiates] _result",
+              "_aggregate_predicate_assessments \u2190[calls] _assess_claim \u2192[calls] _result"
+            ],
+            "summary": "Modified function: _aggregate_predicate_assessments",
+            "symbol_kind": "function"
+          }
+        ],
+        "coverage_limits": [
+          "Structural context was truncated for 2 evidence candidates at 6 paths each."
+        ],
+        "request_id": "shadow:T1:c63a9f2a2e066bee",
+        "schema_version": "2",
+        "subject_id": "T1",
+        "subject_kind": "before_state"
+      },
+      "run": {
+        "candidate_count": 2,
+        "comparison": {
+          "deterministic_ids": [],
+          "deterministic_only_ids": [],
+          "shadow_ids": [
+            "E:structural_change:7f6ee5dc76a147396f78",
+            "E:structural_change:3ebadfc34250f335d1a2"
+          ],
+          "shadow_only_ids": [
+            "E:structural_change:7f6ee5dc76a147396f78",
+            "E:structural_change:3ebadfc34250f335d1a2"
+          ],
+          "shared_ids": []
+        },
+        "diagnostics": [],
+        "duration_ms": 3089.9850410060026,
+        "execution_policy": {
+          "adapter_id": "openai-chat-completions",
+          "api_profile": "deepseek",
+          "endpoint": "https://api.deepseek.com/chat/completions",
+          "identity": "shadow-policy:f49ded2093e7837149c4",
+          "max_output_tokens": 4000,
+          "model_id": "deepseek-v4-flash",
+          "reasoning_effort": "default",
+          "thinking_budget": null,
+          "thinking_mode": "disabled",
+          "timeout_seconds": 180.0
+        },
+        "input_tokens": 1945,
+        "model_id": "deepseek-v4-flash",
+        "output_tokens": 307,
+        "provider_id": "openai-chat-completions",
+        "request_id": "shadow:T1:c63a9f2a2e066bee",
+        "selection": {
+          "insufficient_evidence_ids": [],
+          "rejected_evidence_ids": [],
+          "request_id": "shadow:T1:c63a9f2a2e066bee",
+          "schema_version": "2",
+          "selections": [
+            {
+              "evidence_id": "E:structural_change:7f6ee5dc76a147396f78",
+              "rationale": "The diff in _aggregate_predicate_assessments directly implements the described logic: it removes a binding from the supporting set when it also appears in the contradicting set, thereby preventing a binding from having dual roles. This is the core code change that addresses the invalid dual-role claim.",
+              "role": "supporting",
+              "semantic_role": "producer"
+            },
+            {
+              "evidence_id": "E:structural_change:3ebadfc34250f335d1a2",
+              "rationale": "The added test test_claim_aggregation_converges_cross_predicate_binding_roles exercises the aggregation with a binding that is both supporting and contradicting across predicates, and asserts that the final claim assessment is 'contradicted' with the binding only in contradicting_binding_ids. This validates the behavior described in the statement.",
+              "role": "supporting",
+              "semantic_role": "test"
+            }
+          ],
+          "subject_id": "T1",
+          "unresolved_surfaces": []
+        },
+        "state": "accepted",
+        "subject_id": "T1"
+      }
+    },
+    {
+      "admission_state": "ready",
+      "claim_id": "T2",
+      "deterministic_evidence_ids": [],
+      "diagnostics": [],
+      "eligible_count": 3,
+      "execution_state": "accepted",
+      "request": {
+        "authored_statement": "Predicate assessments preserve their exact roles and reasons.",
+        "candidates": [
+          {
+            "added_code": "from prismcode.assessment.transformation import (\n    _aggregate_predicate_assessments,\n    assess_transformation,\n)\n    TransformationAssessmentReason,\n    TransformationClaim,\n    TransformationPredicateAssessment,\ndef test_claim_aggregation_converges_cross_predicate_binding_roles() -> None:\n    claim = TransformationClaim(\n        id=\"T8\",\n        kind=\"authority\",\n        text=(\n            \"The ordered ShadowExecutionObservation sequence is the detailed \"\n            \"shadow artifact authority.\"\n        ),\n    )\n    supporting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP1\",\n        claim_id=\"T8\",\n        predicate_id=\"TP1\",\n        expectation=\"present_head\",\n        status=\"demonstrated\",\n        supporting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_path_observed\",\n                detail=\"The target path is observed.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n    contradicting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP2\",\n        claim_id=\"T8\",\n        predicate_id=\"TP2\",\n        expectation=\"absent_head\",\n        status=\"contradicted\",\n        contradicting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_bypass_observed\",\n                detail=\"The same path contradicts the competing-path predicate.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n\n    assessment = _aggregate_predicate_assessments(\n        claim,\n        (supporting, contradicting),\n    )\n\n    assert assessment.status == \"contradicted\"\n    assert assessment.supporting_binding_ids == ()\n    assert assessment.contradicting_binding_ids == (\"TAB:T8:E:path\",)\n    assert assessment.predicate_assessments == (supporting, contradicting)\n\n",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:3ebadfc34250f335d1a2",
+            "kind": "structural_change",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "modified",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "test",
+            "qualified_name": "tests/test_transformation_assessment.py",
+            "removed_code": "from prismcode.assessment.transformation import assess_transformation",
+            "revision_side": "review",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput \u2190[instantiates] test_alignment_is_serialized_but_carries_no_assessment_state",
+              "tests/test_transformation_assessment.py \u2192[imports] extract_review_semantics",
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput \u2190[imports] tests/test_verification_projection.py",
+              "tests/test_transformation_assessment.py \u2192[imports] EvidenceItem",
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput",
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput \u2190[instantiates] _brief"
+            ],
+            "summary": "Modified file: tests/test_transformation_assessment.py",
+            "symbol_kind": "file"
+          },
+          {
+            "added_code": "    supporting_candidates = tuple(\n    contradicting_set = set(contradicting)\n    supporting = tuple(\n        binding_id\n        for binding_id in supporting_candidates\n        if binding_id not in contradicting_set\n    )",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "code",
+            "evidence_id": "E:structural_change:7f6ee5dc76a147396f78",
+            "kind": "structural_change",
+            "line_end": 1117,
+            "line_start": 1077,
+            "operation": "modified",
+            "path": "src/prismcode/assessment/transformation.py",
+            "profile": "production",
+            "qualified_name": "_aggregate_predicate_assessments",
+            "removed_code": "    supporting = tuple(",
+            "revision_side": "review",
+            "structural_context": [
+              "_aggregate_predicate_assessments \u2190[calls] _assess_claim \u2192[calls] _predicate_result",
+              "_aggregate_predicate_assessments \u2192[instantiates] TransformationClaimAssessment \u2190[imports] tests/test_verification_projection.py",
+              "_aggregate_predicate_assessments \u2190[calls] _assess_claim \u2192[calls] _assess_closure",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[calls] _aggregate_predicate_assessments",
+              "_aggregate_predicate_assessments \u2192[instantiates] TransformationClaimAssessment \u2190[instantiates] _result",
+              "_aggregate_predicate_assessments \u2190[calls] _assess_claim \u2192[calls] _result"
+            ],
+            "summary": "Modified function: _aggregate_predicate_assessments",
+            "symbol_kind": "function"
+          },
+          {
+            "added_code": "def test_claim_aggregation_converges_cross_predicate_binding_roles() -> None:\n    claim = TransformationClaim(\n        id=\"T8\",\n        kind=\"authority\",\n        text=(\n            \"The ordered ShadowExecutionObservation sequence is the detailed \"\n            \"shadow artifact authority.\"\n        ),\n    )\n    supporting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP1\",\n        claim_id=\"T8\",\n        predicate_id=\"TP1\",\n        expectation=\"present_head\",\n        status=\"demonstrated\",\n        supporting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_path_observed\",\n                detail=\"The target path is observed.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n    contradicting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP2\",\n        claim_id=\"T8\",\n        predicate_id=\"TP2\",\n        expectation=\"absent_head\",\n        status=\"contradicted\",\n        contradicting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_bypass_observed\",\n                detail=\"The same path contradicts the competing-path predicate.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n\n    assessment = _aggregate_predicate_assessments(\n        claim,\n        (supporting, contradicting),\n    )\n\n    assert assessment.status == \"contradicted\"\n    assert assessment.supporting_binding_ids == ()\n    assert assessment.contradicting_binding_ids == (\"TAB:T8:E:path\",)\n    assert assessment.predicate_assessments == (supporting, contradicting)\n\n",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:c2791c858bfc8ed77f72",
+            "kind": "structural_change",
+            "line_end": 236,
+            "line_start": 188,
+            "operation": "added",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "test",
+            "qualified_name": "test_claim_aggregation_converges_cross_predicate_binding_roles",
+            "removed_code": "",
+            "revision_side": "review",
+            "structural_context": [
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason \u2190[instantiates] test_transformation_binding_cannot_create_structural_graph_membership",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[calls] _aggregate_predicate_assessments",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason \u2190[imports] src/prismcode/assessment/migration.py",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason \u2190[instantiates] test_closure_projection_is_the_shared_graph_authority",
+              "_aggregate_predicate_assessments \u2190[calls] test_claim_aggregation_converges_cross_predicate_binding_roles"
+            ],
+            "summary": "Added function: test_claim_aggregation_converges_cross_predicate_binding_roles",
+            "symbol_kind": "function"
+          }
+        ],
+        "coverage_limits": [
+          "Structural context was truncated for 3 evidence candidates at 6 paths each."
+        ],
+        "request_id": "shadow:T2:d5476165d404a04f",
+        "schema_version": "2",
+        "subject_id": "T2",
+        "subject_kind": "after_state"
+      },
+      "run": {
+        "candidate_count": 3,
+        "comparison": {
+          "deterministic_ids": [],
+          "deterministic_only_ids": [],
+          "shadow_ids": [
+            "E:structural_change:3ebadfc34250f335d1a2",
+            "E:structural_change:7f6ee5dc76a147396f78",
+            "E:structural_change:c2791c858bfc8ed77f72"
+          ],
+          "shadow_only_ids": [
+            "E:structural_change:3ebadfc34250f335d1a2",
+            "E:structural_change:7f6ee5dc76a147396f78",
+            "E:structural_change:c2791c858bfc8ed77f72"
+          ],
+          "shared_ids": []
+        },
+        "diagnostics": [],
+        "duration_ms": 4352.244417008478,
+        "execution_policy": {
+          "adapter_id": "openai-chat-completions",
+          "api_profile": "deepseek",
+          "endpoint": "https://api.deepseek.com/chat/completions",
+          "identity": "shadow-policy:f49ded2093e7837149c4",
+          "max_output_tokens": 4000,
+          "model_id": "deepseek-v4-flash",
+          "reasoning_effort": "default",
+          "thinking_budget": null,
+          "thinking_mode": "disabled",
+          "timeout_seconds": 180.0
+        },
+        "input_tokens": 2802,
+        "model_id": "deepseek-v4-flash",
+        "output_tokens": 441,
+        "provider_id": "openai-chat-completions",
+        "request_id": "shadow:T2:d5476165d404a04f",
+        "selection": {
+          "insufficient_evidence_ids": [],
+          "rejected_evidence_ids": [],
+          "request_id": "shadow:T2:d5476165d404a04f",
+          "schema_version": "2",
+          "selections": [
+            {
+              "evidence_id": "E:structural_change:3ebadfc34250f335d1a2",
+              "rationale": "The test file modification shows the addition of the test function and imports that exercise predicate assessment aggregation, but the file-level change itself does not directly confirm that roles and reasons are preserved; it provides the test context for the behavioral claim.",
+              "role": "context",
+              "semantic_role": "test"
+            },
+            {
+              "evidence_id": "E:structural_change:7f6ee5dc76a147396f78",
+              "rationale": "The change to _aggregate_predicate_assessments specifically filters supporting binding IDs that appear in the contradicting set, ensuring that a binding cannot simultaneously serve as supporting and contradicting, which preserves exact roles. This directly supports the claim that predicate assessments preserve their exact roles and reasons.",
+              "role": "supporting",
+              "semantic_role": "producer"
+            },
+            {
+              "evidence_id": "E:structural_change:c2791c858bfc8ed77f72",
+              "rationale": "The added test function explicitly constructs supporting and contradicting predicate assessments with distinct binding IDs and reasons, then asserts the aggregated result preserves the contradicting role and filters the supporting one. This demonstrates the exact roles and reasons are preserved in the aggregation logic.",
+              "role": "supporting",
+              "semantic_role": "test"
+            }
+          ],
+          "subject_id": "T2",
+          "unresolved_surfaces": [
+            "Dynamic execution of the aggregation logic at runtime is not verified by structural evidence alone; only static code and test presence are provided.",
+            "The coverage_limits state structural context was truncated for 3 evidence candidates at 6 paths each; deeper call chains or cross-module impacts may be missed."
+          ]
+        },
+        "state": "accepted",
+        "subject_id": "T2"
+      }
+    },
+    {
+      "admission_state": "ready",
+      "claim_id": "T3",
+      "deterministic_evidence_ids": [],
+      "diagnostics": [],
+      "eligible_count": 3,
+      "execution_state": "accepted",
+      "request": {
+        "authored_statement": "At the conjunctive claim boundary:",
+        "candidates": [
+          {
+            "added_code": "from prismcode.assessment.transformation import (\n    _aggregate_predicate_assessments,\n    assess_transformation,\n)\n    TransformationAssessmentReason,\n    TransformationClaim,\n    TransformationPredicateAssessment,\ndef test_claim_aggregation_converges_cross_predicate_binding_roles() -> None:\n    claim = TransformationClaim(\n        id=\"T8\",\n        kind=\"authority\",\n        text=(\n            \"The ordered ShadowExecutionObservation sequence is the detailed \"\n            \"shadow artifact authority.\"\n        ),\n    )\n    supporting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP1\",\n        claim_id=\"T8\",\n        predicate_id=\"TP1\",\n        expectation=\"present_head\",\n        status=\"demonstrated\",\n        supporting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_path_observed\",\n                detail=\"The target path is observed.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n    contradicting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP2\",\n        claim_id=\"T8\",\n        predicate_id=\"TP2\",\n        expectation=\"absent_head\",\n        status=\"contradicted\",\n        contradicting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_bypass_observed\",\n                detail=\"The same path contradicts the competing-path predicate.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n\n    assessment = _aggregate_predicate_assessments(\n        claim,\n        (supporting, contradicting),\n    )\n\n    assert assessment.status == \"contradicted\"\n    assert assessment.supporting_binding_ids == ()\n    assert assessment.contradicting_binding_ids == (\"TAB:T8:E:path\",)\n    assert assessment.predicate_assessments == (supporting, contradicting)\n\n",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:3ebadfc34250f335d1a2",
+            "kind": "structural_change",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "modified",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "test",
+            "qualified_name": "tests/test_transformation_assessment.py",
+            "removed_code": "from prismcode.assessment.transformation import assess_transformation",
+            "revision_side": "review",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput \u2190[instantiates] test_alignment_is_serialized_but_carries_no_assessment_state",
+              "tests/test_transformation_assessment.py \u2192[imports] extract_review_semantics",
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput \u2190[imports] tests/test_verification_projection.py",
+              "tests/test_transformation_assessment.py \u2192[imports] EvidenceItem",
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput",
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput \u2190[instantiates] _brief"
+            ],
+            "summary": "Modified file: tests/test_transformation_assessment.py",
+            "symbol_kind": "file"
+          },
+          {
+            "added_code": "    supporting_candidates = tuple(\n    contradicting_set = set(contradicting)\n    supporting = tuple(\n        binding_id\n        for binding_id in supporting_candidates\n        if binding_id not in contradicting_set\n    )",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "code",
+            "evidence_id": "E:structural_change:7f6ee5dc76a147396f78",
+            "kind": "structural_change",
+            "line_end": 1117,
+            "line_start": 1077,
+            "operation": "modified",
+            "path": "src/prismcode/assessment/transformation.py",
+            "profile": "production",
+            "qualified_name": "_aggregate_predicate_assessments",
+            "removed_code": "    supporting = tuple(",
+            "revision_side": "review",
+            "structural_context": [
+              "_aggregate_predicate_assessments \u2190[calls] _assess_claim \u2192[calls] _predicate_result",
+              "_aggregate_predicate_assessments \u2192[instantiates] TransformationClaimAssessment \u2190[imports] tests/test_verification_projection.py",
+              "_aggregate_predicate_assessments \u2190[calls] _assess_claim \u2192[calls] _assess_closure",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[calls] _aggregate_predicate_assessments",
+              "_aggregate_predicate_assessments \u2192[instantiates] TransformationClaimAssessment \u2190[instantiates] _result",
+              "_aggregate_predicate_assessments \u2190[calls] _assess_claim \u2192[calls] _result"
+            ],
+            "summary": "Modified function: _aggregate_predicate_assessments",
+            "symbol_kind": "function"
+          },
+          {
+            "added_code": "def test_claim_aggregation_converges_cross_predicate_binding_roles() -> None:\n    claim = TransformationClaim(\n        id=\"T8\",\n        kind=\"authority\",\n        text=(\n            \"The ordered ShadowExecutionObservation sequence is the detailed \"\n            \"shadow artifact authority.\"\n        ),\n    )\n    supporting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP1\",\n        claim_id=\"T8\",\n        predicate_id=\"TP1\",\n        expectation=\"present_head\",\n        status=\"demonstrated\",\n        supporting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_path_observed\",\n                detail=\"The target path is observed.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n    contradicting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP2\",\n        claim_id=\"T8\",\n        predicate_id=\"TP2\",\n        expectation=\"absent_head\",\n        status=\"contradicted\",\n        contradicting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_bypass_observed\",\n                detail=\"The same path contradicts the competing-path predicate.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n\n    assessment = _aggregate_predicate_assessments(\n        claim,\n        (supporting, contradicting),\n    )\n\n    assert assessment.status == \"contradicted\"\n    assert assessment.supporting_binding_ids == ()\n    assert assessment.contradicting_binding_ids == (\"TAB:T8:E:path\",)\n    assert assessment.predicate_assessments == (supporting, contradicting)\n\n",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:c2791c858bfc8ed77f72",
+            "kind": "structural_change",
+            "line_end": 236,
+            "line_start": 188,
+            "operation": "added",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "test",
+            "qualified_name": "test_claim_aggregation_converges_cross_predicate_binding_roles",
+            "removed_code": "",
+            "revision_side": "review",
+            "structural_context": [
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason \u2190[instantiates] test_transformation_binding_cannot_create_structural_graph_membership",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[calls] _aggregate_predicate_assessments",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason \u2190[imports] src/prismcode/assessment/migration.py",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason \u2190[instantiates] test_closure_projection_is_the_shared_graph_authority",
+              "_aggregate_predicate_assessments \u2190[calls] test_claim_aggregation_converges_cross_predicate_binding_roles"
+            ],
+            "summary": "Added function: test_claim_aggregation_converges_cross_predicate_binding_roles",
+            "symbol_kind": "function"
+          }
+        ],
+        "coverage_limits": [
+          "Structural context was truncated for 3 evidence candidates at 6 paths each."
+        ],
+        "request_id": "shadow:T3:2a3ce84e1067006f",
+        "schema_version": "2",
+        "subject_id": "T3",
+        "subject_kind": "after_state"
+      },
+      "run": {
+        "candidate_count": 3,
+        "comparison": {
+          "deterministic_ids": [],
+          "deterministic_only_ids": [],
+          "shadow_ids": [
+            "E:structural_change:7f6ee5dc76a147396f78",
+            "E:structural_change:c2791c858bfc8ed77f72",
+            "E:structural_change:3ebadfc34250f335d1a2"
+          ],
+          "shadow_only_ids": [
+            "E:structural_change:7f6ee5dc76a147396f78",
+            "E:structural_change:c2791c858bfc8ed77f72",
+            "E:structural_change:3ebadfc34250f335d1a2"
+          ],
+          "shared_ids": []
+        },
+        "diagnostics": [],
+        "duration_ms": 3817.014542000834,
+        "execution_policy": {
+          "adapter_id": "openai-chat-completions",
+          "api_profile": "deepseek",
+          "endpoint": "https://api.deepseek.com/chat/completions",
+          "identity": "shadow-policy:f49ded2093e7837149c4",
+          "max_output_tokens": 4000,
+          "model_id": "deepseek-v4-flash",
+          "reasoning_effort": "default",
+          "thinking_budget": null,
+          "thinking_mode": "disabled",
+          "timeout_seconds": 180.0
+        },
+        "input_tokens": 2801,
+        "model_id": "deepseek-v4-flash",
+        "output_tokens": 358,
+        "provider_id": "openai-chat-completions",
+        "request_id": "shadow:T3:2a3ce84e1067006f",
+        "selection": {
+          "insufficient_evidence_ids": [],
+          "rejected_evidence_ids": [],
+          "request_id": "shadow:T3:2a3ce84e1067006f",
+          "schema_version": "2",
+          "selections": [
+            {
+              "evidence_id": "E:structural_change:7f6ee5dc76a147396f78",
+              "rationale": "This production-code change to _aggregate_predicate_assessments directly implements the conjunctive claim boundary logic: it filters supporting bindings that are also present in the contradicting set. This is the core mechanism ensuring that a binding cannot be both supporting and contradicting at the conjunctive boundary.",
+              "role": "supporting",
+              "semantic_role": "boundary"
+            },
+            {
+              "evidence_id": "E:structural_change:c2791c858bfc8ed77f72",
+              "rationale": "This added test explicitly verifies the conjunctive claim boundary behavior: it constructs a supporting and a contradicting predicate assessment that share the same binding ID, and asserts that the aggregated assessment preserves the contradiction, empties supporting_binding_ids, and retains contradicting_binding_ids. This test directly exercises the boundary semantics.",
+              "role": "supporting",
+              "semantic_role": "test"
+            },
+            {
+              "evidence_id": "E:structural_change:3ebadfc34250f335d1a2",
+              "rationale": "This file-level change is the test module housing the added test and the import change for _aggregate_predicate_assessments. It provides the contextual envelope for the test but does not itself define or alter the boundary logic.",
+              "role": "context",
+              "semantic_role": "test"
+            }
+          ],
+          "subject_id": "T3",
+          "unresolved_surfaces": [
+            "No dynamic execution behavior available to confirm the boundary logic is exercised in runtime; the evidence is structural and test-based only."
+          ]
+        },
+        "state": "accepted",
+        "subject_id": "T3"
+      }
+    },
+    {
+      "admission_state": "ready",
+      "claim_id": "T4",
+      "deterministic_evidence_ids": [],
+      "diagnostics": [
+        {
+          "code": "shadow_execution_budget_deferred",
+          "message": "Admitted shadow request was deferred by the review safety limit of 3."
+        }
+      ],
+      "eligible_count": 3,
+      "execution_state": "deferred",
+      "request": {
+        "authored_statement": "Contradiction therefore controls the aggregate role without erasing predicate-level evidence.",
+        "candidates": [
+          {
+            "added_code": "from prismcode.assessment.transformation import (\n    _aggregate_predicate_assessments,\n    assess_transformation,\n)\n    TransformationAssessmentReason,\n    TransformationClaim,\n    TransformationPredicateAssessment,\ndef test_claim_aggregation_converges_cross_predicate_binding_roles() -> None:\n    claim = TransformationClaim(\n        id=\"T8\",\n        kind=\"authority\",\n        text=(\n            \"The ordered ShadowExecutionObservation sequence is the detailed \"\n            \"shadow artifact authority.\"\n        ),\n    )\n    supporting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP1\",\n        claim_id=\"T8\",\n        predicate_id=\"TP1\",\n        expectation=\"present_head\",\n        status=\"demonstrated\",\n        supporting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_path_observed\",\n                detail=\"The target path is observed.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n    contradicting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP2\",\n        claim_id=\"T8\",\n        predicate_id=\"TP2\",\n        expectation=\"absent_head\",\n        status=\"contradicted\",\n        contradicting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_bypass_observed\",\n                detail=\"The same path contradicts the competing-path predicate.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n\n    assessment = _aggregate_predicate_assessments(\n        claim,\n        (supporting, contradicting),\n    )\n\n    assert assessment.status == \"contradicted\"\n    assert assessment.supporting_binding_ids == ()\n    assert assessment.contradicting_binding_ids == (\"TAB:T8:E:path\",)\n    assert assessment.predicate_assessments == (supporting, contradicting)\n\n",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:3ebadfc34250f335d1a2",
+            "kind": "structural_change",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "modified",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "test",
+            "qualified_name": "tests/test_transformation_assessment.py",
+            "removed_code": "from prismcode.assessment.transformation import assess_transformation",
+            "revision_side": "review",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput \u2190[instantiates] test_alignment_is_serialized_but_carries_no_assessment_state",
+              "tests/test_transformation_assessment.py \u2192[imports] extract_review_semantics",
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput \u2190[imports] tests/test_verification_projection.py",
+              "tests/test_transformation_assessment.py \u2192[imports] EvidenceItem",
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput",
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput \u2190[instantiates] _brief"
+            ],
+            "summary": "Modified file: tests/test_transformation_assessment.py",
+            "symbol_kind": "file"
+          },
+          {
+            "added_code": "    supporting_candidates = tuple(\n    contradicting_set = set(contradicting)\n    supporting = tuple(\n        binding_id\n        for binding_id in supporting_candidates\n        if binding_id not in contradicting_set\n    )",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "code",
+            "evidence_id": "E:structural_change:7f6ee5dc76a147396f78",
+            "kind": "structural_change",
+            "line_end": 1117,
+            "line_start": 1077,
+            "operation": "modified",
+            "path": "src/prismcode/assessment/transformation.py",
+            "profile": "production",
+            "qualified_name": "_aggregate_predicate_assessments",
+            "removed_code": "    supporting = tuple(",
+            "revision_side": "review",
+            "structural_context": [
+              "_aggregate_predicate_assessments \u2190[calls] _assess_claim \u2192[calls] _predicate_result",
+              "_aggregate_predicate_assessments \u2192[instantiates] TransformationClaimAssessment \u2190[imports] tests/test_verification_projection.py",
+              "_aggregate_predicate_assessments \u2190[calls] _assess_claim \u2192[calls] _assess_closure",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[calls] _aggregate_predicate_assessments",
+              "_aggregate_predicate_assessments \u2192[instantiates] TransformationClaimAssessment \u2190[instantiates] _result",
+              "_aggregate_predicate_assessments \u2190[calls] _assess_claim \u2192[calls] _result"
+            ],
+            "summary": "Modified function: _aggregate_predicate_assessments",
+            "symbol_kind": "function"
+          },
+          {
+            "added_code": "def test_claim_aggregation_converges_cross_predicate_binding_roles() -> None:\n    claim = TransformationClaim(\n        id=\"T8\",\n        kind=\"authority\",\n        text=(\n            \"The ordered ShadowExecutionObservation sequence is the detailed \"\n            \"shadow artifact authority.\"\n        ),\n    )\n    supporting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP1\",\n        claim_id=\"T8\",\n        predicate_id=\"TP1\",\n        expectation=\"present_head\",\n        status=\"demonstrated\",\n        supporting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_path_observed\",\n                detail=\"The target path is observed.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n    contradicting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP2\",\n        claim_id=\"T8\",\n        predicate_id=\"TP2\",\n        expectation=\"absent_head\",\n        status=\"contradicted\",\n        contradicting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_bypass_observed\",\n                detail=\"The same path contradicts the competing-path predicate.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n\n    assessment = _aggregate_predicate_assessments(\n        claim,\n        (supporting, contradicting),\n    )\n\n    assert assessment.status == \"contradicted\"\n    assert assessment.supporting_binding_ids == ()\n    assert assessment.contradicting_binding_ids == (\"TAB:T8:E:path\",)\n    assert assessment.predicate_assessments == (supporting, contradicting)\n\n",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:c2791c858bfc8ed77f72",
+            "kind": "structural_change",
+            "line_end": 236,
+            "line_start": 188,
+            "operation": "added",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "test",
+            "qualified_name": "test_claim_aggregation_converges_cross_predicate_binding_roles",
+            "removed_code": "",
+            "revision_side": "review",
+            "structural_context": [
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason \u2190[instantiates] test_transformation_binding_cannot_create_structural_graph_membership",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[calls] _aggregate_predicate_assessments",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason \u2190[imports] src/prismcode/assessment/migration.py",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason \u2190[instantiates] test_closure_projection_is_the_shared_graph_authority",
+              "_aggregate_predicate_assessments \u2190[calls] test_claim_aggregation_converges_cross_predicate_binding_roles"
+            ],
+            "summary": "Added function: test_claim_aggregation_converges_cross_predicate_binding_roles",
+            "symbol_kind": "function"
+          }
+        ],
+        "coverage_limits": [
+          "Structural context was truncated for 3 evidence candidates at 6 paths each."
+        ],
+        "request_id": "shadow:T4:437eab7ffa94b124",
+        "schema_version": "2",
+        "subject_id": "T4",
+        "subject_kind": "after_state"
+      },
+      "run": null
+    },
+    {
+      "admission_state": "ready",
+      "claim_id": "T5",
+      "deterministic_evidence_ids": [
+        "E:structural_change:3ebadfc34250f335d1a2",
+        "E:structural_change:c2791c858bfc8ed77f72"
+      ],
+      "diagnostics": [
+        {
+          "code": "shadow_execution_budget_deferred",
+          "message": "Admitted shadow request was deferred by the review safety limit of 3."
+        }
+      ],
+      "eligible_count": 32,
+      "execution_state": "deferred",
+      "request": {
+        "authored_statement": "Entry: canonical TransformationPredicateAssessment sequence.",
+        "candidates": [
+          {
+            "added_code": "from prismcode.assessment.transformation import (\n    _aggregate_predicate_assessments,\n    assess_transformation,\n)\n    TransformationAssessmentReason,\n    TransformationClaim,\n    TransformationPredicateAssessment,\ndef test_claim_aggregation_converges_cross_predicate_binding_roles() -> None:\n    claim = TransformationClaim(\n        id=\"T8\",\n        kind=\"authority\",\n        text=(\n            \"The ordered ShadowExecutionObservation sequence is the detailed \"\n            \"shadow artifact authority.\"\n        ),\n    )\n    supporting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP1\",\n        claim_id=\"T8\",\n        predicate_id=\"TP1\",\n        expectation=\"present_head\",\n        status=\"demonstrated\",\n        supporting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_path_observed\",\n                detail=\"The target path is observed.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n    contradicting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP2\",\n        claim_id=\"T8\",\n        predicate_id=\"TP2\",\n        expectation=\"absent_head\",\n        status=\"contradicted\",\n        contradicting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_bypass_observed\",\n                detail=\"The same path contradicts the competing-path predicate.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n\n    assessment = _aggregate_predicate_assessments(\n        claim,\n        (supporting, contradicting),\n    )\n\n    assert assessment.status == \"contradicted\"\n    assert assessment.supporting_binding_ids == ()\n    assert assessment.contradicting_binding_ids == (\"TAB:T8:E:path\",)\n    assert assessment.predicate_assessments == (supporting, contradicting)\n\n",
+            "admission_tier": "baseline",
+            "association": "deterministic_baseline",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:3ebadfc34250f335d1a2",
+            "kind": "structural_change",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "modified",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "test",
+            "qualified_name": "tests/test_transformation_assessment.py",
+            "removed_code": "from prismcode.assessment.transformation import assess_transformation",
+            "revision_side": "review",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput \u2190[instantiates] test_alignment_is_serialized_but_carries_no_assessment_state",
+              "tests/test_transformation_assessment.py \u2192[imports] extract_review_semantics",
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput \u2190[imports] tests/test_verification_projection.py",
+              "tests/test_transformation_assessment.py \u2192[imports] EvidenceItem",
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput",
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput \u2190[instantiates] _brief"
+            ],
+            "summary": "Modified file: tests/test_transformation_assessment.py",
+            "symbol_kind": "file"
+          },
+          {
+            "added_code": "def test_claim_aggregation_converges_cross_predicate_binding_roles() -> None:\n    claim = TransformationClaim(\n        id=\"T8\",\n        kind=\"authority\",\n        text=(\n            \"The ordered ShadowExecutionObservation sequence is the detailed \"\n            \"shadow artifact authority.\"\n        ),\n    )\n    supporting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP1\",\n        claim_id=\"T8\",\n        predicate_id=\"TP1\",\n        expectation=\"present_head\",\n        status=\"demonstrated\",\n        supporting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_path_observed\",\n                detail=\"The target path is observed.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n    contradicting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP2\",\n        claim_id=\"T8\",\n        predicate_id=\"TP2\",\n        expectation=\"absent_head\",\n        status=\"contradicted\",\n        contradicting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_bypass_observed\",\n                detail=\"The same path contradicts the competing-path predicate.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n\n    assessment = _aggregate_predicate_assessments(\n        claim,\n        (supporting, contradicting),\n    )\n\n    assert assessment.status == \"contradicted\"\n    assert assessment.supporting_binding_ids == ()\n    assert assessment.contradicting_binding_ids == (\"TAB:T8:E:path\",)\n    assert assessment.predicate_assessments == (supporting, contradicting)\n\n",
+            "admission_tier": "baseline",
+            "association": "deterministic_baseline",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:c2791c858bfc8ed77f72",
+            "kind": "structural_change",
+            "line_end": 236,
+            "line_start": 188,
+            "operation": "added",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "test",
+            "qualified_name": "test_claim_aggregation_converges_cross_predicate_binding_roles",
+            "removed_code": "",
+            "revision_side": "review",
+            "structural_context": [
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason \u2190[instantiates] test_transformation_binding_cannot_create_structural_graph_membership",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[calls] _aggregate_predicate_assessments",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason \u2190[imports] src/prismcode/assessment/migration.py",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason \u2190[instantiates] test_closure_projection_is_the_shared_graph_authority",
+              "_aggregate_predicate_assessments \u2190[calls] test_claim_aggregation_converges_cross_predicate_binding_roles"
+            ],
+            "summary": "Added function: test_claim_aggregation_converges_cross_predicate_binding_roles",
+            "symbol_kind": "function"
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:038141a3493c40e49239",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] extract_review_semantics"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] extract_review_semantics",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:06581bef92c8c6385a1b",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] EvidenceItem"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] EvidenceItem",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:071a971ac7c66f2d4e7a",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:106f09ba923a222991f7",
+            "kind": "structural_path",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "base",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] TransformationClosurePolicy"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] TransformationClosurePolicy",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:1142584ef67752f56631",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] src/prismcode/semantics/criteria.py"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] src/prismcode/semantics/criteria.py",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:11e275c92dc5dcf08e5a",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] src/prismcode/facts/transformation.py"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] src/prismcode/facts/transformation.py",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:14fcb536aca188405c88",
+            "kind": "structural_path",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "base",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] extract_review_semantics"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] extract_review_semantics",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:1844b83e68b58f50d96f",
+            "kind": "structural_path",
+            "line_end": 236,
+            "line_start": 188,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[calls] _aggregate_predicate_assessments"
+            ],
+            "summary": "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[calls] _aggregate_predicate_assessments",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:1ddf24e43364758c9246",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] select_transformation_subjects"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] select_transformation_subjects",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:2205534e3a4887357fe8",
+            "kind": "structural_path",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "base",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] DeterministicAnalyzer"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] DeterministicAnalyzer",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:2542e195e24bcc52539e",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] ChangedFile"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] ChangedFile",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:258f4845a8b216001ee0",
+            "kind": "structural_path",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "base",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] ChangedFile"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] ChangedFile",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:2b667b3ea722e3df29b7",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] src/prismcode/model/contracts.py"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] src/prismcode/model/contracts.py",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:2da0962230f7edd55d42",
+            "kind": "structural_path",
+            "line_end": 1123,
+            "line_start": 1077,
+            "operation": "observed",
+            "path": "src/prismcode/assessment/transformation.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "_aggregate_predicate_assessments \u2190[imports] tests/test_transformation_assessment.py"
+            ],
+            "summary": "_aggregate_predicate_assessments \u2190[imports] tests/test_transformation_assessment.py",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:37ad4e8e65d827197c82",
+            "kind": "structural_path",
+            "line_end": 236,
+            "line_start": 188,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason"
+            ],
+            "summary": "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:3e3e632aabf8ffa9eae0",
+            "kind": "structural_path",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "base",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] src/prismcode/routing/transformation.py"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] src/prismcode/routing/transformation.py",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:4065e3e485706a2d1ada",
+            "kind": "structural_path",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "base",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] src/prismcode/facts/transformation.py"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] src/prismcode/facts/transformation.py",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:455822745475477b12d9",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] ClosureScanPlanSet"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] ClosureScanPlanSet",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:4c5af105f2e8c49b83af",
+            "kind": "structural_path",
+            "line_end": 1123,
+            "line_start": 1077,
+            "operation": "observed",
+            "path": "src/prismcode/assessment/transformation.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "_aggregate_predicate_assessments \u2190[calls] test_claim_aggregation_converges_cross_predicate_binding_roles"
+            ],
+            "summary": "_aggregate_predicate_assessments \u2190[calls] test_claim_aggregation_converges_cross_predicate_binding_roles",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:50e718987772a6738b98",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] SourceRecord"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] SourceRecord",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:51cd3589d9ca29df8154",
+            "kind": "structural_path",
+            "line_end": 236,
+            "line_start": 188,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationPredicateAssessment"
+            ],
+            "summary": "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationPredicateAssessment",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:531cbefe9a802b0bcf1e",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] src/prismcode/routing/transformation.py"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] src/prismcode/routing/transformation.py",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:537146c324891759ae62",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] TransformationAssessmentReason"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] TransformationAssessmentReason",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:57c6430f002dc9a165a5",
+            "kind": "structural_path",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "base",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] converge_transformation_closure"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] converge_transformation_closure",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:5b1352a4696639ba40b9",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] StructuralChangeIdentity"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] StructuralChangeIdentity",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:5cc684dc3c398278ec7c",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] TransformationClaim"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] TransformationClaim",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:5e349bc8b22ae3a615ae",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] converge_transformation_closure"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] converge_transformation_closure",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:5eb02cbc4cab09ef10cd",
+            "kind": "structural_path",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "base",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] reconstruct_observed_transformation"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] reconstruct_observed_transformation",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:5fd76db78f0059233757",
+            "kind": "structural_path",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "base",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] TransformationAssessment"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] TransformationAssessment",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:62d7563250090405d940",
+            "kind": "structural_path",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "base",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] VerificationObservation"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] VerificationObservation",
+            "symbol_kind": ""
+          }
+        ],
+        "coverage_limits": [
+          "Structural traversal coverage is incomplete for eligible evidence.",
+          "Structural context was truncated for 2 evidence candidates at 6 paths each."
+        ],
+        "request_id": "shadow:T5:c96666f4f24b9af3",
+        "schema_version": "2",
+        "subject_id": "T5",
+        "subject_kind": "selected_region"
+      },
+      "run": null
+    },
+    {
+      "admission_state": "ready",
+      "claim_id": "T6",
+      "deterministic_evidence_ids": [
+        "E:structural_change:3ebadfc34250f335d1a2",
+        "E:structural_change:7f6ee5dc76a147396f78",
+        "E:structural_change:c2791c858bfc8ed77f72"
+      ],
+      "diagnostics": [
+        {
+          "code": "shadow_execution_budget_deferred",
+          "message": "Admitted shadow request was deferred by the review safety limit of 3."
+        }
+      ],
+      "eligible_count": 33,
+      "execution_state": "deferred",
+      "request": {
+        "authored_statement": "Authority: _aggregate_predicate_assessments.",
+        "candidates": [
+          {
+            "added_code": "from prismcode.assessment.transformation import (\n    _aggregate_predicate_assessments,\n    assess_transformation,\n)\n    TransformationAssessmentReason,\n    TransformationClaim,\n    TransformationPredicateAssessment,\ndef test_claim_aggregation_converges_cross_predicate_binding_roles() -> None:\n    claim = TransformationClaim(\n        id=\"T8\",\n        kind=\"authority\",\n        text=(\n            \"The ordered ShadowExecutionObservation sequence is the detailed \"\n            \"shadow artifact authority.\"\n        ),\n    )\n    supporting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP1\",\n        claim_id=\"T8\",\n        predicate_id=\"TP1\",\n        expectation=\"present_head\",\n        status=\"demonstrated\",\n        supporting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_path_observed\",\n                detail=\"The target path is observed.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n    contradicting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP2\",\n        claim_id=\"T8\",\n        predicate_id=\"TP2\",\n        expectation=\"absent_head\",\n        status=\"contradicted\",\n        contradicting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_bypass_observed\",\n                detail=\"The same path contradicts the competing-path predicate.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n\n    assessment = _aggregate_predicate_assessments(\n        claim,\n        (supporting, contradicting),\n    )\n\n    assert assessment.status == \"contradicted\"\n    assert assessment.supporting_binding_ids == ()\n    assert assessment.contradicting_binding_ids == (\"TAB:T8:E:path\",)\n    assert assessment.predicate_assessments == (supporting, contradicting)\n\n",
+            "admission_tier": "baseline",
+            "association": "deterministic_baseline",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:3ebadfc34250f335d1a2",
+            "kind": "structural_change",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "modified",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "test",
+            "qualified_name": "tests/test_transformation_assessment.py",
+            "removed_code": "from prismcode.assessment.transformation import assess_transformation",
+            "revision_side": "review",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput \u2190[instantiates] test_alignment_is_serialized_but_carries_no_assessment_state",
+              "tests/test_transformation_assessment.py \u2192[imports] extract_review_semantics",
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput \u2190[imports] tests/test_verification_projection.py",
+              "tests/test_transformation_assessment.py \u2192[imports] EvidenceItem",
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput",
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput \u2190[instantiates] _brief"
+            ],
+            "summary": "Modified file: tests/test_transformation_assessment.py",
+            "symbol_kind": "file"
+          },
+          {
+            "added_code": "    supporting_candidates = tuple(\n    contradicting_set = set(contradicting)\n    supporting = tuple(\n        binding_id\n        for binding_id in supporting_candidates\n        if binding_id not in contradicting_set\n    )",
+            "admission_tier": "baseline",
+            "association": "deterministic_baseline",
+            "authority": "structural_provider",
+            "classification": "code",
+            "evidence_id": "E:structural_change:7f6ee5dc76a147396f78",
+            "kind": "structural_change",
+            "line_end": 1117,
+            "line_start": 1077,
+            "operation": "modified",
+            "path": "src/prismcode/assessment/transformation.py",
+            "profile": "production",
+            "qualified_name": "_aggregate_predicate_assessments",
+            "removed_code": "    supporting = tuple(",
+            "revision_side": "review",
+            "structural_context": [
+              "_aggregate_predicate_assessments \u2190[calls] _assess_claim \u2192[calls] _predicate_result",
+              "_aggregate_predicate_assessments \u2192[instantiates] TransformationClaimAssessment \u2190[imports] tests/test_verification_projection.py",
+              "_aggregate_predicate_assessments \u2190[calls] _assess_claim \u2192[calls] _assess_closure",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[calls] _aggregate_predicate_assessments",
+              "_aggregate_predicate_assessments \u2192[instantiates] TransformationClaimAssessment \u2190[instantiates] _result",
+              "_aggregate_predicate_assessments \u2190[calls] _assess_claim \u2192[calls] _result"
+            ],
+            "summary": "Modified function: _aggregate_predicate_assessments",
+            "symbol_kind": "function"
+          },
+          {
+            "added_code": "def test_claim_aggregation_converges_cross_predicate_binding_roles() -> None:\n    claim = TransformationClaim(\n        id=\"T8\",\n        kind=\"authority\",\n        text=(\n            \"The ordered ShadowExecutionObservation sequence is the detailed \"\n            \"shadow artifact authority.\"\n        ),\n    )\n    supporting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP1\",\n        claim_id=\"T8\",\n        predicate_id=\"TP1\",\n        expectation=\"present_head\",\n        status=\"demonstrated\",\n        supporting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_path_observed\",\n                detail=\"The target path is observed.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n    contradicting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP2\",\n        claim_id=\"T8\",\n        predicate_id=\"TP2\",\n        expectation=\"absent_head\",\n        status=\"contradicted\",\n        contradicting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_bypass_observed\",\n                detail=\"The same path contradicts the competing-path predicate.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n\n    assessment = _aggregate_predicate_assessments(\n        claim,\n        (supporting, contradicting),\n    )\n\n    assert assessment.status == \"contradicted\"\n    assert assessment.supporting_binding_ids == ()\n    assert assessment.contradicting_binding_ids == (\"TAB:T8:E:path\",)\n    assert assessment.predicate_assessments == (supporting, contradicting)\n\n",
+            "admission_tier": "baseline",
+            "association": "deterministic_baseline",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:c2791c858bfc8ed77f72",
+            "kind": "structural_change",
+            "line_end": 236,
+            "line_start": 188,
+            "operation": "added",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "test",
+            "qualified_name": "test_claim_aggregation_converges_cross_predicate_binding_roles",
+            "removed_code": "",
+            "revision_side": "review",
+            "structural_context": [
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason \u2190[instantiates] test_transformation_binding_cannot_create_structural_graph_membership",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[calls] _aggregate_predicate_assessments",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason \u2190[imports] src/prismcode/assessment/migration.py",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason \u2190[instantiates] test_closure_projection_is_the_shared_graph_authority",
+              "_aggregate_predicate_assessments \u2190[calls] test_claim_aggregation_converges_cross_predicate_binding_roles"
+            ],
+            "summary": "Added function: test_claim_aggregation_converges_cross_predicate_binding_roles",
+            "symbol_kind": "function"
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:038141a3493c40e49239",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] extract_review_semantics"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] extract_review_semantics",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:06581bef92c8c6385a1b",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] EvidenceItem"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] EvidenceItem",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:071a971ac7c66f2d4e7a",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:106f09ba923a222991f7",
+            "kind": "structural_path",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "base",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] TransformationClosurePolicy"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] TransformationClosurePolicy",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:1142584ef67752f56631",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] src/prismcode/semantics/criteria.py"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] src/prismcode/semantics/criteria.py",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:11e275c92dc5dcf08e5a",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] src/prismcode/facts/transformation.py"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] src/prismcode/facts/transformation.py",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:14fcb536aca188405c88",
+            "kind": "structural_path",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "base",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] extract_review_semantics"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] extract_review_semantics",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:1844b83e68b58f50d96f",
+            "kind": "structural_path",
+            "line_end": 236,
+            "line_start": 188,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[calls] _aggregate_predicate_assessments"
+            ],
+            "summary": "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[calls] _aggregate_predicate_assessments",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:1ddf24e43364758c9246",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] select_transformation_subjects"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] select_transformation_subjects",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:2205534e3a4887357fe8",
+            "kind": "structural_path",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "base",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] DeterministicAnalyzer"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] DeterministicAnalyzer",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:2542e195e24bcc52539e",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] ChangedFile"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] ChangedFile",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:258f4845a8b216001ee0",
+            "kind": "structural_path",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "base",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] ChangedFile"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] ChangedFile",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:2b667b3ea722e3df29b7",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] src/prismcode/model/contracts.py"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] src/prismcode/model/contracts.py",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:2da0962230f7edd55d42",
+            "kind": "structural_path",
+            "line_end": 1123,
+            "line_start": 1077,
+            "operation": "observed",
+            "path": "src/prismcode/assessment/transformation.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "_aggregate_predicate_assessments \u2190[imports] tests/test_transformation_assessment.py"
+            ],
+            "summary": "_aggregate_predicate_assessments \u2190[imports] tests/test_transformation_assessment.py",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:37ad4e8e65d827197c82",
+            "kind": "structural_path",
+            "line_end": 236,
+            "line_start": 188,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason"
+            ],
+            "summary": "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:3e3e632aabf8ffa9eae0",
+            "kind": "structural_path",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "base",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] src/prismcode/routing/transformation.py"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] src/prismcode/routing/transformation.py",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:4065e3e485706a2d1ada",
+            "kind": "structural_path",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "base",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] src/prismcode/facts/transformation.py"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] src/prismcode/facts/transformation.py",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:455822745475477b12d9",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] ClosureScanPlanSet"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] ClosureScanPlanSet",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:4c5af105f2e8c49b83af",
+            "kind": "structural_path",
+            "line_end": 1123,
+            "line_start": 1077,
+            "operation": "observed",
+            "path": "src/prismcode/assessment/transformation.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "_aggregate_predicate_assessments \u2190[calls] test_claim_aggregation_converges_cross_predicate_binding_roles"
+            ],
+            "summary": "_aggregate_predicate_assessments \u2190[calls] test_claim_aggregation_converges_cross_predicate_binding_roles",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:50e718987772a6738b98",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] SourceRecord"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] SourceRecord",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:51cd3589d9ca29df8154",
+            "kind": "structural_path",
+            "line_end": 236,
+            "line_start": 188,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationPredicateAssessment"
+            ],
+            "summary": "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationPredicateAssessment",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:531cbefe9a802b0bcf1e",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] src/prismcode/routing/transformation.py"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] src/prismcode/routing/transformation.py",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:537146c324891759ae62",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] TransformationAssessmentReason"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] TransformationAssessmentReason",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:57c6430f002dc9a165a5",
+            "kind": "structural_path",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "base",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] converge_transformation_closure"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] converge_transformation_closure",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:5b1352a4696639ba40b9",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] StructuralChangeIdentity"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] StructuralChangeIdentity",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:5cc684dc3c398278ec7c",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] TransformationClaim"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] TransformationClaim",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:5e349bc8b22ae3a615ae",
+            "kind": "structural_path",
+            "line_end": 1363,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "head",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] converge_transformation_closure"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] converge_transformation_closure",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:5eb02cbc4cab09ef10cd",
+            "kind": "structural_path",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "base",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] reconstruct_observed_transformation"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] reconstruct_observed_transformation",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:5fd76db78f0059233757",
+            "kind": "structural_path",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "base",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] TransformationAssessment"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] TransformationAssessment",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "",
+            "admission_tier": "provided",
+            "association": "provided_association",
+            "authority": "structural_provider",
+            "classification": "mixed",
+            "evidence_id": "E:structural_path:62d7563250090405d940",
+            "kind": "structural_path",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "observed",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "structural_path",
+            "qualified_name": "",
+            "removed_code": "",
+            "revision_side": "base",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] VerificationObservation"
+            ],
+            "summary": "tests/test_transformation_assessment.py \u2192[imports] VerificationObservation",
+            "symbol_kind": ""
+          }
+        ],
+        "coverage_limits": [
+          "Structural traversal coverage is incomplete for eligible evidence.",
+          "Structural context was truncated for 3 evidence candidates at 6 paths each."
+        ],
+        "request_id": "shadow:T6:3632c296ed38a70f",
+        "schema_version": "2",
+        "subject_id": "T6",
+        "subject_kind": "selected_region"
+      },
+      "run": null
+    },
+    {
+      "admission_state": "ready",
+      "claim_id": "T7",
+      "deterministic_evidence_ids": [],
+      "diagnostics": [
+        {
+          "code": "shadow_execution_budget_deferred",
+          "message": "Admitted shadow request was deferred by the review safety limit of 3."
+        }
+      ],
+      "eligible_count": 3,
+      "execution_state": "deferred",
+      "request": {
+        "authored_statement": "Exit: validated TransformationClaimAssessment.",
+        "candidates": [
+          {
+            "added_code": "from prismcode.assessment.transformation import (\n    _aggregate_predicate_assessments,\n    assess_transformation,\n)\n    TransformationAssessmentReason,\n    TransformationClaim,\n    TransformationPredicateAssessment,\ndef test_claim_aggregation_converges_cross_predicate_binding_roles() -> None:\n    claim = TransformationClaim(\n        id=\"T8\",\n        kind=\"authority\",\n        text=(\n            \"The ordered ShadowExecutionObservation sequence is the detailed \"\n            \"shadow artifact authority.\"\n        ),\n    )\n    supporting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP1\",\n        claim_id=\"T8\",\n        predicate_id=\"TP1\",\n        expectation=\"present_head\",\n        status=\"demonstrated\",\n        supporting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_path_observed\",\n                detail=\"The target path is observed.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n    contradicting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP2\",\n        claim_id=\"T8\",\n        predicate_id=\"TP2\",\n        expectation=\"absent_head\",\n        status=\"contradicted\",\n        contradicting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_bypass_observed\",\n                detail=\"The same path contradicts the competing-path predicate.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n\n    assessment = _aggregate_predicate_assessments(\n        claim,\n        (supporting, contradicting),\n    )\n\n    assert assessment.status == \"contradicted\"\n    assert assessment.supporting_binding_ids == ()\n    assert assessment.contradicting_binding_ids == (\"TAB:T8:E:path\",)\n    assert assessment.predicate_assessments == (supporting, contradicting)\n\n",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:3ebadfc34250f335d1a2",
+            "kind": "structural_change",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "modified",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "test",
+            "qualified_name": "tests/test_transformation_assessment.py",
+            "removed_code": "from prismcode.assessment.transformation import assess_transformation",
+            "revision_side": "review",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput \u2190[instantiates] test_alignment_is_serialized_but_carries_no_assessment_state",
+              "tests/test_transformation_assessment.py \u2192[imports] extract_review_semantics",
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput \u2190[imports] tests/test_verification_projection.py",
+              "tests/test_transformation_assessment.py \u2192[imports] EvidenceItem",
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput",
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput \u2190[instantiates] _brief"
+            ],
+            "summary": "Modified file: tests/test_transformation_assessment.py",
+            "symbol_kind": "file"
+          },
+          {
+            "added_code": "    supporting_candidates = tuple(\n    contradicting_set = set(contradicting)\n    supporting = tuple(\n        binding_id\n        for binding_id in supporting_candidates\n        if binding_id not in contradicting_set\n    )",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "code",
+            "evidence_id": "E:structural_change:7f6ee5dc76a147396f78",
+            "kind": "structural_change",
+            "line_end": 1117,
+            "line_start": 1077,
+            "operation": "modified",
+            "path": "src/prismcode/assessment/transformation.py",
+            "profile": "production",
+            "qualified_name": "_aggregate_predicate_assessments",
+            "removed_code": "    supporting = tuple(",
+            "revision_side": "review",
+            "structural_context": [
+              "_aggregate_predicate_assessments \u2190[calls] _assess_claim \u2192[calls] _predicate_result",
+              "_aggregate_predicate_assessments \u2192[instantiates] TransformationClaimAssessment \u2190[imports] tests/test_verification_projection.py",
+              "_aggregate_predicate_assessments \u2190[calls] _assess_claim \u2192[calls] _assess_closure",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[calls] _aggregate_predicate_assessments",
+              "_aggregate_predicate_assessments \u2192[instantiates] TransformationClaimAssessment \u2190[instantiates] _result",
+              "_aggregate_predicate_assessments \u2190[calls] _assess_claim \u2192[calls] _result"
+            ],
+            "summary": "Modified function: _aggregate_predicate_assessments",
+            "symbol_kind": "function"
+          },
+          {
+            "added_code": "def test_claim_aggregation_converges_cross_predicate_binding_roles() -> None:\n    claim = TransformationClaim(\n        id=\"T8\",\n        kind=\"authority\",\n        text=(\n            \"The ordered ShadowExecutionObservation sequence is the detailed \"\n            \"shadow artifact authority.\"\n        ),\n    )\n    supporting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP1\",\n        claim_id=\"T8\",\n        predicate_id=\"TP1\",\n        expectation=\"present_head\",\n        status=\"demonstrated\",\n        supporting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_path_observed\",\n                detail=\"The target path is observed.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n    contradicting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP2\",\n        claim_id=\"T8\",\n        predicate_id=\"TP2\",\n        expectation=\"absent_head\",\n        status=\"contradicted\",\n        contradicting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_bypass_observed\",\n                detail=\"The same path contradicts the competing-path predicate.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n\n    assessment = _aggregate_predicate_assessments(\n        claim,\n        (supporting, contradicting),\n    )\n\n    assert assessment.status == \"contradicted\"\n    assert assessment.supporting_binding_ids == ()\n    assert assessment.contradicting_binding_ids == (\"TAB:T8:E:path\",)\n    assert assessment.predicate_assessments == (supporting, contradicting)\n\n",
+            "admission_tier": "fallback",
+            "association": "typed_changed_anchor_fallback",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:c2791c858bfc8ed77f72",
+            "kind": "structural_change",
+            "line_end": 236,
+            "line_start": 188,
+            "operation": "added",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "test",
+            "qualified_name": "test_claim_aggregation_converges_cross_predicate_binding_roles",
+            "removed_code": "",
+            "revision_side": "review",
+            "structural_context": [
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason \u2190[instantiates] test_transformation_binding_cannot_create_structural_graph_membership",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[calls] _aggregate_predicate_assessments",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason \u2190[imports] src/prismcode/assessment/migration.py",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason \u2190[instantiates] test_closure_projection_is_the_shared_graph_authority",
+              "_aggregate_predicate_assessments \u2190[calls] test_claim_aggregation_converges_cross_predicate_binding_roles"
+            ],
+            "summary": "Added function: test_claim_aggregation_converges_cross_predicate_binding_roles",
+            "symbol_kind": "function"
+          }
+        ],
+        "coverage_limits": [
+          "Structural context was truncated for 3 evidence candidates at 6 paths each."
+        ],
+        "request_id": "shadow:T7:9687371a0bf1180a",
+        "schema_version": "2",
+        "subject_id": "T7",
+        "subject_kind": "selected_region"
+      },
+      "run": null
+    },
+    {
+      "admission_state": "ready",
+      "claim_id": "T8",
+      "deterministic_evidence_ids": [
+        "E:change_relation:dd491c53650ce524c64d",
+        "E:structural_change:c2791c858bfc8ed77f72"
+      ],
+      "diagnostics": [
+        {
+          "code": "shadow_execution_budget_deferred",
+          "message": "Admitted shadow request was deferred by the review safety limit of 3."
+        }
+      ],
+      "eligible_count": 3,
+      "execution_state": "deferred",
+      "request": {
+        "authored_statement": "Preserved boundaries: predicate assessment, alignment, evidence routing, projection, renderer, and LLM shadow.",
+        "candidates": [
+          {
+            "added_code": "    a separate pipeline change. Predicate assessments preserve their own\n    evidence roles; claim aggregation removes any supporting role also observed\n    as contradicting, so one binding cannot become two claim-level truths.",
+            "admission_tier": "baseline",
+            "association": "deterministic_baseline",
+            "authority": "github_diff",
+            "classification": "document",
+            "evidence_id": "E:change_relation:dd491c53650ce524c64d",
+            "kind": "change_relation",
+            "line_end": 159,
+            "line_start": 157,
+            "operation": "replaced",
+            "path": "docs/architecture.md",
+            "profile": "document",
+            "qualified_name": "",
+            "removed_code": "    a separate pipeline change.",
+            "revision_side": "head",
+            "structural_context": [],
+            "summary": "Replaced change: docs/architecture.md:157-159",
+            "symbol_kind": ""
+          },
+          {
+            "added_code": "def test_claim_aggregation_converges_cross_predicate_binding_roles() -> None:\n    claim = TransformationClaim(\n        id=\"T8\",\n        kind=\"authority\",\n        text=(\n            \"The ordered ShadowExecutionObservation sequence is the detailed \"\n            \"shadow artifact authority.\"\n        ),\n    )\n    supporting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP1\",\n        claim_id=\"T8\",\n        predicate_id=\"TP1\",\n        expectation=\"present_head\",\n        status=\"demonstrated\",\n        supporting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_path_observed\",\n                detail=\"The target path is observed.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n    contradicting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP2\",\n        claim_id=\"T8\",\n        predicate_id=\"TP2\",\n        expectation=\"absent_head\",\n        status=\"contradicted\",\n        contradicting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_bypass_observed\",\n                detail=\"The same path contradicts the competing-path predicate.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n\n    assessment = _aggregate_predicate_assessments(\n        claim,\n        (supporting, contradicting),\n    )\n\n    assert assessment.status == \"contradicted\"\n    assert assessment.supporting_binding_ids == ()\n    assert assessment.contradicting_binding_ids == (\"TAB:T8:E:path\",)\n    assert assessment.predicate_assessments == (supporting, contradicting)\n\n",
+            "admission_tier": "baseline",
+            "association": "deterministic_baseline",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:c2791c858bfc8ed77f72",
+            "kind": "structural_change",
+            "line_end": 236,
+            "line_start": 188,
+            "operation": "added",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "test",
+            "qualified_name": "test_claim_aggregation_converges_cross_predicate_binding_roles",
+            "removed_code": "",
+            "revision_side": "review",
+            "structural_context": [
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason \u2190[instantiates] test_transformation_binding_cannot_create_structural_graph_membership",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[calls] _aggregate_predicate_assessments",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason \u2190[imports] src/prismcode/assessment/migration.py",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason",
+              "test_claim_aggregation_converges_cross_predicate_binding_roles \u2192[instantiates] TransformationAssessmentReason \u2190[instantiates] test_closure_projection_is_the_shared_graph_authority",
+              "_aggregate_predicate_assessments \u2190[calls] test_claim_aggregation_converges_cross_predicate_binding_roles"
+            ],
+            "summary": "Added function: test_claim_aggregation_converges_cross_predicate_binding_roles",
+            "symbol_kind": "function"
+          },
+          {
+            "added_code": "from prismcode.assessment.transformation import (\n    _aggregate_predicate_assessments,\n    assess_transformation,\n)\n    TransformationAssessmentReason,\n    TransformationClaim,\n    TransformationPredicateAssessment,\ndef test_claim_aggregation_converges_cross_predicate_binding_roles() -> None:\n    claim = TransformationClaim(\n        id=\"T8\",\n        kind=\"authority\",\n        text=(\n            \"The ordered ShadowExecutionObservation sequence is the detailed \"\n            \"shadow artifact authority.\"\n        ),\n    )\n    supporting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP1\",\n        claim_id=\"T8\",\n        predicate_id=\"TP1\",\n        expectation=\"present_head\",\n        status=\"demonstrated\",\n        supporting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_path_observed\",\n                detail=\"The target path is observed.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n    contradicting = TransformationPredicateAssessment(\n        id=\"TAP:T8:TP2\",\n        claim_id=\"T8\",\n        predicate_id=\"TP2\",\n        expectation=\"absent_head\",\n        status=\"contradicted\",\n        contradicting_binding_ids=(\"TAB:T8:E:path\",),\n        reasons=(\n            TransformationAssessmentReason(\n                kind=\"authority_bypass_observed\",\n                detail=\"The same path contradicts the competing-path predicate.\",\n                binding_ids=(\"TAB:T8:E:path\",),\n            ),\n        ),\n    )\n\n    assessment = _aggregate_predicate_assessments(\n        claim,\n        (supporting, contradicting),\n    )\n\n    assert assessment.status == \"contradicted\"\n    assert assessment.supporting_binding_ids == ()\n    assert assessment.contradicting_binding_ids == (\"TAB:T8:E:path\",)\n    assert assessment.predicate_assessments == (supporting, contradicting)\n\n",
+            "admission_tier": "same_hunk",
+            "association": "shared_change_relation",
+            "authority": "structural_provider",
+            "classification": "test",
+            "evidence_id": "E:structural_change:3ebadfc34250f335d1a2",
+            "kind": "structural_change",
+            "line_end": 1306,
+            "line_start": 1,
+            "operation": "modified",
+            "path": "tests/test_transformation_assessment.py",
+            "profile": "test",
+            "qualified_name": "tests/test_transformation_assessment.py",
+            "removed_code": "from prismcode.assessment.transformation import assess_transformation",
+            "revision_side": "review",
+            "structural_context": [
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput \u2190[instantiates] test_alignment_is_serialized_but_carries_no_assessment_state",
+              "tests/test_transformation_assessment.py \u2192[imports] extract_review_semantics",
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput \u2190[imports] tests/test_verification_projection.py",
+              "tests/test_transformation_assessment.py \u2192[imports] EvidenceItem",
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput",
+              "tests/test_transformation_assessment.py \u2192[imports] AnalysisInput \u2190[instantiates] _brief"
+            ],
+            "summary": "Modified file: tests/test_transformation_assessment.py",
+            "symbol_kind": "file"
+          }
+        ],
+        "coverage_limits": [
+          "Structural context was truncated for 2 evidence candidates at 6 paths each."
+        ],
+        "request_id": "shadow:T8:daad6562761c1f45",
+        "schema_version": "2",
+        "subject_id": "T8",
+        "subject_kind": "selected_region"
+      },
+      "run": null
+    }
+  ],
+  "schema_version": "llm_shadow_execution.v5",
+  "summary": {
+    "admitted_count": 8,
+    "artifact_written": true,
+    "completed_count": 3,
+    "deferred_count": 5,
+    "failed_count": 0,
+    "state": "partial"
+  }
+}

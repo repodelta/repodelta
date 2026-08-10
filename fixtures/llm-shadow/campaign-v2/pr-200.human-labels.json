@@ -1,0 +1,180 @@
+{
+  "authority": "human_review",
+  "labels": [
+    {
+      "claim_id": "T1",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:T1:83036dde02c74f7a",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:change_relation:9291cb67524009f9673c",
+            "rationale": "The directional AGENTS change shows that Issue-specific routing was absent before the new guideline link was added.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          }
+        ],
+        "subject_id": "T1",
+        "unresolved_surfaces": []
+      }
+    },
+    {
+      "claim_id": "T2",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:T2:f362a7a7b538d90c",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:change_relation:9291cb67524009f9673c",
+            "rationale": "The added routing explicitly separates Issue guidance from commit and pull-request lifecycle guidance.",
+            "role": "supporting",
+            "semantic_role": "authority"
+          }
+        ],
+        "subject_id": "T2",
+        "unresolved_surfaces": []
+      }
+    },
+    {
+      "claim_id": "T3",
+      "response": {
+        "insufficient_evidence_ids": [
+          "E:change_relation:9291cb67524009f9673c"
+        ],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:T3:b83265e0ffd32533",
+        "schema_version": "2",
+        "selections": [],
+        "subject_id": "T3",
+        "unresolved_surfaces": [
+          "The link names the Issue guideline but does not expose its canonical sections or aliases."
+        ]
+      }
+    },
+    {
+      "claim_id": "T4",
+      "response": {
+        "insufficient_evidence_ids": [
+          "E:change_relation:9291cb67524009f9673c"
+        ],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:T4:1b79313c4b32b950",
+        "schema_version": "2",
+        "selections": [],
+        "subject_id": "T4",
+        "unresolved_surfaces": [
+          "The admitted hunk does not contain the Issue guideline content allocation."
+        ]
+      }
+    },
+    {
+      "claim_id": "T5",
+      "response": {
+        "insufficient_evidence_ids": [
+          "E:change_relation:9291cb67524009f9673c"
+        ],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:T5:586b47751505fcc8",
+        "schema_version": "2",
+        "selections": [],
+        "subject_id": "T5",
+        "unresolved_surfaces": [
+          "The admitted hunk routes authors but does not show the claimed PR transition-content contract."
+        ]
+      }
+    },
+    {
+      "claim_id": "T6",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:T6:62db222b97c05759",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:change_relation:9291cb67524009f9673c",
+            "rationale": "The hunk adds the Issue-specific link while retaining the existing commit and PR routing text.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          }
+        ],
+        "subject_id": "T6",
+        "unresolved_surfaces": []
+      }
+    },
+    {
+      "claim_id": "CC1",
+      "response": {
+        "insufficient_evidence_ids": [
+          "E:changed_file:71d6ef3c1531ac94a400",
+          "E:change_relation:9291cb67524009f9673c"
+        ],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:CC1:748326f467965632",
+        "schema_version": "2",
+        "selections": [],
+        "subject_id": "CC1",
+        "unresolved_surfaces": [
+          "File identity and one routing link do not prove repository-wide sole authoring authority."
+        ]
+      }
+    },
+    {
+      "claim_id": "CC2",
+      "response": {
+        "insufficient_evidence_ids": [
+          "E:change_relation:9291cb67524009f9673c"
+        ],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:CC2:d32297e9ca1ff177",
+        "schema_version": "2",
+        "selections": [],
+        "subject_id": "CC2",
+        "unresolved_surfaces": [
+          "The bounded hunk does not expose both guideline contracts needed to prove distinct content authorities."
+        ]
+      }
+    },
+    {
+      "claim_id": "CC3",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [],
+        "request_id": "shadow:CC3:48201983be26e8bd",
+        "schema_version": "2",
+        "selections": [
+          {
+            "evidence_id": "E:change_relation:9291cb67524009f9673c",
+            "rationale": "The AGENTS routing hunk directly distinguishes Issue creation from commit and PR creation guidance.",
+            "role": "supporting",
+            "semantic_role": "documentation"
+          }
+        ],
+        "subject_id": "CC3",
+        "unresolved_surfaces": []
+      }
+    },
+    {
+      "claim_id": "CC4",
+      "response": {
+        "insufficient_evidence_ids": [],
+        "rejected_evidence_ids": [
+          "E:change_relation:9291cb67524009f9673c"
+        ],
+        "request_id": "shadow:CC4:14bd5996e4494f06",
+        "schema_version": "2",
+        "selections": [],
+        "subject_id": "CC4",
+        "unresolved_surfaces": [
+          "No parser or report implementation evidence was admitted for the unchanged-behavior claim."
+        ]
+      }
+    }
+  ],
+  "rubric_version": "shadow-evidence-disposition.v1",
+  "schema_version": "llm_shadow_human_labels.v1"
+}
