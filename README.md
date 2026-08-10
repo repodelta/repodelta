@@ -127,6 +127,4 @@ unless that host is explicitly trusted.
 
 ## License
 
-No open-source license has been selected yet. The repository remains private
-while licensing, contributor terms, and the public/private product boundary are
-reviewed.
+PrismCode is licensed under the [MIT License](LICENSE).
