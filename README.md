@@ -4,6 +4,11 @@ RepoDelta turns a pull request into an interactive visual map of what changed
 across the repository—and helps reviewers judge whether the implementation
 matches its acceptance criteria.
 
+AI agents can now produce changes faster and at a scale that makes supervising
+every execution impractical. RepoDelta shifts human oversight to the acceptance
+boundary: before a result enters the codebase, reviewers can understand and
+govern what changed without replaying every agent step.
+
 It sits after a human or coding agent has written code and opened a PR:
 
 ```text
@@ -197,35 +202,30 @@ generated HTML. Generated reports create hyperlinks only for absolute HTTP and
 HTTPS URLs. Official GitHub is trusted by default; a custom GitHub API host
 must be named explicitly before RepoDelta will send it a token.
 
-## Build the next layer with us
+## Build with us
 
-Change understanding is only the first step. RepoDelta is also an open
-experiment in making coding agents maintainable and extensible enough to work
-on production code: every change is used to test and refine the repository's
-own method, not only its report generator.
+RepoDelta is open to anyone who wants to make code changes easier to understand
+and govern. Bring a useful feature, improve an existing capability, add an
+integration or evaluation case, or simply open an Issue with an idea worth
+exploring.
 
-That connection is visible in every report: Issue-authored objectives,
-requirements, and guardrails (`O/R/G`) describe what the change must achieve,
-while PR-authored transformation claims and completion conditions (`T/CC`)
-describe what the human or coding agent says it changed. RepoDelta places both
-against the observed diff and structural graph, making mismatches, missing
-evidence, and unresolved coverage inspectable instead of trusting the PR
-description as proof.
+Building RepoDelta is also how we explore better coding workflows for an
+agent-native era. Our current approach connects Issue-authored objectives,
+requirements, and guardrails (`O/R/G`) with PR-authored transformation claims
+and completion conditions (`T/CC`), then checks both against the observed change.
+It begins in [AGENTS.md](AGENTS.md) and the repository's guides for
+[Issues](docs/issue-guidelines.md),
+[agent changes](docs/agent-change-protocol.md),
+[commits](docs/commit-message-guidelines.md), and
+[pull requests](docs/pull-request-guidelines.md)—but it is not the only approach
+we welcome. If you have a better method, bring it, test it on real changes, and
+help us learn from the result.
 
-That method starts in [AGENTS.md](AGENTS.md) and is made operational by four
-guides: [Issue authoring](docs/issue-guidelines.md), the
-[agent change protocol](docs/agent-change-protocol.md),
-[commit messages](docs/commit-message-guidelines.md), and
-[pull requests](docs/pull-request-guidelines.md). They define how requirements,
-responsibility boundaries, implementation transitions, verification, and
-post-change learning stay connected.
-
-Contributions and competing approaches are welcome. You can improve an
-existing adapter, help design [requirement sources beyond GitHub Issues](https://github.com/repodelta/repodelta/issues/233)
-such as Jira, add an evaluation case, or challenge the coding method with a
-concrete counterexample. Start with the
-[open Issues](https://github.com/repodelta/repodelta/issues) or open a
-focused Issue using the repository's authoring guide.
+Whether you want to extend RepoDelta, connect a source such as
+[Jira](https://github.com/repodelta/repodelta/issues/233), or challenge how the
+project itself is built, you are welcome here. Start with the
+[open Issues](https://github.com/repodelta/repodelta/issues) or open a focused
+Issue of your own.
 
 ## License
 
