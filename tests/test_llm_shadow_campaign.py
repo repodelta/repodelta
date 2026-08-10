@@ -2,14 +2,14 @@ from pathlib import Path
 
 import pytest
 
-from prismcode.evaluation.shadow import (
+from repodelta.evaluation.shadow import (
     ExpectedShadowOutcome,
     HumanShadowLabelSet,
     evaluate_shadow_outcomes,
     load_human_shadow_labels,
     shadow_metrics,
 )
-from prismcode.llm.execution import load_shadow_execution
+from repodelta.llm.execution import load_shadow_execution
 
 
 CORPUS = Path("fixtures/llm-shadow/campaign-v1")

@@ -4,11 +4,11 @@ from dataclasses import replace
 
 import pytest
 
-from prismcode.assessment.transformation import (
+from repodelta.assessment.transformation import (
     _aggregate_predicate_assessments,
     assess_transformation,
 )
-from prismcode.model.contracts import (
+from repodelta.model.contracts import (
     AnalysisInput,
     AssociationReason,
     AssociationSignature,
@@ -30,15 +30,15 @@ from prismcode.model.contracts import (
     VerificationIdentity,
     VerificationObservation,
 )
-from prismcode.convergence.transformation import (
+from repodelta.convergence.transformation import (
     TransformationClosurePolicy,
     converge_transformation_closure,
 )
-from prismcode.facts.transformation import reconstruct_observed_transformation
-from prismcode.pipeline import DeterministicAnalyzer
-from prismcode.routing.transformation import build_transformation_alignment
-from prismcode.routing.transformation_subjects import select_transformation_subjects
-from prismcode.semantics.criteria import extract_review_semantics
+from repodelta.facts.transformation import reconstruct_observed_transformation
+from repodelta.pipeline import DeterministicAnalyzer
+from repodelta.routing.transformation import build_transformation_alignment
+from repodelta.routing.transformation_subjects import select_transformation_subjects
+from repodelta.semantics.criteria import extract_review_semantics
 
 
 def _packet(
@@ -1344,7 +1344,7 @@ def test_assessment_validation_rejects_unknown_binding_truth() -> None:
 
 
 def test_pipeline_builds_transformation_assessment_once(monkeypatch) -> None:
-    import prismcode.pipeline as pipeline
+    import repodelta.pipeline as pipeline
 
     calls = 0
     real_assess = pipeline.assess_transformation

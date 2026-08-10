@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from prismcode.changes.hunks import DiffHunkCollection
-from prismcode.facts.catalog import build_evidence_catalog
-from prismcode.model.contracts import ReviewSourcePacket
-from prismcode.providers.structural import (
+from repodelta.changes.hunks import DiffHunkCollection
+from repodelta.facts.catalog import build_evidence_catalog
+from repodelta.model.contracts import ReviewSourcePacket
+from repodelta.providers.structural import (
     GraphPathStep,
     GraphSymbol,
     StructuralGraphCollection,

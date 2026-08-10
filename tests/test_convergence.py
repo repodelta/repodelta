@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from dataclasses import fields
 
-from prismcode.convergence.core import ConvergencePolicy, converge_candidates
-from prismcode.model.contracts import (
+from repodelta.convergence.core import ConvergencePolicy, converge_candidates
+from repodelta.model.contracts import (
     ConvergenceGroup,
     EvidenceCatalog,
     EvidenceItem,

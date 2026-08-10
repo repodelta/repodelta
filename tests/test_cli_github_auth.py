@@ -4,8 +4,8 @@ from types import SimpleNamespace
 
 import pytest
 
-import prismcode.cli as cli
-from prismcode.intake.github import GitHubApiError
+import repodelta.cli as cli
+from repodelta.intake.github import GitHubApiError
 
 
 def test_resolve_github_token_prefers_configured_environment(

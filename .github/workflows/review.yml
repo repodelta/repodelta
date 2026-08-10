@@ -1,4 +1,4 @@
-name: PrismCode review
+name: RepoDelta review
 
 on:
   pull_request:
@@ -7,7 +7,7 @@ on:
       repository:
         description: GitHub repository in owner/name form
         required: true
-        default: prismcode-ai/prismcode
+        default: repodelta/repodelta
         type: string
       pull_request:
         description: Pull request number
@@ -27,7 +27,7 @@ jobs:
     env:
       REVIEW_REPOSITORY: ${{ inputs.repository || github.repository }}
       REVIEW_PR: ${{ inputs.pull_request || github.event.pull_request.number }}
-      GITHUB_TOKEN: ${{ secrets.PRISMCODE_GITHUB_TOKEN || github.token }}
+      GITHUB_TOKEN: ${{ secrets.REPODELTA_GITHUB_TOKEN || github.token }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -35,12 +35,12 @@ jobs:
           python-version: "3.12"
       - run: pip install .
       - name: Generate requirement-first report
-        run: prismcode review --repo "$REVIEW_REPOSITORY" --pr "$REVIEW_PR" --output "build/pr-$REVIEW_PR.html"
+        run: repodelta review --repo "$REVIEW_REPOSITORY" --pr "$REVIEW_PR" --output "build/pr-$REVIEW_PR.html"
       - name: Upload review report
         id: report
         uses: actions/upload-artifact@v4
         with:
-          name: prismcode-review-${{ env.REVIEW_PR }}
+          name: repodelta-review-${{ env.REVIEW_PR }}
           path: build/pr-${{ env.REVIEW_PR }}.html
           if-no-files-found: error
           retention-days: 14
@@ -49,7 +49,7 @@ jobs:
           ARTIFACT_URL: ${{ steps.report.outputs.artifact-url }}
         run: |
           {
-            echo "## PrismCode review"
+            echo "## RepoDelta review"
             echo
             echo "Target: [$REVIEW_REPOSITORY#$REVIEW_PR](https://github.com/$REVIEW_REPOSITORY/pull/$REVIEW_PR)"
             echo

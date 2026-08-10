@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from prismcode.model.contracts import (
+from repodelta.model.contracts import (
     AnalysisInput,
     AssociationReason,
     EvidenceCatalog,
@@ -25,9 +25,9 @@ from prismcode.model.contracts import (
     TransformationStructuralTopologyGroup,
     TransformationEvidenceBinding,
 )
-from prismcode.pipeline import DeterministicAnalyzer
-from prismcode.presentation.html import render_html
-from prismcode.projection.verification import project_verification_workspace
+from repodelta.pipeline import DeterministicAnalyzer
+from repodelta.presentation.html import render_html
+from repodelta.projection.verification import project_verification_workspace
 
 
 def _mixed_packet() -> ReviewSourcePacket:

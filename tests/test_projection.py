@@ -6,8 +6,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from prismcode.pipeline import DeterministicAnalyzer
-from prismcode.model.contracts import (
+from repodelta.pipeline import DeterministicAnalyzer
+from repodelta.model.contracts import (
     ArchitecturalChangeTopology,
     ArchitecturalComponent,
     AnalysisInput,
@@ -47,24 +47,24 @@ from prismcode.model.contracts import (
     TransformationStructuralTopologyGroup,
     VerificationIdentity,
 )
-from prismcode.projection.architecture import (
+from repodelta.projection.architecture import (
     classify_architectural_path,
     project_architectural_change_topology,
     validate_architectural_change_topology,
 )
-from prismcode.evaluation.core import load_evaluation_suite
-from prismcode.facts.lexical import association_signature
-from prismcode.intake.fixture import load_fixture
-from prismcode.routing.candidates import build_projection_candidates
-from prismcode.routing.semantics import (
+from repodelta.evaluation.core import load_evaluation_suite
+from repodelta.facts.lexical import association_signature
+from repodelta.intake.fixture import load_fixture
+from repodelta.routing.candidates import build_projection_candidates
+from repodelta.routing.semantics import (
     focus_evidence_role,
     requirement_profile,
 )
-from prismcode.convergence.core import (
+from repodelta.convergence.core import (
     ConvergencePolicy,
     converge_candidates,
 )
-from prismcode.projection.build import (
+from repodelta.projection.build import (
     _canonical_backbone_seed_node_ids,
     _change_backbone,
     _display_evidence_id,
@@ -73,18 +73,18 @@ from prismcode.projection.build import (
     _support_node_delta,
     build_review_projection,
 )
-from prismcode.projection.overview import project_diagnostic_presentation
-from prismcode.projection.structural_groups import (
+from repodelta.projection.overview import project_diagnostic_presentation
+from repodelta.projection.structural_groups import (
     project_structural_relation_groups,
 )
-from prismcode.presentation.html import (
+from repodelta.presentation.html import (
     _architectural_chip,
     _review_graph,
     _structural_compound_layout,
     _structural_edge_path,
     render_html,
 )
-from prismcode.providers.structural import (
+from repodelta.providers.structural import (
     StructuralGraphCollection,
     StructuralGraphIndexStatus,
     StructuralGraphResult,
@@ -160,14 +160,14 @@ def test_architectural_topology_groups_canonical_nodes_and_cross_component_flow(
                 summary="CLI",
                 kind="symbol",
                 classification="code",
-                metadata={"path": "src/prismcode/cli.py"},
+                metadata={"path": "src/repodelta/cli.py"},
             ),
             EvidenceItem(
                 id="E:provider",
                 summary="Provider",
                 kind="symbol",
                 classification="code",
-                metadata={"path": "src/prismcode/providers/openai.py"},
+                metadata={"path": "src/repodelta/providers/openai.py"},
             ),
         )
     )
@@ -175,11 +175,11 @@ def test_architectural_topology_groups_canonical_nodes_and_cross_component_flow(
     topology = project_architectural_change_topology(graph, evidence)
 
     assert [(item.domain, item.layer) for item in topology.components] == [
-        ("prismcode", "entry"),
-        ("prismcode/providers", "infrastructure"),
+        ("repodelta", "entry"),
+        ("repodelta/providers", "infrastructure"),
     ]
     cli_component = next(
-        item for item in topology.components if item.domain == "prismcode"
+        item for item in topology.components if item.domain == "repodelta"
     )
     assert cli_component.internal_relation_group_ids == ()
     assert cli_component.context_node_ids == (provider.id,)
@@ -230,7 +230,7 @@ def test_architectural_component_owns_internal_graph_relation_membership() -> No
                 summary=name,
                 kind="symbol",
                 classification="code",
-                metadata={"path": f"src/prismcode/presentation/{name}.py"},
+                metadata={"path": f"src/repodelta/presentation/{name}.py"},
             )
             for name in ("first", "second")
         )

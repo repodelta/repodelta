@@ -1,17 +1,17 @@
-from prismcode.facts.lexical import association_signature
-from prismcode.model.contracts import (
+from repodelta.facts.lexical import association_signature
+from repodelta.model.contracts import (
     EvidenceCatalog,
     EvidenceItem,
     Requirement,
     ReviewStatement,
 )
-from prismcode.routing.association import (
+from repodelta.routing.association import (
     distinctive_text_terms,
     evidence_reasons,
     statement_reasons,
 )
-from prismcode.routing.candidates import build_projection_candidates
-from prismcode.routing.focus_anchors import associate_focus_anchors
+from repodelta.routing.candidates import build_projection_candidates
+from repodelta.routing.focus_anchors import associate_focus_anchors
 
 
 def _focus(identifier: str, text: str) -> Requirement:

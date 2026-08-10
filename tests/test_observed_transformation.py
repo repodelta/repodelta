@@ -4,10 +4,10 @@ from dataclasses import replace
 
 import pytest
 
-from prismcode.changes.hunks import parse_changed_files
-from prismcode.facts.catalog import build_evidence_catalog
-from prismcode.facts.transformation import reconstruct_observed_transformation
-from prismcode.model.contracts import (
+from repodelta.changes.hunks import parse_changed_files
+from repodelta.facts.catalog import build_evidence_catalog
+from repodelta.facts.transformation import reconstruct_observed_transformation
+from repodelta.model.contracts import (
     AnalysisInput,
     ChangedFile,
     ObservedTransformation,
@@ -15,7 +15,7 @@ from prismcode.model.contracts import (
     SourceRecord,
     VerificationObservation,
 )
-from prismcode.pipeline import DeterministicAnalyzer
+from repodelta.pipeline import DeterministicAnalyzer
 
 
 def _packet(pr_body: str) -> ReviewSourcePacket:
@@ -114,7 +114,7 @@ def test_observed_transformation_rejects_a_missing_canonical_lane_member() -> No
 
 
 def test_pipeline_reconstructs_observed_state_once(monkeypatch) -> None:
-    import prismcode.pipeline as pipeline
+    import repodelta.pipeline as pipeline
 
     calls = 0
     real_reconstruct = pipeline.reconstruct_observed_transformation

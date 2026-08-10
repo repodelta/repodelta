@@ -3,13 +3,13 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
-from prismcode.changes.hunks import parse_changed_files
-from prismcode.closure.planning import compile_closure_scan_plans
-from prismcode.closure.scanning import (
+from repodelta.changes.hunks import parse_changed_files
+from repodelta.closure.planning import compile_closure_scan_plans
+from repodelta.closure.scanning import (
     ClosureScanLimits,
     RepositoryClosureScanner,
 )
-from prismcode.model.contracts import (
+from repodelta.model.contracts import (
     AnalysisInput,
     Requirement,
     ReviewSourcePacket,
@@ -19,12 +19,12 @@ from prismcode.model.contracts import (
     TransformationPredicate,
     TransformationPredicateSet,
 )
-from prismcode.facts.catalog import build_evidence_catalog
-from prismcode.facts.transformation import reconstruct_observed_transformation
-from prismcode.pipeline import DeterministicAnalyzer
-from prismcode.presentation.html import render_html
-from prismcode.routing.transformation import build_transformation_alignment
-from prismcode.assessment.transformation import assess_transformation
+from repodelta.facts.catalog import build_evidence_catalog
+from repodelta.facts.transformation import reconstruct_observed_transformation
+from repodelta.pipeline import DeterministicAnalyzer
+from repodelta.presentation.html import render_html
+from repodelta.routing.transformation import build_transformation_alignment
+from repodelta.assessment.transformation import assess_transformation
 
 
 def _guardrail(text: str) -> Requirement:
@@ -45,7 +45,7 @@ def _repository(tmp_path: Path, files: dict[str, str]) -> tuple[Path, str]:
         check=True,
     )
     subprocess.run(
-        ["git", "-C", str(root), "config", "user.name", "PrismCode Test"],
+        ["git", "-C", str(root), "config", "user.name", "RepoDelta Test"],
         check=True,
     )
     for name, content in files.items():
@@ -286,7 +286,7 @@ def test_removal_scan_preserves_base_head_transition_and_path_profiles(
         check=True,
     )
     subprocess.run(
-        ["git", "-C", str(head), "config", "user.name", "PrismCode Test"],
+        ["git", "-C", str(head), "config", "user.name", "RepoDelta Test"],
         check=True,
     )
     for relative in ("src/service.py", "tests/test_service.py", "docs/design.md"):
@@ -393,10 +393,10 @@ def test_scoped_removal_ignores_same_symbol_outside_declared_path(
     base, base_revision = _repository(
         tmp_path,
         {
-            "src/prismcode/convergence/structural.py": (
+            "src/repodelta/convergence/structural.py": (
                 "def _review_symbol_id():\n    return 'legacy'\n"
             ),
-            "src/prismcode/facts/catalog.py": (
+            "src/repodelta/facts/catalog.py": (
                 "def _review_symbol_id():\n    return 'canonical-other-surface'\n"
             ),
         },
@@ -408,11 +408,11 @@ def test_scoped_removal_ignores_same_symbol_outside_declared_path(
         check=True,
     )
     subprocess.run(
-        ["git", "-C", str(head), "config", "user.name", "PrismCode Test"],
+        ["git", "-C", str(head), "config", "user.name", "RepoDelta Test"],
         check=True,
     )
-    (head / "src/prismcode/convergence/structural.py").write_text(
-        "from prismcode.model.structural_refs import review_symbol_id\n",
+    (head / "src/repodelta/convergence/structural.py").write_text(
+        "from repodelta.model.structural_refs import review_symbol_id\n",
         encoding="utf-8",
     )
     subprocess.run(["git", "-C", str(head), "add", "."], check=True)
@@ -431,7 +431,7 @@ def test_scoped_removal_ignores_same_symbol_outside_declared_path(
         kind="removal",
         text=(
             "Removed `_review_symbol_id` from "
-            "`src/prismcode/convergence/structural.py`."
+            "`src/repodelta/convergence/structural.py`."
         ),
         sources=(SourceRef(label="PR #1"),),
     )
@@ -451,7 +451,7 @@ def test_scoped_removal_ignores_same_symbol_outside_declared_path(
                     id="TP:T1:2",
                     claim_id="T1",
                     selector_kind="repository_path",
-                    values=("src/prismcode/convergence/structural.py",),
+                    values=("src/repodelta/convergence/structural.py",),
                     expectation="absent_head",
                     role="path_scope",
                     sources=claim.sources,
@@ -471,7 +471,7 @@ def test_scoped_removal_ignores_same_symbol_outside_declared_path(
     result = result_set.results[0]
 
     assert {item.path for item in result.revisions[0].matches} == {
-        "src/prismcode/convergence/structural.py"
+        "src/repodelta/convergence/structural.py"
     }
     assert result.revisions[1].matches == ()
 

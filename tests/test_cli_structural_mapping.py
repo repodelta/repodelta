@@ -9,8 +9,8 @@ from pathlib import Path
 
 import pytest
 
-from prismcode.cli import main
-from prismcode.model.contracts import ChangedFile, ReviewSourcePacket, SourceRecord
+from repodelta.cli import main
+from repodelta.model.contracts import ChangedFile, ReviewSourcePacket, SourceRecord
 
 
 def _write_fixture(tmp_path: Path, *, body: str | None = None) -> Path:
@@ -122,7 +122,7 @@ def _run_cli(
         sys,
         "argv",
         [
-            "prismcode",
+            "repodelta",
             "review",
             "--fixture",
             str(fixture),
@@ -178,7 +178,7 @@ def test_cli_shadow_without_provider_is_unavailable_and_fail_closed(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
-    monkeypatch.delenv("PRISMCODE_LLM_MODEL", raising=False)
+    monkeypatch.delenv("REPODELTA_LLM_MODEL", raising=False)
     fixture = _write_fixture(tmp_path)
     output = tmp_path / "review.html"
 
@@ -210,7 +210,7 @@ def test_cli_prepares_labeling_packet_without_invoking_provider(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
-    monkeypatch.delenv("PRISMCODE_LLM_MODEL", raising=False)
+    monkeypatch.delenv("REPODELTA_LLM_MODEL", raising=False)
     fixture = _write_fixture(tmp_path)
     output = tmp_path / "review.html"
     packet = tmp_path / "labeling.json"

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import asdict
 
-from prismcode.model.contracts import (
+from repodelta.model.contracts import (
     CandidateConvergence,
     ConvergenceGroup,
     ProjectionCandidateGroup,
@@ -10,17 +10,17 @@ from prismcode.model.contracts import (
     ProjectionDiagnostic,
     SourceRef,
 )
-from prismcode.projection.overview import (
+from repodelta.projection.overview import (
     _projection_attention,
     project_diagnostic_presentation,
 )
-from prismcode.providers.structural import (
+from repodelta.providers.structural import (
     StructuralGraphCollection,
     StructuralGraphIndexStatus,
     StructuralGraphResult,
     StructuralSeedCoverage,
 )
-from prismcode.routing.coverage import review_provider_diagnostics
+from repodelta.routing.coverage import review_provider_diagnostics
 
 
 def _head_graph(**values) -> StructuralGraphCollection:

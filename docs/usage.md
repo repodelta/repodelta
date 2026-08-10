@@ -1,10 +1,21 @@
 # Usage
 
-PrismCode runs after a pull request exists and writes a standalone interactive
+RepoDelta runs after a pull request exists and writes a standalone interactive
 HTML review brief. The default path is deterministic and does not require an
 LLM provider.
 
-## Install from a source checkout
+## Install the CLI
+
+Install RepoDelta once in an isolated tool environment; this does not modify a
+target repository's virtual environment:
+
+```bash
+pipx install git+https://github.com/repodelta/repodelta.git
+```
+
+Until the first PyPI release, the GitHub URL is the supported install source.
+
+## Contribute from a source checkout
 
 ```bash
 python -m venv .venv
@@ -23,7 +34,7 @@ pytest -q
 ## Review an offline fixture
 
 ```bash
-prismcode review \
+repodelta review \
   --fixture fixtures/pr574.json \
   --output build/pr574.html
 ```
@@ -36,10 +47,10 @@ See [Fixture schema](fixture-schema.md) for the versioned input contract.
 Run from any directory:
 
 ```bash
-prismcode review --repo owner/repository --pr 123 --output build/pr-123.html
+repodelta review --repo owner/repository --pr 123 --output build/pr-123.html
 ```
 
-PrismCode obtains live metadata from GitHub and fetches the exact PR head and
+RepoDelta obtains live metadata from GitHub and fetches the exact PR head and
 base revisions into a private temporary Git source. Pass
 `--repo-root /path/to/local/repository` only as an explicit optimization when a
 local repository already contains both commit objects; its current branch and
@@ -68,7 +79,7 @@ and authority mapping is documented under
 
 ### Structural analysis
 
-Structure-aware analysis is the live-review default. PrismCode creates private
+Structure-aware analysis is the live-review default. RepoDelta creates private
 detached worktrees at the PR's exact head and base revisions, initializes an
 isolated Codegraph index once in each worktree, maps changed hunks to symbols,
 collects bounded structural paths and ownership, and removes the fetched Git
@@ -76,14 +87,14 @@ source, worktrees, and indexes after success or failure.
 
 Authentication is supplied only to the fetch subprocess and is not written to
 the remote URL, command arguments, Git configuration, review metadata, or HTML.
-PrismCode first uses a `codegraph` executable on `PATH`; otherwise it runs
+RepoDelta first uses a `codegraph` executable on `PATH`; otherwise it runs
 `npx --yes @colbymchenry/codegraph`. Codegraph is an external MIT-licensed
-runtime and is not bundled in the PrismCode Python distribution.
+runtime and is not bundled in the RepoDelta Python distribution.
 
 Use the explicit Codegraph-free path when structural analysis is not wanted:
 
 ```bash
-prismcode review \
+repodelta review \
   --repo owner/repository \
   --pr 123 \
   --no-structural-graph \
@@ -113,20 +124,20 @@ Enterprise host must also be trusted with
 
 The repository includes [`.github/workflows/review.yml`](../.github/workflows/review.yml).
 It runs automatically for pull requests in this repository and can be started
-with **Actions → PrismCode review → Run workflow** for another readable
+with **Actions → RepoDelta review → Run workflow** for another readable
 repository and PR number.
 
 Each run exposes a report link in the job summary and retains the HTML as an
 artifact for 14 days. The built-in `GITHUB_TOKEN` covers pull requests in the
 same repository. To review another private repository, configure a
-`PRISMCODE_GITHUB_TOKEN` Actions secret with read access to that target.
+`REPODELTA_GITHUB_TOKEN` Actions secret with read access to that target.
 
 ## Evaluate retrieval offline
 
 Run the golden evaluation suite without GitHub, Codegraph, or model credentials:
 
 ```bash
-prismcode evaluate \
+repodelta evaluate \
   --suite fixtures/evaluation-suite.json \
   --json-output build/evaluation.json \
   --markdown-output build/evaluation.md

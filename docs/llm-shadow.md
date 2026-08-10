@@ -1,18 +1,18 @@
 # LLM shadow evaluation
 
-PrismCode's supported review path is deterministic. The LLM path is an opt-in
+RepoDelta's supported review path is deterministic. The LLM path is an opt-in
 research surface that compares model selections with deterministic evidence
 selection and frozen human labels. It does not change formal assessment,
 verification, HTML conclusions, or mergeability.
 
 The active experiment and results are tracked in
-[#211](https://github.com/prismcode-ai/prismcode/issues/211). Future semantic
+[#211](https://github.com/repodelta/repodelta/issues/211). Future semantic
 intake, R/G-to-subgraph mapping, architectural overlays, and grounded
 explanations are tracked independently in
-[#224](https://github.com/prismcode-ai/prismcode/issues/224),
-[#225](https://github.com/prismcode-ai/prismcode/issues/225),
-[#226](https://github.com/prismcode-ai/prismcode/issues/226), and
-[#227](https://github.com/prismcode-ai/prismcode/issues/227).
+[#224](https://github.com/repodelta/repodelta/issues/224),
+[#225](https://github.com/repodelta/repodelta/issues/225),
+[#226](https://github.com/repodelta/repodelta/issues/226), and
+[#227](https://github.com/repodelta/repodelta/issues/227).
 
 ## Run bounded shadow selection
 
@@ -20,20 +20,20 @@ Configure an OpenAI-compatible provider explicitly:
 
 ```bash
 export OPENAI_API_KEY=...
-export PRISMCODE_LLM_MODEL=...
+export REPODELTA_LLM_MODEL=...
 export OPENAI_BASE_URL=https://api.openai.com/v1
-export PRISMCODE_LLM_API_PROFILE=openai  # openai | siliconflow | deepseek
+export REPODELTA_LLM_API_PROFILE=openai  # openai | siliconflow | deepseek
 
 # Optional provider-neutral execution policy.
-export PRISMCODE_LLM_TIMEOUT_SECONDS=180
-export PRISMCODE_LLM_MAX_OUTPUT_TOKENS=1200
-export PRISMCODE_LLM_THINKING_MODE=disabled  # default | enabled | disabled
-export PRISMCODE_LLM_REASONING_EFFORT=default  # default | high | max
+export REPODELTA_LLM_TIMEOUT_SECONDS=180
+export REPODELTA_LLM_MAX_OUTPUT_TOKENS=1200
+export REPODELTA_LLM_THINKING_MODE=disabled  # default | enabled | disabled
+export REPODELTA_LLM_REASONING_EFFORT=default  # default | high | max
 
 # SiliconFlow-only and valid only with thinking enabled.
-# export PRISMCODE_LLM_THINKING_BUDGET=1024
+# export REPODELTA_LLM_THINKING_BUDGET=1024
 
-prismcode review \
+repodelta review \
   --repo owner/repository \
   --pr 123 \
   --llm-shadow \
@@ -47,7 +47,7 @@ Omitting `--llm-shadow` performs no provider call and writes no shadow artifact.
 Freeze the exact model-independent requests before any provider call:
 
 ```bash
-prismcode review \
+repodelta review \
   --repo owner/repository \
   --pr 123 \
   --llm-shadow-labeling-output build/pr-123.labeling.json \
@@ -61,7 +61,7 @@ model answer.
 Then execute against the frozen packet:
 
 ```bash
-prismcode review \
+repodelta review \
   --repo owner/repository \
   --pr 123 \
   --llm-shadow \
@@ -80,7 +80,7 @@ After execution, compare the frozen human labels, deterministic selection, and
 model dispositions offline:
 
 ```bash
-prismcode compare-shadow \
+repodelta compare-shadow \
   --labeling-packet build/pr-123.labeling.json \
   --execution build/pr-123-shadow.html.llm-shadow.json \
   --human-labels build/pr-123.human-labels.json \
@@ -117,7 +117,7 @@ semantic role, but never an acceptance conclusion. Unknown identities,
 overlapping dispositions, missing dispositions, invalid structured output, and
 request-identity drift fail closed.
 
-The transport uses structured JSON, `store: false`, and no tools. PrismCode
+The transport uses structured JSON, `store: false`, and no tools. RepoDelta
 records typed execution state, request identity, usage, deferrals, failures,
 coverage limits, and a non-secret policy identity beside the deterministic
 report. It does not store raw provider error text or secrets.

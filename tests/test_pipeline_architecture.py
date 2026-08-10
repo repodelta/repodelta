@@ -4,13 +4,13 @@ import ast
 from dataclasses import fields
 from pathlib import Path
 
-import prismcode.pipeline as pipeline
-from prismcode.changes.hunks import ChangedHunk
-from prismcode.intake.fixture import load_fixture
-from prismcode.model.contracts import ChangeRelation, ChangedFile
+import repodelta.pipeline as pipeline
+from repodelta.changes.hunks import ChangedHunk
+from repodelta.intake.fixture import load_fixture
+from repodelta.model.contracts import ChangeRelation, ChangedFile
 
 
-SOURCE = Path("src/prismcode")
+SOURCE = Path("src/repodelta")
 STAGES = (
     "model",
     "intake",
@@ -79,7 +79,7 @@ def test_stage_dependencies_follow_the_canonical_pipeline() -> None:
                 if not isinstance(node, ast.ImportFrom) or not node.module:
                     continue
                 parts = node.module.split(".")
-                if parts[0] != "prismcode" or len(parts) < 2:
+                if parts[0] != "repodelta" or len(parts) < 2:
                     continue
                 dependency = parts[1]
                 if dependency in STAGES and dependency not in ALLOWED[stage]:

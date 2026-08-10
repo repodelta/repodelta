@@ -2,8 +2,8 @@ from dataclasses import replace
 
 import pytest
 
-from prismcode.assessment.migration import close_migration_assessments
-from prismcode.model.contracts import (
+from repodelta.assessment.migration import close_migration_assessments
+from repodelta.model.contracts import (
     TransformationAssessmentReason,
     TransformationClaimAssessment,
     TransformationContract,

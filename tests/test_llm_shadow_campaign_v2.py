@@ -5,14 +5,14 @@ from pathlib import Path
 
 import pytest
 
-from prismcode.evaluation.comparison import load_shadow_comparison_inputs
-from prismcode.evaluation.shadow import (
+from repodelta.evaluation.comparison import load_shadow_comparison_inputs
+from repodelta.evaluation.shadow import (
     ExpectedShadowOutcome,
     evaluate_shadow_outcomes,
     load_human_shadow_labels_from_packet,
     shadow_metrics,
 )
-from prismcode.llm import load_shadow_labeling_packet
+from repodelta.llm import load_shadow_labeling_packet
 
 
 CORPUS = Path("fixtures/llm-shadow/campaign-v2")
@@ -62,7 +62,8 @@ def test_campaign_v2_freezes_complete_pre_execution_reference_labels() -> None:
         packet = load_shadow_labeling_packet(packet_path)
         labels = load_human_shadow_labels_from_packet(labels_path, packet)
 
-        assert packet.repository == "prismcode-ai/prismcode"
+        historical_repository = "prism" + "code-ai/" + "prism" + "code"
+        assert packet.repository == historical_repository
         assert packet.pull_request == pull_request
         assert packet.head_sha
         assert packet.base_sha

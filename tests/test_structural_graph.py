@@ -8,9 +8,9 @@ from contextlib import nullcontext
 from pathlib import Path
 from types import SimpleNamespace
 
-from prismcode.pipeline import DeterministicAnalyzer
-from prismcode.providers.codegraph import CodegraphProvider
-from prismcode.model.contracts import (
+from repodelta.pipeline import DeterministicAnalyzer
+from repodelta.providers.codegraph import CodegraphProvider
+from repodelta.model.contracts import (
     AnalysisInput,
     ChangeRelation,
     ChangedFile,
@@ -20,8 +20,8 @@ from prismcode.model.contracts import (
     SourceRecord,
     SourceRef,
 )
-from prismcode.changes.hunks import parse_changed_files, parse_unified_patch
-from prismcode.providers.structural import (
+from repodelta.changes.hunks import parse_changed_files, parse_unified_patch
+from repodelta.providers.structural import (
     GraphPathStep,
     GraphSymbol,
     HunkSymbolOverlap,
@@ -32,8 +32,8 @@ from prismcode.providers.structural import (
     StructuralOwnershipPolicy,
     StructuralTraversalPolicy,
 )
-from prismcode.providers.mapping import map_packet_changed_symbols
-from prismcode.presentation.html import render_html
+from repodelta.providers.mapping import map_packet_changed_symbols
+from repodelta.presentation.html import render_html
 
 
 def _create_index(
@@ -1564,7 +1564,7 @@ def test_live_review_checkout_must_match_expected_head(
 ) -> None:
     _create_index(tmp_path)
     monkeypatch.setattr(
-        "prismcode.providers.codegraph._checkout_revision",
+        "repodelta.providers.codegraph._checkout_revision",
         lambda _root: "different-head",
     )
     hunks = parse_unified_patch(
@@ -1596,7 +1596,7 @@ def test_stale_base_revision_preserves_head_and_excludes_base_facts(
     )
     _create_index(base_root)
     monkeypatch.setattr(
-        "prismcode.providers.codegraph._checkout_revision",
+        "repodelta.providers.codegraph._checkout_revision",
         lambda root: "head123" if root == head_root else "wrong-base",
     )
     packet = _packet(

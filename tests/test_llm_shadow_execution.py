@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from prismcode.llm import (
+from repodelta.llm import (
     ShadowAdmissionDiagnostic,
     ShadowCandidateAdmission,
     ShadowCandidateAdmissionSet,
@@ -18,13 +18,13 @@ from prismcode.llm import (
     load_shadow_execution,
     write_shadow_execution,
 )
-from prismcode.model.contracts import (
+from repodelta.model.contracts import (
     AnalysisInput,
     ChangedFile,
     ReviewSourcePacket,
     SourceRecord,
 )
-from prismcode.pipeline import DeterministicAnalyzer
+from repodelta.pipeline import DeterministicAnalyzer
 
 
 @dataclass

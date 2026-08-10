@@ -5,8 +5,8 @@ from urllib.error import HTTPError, URLError
 
 import pytest
 
-from prismcode.cli import _openai_shadow_provider_from_env
-from prismcode.llm import (
+from repodelta.cli import _openai_shadow_provider_from_env
+from repodelta.llm import (
     OpenAIShadowConfig,
     OpenAIShadowProvider,
     ShadowEvidenceCandidate,
@@ -247,7 +247,7 @@ def test_openai_transport_classifies_http_failures_without_response_text(
             None,
         )
 
-    monkeypatch.setattr("prismcode.llm.openai.urlopen", fail)
+    monkeypatch.setattr("repodelta.llm.openai.urlopen", fail)
     provider = OpenAIShadowProvider(
         OpenAIShadowConfig(api_key="secret-key", model="model")
     )
@@ -274,7 +274,7 @@ def test_openai_transport_classifies_url_failures_without_reason_text(
     def fail(*_args, **_kwargs):
         raise URLError(reason)
 
-    monkeypatch.setattr("prismcode.llm.openai.urlopen", fail)
+    monkeypatch.setattr("repodelta.llm.openai.urlopen", fail)
     provider = OpenAIShadowProvider(
         OpenAIShadowConfig(api_key="secret-key", model="model")
     )
@@ -300,7 +300,7 @@ def test_openai_transport_classifies_response_decode_without_body_text(
             return b"secret non-json provider body"
 
     monkeypatch.setattr(
-        "prismcode.llm.openai.urlopen", lambda *_args, **_kwargs: InvalidResponse()
+        "repodelta.llm.openai.urlopen", lambda *_args, **_kwargs: InvalidResponse()
     )
     provider = OpenAIShadowProvider(
         OpenAIShadowConfig(api_key="secret-key", model="model")
@@ -335,16 +335,16 @@ def test_cli_config_requires_explicit_key_and_model(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     for name in (
-        "PRISMCODE_LLM_TIMEOUT_SECONDS",
-        "PRISMCODE_LLM_MAX_OUTPUT_TOKENS",
-        "PRISMCODE_LLM_API_PROFILE",
-        "PRISMCODE_LLM_THINKING_MODE",
-        "PRISMCODE_LLM_REASONING_EFFORT",
-        "PRISMCODE_LLM_THINKING_BUDGET",
+        "REPODELTA_LLM_TIMEOUT_SECONDS",
+        "REPODELTA_LLM_MAX_OUTPUT_TOKENS",
+        "REPODELTA_LLM_API_PROFILE",
+        "REPODELTA_LLM_THINKING_MODE",
+        "REPODELTA_LLM_REASONING_EFFORT",
+        "REPODELTA_LLM_THINKING_BUDGET",
     ):
         monkeypatch.delenv(name, raising=False)
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
-    monkeypatch.setenv("PRISMCODE_LLM_MODEL", "configured-model")
+    monkeypatch.setenv("REPODELTA_LLM_MODEL", "configured-model")
     assert _openai_shadow_provider_from_env() is None
 
     monkeypatch.setenv("OPENAI_API_KEY", "secret")
@@ -356,28 +356,28 @@ def test_cli_config_rejects_invalid_execution_policy_env(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setenv("OPENAI_API_KEY", "secret")
-    monkeypatch.setenv("PRISMCODE_LLM_MODEL", "configured-model")
-    monkeypatch.setenv("PRISMCODE_LLM_API_PROFILE", "universal")
+    monkeypatch.setenv("REPODELTA_LLM_MODEL", "configured-model")
+    monkeypatch.setenv("REPODELTA_LLM_API_PROFILE", "universal")
 
     with pytest.raises(ValueError, match="must be one of"):
         _openai_shadow_provider_from_env()
 
-    monkeypatch.setenv("PRISMCODE_LLM_API_PROFILE", "deepseek")
-    monkeypatch.setenv("PRISMCODE_LLM_THINKING_MODE", "enabled")
-    monkeypatch.setenv("PRISMCODE_LLM_THINKING_BUDGET", "1024")
+    monkeypatch.setenv("REPODELTA_LLM_API_PROFILE", "deepseek")
+    monkeypatch.setenv("REPODELTA_LLM_THINKING_MODE", "enabled")
+    monkeypatch.setenv("REPODELTA_LLM_THINKING_BUDGET", "1024")
     with pytest.raises(ValueError, match="requires api_profile=siliconflow"):
         _openai_shadow_provider_from_env()
 
-    monkeypatch.delenv("PRISMCODE_LLM_THINKING_BUDGET")
-    monkeypatch.setenv("PRISMCODE_LLM_TIMEOUT_SECONDS", "eventually")
+    monkeypatch.delenv("REPODELTA_LLM_THINKING_BUDGET")
+    monkeypatch.setenv("REPODELTA_LLM_TIMEOUT_SECONDS", "eventually")
     with pytest.raises(ValueError, match="must be numeric"):
         _openai_shadow_provider_from_env()
 
-    monkeypatch.setenv("PRISMCODE_LLM_TIMEOUT_SECONDS", "0")
+    monkeypatch.setenv("REPODELTA_LLM_TIMEOUT_SECONDS", "0")
     with pytest.raises(ValueError, match="between 0 and 3600"):
         _openai_shadow_provider_from_env()
 
-    monkeypatch.setenv("PRISMCODE_LLM_TIMEOUT_SECONDS", "120")
-    monkeypatch.setenv("PRISMCODE_LLM_MAX_OUTPUT_TOKENS", "1.5")
+    monkeypatch.setenv("REPODELTA_LLM_TIMEOUT_SECONDS", "120")
+    monkeypatch.setenv("REPODELTA_LLM_MAX_OUTPUT_TOKENS", "1.5")
     with pytest.raises(ValueError, match="must be an integer"):
         _openai_shadow_provider_from_env()

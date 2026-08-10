@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from prismcode.pipeline import DeterministicAnalyzer
-from prismcode.model.contracts import (
+from repodelta.pipeline import DeterministicAnalyzer
+from repodelta.model.contracts import (
     AnalysisInput,
     ChangedFile,
     Requirement,
@@ -9,9 +9,9 @@ from prismcode.model.contracts import (
     SourceRef,
     SourceRecord,
 )
-from prismcode.semantics.criteria import extract_review_semantics
-from prismcode.semantics.criteria import parse_markdown_semantics
-from prismcode.presentation.html import render_html
+from repodelta.semantics.criteria import extract_review_semantics
+from repodelta.semantics.criteria import parse_markdown_semantics
+from repodelta.presentation.html import render_html
 
 
 def _packet(
@@ -751,8 +751,8 @@ def test_context_and_typed_claims_use_the_canonical_binding_path() -> None:
         ),
         changed_files=(
             ChangedFile(
-                base_path="src/prismcode/evaluation/core.py",
-                head_path="src/prismcode/evaluation/core.py",
+                base_path="src/repodelta/evaluation/core.py",
+                head_path="src/repodelta/evaluation/core.py",
                 patch=(
                     "@@ -1,1 +1,4 @@\n"
                     "+statement purpose and authority\n"
@@ -1027,7 +1027,7 @@ def test_transformation_predicates_preserve_path_scope_role() -> None:
         pr_body=(
             "## Removed legacy paths\n"
             "- Remove `_review_symbol_id` from "
-            "`src/prismcode/convergence/structural.py`.\n"
+            "`src/repodelta/convergence/structural.py`.\n"
         ),
         pr_source=_pr_source(),
         pr_title="Preserve predicate roles",
@@ -1040,7 +1040,7 @@ def test_transformation_predicates_preserve_path_scope_role() -> None:
         ("symbol", ("_review_symbol_id",), "target"),
         (
             "repository_path",
-            ("src/prismcode/convergence/structural.py",),
+            ("src/repodelta/convergence/structural.py",),
             "path_scope",
         ),
     ]

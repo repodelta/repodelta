@@ -2,16 +2,16 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from prismcode.llm import ShadowAdmissionPolicy, admit_shadow_candidates
-from prismcode.model.contracts import (
+from repodelta.llm import ShadowAdmissionPolicy, admit_shadow_candidates
+from repodelta.model.contracts import (
     AnalysisInput,
     ChangedFile,
     ReviewSourcePacket,
     SourceRecord,
     VerificationObservation,
 )
-from prismcode.pipeline import DeterministicAnalyzer
-from prismcode.routing.transformation import eligible_transformation_evidence
+from repodelta.pipeline import DeterministicAnalyzer
+from repodelta.routing.transformation import eligible_transformation_evidence
 
 
 def _brief(body: str | None = None):

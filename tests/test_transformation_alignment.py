@@ -4,7 +4,7 @@ from dataclasses import replace
 
 import pytest
 
-from prismcode.model.contracts import (
+from repodelta.model.contracts import (
     AnalysisInput,
     ChangedFile,
     ReviewSourcePacket,
@@ -12,7 +12,7 @@ from prismcode.model.contracts import (
     TransformationAlignment,
     VerificationObservation,
 )
-from prismcode.pipeline import DeterministicAnalyzer
+from repodelta.pipeline import DeterministicAnalyzer
 
 
 def _packet() -> ReviewSourcePacket:
@@ -128,7 +128,7 @@ def test_alignment_validation_rejects_unknown_or_duplicate_truth() -> None:
 
 
 def test_pipeline_builds_transformation_alignment_once(monkeypatch) -> None:
-    import prismcode.pipeline as pipeline
+    import repodelta.pipeline as pipeline
 
     calls = 0
     real_build = pipeline.build_transformation_alignment
