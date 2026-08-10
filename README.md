@@ -243,6 +243,23 @@ provider invocation when source revision, admission, request identity,
 candidate membership, coverage limits, or complete human-label coverage
 differs from the frozen `llm_shadow_labeling_packet.v1` artifact.
 
+After execution, render the independent human/model/deterministic comparison:
+
+```bash
+prismcode compare-shadow \
+  --labeling-packet build/pr-123.labeling.json \
+  --execution build/pr-123-shadow.html.llm-shadow.json \
+  --human-labels build/pr-123.human-labels.json \
+  --output build/pr-123-shadow-comparison.html
+```
+
+This offline command revalidates that the execution preserved every frozen
+admission, then shows deterministic-only, LLM-only, shared, and unselected
+candidates beside the human disposition and semantic-role judgment. Provider
+failures and unresolved surfaces remain visible. The output is an evaluation
+artifact only: it is not consumed by `ReviewBrief`, the production review HTML,
+or any assessment authority.
+
 PrismCode sends only bounded canonical evidence candidates through the
 Chat Completions API with the selected explicit transport profile, structured
 JSON output, `store: false`, no tools, and a 40-candidate request limit plus

@@ -122,6 +122,17 @@ to advance. Pre-execution human labels must cover every request and validate
 against this packet. Live execution regenerates and compares the complete
 packet before reading labels or invoking the provider.
 
+`prismcode compare-shadow` is the independent evaluation sink for one blinded
+run. It accepts only a frozen labeling packet, its validated execution artifact,
+and complete independent human labels. Before rendering, it requires the
+execution to preserve every admission's claim, state, eligible count,
+deterministic baseline identities, and exact bounded request. Its standalone
+HTML displays all-labeled and accepted-only metrics, execution and diagnostic
+states, deterministic-only/LLM-only/shared/unselected identity groups, human
+and model dispositions and roles, and unresolved-surface agreement. Empty
+accepted sets are reported as unavailable metrics rather than perfect scores.
+This report is not a second review renderer and has no production consumer.
+
 The first blinded real-PR sample, its human disposition rubric, raw validated
 observations, independent labels, bounded conclusions, and offline regression
 command are recorded in
