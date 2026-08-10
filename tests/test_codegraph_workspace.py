@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+import base64
+import os
 import shutil
 import subprocess
 from pathlib import Path
+from typing import Mapping
 
 import pytest
 
-from prismcode.providers.workspace import isolated_review_roots
+from prismcode.providers.workspace import isolated_review_roots, remote_review_roots
 
 
 class FakeRunner:
@@ -15,11 +18,16 @@ class FakeRunner:
         *,
         fail_index_side: str = "",
         fail_cleanup: bool = False,
+        revisions: dict[str, str] | None = None,
     ) -> None:
         self.fail_index_side = fail_index_side
         self.fail_cleanup = fail_cleanup
         self.commands: list[tuple[str, ...]] = []
         self.managed_roots: dict[str, Path] = {}
+        self.revisions = revisions or {
+            "refs/prismcode/head": "head123",
+            "refs/prismcode/base": "base123",
+        }
 
     def __call__(
         self,
@@ -44,6 +52,13 @@ class FakeRunner:
             raise AssertionError(command)
 
         operation = command[3:]
+        if operation[:1] == ("rev-parse",):
+            return subprocess.CompletedProcess(
+                command,
+                0,
+                self.revisions[operation[1]] + "\n",
+                "",
+            )
         if operation[:3] == ("worktree", "add", "--detach"):
             target = Path(operation[3]).resolve()
             target.mkdir(parents=True)
@@ -63,6 +78,32 @@ class FakeRunner:
         if operation == ("worktree", "prune"):
             return subprocess.CompletedProcess(command, 0, "", "")
         raise AssertionError(command)
+
+
+class FakeFetchRunner:
+    def __init__(self, *, failure: str = "") -> None:
+        self.failure = failure
+        self.calls: list[
+            tuple[tuple[str, ...], dict[str, str]]
+        ] = []
+
+    def __call__(
+        self,
+        command: tuple[str, ...],
+        _timeout: int,
+        environment: Mapping[str, str],
+    ) -> subprocess.CompletedProcess[str]:
+        self.calls.append((command, dict(environment)))
+        if command[:3] == ("git", "init", "--bare"):
+            Path(command[3]).mkdir(parents=True)
+        if self.failure and "fetch" in command:
+            return subprocess.CompletedProcess(
+                command,
+                1,
+                "",
+                self.failure,
+            )
+        return subprocess.CompletedProcess(command, 0, "", "")
 
 
 def _commands(
@@ -222,7 +263,198 @@ def test_required_revision_is_validated_before_worktree_creation(
     assert runner.commands == []
 
 
-def test_live_review_workflow_provisions_pr_revision_objects() -> None:
+def test_live_review_workflow_uses_default_remote_workspace() -> None:
     workflow = Path(".github/workflows/review.yml").read_text(encoding="utf-8")
 
-    assert "uses: actions/checkout@v4\n        with:\n          fetch-depth: 0" in workflow
+    assert "fetch-depth" not in workflow
+    review_command = next(
+        line for line in workflow.splitlines()
+        if "prismcode review --repo" in line
+    )
+    assert "--repo-root" not in review_command
+
+
+def test_remote_review_fetches_exact_private_revisions_without_persisting_token(
+    tmp_path: Path,
+) -> None:
+    fetch_runner = FakeFetchRunner()
+    workspace_runner = FakeRunner()
+    secret = "github-secret-token"
+
+    with remote_review_roots(
+        repository="acme/widget",
+        pull_request=42,
+        api_url="https://api.github.com",
+        token=secret,
+        head_revision="head123",
+        base_revision="base123",
+        structural_graph_enabled=True,
+        fetch_runner=fetch_runner,
+        workspace_runner=workspace_runner,
+        codegraph_command=("fake-codegraph",),
+    ) as roots:
+        managed_parent = roots.head.parent
+        remote_parent = Path(fetch_runner.calls[0][0][3]).parent
+        assert roots.head.exists()
+        assert roots.base is not None and roots.base.exists()
+
+    commands = [command for command, _ in fetch_runner.calls]
+    fetch = next(command for command in commands if "fetch" in command)
+    assert "+refs/pull/42/head:refs/prismcode/head" in fetch
+    assert "+base123:refs/prismcode/base" in fetch
+    assert any("https://github.com/acme/widget.git" in command for command in commands)
+    assert all(secret not in argument for command in commands for argument in command)
+    encoded = base64.b64encode(
+        f"x-access-token:{secret}".encode("utf-8")
+    ).decode("ascii")
+    authenticated = [
+        environment
+        for command, environment in fetch_runner.calls
+        if "fetch" in command
+    ]
+    unauthenticated = [
+        environment
+        for command, environment in fetch_runner.calls
+        if "fetch" not in command
+    ]
+    assert authenticated == [
+        {
+            "GIT_CONFIG_GLOBAL": os.devnull,
+            "GIT_TERMINAL_PROMPT": "0",
+            "GIT_CONFIG_NOSYSTEM": "1",
+            "GIT_CONFIG_COUNT": "1",
+            "GIT_CONFIG_KEY_0": "http.extraHeader",
+            "GIT_CONFIG_VALUE_0": f"Authorization: Basic {encoded}",
+        }
+    ]
+    assert all("GIT_CONFIG_VALUE_0" not in item for item in unauthenticated)
+    assert not managed_parent.exists()
+    assert not remote_parent.exists()
+    assert len(_commands(workspace_runner, ("fake-codegraph", "init"))) == 2
+
+
+def test_remote_no_structural_review_fetches_only_head() -> None:
+    fetch_runner = FakeFetchRunner()
+    workspace_runner = FakeRunner()
+
+    with remote_review_roots(
+        repository="acme/widget",
+        pull_request=42,
+        api_url="https://github.example/enterprise/api/v3",
+        token=None,
+        head_revision="head123",
+        base_revision="",
+        structural_graph_enabled=False,
+        fetch_runner=fetch_runner,
+        workspace_runner=workspace_runner,
+    ) as roots:
+        assert roots.head.exists()
+        assert roots.base is None
+
+    fetch = next(
+        command for command, _ in fetch_runner.calls if "fetch" in command
+    )
+    assert "+refs/pull/42/head:refs/prismcode/head" in fetch
+    assert not any("refs/prismcode/base" in argument for argument in fetch)
+    assert any(
+        "https://github.example/enterprise/acme/widget.git" in command
+        for command, _ in fetch_runner.calls
+    )
+    assert all(
+        "GIT_CONFIG_VALUE_0" not in environment
+        for _, environment in fetch_runner.calls
+    )
+    assert not _commands(workspace_runner, ("fake-codegraph",))
+
+
+def test_remote_review_rejects_revision_mismatch_and_removes_source() -> None:
+    fetch_runner = FakeFetchRunner()
+    workspace_runner = FakeRunner(
+        revisions={
+            "refs/prismcode/head": "different",
+            "refs/prismcode/base": "base123",
+        }
+    )
+
+    with pytest.raises(ValueError, match="head does not match"):
+        with remote_review_roots(
+            repository="acme/widget",
+            pull_request=42,
+            api_url="https://api.github.com",
+            token=None,
+            head_revision="head123",
+            base_revision="base123",
+            structural_graph_enabled=True,
+            fetch_runner=fetch_runner,
+            workspace_runner=workspace_runner,
+            codegraph_command=("fake-codegraph",),
+        ):
+            raise AssertionError("mismatched revision must prevent review")
+
+    remote_parent = Path(fetch_runner.calls[0][0][3]).parent
+    assert not remote_parent.exists()
+    assert not _commands(workspace_runner, ("fake-codegraph",))
+
+
+@pytest.mark.parametrize("failure", ("index", "review"))
+def test_remote_review_removes_every_owned_root_after_downstream_failure(
+    failure: str,
+) -> None:
+    fetch_runner = FakeFetchRunner()
+    workspace_runner = FakeRunner(
+        fail_index_side="base" if failure == "index" else ""
+    )
+
+    expected = ValueError if failure == "index" else RuntimeError
+    match = "base index failed" if failure == "index" else "render failed"
+    with pytest.raises(expected, match=match):
+        with remote_review_roots(
+            repository="acme/widget",
+            pull_request=42,
+            api_url="https://api.github.com",
+            token=None,
+            head_revision="head123",
+            base_revision="base123",
+            structural_graph_enabled=True,
+            fetch_runner=fetch_runner,
+            workspace_runner=workspace_runner,
+            codegraph_command=("fake-codegraph",),
+        ):
+            if failure == "review":
+                raise RuntimeError("render failed")
+
+    remote_parent = Path(fetch_runner.calls[0][0][3]).parent
+    assert not remote_parent.exists()
+    assert not any(root.exists() for root in workspace_runner.managed_roots.values())
+
+
+@pytest.mark.parametrize("encoded", (False, True))
+def test_remote_fetch_failure_redacts_token_and_removes_source(
+    encoded: bool,
+) -> None:
+    secret = "github-secret-token"
+    exposed = (
+        base64.b64encode(f"x-access-token:{secret}".encode()).decode()
+        if encoded
+        else secret
+    )
+    fetch_runner = FakeFetchRunner(failure=f"access denied for {exposed}")
+
+    with pytest.raises(ValueError) as captured:
+        with remote_review_roots(
+            repository="acme/widget",
+            pull_request=42,
+            api_url="https://api.github.com",
+            token=secret,
+            head_revision="head123",
+            base_revision="base123",
+            structural_graph_enabled=True,
+            fetch_runner=fetch_runner,
+        ):
+            raise AssertionError("fetch failure must prevent review")
+
+    assert secret not in str(captured.value)
+    assert exposed not in str(captured.value)
+    assert "[redacted]" in str(captured.value)
+    remote_parent = Path(fetch_runner.calls[0][0][3]).parent
+    assert not remote_parent.exists()
