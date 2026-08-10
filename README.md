@@ -1,7 +1,8 @@
 # PrismCode
 
-PrismCode turns a completed pull request into an interactive, requirement-first
-review report.
+PrismCode turns a pull request into an interactive visual map of what changed
+across the repository—and helps reviewers judge whether the implementation
+matches its acceptance criteria.
 
 It sits after a human or coding agent has written code and opened a PR:
 
@@ -32,6 +33,12 @@ below. The animation alternates between **All** and **R4**: graph membership
 stays fixed while the associated structure is highlighted.
 
 ![Structural graph changing from All to an R4-focused view](docs/assets/prismcode-structural-graph.webp)
+
+When a PR description follows the [authoring guide](docs/pull-request-guidelines.md),
+PrismCode also carries its transformation claims (`T`) and completion
+conditions (`CC`) into the same inspection flow. Selecting one focuses the
+graph on associated code and relationships, so a reviewer can compare what a
+human or coding agent says changed with the structure that actually changed.
 
 ## Quick start
 
@@ -127,22 +134,32 @@ The intended loop is simple:
 4. The PR is revised or reviewed using those observations; PrismCode itself
    does not make the merge decision.
 
-## Deterministic by default
+## Deterministic core, optional LLM research
 
-The supported product path is deterministic. A normal `prismcode review` run
-requires no model and sends no repository content to an LLM provider. Canonical
-diff facts, symbols, structural graphs, evidence routing, assessment, and HTML
-conclusions remain under deterministic authority.
+The complete supported product works without an LLM. A normal
+`prismcode review` run sends no repository content to a model provider;
+canonical diff facts, symbols, structural graphs, evidence routing,
+assessment, and HTML conclusions remain deterministic.
 
-An opt-in, non-authoritative LLM shadow path exists for research only. Its
-current evaluation is tracked in [#211](https://github.com/prismcode-ai/prismcode/issues/211),
-and separate future experiments are tracked in
+PrismCode is also exploring where an LLM can add semantic flexibility without
+becoming an ungrounded review authority:
+
+| Area | Status | Role |
+| --- | --- | --- |
+| Full review generation | Supported, deterministic | Produces the complete interactive report and every formal conclusion without a model. |
+| Candidate evidence interpretation | Experimental ✓ | In an opt-in shadow run, the LLM classifies bounded deterministic candidates as selected, rejected, or insufficient and labels their evidence relationship and semantic role. |
+| LLM-assisted semantic intake and R/G-to-subgraph mapping | To explore | Test whether a model can understand less structured Issue language and improve requirement-to-code retrieval. |
+| Architectural overlays and grounded explanations | To explore | Test model-assisted higher-level views and explanations while preserving source links, uncertainty, and deterministic authority. |
+
+The shadow result never changes the formal report, assessment, or merge
+decision. It is evaluated separately against deterministic selection and
+frozen human labels. See [LLM shadow evaluation](docs/llm-shadow.md) for the
+commands and safety boundary; current and planned experiments are tracked in
+[#211](https://github.com/prismcode-ai/prismcode/issues/211),
 [#224](https://github.com/prismcode-ai/prismcode/issues/224),
 [#225](https://github.com/prismcode-ai/prismcode/issues/225),
 [#226](https://github.com/prismcode-ai/prismcode/issues/226), and
-[#227](https://github.com/prismcode-ai/prismcode/issues/227). See
-[LLM shadow evaluation](docs/llm-shadow.md) for the experimental commands and
-safety boundary.
+[#227](https://github.com/prismcode-ai/prismcode/issues/227).
 
 ## Documentation
 
@@ -181,6 +198,14 @@ Change understanding is only the first step. PrismCode is also an open
 experiment in making coding agents maintainable and extensible enough to work
 on production code: every change is used to test and refine the repository's
 own method, not only its report generator.
+
+That connection is visible in every report: Issue-authored objectives,
+requirements, and guardrails (`O/R/G`) describe what the change must achieve,
+while PR-authored transformation claims and completion conditions (`T/CC`)
+describe what the human or coding agent says it changed. PrismCode places both
+against the observed diff and structural graph, making mismatches, missing
+evidence, and unresolved coverage inspectable instead of trusting the PR
+description as proof.
 
 That method starts in [AGENTS.md](AGENTS.md) and is made operational by four
 guides: [Issue authoring](docs/issue-guidelines.md), the
