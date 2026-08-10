@@ -1,6 +1,6 @@
 # Open-core boundaries
 
-PrismCode has one canonical review path:
+RepoDelta has one canonical review path:
 
 ```text
 fixture or GitHub
@@ -433,6 +433,6 @@ signature or proof of GitHub origin.
 ## Private-code boundary
 
 The open core must not import Workspace, Change Unit, semantic-spine,
-persistence, webhook, or publisher packages from `interact-space/PrismCode`.
-Reusable rules and test vectors may be adapted only through public contracts
-and recorded provenance.
+persistence, webhook, or publisher packages from the private predecessor
+repository described in [Provenance](provenance.md). Reusable rules and test
+vectors may be adapted only through public contracts and recorded provenance.

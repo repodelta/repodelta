@@ -3,8 +3,8 @@ requires = ["setuptools>=77.0.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "prismcode"
-version = "0.3.0"
+name = "repodelta"
+version = "0.1.0"
 description = "Requirement-first, evidence-linked pull request review briefs"
 readme = "README.md"
 license = "MIT"
@@ -12,11 +12,15 @@ license-files = ["LICENSE"]
 requires-python = ">=3.11"
 dependencies = []
 
+[project.urls]
+Homepage = "https://github.com/repodelta/repodelta"
+Issues = "https://github.com/repodelta/repodelta/issues"
+
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
 
 [project.scripts]
-prismcode = "prismcode.cli:main"
+repodelta = "repodelta.cli:main"
 
 [tool.setuptools.package-dir]
 "" = "src"

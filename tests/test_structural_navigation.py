@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import hashlib
 
-from prismcode.model.contracts import (
+from repodelta.model.contracts import (
     EvidenceItem,
     ReviewSourcePacket,
     StructuralGraphEdge,
     StructuralGraphNode,
 )
-from prismcode.presentation.html import _structural_node_href
-from prismcode.projection.structural_navigation import (
+from repodelta.presentation.html import _structural_node_href
+from repodelta.projection.structural_navigation import (
     project_structural_navigation,
 )
 

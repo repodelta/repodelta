@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from prismcode.evaluation.shadow import load_human_shadow_labels_from_packet
-from prismcode.llm import (
+from repodelta.evaluation.shadow import load_human_shadow_labels_from_packet
+from repodelta.llm import (
     ShadowCandidateAdmission,
     ShadowLabelingPacket,
     execute_shadow_admissions,

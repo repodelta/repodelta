@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import pytest
 
-from prismcode.closure.planning import compile_closure_scan_plans
-from prismcode.model.contracts import (
+from repodelta.closure.planning import compile_closure_scan_plans
+from repodelta.model.contracts import (
     AnalysisInput,
     ClosureScanPlanSet,
     Requirement,
@@ -14,9 +14,9 @@ from prismcode.model.contracts import (
     TransformationPredicate,
     TransformationPredicateSet,
 )
-from prismcode.pipeline import DeterministicAnalyzer
-from prismcode.presentation.html import render_html
-from prismcode.semantics.criteria import extract_review_semantics
+from repodelta.pipeline import DeterministicAnalyzer
+from repodelta.presentation.html import render_html
+from repodelta.semantics.criteria import extract_review_semantics
 
 
 def _guardrail(identifier: str, text: str) -> Requirement:
@@ -246,7 +246,7 @@ def test_unmarked_removal_does_not_reconstruct_executable_targets() -> None:
         id="T1",
         kind="removal",
         text=(
-            "Removed src/prismcode/guardrails, GuardrailScan, "
+            "Removed src/repodelta/guardrails, GuardrailScan, "
             "guardrail_scan_provider, and GSP/GSR/GSM identities."
         ),
         sources=(SourceRef(label="PR #1"),),
@@ -269,9 +269,9 @@ def test_planning_conjoins_exact_target_with_path_scope() -> None:
         pr_body=(
             "## Removed legacy paths\n"
             "- Removed `_review_symbol_id` from "
-            "`src/prismcode/convergence/structural.py`.\n"
+            "`src/repodelta/convergence/structural.py`.\n"
             "- Removed the private identity implementation from "
-            "`src/prismcode/projection/build.py`.\n"
+            "`src/repodelta/projection/build.py`.\n"
         ),
         pr_source=SourceRef(label="PR #1"),
         pr_title="Scope negative evidence",
@@ -283,6 +283,6 @@ def test_planning_conjoins_exact_target_with_path_scope() -> None:
     assert predicate.target.kind == "identifier"
     assert predicate.target.value == "_review_symbol_id"
     assert tuple(item.value for item in predicate.path_scopes) == (
-        "src/prismcode/convergence/structural.py",
+        "src/repodelta/convergence/structural.py",
     )
     assert plans[1].predicates == ()

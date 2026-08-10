@@ -6,12 +6,12 @@ from pathlib import Path
 
 import pytest
 
-from prismcode.cli import main
-from prismcode.evaluation.comparison import (
+from repodelta.cli import main
+from repodelta.evaluation.comparison import (
     load_shadow_comparison_inputs,
     write_shadow_comparison_html,
 )
-from prismcode.llm import (
+from repodelta.llm import (
     ShadowCandidateAdmission,
     ShadowLabelingPacket,
     load_shadow_execution,
@@ -28,7 +28,7 @@ LABELS = CORPUS / "pr-203.human-labels.json"
 def _packet() -> ShadowLabelingPacket:
     bundle = load_shadow_execution(EXECUTION)
     return ShadowLabelingPacket(
-        repository="prismcode-ai/prismcode",
+        repository="repodelta/repodelta",
         pull_request=203,
         head_sha="head203",
         base_sha="base203",
@@ -72,7 +72,7 @@ def test_comparison_html_is_stable_and_exposes_semantic_recovery(
     assert "1.0000" in html
     assert "documentation" in html
     assert "E:change_relation:" in html
-    assert "does not change PrismCode assessment or mergeability" in html
+    assert "does not change RepoDelta assessment or mergeability" in html
 
 
 def test_comparison_rejects_execution_that_did_not_use_frozen_admission(
@@ -112,7 +112,7 @@ def test_compare_shadow_cli_renders_offline_report(
         sys,
         "argv",
         [
-            "prismcode",
+            "repodelta",
             "compare-shadow",
             "--labeling-packet",
             str(packet),

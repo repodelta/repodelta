@@ -3,15 +3,15 @@ from pathlib import Path
 
 import pytest
 
-from prismcode.pipeline import DeterministicAnalyzer
-from prismcode.model.contracts import (
+from repodelta.pipeline import DeterministicAnalyzer
+from repodelta.model.contracts import (
     AnalysisInput,
     Requirement,
     ReviewSourcePacket,
     VerificationObservation,
 )
-from prismcode.intake.fixture import load_fixture
-from prismcode.presentation.html import render_html, write_html
+from repodelta.intake.fixture import load_fixture
+from repodelta.presentation.html import render_html, write_html
 
 
 def test_fixture_to_requirement_first_html(tmp_path: Path) -> None:

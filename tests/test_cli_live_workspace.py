@@ -7,9 +7,9 @@ from pathlib import Path
 
 import pytest
 
-import prismcode.cli as cli
-from prismcode.model.contracts import ChangedFile, ReviewSourcePacket, SourceRecord
-from prismcode.providers.workspace import ReviewRevisionRoots
+import repodelta.cli as cli
+from repodelta.model.contracts import ChangedFile, ReviewSourcePacket, SourceRecord
+from repodelta.providers.workspace import ReviewRevisionRoots
 
 
 def _repository(tmp_path: Path) -> tuple[Path, str]:
@@ -28,7 +28,7 @@ def _repository(tmp_path: Path) -> tuple[Path, str]:
             "-C",
             str(root),
             "-c",
-            "user.name=PrismCode Test",
+            "user.name=RepoDelta Test",
             "-c",
             "user.email=test@example.invalid",
             "commit",
@@ -82,7 +82,7 @@ def _run(
         sys,
         "argv",
         [
-            "prismcode",
+            "repodelta",
             "review",
             "--repo",
             "acme/widget",

@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from prismcode.model.contracts import (
+from repodelta.model.contracts import (
     StructuralGraphEdge,
     StructuralGraphNode,
     StructuralGraphPlacement,
 )
-from prismcode.projection.structural_groups import (
+from repodelta.projection.structural_groups import (
     project_structural_relation_groups,
 )
 

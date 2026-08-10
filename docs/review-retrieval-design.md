@@ -5,7 +5,7 @@ the reasoning and target data flow before any LLM reranker is considered.
 
 ## Decision
 
-PrismCode should not rank every statement against every evidence item and then
+RepoDelta should not rank every statement against every evidence item and then
 construct a review projection from the surviving global candidate pool.
 
 The target flow is:

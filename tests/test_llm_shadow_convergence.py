@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from prismcode.llm.convergence import converge_shadow_candidate_identities
-from prismcode.model.contracts import (
+from repodelta.llm.convergence import converge_shadow_candidate_identities
+from repodelta.model.contracts import (
     AssociationReason,
     EvidenceCatalog,
     EvidenceItem,

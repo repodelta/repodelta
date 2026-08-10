@@ -4,11 +4,11 @@ from typing import Any
 
 import pytest
 
-from prismcode.pipeline import DeterministicAnalyzer
-from prismcode.model.contracts import AnalysisInput
-from prismcode.intake.github import GitHubClient, GitHubPullRequestAdapter
-from prismcode.semantics.criteria import extract_intent, extract_requirement_texts
-from prismcode.presentation.html import render_html
+from repodelta.pipeline import DeterministicAnalyzer
+from repodelta.model.contracts import AnalysisInput
+from repodelta.intake.github import GitHubClient, GitHubPullRequestAdapter
+from repodelta.semantics.criteria import extract_intent, extract_requirement_texts
+from repodelta.presentation.html import render_html
 
 
 class FakeClient:

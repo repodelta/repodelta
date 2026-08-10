@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from prismcode.convergence.transformation import (
+from repodelta.convergence.transformation import (
     TransformationClosurePolicy,
     converge_transformation_closure,
 )
-from prismcode.model.contracts import (
+from repodelta.model.contracts import (
     AnalysisInput,
     CandidateConvergence,
     DiagnosticPresentation,
@@ -24,9 +24,9 @@ from prismcode.model.contracts import (
     TransformationSubjectMatch,
     TransformationSubjectSelection,
 )
-from prismcode.pipeline import DeterministicAnalyzer
-from prismcode.projection.build import build_review_projection
-from prismcode.semantics.criteria import extract_review_semantics
+from repodelta.pipeline import DeterministicAnalyzer
+from repodelta.projection.build import build_review_projection
+from repodelta.semantics.criteria import extract_review_semantics
 
 
 def _contract():
@@ -240,7 +240,7 @@ def test_closure_truncates_only_at_complete_path_identity_boundaries() -> None:
 
 
 def test_pipeline_builds_transformation_closure_once(monkeypatch) -> None:
-    import prismcode.pipeline as pipeline
+    import repodelta.pipeline as pipeline
 
     calls = 0
     real_converge = pipeline.converge_transformation_closure

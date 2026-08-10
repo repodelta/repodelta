@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from prismcode.llm.packet import (
+from repodelta.llm.packet import (
     ShadowCodePacketPolicy,
     build_shadow_code_packet,
 )
-from prismcode.model.contracts import (
+from repodelta.model.contracts import (
     ChangeRelation,
     ChangedLine,
     EvidenceCatalog,

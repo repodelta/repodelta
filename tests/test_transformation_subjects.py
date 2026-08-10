@@ -4,8 +4,8 @@ from dataclasses import replace
 
 import pytest
 
-from prismcode.facts.lexical import association_signature
-from prismcode.model.contracts import (
+from repodelta.facts.lexical import association_signature
+from repodelta.model.contracts import (
     AnalysisInput,
     AssociationSignature,
     EvidenceCatalog,
@@ -16,9 +16,9 @@ from prismcode.model.contracts import (
     StructuralChangeIdentity,
     TransformationSubjectSelection,
 )
-from prismcode.pipeline import DeterministicAnalyzer
-from prismcode.routing.transformation_subjects import select_transformation_subjects
-from prismcode.semantics.criteria import extract_review_semantics
+from repodelta.pipeline import DeterministicAnalyzer
+from repodelta.routing.transformation_subjects import select_transformation_subjects
+from repodelta.semantics.criteria import extract_review_semantics
 
 
 def _contract():
@@ -202,7 +202,7 @@ def test_subject_selection_rejects_parallel_match_and_diagnostic_truth() -> None
 
 
 def test_pipeline_builds_transformation_subject_selection_once(monkeypatch) -> None:
-    import prismcode.pipeline as pipeline
+    import repodelta.pipeline as pipeline
 
     calls = 0
     real_select = pipeline.select_transformation_subjects

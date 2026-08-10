@@ -1,11 +1,11 @@
 # Offline evaluation
 
-PrismCode evaluates typed fact routing, structural evidence behavior, and the
+RepoDelta evaluates typed fact routing, structural evidence behavior, and the
 production transformation assessment against explicit golden IDs before those
 authorities change.
 
 ```bash
-prismcode evaluate \
+repodelta evaluate \
   --suite fixtures/evaluation-suite.json \
   --json-output build/evaluation.json \
   --markdown-output build/evaluation.md
@@ -122,7 +122,7 @@ to advance. Pre-execution human labels must cover every request and validate
 against this packet. Live execution regenerates and compares the complete
 packet before reading labels or invoking the provider.
 
-`prismcode compare-shadow` is the independent evaluation sink for one blinded
+`repodelta compare-shadow` is the independent evaluation sink for one blinded
 run. It accepts only a frozen labeling packet, its validated execution artifact,
 and complete independent human labels. Before rendering, it requires the
 execution to preserve every admission's claim, state, eligible count,

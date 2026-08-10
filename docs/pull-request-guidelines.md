@@ -17,7 +17,7 @@ Use `Before` and `After` for general state transitions. Use the more specific
 `Before topology` and `After topology` headings only when the statements claim
 structural topology; generic state prose is preserved but not reclassified.
 When a general state statement refers to a concrete file or symbol, put that
-identity in a Markdown code span so PrismCode can focus the Base-side `Before`
+identity in a Markdown code span so RepoDelta can focus the Base-side `Before`
 or Head-side `After` structure without treating the state prose as proof.
 
 Explain why the resulting tree remains valid if the parent stops permanently.

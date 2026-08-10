@@ -4,8 +4,8 @@ from dataclasses import asdict
 
 import pytest
 
-from prismcode.pipeline import DeterministicAnalyzer
-from prismcode.model.contracts import (
+from repodelta.pipeline import DeterministicAnalyzer
+from repodelta.model.contracts import (
     AnalysisInput,
     ChangedFile,
     ReviewSourcePacket,
@@ -15,10 +15,10 @@ from prismcode.model.contracts import (
     EvidenceItem,
     EvidenceCatalog,
 )
-from prismcode.facts.catalog import build_evidence_catalog
-from prismcode.facts.lexical import association_signature
-from prismcode.changes.hunks import parse_changed_files
-from prismcode.providers.structural import (
+from repodelta.facts.catalog import build_evidence_catalog
+from repodelta.facts.lexical import association_signature
+from repodelta.changes.hunks import parse_changed_files
+from repodelta.providers.structural import (
     GraphPathStep,
     GraphSymbol,
     HunkSymbolOverlap,

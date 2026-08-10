@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from prismcode.cli import main
-from prismcode.evaluation.core import (
+from repodelta.cli import main
+from repodelta.evaluation.core import (
     evaluate_suite,
     load_evaluation_suite,
     write_evaluation_json,
@@ -112,7 +112,7 @@ def test_wrong_slot_expectation_fails_the_gate_and_cli(
         sys,
         "argv",
         [
-            "prismcode",
+            "repodelta",
             "evaluate",
             "--suite",
             str(suite_path),
@@ -282,7 +282,7 @@ def test_wrong_assessment_expectation_fails_the_gate_and_cli(
         sys,
         "argv",
         [
-            "prismcode",
+            "repodelta",
             "evaluate",
             "--suite",
             str(suite_path),
@@ -318,7 +318,7 @@ def test_wrong_focus_expectation_fails_the_gate_and_cli(
         sys,
         "argv",
         [
-            "prismcode",
+            "repodelta",
             "evaluate",
             "--suite",
             str(suite_path),

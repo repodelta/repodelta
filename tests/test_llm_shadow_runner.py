@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from prismcode.llm import (
+from repodelta.llm import (
     ShadowEvidenceRequest,
     ShadowProviderExecutionPolicy,
     ShadowProviderFailure,

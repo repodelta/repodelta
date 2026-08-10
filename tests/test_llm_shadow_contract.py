@@ -4,14 +4,14 @@ import json
 from dataclasses import replace
 from pathlib import Path
 
-from prismcode.llm import (
+from repodelta.llm import (
     ShadowEvidenceCandidate,
     ShadowEvidenceRequest,
     load_shadow_replay,
     parse_shadow_selection,
     serialize_shadow_replay,
 )
-from prismcode.llm.contracts import (
+from repodelta.llm.contracts import (
     MAX_SELECTIONS,
     MAX_UNRESOLVED_SURFACES,
     SHADOW_SCHEMA_VERSION,
@@ -206,19 +206,19 @@ def test_candidate_membership_is_upstream_owned_and_bounded() -> None:
 
 def test_shadow_contract_has_only_cli_execution_authority() -> None:
     execution_callers = []
-    for path in Path("src/prismcode").glob("**/*.py"):
+    for path in Path("src/repodelta").glob("**/*.py"):
         if "llm" in path.parts:
             continue
         source = path.read_text(encoding="utf-8")
         if "execute_shadow_review(" in source:
             execution_callers.append(str(path))
 
-    assert execution_callers == ["src/prismcode/cli.py"]
+    assert execution_callers == ["src/repodelta/cli.py"]
 
 
 def test_shadow_candidate_membership_has_one_production_authority() -> None:
     callers = []
-    for path in Path("src/prismcode").glob("**/*.py"):
+    for path in Path("src/repodelta").glob("**/*.py"):
         source = path.read_text(encoding="utf-8")
         if "converge_shadow_candidate_identities(" not in source:
             continue
@@ -226,7 +226,7 @@ def test_shadow_candidate_membership_has_one_production_authority() -> None:
             continue
         callers.append(str(path))
 
-    assert callers == ["src/prismcode/llm/admission.py"]
+    assert callers == ["src/repodelta/llm/admission.py"]
 
 
 def _fixture_pair() -> tuple[ShadowEvidenceRequest, dict]:

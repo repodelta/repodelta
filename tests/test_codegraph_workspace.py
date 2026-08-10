@@ -9,7 +9,7 @@ from typing import Mapping
 
 import pytest
 
-from prismcode.providers.workspace import isolated_review_roots, remote_review_roots
+from repodelta.providers.workspace import isolated_review_roots, remote_review_roots
 
 
 class FakeRunner:
@@ -25,8 +25,8 @@ class FakeRunner:
         self.commands: list[tuple[str, ...]] = []
         self.managed_roots: dict[str, Path] = {}
         self.revisions = revisions or {
-            "refs/prismcode/head": "head123",
-            "refs/prismcode/base": "base123",
+            "refs/repodelta/head": "head123",
+            "refs/repodelta/base": "base123",
         }
 
     def __call__(
@@ -269,7 +269,7 @@ def test_live_review_workflow_uses_default_remote_workspace() -> None:
     assert "fetch-depth" not in workflow
     review_command = next(
         line for line in workflow.splitlines()
-        if "prismcode review --repo" in line
+        if "repodelta review --repo" in line
     )
     assert "--repo-root" not in review_command
 
@@ -301,8 +301,8 @@ def test_remote_review_fetches_exact_private_revisions_without_persisting_token(
     commands = [command for command, _ in fetch_runner.calls]
     fetch = next(command for command in commands if "fetch" in command)
     assert "--filter=blob:none" not in fetch
-    assert "+refs/pull/42/head:refs/prismcode/head" in fetch
-    assert "+base123:refs/prismcode/base" in fetch
+    assert "+refs/pull/42/head:refs/repodelta/head" in fetch
+    assert "+base123:refs/repodelta/base" in fetch
     assert any("https://github.com/acme/widget.git" in command for command in commands)
     assert all(secret not in argument for command in commands for argument in command)
     encoded = base64.b64encode(
@@ -355,8 +355,8 @@ def test_remote_no_structural_review_fetches_only_head() -> None:
     fetch = next(
         command for command, _ in fetch_runner.calls if "fetch" in command
     )
-    assert "+refs/pull/42/head:refs/prismcode/head" in fetch
-    assert not any("refs/prismcode/base" in argument for argument in fetch)
+    assert "+refs/pull/42/head:refs/repodelta/head" in fetch
+    assert not any("refs/repodelta/base" in argument for argument in fetch)
     assert any(
         "https://github.example/enterprise/acme/widget.git" in command
         for command, _ in fetch_runner.calls
@@ -372,8 +372,8 @@ def test_remote_review_rejects_revision_mismatch_and_removes_source() -> None:
     fetch_runner = FakeFetchRunner()
     workspace_runner = FakeRunner(
         revisions={
-            "refs/prismcode/head": "different",
-            "refs/prismcode/base": "base123",
+            "refs/repodelta/head": "different",
+            "refs/repodelta/base": "base123",
         }
     )
 
