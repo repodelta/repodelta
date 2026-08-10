@@ -61,11 +61,11 @@ def project_structural_relation_groups(
             relation=relation,
             operation=operation,
             member_edge_ids=tuple(item.id for item in members),
-            path_relation_ids=tuple(
+            path_evidence_ids=tuple(
                 dict.fromkeys(
-                    path_relation_id
+                    path_evidence_id
                     for item in members
-                    for path_relation_id in item.path_relation_ids
+                    for path_evidence_id in item.path_evidence_ids
                 )
             ),
         )
