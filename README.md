@@ -1,196 +1,42 @@
 # PrismCode
 
-PrismCode generates requirement-first, evidence-linked pull request review briefs.
+PrismCode turns a completed pull request into an interactive, requirement-first
+review report.
 
-The supported launch path is deterministic. A normal `prismcode review` run
-requires no model, sends no repository content to an LLM provider, and keeps
-canonical facts, structural graphs, evidence routing, assessment, and HTML
-conclusions under deterministic authority. LLM support is an opt-in shadow
-research surface, not part of the launch acceptance claim.
-
-Its core workflow connects explicit Issue/Ticket acceptance criteria to pull-request code
-evidence and requirement-specific CI/Actions observations:
+It sits after a human or coding agent has written code and opened a PR:
 
 ```text
-Issue acceptance criteria -> R1/R2/... -> PR/code evidence -> checks/workflows -> review brief
+Human or coding agent
+        ↓ writes code
+Pull request + linked Issue + CI
+        ↓ prismcode review
+Interactive HTML review brief
+        ↓ inspect evidence and gaps
+Human review decision
 ```
 
-This repository is the standalone open-core implementation. It does not import company-private packages. The fixture workflow requires no network, model API, or company credentials; the GitHub workflow talks only to the configured GitHub API.
+PrismCode does not write the change or approve it. It connects the PR's authored
+requirements and transformation claims to the code, structural relationships,
+and current-head checks a reviewer can actually inspect.
 
-## Current scope
+![PrismCode report overview](docs/assets/prismcode-report-overview.jpg)
 
-The open core provides:
+The report is a standalone HTML file. A reviewer can:
 
-- a versioned, conclusion-free `ReviewSourcePacket` shared by fixture and GitHub ingestion;
-- conclusion-free requirements plus one canonical evidence catalog and typed fact-routing projection;
-- offline JSON fixture ingestion;
-- live GitHub pull request metadata and changed-file ingestion;
-- GitHub GraphQL Development-link Issue ingestion plus current-head REST check-run and commit-status observations;
-- one-pass semantic extraction with separate role, purpose, and authority for
-  Issue/PR obligations, goals, scope, boundaries, implementation, baselines,
-  verification claims, and intent;
-- a deterministic analyzer that builds explainable evidence candidates without declaring implementation or verification status;
-- a requirement-first static HTML renderer;
-- a local CLI;
-- optional repository-local Codegraph hunk-to-symbol mapping with explicit
-  availability and freshness diagnostics;
-- bounded Codegraph paths from changed symbols to unchanged runtime/test
-  neighbors;
-- one canonical, deterministic evidence catalog where mapped code changes use
-  exact symbol identities and only unmapped spans/files remain fallbacks,
-  alongside bounded paths and CI/runtime observations;
-- explainable deterministic O/S/R/G/V review contracts, typed C/B/VC PR
-  claims, typed T/CC transformation declarations, and evidence candidates;
-- deterministic same-R/G, same-slot candidate convergence with typed
-  dominance, bridge reachability, canonical changed-anchor and verification
-  sets, bounded structural evidence subgraphs, compact claim selection, and
-  explicit coverage diagnostics;
-- source-backed executable repository scan plans and bounded PR-head
-  observations for G guardrails, without treating zero matches as satisfaction
-  or repository-wide absence;
-- an R-first consistency view with claim/evidence candidates, binding basis,
-  source links, and vertically aggregated coverage gaps;
-- an Actions workflow for automatic PR reports and manually targeted reviews;
-- clean-install CI with network-free tests.
-- a deterministic offline evaluation suite for binding, structural-path,
-  evidence-classification, and recorded LLM-shadow semantic-mapping baselines.
+- start from Issue-backed requirements and guardrails or PR-authored
+  transformation claims;
+- explore changed symbols, ownership, calls, imports, and nearby runtime or test
+  structure in the structural delta graph;
+- select a claim to focus the graph and expand its canonical observations,
+  conservative assessment, source links, and coverage limits;
+- distinguish supporting evidence from contradiction, missing evidence, and
+  incomplete collection instead of treating relevance as proof.
 
-## LLM opportunity map
-
-PrismCode uses LLMs only where semantic interpretation may add value after
-canonical repository facts and bounded candidate identities already exist. A
-check mark means the capability exists in the opt-in shadow path; it does not
-mean that model output is enabled by default or authoritative.
-
-| Pipeline position | Suitable LLM responsibility | Required boundary | Status |
-| --- | --- | --- | --- |
-| T/CC claim → admitted evidence | Select directly relevant canonical candidates and describe supporting, contradicting, or contextual roles. | The model may cite only deterministic candidate IDs and cannot change assessment. | ✅ Implemented in shadow |
-| Bounded structural context → claim relevance | Use supplied path summaries, symbols, and directional diff excerpts to interpret why an existing candidate may matter. | The model cannot create graph nodes or edges; the value of structural context still needs an ablation test. | ✅ Implemented in shadow |
-| Candidate rejection and uncertainty | Separate unrelated evidence from incomplete or ambiguous evidence and record unresolved surfaces. | Negative and `insufficient` discrimination must improve on frozen human labels before product use. | 🧪 Implemented; not product-ready |
-| Free-form Issue/PR → proposed typed semantics | Suggest R/G/T/CC statements when external repositories do not follow PrismCode headings. | Suggestions must remain beside the deterministic parse and preserve source spans; no silent promotion to requirements. | 🔭 To explore |
-| R/G → canonical structural subgraph | Match requirements and guardrails to existing changed anchors, nodes, edges, and bounded paths using semantic context. | Canonical graph membership remains deterministic; LLM-only matches are review suggestions, never verification. | 🔭 To explore |
-| Architectural component semantics | Suggest semantic overlays for path-convention labels such as `presentation`, `persistence`, `application`, or `unclassified`. | Show deterministic and suggested labels side by side; never rewrite canonical graph topology from prose. | 🔭 To explore |
-| Evidence-grounded explanation | Summarize why selected evidence may support or contradict a claim, with exact evidence and source links. | Every statement must cite supplied IDs and retain coverage limits and unresolved surfaces. | 🔭 To explore |
-| Canonical diff, symbols, calls/imports, ownership, and structural paths | No generative responsibility; these are repository facts. | Missing or unsupported structure must remain unavailable, partial, or unclassified. | 🚫 Intentionally deterministic |
-| Assessment, verification status, mergeability, or approval | No LLM authority. | Only validated deterministic contracts may affect formal conclusions. | 🚫 Intentionally deterministic |
-
-The first shadow campaigns show that model selection can recover semantic
-evidence missed by deterministic matching, but can also over-select ambiguous
-candidates. Until the exploratory rows above have blinded external-repository
-evidence, the open-source product boundary remains the deterministic workflow.
-
-The GitHub adapter intentionally emits source facts only. Linked Issues come
-from GitHub's `closingIssuesReferences` GraphQL field, not Issue numbers typed
-into PR prose. The analyzer applies one authority policy:
-
-- linked-Issue Acceptance Criteria, Requirements, and Definition of Done become
-  authoritative `R1`, `R2`, ... obligations and `G1`, `G2`, ... guardrails;
-- without a selected linked Issue, the same explicit PR-description sections
-  become provisional obligations;
-- Goals/Objectives become `O1`, `O2`, ... retrieval context;
-- Scope/In scope become `S1`, `S2`, ... retrieval context and never acceptance
-  criteria;
-- linked-Issue Verification/Validation/Testing sections become `V1`, `V2`, ...
-  authored verification expectations;
-- linked-Issue Out of scope/Boundary statements become authoritative
-  `G1`, `G2`, ... guardrails;
-- PR Summary/Implementation/Changes and Boundary statements become
-  `C1`, `C2`, ... PR-authored claims;
-- PR Baseline/Results and Verification/Testing become `B1` and `VC1` claims;
-- structured PR transformation sections become typed `T1`, `T2`, ...
-  declarations, while Completion conditions become `CC1`, `CC2`, ...;
-- the PR introduction or title is intent only and is never promoted to `R1`.
-
-When no explicit acceptance criteria are present, the report says so instead
-of manufacturing a requirement from the PR title. Candidate relevance is never
-presented as implementation, verification, or acceptance.
-
-PRs may declare an independently verifiable transformation contract with
-exact Markdown headings:
-
-```markdown
-## Change
-
-## Before
-## After
-
-## Selected region
-### Inputs
-### Outputs
-### Boundaries
-
-## Before topology
-## After topology
-## Canonical authority
-## Production path
-
-## Migration
-### Producers
-### Consumers
-### Tests
-
-## Removed legacy paths
-## Completion conditions
-## Uncertainty
-```
-
-Generic Before/After fields remain unclassified state context; the topology
-variants are explicit structural claims. All fields remain PR-authored claims.
-The current analyzer serializes them
-once in `ReviewBrief.transformation_contract`; it does not treat them as
-repository observations, assessment results, or merge approval. Contract v4
-also records deterministic selector predicates only when the author uses
-explicit Markdown code spans such as `` `DeterministicAnalyzer` ``,
-`` `src/prismcode/pipeline.py` ``, or an ordered
-`` `Source` -> `Analyzer` -> `ReviewBrief` `` path. Unmarked prose remains a
-claim with a typed `no_explicit_selector` diagnostic. PrismCode does not guess
-code identities from prose, and this predicate layer does not itself observe,
-associate, assess, or display repository evidence.
-
-The next deterministic stage resolves each explicit predicate value against
-canonical changed structural identities on its expected Base/Head side. Its
-`TransformationSubjectSelection` retains every exact match and emits one typed
-diagnostic for an unmatched selector; it never guesses from claim prose,
-traverses neighboring graph nodes, or treats a match as verification. This is
-the sole seed boundary for later bounded transformation closure.
-
-Bounded transformation closure then reuses only structural paths already
-collected by the Codegraph provider for those selected seeds. It retains whole
-path identities at up to three hops, adds their canonical relation and ownership
-change facts, and records an explicit diagnostic when the identity safety limit
-defers support. This stage does not invoke Codegraph, perform another graph
-traversal, widen selection from prose, or decide presentation topology.
-
-Independently, the facts stage reconstructs
-`ReviewBrief.observed_transformation` from canonical diff, Base/Head structural,
-path, replacement-candidate, and current-head verification fact IDs. It never
-reads the authored transformation contract. The routing stage then creates a
-typed `ReviewBrief.transformation_alignment` from eligible observed facts and
-provider-owned closure facts. Alignment records deterministic relevance and
-coverage only; it does not select evidence, assess a claim, or approve merge.
-The assessment stage then assigns exactly one conservative
-`demonstrated` / `partial` / `contradicted` / `unverified` status to each typed
-transformation claim. It uses only aligned canonical facts, complete closure
-observations, and current-head verification. Predicate-level roles remain
-visible; when one binding has different roles across a conjunctive claim,
-contradiction controls the claim-level binding role. Assessment still does not
-decide whether the PR may merge.
-The canonical `ReviewProjection` then exposes one verification workspace for
-R/G and T/CC subjects. Matrix rows and evidence-inspector records reference the
-same selected relations, bindings, evidence, diagnostics, and structural graph;
-the projection does not perform another assessment.
-The HTML consumes that workspace through one verification accordion, the
-projection-owned structural graph, and a collapsed Evidence Appendix. This
-replaces the former Canonical Change Map and repeated per-R/G review cards
-without creating a second presentation truth. T/CC structural focus remains
-unavailable until canonical subject selection and bounded closure project it;
-the renderer never manufactures graph membership from aligned evidence alone.
-
-The canonical stage map, ownership rules, and dependency direction are
-documented in [`docs/architecture.md`](docs/architecture.md). Each stage also
-keeps its local input/output contract beside its code.
+![Expanded verification detail](docs/assets/prismcode-verification-detail.jpg)
 
 ## Quick start
+
+From a source checkout:
 
 ```bash
 python -m venv .venv
@@ -200,133 +46,14 @@ pytest -q
 prismcode review --fixture fixtures/pr574.json --output build/pr574.html
 ```
 
-Open `build/pr574.html` in a browser.
+Open `build/pr574.html` in a browser. The fixture path is offline and requires
+no GitHub token, model API, or company credentials.
 
-### Evaluate retrieval offline
-
-Run the golden suite without GitHub, Codegraph, or model credentials:
-
-```bash
-prismcode evaluate \
-  --suite fixtures/evaluation-suite.json \
-  --json-output build/evaluation.json \
-  --markdown-output build/evaluation.md
-```
-
-The command returns non-zero when configured thresholds fail. See
-[`docs/evaluation.md`](docs/evaluation.md) for the versioned contracts, metrics,
-and safety boundary.
-
-### Experimental: run bounded LLM shadow selection
-
-Shadow selection is opt-in and never changes deterministic review assessments:
-
-```bash
-export OPENAI_API_KEY=...
-export PRISMCODE_LLM_MODEL=...
-# Optional OpenAI-compatible HTTPS API root; defaults to OpenAI.
-export OPENAI_BASE_URL=https://api.openai.com/v1
-# Select the explicit OpenAI-compatible transport profile.
-export PRISMCODE_LLM_API_PROFILE=deepseek  # openai | siliconflow | deepseek
-# Optional validated, provider-neutral execution policy.
-export PRISMCODE_LLM_TIMEOUT_SECONDS=180
-export PRISMCODE_LLM_MAX_OUTPUT_TOKENS=1200
-export PRISMCODE_LLM_THINKING_MODE=disabled  # default | enabled | disabled
-export PRISMCODE_LLM_REASONING_EFFORT=default  # default | high | max
-# SiliconFlow-only and valid only with thinking enabled.
-# export PRISMCODE_LLM_THINKING_BUDGET=1024
-
-prismcode review \
-  --repo owner/repository \
-  --pr 123 \
-  --llm-shadow \
-  --output build/pr-123.html
-```
-
-For a blinded campaign, freeze the exact model-independent requests before any
-provider call:
-
-```bash
-prismcode review \
-  --repo owner/repository \
-  --pr 123 \
-  --llm-shadow-labeling-output build/pr-123.labeling.json \
-  --output build/pr-123-deterministic.html
-```
-
-After an independent reviewer completes every disposition in a human-label
-artifact, execute only if the regenerated review admissions still match the
-frozen packet exactly:
-
-```bash
-prismcode review \
-  --repo owner/repository \
-  --pr 123 \
-  --llm-shadow \
-  --llm-shadow-labeling-input build/pr-123.labeling.json \
-  --llm-shadow-human-labels build/pr-123.human-labels.json \
-  --output build/pr-123-shadow.html
-```
-
-The prepare command cannot invoke a model. A blinded execution fails before
-provider invocation when source revision, admission, request identity,
-candidate membership, coverage limits, or complete human-label coverage
-differs from the frozen `llm_shadow_labeling_packet.v1` artifact.
-
-After execution, render the independent human/model/deterministic comparison:
-
-```bash
-prismcode compare-shadow \
-  --labeling-packet build/pr-123.labeling.json \
-  --execution build/pr-123-shadow.html.llm-shadow.json \
-  --human-labels build/pr-123.human-labels.json \
-  --output build/pr-123-shadow-comparison.html
-```
-
-This offline command revalidates that the execution preserved every frozen
-admission, then shows deterministic-only, LLM-only, shared, and unselected
-candidates beside the human disposition and semantic-role judgment. Provider
-failures and unresolved surfaces remain visible. The output is an evaluation
-artifact only: it is not consumed by `ReviewBrief`, the production review HTML,
-or any assessment authority.
-
-PrismCode sends only bounded canonical evidence candidates through the
-Chat Completions API with the selected explicit transport profile, structured
-JSON output, `store: false`, no tools, and a 40-candidate request limit plus
-three-request review limit. OpenAI and SiliconFlow use strict JSON Schema;
-DeepSeek uses JSON Object mode followed by the same fail-closed canonical
-selection validator. Candidate
-membership converges per claim through baseline, aligned, same-hunk, and typed
-fallback tiers before the safety limit is applied. Candidates
-carry catalog-owned file/symbol context, directional changed lines, and bounded
-structural-path summaries; packet truncation is recorded as a coverage limit.
-The strict shadow output partitions every admitted identity exactly once as
-selected, rejected, or insufficient. Selected evidence receives only an
-evidence relationship and semantic role, never an acceptance conclusion;
-uncertain relevance must remain insufficient instead of being rejected.
-It records one
-typed observation per claim, including the bounded request, admission and
-execution fate, validated selection divergence, usage, failures, deferrals,
-coverage limits, and a non-secret execution-policy identity in
-`build/pr-123.html.llm-shadow.json`; the Brief header shows only the execution
-state. A run with no admitted request records `empty`; missing configuration
-records `unavailable`; provider or validation
-failure records `partial` or `failed`; deterministic HTML still succeeds.
-Omitting `--llm-shadow` performs no provider call and writes no shadow artifact.
-
-For an exact offline transport replay, add
-`--llm-shadow-replay path/to/exact-request-replay.json`; replay explicitly
-overrides live configuration.
-
-### Review a live GitHub pull request
-
-#### Basic review from any directory
-
-This always collects the PR, its Development-linked Issue, changed-file
-patches, and CI observations from GitHub:
+## Review a GitHub pull request
 
 ```bash
 export GITHUB_TOKEN=...
+
 prismcode review \
   --repo owner/repository \
   --pr 123 \
@@ -334,134 +61,69 @@ prismcode review \
   --output build/pr-123.html
 ```
 
-For every live structure-aware review, `--repo-root` is only a local Git object
-and worktree source. It does not need to be checked out at either PR revision
-and its `.codegraph` directory is never read or modified. PrismCode creates
-private detached worktrees at the exact GitHub head and base SHAs, initializes
-one Codegraph index in each, runs structural mapping and head guardrail scans,
-then removes both worktrees and indexes after success or failure. The source
-repository must already contain both commit objects. This mode requires either
-a `codegraph` executable or `npx` on `PATH`.
-The bundled review workflow checks out full history so both GitHub PR revision
-objects are available; other CI integrations must provision the same input.
+PrismCode reads the PR, its GitHub Development-linked Issue, changed-file
+patches, and current-head checks. With `--repo-root`, it also analyzes exact PR
+revisions for structural evidence. Use `--no-structural-graph` for the explicit
+dependency-free path.
 
-Use `--no-structural-graph` for the explicit dependency-free path. PrismCode
-still creates and removes an exact temporary head worktree for bounded
-guardrail scans, but it does not initialize Codegraph or create a base
-worktree:
+See [Usage](docs/usage.md) for authentication, structural analysis, CI
+integration, diagnostics, and advanced commands.
 
-```bash
-prismcode review \
-  --repo owner/repository \
-  --pr 123 \
-  --repo-root /path/to/local/repository \
-  --no-structural-graph \
-  --output build/pr-123.html
-```
+## Add it to the PR workflow
 
-When the checkout revision, indexed content hashes, and PR head all match,
-PrismCode maps exact added hunk lines to Codegraph symbols and records
-bounded structural paths:
+The included [PrismCode review workflow](.github/workflows/review.yml) runs on
+pull requests and can also be started manually for a target repository and PR.
+Each run places the report link in the job summary and retains the HTML as a
+GitHub Actions artifact.
 
-```text
-Structural mapping: Codegraph available · 4/4 hunks mapped to 3 symbols · 12 bounded paths · base unavailable · uncovered change relations retained
-```
+The intended loop is simple:
 
-Path expansion starts only from exact changed symbols and follows an explicit
-relation allowlist in both directions. A deterministic depth-phased scheduler
-completes shallower relations before deeper expansion and shares each depth
-fairly between seeds while enforcing per-seed and review-level node/path
-limits. A high-fanout seed therefore cannot consume the review budget before
-later changed symbols are inspected, and deeper paths cannot displace eligible
-direct relations. The provider records complete or truncated traversal
-coverage for every seed. An exact symbol replaces the corresponding
-changed-hunk fallback and remains a structural node even when no path is
-selected. Its hunks, lines, files, and GitHub links remain provenance rather
-than parallel evidence. Unmapped hunks remain canonical evidence. File
-fallback is used only when GitHub supplies no parseable hunk.
+1. A human or coding agent opens or updates a PR.
+2. CI runs PrismCode against that PR revision.
+3. The reviewer opens one report and inspects the requirement-to-evidence path,
+   structural change, checks, and unresolved coverage.
+4. The PR is revised or reviewed using those observations; PrismCode itself
+   does not make the merge decision.
 
-Codegraph `contains` edges are collected separately as bounded structural
-ownership facts for observed symbols. They preserve canonical ancestry such as
-file → class → method without becoming runtime/test paths or consuming path
-budgets. The catalog normalizes revision provenance and converges it into one
-review-level retained/added/removed ownership identity when opposite-revision
-coverage makes that conclusion safe. Incomplete coverage remains provenance
-plus a diagnostic. The shared review graph renders that canonical hierarchy
-beside executable relations and lets reviewers hide its ownership-only context
-without changing graph membership. Nested containers and semantic zoom remain
-future presentation work.
+## Deterministic by default
 
-The CLI may run from anywhere. The supplied local repository may be on another
-branch or have uncommitted work because analysis never reads that working tree;
-all review facts come from the private exact-revision roots. Guardrail and
-removal plans own canonical target predicates with optional path scopes; the
-scanner inspects each target only inside its declared scope under
-explicit file, byte, and match limits and reports per-surface coverage. It
-consumes the typed selectors produced by the one-pass PR semantics stage rather
-than reparsing normalized claim prose, and scans only tracked head files,
-excluding untracked checkout content and
-symlink targets, and refuses a tracked working tree that differs from HEAD.
-Path, file-content, and lexical symbol-name coverage are recorded separately;
-truncation retains the exact boundary kind, limit, and observed count. A
-zero-match observation is never presented as guardrail satisfaction or
-repository-wide absence. A scoped removal requires an exact target and complete
-Base/Head observations; the continued existence of the containing file does not
-contradict removal of a symbol inside it.
+The supported product path is deterministic. A normal `prismcode review` run
+requires no model and sends no repository content to an LLM provider. Canonical
+diff facts, symbols, structural graphs, evidence routing, assessment, and HTML
+conclusions remain under deterministic authority.
 
-Use `--verbose` for individual structural diagnostics, or
-`--no-structural-graph` to skip the probe explicitly. Missing, stale, partial,
-invalid, or unreadable indexes never prevent report generation.
+An opt-in, non-authoritative LLM shadow path exists for research only. Its
+current evaluation is tracked in [#211](https://github.com/prismcode-ai/prismcode/issues/211),
+and separate future experiments are tracked in
+[#224](https://github.com/prismcode-ai/prismcode/issues/224),
+[#225](https://github.com/prismcode-ai/prismcode/issues/225),
+[#226](https://github.com/prismcode-ai/prismcode/issues/226), and
+[#227](https://github.com/prismcode-ai/prismcode/issues/227). See
+[LLM shadow evaluation](docs/llm-shadow.md) for the experimental commands and
+safety boundary.
 
-For a private repository, `GITHUB_TOKEN` must be able to read the repository.
-Public repositories may work without a token, subject to GitHub's
-unauthenticated rate limits. Use `--github-token-env OTHER_ENV_NAME` to select
-another environment variable. Use `--github-api-url` for GitHub Enterprise
-Server. When a token is present, an Enterprise host must also be explicitly
-trusted with `--trusted-github-api-host HOST`; only HTTPS URLs are accepted.
+## Documentation
 
-The adapter records explicit diagnostics when:
+- [Usage](docs/usage.md) — local, GitHub, and Actions workflows
+- [Architecture](docs/architecture.md) — canonical stages, ownership, and
+  dependency direction
+- [Review retrieval design](docs/review-retrieval-design.md) — evidence and
+  structural retrieval contracts
+- [Evaluation](docs/evaluation.md) — offline suites, metrics, and gates
+- [Provenance](docs/provenance.md) — source and evidence identity
+- [Fixture schema](docs/fixture-schema.md) — offline input format
+- [Agent change protocol](docs/agent-change-protocol.md) — the repository's
+  responsibility-closed coding method
 
-- GitHub omits a line-level patch for a changed file;
-- `--max-files` prevents complete changed-file collection.
-- no Development-linked Issue is present;
-- no current-head Check Run or commit status exists, or the head SHA is unavailable.
+## Security
 
-It never converts missing patch, test, or execution evidence into a successful verification claim.
-
-### Automated review workflow
-
-`.github/workflows/review.yml` runs automatically for pull requests in this repository and can
-also be started with **Actions → PrismCode review → Run workflow** for any readable repository
-and PR number. Each run exposes a report link in the job summary and retains the HTML as a
-GitHub Actions artifact for 14 days.
-
-The built-in `GITHUB_TOKEN` covers pull requests in this repository. To review another private
-repository, configure a `PRISMCODE_GITHUB_TOKEN` Actions secret with read access to that target.
-Missing links, patches, head SHAs, checks, and statuses remain explicit rather
-than being treated as passing evidence.
-
-## Architectural boundary
-
-```text
-private managed services
-        │ implement public protocols / call public core
-        ▼
-PrismCode open core
-ReviewSourcePacket → canonical evidence → typed routing → convergence → ReviewProjection → renderer
-```
-
-The open core must remain independently installable and runnable. Optional hosted capabilities should integrate through public protocols or an explicit HTTPS backend, never through an unavailable private import.
-
-## Evidence semantics
-
-The report labels evidence granularity (`CHANGED HUNK`, exact symbol,
-`FILE FALLBACK`, execution observation) and explains retrieval relevance. It
-does not convert a lexical or structural relationship into a review conclusion.
-
-## Security note
-
-Generated HTML only creates hyperlinks for absolute `http` and `https` URLs. Tokens are read from environment variables and are not stored in review metadata or generated output. A token is never sent to a custom API host unless that host is explicitly trusted.
+Tokens are read from environment variables and are not stored in review
+metadata or generated HTML. Generated reports create hyperlinks only for
+absolute HTTP and HTTPS URLs. A token is never sent to a custom GitHub API host
+unless that host is explicitly trusted.
 
 ## License
 
-No open-source license has been selected yet. The repository remains private while licensing, contributor terms, and the public/private product boundary are reviewed.
+No open-source license has been selected yet. The repository remains private
+while licensing, contributor terms, and the public/private product boundary are
+reviewed.
