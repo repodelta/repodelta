@@ -21,39 +21,15 @@ and current-head checks a reviewer can actually inspect.
 
 ![PrismCode Brief with an Issue-backed goal](docs/assets/prismcode-report-overview.jpg)
 
-The Brief preserves the authored review contract instead of reducing the Issue
-to a PR summary. `O` identifies an objective, `R` an independently reviewable
-requirement, and `G` a guardrail or explicit boundary. PrismCode carries those
-statements into the report, associates each one with observed evidence, and
-uses the same identifier as an interactive graph focus.
+PrismCode carries Issue objectives (`O`), requirements (`R`), and guardrails
+(`G`) into source-linked review rows alongside PR-authored transformation
+claims.
 
-For the example above, **R4** means “Head/base revision applicability and
-explicit not-applicable diagnostics remain preserved.” Expanding R4 shows its
-observations and assessment and focuses the structural graph on the code and
-relationships associated with that requirement. It does not ask the graph to
-re-decide what R4 means.
+![Issue requirements and guardrails in the Verification section](docs/assets/prismcode-verification-focus.png)
 
-Two source-backed focus rows from this PR make the mapping concrete:
-
-| Focus | Authored contract carried into the report | Graph behavior |
-| --- | --- | --- |
-| **R4 · Requirement** | Head/base revision applicability and explicit not-applicable diagnostics remain preserved. | Highlights associated implementation and verification structure. |
-| **G5 · Out of scope** | Custom Codegraph extension configuration, graph interaction, LLM evaluation, and assessment semantics. | Shows related structural context without turning it into a requirement. |
-
-The report is a standalone HTML file. A reviewer can:
-
-- start from Issue-backed requirements and guardrails or PR-authored
-  transformation claims;
-- explore changed symbols, ownership, calls, imports, and nearby runtime or test
-  structure in the structural delta graph;
-- select a claim to focus the graph and expand its canonical observations,
-  conservative assessment, source links, and coverage limits;
-- distinguish supporting evidence from contradiction, missing evidence, and
-  incomplete collection instead of treating relevance as proof.
-
-The graph below alternates between the default **All** view and that R4 focus.
-The graph membership stays fixed while the matching region is highlighted and
-unrelated structure is muted.
+Expanding a row shows its observations and assessment and focuses the graph
+below. The animation alternates between **All** and **R4**: graph membership
+stays fixed while the associated structure is highlighted.
 
 ![Structural graph changing from All to an R4-focused view](docs/assets/prismcode-structural-graph.webp)
 
@@ -76,20 +52,30 @@ public repositories can also use GitHub's unauthenticated limits.
 
 ## Review a GitHub pull request
 
-Run from a local checkout of the target repository:
+`--repo` reads live PR, linked-Issue, patch, and check data from GitHub; source
+analysis still uses a local Git checkout containing the PR's base and head
+objects. From that target checkout, run:
 
 ```bash
 cd /path/to/local/repository
 prismcode review --repo owner/repository --pr 123 --output build/pr-123.html
 ```
 
-PrismCode reads the PR, its GitHub Development-linked Issue, changed-file
-patches, and current-head checks. The current directory is the default
-`--repo-root`: PrismCode creates private worktrees at the PR's exact base and
-head revisions, initializes a separate Codegraph index in each, analyzes them,
-and removes both worktrees and indexes. Pass `--repo-root` only when the target
-checkout is elsewhere. Use `--no-structural-graph` for the explicit
-Codegraph-free path.
+When running from somewhere else, identify the same local checkout explicitly:
+
+```bash
+prismcode review \
+  --repo owner/repository \
+  --pr 123 \
+  --repo-root /path/to/local/repository \
+  --output build/pr-123.html
+```
+
+PrismCode creates private worktrees at the PR's exact base and head revisions,
+initializes a separate Codegraph index in each, analyzes them, and removes both
+worktrees and indexes. Remote-only source analysis is not currently supported.
+Use `--no-structural-graph` for the explicit Codegraph-free path; it still
+requires the local checkout for an exact head worktree.
 
 For a network-free smoke test instead:
 
