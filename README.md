@@ -20,19 +20,19 @@ RepoDelta does not write the change or approve it. It connects the PR's authored
 requirements and transformation claims to the code, structural relationships,
 and current-head checks a reviewer can actually inspect.
 
-![RepoDelta Brief with an Issue-backed goal](docs/assets/repodelta-report-overview.jpg)
+![RepoDelta Brief with an Issue-backed goal](https://raw.githubusercontent.com/repodelta/repodelta/main/docs/assets/repodelta-report-overview.jpg)
 
 RepoDelta carries Issue objectives (`O`), requirements (`R`), and guardrails
 (`G`) into source-linked review rows alongside PR-authored transformation
 claims.
 
-![Issue requirements and guardrails in the Verification section](docs/assets/repodelta-verification-focus.png)
+![Issue requirements and guardrails in the Verification section](https://raw.githubusercontent.com/repodelta/repodelta/main/docs/assets/repodelta-verification-focus.png)
 
 Expanding a row shows its observations and assessment and focuses the graph
 below. The animation alternates between **All** and **R4**: graph membership
 stays fixed while the associated structure is highlighted.
 
-![Structural graph changing from All to an R4-focused view](docs/assets/repodelta-structural-graph.webp)
+![Structural graph changing from All to an R4-focused view](https://raw.githubusercontent.com/repodelta/repodelta/main/docs/assets/repodelta-structural-graph.webp)
 
 RepoDelta also carries PR-authored transformation claims (`T`) and completion
 conditions (`CC`) into the same inspection flow. When a claim names a concrete
@@ -50,12 +50,12 @@ Live structure-aware reviews require Python 3.11+, Git, and either the external
 [`pipx`](https://pipx.pypa.io/):
 
 ```bash
-pipx install git+https://github.com/repodelta/repodelta.git
+pipx install repodelta
 ```
 
-Until the first PyPI release, the GitHub URL is the supported install source.
-It does not modify any target project's virtual environment. Contributors can
-use the editable source installation in [Usage](docs/usage.md).
+This installs RepoDelta from PyPI without modifying any target project's
+virtual environment. Contributors can use the editable source installation in
+[Usage](docs/usage.md).
 
 Then review a PR from any directory; no checkout of the target repository is
 required:

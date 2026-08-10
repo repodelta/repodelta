@@ -10,10 +10,11 @@ Install RepoDelta once in an isolated tool environment; this does not modify a
 target repository's virtual environment:
 
 ```bash
-pipx install git+https://github.com/repodelta/repodelta.git
+pipx install repodelta
 ```
 
-Until the first PyPI release, the GitHub URL is the supported install source.
+`pipx` installs the PyPI release in its own managed environment and exposes the
+`repodelta` command without changing a target project's dependencies.
 
 ## Contribute from a source checkout
 
