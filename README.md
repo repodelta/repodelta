@@ -52,16 +52,16 @@ public repositories can also use GitHub's unauthenticated limits.
 
 ## Review a GitHub pull request
 
-`--repo` reads live PR, linked-Issue, patch, and check data from GitHub; source
-analysis still uses a local Git checkout containing the PR's base and head
-objects. From that target checkout, run:
+`--repo` reads live PR, linked-Issue, patch, and check data from GitHub. By
+default PrismCode also fetches the exact PR base and head revisions into a
+private temporary workspace, so the command can run from any directory:
 
 ```bash
-cd /path/to/local/repository
 prismcode review --repo owner/repository --pr 123 --output build/pr-123.html
 ```
 
-When running from somewhere else, identify the same local checkout explicitly:
+If a local repository already contains both revisions, use it as an explicit
+optimization:
 
 ```bash
 prismcode review \
@@ -71,11 +71,12 @@ prismcode review \
   --output build/pr-123.html
 ```
 
-PrismCode creates private worktrees at the PR's exact base and head revisions,
-initializes a separate Codegraph index in each, analyzes them, and removes both
-worktrees and indexes. Remote-only source analysis is not currently supported.
-Use `--no-structural-graph` for the explicit Codegraph-free path; it still
-requires the local checkout for an exact head worktree.
+PrismCode verifies the fetched revisions against GitHub metadata, creates
+private worktrees and separate Codegraph indexes, then removes every owned Git
+source, worktree, and index after success or failure. Credentials remain
+process-scoped and never enter the Git URL, command arguments, report, or
+persisted repository configuration. `--no-structural-graph` is Codegraph-free
+and fetches only the exact head required by deterministic repository scans.
 
 For a network-free smoke test instead:
 

@@ -30,6 +30,7 @@ from prismcode.providers.mapping import (
 from prismcode.providers.workspace import (
     ReviewRevisionRoots,
     isolated_review_roots,
+    remote_review_roots,
 )
 from prismcode.presentation.status import format_structural_coverage
 from prismcode.changes.hunks import parse_changed_files
@@ -224,16 +225,15 @@ def build_parser() -> argparse.ArgumentParser:
     review.add_argument("--max-files", type=_positive_int, default=300, help="Maximum changed files to collect")
     review.add_argument(
         "--repo-root",
-        default=".",
         help=(
-            "Local Git repository used to create exact temporary PR revision "
-            "worktrees (default: current directory)"
+            "Optional local Git repository used instead of fetching exact PR "
+            "revisions from GitHub"
         ),
     )
     review.add_argument(
         "--no-structural-graph",
         action="store_true",
-        help="Skip repository-local structural mapping and use changed-hunk/file anchors",
+        help="Skip Codegraph structural mapping and use changed-hunk/file anchors",
     )
     review.add_argument(
         "--verbose",
@@ -361,20 +361,27 @@ def main() -> int:
                     api_url=args.github_api_url,
                 ) from exc
             analysis_input = AnalysisInput(packet=packet)
-        workspace = (
-            nullcontext(
-                ReviewRevisionRoots(
-                    head=Path(args.repo_root),
-                )
+        if args.fixture:
+            workspace = nullcontext(
+                ReviewRevisionRoots(head=Path(args.repo_root or "."))
             )
-            if args.fixture
-            else isolated_review_roots(
+        elif args.repo_root:
+            workspace = isolated_review_roots(
                 repo_root=args.repo_root,
                 head_revision=analysis_input.packet.head_sha or "",
                 base_revision=analysis_input.packet.base_sha or "",
                 structural_graph_enabled=not args.no_structural_graph,
             )
-        )
+        else:
+            workspace = remote_review_roots(
+                repository=args.repo,
+                pull_request=args.pr,
+                api_url=args.github_api_url,
+                token=token,
+                head_revision=analysis_input.packet.head_sha or "",
+                base_revision=analysis_input.packet.base_sha or "",
+                structural_graph_enabled=not args.no_structural_graph,
+            )
         with workspace as roots:
             structural_graph = None
             changes = analysis_input.changes or parse_changed_files(

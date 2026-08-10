@@ -33,17 +33,17 @@ See [Fixture schema](fixture-schema.md) for the versioned input contract.
 
 ## Review a live GitHub pull request
 
-Run from a local checkout of the target repository:
+Run from any directory:
 
 ```bash
-cd /path/to/local/repository
 prismcode review --repo owner/repository --pr 123 --output build/pr-123.html
 ```
 
-`--repo-root` defaults to the current directory. Pass
-`--repo-root /path/to/local/repository` only when invoking PrismCode from
-somewhere else. The selected repository must contain the PR's base and head Git
-objects; CI checkouts should use full history.
+PrismCode obtains live metadata from GitHub and fetches the exact PR head and
+base revisions into a private temporary Git source. Pass
+`--repo-root /path/to/local/repository` only as an explicit optimization when a
+local repository already contains both commit objects; its current branch and
+working-tree state are not used.
 
 The GitHub adapter collects:
 
@@ -71,14 +71,14 @@ and authority mapping is documented under
 Structure-aware analysis is the live-review default. PrismCode creates private
 detached worktrees at the PR's exact head and base revisions, initializes an
 isolated Codegraph index once in each worktree, maps changed hunks to symbols,
-collects bounded structural paths and ownership, and removes the temporary
-worktrees and indexes after success or failure.
+collects bounded structural paths and ownership, and removes the fetched Git
+source, worktrees, and indexes after success or failure.
 
-The supplied working tree does not need to be checked out at either PR revision
-and may be on another branch. PrismCode first uses a `codegraph` executable on
-`PATH`; otherwise it runs `npx --yes @colbymchenry/codegraph`. Codegraph is an
-external MIT-licensed runtime and is not bundled in the PrismCode Python
-distribution.
+Authentication is supplied only to the fetch subprocess and is not written to
+the remote URL, command arguments, Git configuration, review metadata, or HTML.
+PrismCode first uses a `codegraph` executable on `PATH`; otherwise it runs
+`npx --yes @colbymchenry/codegraph`. Codegraph is an external MIT-licensed
+runtime and is not bundled in the PrismCode Python distribution.
 
 Use the explicit Codegraph-free path when structural analysis is not wanted:
 
@@ -90,8 +90,9 @@ prismcode review \
   --output build/pr-123.html
 ```
 
-This path still creates an exact temporary head worktree for deterministic
-repository scans; it skips the base worktree and both Codegraph indexes.
+This path fetches only the exact head and creates one temporary head worktree
+for deterministic repository scans; it skips the base revision and both
+Codegraph indexes.
 
 Missing, stale, partial, invalid, or unreadable structural data never prevents
 the deterministic report from being generated. Use `--verbose` for individual
