@@ -205,34 +205,38 @@ must be named explicitly before RepoDelta will send it a token.
 ## Build the next layer with us
 
 Structural change understanding is only the first layer. We invite researchers
-and engineers to explore coding workflows designed for an agent-native era—
-workflows that keep fast, parallel change understandable, governable, and
-maintainable.
+and engineers to contribute on two connected fronts:
 
-RepoDelta's own development is part of that open experiment. Every change tests
-and refines the repository's method for making coding agents maintainable and
-extensible on production code, not only its report generator.
+- **Build RepoDelta.** Propose useful capabilities, improve existing behavior,
+  add integrations and evaluation cases, or challenge product assumptions with
+  evidence.
+- **Improve the method.** RepoDelta's own development is a shared experiment in
+  coding workflows designed for an agent-native era. The current method starts
+  in [AGENTS.md](AGENTS.md) and is made operational by four guides:
+  [Issue authoring](docs/issue-guidelines.md), the
+  [agent change protocol](docs/agent-change-protocol.md),
+  [commit messages](docs/commit-message-guidelines.md), and
+  [pull requests](docs/pull-request-guidelines.md). It is a working approach,
+  not doctrine: contributors can question it, compare alternatives, and
+  demonstrate that another method produces changes that are more maintainable,
+  extensible, or trustworthy.
 
-That connection is visible in every report: Issue-authored objectives,
-requirements, and guardrails (`O/R/G`) describe what the change must achieve,
-while PR-authored transformation claims and completion conditions (`T/CC`)
-describe what the human or coding agent says it changed. RepoDelta places both
-against the observed diff and structural graph, making mismatches, missing
-evidence, and unresolved coverage inspectable instead of trusting the PR
-description as proof.
+The current method is visible in every report. Issue-authored objectives,
+requirements, and guardrails (`O/R/G`) describe what the change must achieve;
+PR-authored transformation claims and completion conditions (`T/CC`) describe
+what the human or coding agent says it changed. RepoDelta places both against
+the observed diff and structural graph, making mismatches, missing evidence,
+and unresolved coverage inspectable instead of trusting the PR description as
+proof.
 
-That method starts in [AGENTS.md](AGENTS.md) and is made operational by four
-guides: [Issue authoring](docs/issue-guidelines.md), the
-[agent change protocol](docs/agent-change-protocol.md),
-[commit messages](docs/commit-message-guidelines.md), and
-[pull requests](docs/pull-request-guidelines.md). They define how requirements,
-responsibility boundaries, implementation transitions, verification, and
-post-change learning stay connected.
+These two contribution paths reinforce each other: product changes create real
+cases for evaluating workflow methods, and better methods improve how RepoDelta
+itself evolves.
 
-Contributions and competing approaches are welcome. You can improve an
-existing adapter, help design [requirement sources beyond GitHub Issues](https://github.com/repodelta/repodelta/issues/233)
-such as Jira, add an evaluation case, or challenge the coding method with a
-concrete counterexample. Start with the
+Improve an existing adapter, help design
+[requirement sources beyond GitHub Issues](https://github.com/repodelta/repodelta/issues/233)
+such as Jira, add an evaluation case, or bring a concrete counterexample or
+alternative method. Start with the
 [open Issues](https://github.com/repodelta/repodelta/issues) or open a
 focused Issue using the repository's authoring guide.
 
