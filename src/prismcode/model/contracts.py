@@ -2799,7 +2799,7 @@ class StructuralGraphNode:
     delta: StructuralGraphNodeDelta
     evidence_ids: tuple[str, ...]
     display_evidence_id: str
-    path_relation_ids: tuple[str, ...] = ()
+    path_evidence_ids: tuple[str, ...] = ()
     symbol_navigation_target_id: str = ""
     change_navigation_target_id: str = ""
 
@@ -2812,7 +2812,7 @@ class StructuralGraphEdge:
     relation: str
     operation: Literal["added", "removed", "retained"]
     relation_change_evidence_id: str
-    path_relation_ids: tuple[str, ...] = ()
+    path_evidence_ids: tuple[str, ...] = ()
     source_navigation_target_id: str = ""
     target_navigation_target_id: str = ""
 
@@ -2827,7 +2827,7 @@ class StructuralRelationGroup:
     relation: str
     operation: Literal["added", "removed", "retained"]
     member_edge_ids: tuple[str, ...]
-    path_relation_ids: tuple[str, ...] = ()
+    path_evidence_ids: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.member_edge_ids:
@@ -2840,7 +2840,7 @@ class StructuralRelationGroup:
             raise ValueError(
                 f"{self.id}: structural relation group members must be sorted"
             )
-        if len(set(self.path_relation_ids)) != len(self.path_relation_ids):
+        if len(set(self.path_evidence_ids)) != len(self.path_evidence_ids):
             raise ValueError(
                 f"{self.id}: structural relation group paths must be unique"
             )
@@ -2894,6 +2894,8 @@ class StructuralGraphPlacement:
 
 @dataclass(frozen=True)
 class ReviewStructuralGraph:
+    """Focus-independent canonical PR structure plus its default backbone."""
+
     nodes: tuple[StructuralGraphNode, ...] = ()
     edges: tuple[StructuralGraphEdge, ...] = ()
     relation_groups: tuple[StructuralRelationGroup, ...] = ()
@@ -2904,7 +2906,7 @@ class ReviewStructuralGraph:
     backbone_edge_ids: tuple[str, ...] = ()
     backbone_relation_group_ids: tuple[str, ...] = ()
     backbone_ownership_edge_ids: tuple[str, ...] = ()
-    path_relation_ids: tuple[str, ...] = ()
+    path_evidence_ids: tuple[str, ...] = ()
     navigation_targets: tuple[StructuralNavigationTarget, ...] = ()
 
 
@@ -3174,7 +3176,7 @@ class ReviewProjection:
         ArchitecturalChangeTopology()
     )
     verification_workspace: VerificationWorkspace = VerificationWorkspace()
-    schema_version: str = "review_projection.v30"
+    schema_version: str = "review_projection.v31"
 
     def validate_consistency(
         self,
@@ -3227,6 +3229,26 @@ class ReviewProjection:
         ):
             raise ValueError(
                 "review structural graph contains duplicate navigation targets"
+            )
+        path_evidence_ids = set(self.review_graph.path_evidence_ids)
+        if len(path_evidence_ids) != len(self.review_graph.path_evidence_ids):
+            raise ValueError(
+                "review structural graph contains duplicate path evidence"
+            )
+        if any(
+            evidence_id not in evidence
+            or evidence[evidence_id].kind != "structural_path"
+            for evidence_id in path_evidence_ids
+        ):
+            raise ValueError(
+                "review structural graph references invalid path evidence"
+            )
+        if any(
+            not set(item.path_evidence_ids) <= path_evidence_ids
+            for item in (*self.review_graph.nodes, *self.review_graph.edges)
+        ):
+            raise ValueError(
+                "review structural members reference path evidence outside the graph"
             )
         for node in self.review_graph.nodes:
             if node.display_evidence_id not in node.evidence_ids:
@@ -3478,13 +3500,13 @@ class ReviewProjection:
                 )
             expected_paths = tuple(
                 dict.fromkeys(
-                    path_relation_id
+                    path_evidence_id
                     for item in members
                     if item is not None
-                    for path_relation_id in item.path_relation_ids
+                    for path_evidence_id in item.path_evidence_ids
                 )
             )
-            if group.path_relation_ids != expected_paths:
+            if group.path_evidence_ids != expected_paths:
                 raise ValueError(
                     "review structural relation group path provenance mismatch"
                 )
@@ -3892,7 +3914,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "prismcode-open-core"
-    schema_version: str = "review_brief.v54"
+    schema_version: str = "review_brief.v55"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

@@ -43,7 +43,7 @@ def _edge(
         relation=relation,
         operation="added",
         relation_change_evidence_id=f"E:{edge_id}",
-        path_relation_ids=(f"PATH:{edge_id}",),
+        path_evidence_ids=(f"PATH:{edge_id}",),
     )
 
 
@@ -79,7 +79,7 @@ def test_cross_container_edges_collapse_without_losing_members() -> None:
         "file-b",
     )
     assert group.member_edge_ids == ("edge-class", "edge-method")
-    assert group.path_relation_ids == (
+    assert group.path_evidence_ids == (
         "PATH:edge-class",
         "PATH:edge-method",
     )
