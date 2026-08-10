@@ -4,6 +4,11 @@ RepoDelta turns a pull request into an interactive visual map of what changed
 across the repository—and helps reviewers judge whether the implementation
 matches its acceptance criteria.
 
+AI agents can now produce changes faster and at a scale that makes supervising
+every execution impractical. RepoDelta shifts human oversight to the acceptance
+boundary: before a result enters the codebase, reviewers can understand and
+govern what changed without replaying every agent step.
+
 It sits after a human or coding agent has written code and opened a PR:
 
 ```text
@@ -199,10 +204,14 @@ must be named explicitly before RepoDelta will send it a token.
 
 ## Build the next layer with us
 
-Change understanding is only the first step. RepoDelta is also an open
-experiment in making coding agents maintainable and extensible enough to work
-on production code: every change is used to test and refine the repository's
-own method, not only its report generator.
+Structural change understanding is only the first layer. We invite researchers
+and engineers to explore coding workflows designed for an agent-native era—
+workflows that keep fast, parallel change understandable, governable, and
+maintainable.
+
+RepoDelta's own development is part of that open experiment. Every change tests
+and refines the repository's method for making coding agents maintainable and
+extensible on production code, not only its report generator.
 
 That connection is visible in every report: Issue-authored objectives,
 requirements, and guardrails (`O/R/G`) describe what the change must achieve,
