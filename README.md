@@ -34,11 +34,13 @@ stays fixed while the associated structure is highlighted.
 
 ![Structural graph changing from All to an R4-focused view](docs/assets/prismcode-structural-graph.webp)
 
-When a PR description follows the [authoring guide](docs/pull-request-guidelines.md),
-PrismCode also carries its transformation claims (`T`) and completion
-conditions (`CC`) into the same inspection flow. Selecting one focuses the
-graph on associated code and relationships, so a reviewer can compare what a
-human or coding agent says changed with the structure that actually changed.
+PrismCode also carries PR-authored transformation claims (`T`) and completion
+conditions (`CC`) into the same inspection flow. When a claim names a concrete
+file or symbol in a Markdown code span, selecting it focuses the associated
+code and relationships. Selector-free or unmatched prose stays visible without
+an invented graph mapping, so a reviewer can distinguish a coding agent's
+claim from the structure that actually changed. See the
+[authoring guide](docs/pull-request-guidelines.md).
 
 ## Quick start
 
