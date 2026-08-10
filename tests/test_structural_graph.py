@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 import sqlite3
 import pytest
 from contextlib import nullcontext
@@ -16,6 +17,7 @@ from prismcode.model.contracts import (
     ChangedLine,
     Requirement,
     ReviewSourcePacket,
+    SourceRecord,
     SourceRef,
 )
 from prismcode.changes.hunks import parse_changed_files, parse_unified_patch
@@ -900,6 +902,77 @@ def test_replacement_hunk_uses_presence_for_distinct_symbol_identities() -> None
     assert 'class="isolated-anchor operation-removed"' in html
     assert "focus_relevant_anchor" in html
     assert "old_anchor" in html
+
+
+def test_explicit_state_claim_selectors_focus_the_expected_revision_symbols() -> None:
+    packet = ReviewSourcePacket(
+        repository="acme/widget",
+        pull_request=7,
+        title="Replace writer",
+        source_url="https://github.com/acme/widget/pull/7",
+        head_sha="head123",
+        base_sha="base123",
+        source_records=(
+            SourceRecord(
+                id="pr:7",
+                kind="pull_request",
+                repository="acme/widget",
+                title="Replace writer",
+                body=(
+                    "## Before\n"
+                    "- `LegacyWriter` controlled the result.\n\n"
+                    "## After\n"
+                    "- `CanonicalWriter` controls the result.\n"
+                ),
+            ),
+        ),
+        changed_files=(
+            ChangedFile(
+                base_path="src/service.py",
+                head_path="src/service.py",
+                patch=(
+                    "@@ -1 +1 @@\n"
+                    "-def LegacyWriter(): pass\n"
+                    "+def CanonicalWriter(): pass\n"
+                ),
+                source_url="https://github.com/acme/widget/pull/7/files",
+            ),
+        ),
+    ).with_revision()
+    changes = parse_changed_files(packet.changed_files)
+    hunk_id = changes.hunks[0].id
+    graph = StructuralGraphCollection(
+        revisions=(
+            _revision_result(
+                "head",
+                hunk_id,
+                _symbol("head:canonical", "CanonicalWriter"),
+            ),
+            _revision_result(
+                "base",
+                hunk_id,
+                _symbol("base:legacy", "LegacyWriter"),
+            ),
+        )
+    )
+
+    brief = DeterministicAnalyzer().analyze(
+        AnalysisInput(packet=packet, changes=changes, structural_graph=graph)
+    )
+
+    matches = {
+        item.claim_id: brief.evidence_catalog.by_id()[item.evidence_id]
+        for item in brief.transformation_subject_selection.matches
+    }
+    assert "legacywriter" in matches["T1"].base_signature.identifiers
+    assert "canonicalwriter" in matches["T2"].head_signature.identifiers
+    inspections = brief.projection.verification_workspace.inspections_by_subject_id()
+    assert inspections["T1"].structural_disposition.state == "projected"
+    assert inspections["T2"].structural_disposition.state == "projected"
+
+    html = render_html(brief)
+    assert re.search(r'data-focuses="[^"]*\bT1\b[^"]*"', html)
+    assert re.search(r'data-focuses="[^"]*\bT2\b[^"]*"', html)
 
 
 def test_head_only_file_symbol_retains_modified_file_status() -> None:

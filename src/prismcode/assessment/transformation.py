@@ -99,6 +99,30 @@ def _assess_claim(
     uncertainty_evidence_ids: frozenset[str] = frozenset(),
 ) -> TransformationClaimAssessment:
     if claim.kind in {"before_state", "after_state"}:
+        predicate_assessments = tuple(
+            _predicate_result(
+                claim,
+                predicate,
+                "unverified",
+                (),
+                (),
+                (
+                    _reason(
+                        "generic_transition_context",
+                        "The explicit state selector may focus structural "
+                        "evidence, but the authored before/after state remains "
+                        "context rather than an assessed topology claim.",
+                    ),
+                ),
+            )
+            for predicate in predicates
+            if predicate.role == "target"
+        )
+        if predicate_assessments:
+            return _aggregate_predicate_assessments(
+                claim,
+                predicate_assessments,
+            )
         return _result(
             claim,
             "unverified",
