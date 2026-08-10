@@ -202,43 +202,30 @@ generated HTML. Generated reports create hyperlinks only for absolute HTTP and
 HTTPS URLs. Official GitHub is trusted by default; a custom GitHub API host
 must be named explicitly before RepoDelta will send it a token.
 
-## Build the next layer with us
+## Build with us
 
-Structural change understanding is only the first layer. We invite researchers
-and engineers to contribute on two connected fronts:
+RepoDelta is open to anyone who wants to make code changes easier to understand
+and govern. Bring a useful feature, improve an existing capability, add an
+integration or evaluation case, or simply open an Issue with an idea worth
+exploring.
 
-- **Build RepoDelta.** Propose useful capabilities, improve existing behavior,
-  add integrations and evaluation cases, or challenge product assumptions with
-  evidence.
-- **Improve the method.** RepoDelta's own development is a shared experiment in
-  coding workflows designed for an agent-native era. The current method starts
-  in [AGENTS.md](AGENTS.md) and is made operational by four guides:
-  [Issue authoring](docs/issue-guidelines.md), the
-  [agent change protocol](docs/agent-change-protocol.md),
-  [commit messages](docs/commit-message-guidelines.md), and
-  [pull requests](docs/pull-request-guidelines.md). It is a working approach,
-  not doctrine: contributors can question it, compare alternatives, and
-  demonstrate that another method produces changes that are more maintainable,
-  extensible, or trustworthy.
+Building RepoDelta is also how we explore better coding workflows for an
+agent-native era. Our current approach connects Issue-authored objectives,
+requirements, and guardrails (`O/R/G`) with PR-authored transformation claims
+and completion conditions (`T/CC`), then checks both against the observed change.
+It begins in [AGENTS.md](AGENTS.md) and the repository's guides for
+[Issues](docs/issue-guidelines.md),
+[agent changes](docs/agent-change-protocol.md),
+[commits](docs/commit-message-guidelines.md), and
+[pull requests](docs/pull-request-guidelines.md)—but it is not the only approach
+we welcome. If you have a better method, bring it, test it on real changes, and
+help us learn from the result.
 
-The current method is visible in every report. Issue-authored objectives,
-requirements, and guardrails (`O/R/G`) describe what the change must achieve;
-PR-authored transformation claims and completion conditions (`T/CC`) describe
-what the human or coding agent says it changed. RepoDelta places both against
-the observed diff and structural graph, making mismatches, missing evidence,
-and unresolved coverage inspectable instead of trusting the PR description as
-proof.
-
-These two contribution paths reinforce each other: product changes create real
-cases for evaluating workflow methods, and better methods improve how RepoDelta
-itself evolves.
-
-Improve an existing adapter, help design
-[requirement sources beyond GitHub Issues](https://github.com/repodelta/repodelta/issues/233)
-such as Jira, add an evaluation case, or bring a concrete counterexample or
-alternative method. Start with the
-[open Issues](https://github.com/repodelta/repodelta/issues) or open a
-focused Issue using the repository's authoring guide.
+Whether you want to extend RepoDelta, connect a source such as
+[Jira](https://github.com/repodelta/repodelta/issues/233), or challenge how the
+project itself is built, you are welcome here. Start with the
+[open Issues](https://github.com/repodelta/repodelta/issues) or open a focused
+Issue of your own.
 
 ## License
 
