@@ -122,6 +122,52 @@ def test_explicit_predicates_select_revision_appropriate_structural_subjects() -
     }
 
 
+def test_state_selectors_cannot_cross_their_declared_revision() -> None:
+    contract = extract_review_semantics(
+        issue_body=None,
+        issue_source=None,
+        pr_body=(
+            "## Before\n- `LegacyWriter` controlled the result.\n\n"
+            "## After\n- `CanonicalWriter` controls the result.\n"
+        ),
+        pr_source=SourceRef(label="PR #9"),
+        pr_title="Replace writer",
+    ).transformation_contract
+    base_legacy = _change(
+        "E:base-legacy",
+        path="src/legacy.py",
+        base_name="pkg.LegacyWriter",
+    )
+    head_legacy = _change(
+        "E:head-legacy",
+        path="src/wrong_head.py",
+        head_name="pkg.LegacyWriter",
+    )
+    head_canonical = _change(
+        "E:head-canonical",
+        path="src/canonical.py",
+        head_name="pkg.CanonicalWriter",
+    )
+    base_canonical = _change(
+        "E:base-canonical",
+        path="src/wrong_base.py",
+        base_name="pkg.CanonicalWriter",
+    )
+    catalog = EvidenceCatalog(
+        items=(base_legacy, head_legacy, head_canonical, base_canonical)
+    )
+    observed = ObservedTransformation(
+        structural_change_evidence_ids=tuple(item.id for item in catalog.items)
+    )
+
+    selection = select_transformation_subjects(contract, observed, catalog)
+
+    assert [(item.claim_id, item.evidence_id) for item in selection.matches] == [
+        ("T1", "E:base-legacy"),
+        ("T2", "E:head-canonical"),
+    ]
+
+
 def test_subject_selection_rejects_parallel_match_and_diagnostic_truth() -> None:
     contract = _contract()
     adapter = _change(

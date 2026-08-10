@@ -813,8 +813,6 @@ def _transformation_predicates(
     predicates = []
     diagnostics = []
     for claim, raw_text in zip(claims, raw_texts, strict=True):
-        if claim.kind in {"before_state", "after_state"}:
-            continue
         matches = tuple(_INLINE_CODE_RE.finditer(raw_text))
         selectors = tuple(
             value
@@ -938,11 +936,14 @@ def _predicate_expectation(
         return "absent_head"
     if kind == "before_topology":
         return "present_base"
+    if kind == "before_state":
+        return "present_base"
     if kind == "removal":
         return "absent_head"
     if kind == "completion_condition":
         return "verified_head"
     if kind in {
+        "after_state",
         "after_topology",
         "authority",
         "production_path",

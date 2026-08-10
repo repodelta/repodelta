@@ -915,10 +915,15 @@ def test_generic_transition_states_are_preserved_without_topology_inference() ->
     assert contract.state_transition.after_claim_ids == ("T2",)
     assert contract.topology.before_claim_ids == ("T3",)
     assert contract.topology.after_claim_ids == ("T4",)
-    assert {item.claim_id for item in contract.predicates.predicates} == {
-        "T3",
-        "T4",
-    }
+    assert [
+        (item.claim_id, item.values, item.expectation)
+        for item in contract.predicates.predicates
+    ] == [
+        ("T1", ("LegacyWriter",), "present_base"),
+        ("T2", ("CanonicalWriter",), "present_head"),
+        ("T3", ("Adapter", "LegacyWriter"), "present_base"),
+        ("T4", ("Adapter", "CanonicalWriter"), "present_head"),
+    ]
     assert not any(
         item.claim_id in {"T1", "T2"}
         for item in brief.transformation_alignment.bindings
