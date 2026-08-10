@@ -21,6 +21,25 @@ and current-head checks a reviewer can actually inspect.
 
 ![PrismCode Brief with an Issue-backed goal](docs/assets/prismcode-report-overview.jpg)
 
+The Brief preserves the authored review contract instead of reducing the Issue
+to a PR summary. `O` identifies an objective, `R` an independently reviewable
+requirement, and `G` a guardrail or explicit boundary. PrismCode carries those
+statements into the report, associates each one with observed evidence, and
+uses the same identifier as an interactive graph focus.
+
+For the example above, **R4** means “Head/base revision applicability and
+explicit not-applicable diagnostics remain preserved.” Expanding R4 shows its
+observations and assessment and focuses the structural graph on the code and
+relationships associated with that requirement. It does not ask the graph to
+re-decide what R4 means.
+
+Two source-backed focus rows from this PR make the mapping concrete:
+
+| Focus | Authored contract carried into the report | Graph behavior |
+| --- | --- | --- |
+| **R4 · Requirement** | Head/base revision applicability and explicit not-applicable diagnostics remain preserved. | Highlights associated implementation and verification structure. |
+| **G5 · Out of scope** | Custom Codegraph extension configuration, graph interaction, LLM evaluation, and assessment semantics. | Shows related structural context without turning it into a requirement. |
+
 The report is a standalone HTML file. A reviewer can:
 
 - start from Issue-backed requirements and guardrails or PR-authored
@@ -32,9 +51,9 @@ The report is a standalone HTML file. A reviewer can:
 - distinguish supporting evidence from contradiction, missing evidence, and
   incomplete collection instead of treating relevance as proof.
 
-The graph below alternates between the default **All** view and the result of
-expanding **R4**. The graph membership stays fixed while the matching region is
-highlighted and unrelated structure is muted.
+The graph below alternates between the default **All** view and that R4 focus.
+The graph membership stays fixed while the matching region is highlighted and
+unrelated structure is muted.
 
 ![Structural graph changing from All to an R4-focused view](docs/assets/prismcode-structural-graph.webp)
 
@@ -132,10 +151,38 @@ safety boundary.
 
 ## Security
 
+PrismCode runs locally: repository checkout, temporary base/head worktrees,
+Codegraph indexes, deterministic analysis, and final HTML stay on the machine
+or CI runner where the command executes. A live review calls the configured
+GitHub API to collect PR, linked-Issue, and check data; the optional LLM shadow
+path is the only mode that sends bounded review content to a model provider.
+
 Tokens are read from environment variables and are not stored in review
 metadata or generated HTML. Generated reports create hyperlinks only for
 absolute HTTP and HTTPS URLs. A token is never sent to a custom GitHub API host
 unless that host is explicitly trusted.
+
+## Build the next layer with us
+
+Change understanding is only the first step. PrismCode is also an open
+experiment in making coding agents maintainable and extensible enough to work
+on production code: every change is used to test and refine the repository's
+own method, not only its report generator.
+
+That method starts in [AGENTS.md](AGENTS.md) and is made operational by four
+guides: [Issue authoring](docs/issue-guidelines.md), the
+[agent change protocol](docs/agent-change-protocol.md),
+[commit messages](docs/commit-message-guidelines.md), and
+[pull requests](docs/pull-request-guidelines.md). They define how requirements,
+responsibility boundaries, implementation transitions, verification, and
+post-change learning stay connected.
+
+Contributions and competing approaches are welcome. You can improve an
+existing adapter, help design [requirement sources beyond GitHub Issues](https://github.com/prismcode-ai/prismcode/issues/233)
+such as Jira, add an evaluation case, or challenge the coding method with a
+concrete counterexample. Start with the
+[open Issues](https://github.com/prismcode-ai/prismcode/issues) or open a
+focused Issue using the repository's authoring guide.
 
 ## License
 
