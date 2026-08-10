@@ -300,6 +300,7 @@ def test_remote_review_fetches_exact_private_revisions_without_persisting_token(
 
     commands = [command for command, _ in fetch_runner.calls]
     fetch = next(command for command in commands if "fetch" in command)
+    assert "--filter=blob:none" not in fetch
     assert "+refs/pull/42/head:refs/prismcode/head" in fetch
     assert "+base123:refs/prismcode/base" in fetch
     assert any("https://github.com/acme/widget.git" in command for command in commands)

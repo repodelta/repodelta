@@ -347,7 +347,6 @@ def remote_review_roots(
                 str(source),
                 "fetch",
                 "--no-tags",
-                "--filter=blob:none",
                 "--depth=1",
                 "origin",
                 *refspecs,
