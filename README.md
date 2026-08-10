@@ -40,35 +40,43 @@ highlighted and unrelated structure is muted.
 
 ## Quick start
 
-From a source checkout:
+Live structure-aware reviews require Git and either the external
+[Codegraph](https://github.com/colbymchenry/codegraph) CLI or Node.js with
+`npx`. From a PrismCode source checkout:
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install -e .[dev]
-pytest -q
-prismcode review --fixture fixtures/pr574.json --output build/pr574.html
+pip install .
+prismcode review --repo prismcode-ai/prismcode --pr 210 --output build/pr-210.html
 ```
 
-Open `build/pr574.html` in a browser. The fixture path is offline and requires
-no GitHub token, model API, or company credentials.
+Open `build/pr-210.html` in a browser. PrismCode reads `GITHUB_TOKEN` when it is
+set, otherwise tries the authenticated `gh` CLI for the configured GitHub host;
+public repositories can also use GitHub's unauthenticated limits.
 
 ## Review a GitHub pull request
 
-```bash
-export GITHUB_TOKEN=...
+Run from a local checkout of the target repository:
 
-prismcode review \
-  --repo owner/repository \
-  --pr 123 \
-  --repo-root /path/to/local/repository \
-  --output build/pr-123.html
+```bash
+cd /path/to/local/repository
+prismcode review --repo owner/repository --pr 123 --output build/pr-123.html
 ```
 
 PrismCode reads the PR, its GitHub Development-linked Issue, changed-file
-patches, and current-head checks. With `--repo-root`, it also analyzes exact PR
-revisions for structural evidence. Use `--no-structural-graph` for the explicit
-dependency-free path.
+patches, and current-head checks. The current directory is the default
+`--repo-root`: PrismCode creates private worktrees at the PR's exact base and
+head revisions, initializes a separate Codegraph index in each, analyzes them,
+and removes both worktrees and indexes. Pass `--repo-root` only when the target
+checkout is elsewhere. Use `--no-structural-graph` for the explicit
+Codegraph-free path.
+
+For a network-free smoke test instead:
+
+```bash
+prismcode review --fixture fixtures/pr574.json --output build/pr574.html
+```
 
 See [Usage](docs/usage.md) for authentication, structural analysis, CI
 integration, diagnostics, and advanced commands.

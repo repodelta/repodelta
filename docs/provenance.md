@@ -15,3 +15,18 @@ The implementation in this repository uses the public
 requirement-first pipeline. It does not import Workspace, Change Unit,
 semantic-spine, persistence, webhook, publisher, or other private runtime
 packages from `interact-space/PrismCode`.
+
+## External runtime and APIs
+
+The default live structural path invokes
+[Codegraph](https://github.com/colbymchenry/codegraph) through either an
+installed `codegraph` executable or the external npm package
+[`@colbymchenry/codegraph`](https://www.npmjs.com/package/@colbymchenry/codegraph).
+Codegraph is MIT licensed and is not imported, vendored, or redistributed in
+the PrismCode Python package; PrismCode consumes its temporary SQLite index
+through the `StructuralGraphProvider` boundary.
+
+GitHub REST and GitHub GraphQL are network APIs rather than bundled libraries.
+PrismCode uses Python's standard-library HTTP client for both. GraphQL is used
+only to read the PR's Development-linked Issues; pull-request metadata,
+patches, checks, and statuses come from REST endpoints.

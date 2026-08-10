@@ -9,12 +9,14 @@ LLM provider.
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install -e .[dev]
+pip install .
 ```
 
-Run the network-free test suite:
+Contributors can install the editable development extra and run the
+network-free test suite:
 
 ```bash
+pip install -e .[dev]
 pytest -q
 ```
 
@@ -31,21 +33,23 @@ See [Fixture schema](fixture-schema.md) for the versioned input contract.
 
 ## Review a live GitHub pull request
 
-```bash
-export GITHUB_TOKEN=...
+Run from a local checkout of the target repository:
 
-prismcode review \
-  --repo owner/repository \
-  --pr 123 \
-  --repo-root /path/to/local/repository \
-  --output build/pr-123.html
+```bash
+cd /path/to/local/repository
+prismcode review --repo owner/repository --pr 123 --output build/pr-123.html
 ```
+
+`--repo-root` defaults to the current directory. Pass
+`--repo-root /path/to/local/repository` only when invoking PrismCode from
+somewhere else. The selected repository must contain the PR's base and head Git
+objects; CI checkouts should use full history.
 
 The GitHub adapter collects:
 
-- pull-request metadata and changed-file patches;
-- the Issue selected by GitHub's Development link;
-- current-head Check Runs and commit statuses.
+- pull-request metadata and changed-file patches through GitHub REST;
+- the Issue selected by GitHub's Development link through GitHub GraphQL;
+- current-head Check Runs and commit statuses through GitHub REST.
 
 It records missing links, patches, head SHAs, checks, statuses, and file-limit
 truncation as explicit diagnostics. Missing evidence is never converted into a
@@ -64,27 +68,30 @@ and authority mapping is documented under
 
 ### Structural analysis
 
-For a structure-aware review, `--repo-root` identifies a local Git repository
-that already contains the PR's base and head commit objects. PrismCode creates
-private detached worktrees at those exact revisions, builds an isolated
-Codegraph index for each, maps changed hunks to symbols, collects bounded
-structural paths and ownership, and removes the temporary worktrees and indexes
-after success or failure.
+Structure-aware analysis is the live-review default. PrismCode creates private
+detached worktrees at the PR's exact head and base revisions, initializes an
+isolated Codegraph index once in each worktree, maps changed hunks to symbols,
+collects bounded structural paths and ownership, and removes the temporary
+worktrees and indexes after success or failure.
 
 The supplied working tree does not need to be checked out at either PR revision
-and may be on another branch. This mode requires either a `codegraph` executable
-or `npx` on `PATH`.
+and may be on another branch. PrismCode first uses a `codegraph` executable on
+`PATH`; otherwise it runs `npx --yes @colbymchenry/codegraph`. Codegraph is an
+external MIT-licensed runtime and is not bundled in the PrismCode Python
+distribution.
 
-Use the explicit dependency-free path when structural analysis is not wanted:
+Use the explicit Codegraph-free path when structural analysis is not wanted:
 
 ```bash
 prismcode review \
   --repo owner/repository \
   --pr 123 \
-  --repo-root /path/to/local/repository \
   --no-structural-graph \
   --output build/pr-123.html
 ```
+
+This path still creates an exact temporary head worktree for deterministic
+repository scans; it skips the base worktree and both Codegraph indexes.
 
 Missing, stale, partial, invalid, or unreadable structural data never prevents
 the deterministic report from being generated. Use `--verbose` for individual
