@@ -107,12 +107,7 @@ def _sources(item: EvidenceItem, brief: ReviewBrief) -> str:
     )
 
 
-def _statement_context(
-    label: str,
-    statements: tuple[ReviewStatement, ...],
-) -> str:
-    if not statements:
-        return ""
+def _statement_rows(statements: tuple[ReviewStatement, ...]) -> str:
     rows = []
     for item in statements:
         sources = " · ".join(_source(source) for source in item.sources)
@@ -127,20 +122,44 @@ def _statement_context(
             )
             + "</div>"
         )
+    return "".join(rows)
+
+
+def _statement_context(
+    label: str,
+    statements: tuple[ReviewStatement, ...],
+) -> str:
+    if not statements:
+        return ""
     return (
         f'<details class="context"><summary>{escape(label)} · {len(statements)} '
         f"statement{'s' if len(statements) != 1 else ''}</summary>"
-        f'<div class="context-list">{"".join(rows)}</div></details>'
+        f'<div class="context-list">{_statement_rows(statements)}</div></details>'
+    )
+
+
+def _brief_goals(brief: ReviewBrief) -> str:
+    if not brief.objectives:
+        return ""
+    return (
+        '<section class="brief-goals" aria-labelledby="brief-goals-heading">'
+        '<h2 class="brief-goals-heading" id="brief-goals-heading">Goals</h2>'
+        f'<div class="context-list">{_statement_rows(brief.objectives)}</div>'
+        '</section>'
     )
 
 
 def _review_context(brief: ReviewBrief) -> str:
     content = (
-        _statement_context("Goals", brief.objectives)
-        + _statement_context("Scope", brief.scope)
+        _statement_context("Scope", brief.scope)
         + _statement_context(
             "Verification expectations",
             brief.verification_expectations,
+        )
+        + (
+            _statement_context("PR introduction", (brief.intent,))
+            if brief.objectives and brief.intent.authority == "pr_description"
+            else ""
         )
         + (
             _statement_context("PR claim context", brief.claims)
@@ -1286,6 +1305,10 @@ def render_html(brief: ReviewBrief) -> str:
     verification_accordion = _verification_accordion(brief)
     transformation_summary = _transformation_summary(brief)
     coverage_limits = _coverage_limits(brief)
+    brief_goals = _brief_goals(brief)
+    primary_context = brief_goals or (
+        f'<div class="intent">{escape(brief.intent.text)}</div>'
+    )
     review_context = _review_context(brief)
 
     return f"""<!doctype html>
@@ -1307,6 +1330,8 @@ def render_html(brief: ReviewBrief) -> str:
 .relation-member-arrow{{color:var(--muted);text-align:center}}
 .eyebrow{{display:block;margin-bottom:4px;color:var(--green);font-size:9px;font-weight:760;text-transform:uppercase;letter-spacing:.09em}}
 .section-intro{{margin:0 0 16px;color:var(--muted);font-size:10px}}
+.brief-goals{{max-width:900px;margin-top:18px}}.brief-goals-heading{{margin-bottom:4px}}.brief-goals .context-row{{grid-template-columns:48px minmax(0,1fr);padding:10px 0;border-top:1px solid rgba(111,128,135,.16);border-bottom:0}}.brief-goals .context-copy{{color:#d2dade;font-size:15px}}.brief-goals .context-source{{grid-column:2}}
+@media(max-width:600px){{.brief-goals .context-row{{grid-template-columns:1fr}}.brief-goals .context-source{{grid-column:1}}}}
 .brief-context{{display:grid;gap:6px;margin-top:14px}}.brief-context .context{{margin:0;padding:0;border:0}}.brief-context .context>summary{{padding:7px 0;border-top:1px solid rgba(111,128,135,.16)}}
 .architectural-chip{{cursor:pointer;outline:none}}
 .architectural-chip rect{{fill:rgba(48,83,110,.8);stroke:rgba(159,205,240,.65);stroke-width:.8}}
@@ -1346,7 +1371,7 @@ def render_html(brief: ReviewBrief) -> str:
 @media(max-width:800px){{.transformation-strip{{grid-template-columns:1fr}}.summary-arrow{{transform:rotate(90deg)}}.verification-detail{{grid-template-columns:1fr}}.verification-item>summary{{grid-template-columns:42px minmax(0,1fr)}}.verification-item>summary .status-pill{{grid-column:2}}}}
 </style></head><body><main class="shell">
 <div class="topbar"><span class="brand-mark"></span>PrismCode</div>
-<section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{brief.overview.changed_file_count} changed files</span><span>·</span><span>{escape(ci_copy)}</span><span>·</span><span>{escape(llm_shadow_copy)}</span></div><h1>{escape(packet.title)}</h1><div class="intent">{escape(brief.intent.text)}</div><span class="source-note">Source: {source_line}</span>{review_context}</section>
+<section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{brief.overview.changed_file_count} changed files</span><span>·</span><span>{escape(ci_copy)}</span><span>·</span><span>{escape(llm_shadow_copy)}</span></div><h1>{escape(packet.title)}</h1>{primary_context}<span class="source-note">Source: {source_line}</span>{review_context}</section>
 <section class="section structural-graph-section">{review_graph}</section>
 {transformation_summary}
 <section class="section verification-workspace"><h2>Verification</h2><p class="section-intro">Expand one R/G/T/CC subject to compare its authored claim, canonical observations, deterministic assessment, and structural coverage.</p>{verification_accordion}</section>

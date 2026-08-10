@@ -338,10 +338,48 @@ def test_pr_acceptance_criteria_are_provisional_without_linked_issue() -> None:
     assert "pr description" not in html
     assert 'data-verification-subject="R1"' in html
     assert "<h2>Verification</h2>" in html
-    assert "Goals · 1 statement" in html
-    assert html.index("Goals · 1 statement") < html.index("<h2>Verification</h2>")
+    assert '<h2 class="brief-goals-heading" id="brief-goals-heading">Goals</h2>' in html
+    assert "Goals · 1 statement" not in html
+    assert html.index("brief-goals-heading") < html.index("<h2>Verification</h2>")
     assert "Preserve deterministic review behavior." in html
+    assert "PR introduction · 1 statement" in html
     assert "Introduces a read-only provider boundary." in html
+
+
+def test_linked_issue_goals_replace_pr_introduction_in_brief_header() -> None:
+    packet = _packet(
+        pr_body="Closes #7\n",
+        issue_body=(
+            "## Goals\n"
+            "- Preserve every directly changed anchor.\n"
+            "- Keep repository-reachable context bounded.\n"
+        ),
+    )
+
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    html = render_html(brief)
+
+    assert html.count('id="brief-goals-heading"') == 1
+    assert "Preserve every directly changed anchor." in html
+    assert "Keep repository-reachable context bounded." in html
+    assert '<div class="intent">Closes #7</div>' not in html
+    assert "PR introduction · 1 statement" in html
+    assert html.index("Preserve every directly changed anchor.") < html.index(
+        "PR introduction · 1 statement"
+    )
+
+
+def test_pr_introduction_remains_primary_when_no_goal_exists() -> None:
+    packet = _packet(pr_body="Explain the bounded review change.\n")
+
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    html = render_html(brief)
+
+    assert (
+        '<div class="intent">Explain the bounded review change.</div>' in html
+    )
+    assert 'id="brief-goals-heading"' not in html
+    assert "PR introduction · 1 statement" not in html
 
 
 def test_guardrail_and_verification_aliases_preserve_source_authority() -> None:
