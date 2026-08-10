@@ -112,6 +112,9 @@ safety boundary.
 - [Evaluation](docs/evaluation.md) — offline suites, metrics, and gates
 - [Provenance](docs/provenance.md) — source and evidence identity
 - [Fixture schema](docs/fixture-schema.md) — offline input format
+- [Issue authoring](docs/issue-guidelines.md) and
+  [PR authoring](docs/pull-request-guidelines.md) — source contracts for
+  requirements and change claims
 - [Agent change protocol](docs/agent-change-protocol.md) — the repository's
   responsibility-closed coding method
 

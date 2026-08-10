@@ -51,6 +51,17 @@ It records missing links, patches, head SHAs, checks, statuses, and file-limit
 truncation as explicit diagnostics. Missing evidence is never converted into a
 passing conclusion.
 
+### Author review inputs
+
+Link the governing Issue through GitHub's Development relationship; typing an
+Issue number in PR prose does not create that authority. Prefer one reviewable
+obligation per item under `Requirements`, and keep goals, scope, guardrails, and
+verification expectations in their own sections. See the
+[Issue authoring guide](issue-guidelines.md) and
+[PR authoring guide](pull-request-guidelines.md). The complete heading-to-type
+and authority mapping is documented under
+[Architecture → Semantic authority](architecture.md#semantic-authority).
+
 ### Structural analysis
 
 For a structure-aware review, `--repo-root` identifies a local Git repository
