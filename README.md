@@ -37,17 +37,23 @@ stays fixed while the associated structure is highlighted.
 
 Live structure-aware reviews require Git and either the external
 [Codegraph](https://github.com/colbymchenry/codegraph) CLI or Node.js with
-`npx`. From a PrismCode source checkout:
+`npx`. Install PrismCode once from its source checkout:
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install .
-prismcode review --repo prismcode-ai/prismcode --pr 210 --output build/pr-210.html
 ```
 
-Open `build/pr-210.html` in a browser. PrismCode reads `GITHUB_TOKEN` when it is
-set, otherwise tries the authenticated `gh` CLI for the configured GitHub host;
+Then review a PR from any directory; no checkout of the target repository is
+required:
+
+```bash
+prismcode review --repo owner/repository --pr 123 --output report.html
+```
+
+Open `report.html` in a browser. PrismCode reads `GITHUB_TOKEN` when it is set,
+otherwise tries the authenticated `gh` CLI for the configured GitHub host;
 public repositories can also use GitHub's unauthenticated limits.
 
 ## Review a GitHub pull request
@@ -77,6 +83,24 @@ source, worktree, and index after success or failure. Credentials remain
 process-scoped and never enter the Git URL, command arguments, report, or
 persisted repository configuration. `--no-structural-graph` is Codegraph-free
 and fetches only the exact head required by deterministic repository scans.
+
+Private repositories use the same `GITHUB_TOKEN` or authenticated `gh`
+credentials; do not put a token in the command or repository URL. For GitHub
+Enterprise Server, name both the API endpoint and the host explicitly trusted
+to receive those credentials:
+
+```bash
+prismcode review \
+  --repo team/project \
+  --pr 123 \
+  --github-api-url https://github.company.com/api/v3 \
+  --trusted-github-api-host github.company.com \
+  --output report.html
+```
+
+The trust option must match the HTTPS API host. PrismCode refuses to send a
+token to any other custom host, which protects credentials from an accidental
+or malicious API URL.
 
 For a network-free smoke test instead:
 
@@ -138,16 +162,18 @@ safety boundary.
 
 ## Security
 
-PrismCode runs locally: repository checkout, temporary base/head worktrees,
+PrismCode runs locally: temporary source fetches and base/head worktrees,
 Codegraph indexes, deterministic analysis, and final HTML stay on the machine
 or CI runner where the command executes. A live review calls the configured
-GitHub API to collect PR, linked-Issue, and check data; the optional LLM shadow
-path is the only mode that sends bounded review content to a model provider.
+GitHub API and Git host to collect PR metadata and the exact reviewed source;
+the optional LLM shadow path is the only mode that sends bounded review content
+to a model provider.
 
-Tokens are read from environment variables and are not stored in review
-metadata or generated HTML. Generated reports create hyperlinks only for
-absolute HTTP and HTTPS URLs. A token is never sent to a custom GitHub API host
-unless that host is explicitly trusted.
+Tokens are read from environment variables or the authenticated `gh` CLI and
+are not stored in Git URLs, persisted Git configuration, review metadata, or
+generated HTML. Generated reports create hyperlinks only for absolute HTTP and
+HTTPS URLs. Official GitHub is trusted by default; a custom GitHub API host
+must be named explicitly before PrismCode will send it a token.
 
 ## Build the next layer with us
 
