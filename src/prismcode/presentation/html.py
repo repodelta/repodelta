@@ -178,7 +178,7 @@ def _review_graph(
     if not graph.nodes:
         return (
             '<div class="review-structural-graph">'
-            '<p class="delta-empty">No projected structural graph is available.</p>'
+            '<p class="delta-empty">No canonical PR structural facts are available.</p>'
             "</div>"
         )
     evidence = brief.evidence_catalog.by_id()
@@ -452,7 +452,7 @@ def _review_graph(
             f"{escape(label)}</text>"
             f"<title>{escape(source.summary)} → {escape(target.summary)} · "
             f'{len(group.member_edge_ids)} canonical edges · '
-            f'{len(group.path_relation_ids)} support refs</title></g>'
+            f'{len(group.path_evidence_ids)} support refs</title></g>'
         )
 
     navigation_targets = {
@@ -638,7 +638,7 @@ def _review_graph(
         f'{len(placements)} structural placements · '
         f'{len(backbone_ownership_edges)} ownership deltas · '
         f'{len(isolated_rows)} isolated changed anchors · '
-        f'{len(graph.path_relation_ids)} support refs</div></div>'
+        f'{len(graph.path_evidence_ids)} support refs</div></div>'
         f'{controls}</div><p class="delta-focus-empty" hidden></p>{canvas}'
         f'<div class="relation-group-inspector">{"".join(relation_group_details)}</div>'
         f'{isolated}'

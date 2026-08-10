@@ -474,8 +474,13 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
     assert [item.role for item in overlay.nodes] == ["changed_anchor"]
     assert overlay.path_relation_ids == ()
     assert graph.edges == ()
-    assert graph.nodes[0].review_symbol_id == "E:review_symbol:739129a16c60a7fa48f8"
-    assert graph.nodes[0].evidence_ids == (
+    assert len(graph.nodes) == 3
+    anchor_node = next(
+        item
+        for item in graph.nodes
+        if item.review_symbol_id == "E:review_symbol:739129a16c60a7fa48f8"
+    )
+    assert anchor_node.evidence_ids == (
         "E:structural_change:e3a262c5dc2f418b1bf4",
         "E:symbol:9e703e599343229d97c1",
     )
@@ -488,7 +493,7 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
     assert 'data-focus-target="all">All</button>' in html
     assert '.verification-item[open][data-verification-subject]' not in html
     assert (
-            "1 backbone nodes · 0 support nodes · "
+            "1 backbone nodes · 2 support nodes · "
             "0 backbone relation groups · 0 canonical executable edges · "
             "0 structural placements · "
             "0 ownership deltas · "
@@ -501,6 +506,28 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
     assert '<span class="block-title">Structural paths</span>' not in html
     assert "No associated canonical evidence." not in html
     assert '<span class="block-title">Structural overlay</span>' not in html
+
+
+def test_review_graph_membership_is_independent_of_authored_focus() -> None:
+    suite = load_evaluation_suite(SUITE)
+    case = next(item for item in suite.cases if item.id == "bounded-y-x-z")
+    focused_input = replace(
+        load_fixture(case.fixture),
+        structural_graph=case.structural_graph,
+    )
+
+    focused = DeterministicAnalyzer().analyze(focused_input)
+    unfocused = DeterministicAnalyzer().analyze(
+        replace(focused_input, requirements=())
+    )
+
+    assert focused.projection.slices
+    assert unfocused.projection.slices == ()
+    assert focused.projection.review_graph == unfocused.projection.review_graph
+    assert unfocused.projection.review_graph.backbone_node_ids
+    assert "No canonical PR structural facts are available." not in render_html(
+        unfocused
+    )
 
 
 def test_identical_focus_graphs_share_one_review_graph() -> None:
@@ -521,12 +548,17 @@ def test_identical_focus_graphs_share_one_review_graph() -> None:
 
     graph = brief.projection.review_graph
     first, second = brief.projection.slices
-    assert len(graph.nodes) == 1
+    assert len(graph.nodes) == 3
     assert len(graph.edges) == 0
-    assert tuple(item.node_id for item in first.change_map.structural_overlay.nodes) == tuple(
+    assert tuple(
+        item.node_id for item in first.change_map.structural_overlay.nodes
+    ) == tuple(
         item.node_id for item in second.change_map.structural_overlay.nodes
     )
-    assert first.change_map.structural_overlay.edge_ids == second.change_map.structural_overlay.edge_ids
+    assert (
+        first.change_map.structural_overlay.edge_ids
+        == second.change_map.structural_overlay.edge_ids
+    )
     assert first.change_map.structural_overlay.path_relation_ids == ()
     assert second.change_map.structural_overlay.path_relation_ids == ()
     html = render_html(brief)
@@ -1097,28 +1129,30 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
         "anchor",
         "runtime",
         "test",
+        "detour",
         "anchor_2",
         "test_anchor_one",
         "test_anchor_two",
         "runtime_2",
+        "peripheral",
     }
-    assert len(graph.edges) == 4
+    assert len(graph.edges) == 5
     assert tuple(item.operation for item in graph.edges) == (
         "retained",
         "removed",
         "added",
         "added",
+        "retained",
     )
-    assert graph.edges[0].path_relation_ids == ("P-runtime", "R2-P-runtime")
+    assert graph.edges[0].path_evidence_ids == ("E:path:runtime",)
     assert overlay.edge_ids == second_overlay.edge_ids
     direct_edge = next(
         item
         for item in graph.edges
         if item.relation_change_evidence_id == "E:relation:anchor-anchor2"
     )
-    assert direct_edge.path_relation_ids == (
-        "P-anchor-link",
-        "R2-P-anchor-link",
+    assert direct_edge.path_evidence_ids == (
+        "E:path:anchor-link",
     )
     assert tuple(item.node_id for item in overlay.nodes) == tuple(
         item.node_id for item in second_overlay.nodes
@@ -1150,10 +1184,10 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
     assert html.count('class="delta-canvas"') == 1
     assert graph.backbone_node_ids == (
         _structural_node_id("anchor"),
+        _structural_node_id("runtime"),
         _structural_node_id("anchor_2"),
         _structural_node_id("test_anchor_one"),
         _structural_node_id("test_anchor_two"),
-        _structural_node_id("runtime"),
         _structural_node_id("runtime_2"),
     )
     assert graph.backbone_edge_ids == (
@@ -1471,47 +1505,33 @@ def test_change_backbone_keeps_one_hop_retained_support_from_direct_seed() -> No
 
 
 def test_canonical_backbone_seeds_include_all_direct_changed_anchors() -> None:
-    review_slice = ReviewSlice(
-        change_map=CanonicalChangeMapEntry(
-            focus_statement_id="R1",
-            structural_overlay=StructuralFocusOverlay(
-                nodes=(
-                    StructuralFocusNode(
-                        node_id="N:rg-primary",
-                        role="changed_anchor",
-                    ),
-                    StructuralFocusNode(
-                        node_id="N:rg-test",
-                        role="changed_anchor",
-                    ),
-                    StructuralFocusNode(
-                        node_id="N:rg-primary-context",
-                        role="intermediate",
-                    ),
-                )
-            ),
-        )
-    )
-    transformation_group = TransformationStructuralTopologyGroup(
-        claim_id="T1",
-        structural_overlay=StructuralFocusOverlay(
-            nodes=(
-                StructuralFocusNode(
-                    node_id="N:transformation-anchor",
-                    role="changed_anchor",
-                ),
-                StructuralFocusNode(
-                    node_id="N:transformation-context",
-                    role="intermediate",
+    evidence = {
+        item.id: item
+        for item in (
+            EvidenceItem(
+                id=f"E:{name}",
+                summary=name,
+                kind="structural_change",
+                classification="code",
+                revision_side="review",
+                operation="modified",
+                role="changed_anchor",
+                changed=True,
+                structural_change=StructuralChangeIdentity(
+                    review_symbol_id=name,
+                    head_symbol_evidence_id=f"S:{name}",
                 ),
             )
-        ),
-    )
+            for name in ("production", "test", "transformation")
+        )
+    }
 
     assert _canonical_backbone_seed_node_ids(
-        slices=(review_slice,),
-        transformation_topology_groups=(transformation_group,),
-    ) == ("N:rg-primary", "N:rg-test", "N:transformation-anchor")
+        evidence=evidence,
+    ) == tuple(
+        _structural_node_id(name)
+        for name in ("production", "test", "transformation")
+    )
 
 
 def test_support_node_delta_requires_exact_base_and_head_facts() -> None:
@@ -2415,8 +2435,11 @@ def test_graph_and_no_graph_use_the_same_projection_contract() -> None:
         without_graph.projection.slices[0].standalone_changed_fact_relation_ids
     )
     assert with_graph.projection.review_graph.nodes
-    assert without_graph.projection.review_graph.path_relation_ids == ()
-    assert with_graph.projection.review_graph.path_relation_ids == ()
+    assert without_graph.projection.review_graph.path_evidence_ids == ()
+    assert with_graph.projection.review_graph.path_evidence_ids == (
+        "E:structural_path:01124120c3c65a9b12f3",
+        "E:structural_path:25dab9624b35bb9d49bd",
+    )
     assert without_graph.projection.slices[0].change_map.structural_overlay.nodes == ()
     assert with_graph.projection.slices[0].change_map.structural_overlay.nodes
 
