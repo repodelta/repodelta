@@ -19,7 +19,7 @@ PrismCode does not write the change or approve it. It connects the PR's authored
 requirements and transformation claims to the code, structural relationships,
 and current-head checks a reviewer can actually inspect.
 
-![PrismCode report overview](docs/assets/prismcode-report-overview.jpg)
+![PrismCode Brief with an Issue-backed goal](docs/assets/prismcode-report-overview.jpg)
 
 The report is a standalone HTML file. A reviewer can:
 
@@ -32,7 +32,11 @@ The report is a standalone HTML file. A reviewer can:
 - distinguish supporting evidence from contradiction, missing evidence, and
   incomplete collection instead of treating relevance as proof.
 
-![Expanded verification detail](docs/assets/prismcode-verification-detail.jpg)
+The graph below alternates between the default **All** view and the result of
+expanding **R4**. The graph membership stays fixed while the matching region is
+highlighted and unrelated structure is muted.
+
+![Structural graph changing from All to an R4-focused view](docs/assets/prismcode-structural-graph.webp)
 
 ## Quick start
 
