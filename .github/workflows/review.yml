@@ -29,8 +29,8 @@ jobs:
       REVIEW_PR: ${{ inputs.pull_request || github.event.pull_request.number }}
       GITHUB_TOKEN: ${{ secrets.REPODELTA_GITHUB_TOKEN || github.token }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - run: pip install .
@@ -38,7 +38,7 @@ jobs:
         run: repodelta review --repo "$REVIEW_REPOSITORY" --pr "$REVIEW_PR" --output "build/pr-$REVIEW_PR.html"
       - name: Upload review report
         id: report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: repodelta-review-${{ env.REVIEW_PR }}
           path: build/pr-${{ env.REVIEW_PR }}.html
