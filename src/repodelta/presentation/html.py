@@ -336,6 +336,14 @@ def _review_graph(
             f"<title>{escape(parent_node.review_symbol_id)} ownership container</title>"
             "</rect>"
         )
+        header_chip = (
+            _architectural_chip(
+                architectural_components[parent_node.id],
+                container.width - 24,
+            )
+            if kind == "file"
+            else ""
+        )
         header = (
             f'<g class="structural-container-header {kind_class} '
             f'operation-{escape(parent_node.delta)}" '
@@ -348,7 +356,9 @@ def _review_graph(
             f'{escape(kind)} · {escape(parent_node.delta)}</text>'
             f'<text class="delta-node-name" x="11" y="32">'
             f'{escape(name_label or path_label)}</text>'
-            f'{_architectural_chip(architectural_components[parent_node.id], container.width - 24)}'
+            f'<line class="structural-container-divider" x1="10" y1="41" '
+            f'x2="{container.width - 34}" y2="41"/>'
+            f'{header_chip}'
             f"<title>{escape(full_name)}</title></g>"
         )
         href = _structural_node_href(
@@ -527,6 +537,11 @@ def _review_graph(
             for focus_id, role in node_focus.get(node.id, ())
             if role == "intermediate"
         )
+        node_chip = (
+            _architectural_chip(architectural_components[node.id], 210)
+            if node.id not in placed_child_node_ids
+            else ""
+        )
         content = (
             f'<g class="delta-node {kind_class} operation-{escape(node.delta)}'
             + (
@@ -548,7 +563,7 @@ def _review_graph(
             f'<text class="delta-node-path" x="12" y="57">'
             f'{escape("" if node.id in placed_child_node_ids else path_label)}'
             "</text>"
-            f'{_architectural_chip(architectural_components[node.id], 210)}'
+            f'{node_chip}'
             f"<title>{escape(full_name)}</title></g>"
         )
         href = _structural_node_href(node, graph.navigation_targets)
@@ -1363,10 +1378,15 @@ def render_html(brief: ReviewBrief) -> str:
 .delta-node.operation-removed .delta-node-marker{{stroke:var(--red)}}
 .delta-node.operation-renamed .delta-node-marker{{stroke:var(--blue)}}
 .delta-node.operation-retained .delta-node-marker,.delta-node.operation-unresolved .delta-node-marker{{stroke:var(--faint)}}
-.delta-node.kind-function rect,.delta-node.kind-method rect,.delta-node.kind-variable rect,.delta-node.kind-import rect{{fill:transparent;stroke:none}}
+.delta-node.kind-function rect,.delta-node.kind-method rect,.delta-node.kind-variable rect,.delta-node.kind-import rect,.delta-node.kind-class rect{{fill:transparent;stroke:none}}
 .delta-node.kind-function .delta-node-name,.delta-node.kind-method .delta-node-name{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px}}
-.structural-container.kind-class{{fill:rgba(8,12,15,.12);stroke:rgba(111,128,135,.28)}}
-.structural-container-header.kind-class rect{{fill:transparent;stroke:rgba(111,128,135,.26)}}
+.structural-container.kind-file,.structural-container.kind-class{{fill:transparent;stroke:none}}
+.structural-container-header.kind-file rect,.structural-container-header.kind-class rect{{fill:transparent;stroke:none}}
+.structural-container-divider{{stroke:rgba(111,128,135,.28);stroke-width:1}}
+.structural-container-header.operation-added .structural-container-divider{{stroke:rgba(123,227,172,.55)}}
+.structural-container-header.operation-modified .structural-container-divider{{stroke:rgba(231,202,124,.55)}}
+.structural-container-header.operation-removed .structural-container-divider{{stroke:rgba(239,143,145,.55);stroke-dasharray:5 4}}
+.structural-container-header.kind-class .delta-node-kind{{fill:var(--faint)}}
 .relationship-inspector,.isolated-anchors{{margin-top:12px;border-top:1px solid rgba(111,128,135,.18);padding-top:10px}}
 .relationship-inspector>summary,.isolated-anchors>summary{{cursor:pointer;color:var(--muted);font-size:10px}}
 .standalone-explanation{{margin:8px 0 0;color:var(--faint);font-size:9px}}
@@ -1388,10 +1408,10 @@ def render_html(brief: ReviewBrief) -> str:
 @media(max-width:600px){{.brief-goals .context-row{{grid-template-columns:1fr}}.brief-goals .context-source{{grid-column:1}}}}
 .brief-context{{display:grid;gap:6px;margin-top:14px}}.brief-context .context{{margin:0;padding:0;border:0}}.brief-context .context>summary{{padding:7px 0;border-top:1px solid rgba(111,128,135,.16)}}
 .architectural-chip{{cursor:pointer;outline:none}}
-.architectural-chip rect{{fill:rgba(48,83,110,.8);stroke:rgba(159,205,240,.65);stroke-width:.8}}
+.architectural-chip rect{{fill:transparent;stroke:none}}
 .architectural-chip text{{fill:#c9e8ff;font-size:7px;font-weight:760;text-anchor:middle;text-transform:uppercase}}
-.architectural-chip:hover rect,.architectural-chip:focus rect,.architectural-chip.member-active rect{{stroke:var(--green);fill:rgba(54,118,87,.55)}}
-.architectural-chip.layer-unclassified rect{{stroke-dasharray:3 2;fill:rgba(111,128,135,.24)}}
+.architectural-chip:hover text,.architectural-chip:focus text,.architectural-chip.member-active text{{fill:var(--green)}}
+.architectural-chip.layer-unclassified rect{{fill:transparent;stroke:none}}
 .architectural-chip-html{{grid-column:1/-1;justify-self:start;border:1px solid rgba(159,205,240,.45);border-radius:999px;padding:2px 7px;background:rgba(48,83,110,.32);color:#c9e8ff;font:760 8px inherit;text-transform:uppercase;cursor:pointer}}
 .architectural-chip-html.layer-unclassified{{border-style:dashed;color:var(--muted)}}
 .member-muted{{opacity:.13}}.member-context{{opacity:.65}}.member-active{{opacity:1;filter:drop-shadow(0 0 5px rgba(123,227,172,.35))}}
