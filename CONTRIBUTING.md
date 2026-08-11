@@ -5,6 +5,10 @@ problem, suggest a capability, improve the implementation or documentation,
 add an integration or evaluation case, or propose a different approach to the
 project's coding workflow.
 
+Issues express product direction and must remain accountable to people. An
+agent may help research or draft an Issue, but the proposer or assignee is an
+identifiable person who owns its intent, requirements, and follow-through.
+
 Before opening an Issue, follow the repository's
 [Issue authoring guide](docs/issue-guidelines.md). Before submitting code,
 follow the [agent change protocol](docs/agent-change-protocol.md) when it
@@ -26,14 +30,19 @@ Opening an Issue or pull request does not grant write or merge access. These
 rules apply equally to changes proposed by maintainers: an author cannot
 approve their own pull request.
 
-## Agent-authored changes
+## Execution and accountability
 
-Submission identity and acceptance identity are separate responsibilities.
-Agent-authored pull requests should be opened by RepoDelta's dedicated bot or
-GitHub App, not through the personal credentials of the maintainer directing
-the work. Any designated maintainer may then review and approve the pull
-request, including the maintainer who directed that agent execution.
+RepoDelta governs the resulting change, not how it was produced locally. A
+pull request may be prepared or assigned to a person, an agent, or both, and an
+agent may submit through a person's account. The repository does not treat the
+PR account as proof of who performed the implementation.
 
-When an agent instead submits through a maintainer's personal account, GitHub
-treats that maintainer as the pull-request author. The author cannot approve
-their own pull request, so another designated maintainer must review it.
+Human accountability remains at both sides of that execution. An identifiable
+person owns the Issue's direction and requirements, and an identifiable human
+maintainer owns the decision to accept the resulting change. Agents may assist
+either process, but they do not replace the accountable Issue owner or provide
+the approving review.
+
+GitHub does not allow a pull-request author to approve their own pull request.
+When an agent submits through a maintainer's personal account, another
+designated maintainer must therefore provide the approval.
