@@ -44,9 +44,19 @@ def build_parser() -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
     submit = subparsers.add_parser("submit", help="Push HEAD and create a pull request")
-    submit.add_argument("--app-id")
-    submit.add_argument("--installation-id")
-    submit.add_argument("--private-key", type=Path)
+    submit.add_argument(
+        "--app-id",
+        help="GitHub App ID; or set REPODELTA_BOT_APP_ID",
+    )
+    submit.add_argument(
+        "--installation-id",
+        help="GitHub App installation ID; or set REPODELTA_BOT_INSTALLATION_ID",
+    )
+    submit.add_argument(
+        "--private-key",
+        type=Path,
+        help="owner-only App private key; or set REPODELTA_BOT_PRIVATE_KEY",
+    )
     submit.add_argument("--repo", required=True, help="GitHub repository in owner/name form")
     submit.add_argument("--repo-root", type=Path, default=Path.cwd())
     submit.add_argument("--head", help="Remote head branch; defaults to the current branch")
