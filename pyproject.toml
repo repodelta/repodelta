@@ -21,7 +21,6 @@ dev = ["pytest>=8.0"]
 
 [project.scripts]
 repodelta = "repodelta.cli:main"
-repodelta-bot = "repodelta.bot_cli:main"
 
 [tool.setuptools.package-dir]
 "" = "src"

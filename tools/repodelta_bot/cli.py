@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 from typing import Sequence
 
-from repodelta.app_submit import SubmissionConfig, SubmissionError, submit_change
+from repodelta_bot.submit import SubmissionConfig, SubmissionError, submit_change
 
 
 def _configured_value(value: str | None, environment_name: str) -> str:

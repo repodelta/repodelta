@@ -5,13 +5,16 @@ import json
 import os
 import re
 import subprocess
+import sys
 from pathlib import Path
 from types import SimpleNamespace
 from urllib.error import HTTPError
 
 import pytest
 
-from repodelta.app_submit import (
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
+
+from repodelta_bot.submit import (  # noqa: E402
     SubmissionConfig,
     SubmissionError,
     create_app_jwt,

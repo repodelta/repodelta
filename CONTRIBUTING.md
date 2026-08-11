@@ -36,10 +36,10 @@ Maintainers can submit an agent-prepared branch through the repository's
 GitHub App, then review it under their own human identity:
 
 ```bash
-repodelta-bot submit --repo repodelta/repodelta --title "..." \
+./tools/repodelta-bot submit --repo repodelta/repodelta --title "..." \
   --body-file pr.md --reviewer HUMAN_GITHUB_LOGIN
 ```
 
 An App manager supplies their owner-only private key and App identifiers as
-described by `repodelta-bot submit --help`. The bot only pushes and opens the
-PR; a human maintainer still approves it.
+described by `./tools/repodelta-bot submit --help`. The bot only pushes and
+opens the PR; a human maintainer still approves it.
