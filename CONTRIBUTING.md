@@ -29,3 +29,5 @@ Opening an Issue or pull request does not grant write or merge access.
 RepoDelta evaluates the resulting change, not how it was produced locally.
 GitHub does not allow pull-request authors to approve their own PRs, so a PR
 submitted through a maintainer's account needs another maintainer's approval.
+Maintainers who want a separate submission identity can use the optional
+[GitHub App submission workflow](docs/github-app-submission.md).
