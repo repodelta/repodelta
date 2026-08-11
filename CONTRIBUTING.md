@@ -1,0 +1,31 @@
+# Contributing to RepoDelta
+
+RepoDelta welcomes Issues and pull requests from everyone. Bring a problem,
+an idea, a useful feature, an integration, an evaluation case, or a different
+approach to the project's coding workflow.
+
+**People own intent and acceptance; people and agents are free to implement the
+change in whatever way works.** An identifiable person owns each Issue's
+direction and requirements. A pull request may be prepared or assigned to a
+person, an agent, or both. Before it enters `main`, an identifiable human
+maintainer reviews and approves the result.
+
+Before contributing, see the guides for
+[Issues](docs/issue-guidelines.md),
+[agent changes](docs/agent-change-protocol.md),
+[commits](docs/commit-message-guidelines.md), and
+[pull requests](docs/pull-request-guidelines.md).
+
+## Merge requirements
+
+Every pull request must:
+
+- receive an approving review from a designated maintainer;
+- pass the required CI and RepoDelta review checks;
+- resolve review conversations; and
+- receive a new approval after later commits make an earlier review stale.
+
+Opening an Issue or pull request does not grant write or merge access.
+RepoDelta evaluates the resulting change, not how it was produced locally.
+GitHub does not allow pull-request authors to approve their own PRs, so a PR
+submitted through a maintainer's account needs another maintainer's approval.
