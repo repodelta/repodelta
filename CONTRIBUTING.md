@@ -25,3 +25,15 @@ into `main`. Every pull request must:
 Opening an Issue or pull request does not grant write or merge access. These
 rules apply equally to changes proposed by maintainers: an author cannot
 approve their own pull request.
+
+## Agent-authored changes
+
+Submission identity and acceptance identity are separate responsibilities.
+Agent-authored pull requests should be opened by RepoDelta's dedicated bot or
+GitHub App, not through the personal credentials of the maintainer directing
+the work. Any designated maintainer may then review and approve the pull
+request, including the maintainer who directed that agent execution.
+
+When an agent instead submits through a maintainer's personal account, GitHub
+treats that maintainer as the pull-request author. The author cannot approve
+their own pull request, so another designated maintainer must review it.
