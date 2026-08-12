@@ -18,6 +18,7 @@ from typing import Callable, Iterator, Sequence
 
 GITHUB_API_URL = "https://api.github.com"
 REPOSITORY_PATTERN = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+")
+GIT_OBJECT_PATTERN = re.compile(r"[0-9a-f]{40}")
 
 
 class SubmissionError(RuntimeError):
@@ -37,6 +38,25 @@ class SubmissionConfig:
     reviewers: tuple[str, ...] = ()
     draft: bool = False
     repo_root: Path = Path(".")
+    expected_remote_head: str | None = None
+
+
+@dataclass(frozen=True)
+class PushConfig:
+    app_id: str
+    installation_id: str
+    private_key: Path
+    repo: str
+    head: str
+    repo_root: Path = Path(".")
+    expected_remote_head: str | None = None
+
+
+@dataclass(frozen=True)
+class PushedHead:
+    local_head: str
+    previous_remote_head: str | None
+    remote_head: str
 
 
 @dataclass(frozen=True)
@@ -65,6 +85,13 @@ def _validate_repo(value: str) -> str:
     if not REPOSITORY_PATTERN.fullmatch(value) or value.endswith(".git"):
         raise SubmissionError("repository must use GitHub owner/name form")
     return value
+
+
+def _validate_git_object(value: str, label: str) -> str:
+    normalized = value.strip().lower()
+    if not GIT_OBJECT_PATTERN.fullmatch(normalized):
+        raise SubmissionError(f"{label} must be a full 40-character Git object ID")
+    return normalized
 
 
 def validate_private_key(path: Path) -> Path:
@@ -191,28 +218,118 @@ def temporary_git_credentials(token: str) -> Iterator[dict[str, str]]:
         }
 
 
+def _local_head(
+    repo_root: Path,
+    *,
+    run: Run,
+) -> str:
+    try:
+        completed = run(
+            ["git", "rev-parse", "--verify", "HEAD"],
+            cwd=repo_root,
+            check=True,
+            capture_output=True,
+        )
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise SubmissionError("Unable to resolve the local Git HEAD") from exc
+    try:
+        value = completed.stdout.decode().strip()
+    except (AttributeError, UnicodeDecodeError) as exc:
+        raise SubmissionError("Git returned an invalid local HEAD") from exc
+    return _validate_git_object(value, "local HEAD")
+
+
+def _remote_head(
+    remote: str,
+    head: str,
+    *,
+    repo_root: Path,
+    environment: dict[str, str],
+    run: Run,
+) -> str | None:
+    try:
+        completed = run(
+            [
+                "git",
+                "-c",
+                "credential.helper=",
+                "ls-remote",
+                "--exit-code",
+                remote,
+                f"refs/heads/{head}",
+            ],
+            cwd=repo_root,
+            env=environment,
+            check=False,
+            capture_output=True,
+        )
+    except OSError as exc:
+        raise SubmissionError("Unable to resolve the remote Git head") from exc
+    if completed.returncode == 2 and not completed.stdout.strip():
+        return None
+    if completed.returncode != 0:
+        raise SubmissionError("Unable to resolve the remote Git head")
+    try:
+        fields = completed.stdout.decode().strip().split()
+    except (AttributeError, UnicodeDecodeError) as exc:
+        raise SubmissionError("Git returned an invalid remote head") from exc
+    if len(fields) != 2 or fields[1] != f"refs/heads/{head}":
+        raise SubmissionError("Git returned an invalid remote head")
+    return _validate_git_object(fields[0], "remote head")
+
+
 def push_head(
-    config: SubmissionConfig,
+    config: SubmissionConfig | PushConfig,
     token: str,
     *,
     run: Run = subprocess.run,
-) -> None:
+) -> PushedHead:
     repo = _validate_repo(config.repo)
     remote = f"https://x-access-token@github.com/{repo}.git"
+    local_head = _local_head(config.repo_root, run=run)
+    expected_remote_head = (
+        _validate_git_object(config.expected_remote_head, "expected remote head")
+        if config.expected_remote_head is not None
+        else None
+    )
     with temporary_git_credentials(token) as credential_env:
         environment = os.environ.copy()
         environment.update(credential_env)
+        previous_remote_head = _remote_head(
+            remote,
+            config.head,
+            repo_root=config.repo_root,
+            environment=environment,
+            run=run,
+        )
+        if (
+            expected_remote_head is not None
+            and previous_remote_head != expected_remote_head
+        ):
+            raise SubmissionError(
+                "Remote head changed after it was selected for App submission"
+            )
+        if previous_remote_head == local_head:
+            raise SubmissionError(
+                "Remote branch already equals local HEAD; no GitHub App push "
+                "would occur"
+            )
+        command = ["git", "-c", "credential.helper=", "push"]
+        if expected_remote_head is not None:
+            command.append(
+                f"--force-with-lease=refs/heads/{config.head}:"
+                f"{expected_remote_head}"
+            )
+        command.extend(
+            [
+                "--",
+                remote,
+                f"HEAD:refs/heads/{config.head}",
+            ]
+        )
         try:
             run(
-                [
-                    "git",
-                    "-c",
-                    "credential.helper=",
-                    "push",
-                    "--",
-                    remote,
-                    f"HEAD:refs/heads/{config.head}",
-                ],
+                command,
                 cwd=config.repo_root,
                 env=environment,
                 check=True,
@@ -220,6 +337,22 @@ def push_head(
             )
         except (OSError, subprocess.CalledProcessError) as exc:
             raise SubmissionError("Git push through the GitHub App failed") from exc
+        remote_head = _remote_head(
+            remote,
+            config.head,
+            repo_root=config.repo_root,
+            environment=environment,
+            run=run,
+        )
+        if remote_head != local_head:
+            raise SubmissionError(
+                "GitHub App push did not establish the selected local HEAD"
+            )
+    return PushedHead(
+        local_head=local_head,
+        previous_remote_head=previous_remote_head,
+        remote_head=remote_head,
+    )
 
 
 def create_pull_request(
@@ -287,3 +420,24 @@ def submit_change(
     )
     push_head(config, token, run=run)
     return create_pull_request(config, token, open_url=open_url)
+
+
+def submit_head(
+    config: PushConfig,
+    *,
+    run: Run = subprocess.run,
+    open_url: Open = urllib.request.urlopen,
+    now: int | None = None,
+) -> PushedHead:
+    app_jwt = create_app_jwt(
+        config.app_id,
+        config.private_key,
+        now=now,
+        run=run,
+    )
+    token = request_installation_token(
+        config.installation_id,
+        app_jwt,
+        open_url=open_url,
+    )
+    return push_head(config, token, run=run)

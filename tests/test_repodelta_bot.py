@@ -26,6 +26,10 @@ from repodelta_bot.submit import (  # noqa: E402
 )
 
 
+LOCAL_HEAD = "a" * 40
+REMOTE_HEAD = "b" * 40
+
+
 class JsonResponse:
     def __init__(self, value: dict[str, object]) -> None:
         self.value = value
@@ -145,9 +149,20 @@ def test_temporary_git_credentials_are_removed_after_failure() -> None:
 def test_git_push_keeps_token_out_of_arguments_and_environment(
     tmp_path: Path,
 ) -> None:
-    observed: dict[str, object] = {}
+    observed: dict[str, object] = {"remote_reads": 0}
 
     def fake_run(command: list[str], **kwargs: object) -> subprocess.CompletedProcess[bytes]:
+        if command == ["git", "rev-parse", "--verify", "HEAD"]:
+            return subprocess.CompletedProcess(command, 0, f"{LOCAL_HEAD}\n".encode(), b"")
+        if "ls-remote" in command:
+            observed["remote_reads"] = int(observed["remote_reads"]) + 1
+            head = REMOTE_HEAD if observed["remote_reads"] == 1 else LOCAL_HEAD
+            return subprocess.CompletedProcess(
+                command,
+                0,
+                f"{head}\trefs/heads/codex/example\n".encode(),
+                b"",
+            )
         observed["command"] = command
         observed["environment"] = kwargs["env"]
         askpass = Path(kwargs["env"]["GIT_ASKPASS"])
@@ -166,6 +181,115 @@ def test_git_push_keeps_token_out_of_arguments_and_environment(
         "https://x-access-token@github.com/repodelta/repodelta.git",
         "HEAD:refs/heads/codex/example",
     ]
+    assert observed["remote_reads"] == 2
+
+
+def test_same_remote_head_fails_before_claiming_an_app_push(
+    tmp_path: Path,
+) -> None:
+    observed_commands: list[list[str]] = []
+
+    def fake_run(
+        command: list[str], **kwargs: object
+    ) -> subprocess.CompletedProcess[bytes]:
+        observed_commands.append(command)
+        if command == ["git", "rev-parse", "--verify", "HEAD"]:
+            output = f"{LOCAL_HEAD}\n".encode()
+        else:
+            output = f"{LOCAL_HEAD}\trefs/heads/codex/example\n".encode()
+        return subprocess.CompletedProcess(command, 0, output, b"")
+
+    with pytest.raises(SubmissionError, match="no GitHub App push"):
+        push_head(_config(tmp_path), "short-token", run=fake_run)
+
+    assert not any(command[3:4] == ["push"] for command in observed_commands)
+
+
+def test_leased_handoff_requires_and_pushes_from_the_observed_remote_head(
+    tmp_path: Path,
+) -> None:
+    observed: dict[str, object] = {"remote_reads": 0}
+
+    def fake_run(
+        command: list[str], **kwargs: object
+    ) -> subprocess.CompletedProcess[bytes]:
+        if command == ["git", "rev-parse", "--verify", "HEAD"]:
+            return subprocess.CompletedProcess(
+                command, 0, f"{LOCAL_HEAD}\n".encode(), b""
+            )
+        if "ls-remote" in command:
+            observed["remote_reads"] = int(observed["remote_reads"]) + 1
+            head = REMOTE_HEAD if observed["remote_reads"] == 1 else LOCAL_HEAD
+            return subprocess.CompletedProcess(
+                command,
+                0,
+                f"{head}\trefs/heads/codex/example\n".encode(),
+                b"",
+            )
+        observed["push"] = command
+        return subprocess.CompletedProcess(command, 0, b"", b"")
+
+    receipt = push_head(
+        _config(tmp_path, expected_remote_head=REMOTE_HEAD),
+        "short-token",
+        run=fake_run,
+    )
+
+    assert receipt.previous_remote_head == REMOTE_HEAD
+    assert receipt.remote_head == LOCAL_HEAD
+    assert observed["push"] == [
+        "git",
+        "-c",
+        "credential.helper=",
+        "push",
+        f"--force-with-lease=refs/heads/codex/example:{REMOTE_HEAD}",
+        "--",
+        "https://x-access-token@github.com/repodelta/repodelta.git",
+        "HEAD:refs/heads/codex/example",
+    ]
+
+
+def test_leased_handoff_rejects_a_remote_head_change(tmp_path: Path) -> None:
+    def fake_run(
+        command: list[str], **kwargs: object
+    ) -> subprocess.CompletedProcess[bytes]:
+        if command == ["git", "rev-parse", "--verify", "HEAD"]:
+            output = f"{LOCAL_HEAD}\n".encode()
+        else:
+            output = f"{'c' * 40}\trefs/heads/codex/example\n".encode()
+        return subprocess.CompletedProcess(command, 0, output, b"")
+
+    with pytest.raises(SubmissionError, match="changed after it was selected"):
+        push_head(
+            _config(tmp_path, expected_remote_head=REMOTE_HEAD),
+            "short-token",
+            run=fake_run,
+        )
+
+
+def test_post_push_remote_head_must_match_local_head(tmp_path: Path) -> None:
+    remote_reads = 0
+
+    def fake_run(
+        command: list[str], **kwargs: object
+    ) -> subprocess.CompletedProcess[bytes]:
+        nonlocal remote_reads
+        if command == ["git", "rev-parse", "--verify", "HEAD"]:
+            return subprocess.CompletedProcess(
+                command, 0, f"{LOCAL_HEAD}\n".encode(), b""
+            )
+        if "ls-remote" in command:
+            remote_reads += 1
+            return subprocess.CompletedProcess(
+                command,
+                0,
+                f"{REMOTE_HEAD}\trefs/heads/codex/example\n".encode(),
+                b"",
+            )
+        return subprocess.CompletedProcess(command, 0, b"", b"")
+
+    with pytest.raises(SubmissionError, match="did not establish"):
+        push_head(_config(tmp_path), "short-token", run=fake_run)
 
 
 def test_pull_request_creation_requests_human_reviewers(tmp_path: Path) -> None:

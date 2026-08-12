@@ -7,7 +7,13 @@ import sys
 from pathlib import Path
 from typing import Sequence
 
-from repodelta_bot.submit import SubmissionConfig, SubmissionError, submit_change
+from repodelta_bot.submit import (
+    PushConfig,
+    SubmissionConfig,
+    SubmissionError,
+    submit_change,
+    submit_head,
+)
 
 
 def _configured_value(value: str | None, environment_name: str) -> str:
@@ -44,22 +50,38 @@ def build_parser() -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
     submit = subparsers.add_parser("submit", help="Push HEAD and create a pull request")
-    submit.add_argument(
-        "--app-id",
-        help="GitHub App ID; or set REPODELTA_BOT_APP_ID",
+    push = subparsers.add_parser(
+        "push",
+        help="Push HEAD through the App to an existing pull-request branch",
     )
-    submit.add_argument(
-        "--installation-id",
-        help="GitHub App installation ID; or set REPODELTA_BOT_INSTALLATION_ID",
-    )
-    submit.add_argument(
-        "--private-key",
-        type=Path,
-        help="owner-only App private key; or set REPODELTA_BOT_PRIVATE_KEY",
-    )
-    submit.add_argument("--repo", required=True, help="GitHub repository in owner/name form")
-    submit.add_argument("--repo-root", type=Path, default=Path.cwd())
-    submit.add_argument("--head", help="Remote head branch; defaults to the current branch")
+    for command in (submit, push):
+        command.add_argument(
+            "--app-id",
+            help="GitHub App ID; or set REPODELTA_BOT_APP_ID",
+        )
+        command.add_argument(
+            "--installation-id",
+            help="GitHub App installation ID; or set REPODELTA_BOT_INSTALLATION_ID",
+        )
+        command.add_argument(
+            "--private-key",
+            type=Path,
+            help="owner-only App private key; or set REPODELTA_BOT_PRIVATE_KEY",
+        )
+        command.add_argument(
+            "--repo",
+            required=True,
+            help="GitHub repository in owner/name form",
+        )
+        command.add_argument("--repo-root", type=Path, default=Path.cwd())
+        command.add_argument(
+            "--head",
+            help="Remote head branch; defaults to the current branch",
+        )
+        command.add_argument(
+            "--expected-remote-head",
+            help="full observed remote SHA required for a leased handoff",
+        )
     submit.add_argument("--base", default="main")
     submit.add_argument("--title", required=True)
     submit.add_argument("--body-file", type=Path, required=True)
@@ -82,8 +104,25 @@ def main(argv: Sequence[str] | None = None) -> int:
             raise SubmissionError(
                 "provide --private-key or set REPODELTA_BOT_PRIVATE_KEY"
             )
-        body = args.body_file.read_text()
         head = args.head or _current_branch(args.repo_root)
+        if args.command == "push":
+            result = submit_head(
+                PushConfig(
+                    app_id=app_id,
+                    installation_id=installation_id,
+                    private_key=Path(key_value),
+                    repo=args.repo,
+                    head=head,
+                    repo_root=args.repo_root,
+                    expected_remote_head=args.expected_remote_head,
+                )
+            )
+            print(
+                f"Pushed {result.remote_head} to {args.repo}:{head} "
+                "through the GitHub App"
+            )
+            return 0
+        body = args.body_file.read_text()
         result = submit_change(
             SubmissionConfig(
                 app_id=app_id,
@@ -97,6 +136,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 reviewers=tuple(args.reviewer),
                 draft=args.draft,
                 repo_root=args.repo_root,
+                expected_remote_head=args.expected_remote_head,
             )
         )
     except (OSError, SubmissionError) as exc:

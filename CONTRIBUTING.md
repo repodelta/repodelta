@@ -42,4 +42,17 @@ GitHub App, then review it under their own human identity:
 
 An App manager supplies their owner-only private key and App identifiers as
 described by `./tools/repodelta-bot submit --help`. The bot only pushes and
-opens the PR; a human maintainer still approves it.
+opens the PR; a human maintainer still approves it. Submission fails closed if
+the same commit was already pushed through a personal account, because an
+up-to-date Git operation cannot make the App the effective pusher.
+
+To update an existing bot-authored PR, first commit the new local result and
+then let the App perform the branch update:
+
+```bash
+./tools/repodelta-bot push --repo repodelta/repodelta
+```
+
+Use `--expected-remote-head FULL_SHA` for an intentional history handoff. The
+lease rejects the update if anyone changed the remote branch after that SHA was
+observed.
