@@ -9,7 +9,12 @@ from typing import Mapping
 
 import pytest
 
-from repodelta.providers.workspace import isolated_review_roots, remote_review_roots
+from repodelta.providers.workspace import (
+    _codegraph_command,
+    _initialize_index,
+    isolated_review_roots,
+    remote_review_roots,
+)
 
 
 class FakeRunner:
@@ -115,6 +120,109 @@ def _commands(
     )
 
 
+def test_supported_installed_codegraph_is_selected(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[tuple[str, ...]] = []
+
+    def runner(
+        command: tuple[str, ...], _timeout: int
+    ) -> subprocess.CompletedProcess[str]:
+        calls.append(command)
+        return subprocess.CompletedProcess(
+            command,
+            0,
+            "Initialize CodeGraph and build the project index",
+            "",
+        )
+
+    monkeypatch.setattr(
+        shutil,
+        "which",
+        lambda name: "/tools/codegraph" if name == "codegraph" else None,
+    )
+
+    assert _codegraph_command(runner=runner) == ("/tools/codegraph",)
+    assert calls == [("/tools/codegraph", "init", "--help")]
+
+
+def test_unrelated_same_name_executable_falls_back_to_scoped_npx(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def runner(
+        command: tuple[str, ...], _timeout: int
+    ) -> subprocess.CompletedProcess[str]:
+        return subprocess.CompletedProcess(
+            command,
+            0,
+            "Utilities for Python source graphs",
+            "",
+        )
+
+    locations = {
+        "codegraph": "/python/bin/codegraph",
+        "npx": "/node/bin/npx",
+    }
+    monkeypatch.setattr(shutil, "which", locations.get)
+
+    assert _codegraph_command(runner=runner) == (
+        "/node/bin/npx",
+        "--yes",
+        "@colbymchenry/codegraph@1.2.0",
+    )
+
+
+def test_npx_only_environment_uses_scoped_tested_package(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        shutil,
+        "which",
+        lambda name: "/node/bin/npx" if name == "npx" else None,
+    )
+
+    assert _codegraph_command() == (
+        "/node/bin/npx",
+        "--yes",
+        "@colbymchenry/codegraph@1.2.0",
+    )
+
+
+def test_missing_supported_codegraph_names_scoped_package_and_pypi_collision(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(shutil, "which", lambda _name: None)
+
+    with pytest.raises(ValueError) as captured:
+        _codegraph_command()
+
+    message = str(captured.value)
+    assert "@colbymchenry/codegraph" in message
+    assert "unrelated PyPI `codegraph`" in message
+    assert "--no-structural-graph" in message
+
+
+def test_successful_command_without_codegraph_index_fails_closed(
+    tmp_path: Path,
+) -> None:
+    def runner(
+        command: tuple[str, ...], _timeout: int
+    ) -> subprocess.CompletedProcess[str]:
+        return subprocess.CompletedProcess(command, 0, "done", "")
+
+    with pytest.raises(ValueError) as captured:
+        _initialize_index(
+            tmp_path,
+            runner=runner,
+            codegraph_command=("same-name-command",),
+        )
+
+    message = str(captured.value)
+    assert ".codegraph/codegraph.db" in message
+    assert "@colbymchenry/codegraph" in message
+    assert "unrelated PyPI `codegraph`" in message
+
+
 def test_head_and_base_indexes_are_private_and_removed(tmp_path: Path) -> None:
     source = tmp_path / "source"
     source.mkdir()
@@ -212,10 +320,16 @@ def test_cleanup_failure_still_removes_private_directory(
 
 def test_no_structural_graph_creates_only_private_head_without_codegraph(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     source = tmp_path / "source"
     source.mkdir()
     runner = FakeRunner()
+
+    def reject_resolution(_name: str) -> None:
+        raise AssertionError("CodeGraph resolution must remain disabled")
+
+    monkeypatch.setattr(shutil, "which", reject_resolution)
 
     with isolated_review_roots(
         repo_root=source,

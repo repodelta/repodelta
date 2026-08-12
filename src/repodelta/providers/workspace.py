@@ -18,6 +18,15 @@ EnvironmentCommandRunner = Callable[
     [Command, int, Mapping[str, str]], subprocess.CompletedProcess[str]
 ]
 
+_CODEGRAPH_NPM_PACKAGE = "@colbymchenry/codegraph"
+_CODEGRAPH_NPX_SPEC = f"{_CODEGRAPH_NPM_PACKAGE}@1.2.0"
+_CODEGRAPH_INSTALL_GUIDANCE = (
+    "RepoDelta structural mapping requires the CodeGraph CLI from "
+    "`@colbymchenry/codegraph` (not the unrelated PyPI `codegraph` package); "
+    "install it with `npm install -g @colbymchenry/codegraph`, provide Node.js "
+    "with `npx`, or use --no-structural-graph"
+)
+
 
 @dataclass(frozen=True)
 class ReviewRevisionRoots:
@@ -150,17 +159,36 @@ def _git_auth_environment(token: str | None) -> dict[str, str]:
     return environment
 
 
-def _codegraph_command() -> Command:
+def _installed_codegraph_is_supported(
+    executable: str,
+    *,
+    runner: CommandRunner,
+) -> bool:
+    """Identify the external CLI by the smallest capability RepoDelta consumes."""
+
+    try:
+        result = runner((executable, "init", "--help"), 15)
+    except ValueError:
+        return False
+    description = f"{result.stdout}\n{result.stderr}".casefold()
+    return (
+        result.returncode == 0
+        and "codegraph" in description
+        and "index" in description
+    )
+
+
+def _codegraph_command(*, runner: CommandRunner = _run) -> Command:
     executable = shutil.which("codegraph")
-    if executable:
+    if executable and _installed_codegraph_is_supported(
+        executable,
+        runner=runner,
+    ):
         return (executable,)
     npx = shutil.which("npx")
     if npx:
-        return (npx, "--yes", "@colbymchenry/codegraph")
-    raise ValueError(
-        "structure-aware review requires `codegraph` or `npx` on PATH; "
-        "use --no-structural-graph to disable structural mapping"
-    )
+        return (npx, "--yes", _CODEGRAPH_NPX_SPEC)
+    raise ValueError(_CODEGRAPH_INSTALL_GUIDANCE)
 
 
 def _initialize_index(
@@ -175,6 +203,12 @@ def _initialize_index(
         timeout=300,
         action=f"Codegraph init for {root}",
     )
+    database = root / ".codegraph" / "codegraph.db"
+    if not database.is_file():
+        raise ValueError(
+            f"CodeGraph init for {root} did not create "
+            f"{database.relative_to(root)}. {_CODEGRAPH_INSTALL_GUIDANCE}"
+        )
 
 
 @contextmanager
@@ -203,7 +237,7 @@ def isolated_review_roots(
     base = temporary_parent / "base"
     managed_roots: list[Path] = []
     command = (
-        codegraph_command or _codegraph_command()
+        codegraph_command or _codegraph_command(runner=runner)
         if structural_graph_enabled
         else None
     )
