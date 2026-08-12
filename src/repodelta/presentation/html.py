@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass
 from html import escape
 from pathlib import Path
@@ -21,6 +22,7 @@ from repodelta.model.contracts import (
     StructuralRelationGroup,
 )
 
+
 @dataclass(frozen=True)
 class _StructuralContainerLayout:
     node_id: str
@@ -39,6 +41,15 @@ class _StructuralLayout:
     secondary_placements: tuple[StructuralGraphPlacement, ...]
     width: int
     height: int
+
+
+@dataclass(frozen=True)
+class _EvidencePathSegment:
+    id: str
+    focus_ids: tuple[str, ...]
+    kind: str
+    node_ids: tuple[str, ...]
+    edge_ids: tuple[str, ...]
 
 
 def _safe_href(value: str | None) -> str | None:
@@ -559,11 +570,16 @@ def _review_graph(
             else content
         )
 
+    isolated_nodes = tuple(
+        node
+        for node in backbone_nodes.values()
+        if node.id not in connected_node_ids and node.delta != "retained"
+    )
     isolated_rows = []
-    for node in backbone_nodes.values():
-        if node.id in connected_node_ids or node.delta == "retained":
-            continue
+    for node in isolated_nodes:
         fact = _structural_display_fact(node, evidence)
+        if fact.metadata.get("symbol_kind") == "file":
+            continue
         sources = _sources(fact, brief)
         focuses = ", ".join(
             focus_id for focus_id, _role in node_focus.get(node.id, ())
@@ -586,16 +602,65 @@ def _review_graph(
             + "</div>"
         )
 
+    focus_buttons: dict[str, list[str]] = {
+        "R": [], "G": [], "T": [], "CC": []
+    }
+    matrix_by_subject = {
+        item.subject_id: item for item in workspace.matrix
+    }
+    for inspection in workspace.inspections:
+        overlay = inspection.structural_overlay
+        has_visible_structure = bool(
+            {item.node_id for item in overlay.nodes} & set(backbone_nodes)
+            or set(overlay.relation_group_ids) & set(graph.backbone_relation_group_ids)
+            or set(overlay.edge_ids) & set(graph.backbone_edge_ids)
+            or set(overlay.ownership_edge_ids) & set(graph.backbone_ownership_edge_ids)
+            or set(overlay.placement_ids) & set(graph.primary_placement_ids)
+        )
+        family = (
+            "CC"
+            if inspection.subject_id.startswith("CC")
+            else inspection.subject_id[:1]
+        )
+        if family not in focus_buttons:
+            continue
+        matrix_entry = matrix_by_subject.get(inspection.subject_id)
+        focus_copy = matrix_entry.text if matrix_entry is not None else ""
+        focus_buttons[family].append(
+            '<button class="delta-focus'
+            + ("" if has_visible_structure else " no-visible-backbone")
+            + '" type="button" '
+            f'data-focus-target="{escape(inspection.subject_id, quote=True)}" '
+            f'data-focus-copy="{escape(focus_copy, quote=True)}" '
+            f'title="Focus structural evidence for {escape(inspection.subject_id, quote=True)}">'
+            f'{escape(inspection.subject_id)}</button>'
+        )
+    family_labels = {
+        "R": "Requirements",
+        "G": "Guardrails",
+        "T": "Transformations",
+        "CC": "Completion",
+    }
+    focus_families = "".join(
+        '<div class="delta-focus-family">'
+        f'<span>{escape(family_labels[family])}</span>'
+        f'<div>{"".join(focus_buttons[family])}</div></div>'
+        for family in ("R", "G", "T", "CC")
+        if focus_buttons[family]
+    )
     controls = (
         '<div class="delta-focus-controls" role="group" '
         'aria-label="Structural graph focus">'
+        '<div class="delta-focus-primary">'
         '<button class="delta-focus active" type="button" '
-        'data-focus-target="all">All</button>'
-        + "</div>"
+        'data-focus-target="overview">Overview</button>'
+        '</div>'
+        f'<div class="delta-focus-families">{focus_families}</div></div>'
     )
     canvas = (
         '<div class="delta-canvas-scroll"><svg class="delta-canvas" '
         f'viewBox="0 0 {canvas_width} {canvas_height}" '
+        f'data-original-view-box="0 0 {canvas_width} {canvas_height}" '
         f'aria-label="Structural delta graph" role="img">'
         "<defs>"
         '<marker id="arrow-added" markerWidth="8" markerHeight="8" refX="7" '
@@ -643,10 +708,52 @@ def _review_graph(
             else ""
         )
     )
+    file_overview = _file_structural_overview(
+        graph=graph,
+        backbone_nodes=backbone_nodes,
+        backbone_relation_groups=backbone_relation_groups,
+        placements=placements,
+        evidence=evidence,
+        architectural_components=architectural_components,
+        node_focus=node_focus,
+        edge_focus=edge_focus,
+        relation_group_focus=relation_group_focus,
+    )
+    evidence_paths = _evidence_paths(
+        graph=graph,
+        backbone_nodes=backbone_nodes,
+        backbone_edges=backbone_edges,
+        placements=placements,
+        evidence=evidence,
+        architectural_components=architectural_components,
+        workspace=workspace,
+    )
+    member_graph = _file_member_graph(
+        graph=graph,
+        backbone_nodes=backbone_nodes,
+        backbone_edges=backbone_edges,
+        backbone_relation_groups=backbone_relation_groups,
+        placements=placements,
+        evidence=evidence,
+        architectural_components=architectural_components,
+        node_focus=node_focus,
+        edge_focus=edge_focus,
+        relation_group_focus=relation_group_focus,
+    )
+    audit_graph = member_graph or f"{canvas}{relationship_inspector}"
+    audit = (
+        '<details class="structural-audit"><summary>Full structural audit · '
+        f'{len(backbone_nodes)} symbols · {len(backbone_edges)} relations</summary>'
+        '<p class="structural-audit-intro">Canonical members, exact relationships, '
+        'ownership, unresolved context, and standalone changes.</p>'
+        f'{audit_graph}{isolated}</details>'
+        if audit_graph or isolated
+        else ""
+    )
     return (
         '<div class="review-structural-graph">'
         '<div class="delta-graph-heading"><div>'
-        '<h3>Structural delta graph</h3>'
+        '<h3>Structural delta overview</h3>'
         f'<div class="structural-coverage state-{escape(coverage_state)}">'
         f"{escape(coverage_copy)}</div>"
         f'<div class="subgraph-summary">{len(backbone_nodes)} backbone nodes · '
@@ -655,13 +762,1083 @@ def _review_graph(
         f'{len(backbone_edges)} canonical executable edges · '
         f'{len(placements)} structural placements · '
         f'{len(backbone_ownership_edges)} ownership deltas · '
-        f'{len(isolated_rows)} isolated changed anchors · '
+        f'{len(isolated_nodes)} isolated changed anchors · '
         f'{len(graph.path_evidence_ids)} support refs</div></div>'
-        f'{controls}</div><p class="delta-focus-empty" hidden></p>{canvas}'
-        f'{relationship_inspector}'
-        f'{isolated}'
+        f'{controls}</div><p class="delta-focus-copy" hidden></p>'
+        '<p class="delta-focus-empty" hidden></p>'
+        '<div class="unified-graph-stage">'
+        f'{file_overview}{evidence_paths}</div>{audit}'
         "</div>"
     )
+
+
+def _file_structural_overview(
+    *,
+    graph: ReviewStructuralGraph,
+    backbone_nodes: dict[str, StructuralGraphNode],
+    backbone_relation_groups: tuple[StructuralRelationGroup, ...],
+    placements: tuple[StructuralGraphPlacement, ...],
+    evidence: dict[str, EvidenceItem],
+    architectural_components: dict[str, ArchitecturalComponent] | None = None,
+    node_focus: dict[str, list[tuple[str, str]]] | None = None,
+    edge_focus: dict[str, list[str]] | None = None,
+    relation_group_focus: dict[str, list[str]] | None = None,
+) -> str:
+    """Project canonical symbols into the collapsed state of one graph."""
+
+    architectural_components = architectural_components or {}
+    node_focus = node_focus or {}
+    edge_focus = edge_focus or {}
+    relation_group_focus = relation_group_focus or {}
+
+    facts = {
+        node_id: _structural_display_fact(node, evidence)
+        for node_id, node in backbone_nodes.items()
+    }
+    file_node_ids = tuple(
+        node_id
+        for node_id, fact in facts.items()
+        if fact.metadata.get("symbol_kind") == "file"
+    )
+    if not file_node_ids:
+        return (
+            '<div class="file-graph-layer"><p class="file-overview-empty">'
+            'No canonical file ownership is available for a collapsed '
+            'projection. Use the full structural audit for the collected '
+            'symbols.</p></div>'
+        )
+
+    primary_ids = set(graph.primary_placement_ids)
+    parent_by_child = {
+        placement.child_node_id: placement.parent_node_id
+        for placement in placements
+        if placement.id in primary_ids
+    }
+
+    def owning_file(node_id: str) -> str | None:
+        visited: set[str] = set()
+        current = node_id
+        while current not in visited:
+            visited.add(current)
+            if current in file_node_ids:
+                return current
+            parent = parent_by_child.get(current)
+            if parent is None:
+                return None
+            current = parent
+        return None
+
+    file_by_node = {
+        node_id: file_id
+        for node_id in backbone_nodes
+        if (file_id := owning_file(node_id)) is not None
+    }
+    members_by_file: dict[str, list[str]] = {
+        file_id: [] for file_id in file_node_ids
+    }
+    for node_id, file_id in file_by_node.items():
+        if node_id != file_id:
+            members_by_file[file_id].append(node_id)
+
+    alphabetic_files = tuple(sorted(
+        file_node_ids,
+        key=lambda item: _structural_standalone_name(facts[item]),
+    ))
+    verification_file_ids = {
+        file_id
+        for file_id in alphabetic_files
+        if architectural_components.get(file_id) is not None
+        and architectural_components[file_id].layer == "verification"
+    }
+    relation_file_pairs = {
+        (source_file, target_file)
+        for group in backbone_relation_groups
+        if (source_file := file_by_node.get(group.source_node_id)) is not None
+        and (target_file := file_by_node.get(group.target_node_id)) is not None
+        and source_file != target_file
+    }
+
+    def topology_order(file_ids: set[str]) -> tuple[str, ...]:
+        pairs = {
+            (source_id, target_id)
+            for source_id, target_id in relation_file_pairs
+            if source_id in file_ids and target_id in file_ids
+        }
+        connected_ids = {
+            node_id for pair in pairs for node_id in pair
+        }
+        outgoing: dict[str, set[str]] = {node_id: set() for node_id in file_ids}
+        indegree = {node_id: 0 for node_id in file_ids}
+        for source_id, target_id in pairs:
+            if target_id in outgoing[source_id]:
+                continue
+            outgoing[source_id].add(target_id)
+            indegree[target_id] += 1
+
+        def sort_key(node_id: str) -> tuple[bool, str]:
+            return (
+                node_id not in connected_ids,
+                _structural_standalone_name(facts[node_id]),
+            )
+
+        ready = sorted(
+            (node_id for node_id, count in indegree.items() if count == 0),
+            key=sort_key,
+        )
+        ordered: list[str] = []
+        while ready:
+            node_id = ready.pop(0)
+            ordered.append(node_id)
+            for target_id in sorted(outgoing[node_id], key=sort_key):
+                indegree[target_id] -= 1
+                if indegree[target_id] == 0:
+                    ready.append(target_id)
+                    ready.sort(key=sort_key)
+        ordered.extend(sorted(file_ids - set(ordered), key=sort_key))
+        return tuple(ordered)
+
+    verification_files = topology_order(verification_file_ids)
+    production_files = topology_order(
+        set(file_node_ids) - verification_file_ids
+    )
+    ordered_files = (*production_files, *verification_files)
+    cell_width, cell_height = 300, 142
+    node_width, node_height = 250, 84
+    columns = min(3, max(1, len(production_files), len(verification_files)))
+    positions: dict[str, tuple[int, int]] = {}
+    production_rows = max(
+        1,
+        (len(production_files) + columns - 1) // columns,
+    )
+    for index, file_id in enumerate(production_files):
+        positions[file_id] = (
+            30 + (index % columns) * cell_width,
+            45 + (index // columns) * cell_height,
+        )
+    verification_start = 55 + production_rows * cell_height
+    verification_column_rows: dict[int, int] = {}
+    for index, file_id in enumerate(verification_files):
+        target_columns = tuple(sorted({
+            round((positions[target_id][0] - 30) / cell_width)
+            for source_id, target_id in relation_file_pairs
+            if source_id == file_id and target_id in positions
+        }))
+        column = target_columns[0] if target_columns else index % columns
+        row = verification_column_rows.get(column, 0)
+        verification_column_rows[column] = row + 1
+        positions[file_id] = (
+            30 + column * cell_width,
+            verification_start + 38 + row * cell_height,
+        )
+    verification_rows = (
+        max(verification_column_rows.values(), default=0)
+        if verification_files
+        else 0
+    )
+    canvas_width = max(330, columns * cell_width)
+    canvas_height = (
+        65
+        + production_rows * cell_height
+        + (54 + verification_rows * cell_height if verification_files else 0)
+    )
+
+    groups_by_id = {item.id: item for item in backbone_relation_groups}
+    bundles: dict[tuple[str, str, str], list[str]] = {}
+    for group in backbone_relation_groups:
+        source_file = file_by_node.get(group.source_node_id)
+        target_file = file_by_node.get(group.target_node_id)
+        if source_file is None or target_file is None or source_file == target_file:
+            continue
+        bundles.setdefault(
+            (source_file, target_file, group.operation), []
+        ).append(group.id)
+
+    def group_focuses(group_ids: list[str]) -> tuple[str, ...]:
+        return tuple(dict.fromkeys(
+            focus_id
+            for group_id in group_ids
+            for focus_id in (
+                *relation_group_focus.get(group_id, ()),
+                *(
+                    edge_focus_id
+                    for edge_id in groups_by_id[group_id].member_edge_ids
+                    for edge_focus_id in edge_focus.get(edge_id, ())
+                ),
+            )
+        ))
+
+    edge_shapes = []
+    adjacent_groups: dict[str, set[str]] = {
+        file_id: set() for file_id in ordered_files
+    }
+    adjacent_context_nodes: dict[str, set[str]] = {
+        file_id: set() for file_id in ordered_files
+    }
+    for (source_file, target_file, operation), group_ids in sorted(
+        bundles.items()
+    ):
+        adjacent_groups[source_file].update(group_ids)
+        adjacent_groups[target_file].update(group_ids)
+        adjacent_context_nodes[source_file].update(
+            (target_file, *(
+                group.target_node_id
+                for group in backbone_relation_groups
+                if group.id in group_ids
+            ))
+        )
+        adjacent_context_nodes[target_file].update(
+            (source_file, *(
+                group.source_node_id
+                for group in backbone_relation_groups
+                if group.id in group_ids
+            ))
+        )
+        source_x, source_y = positions[source_file]
+        target_x, target_y = positions[target_file]
+        source_center = (
+            source_x + node_width / 2,
+            source_y + node_height / 2,
+        )
+        target_center = (
+            target_x + node_width / 2,
+            target_y + node_height / 2,
+        )
+        delta_x = target_center[0] - source_center[0]
+        delta_y = target_center[1] - source_center[1]
+        boundary_scale = min(
+            node_width / 2 / abs(delta_x) if delta_x else float("inf"),
+            node_height / 2 / abs(delta_y) if delta_y else float("inf"),
+        )
+        x1 = source_center[0] + delta_x * boundary_scale
+        y1 = source_center[1] + delta_y * boundary_scale
+        x2 = target_center[0] - delta_x * boundary_scale
+        y2 = target_center[1] - delta_y * boundary_scale
+        mid_x, mid_y = (x1 + x2) / 2, (y1 + y2) / 2
+        horizontal = abs(delta_y) < 1
+        label_rect_y = (
+            min(source_y, target_y) - 18
+            if horizontal
+            else mid_y - 25
+        )
+        label_text_y = label_rect_y + 12
+        relations = tuple(dict.fromkeys(
+            groups_by_id[group_id].relation for group_id in group_ids
+        ))
+        relation_title = " + ".join(relations)
+        label = f"{relation_title} · {operation}"
+        label_width = min(224, max(128, len(label) * 4.5 + 18))
+        focuses = group_focuses(group_ids)
+        edge_shapes.append(
+            f'<g class="file-delta-edge operation-{escape(operation)}" '
+            f'data-source-file="{escape(source_file, quote=True)}" '
+            f'data-target-file="{escape(target_file, quote=True)}" '
+            f'data-group-ids="{escape(" ".join(group_ids), quote=True)}" '
+            f'data-focuses="{escape(" ".join(focuses), quote=True)}">'
+            f'<title>{escape(relation_title)} · {escape(operation)}</title>'
+            f'<path d="M{x1} {y1} Q{mid_x} {mid_y - 28} {x2} {y2}" '
+            f'marker-end="url(#file-arrow-{escape(operation)})"/>'
+            f'<rect x="{mid_x - label_width / 2}" y="{label_rect_y}" '
+            f'width="{label_width}" '
+            'height="17" rx="4"/>'
+            f'<text x="{mid_x}" y="{label_text_y}">{escape(label)}</text></g>'
+        )
+
+    file_shapes = []
+    for file_id in ordered_files:
+        file_node = backbone_nodes[file_id]
+        file_fact = facts[file_id]
+        member_ids = tuple(
+            sorted(
+                members_by_file[file_id],
+                key=lambda item: (
+                    str(facts[item].metadata.get("symbol_kind", "symbol")),
+                    _structural_name(facts[item]),
+                ),
+            )
+        )
+        counts = Counter(
+            str(facts[node_id].metadata.get("symbol_kind", "symbol"))
+            for node_id in member_ids
+        )
+        count_copy = " · ".join(
+            f"{count} {_structural_kind_count_label(kind, count)}"
+            for kind, count in sorted(counts.items())
+        ) or "No contained symbol was projected"
+        node_direct_focuses, node_context_focuses = _aggregate_node_focus(
+            (file_id, *member_ids), node_focus
+        )
+        direct_focuses = tuple(dict.fromkeys((
+            *node_direct_focuses,
+            *group_focuses(sorted(adjacent_groups[file_id])),
+        )))
+        context_focuses = tuple(
+            focus_id
+            for focus_id in node_context_focuses
+            if focus_id not in direct_focuses
+        )
+        file_name = _structural_standalone_name(file_fact)
+        component = architectural_components.get(file_id)
+        layer = component.layer if component is not None else "unclassified"
+        x, y = positions[file_id]
+        file_shapes.append(
+            '<g class="file-graph-node" tabindex="0" role="button" '
+            f'data-structural-node="{escape(file_id, quote=True)}" '
+            f'data-file-node="{escape(file_id, quote=True)}" '
+            f'data-focuses="{escape(" ".join(direct_focuses), quote=True)}" '
+            f'data-context-focuses="{escape(" ".join(context_focuses), quote=True)}" '
+            f'data-member-node-ids="{escape(" ".join((file_id, *member_ids)), quote=True)}" '
+            f'data-context-node-ids="{escape(" ".join(sorted(adjacent_context_nodes[file_id])), quote=True)}" '
+            f'data-member-group-ids="{escape(" ".join(sorted(adjacent_groups[file_id])), quote=True)}" '
+            f'transform="translate({x} {y})">'
+            f'<rect width="{node_width}" height="{node_height}" rx="11"/>'
+            f'<text class="file-node-operation" x="13" y="19">{escape(file_node.delta)}</text>'
+            f'<text class="file-node-layer" x="{node_width - 13}" y="19">{escape(layer)}</text>'
+            f'<text class="file-node-name" x="13" y="43">{escape(_truncate_label(file_name, 39))}</text>'
+            f'<text class="file-node-counts" x="13" y="66">{escape(_truncate_label(count_copy, 48))}</text>'
+            f'<title>{escape(file_name)} · select related focused structure</title></g>'
+        )
+
+    lane_shapes = (
+        '<text class="file-lane-label" x="30" y="25">Production change</text>'
+        + (
+            f'<line class="file-lane-divider" x1="20" y1="{verification_start + 3}" '
+            f'x2="{canvas_width - 20}" y2="{verification_start + 3}"/>'
+            f'<text class="file-lane-label verification" x="30" '
+            f'y="{verification_start + 25}">Verification</text>'
+            if verification_files
+            else ""
+        )
+    )
+    return (
+        '<div class="file-graph-layer">'
+        '<p class="file-overview-intro">Changed files and aggregated cross-file '
+        'relations. Select an authored subject to isolate its related structure.</p>'
+        '<div class="delta-canvas-scroll"><svg class="file-delta-canvas" '
+        f'viewBox="0 0 {canvas_width} {canvas_height}" role="img" '
+        'aria-label="File-level structural delta graph"><defs>'
+        '<marker id="file-arrow-added" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path fill="#7be3ac" d="M0,0 L0,6 L8,3 z"/></marker>'
+        '<marker id="file-arrow-removed" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path fill="#ef8f91" d="M0,0 L0,6 L8,3 z"/></marker>'
+        '<marker id="file-arrow-retained" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path fill="#71848d" d="M0,0 L0,6 L8,3 z"/></marker>'
+        '</defs>'
+        f'{lane_shapes}{"".join(edge_shapes)}{"".join(file_shapes)}</svg></div></div>'
+    )
+
+
+def _evidence_paths(
+    *,
+    graph: ReviewStructuralGraph,
+    backbone_nodes: dict[str, StructuralGraphNode],
+    backbone_edges: tuple[StructuralGraphEdge, ...],
+    placements: tuple[StructuralGraphPlacement, ...],
+    evidence: dict[str, EvidenceItem],
+    architectural_components: dict[str, ArchitecturalComponent],
+    workspace: object,
+) -> str:
+    """Render focus-owned exact relations as selectable structural classes."""
+
+    if not getattr(workspace, "inspections", ()):  # no authored focus exists
+        return ""
+    facts = {
+        node_id: _structural_display_fact(node, evidence)
+        for node_id, node in backbone_nodes.items()
+    }
+    file_ids = {
+        node_id
+        for node_id, fact in facts.items()
+        if fact.metadata.get("symbol_kind") == "file"
+    }
+    primary_ids = set(graph.primary_placement_ids)
+    parent_by_child = {
+        placement.child_node_id: placement.parent_node_id
+        for placement in placements
+        if placement.id in primary_ids
+    }
+
+    def owning_file(node_id: str) -> str | None:
+        current = node_id
+        visited: set[str] = set()
+        while current not in visited:
+            visited.add(current)
+            if current in file_ids:
+                return current
+            current = parent_by_child.get(current, "")
+            if not current:
+                return None
+        return None
+
+    file_by_node = {
+        node_id: file_id
+        for node_id in backbone_nodes
+        if (file_id := owning_file(node_id)) is not None
+    }
+    edge_by_id = {item.id: item for item in backbone_edges}
+    group_ids_by_edge = {
+        edge_id: group.id
+        for group in graph.relation_groups
+        if group.id in set(graph.backbone_relation_group_ids)
+        for edge_id in group.member_edge_ids
+    }
+    segments: list[_EvidencePathSegment] = []
+
+    def edge_kind(edge: StructuralGraphEdge) -> str:
+        node_ids = (edge.source_node_id, edge.target_node_id)
+        if any(backbone_nodes[node_id].delta == "unresolved" for node_id in node_ids):
+            return "unresolved"
+        if any(
+            facts[node_id].classification == "test"
+            or facts[node_id].profile in {"test", "verification"}
+            or architectural_components.get(node_id) is not None
+            and architectural_components[node_id].layer == "verification"
+            for node_id in node_ids
+        ):
+            return "verification"
+        if edge.relation not in {"calls", "instantiates"}:
+            return "context"
+        return "change"
+
+    for inspection in workspace.inspections:
+        focus_id = inspection.subject_id
+        overlay = inspection.structural_overlay
+        selected_edges = tuple(
+            edge_by_id[edge_id]
+            for edge_id in overlay.edge_ids
+            if edge_id in edge_by_id
+        )
+        edges_by_kind: dict[str, list[StructuralGraphEdge]] = {}
+        for edge in selected_edges:
+            edges_by_kind.setdefault(edge_kind(edge), []).append(edge)
+
+        covered_node_ids = {
+            node_id
+            for edge in selected_edges
+            for node_id in (edge.source_node_id, edge.target_node_id)
+        }
+        standalone_nodes_by_kind: dict[str, list[str]] = {}
+        for focus_node in overlay.nodes:
+            if (
+                focus_node.node_id not in backbone_nodes
+                or focus_node.node_id in covered_node_ids
+                or focus_node.role == "intermediate"
+            ):
+                continue
+            node_id = focus_node.node_id
+            node = backbone_nodes[node_id]
+            fact = facts[node_id]
+            component = architectural_components.get(node_id)
+            if node.delta == "unresolved":
+                kind = "unresolved"
+            elif (
+                fact.classification == "test"
+                or fact.profile in {"test", "verification"}
+                or component is not None and component.layer == "verification"
+            ):
+                kind = "verification"
+            else:
+                kind = "context"
+            standalone_nodes_by_kind.setdefault(kind, []).append(node_id)
+
+        for kind in ("change", "verification", "context", "unresolved"):
+            selected_kind_edges = tuple(edges_by_kind.get(kind, ()))
+            node_ids = tuple(dict.fromkeys((
+                *(
+                    node_id
+                    for edge in selected_kind_edges
+                    for node_id in (edge.source_node_id, edge.target_node_id)
+                ),
+                *standalone_nodes_by_kind.get(kind, ()),
+            )))
+            if not node_ids:
+                continue
+            segments.append(
+                _EvidencePathSegment(
+                    id=f"{focus_id}:{kind}",
+                    focus_ids=(focus_id,),
+                    kind=kind,
+                    node_ids=node_ids,
+                    edge_ids=tuple(edge.id for edge in selected_kind_edges),
+                )
+            )
+
+    if not segments:
+        return (
+            '<section class="evidence-paths" hidden>'
+            '<p class="evidence-path-empty">No exact focused structure '
+            'is available. Use the full audit for collected facts.'
+            '</p></section>'
+        )
+
+    def node_label(node_id: str) -> str:
+        fact = facts[node_id]
+        _path, separator, name = _structural_name(fact).partition(" · ")
+        return _structural_symbol_label(fact, name if separator else _path)
+
+    def step_html(node_id: str) -> str:
+        node = backbone_nodes[node_id]
+        label = escape(node_label(node_id))
+        file_id = file_by_node.get(node_id)
+        file_label = (
+            _structural_standalone_name(facts[file_id])
+            if file_id is not None
+            else str(facts[node_id].metadata.get("path", "Unowned structural node"))
+        )
+        href = _structural_node_href(node, graph.navigation_targets)
+        symbol = (
+            f'<a href="{escape(href, quote=True)}" target="_blank" '
+            f'rel="noopener">{label}</a>'
+            if href
+            else f"<b>{label}</b>"
+        )
+        return (
+            '<span class="path-trace-step" '
+            f'data-structural-node="{escape(node_id, quote=True)}">'
+            f'{symbol}<small>{escape(file_label)}</small></span>'
+        )
+
+    def trace_html(segment: _EvidencePathSegment, *, reverse: bool) -> str:
+        oriented: list[tuple[StructuralGraphEdge, str, str]] = []
+        for edge_id in segment.edge_ids:
+            edge = edge_by_id[edge_id]
+            source_id, target_id = (
+                (edge.target_node_id, edge.source_node_id)
+                if reverse
+                else (edge.source_node_id, edge.target_node_id)
+            )
+            oriented.append((edge, source_id, target_id))
+        outgoing: dict[
+            str, list[tuple[StructuralGraphEdge, str, str]]
+        ] = {}
+        target_ids: set[str] = set()
+        for item in oriented:
+            outgoing.setdefault(item[1], []).append(item)
+            target_ids.add(item[2])
+        for values in outgoing.values():
+            values.sort(
+                key=lambda item: (
+                    item[0].relation,
+                    _structural_name(facts[item[2]]),
+                )
+            )
+        roots = sorted(
+            (node_id for node_id in outgoing if node_id not in target_ids),
+            key=lambda node_id: _structural_name(facts[node_id]),
+        )
+        if not roots:
+            roots = sorted(
+                outgoing,
+                key=lambda node_id: _structural_name(facts[node_id]),
+            )
+        rendered_edges: set[str] = set()
+        expanded_nodes: set[str] = set()
+
+        def render_tree(node_id: str, trail: frozenset[str]) -> str:
+            expanded_nodes.add(node_id)
+            children = []
+            for edge, _source_id, target_id in outgoing.get(node_id, ()):
+                if edge.id in rendered_edges:
+                    continue
+                rendered_edges.add(edge.id)
+                if target_id in trail:
+                    target = (
+                        '<span class="path-tree-reference">'
+                        f'↳ {escape(node_label(target_id))}</span>'
+                    )
+                else:
+                    target = render_tree(target_id, trail | {node_id})
+                children.append(
+                    '<li><span class="path-tree-relation">'
+                    f'{escape(edge.relation)} · {escape(edge.operation)} '
+                    '<b aria-hidden="true">→</b></span>'
+                    f'{target}</li>'
+                )
+            return (
+                '<div class="path-tree-node">'
+                f'{step_html(node_id)}'
+                + (
+                    f'<ul>{"".join(children)}</ul>'
+                    if children
+                    else ""
+                )
+                + '</div>'
+            )
+
+        forest = [render_tree(root, frozenset()) for root in roots]
+        for edge, source_id, _target_id in oriented:
+            if edge.id not in rendered_edges:
+                forest.append(render_tree(source_id, frozenset()))
+        for node_id in segment.node_ids:
+            if node_id not in expanded_nodes:
+                forest.append(render_tree(node_id, frozenset()))
+        direction = "reverse" if reverse else "forward"
+        return (
+            f'<div class="path-trace-order" data-path-direction="{direction}"'
+            + (" hidden" if reverse else "")
+            + f'><div class="path-tree-forest">{"".join(forest)}</div></div>'
+        )
+
+    labels = {
+        "change": "Runtime change",
+        "verification": "Verification",
+        "context": "Structural context",
+        "unresolved": "Unresolved context",
+    }
+    rows = []
+    traces = []
+    for segment in segments:
+        file_node_ids = tuple(dict.fromkeys(
+            file_id
+            for node_id in segment.node_ids
+            if (file_id := file_by_node.get(node_id)) is not None
+        ))
+        group_ids = tuple(dict.fromkeys(
+            group_ids_by_edge[edge_id]
+            for edge_id in segment.edge_ids
+            if edge_id in group_ids_by_edge
+        ))
+        selected_edges = tuple(edge_by_id[edge_id] for edge_id in segment.edge_ids)
+        target_node_ids = {edge.target_node_id for edge in selected_edges}
+        root_node_ids = tuple(dict.fromkeys(
+            edge.source_node_id
+            for edge in selected_edges
+            if edge.source_node_id not in target_node_ids
+        )) or tuple(dict.fromkeys(
+            edge.source_node_id for edge in selected_edges
+        ))
+        if not root_node_ids:
+            root_node_ids = segment.node_ids[:1]
+        root_labels = [node_label(node_id) for node_id in root_node_ids[:2]]
+        summary_parts = []
+        for index, label in enumerate(root_labels):
+            summary_parts.append(f"<code>{escape(label)}</code>")
+            if index < len(root_labels) - 1:
+                summary_parts.append(
+                    '<span class="evidence-path-plus">+</span>'
+                )
+        if segment.edge_ids:
+            summary_parts.append('<span class="evidence-path-arrow">→</span>')
+            summary_parts.append('<code>…</code>')
+        rows.append(
+            '<button class="evidence-path-row" type="button" '
+            f'data-path-id="{escape(segment.id, quote=True)}" '
+            f'data-path-kind="{escape(segment.kind, quote=True)}" '
+            f'data-focuses="{escape(" ".join(segment.focus_ids), quote=True)}" '
+            f'data-file-node-ids="{escape(" ".join(file_node_ids), quote=True)}" '
+            f'data-group-ids="{escape(" ".join(group_ids), quote=True)}" '
+            'aria-pressed="false">'
+            f'<span class="evidence-path-kind">{labels[segment.kind]}</span>'
+            f'<span class="evidence-path-main">{"".join(summary_parts)}</span>'
+            '<span class="evidence-path-action">Inspect</span></button>'
+        )
+        relations = tuple(edge_by_id[edge_id].relation for edge_id in segment.edge_ids)
+        direction_mode = (
+            "calls"
+            if relations and all(item in {"calls", "instantiates"} for item in relations)
+            else "path"
+        )
+        traces.append(
+            '<div class="evidence-path-trace" '
+            f'data-path-trace="{escape(segment.id, quote=True)}" '
+            f'data-direction-mode="{direction_mode}" hidden>'
+            f'{trace_html(segment, reverse=False)}'
+            f'{trace_html(segment, reverse=True)}</div>'
+        )
+
+    return (
+        '<section class="evidence-paths" hidden>'
+        '<div class="evidence-path-heading"><div><h4>Focused structure</h4>'
+        '<p>Select one evidence class. Runtime, verification, context, and '
+        'unresolved structure remain visibly separate.</p></div></div>'
+        f'<div class="evidence-path-list">{"".join(rows)}</div>'
+        '<div class="evidence-path-inspector" hidden>'
+        '<div class="evidence-path-inspector-heading">'
+        '<b>Selected structure</b><div class="path-direction-controls" '
+        'role="group" aria-label="Path direction">'
+        '<button type="button" data-path-direction-target="forward" '
+        'aria-pressed="true">Callees</button>'
+        '<button type="button" data-path-direction-target="reverse" '
+        'aria-pressed="false">Callers</button></div></div>'
+        f'{"".join(traces)}</div>'
+        '<p class="evidence-path-empty" hidden>No exact focused structure '
+        'is available. Use the full audit for collected facts.'
+        '</p></section>'
+    )
+
+
+def _aggregate_node_focus(
+    node_ids: tuple[str, ...],
+    node_focus: dict[str, list[tuple[str, str]]],
+) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    direct = {
+        focus_id
+        for node_id in node_ids
+        for focus_id, role in node_focus.get(node_id, ())
+        if role != "intermediate"
+    }
+    contextual = {
+        focus_id
+        for node_id in node_ids
+        for focus_id, role in node_focus.get(node_id, ())
+        if role == "intermediate" and focus_id not in direct
+    }
+    return tuple(sorted(direct)), tuple(sorted(contextual))
+
+
+def _structural_kind_count_label(kind: str, count: int) -> str:
+    if count == 1:
+        return kind
+    return {
+        "class": "classes",
+        "property": "properties",
+    }.get(kind, f"{kind}s")
+
+
+def _file_member_graph(
+    *,
+    graph: ReviewStructuralGraph,
+    backbone_nodes: dict[str, StructuralGraphNode],
+    backbone_edges: tuple[StructuralGraphEdge, ...],
+    backbone_relation_groups: tuple[StructuralRelationGroup, ...],
+    placements: tuple[StructuralGraphPlacement, ...],
+    evidence: dict[str, EvidenceItem],
+    architectural_components: dict[str, ArchitecturalComponent],
+    node_focus: dict[str, list[tuple[str, str]]],
+    edge_focus: dict[str, list[str]],
+    relation_group_focus: dict[str, list[str]],
+) -> str:
+    """Render canonical detail as readable file lanes rather than nested boxes."""
+
+    facts = {
+        node_id: _structural_display_fact(node, evidence)
+        for node_id, node in backbone_nodes.items()
+    }
+    file_ids = {
+        node_id
+        for node_id, fact in facts.items()
+        if fact.metadata.get("symbol_kind") == "file"
+    }
+    if not file_ids:
+        return ""
+    primary_ids = set(graph.primary_placement_ids)
+    parent_by_child = {
+        placement.child_node_id: placement.parent_node_id
+        for placement in placements
+        if placement.id in primary_ids
+    }
+
+    def owning_file(node_id: str) -> str | None:
+        current = node_id
+        visited: set[str] = set()
+        while current not in visited:
+            visited.add(current)
+            if current in file_ids:
+                return current
+            current = parent_by_child.get(current, "")
+            if not current:
+                return None
+        return None
+
+    file_by_node = {
+        node_id: file_id
+        for node_id in backbone_nodes
+        if (file_id := owning_file(node_id)) is not None
+    }
+    members_by_file: dict[str, list[str]] = {file_id: [] for file_id in file_ids}
+    for node_id, file_id in file_by_node.items():
+        if node_id != file_id:
+            members_by_file[file_id].append(node_id)
+
+    group_by_edge_id = {
+        edge_id: group
+        for group in backbone_relation_groups
+        for edge_id in group.member_edge_ids
+    }
+    ungrouped_edge_ids = sorted(
+        edge.id for edge in backbone_edges if edge.id not in group_by_edge_id
+    )
+    if ungrouped_edge_ids:
+        raise ValueError(
+            "file member graph requires one relation group for every backbone "
+            f'exact edge: {", ".join(ungrouped_edge_ids)}'
+        )
+
+    def edge_focuses(edge: StructuralGraphEdge) -> tuple[str, ...]:
+        group = group_by_edge_id[edge.id]
+        return tuple(dict.fromkeys((
+            *edge_focus.get(edge.id, ()),
+            *relation_group_focus.get(group.id, ()),
+        )))
+
+    outgoing: dict[str, list[StructuralGraphEdge]] = {}
+    edge_focus_by_node: dict[str, list[str]] = {}
+    relation_endpoint_ids: set[str] = set()
+    for edge in backbone_edges:
+        outgoing.setdefault(edge.source_node_id, []).append(edge)
+        relation_endpoint_ids.update((edge.source_node_id, edge.target_node_id))
+        for node_id in (edge.source_node_id, edge.target_node_id):
+            edge_focus_by_node.setdefault(node_id, []).extend(
+                edge_focuses(edge)
+            )
+    navigation_targets = {item.id: item for item in graph.navigation_targets}
+
+    def target_presentation(
+        edge: StructuralGraphEdge,
+        source_file_id: str,
+    ) -> tuple[str, str, str]:
+        target = facts[edge.target_node_id]
+        _target_path, target_separator, raw_target_name = (
+            _structural_name(target).partition(" · ")
+        )
+        target_name = raw_target_name if target_separator else _target_path
+        target_label = _structural_symbol_label(target, target_name)
+        target_file_id = file_by_node.get(edge.target_node_id)
+        target_file_label = (
+            _structural_standalone_name(facts[target_file_id])
+            if target_file_id
+            else str(target.metadata.get("path", "external"))
+        )
+        file_badge = (
+            "this file"
+            if target_file_id == source_file_id
+            else target_file_label.rsplit("/", 1)[-1]
+        )
+        navigation = navigation_targets.get(edge.target_navigation_target_id)
+        target_html = (
+            f'<a class="relation-target-symbol" '
+            f'href="{escape(navigation.url, quote=True)}" target="_blank" '
+            f'rel="noopener">{escape(target_label)}</a>'
+            if navigation is not None
+            and navigation.state == "available"
+            and navigation.url
+            else f'<b class="relation-target-symbol">{escape(target_label)}</b>'
+        )
+        return file_badge, target_file_label, target_html
+
+    def render_member_relation(
+        edge: StructuralGraphEdge,
+        source_file_id: str,
+    ) -> str:
+        file_badge, target_file_label, target_html = target_presentation(
+            edge, source_file_id
+        )
+        focuses = edge_focuses(edge)
+        operation_symbol = {
+            "added": "+",
+            "removed": "−",
+            "retained": "=",
+        }[edge.operation]
+        return (
+            '<div class="member-relation" tabindex="0" '
+            f'data-edge-id="{escape(edge.id, quote=True)}" '
+            f'data-source-node="{escape(edge.source_node_id, quote=True)}" '
+            f'data-target-node="{escape(edge.target_node_id, quote=True)}" '
+            f'data-relation-group="{escape(group_by_edge_id[edge.id].id, quote=True)}" '
+            f'data-focuses="{escape(" ".join(focuses), quote=True)}" '
+            f'title="{len(edge.path_evidence_ids)} support references">'
+            f'<span class="relation-kind">{escape(edge.relation)}</span>'
+            f'<span class="relation-operation operation-{escape(edge.operation)}">'
+            f'{operation_symbol}</span>'
+            f'<span class="relation-target-file" title="{escape(target_file_label, quote=True)}">'
+            f'{escape(file_badge)}</span>'
+            f'<span class="relation-arrow">→</span>{target_html}</div>'
+        )
+
+    def render_file_relations(file_id: str) -> str:
+        file_edges = tuple(outgoing.get(file_id, ()))
+        if not file_edges:
+            return ""
+        grouped: dict[tuple[str, str, str], list[StructuralGraphEdge]] = {}
+        for edge in file_edges:
+            target_file_id = file_by_node.get(edge.target_node_id)
+            target_file = (
+                _structural_standalone_name(facts[target_file_id])
+                if target_file_id
+                else str(facts[edge.target_node_id].metadata.get("path", "external"))
+            )
+            grouped.setdefault(
+                (edge.relation, edge.operation, target_file), []
+            ).append(edge)
+        rows = []
+        for (relation, operation, target_file), grouped_edges in sorted(
+            grouped.items()
+        ):
+            operation_symbol = {
+                "added": "+",
+                "removed": "−",
+                "retained": "=",
+            }[operation]
+            focuses = tuple(dict.fromkeys(
+                focus_id
+                for edge in grouped_edges
+                for focus_id in edge_focuses(edge)
+            ))
+            exact_targets = "".join(
+                f'<li class="file-relation-target" '
+                f'data-edge-id="{escape(edge.id, quote=True)}" '
+                f'data-source-node="{escape(edge.source_node_id, quote=True)}" '
+                f'data-target-node="{escape(edge.target_node_id, quote=True)}">'
+                + target_presentation(edge, file_id)[2]
+                + '</li>'
+                for edge in grouped_edges
+            )
+            rows.append(
+                '<details class="file-relation-group" '
+                f'data-focuses="{escape(" ".join(focuses), quote=True)}">'
+                '<summary>'
+                f'<span class="relation-kind">{escape(relation)}</span>'
+                f'<span class="relation-operation operation-{escape(operation)}">'
+                f'{operation_symbol}</span>'
+                f'<span class="relation-target-file" title="{escape(target_file, quote=True)}">'
+                f'{escape(target_file.rsplit("/", 1)[-1])}</span>'
+                f'<b>{len(grouped_edges)} exact target'
+                f'{"s" if len(grouped_edges) != 1 else ""}</b></summary>'
+                f'<ul>{exact_targets}</ul></details>'
+            )
+        return (
+            '<div class="file-relations"><span>File relationships</span>'
+            + "".join(rows)
+            + "</div>"
+        )
+
+    panels = []
+    for file_id in sorted(
+        file_ids,
+        key=lambda item: _structural_standalone_name(facts[item]),
+    ):
+        file_member_ids = set(members_by_file[file_id])
+        children_by_parent: dict[str, list[str]] = {}
+        for child_id in file_member_ids:
+            children_by_parent.setdefault(
+                parent_by_child.get(child_id, file_id), []
+            ).append(child_id)
+        member_ids: list[str] = []
+        member_depth: dict[str, int] = {}
+
+        def append_children(parent_id: str, depth: int) -> None:
+            for child_id in sorted(
+                children_by_parent.get(parent_id, ()),
+                key=lambda item: _structural_name(facts[item]),
+            ):
+                if child_id in member_depth:
+                    continue
+                member_depth[child_id] = depth
+                member_ids.append(child_id)
+                append_children(child_id, depth + 1)
+
+        append_children(file_id, 0)
+        for member_id in sorted(
+            file_member_ids - set(member_ids),
+            key=lambda item: _structural_name(facts[item]),
+        ):
+            member_depth[member_id] = 0
+            member_ids.append(member_id)
+        node_direct_focuses, context_focuses = _aggregate_node_focus(
+            (file_id, *member_ids), node_focus
+        )
+        direct_focuses = tuple(dict.fromkeys((
+            *node_direct_focuses,
+            *(
+                focus_id
+                for node_id in (file_id, *member_ids)
+                for focus_id in edge_focus_by_node.get(node_id, ())
+            ),
+        )))
+        rows = []
+        for node_id in member_ids:
+            node = backbone_nodes[node_id]
+            fact = facts[node_id]
+            kind = str(fact.metadata.get("symbol_kind", "symbol"))
+            _path, separator, raw_name = _structural_name(fact).partition(" · ")
+            name = raw_name if separator else _path
+            label = _structural_symbol_label(fact, name)
+            parent_id = parent_by_child.get(node_id)
+            parent_label = ""
+            if parent_id and parent_id != file_id and parent_id in facts:
+                if "::" in name:
+                    name = name.rsplit("::", 1)[-1]
+                    label = _structural_symbol_label(fact, name)
+                _parent_path, parent_separator, raw_parent_name = (
+                    _structural_name(facts[parent_id]).partition(" · ")
+                )
+                parent_name = (
+                    raw_parent_name if parent_separator else _parent_path
+                )
+                if "::" in parent_name:
+                    parent_name = parent_name.rsplit("::", 1)[-1]
+                parent_label = _structural_symbol_label(
+                    facts[parent_id], parent_name
+                )
+            node_direct, contextual = _aggregate_node_focus(
+                (node_id,), node_focus
+            )
+            direct = tuple(dict.fromkeys((
+                *node_direct,
+                *edge_focus_by_node.get(node_id, ()),
+            )))
+            relations = "".join(
+                render_member_relation(edge, file_id)
+                for edge in outgoing.get(node_id, ())
+            )
+            node_href = _structural_node_href(node, graph.navigation_targets)
+            node_label = (
+                f'<a class="member-node-link" href="{escape(node_href, quote=True)}" '
+                f'target="_blank" rel="noopener">{escape(label)}</a>'
+                if node_href
+                else f'<b>{escape(label)}</b>'
+            )
+            inherited_operation = node.delta == backbone_nodes[file_id].delta
+            operation = (
+                '<span class="member-operation inherited" aria-hidden="true"></span>'
+                if inherited_operation
+                else (
+                    f'<span class="member-operation operation-{escape(node.delta)}">'
+                    f'{escape(node.delta)}</span>'
+                )
+            )
+            nested = bool(parent_label)
+            aria_label = (
+                f'{label}, {kind}, nested in {parent_label}'
+                if nested
+                else f'{label}, {kind}'
+            )
+            rows.append(
+                '<div class="file-member-line'
+                f'{" is-nested" if nested else ""}" '
+                f'style="--member-depth:{min(member_depth[node_id], 3)}" '
+                f'data-structural-node="{escape(node_id, quote=True)}" '
+                f'data-parent-node="{escape(parent_id or "", quote=True)}" '
+                f'data-focuses="{escape(" ".join(direct), quote=True)}" '
+                f'data-context-focuses="{escape(" ".join(contextual), quote=True)}" '
+                f'aria-label="{escape(aria_label, quote=True)}">'
+                '<div class="member-line-main">'
+                f'{operation}{node_label}'
+                f'<small>{escape(kind.replace("_", " "))}</small>'
+                f'</div>{relations}</div>'
+            )
+        panel_node_ids = {file_id, *member_ids}
+        isolated_file = not bool(panel_node_ids & relation_endpoint_ids)
+        file_node = backbone_nodes[file_id]
+        file_href = _structural_node_href(file_node, graph.navigation_targets)
+        file_label = escape(_structural_standalone_name(facts[file_id]))
+        file_heading = (
+            f'<a class="file-node-link" href="{escape(file_href, quote=True)}" '
+            f'target="_blank" rel="noopener">{file_label}</a>'
+            if file_href
+            else f'<b>{file_label}</b>'
+        )
+        component = architectural_components[file_id]
+        file_relations = render_file_relations(file_id)
+        panels.append(
+            '<section class="file-member-panel" '
+            f'data-structural-node="{escape(file_id, quote=True)}" '
+            f'data-focuses="{escape(" ".join(direct_focuses), quote=True)}" '
+            f'data-context-focuses="{escape(" ".join(context_focuses), quote=True)}">'
+            '<header><div class="file-header-meta"><span>file · '
+            f'{escape(backbone_nodes[file_id].delta)}'
+            f'{" · isolated" if isolated_file else ""}</span>'
+            f'{_architectural_chip_html(component)}</div>'
+            f'{file_heading}</header>{file_relations}'
+            f'<div class="file-member-lines">{"".join(rows)}</div></section>'
+        )
+    return '<div class="file-member-graph">' + "".join(panels) + "</div>"
 
 
 def _architectural_membership_attributes(
@@ -1357,6 +2534,8 @@ def render_html(brief: ReviewBrief) -> str:
 <title>{escape(packet.title)} · RepoDelta</title>
 <style>
 :root{{color-scheme:dark;--bg:#080c0f;--panel:#10171b;--border:#26373f;--text:#edf3f0;--muted:#9eaaaf;--faint:#6f7d83;--green:#7be3ac;--amber:#e7ca7c;--red:#ef8f91;--blue:#9fcdf0;--shadow:0 22px 64px rgba(0,0,0,.28)}}*{{box-sizing:border-box}}body{{margin:0;color:var(--text);line-height:1.55;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 18% -8%,rgba(69,167,118,.12),transparent 31rem),var(--bg)}}code{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}}.shell{{width:min(1180px,calc(100% - 40px));margin:30px auto 84px}}.topbar{{margin-bottom:22px;font-weight:720}}.brand-mark{{display:inline-block;width:14px;height:14px;margin-right:10px;border:2px solid white;transform:rotate(45deg);border-radius:3px}}.section{{border:2px solid var(--border);border-radius:18px;background:linear-gradient(180deg,rgba(17,24,28,.97),rgba(11,17,21,.98));box-shadow:var(--shadow);padding:28px;margin-bottom:22px}}h1{{font-size:31px;margin:0 0 14px}}h2{{font-size:22px;margin:0 0 14px}}h3{{font-size:16px;margin:0 0 8px}}.meta{{display:flex;flex-wrap:wrap;gap:9px;color:var(--muted);font-size:13px;margin-bottom:16px}}.intent{{max-width:850px;color:#d2dade;font-size:15px}}.source-link,.file-link{{color:#b9dfff;text-decoration:none}}.source-note,.projection-source,.context-source{{display:block;color:var(--faint);font-size:10px;line-height:1.45}}.projection-heading{{display:block;margin-bottom:9px;color:#89979d;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.045em}}.review-structural-graph{{margin-top:24px;padding:18px;border:1px solid rgba(111,128,135,.22);border-radius:12px;background:rgba(5,10,13,.24)}}.delta-graph-heading{{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}}.structural-coverage{{margin-bottom:3px;color:var(--muted);font-size:9px}}.structural-coverage.state-partial,.structural-coverage.state-stale,.structural-coverage.state-missing,.structural-coverage.state-invalid,.structural-coverage.state-error{{color:var(--amber)}}.subgraph-summary{{color:var(--muted);font-size:9px}}.delta-focus-controls{{display:flex;flex:1 1 560px;min-width:0;max-width:720px;flex-wrap:wrap;justify-content:flex-end;gap:5px}}.delta-focus{{border:1px solid rgba(111,128,135,.35);border-radius:999px;padding:4px 9px;background:transparent;color:var(--muted);font:700 9px inherit;cursor:pointer}}.delta-focus:hover,.delta-focus.active{{border-color:var(--green);background:rgba(54,118,87,.20);color:#c9efd6}}.delta-canvas-scroll{{margin-top:14px;overflow-x:auto;border:1px solid rgba(111,128,135,.16);border-radius:10px;background:rgba(3,7,9,.34)}}.delta-canvas{{display:block;min-width:100%;height:auto}}.delta-edge,.structural-container,.delta-node,.isolated-anchor{{transition:opacity .16s ease,filter .16s ease}}.delta-edge path{{fill:none;stroke-width:1.8}}.delta-edge-label-bg{{fill:rgba(3,7,9,.92);stroke:rgba(111,128,135,.24);stroke-width:.7}}.delta-edge-label{{font-size:8px;text-anchor:middle;paint-order:stroke;stroke:var(--bg);stroke-width:2px;stroke-linejoin:round}}.delta-edge.operation-added path{{stroke:var(--green)}}.delta-edge.operation-added text{{fill:var(--green)}}.delta-edge.operation-removed path{{stroke:var(--red);stroke-dasharray:6 5}}.delta-edge.operation-removed text{{fill:var(--red)}}.delta-edge.operation-retained path{{stroke:#73848c}}.delta-edge.operation-retained text{{fill:#94a2a8}}#arrow-added path{{fill:var(--green)}}#arrow-removed path{{fill:var(--red)}}#arrow-retained path{{fill:#73848c}}.structural-container{{fill:rgba(16,27,33,.42);stroke:#354a54;stroke-width:1.1}}.structural-container.operation-added{{stroke:rgba(123,227,172,.52);fill:rgba(54,118,87,.06)}}.structural-container.operation-removed{{stroke:rgba(239,143,145,.5);stroke-dasharray:6 4;fill:rgba(112,43,48,.05)}}.delta-node rect{{fill:#111a1f;stroke:#53656e;stroke-width:1.2}}.delta-node.operation-added rect{{stroke:var(--green);fill:rgba(54,118,87,.14)}}.delta-node.operation-modified rect{{stroke:var(--amber);fill:rgba(106,85,30,.13)}}.delta-node.operation-removed rect{{stroke:var(--red);stroke-dasharray:6 4;fill:rgba(112,43,48,.12)}}.delta-node-kind{{fill:var(--muted);font-size:8px;text-transform:uppercase}}.delta-node-name{{fill:var(--text);font-size:10px;font-weight:700}}.delta-node-path{{fill:var(--faint);font-size:8px}}.focus-muted{{opacity:.13}}.focus-context{{opacity:.7}}.structural-container.focus-context,.structural-container-header.focus-context{{filter:drop-shadow(0 0 2px rgba(159,205,240,.22))}}.focus-active{{opacity:1;filter:drop-shadow(0 0 5px rgba(123,227,172,.35))}}.delta-empty{{margin:14px 0 0;padding:18px;border:1px dashed rgba(111,128,135,.26);border-radius:10px;color:var(--faint);font-size:11px}}.isolated-anchors{{margin-top:12px;border-top:1px solid rgba(111,128,135,.18);padding-top:10px}}.isolated-anchors>summary{{cursor:pointer;color:var(--muted);font-size:10px}}.isolated-anchor-list{{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:9px}}.isolated-anchor{{display:grid;grid-template-columns:auto 1fr auto;gap:4px 7px;min-width:0;padding:8px;border:1px solid rgba(111,128,135,.16);border-left:2px solid var(--amber);border-radius:7px}}.isolated-anchor.operation-added{{border-left-color:var(--green)}}.isolated-anchor.operation-removed{{border-left-color:var(--red);border-style:dashed}}.isolated-anchor-focus,.isolated-anchor-operation,.isolated-anchor-kind{{color:var(--faint);font-size:8px}}.isolated-anchor-operation{{text-transform:uppercase}}.isolated-anchor-kind{{text-align:right}}.isolated-anchor-name{{grid-column:1/-1;overflow-wrap:anywhere;font-size:9px}}.isolated-anchor .projection-source{{grid-column:1/-1}}.context{{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(111,128,135,.24)}}.context>summary{{cursor:pointer;color:var(--muted);font-size:11px}}.context-row{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px;gap:12px;padding:12px 0;border-bottom:1px solid rgba(111,128,135,.18)}}.context-id{{color:#9fcdf0;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace}}.context-copy{{font-size:12px}}.context-authority{{color:var(--muted);font-size:10px;text-align:right}}.context-source{{grid-column:2/-1}}.attention-list,.file-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:var(--amber);font-size:10px;font-weight:700;text-transform:uppercase}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px}}.empty,.empty-state{{color:var(--faint);font-size:12px}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}@media(max-width:950px){{.isolated-anchor-list{{grid-template-columns:repeat(2,minmax(0,1fr))}}}}@media(max-width:600px){{.shell{{width:calc(100% - 18px);margin-top:16px}}.section{{padding:22px 20px}}.attention-row,.context-row{{grid-template-columns:1fr}}.delta-graph-heading{{display:block}}.delta-focus-controls{{max-width:none;justify-content:flex-start;margin-top:10px}}.isolated-anchor-list{{grid-template-columns:1fr}}}}@media print{{:root{{color-scheme:light;--bg:#fff;--panel:#fff;--text:#111;--muted:#444;--faint:#666;--border:#bbb}}body{{background:#fff}}.section{{box-shadow:none;break-inside:avoid}}.delta-focus-controls{{display:none}}.delta-canvas-scroll{{overflow:visible}}}}.delta-graph-heading{{flex-wrap:wrap}}.delta-node.operation-renamed rect{{stroke:var(--blue);stroke-dasharray:8 3;fill:rgba(48,83,110,.14)}}.isolated-anchor.operation-renamed{{border-left-color:var(--blue);border-style:dashed}}.delta-node.operation-retained rect{{stroke:#53656e;fill:#111a1f}}.delta-node.operation-unresolved rect{{stroke:var(--faint);stroke-dasharray:3 3;fill:rgba(111,125,131,.08)}}.isolated-anchor.operation-unresolved{{border-left-color:var(--faint);border-style:dashed}}.structural-container-header,.secondary-placement{{transition:opacity .16s ease,filter .16s ease}}.structural-container-header rect{{fill:#132027;stroke:#58707c;stroke-width:1.1}}.structural-container-header.operation-added rect{{stroke:var(--green);fill:rgba(54,118,87,.14)}}.structural-container-header.operation-modified rect{{stroke:var(--amber);fill:rgba(106,85,30,.13)}}.structural-container-header.operation-removed rect{{stroke:var(--red);stroke-dasharray:6 4;fill:rgba(112,43,48,.12)}}.structural-container-header.operation-unresolved rect{{stroke:var(--faint);stroke-dasharray:3 3}}.secondary-placement rect{{fill:rgba(48,83,110,.18);stroke:var(--blue);stroke-width:.8;stroke-dasharray:3 2}}.secondary-placement text{{fill:var(--blue);font-size:8px}}.delta-focus.no-visible-backbone{{border-style:dashed;color:var(--faint)}}.delta-focus-empty{{margin:12px 0 0;padding:9px 11px;border:1px dashed rgba(111,128,135,.3);border-radius:8px;color:var(--muted);font-size:10px}}
+.delta-focus-copy{{display:grid;grid-template-columns:34px minmax(0,1fr);gap:8px;margin:12px 0 0;padding:8px 10px;border-left:2px solid var(--green);background:rgba(54,118,87,.06);color:var(--muted);font-size:9px}}
+.delta-focus-copy[hidden]{{display:none}}.delta-focus-copy b{{color:var(--green)}}
 .delta-node-marker{{stroke-width:3;stroke-linecap:round}}
 .delta-node.operation-added .delta-node-marker{{stroke:var(--green)}}
 .delta-node.operation-modified .delta-node-marker{{stroke:var(--amber)}}
@@ -1370,6 +2549,62 @@ def render_html(brief: ReviewBrief) -> str:
 .relationship-inspector,.isolated-anchors{{margin-top:12px;border-top:1px solid rgba(111,128,135,.18);padding-top:10px}}
 .relationship-inspector>summary,.isolated-anchors>summary{{cursor:pointer;color:var(--muted);font-size:10px}}
 .standalone-explanation{{margin:8px 0 0;color:var(--faint);font-size:9px}}
+.file-overview-intro{{margin:0 0 12px;color:var(--muted);font-size:10px}}
+.unified-graph-stage{{margin-top:14px}}
+.file-delta-canvas{{display:block;width:100%;min-width:720px;height:auto}}
+.file-graph-node{{cursor:pointer;outline:none}}
+.file-graph-node rect{{fill:#111a1f;stroke:#53656e;stroke-width:1.2}}
+.file-graph-node:hover rect,.file-graph-node:focus rect{{stroke:var(--green);fill:rgba(54,118,87,.14)}}
+.file-node-operation{{fill:var(--green);font-size:8px;text-transform:uppercase}}
+.file-node-name{{fill:var(--text);font-size:10px;font-weight:700}}
+.file-node-counts{{fill:var(--faint);font-size:8px}}
+.file-delta-edge>path{{fill:none;stroke:#71848d;stroke-width:1.4}}
+.file-delta-edge.operation-added>path{{stroke:var(--green)}}
+.file-delta-edge.operation-removed>path{{stroke:var(--red);stroke-dasharray:5 4}}
+.file-delta-edge rect{{fill:#10171b;stroke:rgba(111,128,135,.24)}}
+.file-delta-edge text{{fill:var(--muted);font-size:7px;text-anchor:middle}}
+.file-member-graph{{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px;align-items:start}}
+.file-member-panel{{min-width:0;border:1px solid rgba(111,128,135,.28);border-radius:11px;background:rgba(5,10,13,.34);overflow:hidden}}
+.file-member-panel>header{{display:grid;gap:3px;padding:11px 13px;border-bottom:1px solid rgba(111,128,135,.22);background:rgba(16,27,33,.5)}}
+.file-header-meta{{display:flex;justify-content:space-between;gap:8px;align-items:center}}
+.file-header-meta>span{{color:var(--green);font-size:8px;text-transform:uppercase}}
+.file-member-panel>header b,.file-node-link{{overflow-wrap:anywhere;font-size:10px}}
+.file-node-link,.member-node-link,.member-relation a{{color:inherit;text-decoration:none}}
+.file-node-link:hover,.member-node-link:hover,.member-relation a:hover{{color:var(--blue);text-decoration:underline}}
+.file-member-lines{{padding:4px 12px 9px}}
+.file-member-line{{padding:8px 0}}
+.file-member-line.is-nested{{margin-left:calc(var(--member-depth,0) * 12px);padding-left:10px;border-left:1px solid rgba(111,128,135,.24)}}
+.file-member-line+.file-member-line{{border-top:1px solid rgba(111,128,135,.12)}}
+.member-line-main{{display:grid;grid-template-columns:52px minmax(0,1fr) 58px;gap:8px;align-items:center}}
+.member-line-main b,.member-node-link{{overflow-wrap:anywhere;font:650 9px ui-monospace,SFMono-Regular,Menlo,monospace}}
+.member-line-main small,.member-operation{{color:var(--faint);font-size:7px;text-transform:uppercase}}
+.member-line-main small{{text-align:right}}
+.member-operation.inherited{{min-height:1px}}
+.member-relation{{display:grid;grid-template-columns:74px 18px 78px 12px minmax(0,1fr);gap:5px;align-items:center;margin:5px 0 0 60px;padding:4px 6px;border-left:2px solid rgba(123,227,172,.48);background:rgba(54,118,87,.05);font-size:7px;outline:none}}
+.member-relation:focus{{background:rgba(54,118,87,.14);border-left-color:var(--green)}}
+.relation-kind{{color:var(--green);font-weight:720;text-transform:uppercase}}
+.relation-operation{{font-size:10px;font-weight:800;text-align:center}}
+.relation-operation.operation-added{{color:var(--green)}}
+.relation-operation.operation-removed{{color:var(--red)}}
+.relation-operation.operation-retained{{color:var(--faint)}}
+.relation-target-file{{overflow:hidden;padding:1px 5px;border:1px solid rgba(159,205,240,.28);border-radius:999px;color:var(--blue);text-overflow:ellipsis;white-space:nowrap}}
+.relation-arrow{{color:var(--faint);text-align:center}}
+.relation-target-symbol{{min-width:0;overflow-wrap:anywhere;color:var(--muted);font-weight:550}}
+.file-relations{{padding:8px 12px;border-bottom:1px solid rgba(111,128,135,.16);background:rgba(3,7,9,.18)}}
+.file-relations>span{{display:block;margin-bottom:5px;color:var(--faint);font-size:7px;font-weight:750;text-transform:uppercase;letter-spacing:.06em}}
+.file-relation-group{{border-top:1px solid rgba(111,128,135,.1)}}
+.file-relation-group>summary{{display:grid;grid-template-columns:74px 18px 78px minmax(0,1fr);gap:5px;align-items:center;padding:5px 0;cursor:pointer;font-size:7px}}
+.file-relation-group>summary b{{color:var(--muted);font-weight:550}}
+.file-relation-group ul{{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 6px;padding:0;list-style:none}}
+.file-relation-group li{{padding:2px 6px;border-radius:5px;background:rgba(159,205,240,.07);font-size:7px}}
+.file-member-line.related-target{{border-radius:5px;background:rgba(159,205,240,.09);box-shadow:inset 2px 0 var(--blue)}}
+.delta-focus-controls{{display:grid;flex:1 1 100%;max-width:none;gap:10px;margin-top:12px}}
+.delta-focus-primary{{display:flex;gap:7px;align-items:center}}
+.delta-focus-families{{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 18px}}
+.delta-focus-family{{display:grid;grid-template-columns:96px minmax(0,1fr);gap:9px;align-items:start}}
+.delta-focus-family>span{{padding-top:5px;color:var(--faint);font-size:8px;font-weight:750;text-transform:uppercase;letter-spacing:.06em}}
+.delta-focus-family>div{{display:flex;flex-wrap:wrap;gap:5px}}
+.file-overview-empty{{margin:14px 0 0;padding:12px;border:1px dashed rgba(111,128,135,.26);border-radius:8px;color:var(--faint);font-size:10px}}
 .delta-edge[role="button"]{{cursor:pointer;outline:none}}
 .delta-edge[role="button"]:focus path,.delta-edge.group-expanded path{{stroke-width:3}}
 .relation-group-inspector{{display:grid;gap:7px;margin-top:10px}}
@@ -1394,6 +2629,7 @@ def render_html(brief: ReviewBrief) -> str:
 .architectural-chip.layer-unclassified rect{{stroke-dasharray:3 2;fill:rgba(111,128,135,.24)}}
 .architectural-chip-html{{grid-column:1/-1;justify-self:start;border:1px solid rgba(159,205,240,.45);border-radius:999px;padding:2px 7px;background:rgba(48,83,110,.32);color:#c9e8ff;font:760 8px inherit;text-transform:uppercase;cursor:pointer}}
 .architectural-chip-html.layer-unclassified{{border-style:dashed;color:var(--muted)}}
+.file-header-meta .architectural-chip-html{{grid-column:auto;justify-self:auto;padding:1px 6px;font-size:7px}}
 .member-muted{{opacity:.13}}.member-context{{opacity:.65}}.member-active{{opacity:1;filter:drop-shadow(0 0 5px rgba(123,227,172,.35))}}
 .transformation-strip{{display:grid;grid-template-columns:minmax(0,1fr) 28px minmax(0,1.2fr) 28px minmax(0,1fr);gap:8px;align-items:stretch}}
 .summary-stage{{min-width:0;padding:13px;border:1px solid rgba(111,128,135,.2);border-radius:10px;background:rgba(3,7,9,.2)}}
@@ -1423,6 +2659,56 @@ def render_html(brief: ReviewBrief) -> str:
 .verification-coverage,.display-boundary{{display:block;margin-top:10px;color:var(--faint);font-size:8px}}
 .coverage-limits{{margin-top:14px;padding:0 12px;border:1px solid rgba(111,128,135,.2);border-radius:9px;background:rgba(3,7,9,.2)}}.coverage-limits>summary{{padding:10px 0;cursor:pointer;color:var(--amber);font-size:10px}}
 @media(max-width:800px){{.transformation-strip{{grid-template-columns:1fr}}.summary-arrow{{transform:rotate(90deg)}}.verification-detail{{grid-template-columns:1fr}}.verification-item>summary{{grid-template-columns:42px minmax(0,1fr)}}.verification-item>summary .status-pill{{grid-column:2}}}}
+@media(max-width:760px){{.file-delta-canvas{{min-width:680px}}.file-member-graph{{grid-template-columns:1fr}}.delta-focus-families{{grid-template-columns:1fr}}.delta-focus-family{{grid-template-columns:82px minmax(0,1fr)}}}}
+.file-graph-node,.file-delta-edge{{transition:opacity .16s ease,filter .16s ease}}
+.file-graph-node.focus-muted,.file-delta-edge.focus-muted{{opacity:.12}}
+.file-graph-node.focus-context,.file-delta-edge.focus-context{{opacity:.52}}
+.file-graph-node.focus-active{{opacity:1;filter:drop-shadow(0 0 5px rgba(123,227,172,.25))}}
+.file-delta-edge.focus-active{{opacity:1;filter:drop-shadow(0 0 3px rgba(123,227,172,.25))}}
+.file-node-layer{{fill:var(--blue);font-size:7px;text-anchor:end;text-transform:uppercase}}
+.file-lane-label{{fill:var(--faint);font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}}
+.file-lane-label.verification{{fill:var(--blue)}}
+.file-lane-divider{{stroke:rgba(111,128,135,.24);stroke-width:1}}
+.evidence-paths{{margin-top:18px}}
+.evidence-paths[hidden]{{display:none}}
+.evidence-path-heading{{display:flex;justify-content:space-between;gap:14px;align-items:end;margin-bottom:8px}}
+.evidence-path-heading h4{{margin:0;font-size:13px}}
+.evidence-path-heading p{{margin:2px 0 0;color:var(--muted);font-size:9px}}
+.evidence-path-list{{border-top:1px solid rgba(111,128,135,.22)}}
+.evidence-path-row{{display:grid;grid-template-columns:115px minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;padding:10px 8px;border:0;border-bottom:1px solid rgba(111,128,135,.12);background:transparent;color:var(--text);font:inherit;text-align:left;cursor:pointer}}
+.evidence-path-row[hidden]{{display:none}}
+.evidence-path-row:hover,.evidence-path-row.active{{background:rgba(54,118,87,.10)}}
+.evidence-path-row.active{{box-shadow:inset 2px 0 var(--green)}}
+.evidence-path-kind{{color:var(--blue);font-size:8px;font-weight:720;text-transform:uppercase}}
+.evidence-path-main{{display:flex;min-width:0;align-items:center;gap:7px;overflow:hidden}}
+.evidence-path-main code{{overflow:hidden;color:var(--text);font-size:9px;text-overflow:ellipsis;white-space:nowrap}}
+.evidence-path-arrow{{flex:0 0 auto;color:var(--green)}}.evidence-path-plus{{color:var(--faint)}}
+.evidence-path-action{{color:var(--faint);font-size:8px;white-space:nowrap}}
+.evidence-path-inspector{{margin-top:12px;padding:12px;border:1px solid rgba(111,128,135,.24);background:rgba(3,7,9,.22)}}
+.evidence-path-inspector[hidden],.evidence-path-trace[hidden],.path-trace-order[hidden]{{display:none}}
+.evidence-path-inspector-heading{{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:11px;font-size:9px}}
+.path-direction-controls{{display:flex;gap:5px}}
+.path-direction-controls button{{padding:4px 8px;border:1px solid rgba(111,128,135,.34);border-radius:6px;background:transparent;color:var(--muted);font:inherit;font-size:8px;cursor:pointer}}
+.path-direction-controls button[aria-pressed="true"]{{border-color:var(--green);color:var(--text)}}
+.path-tree-forest{{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start}}
+.path-tree-forest>.path-tree-node:only-child{{grid-column:1/-1}}
+.path-tree-node{{min-width:0}}
+.path-tree-node>ul{{display:grid;gap:6px;margin:6px 0 0 12px;padding:0 0 0 14px;border-left:1px solid rgba(123,227,172,.28);list-style:none}}
+.path-tree-node>ul>li{{display:grid;grid-template-columns:94px minmax(0,1fr);gap:8px;align-items:start;position:relative}}
+.path-tree-node>ul>li::before{{content:"";position:absolute;top:13px;left:-14px;width:11px;border-top:1px solid rgba(123,227,172,.42)}}
+.path-trace-step{{display:grid;min-width:0;gap:3px;padding:7px 9px;border-left:2px solid var(--green);background:rgba(16,27,33,.5)}}
+.path-trace-step a,.path-trace-step b{{overflow:hidden;color:var(--text);font:650 9px ui-monospace,SFMono-Regular,Menlo,monospace;text-decoration:none;text-overflow:ellipsis;white-space:nowrap}}
+.path-trace-step a:hover{{color:var(--blue);text-decoration:underline}}
+.path-trace-step small{{overflow:hidden;color:var(--faint);font-size:7px;text-overflow:ellipsis;white-space:nowrap}}
+.path-tree-relation{{padding-top:7px;color:var(--green);font-size:7px;text-align:right}}
+.path-tree-relation b{{font-size:10px;font-weight:400}}
+.path-tree-reference{{display:block;padding:7px 9px;color:var(--blue);font:650 8px ui-monospace,SFMono-Regular,Menlo,monospace}}
+.evidence-path-empty{{margin:10px 0 0;padding:10px;border:1px dashed rgba(111,128,135,.28);color:var(--muted);font-size:9px}}
+.structural-audit{{margin-top:14px;border-top:1px solid rgba(111,128,135,.22);padding-top:10px}}
+.structural-audit>summary{{cursor:pointer;color:var(--muted);font-size:10px}}
+.structural-audit-intro{{margin:8px 0 0;color:var(--faint);font-size:8px}}
+.structural-audit .file-member-graph{{margin-top:10px}}
+@media(max-width:760px){{.evidence-path-row{{grid-template-columns:1fr auto}}.evidence-path-kind{{grid-column:1/-1}}.path-tree-forest{{grid-template-columns:1fr}}.path-tree-node>ul>li{{grid-template-columns:82px minmax(0,1fr)}}.evidence-path-main{{flex-wrap:wrap}}}}
 </style></head><body><main class="shell">
 <div class="topbar"><span class="brand-mark"></span>RepoDelta</div>
 <section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{brief.overview.changed_file_count} changed files</span><span>·</span><span>{escape(ci_copy)}</span><span>·</span><span>{escape(llm_shadow_copy)}</span></div><h1>{escape(packet.title)}</h1>{primary_context}<span class="source-note">Source: {source_line}</span>{review_context}</section>
@@ -1432,32 +2718,134 @@ def render_html(brief: ReviewBrief) -> str:
     {coverage_limits}
 <div class="footer">RepoDelta · {escape(pr_label)} · Schema {escape(brief.schema_version)} · Generated by {escape(brief.generated_by)}</div>
 </main><script>
+const tokenSet = (value) => new Set((value || "").split(/\\s+/).filter(Boolean));
+const intersects = (left, right) => [...left].some((item) => right.has(item));
 const focusSurfaces = document.querySelectorAll(".review-structural-graph");
-const clearMemberFocus = () => {{
-  document.querySelectorAll(".member-muted, .member-context, .member-active").forEach((item) => {{
-    item.classList.remove("member-muted", "member-context", "member-active");
+const clearMapFocus = (surface) => {{
+  surface.querySelectorAll(".file-graph-node, .file-delta-edge").forEach((item) => {{
+    item.classList.remove("focus-muted", "focus-context", "focus-active");
   }});
 }};
+const applyAuthoredMapFocus = (surface, focus) => {{
+  clearMapFocus(surface);
+  let matched = false;
+  surface.querySelectorAll(".file-graph-node, .file-delta-edge").forEach((item) => {{
+    const direct = focus === "overview" || tokenSet(item.dataset.focuses).has(focus);
+    const contextual = focus !== "overview" && !direct &&
+      tokenSet(item.dataset.contextFocuses).has(focus);
+    if (focus !== "overview" && (direct || contextual)) matched = true;
+    item.classList.toggle("focus-muted", !direct && !contextual);
+    item.classList.toggle("focus-context", contextual);
+    item.classList.toggle("focus-active", focus !== "overview" && direct);
+  }});
+  return matched;
+}};
+const setPathDirection = (surface, direction) => {{
+  const inspector = surface.querySelector(".evidence-path-inspector");
+  if (!inspector) return;
+  inspector.querySelectorAll("[data-path-direction-target]").forEach((button) => {{
+    button.setAttribute("aria-pressed", String(
+      button.dataset.pathDirectionTarget === direction
+    ));
+  }});
+  inspector.querySelectorAll(".evidence-path-trace:not([hidden]) .path-trace-order").forEach((order) => {{
+    order.hidden = order.dataset.pathDirection !== direction;
+  }});
+}};
+const activateEvidencePath = (surface, row, narrowMap = true) => {{
+  const fileIds = tokenSet(row.dataset.fileNodeIds);
+  const groupIds = tokenSet(row.dataset.groupIds);
+  surface.querySelectorAll(".evidence-path-row").forEach((item) => {{
+    const active = item === row;
+    item.classList.toggle("active", active);
+    item.setAttribute("aria-pressed", String(active));
+  }});
+  if (narrowMap) {{
+    clearMapFocus(surface);
+    surface.querySelectorAll(".file-graph-node").forEach((node) => {{
+      const active = fileIds.has(node.dataset.fileNode);
+      node.classList.toggle("focus-active", active);
+      node.classList.toggle("focus-muted", !active);
+    }});
+    surface.querySelectorAll(".file-delta-edge").forEach((edge) => {{
+      const active = intersects(tokenSet(edge.dataset.groupIds), groupIds);
+      edge.classList.toggle("focus-active", active);
+      edge.classList.toggle("focus-muted", !active);
+    }});
+  }}
+  const inspector = surface.querySelector(".evidence-path-inspector");
+  if (!inspector) return;
+  inspector.hidden = false;
+  let selectedTrace = null;
+  inspector.querySelectorAll(".evidence-path-trace").forEach((trace) => {{
+    const active = trace.dataset.pathTrace === row.dataset.pathId;
+    trace.hidden = !active;
+    if (active) selectedTrace = trace;
+  }});
+  const callsMode = selectedTrace?.dataset.directionMode === "calls";
+  const forward = inspector.querySelector('[data-path-direction-target="forward"]');
+  const reverse = inspector.querySelector('[data-path-direction-target="reverse"]');
+  if (forward) forward.textContent = callsMode ? "Callees" : "Forward";
+  if (reverse) reverse.textContent = callsMode ? "Callers" : "Reverse";
+  setPathDirection(surface, "forward");
+}};
+const filterEvidencePaths = (surface, focus) => {{
+  const paths = surface.querySelector(".evidence-paths");
+  if (!paths) return false;
+  paths.hidden = focus === "overview";
+  const inspector = paths.querySelector(".evidence-path-inspector");
+  if (focus === "overview") {{
+    if (inspector) inspector.hidden = true;
+    paths.querySelectorAll(".evidence-path-row").forEach((row) => {{
+      row.hidden = true;
+      row.classList.remove("active");
+      row.setAttribute("aria-pressed", "false");
+    }});
+    return false;
+  }}
+  let firstVisible = null;
+  paths.querySelectorAll(".evidence-path-row").forEach((row) => {{
+    const visible = tokenSet(row.dataset.focuses).has(focus);
+    row.hidden = !visible;
+    row.classList.remove("active");
+    row.setAttribute("aria-pressed", "false");
+    if (visible && !firstVisible) firstVisible = row;
+  }});
+  const empty = paths.querySelector(".evidence-path-empty");
+  if (empty) empty.hidden = Boolean(firstVisible);
+  if (!firstVisible) {{
+    if (inspector) inspector.hidden = true;
+    return false;
+  }}
+  activateEvidencePath(surface, firstVisible, false);
+  return true;
+}};
 const activateFocus = (focus) => {{
-  clearMemberFocus();
   document.querySelectorAll(".delta-focus").forEach((item) => {{
     item.classList.toggle("active", item.dataset.focusTarget === focus);
   }});
   focusSurfaces.forEach((surface) => {{
-    let matched = false;
-    surface.querySelectorAll("[data-focuses], [data-context-focuses]").forEach((item) => {{
-      const direct = focus === "all" ||
-        (item.dataset.focuses || "").split(/\\s+/).includes(focus);
-      const contextual = focus !== "all" && !direct &&
-        (item.dataset.contextFocuses || "").split(/\\s+/).includes(focus);
-      if (focus !== "all" && (direct || contextual)) matched = true;
-      item.classList.toggle("focus-muted", !direct && !contextual);
-      item.classList.toggle("focus-context", contextual);
-      item.classList.toggle("focus-active", focus !== "all" && direct);
-    }});
+    const focusButton = surface.querySelector(
+      `.delta-focus[data-focus-target="${{CSS.escape(focus)}}"]`
+    );
+    const focusCopy = surface.querySelector(".delta-focus-copy");
+    if (focusCopy) {{
+      const copy = focusButton?.dataset.focusCopy || "";
+      focusCopy.hidden = focus === "overview" || !copy;
+      focusCopy.replaceChildren();
+      if (copy) {{
+        const id = document.createElement("b");
+        const text = document.createElement("span");
+        id.textContent = focus;
+        text.textContent = copy;
+        focusCopy.append(id, text);
+      }}
+    }}
+    const matchedMap = applyAuthoredMapFocus(surface, focus);
+    const matchedPath = filterEvidencePaths(surface, focus);
     const empty = surface.querySelector(".delta-focus-empty");
     if (empty) {{
-      const show = focus !== "all" && !matched;
+      const show = focus !== "overview" && !matchedMap && !matchedPath;
       empty.hidden = !show;
       empty.textContent = show
         ? (document.querySelector(
@@ -1469,32 +2857,33 @@ const activateFocus = (focus) => {{
   }});
 }};
 const activateMembers = (trigger) => {{
-  activateFocus("all");
-  const nodeIds = new Set((trigger.dataset.memberNodeIds || "").split(/\\s+/).filter(Boolean));
-  const contextNodeIds = new Set((trigger.dataset.contextNodeIds || "").split(/\\s+/).filter(Boolean));
-  const groupIds = new Set((trigger.dataset.memberGroupIds || "").split(/\\s+/).filter(Boolean));
-  const contextGroupIds = new Set((trigger.dataset.contextGroupIds || "").split(/\\s+/).filter(Boolean));
-  document.querySelectorAll("[data-component-target]").forEach((item) => {{
+  const audit = trigger.closest(".structural-audit");
+  if (!audit) return;
+  audit.open = true;
+  const nodeIds = tokenSet(trigger.dataset.memberNodeIds);
+  const contextNodeIds = tokenSet(trigger.dataset.contextNodeIds);
+  const groupIds = tokenSet(trigger.dataset.memberGroupIds);
+  const contextGroupIds = tokenSet(trigger.dataset.contextGroupIds);
+  audit.querySelectorAll("[data-component-target]").forEach((item) => {{
     const active = item.dataset.componentTarget === trigger.dataset.componentTarget;
     item.classList.toggle("member-active", active);
     item.classList.toggle("member-muted", !active);
   }});
-  document.querySelectorAll("[data-structural-node]").forEach((item) => {{
+  audit.querySelectorAll("[data-structural-node]").forEach((item) => {{
     const active = nodeIds.has(item.dataset.structuralNode);
     const contextual = !active && contextNodeIds.has(item.dataset.structuralNode);
     item.classList.toggle("member-active", active);
     item.classList.toggle("member-context", contextual);
     item.classList.toggle("member-muted", !active && !contextual);
   }});
-  document.querySelectorAll("[data-group-target]").forEach((item) => {{
+  audit.querySelectorAll("[data-group-target]").forEach((item) => {{
     const active = groupIds.has(item.dataset.groupTarget);
     const contextual = !active && contextGroupIds.has(item.dataset.groupTarget);
     item.classList.toggle("member-active", active);
     item.classList.toggle("member-context", contextual);
     item.classList.toggle("member-muted", !active && !contextual);
   }});
-  const graph = document.querySelector(".review-structural-graph");
-  if (graph) graph.scrollIntoView({{ behavior: "smooth", block: "center" }});
+  audit.scrollIntoView({{ behavior: "smooth", block: "nearest" }});
 }};
 document.querySelectorAll("[data-component-target]").forEach((item) => {{
   item.addEventListener("click", (event) => {{
@@ -1502,22 +2891,60 @@ document.querySelectorAll("[data-component-target]").forEach((item) => {{
     event.stopPropagation();
     activateMembers(item);
   }});
-  item.addEventListener("keydown", (event) => {{
-    if (event.key !== "Enter" && event.key !== " ") return;
-    event.preventDefault();
-    activateMembers(item);
-  }});
 }});
+const verificationItems = document.querySelectorAll(
+  ".verification-item[data-verification-subject]"
+);
 document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
   const interaction = {{ expandedGroup: null }};
   graph.querySelectorAll(".delta-focus").forEach((button) => {{
-    button.addEventListener("click", () =>
-      activateFocus(button.dataset.focusTarget));
-  }}
-);
+    button.addEventListener("click", () => {{
+      const focus = button.dataset.focusTarget;
+      activateFocus(focus);
+      verificationItems.forEach((item) => {{
+        item.open = focus !== "overview" && item.dataset.verificationSubject === focus;
+      }});
+    }});
+  }});
+  graph.querySelectorAll(".evidence-path-row").forEach((row) => {{
+    row.addEventListener("click", () => activateEvidencePath(graph, row));
+  }});
+  graph.querySelectorAll("[data-path-direction-target]").forEach((button) => {{
+    button.addEventListener("click", () => {{
+      setPathDirection(graph, button.dataset.pathDirectionTarget);
+    }});
+  }});
+  graph.querySelectorAll(".file-graph-node").forEach((node) => {{
+    const selectPath = () => {{
+      const fileId = node.dataset.fileNode;
+      const row = Array.from(graph.querySelectorAll(".evidence-path-row:not([hidden])"))
+        .find((candidate) => tokenSet(candidate.dataset.fileNodeIds).has(fileId));
+      if (row) {{
+        activateEvidencePath(graph, row);
+        return;
+      }}
+      clearMapFocus(graph);
+      graph.querySelectorAll(".file-graph-node").forEach((candidate) => {{
+        const active = candidate === node;
+        candidate.classList.toggle("focus-active", active);
+        candidate.classList.toggle("focus-muted", !active);
+      }});
+      graph.querySelectorAll(".file-delta-edge").forEach((edge) => {{
+        const active = edge.dataset.sourceFile === fileId || edge.dataset.targetFile === fileId;
+        edge.classList.toggle("focus-active", active);
+        edge.classList.toggle("focus-muted", !active);
+      }});
+    }};
+    node.addEventListener("click", selectPath);
+    node.addEventListener("keydown", (event) => {{
+      if (event.key === "Enter" || event.key === " ") {{
+        event.preventDefault();
+        selectPath();
+      }}
+    }});
+  }});
   const toggleGroup = (groupId) => {{
-    interaction.expandedGroup =
-      interaction.expandedGroup === groupId ? null : groupId;
+    interaction.expandedGroup = interaction.expandedGroup === groupId ? null : groupId;
     const inspector = graph.querySelector(".relationship-inspector");
     if (inspector && interaction.expandedGroup) inspector.open = true;
     graph.querySelectorAll("[data-group-target]").forEach((item) => {{
@@ -1530,37 +2957,30 @@ document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
     }});
   }};
   graph.querySelectorAll("[data-group-target]").forEach((group) => {{
-    const toggle = () => toggleGroup(group.dataset.groupTarget);
-    group.addEventListener("click", toggle);
-    group.addEventListener("keydown", (event) => {{
-      if (event.key === "Enter" || event.key === " ") {{
-        event.preventDefault();
-        toggle();
-      }}
-    }});
+    group.addEventListener("click", () => toggleGroup(group.dataset.groupTarget));
   }});
-  graph.querySelectorAll(".relation-group-details").forEach((details) => {{
-    details.addEventListener("toggle", () => {{
-      if (details.open &&
-        interaction.expandedGroup !== details.dataset.groupId) {{
-        toggleGroup(details.dataset.groupId);
-      }} else if (!details.open &&
-        interaction.expandedGroup === details.dataset.groupId) {{
-        toggleGroup(details.dataset.groupId);
-      }}
-    }});
+  graph.querySelectorAll(".member-relation[data-target-node]").forEach((relation) => {{
+    const setTargetHighlight = (active) => {{
+      graph.querySelectorAll(".file-member-line.related-target").forEach((row) => {{
+        row.classList.remove("related-target");
+      }});
+      if (!active) return;
+      graph.querySelector(
+        `.file-member-line[data-structural-node="${{CSS.escape(relation.dataset.targetNode)}}"]`
+      )?.classList.add("related-target");
+    }};
+    relation.addEventListener("mouseenter", () => setTargetHighlight(true));
+    relation.addEventListener("mouseleave", () => setTargetHighlight(false));
+    relation.addEventListener("focus", () => setTargetHighlight(true));
+    relation.addEventListener("blur", () => setTargetHighlight(false));
   }});
-}}
-);
-const verificationItems = document.querySelectorAll(
-  ".verification-item[data-verification-subject]"
-);
+}});
 verificationItems.forEach((item) => {{
   item.addEventListener("toggle", () => {{
     if (!item.open) {{
       queueMicrotask(() => {{
         if (![...verificationItems].some((candidate) => candidate.open)) {{
-          activateFocus("all");
+          activateFocus("overview");
         }}
       }});
       return;
@@ -1571,7 +2991,7 @@ verificationItems.forEach((item) => {{
     activateFocus(item.dataset.verificationSubject);
   }});
 }});
-activateFocus("all");
+activateFocus("overview");
 document.querySelectorAll("[data-summary-subject]").forEach((button) => {{
   button.addEventListener("click", () => {{
     const subject = button.dataset.summarySubject;
