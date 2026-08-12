@@ -36,6 +36,7 @@ from repodelta.model.contracts import (
     StructuralGraphEdge,
     StructuralGraphNode,
     StructuralGraphPlacement,
+    StructuralNavigationTarget,
     StructuralRelationGroup,
     StructuralOwnershipChangeIdentity,
     StructuralOwnershipIdentity,
@@ -79,9 +80,13 @@ from repodelta.projection.structural_groups import (
 )
 from repodelta.presentation.html import (
     _architectural_chip,
+    _evidence_paths,
+    _file_member_graph,
+    _file_structural_overview,
     _review_graph,
     _structural_compound_layout,
     _structural_edge_path,
+    _structural_kind_count_label,
     render_html,
 )
 from repodelta.providers.structural import (
@@ -104,6 +109,7 @@ def _with_verification_overlays(
     return SimpleNamespace(
         architectural_topology=topology,
         verification_workspace=SimpleNamespace(
+            matrix=(),
             inspections=tuple(
                 SimpleNamespace(
                     subject_id=item.change_map.focus_statement_id,
@@ -113,6 +119,620 @@ def _with_verification_overlays(
             )
         )
     )
+
+
+def test_file_overview_aggregates_canonical_members_and_edges() -> None:
+    def fact(
+        fact_id: str,
+        name: str,
+        kind: str,
+        path: str,
+    ) -> EvidenceItem:
+        return EvidenceItem(
+            id=fact_id,
+            summary=name,
+            kind="symbol",
+            classification="code",
+            metadata={
+                "qualified_name": name,
+                "symbol_kind": kind,
+                "path": path,
+            },
+        )
+
+    evidence = {
+        "E:file:a": fact("E:file:a", "a.py", "file", "src/a.py"),
+        "E:file:b": fact("E:file:b", "b.py", "file", "src/b.py"),
+        "E:fn:a": fact("E:fn:a", "run", "function", "src/a.py"),
+        "E:fn:b": fact("E:fn:b", "load", "function", "src/b.py"),
+    }
+    nodes = tuple(
+        StructuralGraphNode(
+            id=node_id,
+            review_symbol_id=node_id,
+            delta="added",
+            evidence_ids=(fact_id,),
+            display_evidence_id=fact_id,
+            symbol_navigation_target_id=f"T:{node_id}",
+        )
+        for node_id, fact_id in (
+            ("N:file:a", "E:file:a"),
+            ("N:file:b", "E:file:b"),
+            ("N:fn:a", "E:fn:a"),
+            ("N:fn:b", "E:fn:b"),
+        )
+    )
+    edge = StructuralGraphEdge(
+        id="E:calls",
+        source_node_id="N:fn:a",
+        target_node_id="N:fn:b",
+        relation="calls",
+        operation="added",
+        relation_change_evidence_id="E:relation:calls",
+        target_navigation_target_id="T:N:fn:b",
+    )
+    file_edge = StructuralGraphEdge(
+        id="E:imports",
+        source_node_id="N:file:a",
+        target_node_id="N:fn:b",
+        relation="imports",
+        operation="added",
+        relation_change_evidence_id="E:relation:imports",
+        target_navigation_target_id="T:N:fn:b",
+    )
+    placements = (
+        StructuralGraphPlacement(
+            id="P:a",
+            parent_node_id="N:file:a",
+            child_node_id="N:fn:a",
+            head_ownership_evidence_ids=("E:owns:a",),
+        ),
+        StructuralGraphPlacement(
+            id="P:b",
+            parent_node_id="N:file:b",
+            child_node_id="N:fn:b",
+            head_ownership_evidence_ids=("E:owns:b",),
+        ),
+    )
+    graph = ReviewStructuralGraph(
+        nodes=nodes,
+        edges=(edge, file_edge),
+        placements=placements,
+        primary_placement_ids=("P:a", "P:b"),
+        backbone_node_ids=tuple(node.id for node in nodes),
+        backbone_edge_ids=(edge.id, file_edge.id),
+        navigation_targets=tuple(
+            StructuralNavigationTarget(
+                id=f"T:{node.id}",
+                owner_node_id=node.id,
+                purpose="symbol",
+                state="available",
+                kind="revision_symbol",
+                revision_side="head",
+                url=f"https://github.com/example/repo/blob/head/{node.id}",
+                path=f"{node.id}.py",
+            )
+            for node in nodes
+        ),
+    )
+    relation_group = StructuralRelationGroup(
+        id="RG:calls",
+        source_node_id="N:file:a",
+        target_node_id="N:file:b",
+        relation="calls",
+        operation="added",
+        member_edge_ids=(edge.id,),
+    )
+    import_group = StructuralRelationGroup(
+        id="RG:imports",
+        source_node_id="N:file:a",
+        target_node_id="N:file:b",
+        relation="imports",
+        operation="added",
+        member_edge_ids=(file_edge.id,),
+    )
+    components = {
+        "N:file:a": ArchitecturalComponent(
+            id="AC:a",
+            domain="src/a",
+            layer="application",
+            node_ids=("N:file:a", "N:fn:a"),
+            classification_authority="path_convention",
+            context_node_ids=("N:file:b", "N:fn:b"),
+            context_relation_group_ids=("RG:calls", "RG:imports"),
+        ),
+        "N:file:b": ArchitecturalComponent(
+            id="AC:b",
+            domain="src/b",
+            layer="infrastructure",
+            node_ids=("N:file:b", "N:fn:b"),
+            classification_authority="path_convention",
+            context_node_ids=("N:file:a", "N:fn:a"),
+            context_relation_group_ids=("RG:calls", "RG:imports"),
+        ),
+    }
+    architectural_components = {
+        node_id: component
+        for component in components.values()
+        for node_id in component.node_ids
+    }
+
+    html = _file_structural_overview(
+        graph=graph,
+        backbone_nodes={node.id: node for node in nodes},
+        backbone_relation_groups=(relation_group, import_group),
+        placements=placements,
+        evidence=evidence,
+        architectural_components=architectural_components,
+        node_focus={"N:fn:a": [("R1", "changed_anchor")]},
+        edge_focus={edge.id: ["R1"], file_edge.id: ["G1"]},
+    )
+
+    assert html.count('class="file-graph-node"') == 2
+    assert "src/a.py" in html
+    assert "1 function" in html
+    assert "calls + imports · added" in html
+    assert html.count('class="file-delta-edge operation-added"') == 1
+    assert '<title>calls + imports · added</title>' in html
+    assert "contains · retained" not in html
+    assert 'marker-end="url(#file-arrow-added)"' in html
+    assert 'fill="#7be3ac"' in html
+    assert 'data-member-node-ids="N:file:a N:fn:a"' in html
+    assert 'data-member-group-ids="RG:calls RG:imports"' in html
+    assert html.count('data-focuses="R1 G1"') == 3
+    assert '<text class="file-node-layer" x="237" y="19">application</text>' in html
+    assert 'data-file-node="N:file:a"' in html
+    assert 'data-file-node="N:file:b"' in html
+    assert 'transform="translate(30 45)"' in html
+    assert 'transform="translate(330 45)"' in html
+
+    member_html = _file_member_graph(
+        graph=graph,
+        backbone_nodes={node.id: node for node in nodes},
+        backbone_edges=(edge, file_edge),
+        backbone_relation_groups=(relation_group, import_group),
+        placements=placements,
+        evidence=evidence,
+        architectural_components=architectural_components,
+        node_focus={},
+        edge_focus={edge.id: ["R1"], file_edge.id: ["G1"]},
+        relation_group_focus={},
+    )
+    assert 'class="file-member-links"' not in member_html
+    assert 'class="member-cross-link-data"' not in member_html
+    assert 'data-source-node="N:fn:a"' in member_html
+    assert 'data-target-node="N:fn:b"' in member_html
+    assert '<span class="relation-target-file" title="src/b.py">b.py</span>' in member_html
+    assert '<span class="relation-arrow">→</span>' in member_html
+    assert '>load()</a>' in member_html
+    assert "File relationships" in member_html
+    assert '<span class="relation-kind">imports</span>' in member_html
+    assert "1 exact target" in member_html
+    assert member_html.count('data-edge-id="') == 2
+    assert member_html.count('data-focuses="R1 G1"') == 2
+    assert 'data-edge-id="E:calls" data-source-node="N:fn:a"' in member_html
+    assert 'data-edge-id="E:imports" data-source-node="N:file:a"' in member_html
+    assert member_html.count('class="architectural-chip-html ') == 2
+    assert ">application</button>" in member_html
+    assert ">infrastructure</button>" in member_html
+    assert 'class="file-node-link"' in member_html
+    assert 'class="member-node-link"' in member_html
+    assert 'href="https://github.com/example/repo/blob/head/N:fn:a"' in member_html
+
+    render_graph = replace(
+        graph,
+        relation_groups=(relation_group, import_group),
+        backbone_relation_group_ids=(relation_group.id, import_group.id),
+    )
+    review_html = _review_graph(
+        render_graph,
+        SimpleNamespace(
+            architectural_topology=ArchitecturalChangeTopology(
+                components=tuple(components.values())
+            ),
+            verification_workspace=SimpleNamespace(
+                inspections=(),
+                matrix=(),
+            ),
+        ),
+        SimpleNamespace(
+            evidence_catalog=EvidenceCatalog(items=tuple(evidence.values())),
+            overview=SimpleNamespace(
+                structural_coverage=StructuralCoverage(state="available")
+            ),
+        ),
+    )
+    assert '<details class="relationship-inspector">' not in review_html
+    assert review_html.count('data-edge-id="') == 2
+
+    with pytest.raises(
+        ValueError,
+        match="one relation group for every backbone exact edge: E:imports",
+    ):
+        _file_member_graph(
+            graph=graph,
+            backbone_nodes={node.id: node for node in nodes},
+            backbone_edges=(edge, file_edge),
+            backbone_relation_groups=(relation_group,),
+            placements=placements,
+            evidence=evidence,
+            architectural_components=architectural_components,
+            node_focus={},
+            edge_focus={},
+            relation_group_focus={},
+        )
+
+
+def test_structural_file_overview_pluralizes_classes() -> None:
+    assert _structural_kind_count_label("class", 1) == "class"
+    assert _structural_kind_count_label("class", 3) == "classes"
+    assert _structural_kind_count_label("function", 2) == "functions"
+
+
+def test_evidence_paths_separate_runtime_and_verification_exact_traces() -> None:
+    def fact(
+        fact_id: str,
+        review_id: str,
+        name: str,
+        kind: str,
+        path: str,
+        *,
+        classification: str = "code",
+    ) -> EvidenceItem:
+        return EvidenceItem(
+            id=fact_id,
+            summary=name,
+            kind="symbol",
+            classification=classification,
+            profile="test" if classification == "test" else "production",
+            metadata={
+                "qualified_name": name,
+                "review_symbol_id": review_id,
+                "symbol_kind": kind,
+                "path": path,
+            },
+        )
+
+    evidence = {
+        "E:file:cli": fact(
+            "E:file:cli", "file:cli", "cli.py", "file", "src/cli.py"
+        ),
+        "E:file:submit": fact(
+            "E:file:submit",
+            "file:submit",
+            "submit.py",
+            "file",
+            "src/submit.py",
+        ),
+        "E:file:test": fact(
+            "E:file:test",
+            "file:test",
+            "test_submit.py",
+            "file",
+            "tests/test_submit.py",
+            classification="test",
+        ),
+        "E:main": fact(
+            "E:main", "main", "main", "function", "src/cli.py"
+        ),
+        "E:submit": fact(
+            "E:submit",
+            "submit",
+            "submit_change",
+            "function",
+            "src/submit.py",
+        ),
+        "E:test": fact(
+            "E:test",
+            "test_submit",
+            "test_submit_change",
+            "function",
+            "tests/test_submit.py",
+            classification="test",
+        ),
+        "E:path:runtime": EvidenceItem(
+            id="E:path:runtime",
+            summary="runtime path",
+            kind="structural_path",
+            classification="code",
+            profile="structural_path",
+            authority="structural_provider",
+            revision_side="head",
+            operation="observed",
+            role="structural_path",
+            metadata={
+                "steps": (
+                    {
+                        "source_evidence_id": "E:main",
+                        "target_evidence_id": "E:submit",
+                        "relation": "calls",
+                        "direction": "outgoing",
+                    },
+                )
+            },
+        ),
+        "E:path:test": EvidenceItem(
+            id="E:path:test",
+            summary="verification path",
+            kind="structural_path",
+            classification="test",
+            profile="structural_path",
+            authority="structural_provider",
+            revision_side="head",
+            operation="observed",
+            role="structural_path",
+            metadata={
+                "steps": (
+                    {
+                        "source_evidence_id": "E:test",
+                        "target_evidence_id": "E:submit",
+                        "relation": "calls",
+                        "direction": "outgoing",
+                    },
+                )
+            },
+        ),
+    }
+    node_specs = (
+        ("N:file:cli", "file:cli", "E:file:cli"),
+        ("N:file:submit", "file:submit", "E:file:submit"),
+        ("N:file:test", "file:test", "E:file:test"),
+        ("N:main", "main", "E:main"),
+        ("N:submit", "submit", "E:submit"),
+        ("N:test", "test_submit", "E:test"),
+    )
+    nodes = tuple(
+        StructuralGraphNode(
+            id=node_id,
+            review_symbol_id=review_id,
+            delta="added",
+            evidence_ids=(evidence_id,),
+            display_evidence_id=evidence_id,
+            symbol_navigation_target_id=f"T:{node_id}",
+        )
+        for node_id, review_id, evidence_id in node_specs
+    )
+    edges = (
+        StructuralGraphEdge(
+            id="D:runtime",
+            source_node_id="N:main",
+            target_node_id="N:submit",
+            relation="calls",
+            operation="added",
+            relation_change_evidence_id="E:relation:runtime",
+            path_evidence_ids=("E:path:runtime",),
+        ),
+        StructuralGraphEdge(
+            id="D:test",
+            source_node_id="N:test",
+            target_node_id="N:submit",
+            relation="calls",
+            operation="added",
+            relation_change_evidence_id="E:relation:test",
+            path_evidence_ids=("E:path:test",),
+        ),
+    )
+    placements = (
+        StructuralGraphPlacement(
+            id="P:main",
+            parent_node_id="N:file:cli",
+            child_node_id="N:main",
+            head_ownership_evidence_ids=("E:owns:main",),
+        ),
+        StructuralGraphPlacement(
+            id="P:submit",
+            parent_node_id="N:file:submit",
+            child_node_id="N:submit",
+            head_ownership_evidence_ids=("E:owns:submit",),
+        ),
+        StructuralGraphPlacement(
+            id="P:test",
+            parent_node_id="N:file:test",
+            child_node_id="N:test",
+            head_ownership_evidence_ids=("E:owns:test",),
+        ),
+    )
+    groups = (
+        StructuralRelationGroup(
+            id="RG:runtime",
+            source_node_id="N:file:cli",
+            target_node_id="N:file:submit",
+            relation="calls",
+            operation="added",
+            member_edge_ids=("D:runtime",),
+        ),
+        StructuralRelationGroup(
+            id="RG:test",
+            source_node_id="N:file:test",
+            target_node_id="N:file:submit",
+            relation="calls",
+            operation="added",
+            member_edge_ids=("D:test",),
+        ),
+    )
+    graph = ReviewStructuralGraph(
+        nodes=nodes,
+        edges=edges,
+        relation_groups=groups,
+        placements=placements,
+        primary_placement_ids=tuple(item.id for item in placements),
+        backbone_node_ids=tuple(item.id for item in nodes),
+        backbone_edge_ids=tuple(item.id for item in edges),
+        backbone_relation_group_ids=tuple(item.id for item in groups),
+        navigation_targets=tuple(
+            StructuralNavigationTarget(
+                id=f"T:{node.id}",
+                owner_node_id=node.id,
+                purpose="symbol",
+                state="available",
+                kind="revision_symbol",
+                revision_side="head",
+                url=f"https://github.com/example/repo/blob/head/{node.id}",
+                path=f"{node.id}.py",
+            )
+            for node in nodes
+        ),
+    )
+    components = {
+        node.id: ArchitecturalComponent(
+            id=f"AC:{node.id}",
+            domain="tests" if node.id in {"N:file:test", "N:test"} else "src",
+            layer=(
+                "verification"
+                if node.id in {"N:file:test", "N:test"}
+                else "application"
+            ),
+            node_ids=(node.id,),
+            classification_authority="path_convention",
+        )
+        for node in nodes
+    }
+    html = _evidence_paths(
+        graph=graph,
+        backbone_nodes={item.id: item for item in nodes},
+        backbone_edges=edges,
+        placements=placements,
+        evidence=evidence,
+        architectural_components=components,
+        workspace=SimpleNamespace(
+            inspections=(
+                SimpleNamespace(
+                    subject_id="R1",
+                    structural_overlay=StructuralFocusOverlay(
+                        nodes=tuple(
+                            StructuralFocusNode(
+                                node_id=node_id,
+                                role="changed_anchor",
+                            )
+                            for node_id in ("N:main", "N:submit", "N:test")
+                        ),
+                        edge_ids=("D:runtime", "D:test"),
+                        relation_group_ids=("RG:runtime", "RG:test"),
+                    ),
+                ),
+            )
+        ),
+    )
+
+    assert html.count('class="evidence-path-row"') == 2
+    assert html.count('data-focuses="R1"') == 2
+    assert 'data-path-kind="change"' in html
+    assert 'data-path-kind="verification"' in html
+    assert '<span class="evidence-path-kind">Runtime change</span>' in html
+    assert '<span class="evidence-path-kind">Verification</span>' in html
+    assert html.count("calls · added") == 4
+    assert html.count('class="path-tree-forest"') == 4
+    assert 'data-file-node-ids="N:file:cli N:file:submit"' in html
+    assert 'data-group-ids="RG:test"' in html
+    assert 'href="https://github.com/example/repo/blob/head/N:main"' in html
+    assert "test_submit_change()" in html
+    assert "member-flow-counts" not in html
+
+
+def test_file_member_graph_flattens_nested_symbols_into_labeled_rows() -> None:
+    def fact(fact_id: str, name: str, kind: str) -> EvidenceItem:
+        return EvidenceItem(
+            id=fact_id,
+            summary=name,
+            kind="symbol",
+            classification="code",
+            metadata={
+                "qualified_name": name,
+                "symbol_kind": kind,
+                "path": "tests/test_example.py",
+            },
+        )
+
+    evidence = {
+        "E:file": fact("E:file", "tests/test_example.py", "file"),
+        "E:test": fact("E:test", "test_submit()", "function"),
+        "E:fake": fact("E:fake", "test_submit::fake_run()", "function"),
+        "E:token": fact(
+            "E:token", "test_submit::fake_run::token", "variable"
+        ),
+    }
+    nodes = tuple(
+        StructuralGraphNode(
+            id=node_id,
+            review_symbol_id=node_id,
+            delta="added",
+            evidence_ids=(fact_id,),
+            display_evidence_id=fact_id,
+        )
+        for node_id, fact_id in (
+            ("N:file", "E:file"),
+            ("N:test", "E:test"),
+            ("N:fake", "E:fake"),
+            ("N:token", "E:token"),
+        )
+    )
+    placements = (
+        StructuralGraphPlacement(
+            id="P:test",
+            parent_node_id="N:file",
+            child_node_id="N:test",
+            head_ownership_evidence_ids=("E:owns:test",),
+        ),
+        StructuralGraphPlacement(
+            id="P:fake",
+            parent_node_id="N:test",
+            child_node_id="N:fake",
+            head_ownership_evidence_ids=("E:owns:fake",),
+        ),
+        StructuralGraphPlacement(
+            id="P:token",
+            parent_node_id="N:fake",
+            child_node_id="N:token",
+            head_ownership_evidence_ids=("E:owns:token",),
+        ),
+    )
+    graph = ReviewStructuralGraph(
+        nodes=nodes,
+        placements=placements,
+        primary_placement_ids=("P:test", "P:fake", "P:token"),
+        backbone_node_ids=tuple(node.id for node in nodes),
+    )
+
+    html = _file_member_graph(
+        graph=graph,
+        backbone_nodes={node.id: node for node in nodes},
+        backbone_edges=(),
+        backbone_relation_groups=(),
+        placements=placements,
+        evidence=evidence,
+        architectural_components={
+            node.id: ArchitecturalComponent(
+                id="AC:verification",
+                domain="tests",
+                layer="verification",
+                node_ids=tuple(sorted(item.id for item in nodes)),
+                classification_authority="path_convention",
+            )
+            for node in nodes
+        },
+        node_focus={},
+        edge_focus={},
+        relation_group_focus={},
+    )
+
+    assert html.count('class="file-member-panel"') == 1
+    assert html.count('style="--member-depth:') == 3
+    assert "<b>fake_run()</b>" in html
+    assert 'aria-label="fake_run(), function, nested in test_submit()"' in html
+    assert 'data-parent-node="N:test"' in html
+    assert "<b>test_submit::fake_run()</b>" not in html
+    assert "<b>token</b>" in html
+    assert 'aria-label="token, variable, nested in fake_run()"' in html
+    assert 'data-parent-node="N:fake"' in html
+    assert 'style="--member-depth:2"' in html
+    assert html.count('class="member-operation inherited"') == 3
+    assert html.count('class="architectural-chip-html ') == 1
+    assert (
+        html.index("<b>test_submit()</b>")
+        < html.index("<b>fake_run()</b>")
+        < html.index("<b>token</b>")
+    )
+    assert "file · added · isolated" in html
 
 
 SUITE = Path("fixtures/evaluation-suite.json")
@@ -485,12 +1105,32 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
         "E:symbol:9e703e599343229d97c1",
     )
     html = render_html(brief)
-    assert html.count("Structural delta graph") == 1
+    assert html.count("Structural delta overview") == 1
+    assert html.count('class="unified-graph-stage"') == 1
+    assert html.count('class="file-graph-layer"') == 1
+    assert 'class="symbol-graph-layer"' not in html
+    assert "Symbol-level graph ·" not in html
+    assert "Expand all ·" not in html
+    assert "Full structural audit ·" in html
+    assert 'class="evidence-paths" hidden' in html
+    assert 'data-path-kind="unresolved"' in html
     assert "Change topology" not in html
     assert 'class="architectural-chip-html ' in html
     assert 'data-component-target="' in html
-    assert html.index("Structural delta graph") < html.index("Verification")
-    assert 'data-focus-target="all">All</button>' in html
+    assert html.index("Structural delta overview") < html.index("Verification")
+    assert 'data-focus-target="overview">Overview</button>' in html
+    assert 'data-focus-target="R1"' in html
+    assert 'data-focus-copy="' in html
+    assert "focusCopy.replaceChildren()" in html
+    assert "text.textContent = copy" in html
+    assert (
+        'const focusSurfaces = document.querySelectorAll('
+        '".review-structural-graph");'
+    ) in html
+    assert "filterEvidencePaths(surface, focus)" in html
+    assert "activateEvidencePath(surface, firstVisible, false)" in html
+    assert '<span>Requirements</span>' in html
+    assert 'item.dataset.verificationSubject === focus' in html
     assert '.verification-item[open][data-verification-subject]' not in html
     assert (
             "1 backbone nodes · 2 support nodes · "
@@ -564,7 +1204,7 @@ def test_identical_focus_graphs_share_one_review_graph() -> None:
     assert first.change_map.structural_overlay.path_relation_ids == ()
     assert second.change_map.structural_overlay.path_relation_ids == ()
     html = render_html(brief)
-    assert html.count("Structural delta graph") == 1
+    assert html.count("Structural delta overview") == 1
     assert html.count('<div class="isolated-anchor operation-unresolved"') == 1
     assert 'data-verification-subject="R1"' in html
     assert 'data-verification-subject="R2"' in html
@@ -1358,6 +1998,13 @@ def test_review_graph_renders_complete_focus_union() -> None:
                 evidence,
             ),
             verification_workspace=SimpleNamespace(
+                matrix=tuple(
+                    SimpleNamespace(
+                        subject_id=focus_id,
+                        text=f"{focus_id} authored contract",
+                    )
+                    for focus_id in ("R1", "R2", "R3", "G1", "G2")
+                ),
                 inspections=tuple(
                     SimpleNamespace(
                         subject_id=item.change_map.focus_statement_id,
@@ -1423,7 +2070,14 @@ def test_review_graph_renders_complete_focus_union() -> None:
     assert html.count('class="isolated-anchor operation-') == 1
     assert html.count('class="delta-edge operation-') == 3
     assert 'data-focuses="R1 R2 G1"' in html
-    assert html.count('data-focus-target="all"') == 1
+    assert html.count('data-focus-target="overview"') == 1
+    assert html.count('data-focus-target="R1"') == 1
+    assert html.count('data-focus-target="R2"') == 1
+    assert html.count('data-focus-target="G1"') == 1
+    assert 'data-focus-copy="R1 authored contract"' in html
+    assert '<p class="delta-focus-copy" hidden></p>' in html
+    assert '<span>Requirements</span>' in html
+    assert '<span>Guardrails</span>' in html
 
 
 def test_change_backbone_does_not_transitively_promote_changed_edges() -> None:
