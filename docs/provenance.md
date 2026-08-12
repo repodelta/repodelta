@@ -22,6 +22,7 @@ The default live structural path invokes
 [Codegraph](https://github.com/colbymchenry/codegraph) through either an
 installed `codegraph` executable or the external npm package
 [`@colbymchenry/codegraph`](https://www.npmjs.com/package/@colbymchenry/codegraph).
+The unrelated `codegraph` distribution on PyPI is not a RepoDelta dependency.
 Codegraph is MIT licensed and is not imported, vendored, or redistributed in
 the RepoDelta Python package; RepoDelta consumes its temporary SQLite index
 through the `StructuralGraphProvider` boundary.
