@@ -1117,12 +1117,10 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
     assert "Change topology" not in html
     assert 'class="architectural-chip-html ' in html
     assert 'data-component-target="' in html
-    assert html.index("Structural delta overview") < html.index("Verification")
+    assert html.index("Structural delta overview") < html.index("Assessment &amp; evidence")
     assert 'data-focus-target="overview">Overview</button>' in html
     assert 'data-focus-target="R1"' in html
-    assert 'data-focus-copy="' in html
-    assert "focusCopy.replaceChildren()" in html
-    assert "text.textContent = copy" in html
+    assert 'data-focus-copy="' not in html
     assert (
         'const focusSurfaces = document.querySelectorAll('
         '".review-structural-graph");'
@@ -2074,8 +2072,7 @@ def test_review_graph_renders_complete_focus_union() -> None:
     assert html.count('data-focus-target="R1"') == 1
     assert html.count('data-focus-target="R2"') == 1
     assert html.count('data-focus-target="G1"') == 1
-    assert 'data-focus-copy="R1 authored contract"' in html
-    assert '<p class="delta-focus-copy" hidden></p>' in html
+    assert 'data-focus-copy="R1 authored contract"' not in html
     assert '<span>Requirements</span>' in html
     assert '<span>Guardrails</span>' in html
 
@@ -2805,7 +2802,7 @@ def test_selection_and_rendering_are_byte_stable() -> None:
     assert "candidate_binding" not in html
     assert "Issue contract" not in html
     assert '<span class="projection-heading">Claimed</span>' not in html
-    assert "Observed" in html
+    assert "Canonical observations" in html
 
 
 def test_generic_inspection_budget_does_not_truncate_changed_anchor_set() -> None:
@@ -3054,7 +3051,7 @@ def test_focus_evidence_roles_are_routed_before_convergence_and_presentation() -
     assert len(review_slice.standalone_test_support_relation_ids) == 1
     assert len(review_slice.standalone_document_support_relation_ids) == 1
     html = render_html(brief)
-    assert "Observed" in html
+    assert "Canonical observations" in html
     assert "production" in html
 
     bounded = converge_candidates(
