@@ -277,6 +277,7 @@ def _review_graph(
         for node in backbone_nodes.values()
         if node.id in connected_node_ids
     )
+    placed_child_node_ids = {placement.child_node_id for placement in placements}
     layout = _structural_compound_layout(
         connected_nodes,
         backbone_relation_groups,
@@ -298,6 +299,7 @@ def _review_graph(
         full_name = _structural_name(fact)
         path_label, name_label = _structural_label_parts(full_name)
         kind = str(fact.metadata.get("symbol_kind", "symbol")).replace("_", " ")
+        kind_class = _structural_kind_class(fact)
         direct_focuses = tuple(
             focus_id
             for focus_id, role in node_focus.get(container.node_id, ())
@@ -324,7 +326,8 @@ def _review_graph(
             )
         )
         container_shapes.append(
-            f'<rect class="structural-container operation-{escape(parent_node.delta)}" '
+            f'<rect class="structural-container {kind_class} '
+            f'operation-{escape(parent_node.delta)}" '
             f'data-structural-node="{escape(parent_node.id, quote=True)}" '
             f'data-focuses="{escape(" ".join(direct_focuses), quote=True)}" '
             f'data-context-focuses="{escape(" ".join(contextual_focuses), quote=True)}" '
@@ -334,7 +337,8 @@ def _review_graph(
             "</rect>"
         )
         header = (
-            f'<g class="structural-container-header operation-{escape(parent_node.delta)}" '
+            f'<g class="structural-container-header {kind_class} '
+            f'operation-{escape(parent_node.delta)}" '
             f'data-structural-node="{escape(parent_node.id, quote=True)}" '
             f'data-focuses="{escape(" ".join(direct_focuses), quote=True)}" '
             f'data-context-focuses="{escape(" ".join(contextual_focuses), quote=True)}" '
@@ -512,6 +516,7 @@ def _review_graph(
         full_name = _structural_name(fact)
         path_label, name_label = _structural_label_parts(full_name)
         kind = str(fact.metadata.get("symbol_kind", "symbol")).replace("_", " ")
+        kind_class = _structural_kind_class(fact)
         direct_focuses = " ".join(
             focus_id
             for focus_id, role in node_focus.get(node.id, ())
@@ -523,7 +528,7 @@ def _review_graph(
             if role == "intermediate"
         )
         content = (
-            f'<g class="delta-node operation-{escape(node.delta)}'
+            f'<g class="delta-node {kind_class} operation-{escape(node.delta)}'
             + (
                 " ownership-only"
                 if node.id not in executable_connected_node_ids
@@ -535,12 +540,14 @@ def _review_graph(
             f'data-context-focuses="{escape(contextual_focuses, quote=True)}" '
             f'transform="translate({x} {y})">'
             '<rect width="210" height="72" rx="10"/>'
+            '<line class="delta-node-marker" x1="2" y1="11" x2="2" y2="61"/>'
             f'<text class="delta-node-kind" x="12" y="17">'
             f'{escape(kind)} · {escape(node.delta)}</text>'
             f'<text class="delta-node-name" x="12" y="39">'
-            f'{escape(name_label)}</text>'
+            f'{escape(_structural_symbol_label(fact, name_label))}</text>'
             f'<text class="delta-node-path" x="12" y="57">'
-            f'{escape(path_label)}</text>'
+            f'{escape("" if node.id in placed_child_node_ids else path_label)}'
+            "</text>"
             f'{_architectural_chip(architectural_components[node.id], 210)}'
             f"<title>{escape(full_name)}</title></g>"
         )
@@ -568,7 +575,7 @@ def _review_graph(
             f'data-focuses="{escape(" ".join(item[0] for item in node_focus.get(node.id, ())), quote=True)}">'
             f'<span class="isolated-anchor-focus">{escape(focuses)}</span>'
             f'<span class="isolated-anchor-operation">{escape(node.delta)}</span>'
-            f'<span class="isolated-anchor-name">{escape(_structural_name(fact))}</span>'
+            f'<span class="isolated-anchor-name">{escape(_structural_standalone_name(fact))}</span>'
             f'<span class="isolated-anchor-kind">{escape(kind)}</span>'
             f'{_architectural_chip_html(architectural_components[node.id])}'
             + (
@@ -609,10 +616,21 @@ def _review_graph(
     )
     isolated = (
         '<details class="isolated-anchors"><summary>'
-        f'{len(isolated_rows)} isolated changed anchor'
-        f'{"s" if len(isolated_rows) != 1 else ""}</summary>'
+        f'Standalone changes · {len(isolated_rows)}</summary>'
+        '<p class="standalone-explanation">Changed facts with no observed '
+        'executable or ownership relationship in the projected graph.</p>'
         f'<div class="isolated-anchor-list">{"".join(isolated_rows)}</div></details>'
         if isolated_rows
+        else ""
+    )
+    relationship_inspector = (
+        '<details class="relationship-inspector"><summary>'
+        f'Exact relationships · {len(backbone_relation_groups)} groups · '
+        f'{len(backbone_edges)} edges</summary>'
+        '<div class="relation-group-inspector">'
+        f'{"".join(relation_group_details)}</div>'
+        '</details>'
+        if relation_group_details
         else ""
     )
     coverage = brief.overview.structural_coverage
@@ -640,7 +658,7 @@ def _review_graph(
         f'{len(isolated_rows)} isolated changed anchors · '
         f'{len(graph.path_evidence_ids)} support refs</div></div>'
         f'{controls}</div><p class="delta-focus-empty" hidden></p>{canvas}'
-        f'<div class="relation-group-inspector">{"".join(relation_group_details)}</div>'
+        f'{relationship_inspector}'
         f'{isolated}'
         "</div>"
     )
@@ -1028,6 +1046,29 @@ def _structural_name(item: EvidenceItem) -> str:
     return f"{short_path} · {qualified_name}"
 
 
+def _structural_kind_class(item: EvidenceItem) -> str:
+    kind = str(item.metadata.get("symbol_kind", "symbol"))
+    normalized = "".join(
+        character if character.isalnum() else "-" for character in kind
+    )
+    return f"kind-{normalized or 'symbol'}"
+
+
+def _structural_symbol_label(item: EvidenceItem, label: str) -> str:
+    kind = str(item.metadata.get("symbol_kind", "symbol"))
+    if kind not in {"function", "method"} or label.endswith(")"):
+        return label
+    return f"{label}()"
+
+
+def _structural_standalone_name(item: EvidenceItem) -> str:
+    if item.metadata.get("symbol_kind") == "file" and item.metadata.get("path"):
+        return str(item.metadata["path"])
+    path_label, name_label = _structural_label_parts(_structural_name(item))
+    display_name = _structural_symbol_label(item, name_label)
+    return f"{path_label} · {display_name}" if path_label else display_name
+
+
 
 
 def _attention(brief: ReviewBrief) -> str:
@@ -1316,6 +1357,19 @@ def render_html(brief: ReviewBrief) -> str:
 <title>{escape(packet.title)} · RepoDelta</title>
 <style>
 :root{{color-scheme:dark;--bg:#080c0f;--panel:#10171b;--border:#26373f;--text:#edf3f0;--muted:#9eaaaf;--faint:#6f7d83;--green:#7be3ac;--amber:#e7ca7c;--red:#ef8f91;--blue:#9fcdf0;--shadow:0 22px 64px rgba(0,0,0,.28)}}*{{box-sizing:border-box}}body{{margin:0;color:var(--text);line-height:1.55;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 18% -8%,rgba(69,167,118,.12),transparent 31rem),var(--bg)}}code{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}}.shell{{width:min(1180px,calc(100% - 40px));margin:30px auto 84px}}.topbar{{margin-bottom:22px;font-weight:720}}.brand-mark{{display:inline-block;width:14px;height:14px;margin-right:10px;border:2px solid white;transform:rotate(45deg);border-radius:3px}}.section{{border:2px solid var(--border);border-radius:18px;background:linear-gradient(180deg,rgba(17,24,28,.97),rgba(11,17,21,.98));box-shadow:var(--shadow);padding:28px;margin-bottom:22px}}h1{{font-size:31px;margin:0 0 14px}}h2{{font-size:22px;margin:0 0 14px}}h3{{font-size:16px;margin:0 0 8px}}.meta{{display:flex;flex-wrap:wrap;gap:9px;color:var(--muted);font-size:13px;margin-bottom:16px}}.intent{{max-width:850px;color:#d2dade;font-size:15px}}.source-link,.file-link{{color:#b9dfff;text-decoration:none}}.source-note,.projection-source,.context-source{{display:block;color:var(--faint);font-size:10px;line-height:1.45}}.projection-heading{{display:block;margin-bottom:9px;color:#89979d;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.045em}}.review-structural-graph{{margin-top:24px;padding:18px;border:1px solid rgba(111,128,135,.22);border-radius:12px;background:rgba(5,10,13,.24)}}.delta-graph-heading{{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}}.structural-coverage{{margin-bottom:3px;color:var(--muted);font-size:9px}}.structural-coverage.state-partial,.structural-coverage.state-stale,.structural-coverage.state-missing,.structural-coverage.state-invalid,.structural-coverage.state-error{{color:var(--amber)}}.subgraph-summary{{color:var(--muted);font-size:9px}}.delta-focus-controls{{display:flex;flex:1 1 560px;min-width:0;max-width:720px;flex-wrap:wrap;justify-content:flex-end;gap:5px}}.delta-focus{{border:1px solid rgba(111,128,135,.35);border-radius:999px;padding:4px 9px;background:transparent;color:var(--muted);font:700 9px inherit;cursor:pointer}}.delta-focus:hover,.delta-focus.active{{border-color:var(--green);background:rgba(54,118,87,.20);color:#c9efd6}}.delta-canvas-scroll{{margin-top:14px;overflow-x:auto;border:1px solid rgba(111,128,135,.16);border-radius:10px;background:rgba(3,7,9,.34)}}.delta-canvas{{display:block;min-width:100%;height:auto}}.delta-edge,.structural-container,.delta-node,.isolated-anchor{{transition:opacity .16s ease,filter .16s ease}}.delta-edge path{{fill:none;stroke-width:1.8}}.delta-edge-label-bg{{fill:rgba(3,7,9,.92);stroke:rgba(111,128,135,.24);stroke-width:.7}}.delta-edge-label{{font-size:8px;text-anchor:middle;paint-order:stroke;stroke:var(--bg);stroke-width:2px;stroke-linejoin:round}}.delta-edge.operation-added path{{stroke:var(--green)}}.delta-edge.operation-added text{{fill:var(--green)}}.delta-edge.operation-removed path{{stroke:var(--red);stroke-dasharray:6 5}}.delta-edge.operation-removed text{{fill:var(--red)}}.delta-edge.operation-retained path{{stroke:#73848c}}.delta-edge.operation-retained text{{fill:#94a2a8}}#arrow-added path{{fill:var(--green)}}#arrow-removed path{{fill:var(--red)}}#arrow-retained path{{fill:#73848c}}.structural-container{{fill:rgba(16,27,33,.42);stroke:#354a54;stroke-width:1.1}}.structural-container.operation-added{{stroke:rgba(123,227,172,.52);fill:rgba(54,118,87,.06)}}.structural-container.operation-removed{{stroke:rgba(239,143,145,.5);stroke-dasharray:6 4;fill:rgba(112,43,48,.05)}}.delta-node rect{{fill:#111a1f;stroke:#53656e;stroke-width:1.2}}.delta-node.operation-added rect{{stroke:var(--green);fill:rgba(54,118,87,.14)}}.delta-node.operation-modified rect{{stroke:var(--amber);fill:rgba(106,85,30,.13)}}.delta-node.operation-removed rect{{stroke:var(--red);stroke-dasharray:6 4;fill:rgba(112,43,48,.12)}}.delta-node-kind{{fill:var(--muted);font-size:8px;text-transform:uppercase}}.delta-node-name{{fill:var(--text);font-size:10px;font-weight:700}}.delta-node-path{{fill:var(--faint);font-size:8px}}.focus-muted{{opacity:.13}}.focus-context{{opacity:.7}}.structural-container.focus-context,.structural-container-header.focus-context{{filter:drop-shadow(0 0 2px rgba(159,205,240,.22))}}.focus-active{{opacity:1;filter:drop-shadow(0 0 5px rgba(123,227,172,.35))}}.delta-empty{{margin:14px 0 0;padding:18px;border:1px dashed rgba(111,128,135,.26);border-radius:10px;color:var(--faint);font-size:11px}}.isolated-anchors{{margin-top:12px;border-top:1px solid rgba(111,128,135,.18);padding-top:10px}}.isolated-anchors>summary{{cursor:pointer;color:var(--muted);font-size:10px}}.isolated-anchor-list{{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:9px}}.isolated-anchor{{display:grid;grid-template-columns:auto 1fr auto;gap:4px 7px;min-width:0;padding:8px;border:1px solid rgba(111,128,135,.16);border-left:2px solid var(--amber);border-radius:7px}}.isolated-anchor.operation-added{{border-left-color:var(--green)}}.isolated-anchor.operation-removed{{border-left-color:var(--red);border-style:dashed}}.isolated-anchor-focus,.isolated-anchor-operation,.isolated-anchor-kind{{color:var(--faint);font-size:8px}}.isolated-anchor-operation{{text-transform:uppercase}}.isolated-anchor-kind{{text-align:right}}.isolated-anchor-name{{grid-column:1/-1;overflow-wrap:anywhere;font-size:9px}}.isolated-anchor .projection-source{{grid-column:1/-1}}.context{{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(111,128,135,.24)}}.context>summary{{cursor:pointer;color:var(--muted);font-size:11px}}.context-row{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px;gap:12px;padding:12px 0;border-bottom:1px solid rgba(111,128,135,.18)}}.context-id{{color:#9fcdf0;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace}}.context-copy{{font-size:12px}}.context-authority{{color:var(--muted);font-size:10px;text-align:right}}.context-source{{grid-column:2/-1}}.attention-list,.file-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:var(--amber);font-size:10px;font-weight:700;text-transform:uppercase}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px}}.empty,.empty-state{{color:var(--faint);font-size:12px}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}@media(max-width:950px){{.isolated-anchor-list{{grid-template-columns:repeat(2,minmax(0,1fr))}}}}@media(max-width:600px){{.shell{{width:calc(100% - 18px);margin-top:16px}}.section{{padding:22px 20px}}.attention-row,.context-row{{grid-template-columns:1fr}}.delta-graph-heading{{display:block}}.delta-focus-controls{{max-width:none;justify-content:flex-start;margin-top:10px}}.isolated-anchor-list{{grid-template-columns:1fr}}}}@media print{{:root{{color-scheme:light;--bg:#fff;--panel:#fff;--text:#111;--muted:#444;--faint:#666;--border:#bbb}}body{{background:#fff}}.section{{box-shadow:none;break-inside:avoid}}.delta-focus-controls{{display:none}}.delta-canvas-scroll{{overflow:visible}}}}.delta-graph-heading{{flex-wrap:wrap}}.delta-node.operation-renamed rect{{stroke:var(--blue);stroke-dasharray:8 3;fill:rgba(48,83,110,.14)}}.isolated-anchor.operation-renamed{{border-left-color:var(--blue);border-style:dashed}}.delta-node.operation-retained rect{{stroke:#53656e;fill:#111a1f}}.delta-node.operation-unresolved rect{{stroke:var(--faint);stroke-dasharray:3 3;fill:rgba(111,125,131,.08)}}.isolated-anchor.operation-unresolved{{border-left-color:var(--faint);border-style:dashed}}.structural-container-header,.secondary-placement{{transition:opacity .16s ease,filter .16s ease}}.structural-container-header rect{{fill:#132027;stroke:#58707c;stroke-width:1.1}}.structural-container-header.operation-added rect{{stroke:var(--green);fill:rgba(54,118,87,.14)}}.structural-container-header.operation-modified rect{{stroke:var(--amber);fill:rgba(106,85,30,.13)}}.structural-container-header.operation-removed rect{{stroke:var(--red);stroke-dasharray:6 4;fill:rgba(112,43,48,.12)}}.structural-container-header.operation-unresolved rect{{stroke:var(--faint);stroke-dasharray:3 3}}.secondary-placement rect{{fill:rgba(48,83,110,.18);stroke:var(--blue);stroke-width:.8;stroke-dasharray:3 2}}.secondary-placement text{{fill:var(--blue);font-size:8px}}.delta-focus.no-visible-backbone{{border-style:dashed;color:var(--faint)}}.delta-focus-empty{{margin:12px 0 0;padding:9px 11px;border:1px dashed rgba(111,128,135,.3);border-radius:8px;color:var(--muted);font-size:10px}}
+.delta-node-marker{{stroke-width:3;stroke-linecap:round}}
+.delta-node.operation-added .delta-node-marker{{stroke:var(--green)}}
+.delta-node.operation-modified .delta-node-marker{{stroke:var(--amber)}}
+.delta-node.operation-removed .delta-node-marker{{stroke:var(--red)}}
+.delta-node.operation-renamed .delta-node-marker{{stroke:var(--blue)}}
+.delta-node.operation-retained .delta-node-marker,.delta-node.operation-unresolved .delta-node-marker{{stroke:var(--faint)}}
+.delta-node.kind-function rect,.delta-node.kind-method rect,.delta-node.kind-variable rect,.delta-node.kind-import rect{{fill:transparent;stroke:none}}
+.delta-node.kind-function .delta-node-name,.delta-node.kind-method .delta-node-name{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px}}
+.structural-container.kind-class{{fill:rgba(8,12,15,.12);stroke:rgba(111,128,135,.28)}}
+.structural-container-header.kind-class rect{{fill:transparent;stroke:rgba(111,128,135,.26)}}
+.relationship-inspector,.isolated-anchors{{margin-top:12px;border-top:1px solid rgba(111,128,135,.18);padding-top:10px}}
+.relationship-inspector>summary,.isolated-anchors>summary{{cursor:pointer;color:var(--muted);font-size:10px}}
+.standalone-explanation{{margin:8px 0 0;color:var(--faint);font-size:9px}}
 .delta-edge[role="button"]{{cursor:pointer;outline:none}}
 .delta-edge[role="button"]:focus path,.delta-edge.group-expanded path{{stroke-width:3}}
 .relation-group-inspector{{display:grid;gap:7px;margin-top:10px}}
@@ -1464,6 +1518,8 @@ document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
   const toggleGroup = (groupId) => {{
     interaction.expandedGroup =
       interaction.expandedGroup === groupId ? null : groupId;
+    const inspector = graph.querySelector(".relationship-inspector");
+    if (inspector && interaction.expandedGroup) inspector.open = true;
     graph.querySelectorAll("[data-group-target]").forEach((item) => {{
       const expanded = item.dataset.groupTarget === interaction.expandedGroup;
       item.classList.toggle("group-expanded", expanded);

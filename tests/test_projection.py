@@ -502,6 +502,8 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
     assert 'data-verification-subject="R1"' in html
     assert 'class="delta-canvas"' not in html
     assert '<details class="isolated-anchors">' in html
+    assert "Standalone changes · 1" in html
+    assert "no observed executable or ownership relationship" in html
     assert "No safe canonical relation delta is available." in html
     assert '<span class="block-title">Structural paths</span>' not in html
     assert "No associated canonical evidence." not in html
@@ -771,15 +773,15 @@ def test_canonical_ownership_projects_recursive_shared_focus_hierarchy() -> None
         "2 ownership deltas · "
         "0 isolated changed anchors"
     ) in html
-    assert html.count('class="structural-container operation-') == 2
-    assert html.count('class="structural-container-header operation-') == 2
+    assert html.count('class="structural-container kind-') == 2
+    assert html.count('class="structural-container-header kind-') == 2
     assert "Structural coverage · unavailable" in html
     assert html.count('data-context-focuses="R1 R2"') >= 4
     assert html.count('data-focuses="R1 R2"') == 1
     assert "member · retained" not in html
     assert 'class="hierarchy-toggle' not in html
     assert 'class="ownership-edge' not in html
-    assert html.count('class="delta-node operation-') == 1
+    assert html.count('class="delta-node kind-') == 1
 
     cyclic_evidence = replace(
         evidence,
@@ -1199,8 +1201,8 @@ def test_projection_uses_review_relevant_structural_closure() -> None:
     assert "calls · added" in html
     assert "calls · retained" in html
     assert "function · modified" in html
-    assert "test_anchor_one" in html
-    assert "test_anchor_two" in html
+    assert "anchor()" in html
+    assert "anchor_2()" in html
     assert "variable · context" not in html
     assert 'data-focuses="R1 R2"' in html
 
@@ -1400,6 +1402,9 @@ def test_review_graph_renders_complete_focus_union() -> None:
         ),
     )
     assert html.count('class="relation-group-details"') == 3
+    assert '<details class="relationship-inspector"><summary>' in html
+    assert "Exact relationships · 3 groups · 3 edges" in html
+    assert '<details class="relationship-inspector" open>' not in html
     assert html.count('class="relation-member"') == 3
     assert html.count('data-group-target="') == 3
     assert html.count('role="button" aria-expanded="false"') == 3
@@ -1414,7 +1419,7 @@ def test_review_graph_renders_complete_focus_union() -> None:
         "0 ownership deltas · "
         "1 isolated changed anchor"
     ) in html
-    assert html.count('class="delta-node operation-') == 4
+    assert html.count('class="delta-node kind-') == 4
     assert html.count('class="isolated-anchor operation-') == 1
     assert html.count('class="delta-edge operation-') == 3
     assert 'data-focuses="R1 R2 G1"' in html
