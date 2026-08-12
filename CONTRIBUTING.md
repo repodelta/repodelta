@@ -29,3 +29,17 @@ Opening an Issue or pull request does not grant write or merge access.
 RepoDelta evaluates the resulting change, not how it was produced locally.
 GitHub does not allow pull-request authors to approve their own PRs, so a PR
 submitted through a maintainer's account needs another maintainer's approval.
+
+## Optional bot submission
+
+Maintainers can submit an agent-prepared branch through the repository's
+GitHub App, then review it under their own human identity:
+
+```bash
+./tools/repodelta-bot submit --repo repodelta/repodelta --title "..." \
+  --body-file pr.md --reviewer HUMAN_GITHUB_LOGIN
+```
+
+An App manager supplies their owner-only private key and App identifiers as
+described by `./tools/repodelta-bot submit --help`. The bot only pushes and
+opens the PR; a human maintainer still approves it.
