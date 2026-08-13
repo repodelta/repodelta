@@ -33,7 +33,9 @@ repodelta compare-structural-correctness \
 Packet identity, candidate completeness, subject completeness, file roles,
 focus membership, relation identity, and claimed equivalent focus membership
 are validated before comparison. The packet exposes the bounded candidate
-universe but not RepoDelta's selected files, roles, or focus memberships.
+universe, conclusion-free symbol names and relation endpoints, changed-file
+counts, and at most 32 diff hunk headers per file. It does not expose source
+lines, RepoDelta's selected files, projected roles, or focus memberships.
 
 ## Campaign v1 sample
 

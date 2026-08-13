@@ -11,14 +11,32 @@ from repodelta.evaluation.structural_correctness import (
     ObservedFile,
     ObservedFocus,
     StructuralCandidate,
+    StructuralRelationCandidate,
+    StructuralSymbolCandidate,
     StructuralCorrectnessLabels,
     StructuralCorrectnessObservation,
     StructuralCorrectnessPacket,
     StructuralSubject,
     load_labels,
+    prepare_structural_correctness_packet,
     prepare_structural_correctness_label_template,
     write_comparison_html,
     write_json_artifact,
+)
+from repodelta.model.contracts import (
+    ChangedFile,
+    EvidenceCatalog,
+    EvidenceItem,
+    ReviewBrief,
+    ReviewOverview,
+    ReviewProjection,
+    ReviewSourcePacket,
+    ReviewStatement,
+    ReviewStructuralGraph,
+    StructuralCoverage,
+    StructuralGraphEdge,
+    StructuralGraphNode,
+    StructuralRelationGroup,
 )
 
 
@@ -33,6 +51,23 @@ def _packet() -> StructuralCorrectnessPacket:
             StructuralCandidate("F:b", "src/b.py", "retained", ("S:b",)),
             StructuralCandidate("F:c", "src/c.py", "modified", ("S:c",)),
         ),
+        symbols=(
+            StructuralSymbolCandidate(
+                "S:a", "F:a", "src/a.py", "run", "function", "modified"
+            ),
+            StructuralSymbolCandidate(
+                "S:b", "F:b", "src/b.py", "bridge", "function", "retained"
+            ),
+            StructuralSymbolCandidate(
+                "S:c", "F:c", "src/c.py", "other", "function", "modified"
+            ),
+        ),
+        relations=(
+            StructuralRelationCandidate(
+                "REL:1", "S:a", "S:b", "calls", "retained"
+            ),
+        ),
+        changed_surfaces=(),
         subjects=(
             StructuralSubject("R1", "requirement", "Keep the path continuous."),
             StructuralSubject("G1", "guardrail", "Do not change c."),
@@ -88,7 +123,90 @@ def test_label_template_is_complete_but_blind() -> None:
 
     assert {item.disposition for item in template.files} == {"unresolved"}
     assert all(item.unresolved for item in template.focuses)
-    assert "retained_bridge" not in json.dumps(packet, default=lambda value: value.__dict__)
+    serialized = json.dumps(packet, default=lambda value: value.__dict__)
+    assert "retained_bridge" not in serialized
+    assert '"source_node_id": "S:a"' in serialized
+    assert '"qualified_name": "run"' in serialized
+
+
+def test_packet_exposes_bounded_structural_facts_without_projected_answers() -> None:
+    file_fact = EvidenceItem(
+        id="EV:file",
+        summary="src/a.py",
+        kind="symbol",
+        classification="code",
+        metadata={
+            "path": "src/a.py",
+            "qualified_name": "src/a.py",
+            "symbol_kind": "file",
+        },
+    )
+    symbol_fact = EvidenceItem(
+        id="EV:symbol",
+        summary="run",
+        kind="symbol",
+        classification="code",
+        metadata={
+            "path": "src/a.py",
+            "qualified_name": "run",
+            "symbol_kind": "function",
+        },
+    )
+    file_node = StructuralGraphNode(
+        "F:a", "file:a", "modified", ("EV:file",), "EV:file"
+    )
+    symbol_node = StructuralGraphNode(
+        "S:a", "symbol:a", "modified", ("EV:symbol",), "EV:symbol"
+    )
+    edge = StructuralGraphEdge(
+        "E:1", "F:a", "S:a", "contains", "added", "EV:relation"
+    )
+    relation = StructuralRelationGroup(
+        "REL:1", "F:a", "S:a", "contains", "added", ("E:1",)
+    )
+    source_packet = ReviewSourcePacket(
+        repository="repodelta/repodelta",
+        pull_request=1,
+        title="Change run",
+        source_records=(),
+        changed_files=(
+            ChangedFile(
+                "src/a.py",
+                "src/a.py",
+                additions=3,
+                deletions=1,
+                patch="@@ -1,2 +1,4 @@\n-secret implementation line\n",
+            ),
+        ),
+        base_sha="base",
+        head_sha="head",
+    )
+    brief = ReviewBrief(
+        packet=source_packet,
+        intent=ReviewStatement("O1", "Change run"),
+        requirements=(),
+        evidence_catalog=EvidenceCatalog((file_fact, symbol_fact)),
+        projection=ReviewProjection(
+            review_graph=ReviewStructuralGraph(
+                nodes=(file_node, symbol_node),
+                edges=(edge,),
+                relation_groups=(relation,),
+            )
+        ),
+        overview=ReviewOverview(
+            "open", "not_observed", 1, StructuralCoverage("available")
+        ),
+    )
+
+    packet = prepare_structural_correctness_packet(brief)
+    serialized = json.dumps(packet, default=lambda value: value.__dict__)
+
+    assert packet.symbols[0].qualified_name == "run"
+    assert packet.relations[0].source_node_id == "F:a"
+    assert packet.changed_surfaces[0].hunk_headers == ("@@ -1,2 +1,4 @@",)
+    assert "secret implementation line" not in serialized
+    assert "direct_file_node_ids" not in serialized
+    assert "retained_bridge" not in serialized
 
 
 def test_comparison_exposes_false_inclusion_role_disagreement_and_focus_error(
