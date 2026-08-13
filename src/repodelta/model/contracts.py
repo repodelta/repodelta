@@ -3038,7 +3038,9 @@ class StructuralOverviewFile:
     member_node_ids: tuple[str, ...]
     role: StructuralOverviewFileRole
     lane: StructuralOverviewLane
+    architectural_layer: ArchitecturalLayer
     relation_group_ids: tuple[str, ...] = ()
+    context_file_node_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)

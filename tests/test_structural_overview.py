@@ -164,3 +164,27 @@ def test_overview_validation_rejects_changed_exact_relation_members() -> None:
         validate_structural_overview(
             invalid, graph, architecture, workspace, evidence
         )
+
+
+def test_overview_validation_rejects_renderer_owned_role_override() -> None:
+    graph, evidence, workspace = _overview_fixture()
+    architecture = project_architectural_change_topology(graph, evidence)
+    overview = project_structural_overview(
+        graph, architecture, workspace, evidence
+    )
+    bridge_index = next(
+        index
+        for index, item in enumerate(overview.files)
+        if item.file_node_id == "N:B"
+    )
+    files = list(overview.files)
+    files[bridge_index] = replace(files[bridge_index], role="changed")
+
+    with pytest.raises(ValueError, match="diverges from canonical authorities"):
+        validate_structural_overview(
+            replace(overview, files=tuple(files)),
+            graph,
+            architecture,
+            workspace,
+            evidence,
+        )

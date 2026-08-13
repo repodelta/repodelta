@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from inspect import signature
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -37,6 +38,7 @@ from repodelta.model.contracts import (
     StructuralGraphNode,
     StructuralGraphPlacement,
     StructuralNavigationTarget,
+    StructuralOverviewProjection,
     StructuralRelationGroup,
     StructuralOwnershipChangeIdentity,
     StructuralOwnershipIdentity,
@@ -47,6 +49,8 @@ from repodelta.model.contracts import (
     TransformationStructuralClosure,
     TransformationStructuralTopologyGroup,
     VerificationIdentity,
+    VerificationEvidenceInspection,
+    VerificationWorkspace,
 )
 from repodelta.projection.architecture import (
     classify_architectural_path,
@@ -78,6 +82,7 @@ from repodelta.projection.overview import project_diagnostic_presentation
 from repodelta.projection.structural_groups import (
     project_structural_relation_groups,
 )
+from repodelta.projection.structural_overview import project_structural_overview
 from repodelta.presentation.html import (
     _architectural_chip,
     _evidence_paths,
@@ -106,18 +111,26 @@ def _with_verification_overlays(
             projection.review_graph,
             evidence,
         )
+    workspace = VerificationWorkspace(
+        inspections=tuple(
+            VerificationEvidenceInspection(
+                id=f"VEI:{item.change_map.focus_statement_id}",
+                subject_id=item.change_map.focus_statement_id,
+                structural_overlay=item.change_map.structural_overlay,
+                structural_disposition=item.change_map.structural_disposition,
+            )
+            for item in projection.slices
+        )
+    )
     return SimpleNamespace(
         architectural_topology=topology,
-        verification_workspace=SimpleNamespace(
-            matrix=(),
-            inspections=tuple(
-                SimpleNamespace(
-                    subject_id=item.change_map.focus_statement_id,
-                    structural_overlay=item.change_map.structural_overlay,
-                )
-                for item in projection.slices
-            )
-        )
+        verification_workspace=workspace,
+        structural_overview=project_structural_overview(
+            projection.review_graph,
+            topology,
+            workspace,
+            evidence,
+        ),
     )
 
 
@@ -238,7 +251,7 @@ def test_file_overview_aggregates_canonical_members_and_edges() -> None:
             layer="application",
             node_ids=("N:file:a", "N:fn:a"),
             classification_authority="path_convention",
-            context_node_ids=("N:file:b", "N:fn:b"),
+            context_node_ids=("N:file:b",),
             context_relation_group_ids=("RG:calls", "RG:imports"),
         ),
         "N:file:b": ArchitecturalComponent(
@@ -247,7 +260,7 @@ def test_file_overview_aggregates_canonical_members_and_edges() -> None:
             layer="infrastructure",
             node_ids=("N:file:b", "N:fn:b"),
             classification_authority="path_convention",
-            context_node_ids=("N:file:a", "N:fn:a"),
+            context_node_ids=("N:file:a",),
             context_relation_group_ids=("RG:calls", "RG:imports"),
         ),
     }
@@ -257,15 +270,40 @@ def test_file_overview_aggregates_canonical_members_and_edges() -> None:
         for node_id in component.node_ids
     }
 
+    render_graph = replace(
+        graph,
+        relation_groups=(relation_group, import_group),
+        backbone_relation_group_ids=(relation_group.id, import_group.id),
+    )
+    topology = ArchitecturalChangeTopology(components=tuple(components.values()))
+    workspace = VerificationWorkspace(inspections=(
+        VerificationEvidenceInspection(
+            id="VEI:R1",
+            subject_id="R1",
+            structural_overlay=StructuralFocusOverlay(
+                edge_ids=(edge.id,),
+                relation_group_ids=(relation_group.id,),
+            ),
+            structural_disposition=StructuralFocusDisposition(state="projected"),
+        ),
+        VerificationEvidenceInspection(
+            id="VEI:G1",
+            subject_id="G1",
+            structural_overlay=StructuralFocusOverlay(
+                edge_ids=(file_edge.id,),
+                relation_group_ids=(import_group.id,),
+            ),
+            structural_disposition=StructuralFocusDisposition(state="projected"),
+        ),
+    ))
+    catalog = EvidenceCatalog(items=tuple(evidence.values()))
+    overview = project_structural_overview(
+        render_graph, topology, workspace, catalog
+    )
     html = _file_structural_overview(
-        graph=graph,
+        overview=overview,
         backbone_nodes={node.id: node for node in nodes},
-        backbone_relation_groups=(relation_group, import_group),
-        placements=placements,
         evidence=evidence,
-        architectural_components=architectural_components,
-        node_focus={"N:fn:a": [("R1", "changed_anchor")]},
-        edge_focus={edge.id: ["R1"], file_edge.id: ["G1"]},
     )
 
     assert html.count('class="file-graph-node"') == 2
@@ -319,21 +357,12 @@ def test_file_overview_aggregates_canonical_members_and_edges() -> None:
     assert 'class="member-node-link"' in member_html
     assert 'href="https://github.com/example/repo/blob/head/N:fn:a"' in member_html
 
-    render_graph = replace(
-        graph,
-        relation_groups=(relation_group, import_group),
-        backbone_relation_group_ids=(relation_group.id, import_group.id),
-    )
     review_html = _review_graph(
         render_graph,
         SimpleNamespace(
-            architectural_topology=ArchitecturalChangeTopology(
-                components=tuple(components.values())
-            ),
-            verification_workspace=SimpleNamespace(
-                inspections=(),
-                matrix=(),
-            ),
+            architectural_topology=topology,
+            verification_workspace=workspace,
+            structural_overview=overview,
         ),
         SimpleNamespace(
             evidence_catalog=EvidenceCatalog(items=tuple(evidence.values())),
@@ -367,6 +396,14 @@ def test_structural_file_overview_pluralizes_classes() -> None:
     assert _structural_kind_count_label("class", 1) == "class"
     assert _structural_kind_count_label("class", 3) == "classes"
     assert _structural_kind_count_label("function", 2) == "functions"
+
+
+def test_file_overview_renderer_cannot_receive_semantic_graph_inputs() -> None:
+    assert set(signature(_file_structural_overview).parameters) == {
+        "overview",
+        "backbone_nodes",
+        "evidence",
+    }
 
 
 def test_file_overview_keeps_retained_context_outside_changed_map() -> None:
@@ -446,37 +483,15 @@ def test_file_overview_keeps_retained_context_outside_changed_map() -> None:
         )),
         backbone_relation_group_ids=tuple(item.id for item in groups),
     )
-    components = {
-        "N:runtime": ArchitecturalComponent(
-            id="AC:runtime",
-            domain="src",
-            layer="application",
-            node_ids=("N:runtime",),
-            classification_authority="path_convention",
-        ),
-        "N:test": ArchitecturalComponent(
-            id="AC:test",
-            domain="tests",
-            layer="verification",
-            node_ids=("N:test",),
-            classification_authority="path_convention",
-        ),
-        "N:sink": ArchitecturalComponent(
-            id="AC:sink",
-            domain="src",
-            layer="infrastructure",
-            node_ids=("N:sink",),
-            classification_authority="path_convention",
-        ),
-    }
-
+    catalog = EvidenceCatalog(items=tuple(evidence.values()))
+    topology = project_architectural_change_topology(graph, catalog)
+    overview = project_structural_overview(
+        graph, topology, VerificationWorkspace(), catalog
+    )
     html = _file_structural_overview(
-        graph=graph,
+        overview=overview,
         backbone_nodes={item.id: item for item in nodes},
-        backbone_relation_groups=groups,
-        placements=(),
         evidence=evidence,
-        architectural_components=components,
     )
 
     assert html.count('class="file-graph-node') == 4
@@ -1238,7 +1253,10 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
     assert 'class="architectural-chip-html ' in html
     assert 'data-component-target="' in html
     assert html.index("Structural delta overview") < html.index("Assessment &amp; evidence")
-    assert 'data-focus-target="overview">Overview</button>' in html
+    assert (
+        'data-focus-target="overview" data-overview-visible="true">Overview</button>'
+        in html
+    )
     assert 'data-focus-target="R1"' in html
     assert 'data-focus-copy="' not in html
     assert (
@@ -2130,7 +2148,8 @@ def test_review_graph_renders_complete_focus_union() -> None:
                     )
                     for item in projection.slices
                 )
-            )
+            ),
+            structural_overview=StructuralOverviewProjection(),
         ),
         SimpleNamespace(
             evidence_catalog=evidence,

@@ -22,6 +22,23 @@ def project_structural_overview(
 ) -> StructuralOverviewProjection:
     """Project compact file membership once for every presentation adapter."""
 
+    result = _derive_structural_overview(
+        graph, architecture, workspace, evidence_catalog
+    )
+    validate_structural_overview(
+        result, graph, architecture, workspace, evidence_catalog
+    )
+    return result
+
+
+def _derive_structural_overview(
+    graph: ReviewStructuralGraph,
+    architecture: ArchitecturalChangeTopology,
+    workspace: VerificationWorkspace,
+    evidence_catalog: EvidenceCatalog,
+) -> StructuralOverviewProjection:
+    """Derive one overview value from its three canonical authorities."""
+
     evidence = evidence_catalog.by_id()
     nodes = {item.id: item for item in graph.nodes}
     groups = {item.id: item for item in graph.relation_groups}
@@ -38,7 +55,7 @@ def project_structural_overview(
         if evidence[node.display_evidence_id].metadata.get("symbol_kind") == "file"
     }
     if not file_node_ids:
-        result = StructuralOverviewProjection(
+        return StructuralOverviewProjection(
             focuses=tuple(
                 StructuralOverviewFocus(
                     subject_id=item.subject_id,
@@ -47,10 +64,6 @@ def project_structural_overview(
                 for item in workspace.inspections
             )
         )
-        validate_structural_overview(
-            result, graph, architecture, workspace, evidence_catalog
-        )
-        return result
 
     placements = {item.id: item for item in graph.placements}
     primary_parent = {
@@ -113,6 +126,12 @@ def project_structural_overview(
     retained_bridge_ids = _retained_bridges(changed_file_ids, outgoing)
     displayed_file_ids = changed_file_ids | retained_bridge_ids
     context_group_ids: dict[str, set[str]] = {}
+    boundary_group_ids_by_displayed: dict[str, set[str]] = {
+        file_id: set() for file_id in displayed_file_ids
+    }
+    context_files_by_displayed: dict[str, set[str]] = {
+        file_id: set() for file_id in displayed_file_ids
+    }
     for group_id, (source_file, target_file) in file_group_endpoints.items():
         if source_file is None or target_file is None or source_file == target_file:
             continue
@@ -127,6 +146,8 @@ def project_structural_overview(
             continue
         context_file = target_file if displayed_endpoint == source_file else source_file
         context_group_ids.setdefault(context_file, set()).add(group_id)
+        boundary_group_ids_by_displayed[displayed_endpoint].add(group_id)
+        context_files_by_displayed[displayed_endpoint].add(context_file)
 
     layer_by_node = {
         node_id: component.layer
@@ -214,10 +235,17 @@ def project_structural_overview(
                 if layer_by_node.get(file_id) == "verification"
                 else "production"
             ),
+            architectural_layer=layer_by_node.get(file_id, "unclassified"),
             relation_group_ids=tuple(sorted(
-                visible_group_ids_by_file.get(file_id, ())
+                (
+                    visible_group_ids_by_file.get(file_id, set())
+                    | boundary_group_ids_by_displayed.get(file_id, set())
+                )
                 if file_id in displayed_file_ids
                 else context_group_ids.get(file_id, ())
+            )),
+            context_file_node_ids=tuple(sorted(
+                context_files_by_displayed.get(file_id, ())
             )),
         )
         for file_id in sorted(displayed_file_ids | set(context_group_ids))
@@ -227,6 +255,11 @@ def project_structural_overview(
         group_id: relation.id
         for relation in relation_items
         for group_id in relation.relation_group_ids
+    }
+    group_id_by_edge_id = {
+        edge_id: group.id
+        for group in groups.values()
+        for edge_id in group.member_edge_ids
     }
     overview_files = {item.file_node_id: item for item in file_items}
     focus_items = []
@@ -245,11 +278,7 @@ def project_structural_overview(
         overlay_group_ids.update(
             group_id
             for edge_id in inspection.structural_overlay.edge_ids
-            for group_id in (
-                relation_id
-                for relation_id, group in groups.items()
-                if edge_id in group.member_edge_ids
-            )
+            if (group_id := group_id_by_edge_id.get(edge_id)) is not None
         )
         relation_ids = {
             relation_id_by_group_id[group_id]
@@ -272,15 +301,11 @@ def project_structural_overview(
             )
         )
 
-    result = StructuralOverviewProjection(
+    return StructuralOverviewProjection(
         files=file_items,
         relations=tuple(relation_items),
         focuses=tuple(focus_items),
     )
-    validate_structural_overview(
-        result, graph, architecture, workspace, evidence_catalog
-    )
-    return result
 
 
 def _retained_bridges(
@@ -364,8 +389,17 @@ def validate_structural_overview(
             raise ValueError("structural overview file contains non-canonical members")
         if item.file_node_id not in architecture_nodes:
             raise ValueError("structural overview file lacks architectural authority")
+        expected_layer = next(
+            component.layer
+            for component in architecture.components
+            if item.file_node_id in component.node_ids
+        )
+        if item.architectural_layer != expected_layer:
+            raise ValueError("structural overview changed architectural layer")
         if not set(item.relation_group_ids) <= backbone_groups:
             raise ValueError("structural overview file references non-backbone relations")
+        if not set(item.context_file_node_ids) <= set(files):
+            raise ValueError("structural overview file references unknown context files")
     visible_files = {
         item.file_node_id
         for item in overview.files
@@ -406,3 +440,8 @@ def validate_structural_overview(
             raise ValueError("structural overview focus references unknown files")
         if not set(item.relation_ids) <= set(relations):
             raise ValueError("structural overview focus references unknown relations")
+    expected = _derive_structural_overview(
+        graph, architecture, workspace, evidence_catalog
+    )
+    if overview != expected:
+        raise ValueError("structural overview diverges from canonical authorities")
