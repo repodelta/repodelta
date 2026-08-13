@@ -20,6 +20,7 @@ from repodelta.model.contracts import (
     StructuralGraphNode,
     StructuralGraphPlacement,
     StructuralNavigationTarget,
+    StructuralOverviewProjection,
     StructuralRelationGroup,
 )
 
@@ -195,6 +196,7 @@ def _focus_controls(workspace: object, visible_subject_ids: frozenset[str]) -> s
             + ("" if entry.subject_id in visible_subject_ids else " no-visible-backbone")
             + '" type="button" '
             f'data-focus-target="{escape(entry.subject_id, quote=True)}" '
+            f'data-overview-visible="{str(entry.subject_id in visible_subject_ids).lower()}" '
             f'title="Inspect {escape(entry.subject_id, quote=True)}">'
             f'{escape(entry.subject_id)}</button>'
         )
@@ -216,7 +218,7 @@ def _focus_controls(workspace: object, visible_subject_ids: frozenset[str]) -> s
         'aria-label="Structural graph focus">'
         '<div class="delta-focus-primary">'
         '<button class="delta-focus active" type="button" '
-        'data-focus-target="overview">Overview</button>'
+        'data-focus-target="overview" data-overview-visible="true">Overview</button>'
         '</div>'
         f'<div class="delta-focus-families">{focus_families}</div></div>'
     )
@@ -654,18 +656,13 @@ def _review_graph(
             + "</div>"
         )
 
-    visible_focus_ids: set[str] = set()
-    for inspection in workspace.inspections:
-        overlay = inspection.structural_overlay
-        has_visible_structure = bool(
-            {item.node_id for item in overlay.nodes} & set(backbone_nodes)
-            or set(overlay.relation_group_ids) & set(graph.backbone_relation_group_ids)
-            or set(overlay.edge_ids) & set(graph.backbone_edge_ids)
-            or set(overlay.ownership_edge_ids) & set(graph.backbone_ownership_edge_ids)
-            or set(overlay.placement_ids) & set(graph.primary_placement_ids)
-        )
-        if has_visible_structure:
-            visible_focus_ids.add(inspection.subject_id)
+    visible_focus_ids = {
+        focus.subject_id
+        for focus in projection.structural_overview.focuses
+        if focus.direct_file_node_ids
+        or focus.context_file_node_ids
+        or focus.relation_ids
+    }
     controls = _focus_controls(workspace, frozenset(visible_focus_ids))
     canvas = (
         '<div class="delta-canvas-scroll"><svg class="delta-canvas" '
@@ -719,15 +716,9 @@ def _review_graph(
         )
     )
     file_overview = _file_structural_overview(
-        graph=graph,
+        overview=projection.structural_overview,
         backbone_nodes=backbone_nodes,
-        backbone_relation_groups=backbone_relation_groups,
-        placements=placements,
         evidence=evidence,
-        architectural_components=architectural_components,
-        node_focus=node_focus,
-        edge_focus=edge_focus,
-        relation_group_focus=relation_group_focus,
     )
     evidence_paths = _evidence_paths(
         graph=graph,
@@ -790,71 +781,32 @@ def _review_graph(
 
 def _file_structural_overview(
     *,
-    graph: ReviewStructuralGraph,
+    overview: StructuralOverviewProjection,
     backbone_nodes: dict[str, StructuralGraphNode],
-    backbone_relation_groups: tuple[StructuralRelationGroup, ...],
-    placements: tuple[StructuralGraphPlacement, ...],
     evidence: dict[str, EvidenceItem],
-    architectural_components: dict[str, ArchitecturalComponent] | None = None,
-    node_focus: dict[str, list[tuple[str, str]]] | None = None,
-    edge_focus: dict[str, list[str]] | None = None,
-    relation_group_focus: dict[str, list[str]] | None = None,
 ) -> str:
-    """Project canonical symbols into the collapsed state of one graph."""
-
-    architectural_components = architectural_components or {}
-    node_focus = node_focus or {}
-    edge_focus = edge_focus or {}
-    relation_group_focus = relation_group_focus or {}
+    """Render the canonical compact structural overview without re-projecting it."""
 
     facts = {
         node_id: _structural_display_fact(node, evidence)
         for node_id, node in backbone_nodes.items()
     }
-    file_node_ids = tuple(
-        node_id
-        for node_id, fact in facts.items()
-        if fact.metadata.get("symbol_kind") == "file"
-    )
-    if not file_node_ids:
+    overview_files = overview.files_by_id()
+    visible_files = {
+        file_id: item
+        for file_id, item in overview_files.items()
+        if item.role != "retained_context"
+    }
+    if not visible_files:
         return (
             '<div class="file-graph-layer"><p class="file-overview-empty">'
-            'No canonical file ownership is available for a collapsed '
-            'projection. Use the full structural audit for the collected '
-            'symbols.</p></div>'
+            'No changed file-level structure is available. Retained context '
+            'remains in the full structural audit.</p></div>'
         )
-
-    primary_ids = set(graph.primary_placement_ids)
-    parent_by_child = {
-        placement.child_node_id: placement.parent_node_id
-        for placement in placements
-        if placement.id in primary_ids
+    file_node_ids = tuple(visible_files)
+    members_by_file = {
+        file_id: visible_files[file_id].member_node_ids for file_id in file_node_ids
     }
-
-    def owning_file(node_id: str) -> str | None:
-        visited: set[str] = set()
-        current = node_id
-        while current not in visited:
-            visited.add(current)
-            if current in file_node_ids:
-                return current
-            parent = parent_by_child.get(current)
-            if parent is None:
-                return None
-            current = parent
-        return None
-
-    file_by_node = {
-        node_id: file_id
-        for node_id in backbone_nodes
-        if (file_id := owning_file(node_id)) is not None
-    }
-    members_by_file: dict[str, list[str]] = {
-        file_id: [] for file_id in file_node_ids
-    }
-    for node_id, file_id in file_by_node.items():
-        if node_id != file_id:
-            members_by_file[file_id].append(node_id)
 
     alphabetic_files = tuple(sorted(
         file_node_ids,
@@ -863,15 +815,13 @@ def _file_structural_overview(
     verification_file_ids = {
         file_id
         for file_id in alphabetic_files
-        if architectural_components.get(file_id) is not None
-        and architectural_components[file_id].layer == "verification"
+        if visible_files[file_id].lane == "verification"
     }
     relation_file_pairs = {
         (source_file, target_file)
-        for group in backbone_relation_groups
-        if (source_file := file_by_node.get(group.source_node_id)) is not None
-        and (target_file := file_by_node.get(group.target_node_id)) is not None
-        and source_file != target_file
+        for relation in overview.relations
+        for source_file in relation.source_file_node_ids
+        for target_file in (relation.target_file_node_id,)
     }
 
     def topology_order(file_ids: set[str]) -> tuple[str, ...]:
@@ -920,7 +870,8 @@ def _file_structural_overview(
     ordered_files = (*production_files, *verification_files)
     cell_width, cell_height = 300, 142
     node_width, node_height = 250, 84
-    columns = min(3, max(1, len(production_files), len(verification_files)))
+    columns = min(3, max(1, len(production_files)))
+    canvas_width = max(600, columns * cell_width)
     positions: dict[str, tuple[int, int]] = {}
     production_rows = max(
         1,
@@ -932,103 +883,93 @@ def _file_structural_overview(
             45 + (index // columns) * cell_height,
         )
     verification_start = 55 + production_rows * cell_height
-    verification_column_rows: dict[int, int] = {}
+    verification_columns = min(2, max(1, len(verification_files)))
+    verification_gap = 12
+    verification_inner_width = canvas_width - 80
+    verification_node_width = (
+        verification_inner_width
+        - verification_gap * (verification_columns - 1)
+    ) / verification_columns
+    verification_node_height = 42
     for index, file_id in enumerate(verification_files):
-        target_columns = tuple(sorted({
-            round((positions[target_id][0] - 30) / cell_width)
-            for source_id, target_id in relation_file_pairs
-            if source_id == file_id and target_id in positions
-        }))
-        column = target_columns[0] if target_columns else index % columns
-        row = verification_column_rows.get(column, 0)
-        verification_column_rows[column] = row + 1
+        column = index % verification_columns
+        row = index // verification_columns
         positions[file_id] = (
-            30 + column * cell_width,
-            verification_start + 38 + row * cell_height,
+            40 + column * (verification_node_width + verification_gap),
+            verification_start + 46 + row * (verification_node_height + 8),
         )
     verification_rows = (
-        max(verification_column_rows.values(), default=0)
+        (len(verification_files) + verification_columns - 1)
+        // verification_columns
         if verification_files
         else 0
     )
-    canvas_width = max(330, columns * cell_width)
     canvas_height = (
         65
         + production_rows * cell_height
-        + (54 + verification_rows * cell_height if verification_files else 0)
+        + (
+            72 + verification_rows * (verification_node_height + 8)
+            if verification_files
+            else 0
+        )
     )
 
-    groups_by_id = {item.id: item for item in backbone_relation_groups}
-    bundles: dict[tuple[str, str, str], list[str]] = {}
-    for group in backbone_relation_groups:
-        source_file = file_by_node.get(group.source_node_id)
-        target_file = file_by_node.get(group.target_node_id)
-        if source_file is None or target_file is None or source_file == target_file:
-            continue
-        bundles.setdefault(
-            (source_file, target_file, group.operation), []
-        ).append(group.id)
-
-    def group_focuses(group_ids: list[str]) -> tuple[str, ...]:
-        return tuple(dict.fromkeys(
-            focus_id
-            for group_id in group_ids
-            for focus_id in (
-                *relation_group_focus.get(group_id, ()),
-                *(
-                    edge_focus_id
-                    for edge_id in groups_by_id[group_id].member_edge_ids
-                    for edge_focus_id in edge_focus.get(edge_id, ())
-                ),
-            )
-        ))
+    def file_size(file_id: str) -> tuple[float, float]:
+        return (
+            (verification_node_width, verification_node_height)
+            if file_id in verification_file_ids
+            else (node_width, node_height)
+        )
 
     edge_shapes = []
-    adjacent_groups: dict[str, set[str]] = {
-        file_id: set() for file_id in ordered_files
-    }
-    adjacent_context_nodes: dict[str, set[str]] = {
-        file_id: set() for file_id in ordered_files
-    }
-    for (source_file, target_file, operation), group_ids in sorted(
-        bundles.items()
-    ):
-        adjacent_groups[source_file].update(group_ids)
-        adjacent_groups[target_file].update(group_ids)
-        adjacent_context_nodes[source_file].update(
-            (target_file, *(
-                group.target_node_id
-                for group in backbone_relation_groups
-                if group.id in group_ids
-            ))
+    focuses = overview.focuses_by_subject_id()
+    for relation in overview.relations:
+        source_files = relation.source_file_node_ids
+        target_file = relation.target_file_node_id
+        operation = relation.operation
+        group_ids = relation.relation_group_ids
+        visual_source = (
+            "__verification__"
+            if all(source in verification_file_ids for source in source_files)
+            and target_file not in verification_file_ids
+            else source_files[0]
         )
-        adjacent_context_nodes[target_file].update(
-            (source_file, *(
-                group.source_node_id
-                for group in backbone_relation_groups
-                if group.id in group_ids
-            ))
+        source_x, source_y = (
+            (canvas_width / 2, verification_start + 8)
+            if visual_source == "__verification__"
+            else positions[visual_source]
         )
-        source_x, source_y = positions[source_file]
         target_x, target_y = positions[target_file]
+        source_width, source_height = (
+            (0, 0)
+            if visual_source == "__verification__"
+            else file_size(visual_source)
+        )
+        target_width, target_height = file_size(target_file)
         source_center = (
-            source_x + node_width / 2,
-            source_y + node_height / 2,
+            source_x + source_width / 2,
+            source_y + source_height / 2,
         )
         target_center = (
-            target_x + node_width / 2,
-            target_y + node_height / 2,
+            target_x + target_width / 2,
+            target_y + target_height / 2,
         )
         delta_x = target_center[0] - source_center[0]
         delta_y = target_center[1] - source_center[1]
-        boundary_scale = min(
-            node_width / 2 / abs(delta_x) if delta_x else float("inf"),
-            node_height / 2 / abs(delta_y) if delta_y else float("inf"),
+        source_boundary_scale = min(
+            source_width / 2 / abs(delta_x) if delta_x else float("inf"),
+            source_height / 2 / abs(delta_y) if delta_y else float("inf"),
         )
-        x1 = source_center[0] + delta_x * boundary_scale
-        y1 = source_center[1] + delta_y * boundary_scale
-        x2 = target_center[0] - delta_x * boundary_scale
-        y2 = target_center[1] - delta_y * boundary_scale
+        if visual_source == "__verification__":
+            source_boundary_scale = 0
+        target_boundary_scale = min(
+            target_width / 2 / abs(delta_x) if delta_x else float("inf"),
+            target_height / 2 / abs(delta_y) if delta_y else float("inf"),
+        )
+        x1 = source_center[0] + delta_x * source_boundary_scale
+        y1 = source_center[1] + delta_y * source_boundary_scale
+        x2 = target_center[0] - delta_x * target_boundary_scale
+        y2 = target_center[1] - delta_y * target_boundary_scale
         mid_x, mid_y = (x1 + x2) / 2, (y1 + y2) / 2
         horizontal = abs(delta_y) < 1
         label_rect_y = (
@@ -1037,20 +978,33 @@ def _file_structural_overview(
             else mid_y - 25
         )
         label_text_y = label_rect_y + 12
-        relations = tuple(dict.fromkeys(
-            groups_by_id[group_id].relation for group_id in group_ids
-        ))
-        relation_title = " + ".join(relations)
-        label = f"{relation_title} · {operation}"
+        relation_title = " + ".join(relation.relations)
+        exact_edge_count = len(relation.member_edge_ids)
+        operation_label = "existing" if operation == "retained" else operation
+        label = f"{operation_label} {relation_title}"
+        if len(source_files) > 1 or exact_edge_count > 1:
+            label += f" ×{exact_edge_count}"
         label_width = min(224, max(128, len(label) * 4.5 + 18))
-        focuses = group_focuses(group_ids)
+        relation_focuses = tuple(
+            focus.subject_id
+            for focus in overview.focuses
+            if relation.id in focus.relation_ids
+        )
         edge_shapes.append(
             f'<g class="file-delta-edge operation-{escape(operation)}" '
-            f'data-source-file="{escape(source_file, quote=True)}" '
+            f'data-source-file="{escape(source_files[0], quote=True)}" '
+            f'data-source-file-ids="{escape(" ".join(source_files), quote=True)}" '
             f'data-target-file="{escape(target_file, quote=True)}" '
             f'data-group-ids="{escape(" ".join(group_ids), quote=True)}" '
-            f'data-focuses="{escape(" ".join(focuses), quote=True)}">'
+            f'data-overview-relation="{escape(relation.id, quote=True)}" '
+            f'data-focuses="{escape(" ".join(relation_focuses), quote=True)}">'
             f'<title>{escape(relation_title)} · {escape(operation)}</title>'
+            + (
+                f'<circle class="file-edge-bus" cx="{x1}" cy="{y1}" r="3"/>'
+                if visual_source == "__verification__"
+                else ""
+            )
+            +
             f'<path d="M{x1} {y1} Q{mid_x} {mid_y - 28} {x2} {y2}" '
             f'marker-end="url(#file-arrow-{escape(operation)})"/>'
             f'<rect x="{mid_x - label_width / 2}" y="{label_rect_y}" '
@@ -1080,38 +1034,51 @@ def _file_structural_overview(
             f"{count} {_structural_kind_count_label(kind, count)}"
             for kind, count in sorted(counts.items())
         ) or "No contained symbol was projected"
-        node_direct_focuses, node_context_focuses = _aggregate_node_focus(
-            (file_id, *member_ids), node_focus
+        direct_focuses = tuple(
+            focus.subject_id
+            for focus in overview.focuses
+            if file_id in focus.direct_file_node_ids
         )
-        direct_focuses = tuple(dict.fromkeys((
-            *node_direct_focuses,
-            *group_focuses(sorted(adjacent_groups[file_id])),
-        )))
         context_focuses = tuple(
-            focus_id
-            for focus_id in node_context_focuses
-            if focus_id not in direct_focuses
+            focus.subject_id
+            for focus in overview.focuses
+            if file_id in focus.context_file_node_ids
+            and focus.subject_id not in direct_focuses
         )
         file_name = _structural_standalone_name(file_fact)
-        component = architectural_components.get(file_id)
-        layer = component.layer if component is not None else "unclassified"
+        overview_file = visible_files[file_id]
+        layer = overview_file.architectural_layer
         x, y = positions[file_id]
+        width, height = file_size(file_id)
+        is_verification = file_id in verification_file_ids
+        is_retained_bridge = overview_file.role == "retained_bridge"
         file_shapes.append(
-            '<g class="file-graph-node" tabindex="0" role="button" '
+            '<g class="file-graph-node'
+            + (" verification-row" if is_verification else "")
+            + (" retained-bridge" if is_retained_bridge else "")
+            + '" tabindex="0" role="button" '
             f'data-structural-node="{escape(file_id, quote=True)}" '
             f'data-file-node="{escape(file_id, quote=True)}" '
             f'data-focuses="{escape(" ".join(direct_focuses), quote=True)}" '
             f'data-context-focuses="{escape(" ".join(context_focuses), quote=True)}" '
             f'data-member-node-ids="{escape(" ".join((file_id, *member_ids)), quote=True)}" '
-            f'data-context-node-ids="{escape(" ".join(sorted(adjacent_context_nodes[file_id])), quote=True)}" '
-            f'data-member-group-ids="{escape(" ".join(sorted(adjacent_groups[file_id])), quote=True)}" '
+            f'data-context-node-ids="{escape(" ".join(overview_file.context_file_node_ids), quote=True)}" '
+            f'data-member-group-ids="{escape(" ".join(overview_file.relation_group_ids), quote=True)}" '
             f'transform="translate({x} {y})">'
-            f'<rect width="{node_width}" height="{node_height}" rx="11"/>'
-            f'<text class="file-node-operation" x="13" y="19">{escape(file_node.delta)}</text>'
-            f'<text class="file-node-layer" x="{node_width - 13}" y="19">{escape(layer)}</text>'
-            f'<text class="file-node-name" x="13" y="43">{escape(_truncate_label(file_name, 39))}</text>'
-            f'<text class="file-node-counts" x="13" y="66">{escape(_truncate_label(count_copy, 48))}</text>'
-            f'<title>{escape(file_name)} · select related focused structure</title></g>'
+            f'<rect width="{width}" height="{height}" rx="{7 if is_verification else 11}"/>'
+            + (
+                f'<circle class="verification-change-dot" cx="13" cy="21" r="3"/>'
+                f'<text class="file-node-name" x="23" y="24">{escape(_truncate_label(file_name, 27))}</text>'
+                f'<text class="file-node-operation" x="{width - 13}" y="24" text-anchor="end">{escape(file_node.delta)}</text>'
+                if is_verification
+                else (
+                    f'<text class="file-node-operation" x="13" y="19">{escape(file_node.delta)}</text>'
+                    f'<text class="file-node-layer" x="{width - 13}" y="19">{escape(layer)}</text>'
+                    f'<text class="file-node-name" x="13" y="43">{escape(_truncate_label(file_name, 39))}</text>'
+                    f'<text class="file-node-counts" x="13" y="66">{escape("Existing path bridge" if is_retained_bridge else _truncate_label(count_copy, 48))}</text>'
+                )
+            )
+            + f'<title>{escape(file_name)} · select related focused structure</title></g>'
         )
 
     lane_shapes = (
@@ -1119,16 +1086,49 @@ def _file_structural_overview(
         + (
             f'<line class="file-lane-divider" x1="20" y1="{verification_start + 3}" '
             f'x2="{canvas_width - 20}" y2="{verification_start + 3}"/>'
-            f'<text class="file-lane-label verification" x="30" '
-            f'y="{verification_start + 25}">Verification</text>'
+            f'<rect class="verification-lane-container" x="20" '
+            f'y="{verification_start + 8}" width="{canvas_width - 40}" '
+            f'height="{canvas_height - verification_start - 18}" rx="10"/>'
+            f'<text class="file-lane-label verification" x="40" '
+            f'y="{verification_start + 32}">Verification changes · '
+            f'{len(verification_files)} '
+            f'{"file" if len(verification_files) == 1 else "files"}</text>'
             if verification_files
             else ""
         )
     )
+    retained_context = ""
+    retained_context_files = tuple(
+        item for item in overview.files if item.role == "retained_context"
+    )
+    if retained_context_files:
+        context_chips = "".join(
+            '<span class="retained-context-chip" '
+            f'data-context-file="{escape(item.file_node_id, quote=True)}" '
+            f'data-focuses="{escape(" ".join(focus.subject_id for focus in overview.focuses if item.file_node_id in focus.direct_file_node_ids), quote=True)}">'
+            f'{escape(_structural_standalone_name(facts[item.file_node_id]))}'
+            f'<small>{len(item.relation_group_ids)} boundary relation'
+            f'{"s" if len(item.relation_group_ids) != 1 else ""}</small></span>'
+            for item in sorted(
+                retained_context_files,
+                key=lambda value: _structural_standalone_name(
+                    facts[value.file_node_id]
+                ),
+            )
+        )
+        retained_context = (
+            '<details class="retained-boundary-context"><summary>'
+            f'Existing context · {len(retained_context_files)} '
+            f'{"file" if len(retained_context_files) == 1 else "files"}</summary>'
+            '<p>Retained dependencies adjacent to this PR’s changed files. '
+            'Exact relationships remain in the full structural audit.</p>'
+            f'<div>{context_chips}</div></details>'
+        )
     return (
         '<div class="file-graph-layer">'
-        '<p class="file-overview-intro">Changed files and aggregated cross-file '
-        'relations. Select an authored subject to isolate its related structure.</p>'
+        '<p class="file-overview-intro">Changed files and the retained bridge '
+        'files required to keep their structural paths continuous. Other '
+        'retained context stays outside the primary map.</p>'
         '<div class="delta-canvas-scroll"><svg class="file-delta-canvas" '
         f'viewBox="0 0 {canvas_width} {canvas_height}" role="img" '
         'aria-label="File-level structural delta graph"><defs>'
@@ -1136,7 +1136,8 @@ def _file_structural_overview(
         '<marker id="file-arrow-removed" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path fill="#ef8f91" d="M0,0 L0,6 L8,3 z"/></marker>'
         '<marker id="file-arrow-retained" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path fill="#71848d" d="M0,0 L0,6 L8,3 z"/></marker>'
         '</defs>'
-        f'{lane_shapes}{"".join(edge_shapes)}{"".join(file_shapes)}</svg></div></div>'
+        f'{lane_shapes}{"".join(edge_shapes)}{"".join(file_shapes)}</svg></div>'
+        f'{retained_context}</div>'
     )
 
 
@@ -2587,14 +2588,27 @@ def render_html(brief: ReviewBrief) -> str:
 .file-graph-node{{cursor:pointer;outline:none}}
 .file-graph-node rect{{fill:#111a1f;stroke:#53656e;stroke-width:1.2}}
 .file-graph-node:hover rect,.file-graph-node:focus rect{{stroke:var(--green);fill:rgba(54,118,87,.14)}}
+.verification-lane-container{{fill:rgba(48,83,110,.06);stroke:rgba(159,205,240,.22);stroke-width:1}}
+.file-graph-node.verification-row rect{{fill:rgba(9,15,19,.78);stroke:rgba(159,205,240,.28)}}
+.file-graph-node.verification-row .file-node-operation{{fill:var(--muted)}}
+.file-graph-node.retained-bridge rect{{fill:rgba(113,132,141,.06);stroke:#71848d;stroke-dasharray:5 4}}
+.file-graph-node.retained-bridge .file-node-operation{{fill:#94a2a8}}
+.verification-change-dot{{fill:var(--blue)}}
 .file-node-operation{{fill:var(--green);font-size:8px;text-transform:uppercase}}
 .file-node-name{{fill:var(--text);font-size:10px;font-weight:700}}
 .file-node-counts{{fill:var(--faint);font-size:8px}}
-.file-delta-edge>path{{fill:none;stroke:#71848d;stroke-width:1.4}}
+.file-delta-edge>path{{fill:none;stroke:#71848d;stroke-width:1.8}}
+.file-edge-bus{{fill:var(--blue);stroke:#0b1115;stroke-width:1}}
 .file-delta-edge.operation-added>path{{stroke:var(--green)}}
 .file-delta-edge.operation-removed>path{{stroke:var(--red);stroke-dasharray:5 4}}
 .file-delta-edge rect{{fill:#10171b;stroke:rgba(111,128,135,.24)}}
 .file-delta-edge text{{fill:var(--muted);font-size:7px;text-anchor:middle}}
+.retained-boundary-context{{margin-top:10px;padding-top:9px;border-top:1px solid rgba(111,128,135,.18)}}
+.retained-boundary-context>summary{{cursor:pointer;color:var(--muted);font-size:9px}}
+.retained-boundary-context>p{{margin:6px 0;color:var(--faint);font-size:8px}}
+.retained-boundary-context>div{{display:flex;flex-wrap:wrap;gap:5px}}
+.retained-context-chip{{display:inline-flex;gap:6px;align-items:center;padding:4px 7px;border:1px solid rgba(111,128,135,.22);border-radius:999px;color:var(--muted);font:650 8px ui-monospace,SFMono-Regular,Menlo,monospace}}
+.retained-context-chip small{{color:var(--faint);font:7px Inter,ui-sans-serif,system-ui,sans-serif}}
 .file-member-graph{{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px;align-items:start}}
 .file-member-panel{{min-width:0;border:1px solid rgba(111,128,135,.28);border-radius:11px;background:rgba(5,10,13,.34);overflow:hidden}}
 .file-member-panel>header{{display:grid;gap:3px;padding:11px 13px;border-bottom:1px solid rgba(111,128,135,.22);background:rgba(16,27,33,.5)}}
@@ -2689,11 +2703,13 @@ def render_html(brief: ReviewBrief) -> str:
 .coverage-limits{{margin-top:14px;padding:0 12px;border:1px solid rgba(111,128,135,.2);border-radius:9px;background:rgba(3,7,9,.2)}}.coverage-limits>summary{{padding:10px 0;cursor:pointer;color:var(--amber);font-size:10px}}
 @media(max-width:800px){{.transformation-strip{{grid-template-columns:1fr}}.summary-arrow{{transform:rotate(90deg)}}.verification-detail{{grid-template-columns:1fr}}.focus-assessment-heading{{grid-template-columns:1fr}}}}
 @media(max-width:760px){{.file-delta-canvas{{min-width:680px}}.file-member-graph{{grid-template-columns:1fr}}.delta-focus-families{{grid-template-columns:1fr}}.delta-focus-family{{grid-template-columns:82px minmax(0,1fr)}}}}
-.file-graph-node,.file-delta-edge{{transition:opacity .16s ease,filter .16s ease}}
+.file-graph-node,.file-delta-edge,.retained-context-chip{{transition:opacity .16s ease,filter .16s ease}}
+.file-graph-node.focus-hidden,.file-delta-edge.focus-hidden,.retained-context-chip.focus-hidden{{display:none}}
 .file-graph-node.focus-muted,.file-delta-edge.focus-muted{{opacity:.12}}
 .file-graph-node.focus-context,.file-delta-edge.focus-context{{opacity:.52}}
 .file-graph-node.focus-active{{opacity:1;filter:drop-shadow(0 0 5px rgba(123,227,172,.25))}}
 .file-delta-edge.focus-active{{opacity:1;filter:drop-shadow(0 0 3px rgba(123,227,172,.25))}}
+.file-graph-layer.focus-no-map .delta-canvas-scroll,.file-graph-layer.focus-no-map .retained-boundary-context{{display:none}}
 .file-node-layer{{fill:var(--blue);font-size:7px;text-anchor:end;text-transform:uppercase}}
 .file-lane-label{{fill:var(--faint);font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}}
 .file-lane-label.verification{{fill:var(--blue)}}
@@ -2750,22 +2766,26 @@ const tokenSet = (value) => new Set((value || "").split(/\\s+/).filter(Boolean))
 const intersects = (left, right) => [...left].some((item) => right.has(item));
 const focusSurfaces = document.querySelectorAll(".review-structural-graph");
 const clearMapFocus = (surface) => {{
-  surface.querySelectorAll(".file-graph-node, .file-delta-edge").forEach((item) => {{
-    item.classList.remove("focus-muted", "focus-context", "focus-active");
+  surface.querySelectorAll(".file-graph-node, .file-delta-edge, .retained-context-chip").forEach((item) => {{
+    item.classList.remove("focus-hidden", "focus-muted", "focus-context", "focus-active");
   }});
+  surface.querySelector(".file-graph-layer")?.classList.remove("focus-no-map");
 }};
 const applyAuthoredMapFocus = (surface, focus) => {{
   clearMapFocus(surface);
-  let matched = false;
-  surface.querySelectorAll(".file-graph-node, .file-delta-edge").forEach((item) => {{
+  surface.querySelectorAll(".file-graph-node, .file-delta-edge, .retained-context-chip").forEach((item) => {{
     const direct = focus === "overview" || tokenSet(item.dataset.focuses).has(focus);
     const contextual = focus !== "overview" && !direct &&
       tokenSet(item.dataset.contextFocuses).has(focus);
-    if (focus !== "overview" && (direct || contextual)) matched = true;
-    item.classList.toggle("focus-muted", !direct && !contextual);
+    item.classList.toggle("focus-hidden", focus !== "overview" && !direct && !contextual);
     item.classList.toggle("focus-context", contextual);
     item.classList.toggle("focus-active", focus !== "overview" && direct);
   }});
+  const control = surface.querySelector(`[data-focus-target="${{focus}}"]`);
+  const matched = focus === "overview" || control?.dataset.overviewVisible === "true";
+  surface.querySelector(".file-graph-layer")?.classList.toggle(
+    "focus-no-map", focus !== "overview" && !matched
+  );
   return matched;
 }};
 const setPathDirection = (surface, direction) => {{
@@ -2942,7 +2962,8 @@ document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
         candidate.classList.toggle("focus-muted", !active);
       }});
       graph.querySelectorAll(".file-delta-edge").forEach((edge) => {{
-        const active = edge.dataset.sourceFile === fileId || edge.dataset.targetFile === fileId;
+        const active = tokenSet(edge.dataset.sourceFileIds).has(fileId) ||
+          edge.dataset.targetFile === fileId;
         edge.classList.toggle("focus-active", active);
         edge.classList.toggle("focus-muted", !active);
       }});

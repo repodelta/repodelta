@@ -43,6 +43,9 @@ from repodelta.projection.structural_groups import (
 from repodelta.projection.structural_navigation import (
     project_structural_navigation,
 )
+from repodelta.projection.structural_overview import (
+    project_structural_overview,
+)
 from repodelta.projection.verification import project_verification_workspace
 
 
@@ -435,11 +438,18 @@ def build_review_projection(
         transformation_structural_topology=transformation_topology,
         transformation_structural_closure=transformation_structural_closure,
     )
+    structural_overview = project_structural_overview(
+        review_graph,
+        architectural_topology,
+        verification_workspace,
+        evidence_catalog,
+    )
     projection = ReviewProjection(
         slices=tuple(slices),
         review_graph=review_graph,
         architectural_topology=architectural_topology,
         verification_workspace=verification_workspace,
+        structural_overview=structural_overview,
     )
     projection.validate_consistency(
         evidence_catalog,
