@@ -16,6 +16,7 @@ from repodelta.evaluation.structural_correctness import (
     StructuralCorrectnessLabels,
     StructuralCorrectnessObservation,
     StructuralCorrectnessPacket,
+    StructuralCoverageSnapshot,
     StructuralSubject,
     load_labels,
     prepare_structural_correctness_packet,
@@ -73,7 +74,10 @@ def _packet() -> StructuralCorrectnessPacket:
             StructuralSubject("G1", "guardrail", "Do not change c."),
         ),
         relation_ids=("REL:1",),
-        coverage_state="available",
+        coverage=StructuralCoverageSnapshot(
+            "available", "codegraph", 3, 3, 3, 2, 2, 1, 1, 3, 3, "",
+            "available", 2, 2, 2,
+        ),
     )
 
 
@@ -127,6 +131,7 @@ def test_label_template_is_complete_but_blind() -> None:
     assert "retained_bridge" not in serialized
     assert '"source_node_id": "S:a"' in serialized
     assert '"qualified_name": "run"' in serialized
+    assert packet.coverage.complete_seed_count == 1
 
 
 def test_packet_exposes_bounded_structural_facts_without_projected_answers() -> None:
@@ -204,6 +209,7 @@ def test_packet_exposes_bounded_structural_facts_without_projected_answers() -> 
     assert packet.symbols[0].qualified_name == "run"
     assert packet.relations[0].source_node_id == "F:a"
     assert packet.changed_surfaces[0].hunk_headers == ("@@ -1,2 +1,4 @@",)
+    assert packet.coverage.mapped_hunk_count == 0
     assert "secret implementation line" not in serialized
     assert "direct_file_node_ids" not in serialized
     assert "retained_bridge" not in serialized
@@ -224,6 +230,8 @@ def test_comparison_exposes_false_inclusion_role_disagreement_and_focus_error(
     assert "F:c" in html
     assert "Non-authoritative evaluation" in html
     assert "does not change assessment or mergeability" in html
+    assert "Packet-bound reference labels" in html
+    assert "campaign record owns whether those labels are proposed" in html
 
 
 def test_labels_reject_stale_packet_identity(tmp_path) -> None:

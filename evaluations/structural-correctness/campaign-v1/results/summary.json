@@ -1,0 +1,209 @@
+{
+  "campaign_id": "structural-correctness-v1",
+  "decision": {
+    "coverage_truthfulness": "required",
+    "focus_provenance": "required_after_membership_correction",
+    "large_change_clustering": "defer_until_correctness_improves",
+    "underlying_projection_correction": "required",
+    "workflow_traceability": "independent_later_work"
+  },
+  "label_status": "proposed_until_maintainer_merge",
+  "samples": [
+    {
+      "change_shape": "small_structural_correction",
+      "coverage": {
+        "complete_seed_count": 0,
+        "seed_count": 4,
+        "state": "available",
+        "truncated_seed_count": 4
+      },
+      "files": {
+        "false_exclusion": 0,
+        "false_inclusion": 2,
+        "match": 28,
+        "role_disagreement": 0
+      },
+      "focuses": {
+        "exact": 2,
+        "false_exclusion": 11,
+        "false_inclusion": 5,
+        "scored": 13,
+        "unresolved": 0
+      },
+      "pull_request": 208
+    },
+    {
+      "change_shape": "revision_aware_state_mapping",
+      "coverage": {
+        "complete_seed_count": 0,
+        "seed_count": 7,
+        "state": "available",
+        "truncated_seed_count": 7
+      },
+      "files": {
+        "false_exclusion": 0,
+        "false_inclusion": 5,
+        "match": 21,
+        "role_disagreement": 2
+      },
+      "focuses": {
+        "exact": 1,
+        "false_exclusion": 10,
+        "false_inclusion": 49,
+        "scored": 12,
+        "unresolved": 4
+      },
+      "pull_request": 238
+    },
+    {
+      "change_shape": "documentation_only",
+      "coverage": {
+        "complete_seed_count": 0,
+        "seed_count": 0,
+        "state": "available",
+        "truncated_seed_count": 0
+      },
+      "files": {
+        "false_exclusion": 0,
+        "false_inclusion": 0,
+        "match": 0,
+        "role_disagreement": 0
+      },
+      "focuses": {
+        "exact": 0,
+        "false_exclusion": 0,
+        "false_inclusion": 0,
+        "scored": 0,
+        "unresolved": 0
+      },
+      "pull_request": 245
+    },
+    {
+      "change_shape": "new_cross_component_feature",
+      "coverage": {
+        "complete_seed_count": 8,
+        "seed_count": 47,
+        "state": "available",
+        "truncated_seed_count": 39
+      },
+      "files": {
+        "false_exclusion": 0,
+        "false_inclusion": 0,
+        "match": 4,
+        "role_disagreement": 1
+      },
+      "focuses": {
+        "exact": 6,
+        "false_exclusion": 6,
+        "false_inclusion": 4,
+        "scored": 11,
+        "unresolved": 7
+      },
+      "pull_request": 250
+    },
+    {
+      "change_shape": "remote_workspace_feature",
+      "coverage": {
+        "complete_seed_count": 5,
+        "seed_count": 30,
+        "state": "available",
+        "truncated_seed_count": 25
+      },
+      "files": {
+        "false_exclusion": 0,
+        "false_inclusion": 10,
+        "match": 14,
+        "role_disagreement": 0
+      },
+      "focuses": {
+        "exact": 2,
+        "false_exclusion": 6,
+        "false_inclusion": 27,
+        "scored": 10,
+        "unresolved": 10
+      },
+      "pull_request": 235
+    },
+    {
+      "change_shape": "presentation_investigation_refactor",
+      "coverage": {
+        "complete_seed_count": 0,
+        "seed_count": 14,
+        "state": "available",
+        "truncated_seed_count": 14
+      },
+      "files": {
+        "false_exclusion": 0,
+        "false_inclusion": 6,
+        "match": 7,
+        "role_disagreement": 3
+      },
+      "focuses": {
+        "exact": 1,
+        "false_exclusion": 0,
+        "false_inclusion": 10,
+        "scored": 2,
+        "unresolved": 10
+      },
+      "pull_request": 262
+    },
+    {
+      "change_shape": "canonical_projection_migration",
+      "coverage": {
+        "complete_seed_count": 2,
+        "seed_count": 42,
+        "state": "available",
+        "truncated_seed_count": 40
+      },
+      "files": {
+        "false_exclusion": 0,
+        "false_inclusion": 1,
+        "match": 18,
+        "role_disagreement": 2
+      },
+      "focuses": {
+        "exact": 4,
+        "false_exclusion": 2,
+        "false_inclusion": 0,
+        "scored": 5,
+        "unresolved": 9
+      },
+      "pull_request": 267
+    },
+    {
+      "change_shape": "large_mechanical_identity_migration",
+      "coverage": {
+        "complete_seed_count": 7,
+        "seed_count": 163,
+        "state": "available",
+        "truncated_seed_count": 156
+      },
+      "files": {
+        "false_exclusion": 0,
+        "false_inclusion": 0,
+        "match": 100,
+        "role_disagreement": 0
+      },
+      "focuses": {
+        "exact": 5,
+        "false_exclusion": 7,
+        "false_inclusion": 155,
+        "scored": 13,
+        "unresolved": 7
+      },
+      "pull_request": 240
+    }
+  ],
+  "schema_version": "structural_correctness_campaign_summary.v1",
+  "totals": {
+    "file_false_exclusion": 0,
+    "file_false_inclusion": 24,
+    "file_match": 192,
+    "file_role_disagreement": 8,
+    "focus_exact": 21,
+    "focus_false_exclusion": 42,
+    "focus_false_inclusion": 250,
+    "focus_scored": 66,
+    "focus_unresolved": 47
+  }
+}

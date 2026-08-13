@@ -1,0 +1,1858 @@
+{
+  "base_sha": "ee9db8b79a7aee91c0ab935f4a16d25c9cd7f9ed",
+  "candidates": [
+    {
+      "file_node_id": "SN:4b879d2d36aec054db6f",
+      "member_node_ids": [
+        "SN:759f4a0bb738db1afa53"
+      ],
+      "operation": "unresolved",
+      "path": "src/prismcode/presentation/html.py"
+    },
+    {
+      "file_node_id": "SN:665951494d1c8e374edd",
+      "member_node_ids": [
+        "SN:0230e3688d34cbc1c633"
+      ],
+      "operation": "retained",
+      "path": "src/prismcode/closure/scanning.py"
+    },
+    {
+      "file_node_id": "SN:068a6879a21eea15723f",
+      "member_node_ids": [
+        "SN:077f55703efc7c3048f3"
+      ],
+      "operation": "unresolved",
+      "path": "src/prismcode/providers/mapping.py"
+    },
+    {
+      "file_node_id": "SN:1f70c5dda43a719ec7f9",
+      "member_node_ids": [
+        "SN:2b56b1f15c8530478967",
+        "SN:2ffd9eb261e18b044a48",
+        "SN:e3b4d85dd7e31b56809f",
+        "SN:80d3610449992578a1f7",
+        "SN:ce9dc0df3167959d42c3",
+        "SN:7ce489e0e1583ebb7ee1",
+        "SN:775059ab654ccc2571e9",
+        "SN:1b40010c772ba159648b",
+        "SN:efe6eb3827591e4c92b0"
+      ],
+      "operation": "retained",
+      "path": "src/prismcode/intake/github.py"
+    },
+    {
+      "file_node_id": "SN:acae5532a486c6a94a4a",
+      "member_node_ids": [
+        "SN:a81e110713aa24f7833a",
+        "SN:59c4a83dd6d286c6cc88",
+        "SN:bd596fa3b48c56acdcbb",
+        "SN:5b5867605c7a840c36b2"
+      ],
+      "operation": "retained",
+      "path": "src/prismcode/llm/execution.py"
+    },
+    {
+      "file_node_id": "SN:ef14e4d527e73b0a2d96",
+      "member_node_ids": [
+        "SN:c508618d7302e73db040",
+        "SN:2d1d5de4cc374027a7ba",
+        "SN:d324715ac516f69dd6c6",
+        "SN:113bc0bd065d41cf2176",
+        "SN:224e74c2539da74d90fc",
+        "SN:e17326fb5baeb2c79e39"
+      ],
+      "operation": "modified",
+      "path": "src/prismcode/cli.py"
+    },
+    {
+      "file_node_id": "SN:d3f06baf4a8d38de0f4e",
+      "member_node_ids": [
+        "SN:791716b3a8cb3d854009"
+      ],
+      "operation": "retained",
+      "path": "src/prismcode/providers/codegraph.py"
+    },
+    {
+      "file_node_id": "SN:c679cade70653a4179c8",
+      "member_node_ids": [
+        "SN:210402b7f47de1845614",
+        "SN:c7b56e0cdafd7207a1d5",
+        "SN:274261f5ca6a951f3acf",
+        "SN:65f2bddea43702f029e9",
+        "SN:fbdd2daff35b834c868c",
+        "SN:af14ac23d3c198f604a8",
+        "SN:db7d3201eeda031224a5"
+      ],
+      "operation": "added",
+      "path": "tests/test_cli_live_workspace.py"
+    },
+    {
+      "file_node_id": "SN:f67033ea8b1f8a205a24",
+      "member_node_ids": [
+        "SN:d1cab996c7b79707a881"
+      ],
+      "operation": "retained",
+      "path": "src/prismcode/presentation/status.py"
+    },
+    {
+      "file_node_id": "SN:6b778567a37450e55c01",
+      "member_node_ids": [
+        "SN:ba69a503e6210a41bd5d"
+      ],
+      "operation": "retained",
+      "path": "src/prismcode/intake/fixture.py"
+    },
+    {
+      "file_node_id": "SN:cd19a132349ceeb5eb5a",
+      "member_node_ids": [
+        "SN:6b685cdf6a23d051dd52",
+        "SN:af57309a02448e126ab6",
+        "SN:c49ccc61daaa4f6dc73f",
+        "SN:bd9099fb6df4ed2e75f3",
+        "SN:edcb1317aa5f5fcc9fe7",
+        "SN:02d056fdaa4a75fba925",
+        "SN:3b7565d676b62e10fc8f",
+        "SN:fcce4d6c1c8ee7ade588",
+        "SN:50528b6cc09a31a0bdb6",
+        "SN:21dc75d97e90da94cf57",
+        "SN:b104954b725ce2e571c1"
+      ],
+      "operation": "retained",
+      "path": "tests/test_cli_structural_mapping.py"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "member_node_ids": [
+        "SN:d60ab8391ecc6f580ee4",
+        "SN:5176dacfa5eb098779f1",
+        "SN:ac3825203b176509f017",
+        "SN:791ea0f42acc2a2d0e63",
+        "SN:34acea9f4f83f15d8995",
+        "SN:e07680b66a5b2177f906",
+        "SN:1635f69869b65eb8f6e0",
+        "SN:900cb08a99b69560d1de",
+        "SN:48e5be66da52dd920ef0",
+        "SN:15fee4a667a914118edb",
+        "SN:b42a6abb614a25065834",
+        "SN:dff11285e8a262400060",
+        "SN:b8843cc1a4484a3cc9d7",
+        "SN:f976c50e2f23dc3a89cc",
+        "SN:d9a801682e4230235323",
+        "SN:1f72795cdf2402f7f4cf",
+        "SN:dd3c7e7152f9e53043bf",
+        "SN:aee21fc0ae8412b58509",
+        "SN:97bd224117f19ced4372",
+        "SN:d3dd8dd378028ccd5d51"
+      ],
+      "operation": "modified",
+      "path": "tests/test_codegraph_workspace.py"
+    },
+    {
+      "file_node_id": "SN:0df2f3d7200aff711eee",
+      "member_node_ids": [
+        "SN:9fa24c1bf0c3b2746f5f"
+      ],
+      "operation": "unresolved",
+      "path": "src/prismcode/changes/hunks.py"
+    },
+    {
+      "file_node_id": "SN:ef861a5c6adac990706a",
+      "member_node_ids": [
+        "SN:51e3fadb18c4a4a50a33",
+        "SN:7f672b59c1d10c6f4ae8",
+        "SN:cf3e356f321c44c0d44e"
+      ],
+      "operation": "unresolved",
+      "path": "tests/test_evaluation.py"
+    },
+    {
+      "file_node_id": "SN:2ac9b806e153683f16b3",
+      "member_node_ids": [
+        "SN:31776beb122c49817441",
+        "SN:54f59eef0fdd456f4e1f",
+        "SN:ed13be5528f17423fb7a"
+      ],
+      "operation": "retained",
+      "path": "src/prismcode/pipeline.py"
+    },
+    {
+      "file_node_id": "SN:9435b88dc81d757c519d",
+      "member_node_ids": [
+        "SN:f15a44ba11c2a19803bf",
+        "SN:08fd67e9f8826a442f84",
+        "SN:55daee53591c05252c53",
+        "SN:abdf16878d5de20d1fb4"
+      ],
+      "operation": "retained",
+      "path": "src/prismcode/evaluation/core.py"
+    },
+    {
+      "file_node_id": "SN:8d644249e69add583ca7",
+      "member_node_ids": [
+        "SN:1402e6abd9dbbc2576d2",
+        "SN:1263e1b2e87375fa2835"
+      ],
+      "operation": "retained",
+      "path": "src/prismcode/llm/openai.py"
+    },
+    {
+      "file_node_id": "SN:23f3671fb2b03d2dca66",
+      "member_node_ids": [
+        "SN:a052580806bff7e9425a"
+      ],
+      "operation": "unresolved",
+      "path": "tests/test_llm_shadow_comparison.py"
+    },
+    {
+      "file_node_id": "SN:e9720893ed51042b845f",
+      "member_node_ids": [
+        "SN:e80d518af93f0349872e"
+      ],
+      "operation": "retained",
+      "path": "src/prismcode/evaluation/shadow.py"
+    },
+    {
+      "file_node_id": "SN:4b28b5e522e838968b30",
+      "member_node_ids": [
+        "SN:e31264b316a88cffb351",
+        "SN:0edc6c2b725ea9c2b9b4",
+        "SN:520117468b323acaff3c"
+      ],
+      "operation": "unresolved",
+      "path": "src/prismcode/llm/labeling.py"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "member_node_ids": [
+        "SN:4f6abfce36264d7d285f",
+        "SN:911e04a05962c8a614cd",
+        "SN:039ae519b3d5a07b5800",
+        "SN:2639513d25c07edfc597",
+        "SN:a1425f12fa958e775a2b"
+      ],
+      "operation": "retained",
+      "path": "src/prismcode/model/contracts.py"
+    },
+    {
+      "file_node_id": "SN:51431649d90f2b4c78c3",
+      "member_node_ids": [
+        "SN:2f1d216f93e61ff00415",
+        "SN:243b3d9b06d9b7115488",
+        "SN:ac4ddbe869abcda97db5",
+        "SN:fd734ecf164b6af521ca",
+        "SN:e0a0a642df4edcecce4b",
+        "SN:8ddfe51bd87b96dec16a",
+        "SN:4b3329617dfe529df905",
+        "SN:286926f75580eb2fd834",
+        "SN:92825ae04eca6ca025d5",
+        "SN:40d0b559cd1d46e4ccb2",
+        "SN:f12a3435be353934fe37",
+        "SN:6bfe73c61cf2d13c8b12",
+        "SN:02284c415b8e355cc6cb",
+        "SN:8e928e97e4d077caa345"
+      ],
+      "operation": "modified",
+      "path": "src/prismcode/providers/workspace.py"
+    },
+    {
+      "file_node_id": "SN:0f84fdd3d21d6d6a9f66",
+      "member_node_ids": [
+        "SN:2c99749e7dea4a21245e"
+      ],
+      "operation": "unresolved",
+      "path": "src/prismcode/evaluation/comparison.py"
+    },
+    {
+      "file_node_id": "SN:919a9740d50b23695404",
+      "member_node_ids": [
+        "SN:ecbcae613feb469aa05b"
+      ],
+      "operation": "unresolved",
+      "path": "src/prismcode/llm/replay.py"
+    }
+  ],
+  "changed_surfaces": [
+    {
+      "additions": 0,
+      "base_path": ".github/workflows/review.yml",
+      "deletions": 2,
+      "head_path": ".github/workflows/review.yml",
+      "hunk_headers": [
+        "@@ -30,8 +30,6 @@ jobs:"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 11,
+      "base_path": "README.md",
+      "deletions": 10,
+      "head_path": "README.md",
+      "hunk_headers": [
+        "@@ -52,16 +52,16 @@ public repositories can also use GitHub's unauthenticated limits.",
+        "@@ -71,11 +71,12 @@ prismcode review \\"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 14,
+      "base_path": "docs/architecture.md",
+      "deletions": 9,
+      "head_path": "docs/architecture.md",
+      "hunk_headers": [
+        "@@ -212,19 +212,24 @@ GitHub REST endpoints."
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 16,
+      "base_path": "docs/usage.md",
+      "deletions": 15,
+      "head_path": "docs/usage.md",
+      "hunk_headers": [
+        "@@ -33,17 +33,17 @@ See [Fixture schema](fixture-schema.md) for the versioned input contract.",
+        "@@ -71,14 +71,14 @@ and authority mapping is documented under",
+        "@@ -90,8 +90,9 @@ prismcode review \\"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 19,
+      "base_path": "src/prismcode/cli.py",
+      "deletions": 12,
+      "head_path": "src/prismcode/cli.py",
+      "hunk_headers": [
+        "@@ -30,6 +30,7 @@",
+        "@@ -224,16 +225,15 @@ def build_parser() -> argparse.ArgumentParser:",
+        "@@ -361,20 +361,27 @@ def main() -> int:"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 206,
+      "base_path": "src/prismcode/providers/workspace.py",
+      "deletions": 1,
+      "head_path": "src/prismcode/providers/workspace.py",
+      "hunk_headers": [
+        "@@ -1,16 +1,22 @@",
+        "@@ -37,6 +43,27 @@ def _run(command: Command, timeout: int) -> subprocess.CompletedProcess[str]:",
+        "@@ -51,6 +78,78 @@ def _checked(",
+        "@@ -183,3 +282,109 @@ def isolated_review_roots("
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 180,
+      "base_path": null,
+      "deletions": 0,
+      "head_path": "tests/test_cli_live_workspace.py",
+      "hunk_headers": [
+        "@@ -0,0 +1,180 @@"
+      ],
+      "status": "added"
+    },
+    {
+      "additions": 236,
+      "base_path": "tests/test_codegraph_workspace.py",
+      "deletions": 3,
+      "head_path": "tests/test_codegraph_workspace.py",
+      "hunk_headers": [
+        "@@ -1,12 +1,15 @@",
+        "@@ -15,11 +18,16 @@ def __init__(",
+        "@@ -44,6 +52,13 @@ def __call__(",
+        "@@ -65,6 +80,32 @@ def __call__(",
+        "@@ -222,7 +263,199 @@ def test_required_revision_is_validated_before_worktree_creation("
+      ],
+      "status": "modified"
+    }
+  ],
+  "coverage": {
+    "base_hunk_count": 5,
+    "base_mapped_hunk_count": 5,
+    "base_state": "available",
+    "base_symbol_count": 5,
+    "complete_seed_count": 5,
+    "hunk_count": 13,
+    "indexed_files": 4,
+    "mapped_hunk_count": 13,
+    "missing_reason": "",
+    "path_count": 120,
+    "provider": "codegraph",
+    "requested_files": 4,
+    "seed_count": 30,
+    "state": "available",
+    "symbol_count": 35,
+    "truncated_seed_count": 25
+  },
+  "head_sha": "d890d0c838cc42e14cdbdb5f1de7ee078a755c80",
+  "pull_request": 235,
+  "relation_ids": [
+    "SRG:e87947de95fab9393881",
+    "SRG:15a2e5781916932096b3",
+    "SRG:bea3cbaf864dfd6361fb",
+    "SRG:c67160f9a28bbe9d48b1",
+    "SRG:089727d7751b7aab0858",
+    "SRG:33450fea101dc758c3f8",
+    "SRG:0a9bf7aee5ed5f8db252",
+    "SRG:356ac7eadd2c703705d1",
+    "SRG:9adf1222596afa9d6d08",
+    "SRG:b33556c2471352118493",
+    "SRG:3966328f9890ec3eaa8e",
+    "SRG:03b6f7125cbe667b80c3",
+    "SRG:78fecb8c5a26b0025f7b",
+    "SRG:0d480e2830ea60087c7e",
+    "SRG:9f3011e2626fbef31de5",
+    "SRG:746647b386d6cd90b3c7",
+    "SRG:134c93a21f56925451c6",
+    "SRG:80b1d666473d83a5774a",
+    "SRG:26e021362eac5b3bc8c1",
+    "SRG:a959af50423e3f190df0",
+    "SRG:4a6b9dd6a0193574d6a7",
+    "SRG:6a9804b31ea68666f66c",
+    "SRG:34b59cb32eec7dd193d1",
+    "SRG:a78cc8a8d3b50c95073a",
+    "SRG:162a4864c92c0a90f2dd",
+    "SRG:53ae97fdba1c67750bd0",
+    "SRG:7918646492fd5d599cd7",
+    "SRG:0f3ed6c078f4d477f893",
+    "SRG:f7e372eb4dea527a5dcf",
+    "SRG:27e7b51c4e943309e8b7",
+    "SRG:3c9a087cda44076aca2f",
+    "SRG:42765fa8f5512295eed5",
+    "SRG:05def98d2417428bf4ab",
+    "SRG:44615d66fd3212802c01",
+    "SRG:34f92364ac60754abd67",
+    "SRG:8e08a4566bc8683c809a",
+    "SRG:4f33ab47f68c86a417a8",
+    "SRG:3ee042060adcd0905388",
+    "SRG:25690f346259f2c246ed",
+    "SRG:927267dcf74bc63f12aa",
+    "SRG:d1598a42818ad464704b",
+    "SRG:a80a32d578d1157fb8e0",
+    "SRG:1eddbe86cf9a45700320",
+    "SRG:c298c1e4595029c8ceb8",
+    "SRG:31b164138c09c751a329",
+    "SRG:4bd44d480138c003bd36",
+    "SRG:37502360374f389f6a72",
+    "SRG:9e9d03bc7e30049eeabe",
+    "SRG:94a905693929cbde628e",
+    "SRG:f5e8534f5dd32ffb2f93",
+    "SRG:c1a1e7835a9369afa456",
+    "SRG:979aa458b466126637ad",
+    "SRG:19b046ac47901e1a93de",
+    "SRG:d2b19720790384f91062",
+    "SRG:204098abb87048ad1f45",
+    "SRG:dfadba4e2c12fe3d68da",
+    "SRG:571847d17e8f6a8ce093",
+    "SRG:829b0083832faccad1d8",
+    "SRG:ed7cad21fdb6dbee64d8",
+    "SRG:97322b39a33d305cf065",
+    "SRG:82a031964dd09dcf7a1a",
+    "SRG:1bd2e108a3ae8d20b945",
+    "SRG:2652a8736ce1f310b4f2",
+    "SRG:96e4d288744b6ad0afeb",
+    "SRG:ce8e05d8639af21f64c5",
+    "SRG:da7ded6ab786fa2e53f2",
+    "SRG:ea596772c470baf8adf3",
+    "SOR:2f6f56fae5dd108c196d",
+    "SOR:532d04cabb8e8c34c4b5",
+    "SOR:08a1a3a1725299a4e3cd",
+    "SOR:4d3bbea33d7c862957ac",
+    "SOR:762d329ea52acf373616",
+    "SOR:7f68b43373b89c1bb9ac",
+    "SOR:7d5e4caf5343aa9c2dea"
+  ],
+  "relations": [
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:e87947de95fab9393881",
+      "source_node_id": "SN:02284c415b8e355cc6cb",
+      "target_node_id": "SN:243b3d9b06d9b7115488"
+    },
+    {
+      "operation": "added",
+      "relation": "instantiates",
+      "relation_id": "SRG:15a2e5781916932096b3",
+      "source_node_id": "SN:15fee4a667a914118edb",
+      "target_node_id": "SN:1635f69869b65eb8f6e0"
+    },
+    {
+      "operation": "added",
+      "relation": "instantiates",
+      "relation_id": "SRG:bea3cbaf864dfd6361fb",
+      "source_node_id": "SN:15fee4a667a914118edb",
+      "target_node_id": "SN:dd3c7e7152f9e53043bf"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:c67160f9a28bbe9d48b1",
+      "source_node_id": "SN:2f1d216f93e61ff00415",
+      "target_node_id": "SN:02284c415b8e355cc6cb"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:089727d7751b7aab0858",
+      "source_node_id": "SN:2f1d216f93e61ff00415",
+      "target_node_id": "SN:243b3d9b06d9b7115488"
+    },
+    {
+      "operation": "added",
+      "relation": "instantiates",
+      "relation_id": "SRG:33450fea101dc758c3f8",
+      "source_node_id": "SN:48e5be66da52dd920ef0",
+      "target_node_id": "SN:1635f69869b65eb8f6e0"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:0a9bf7aee5ed5f8db252",
+      "source_node_id": "SN:48e5be66da52dd920ef0",
+      "target_node_id": "SN:791ea0f42acc2a2d0e63"
+    },
+    {
+      "operation": "added",
+      "relation": "instantiates",
+      "relation_id": "SRG:356ac7eadd2c703705d1",
+      "source_node_id": "SN:48e5be66da52dd920ef0",
+      "target_node_id": "SN:dd3c7e7152f9e53043bf"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:9adf1222596afa9d6d08",
+      "source_node_id": "SN:4b3329617dfe529df905",
+      "target_node_id": "SN:02284c415b8e355cc6cb"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:b33556c2471352118493",
+      "source_node_id": "SN:4b3329617dfe529df905",
+      "target_node_id": "SN:2f1d216f93e61ff00415"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:3966328f9890ec3eaa8e",
+      "source_node_id": "SN:4b3329617dfe529df905",
+      "target_node_id": "SN:92825ae04eca6ca025d5"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:03b6f7125cbe667b80c3",
+      "source_node_id": "SN:4b3329617dfe529df905",
+      "target_node_id": "SN:ac4ddbe869abcda97db5"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:78fecb8c5a26b0025f7b",
+      "source_node_id": "SN:4b3329617dfe529df905",
+      "target_node_id": "SN:e0a0a642df4edcecce4b"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:0d480e2830ea60087c7e",
+      "source_node_id": "SN:4b3329617dfe529df905",
+      "target_node_id": "SN:f12a3435be353934fe37"
+    },
+    {
+      "operation": "added",
+      "relation": "instantiates",
+      "relation_id": "SRG:9f3011e2626fbef31de5",
+      "source_node_id": "SN:5176dacfa5eb098779f1",
+      "target_node_id": "SN:1635f69869b65eb8f6e0"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:746647b386d6cd90b3c7",
+      "source_node_id": "SN:af14ac23d3c198f604a8",
+      "target_node_id": "SN:210402b7f47de1845614"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:134c93a21f56925451c6",
+      "source_node_id": "SN:af14ac23d3c198f604a8",
+      "target_node_id": "SN:274261f5ca6a951f3acf"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:80b1d666473d83a5774a",
+      "source_node_id": "SN:af14ac23d3c198f604a8",
+      "target_node_id": "SN:65f2bddea43702f029e9"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:26e021362eac5b3bc8c1",
+      "source_node_id": "SN:af14ac23d3c198f604a8",
+      "target_node_id": "SN:db7d3201eeda031224a5"
+    },
+    {
+      "operation": "added",
+      "relation": "instantiates",
+      "relation_id": "SRG:a959af50423e3f190df0",
+      "source_node_id": "SN:b42a6abb614a25065834",
+      "target_node_id": "SN:1635f69869b65eb8f6e0"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:4a6b9dd6a0193574d6a7",
+      "source_node_id": "SN:b42a6abb614a25065834",
+      "target_node_id": "SN:791ea0f42acc2a2d0e63"
+    },
+    {
+      "operation": "added",
+      "relation": "instantiates",
+      "relation_id": "SRG:6a9804b31ea68666f66c",
+      "source_node_id": "SN:b42a6abb614a25065834",
+      "target_node_id": "SN:dd3c7e7152f9e53043bf"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:34b59cb32eec7dd193d1",
+      "source_node_id": "SN:c508618d7302e73db040",
+      "target_node_id": "SN:113bc0bd065d41cf2176"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:a78cc8a8d3b50c95073a",
+      "source_node_id": "SN:c508618d7302e73db040",
+      "target_node_id": "SN:2d1d5de4cc374027a7ba"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:162a4864c92c0a90f2dd",
+      "source_node_id": "SN:c508618d7302e73db040",
+      "target_node_id": "SN:d324715ac516f69dd6c6"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:53ae97fdba1c67750bd0",
+      "source_node_id": "SN:c508618d7302e73db040",
+      "target_node_id": "SN:e17326fb5baeb2c79e39"
+    },
+    {
+      "operation": "added",
+      "relation": "imports",
+      "relation_id": "SRG:7918646492fd5d599cd7",
+      "source_node_id": "SN:c679cade70653a4179c8",
+      "target_node_id": "SN:51431649d90f2b4c78c3"
+    },
+    {
+      "operation": "added",
+      "relation": "instantiates",
+      "relation_id": "SRG:0f3ed6c078f4d477f893",
+      "source_node_id": "SN:c679cade70653a4179c8",
+      "target_node_id": "SN:51431649d90f2b4c78c3"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:f7e372eb4dea527a5dcf",
+      "source_node_id": "SN:c679cade70653a4179c8",
+      "target_node_id": "SN:ef14e4d527e73b0a2d96"
+    },
+    {
+      "operation": "added",
+      "relation": "imports",
+      "relation_id": "SRG:27e7b51c4e943309e8b7",
+      "source_node_id": "SN:c679cade70653a4179c8",
+      "target_node_id": "SN:ef14e4d527e73b0a2d96"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:3c9a087cda44076aca2f",
+      "source_node_id": "SN:c679cade70653a4179c8",
+      "target_node_id": "SN:f63087ace0914f7968f6"
+    },
+    {
+      "operation": "added",
+      "relation": "imports",
+      "relation_id": "SRG:42765fa8f5512295eed5",
+      "source_node_id": "SN:c679cade70653a4179c8",
+      "target_node_id": "SN:f63087ace0914f7968f6"
+    },
+    {
+      "operation": "added",
+      "relation": "instantiates",
+      "relation_id": "SRG:05def98d2417428bf4ab",
+      "source_node_id": "SN:c679cade70653a4179c8",
+      "target_node_id": "SN:f63087ace0914f7968f6"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:44615d66fd3212802c01",
+      "source_node_id": "SN:c7b56e0cdafd7207a1d5",
+      "target_node_id": "SN:274261f5ca6a951f3acf"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:34f92364ac60754abd67",
+      "source_node_id": "SN:c7b56e0cdafd7207a1d5",
+      "target_node_id": "SN:65f2bddea43702f029e9"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:8e08a4566bc8683c809a",
+      "source_node_id": "SN:c7b56e0cdafd7207a1d5",
+      "target_node_id": "SN:db7d3201eeda031224a5"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:4f33ab47f68c86a417a8",
+      "source_node_id": "SN:c7b56e0cdafd7207a1d5",
+      "target_node_id": "SN:fbdd2daff35b834c868c"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:3ee042060adcd0905388",
+      "source_node_id": "SN:cd19a132349ceeb5eb5a",
+      "target_node_id": "SN:ef14e4d527e73b0a2d96"
+    },
+    {
+      "operation": "added",
+      "relation": "instantiates",
+      "relation_id": "SRG:25690f346259f2c246ed",
+      "source_node_id": "SN:e07680b66a5b2177f906",
+      "target_node_id": "SN:1635f69869b65eb8f6e0"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:927267dcf74bc63f12aa",
+      "source_node_id": "SN:e07680b66a5b2177f906",
+      "target_node_id": "SN:791ea0f42acc2a2d0e63"
+    },
+    {
+      "operation": "added",
+      "relation": "instantiates",
+      "relation_id": "SRG:d1598a42818ad464704b",
+      "source_node_id": "SN:e07680b66a5b2177f906",
+      "target_node_id": "SN:dd3c7e7152f9e53043bf"
+    },
+    {
+      "operation": "retained",
+      "relation": "references",
+      "relation_id": "SRG:a80a32d578d1157fb8e0",
+      "source_node_id": "SN:e17326fb5baeb2c79e39",
+      "target_node_id": "SN:224e74c2539da74d90fc"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:1eddbe86cf9a45700320",
+      "source_node_id": "SN:ee9f732179c0e1633115",
+      "target_node_id": "SN:51431649d90f2b4c78c3"
+    },
+    {
+      "operation": "added",
+      "relation": "imports",
+      "relation_id": "SRG:c298c1e4595029c8ceb8",
+      "source_node_id": "SN:ee9f732179c0e1633115",
+      "target_node_id": "SN:51431649d90f2b4c78c3"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:31b164138c09c751a329",
+      "source_node_id": "SN:ee9f732179c0e1633115",
+      "target_node_id": "SN:51431649d90f2b4c78c3"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:4bd44d480138c003bd36",
+      "source_node_id": "SN:ef14e4d527e73b0a2d96",
+      "target_node_id": "SN:1f70c5dda43a719ec7f9"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:37502360374f389f6a72",
+      "source_node_id": "SN:ef14e4d527e73b0a2d96",
+      "target_node_id": "SN:1f70c5dda43a719ec7f9"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:9e9d03bc7e30049eeabe",
+      "source_node_id": "SN:ef14e4d527e73b0a2d96",
+      "target_node_id": "SN:2ac9b806e153683f16b3"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:94a905693929cbde628e",
+      "source_node_id": "SN:ef14e4d527e73b0a2d96",
+      "target_node_id": "SN:2ac9b806e153683f16b3"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:f5e8534f5dd32ffb2f93",
+      "source_node_id": "SN:ef14e4d527e73b0a2d96",
+      "target_node_id": "SN:51431649d90f2b4c78c3"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:c1a1e7835a9369afa456",
+      "source_node_id": "SN:ef14e4d527e73b0a2d96",
+      "target_node_id": "SN:51431649d90f2b4c78c3"
+    },
+    {
+      "operation": "added",
+      "relation": "imports",
+      "relation_id": "SRG:979aa458b466126637ad",
+      "source_node_id": "SN:ef14e4d527e73b0a2d96",
+      "target_node_id": "SN:51431649d90f2b4c78c3"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:19b046ac47901e1a93de",
+      "source_node_id": "SN:ef14e4d527e73b0a2d96",
+      "target_node_id": "SN:51431649d90f2b4c78c3"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:d2b19720790384f91062",
+      "source_node_id": "SN:ef14e4d527e73b0a2d96",
+      "target_node_id": "SN:665951494d1c8e374edd"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:204098abb87048ad1f45",
+      "source_node_id": "SN:ef14e4d527e73b0a2d96",
+      "target_node_id": "SN:6b778567a37450e55c01"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:dfadba4e2c12fe3d68da",
+      "source_node_id": "SN:ef14e4d527e73b0a2d96",
+      "target_node_id": "SN:8d644249e69add583ca7"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:571847d17e8f6a8ce093",
+      "source_node_id": "SN:ef14e4d527e73b0a2d96",
+      "target_node_id": "SN:9435b88dc81d757c519d"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:829b0083832faccad1d8",
+      "source_node_id": "SN:ef14e4d527e73b0a2d96",
+      "target_node_id": "SN:9435b88dc81d757c519d"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:ed7cad21fdb6dbee64d8",
+      "source_node_id": "SN:ef14e4d527e73b0a2d96",
+      "target_node_id": "SN:acae5532a486c6a94a4a"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:97322b39a33d305cf065",
+      "source_node_id": "SN:ef14e4d527e73b0a2d96",
+      "target_node_id": "SN:acae5532a486c6a94a4a"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:82a031964dd09dcf7a1a",
+      "source_node_id": "SN:ef14e4d527e73b0a2d96",
+      "target_node_id": "SN:c508618d7302e73db040"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:1bd2e108a3ae8d20b945",
+      "source_node_id": "SN:ef14e4d527e73b0a2d96",
+      "target_node_id": "SN:d3f06baf4a8d38de0f4e"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:2652a8736ce1f310b4f2",
+      "source_node_id": "SN:ef14e4d527e73b0a2d96",
+      "target_node_id": "SN:e9720893ed51042b845f"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:96e4d288744b6ad0afeb",
+      "source_node_id": "SN:ef14e4d527e73b0a2d96",
+      "target_node_id": "SN:f63087ace0914f7968f6"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:ce8e05d8639af21f64c5",
+      "source_node_id": "SN:ef14e4d527e73b0a2d96",
+      "target_node_id": "SN:f67033ea8b1f8a205a24"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:da7ded6ab786fa2e53f2",
+      "source_node_id": "SN:ef14e4d527e73b0a2d96",
+      "target_node_id": "SN:f67033ea8b1f8a205a24"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:ea596772c470baf8adf3",
+      "source_node_id": "SN:fd734ecf164b6af521ca",
+      "target_node_id": "SN:243b3d9b06d9b7115488"
+    }
+  ],
+  "repository": "repodelta/repodelta",
+  "schema_version": "structural_correctness_packet.v3",
+  "subjects": [
+    {
+      "authored_statement": "prismcode review --repo owner/repository --pr 123 --output report.html obtains the exact PR base and head Git revisions without requiring a pre-existing local checkout.",
+      "subject_id": "R1",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "The default live path gives the existing repository scanner and structural providers clean Git checkouts whose observed revisions equal the GitHub source packet SHAs.",
+      "subject_id": "R2",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "Structure-aware review builds isolated head and base Codegraph indexes and removes every PrismCode-owned repository, worktree, index, and credential helper artifact after success or failure.",
+      "subject_id": "R3",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "--no-structural-graph obtains only the exact head checkout required by deterministic repository scanning.",
+      "subject_id": "R4",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "--repo-root remains an explicit local-checkout override and preserves current exact-revision behavior.",
+      "subject_id": "R5",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "Public GitHub, token-authenticated private repositories, and configured trusted GitHub Enterprise hosts use the same bounded workspace contract.",
+      "subject_id": "R6",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "Never place a token in a Git remote URL, command argument, diagnostic, review metadata, generated HTML, or persisted Git configuration.",
+      "subject_id": "G1",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "Do not replace Git revision and clean-checkout validation with an asserted directory identity.",
+      "subject_id": "G2",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "Do not execute or initialize submodules.",
+      "subject_id": "G3",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "Fail closed when the requested revisions cannot be obtained or do not match the GitHub packet.",
+      "subject_id": "G4",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "Do not add a persistent repository cache in this change.",
+      "subject_id": "G5",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "Persistent clone caches, non-GitHub forges, submodule materialization, sparse-checkout policy, package publication, and changes to deterministic review semantics.",
+      "subject_id": "G6",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "--repo-root defaulted to the current directory. The short command appeared remote-capable because --repo collected GitHub metadata, but it succeeded only when the current directory happened to be a local checkout containing both PR revisions. Even --no-structural-graph required that checkout for its exact head worktree.",
+      "subject_id": "T1",
+      "subject_kind": "transformation_claim"
+    },
+    {
+      "authored_statement": "The bundled workflow compensated with a full-history checkout, and a user installing PrismCode elsewhere could not review a PR with repository coordinates alone.",
+      "subject_id": "T2",
+      "subject_kind": "transformation_claim"
+    },
+    {
+      "authored_statement": "prismcode review --repo owner/repository --pr 123 --output report.html is the default live path from any directory.",
+      "subject_id": "T3",
+      "subject_kind": "transformation_claim"
+    },
+    {
+      "authored_statement": "PrismCode creates a private bare Git source, fetches the GitHub PR head ref and exact base SHA, verifies both observed revisions against the source packet, and passes them into the existing exact-worktree lifecycle.",
+      "subject_id": "T4",
+      "subject_kind": "transformation_claim"
+    },
+    {
+      "authored_statement": "Structure-aware review initializes isolated Codegraph indexes in the exact head and base worktrees.",
+      "subject_id": "T5",
+      "subject_kind": "transformation_claim"
+    },
+    {
+      "authored_statement": "--no-structural-graph fetches and materializes only the exact head required by deterministic repository scanning.",
+      "subject_id": "T6",
+      "subject_kind": "transformation_claim"
+    },
+    {
+      "authored_statement": "--repo-root explicitly substitutes an existing local Git object source and retains the prior exact-revision behavior.",
+      "subject_id": "T7",
+      "subject_kind": "transformation_claim"
+    },
+    {
+      "authored_statement": "The bundled workflow no longer checks out full history merely to provision review revision objects.",
+      "subject_id": "T8",
+      "subject_kind": "transformation_claim"
+    }
+  ],
+  "symbols": [
+    {
+      "file_node_id": "SN:cd19a132349ceeb5eb5a",
+      "node_id": "SN:6b685cdf6a23d051dd52",
+      "operation": "unresolved",
+      "path": "tests/test_cli_structural_mapping.py",
+      "qualified_name": "test_cli_shadow_without_provider_is_unavailable_and_fail_closed",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:51431649d90f2b4c78c3",
+      "node_id": "SN:2f1d216f93e61ff00415",
+      "operation": "added",
+      "path": "src/prismcode/providers/workspace.py",
+      "qualified_name": "_checked_with_environment",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:51431649d90f2b4c78c3",
+      "node_id": "SN:243b3d9b06d9b7115488",
+      "operation": "retained",
+      "path": "src/prismcode/providers/workspace.py",
+      "qualified_name": "Command",
+      "symbol_kind": "variable"
+    },
+    {
+      "file_node_id": "SN:068a6879a21eea15723f",
+      "node_id": "SN:077f55703efc7c3048f3",
+      "operation": "unresolved",
+      "path": "src/prismcode/providers/mapping.py",
+      "qualified_name": "map_packet_changed_symbols",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:4f6abfce36264d7d285f",
+      "operation": "retained",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "ReviewSourcePacket",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:ef14e4d527e73b0a2d96",
+      "node_id": "SN:c508618d7302e73db040",
+      "operation": "modified",
+      "path": "src/prismcode/cli.py",
+      "qualified_name": "main",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:d60ab8391ecc6f580ee4",
+      "operation": "added",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "FakeFetchRunner::__init__",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:ef14e4d527e73b0a2d96",
+      "node_id": "SN:2d1d5de4cc374027a7ba",
+      "operation": "retained",
+      "path": "src/prismcode/cli.py",
+      "qualified_name": "_resolve_github_token",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1f70c5dda43a719ec7f9",
+      "node_id": "SN:2b56b1f15c8530478967",
+      "operation": "unresolved",
+      "path": "src/prismcode/intake/github.py",
+      "qualified_name": "_as_int",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:911e04a05962c8a614cd",
+      "operation": "retained",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "ReviewSourcePacket::with_revision",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:23f3671fb2b03d2dca66",
+      "node_id": "SN:a052580806bff7e9425a",
+      "operation": "unresolved",
+      "path": "tests/test_llm_shadow_comparison.py",
+      "qualified_name": "test_compare_shadow_cli_renders_offline_report",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:5176dacfa5eb098779f1",
+      "operation": "added",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "test_remote_fetch_failure_redacts_token_and_removes_source",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:665951494d1c8e374edd",
+      "node_id": "SN:0230e3688d34cbc1c633",
+      "operation": "retained",
+      "path": "src/prismcode/closure/scanning.py",
+      "qualified_name": "RepositoryClosureScanner",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:1f70c5dda43a719ec7f9",
+      "node_id": "SN:2ffd9eb261e18b044a48",
+      "operation": "unresolved",
+      "path": "src/prismcode/intake/github.py",
+      "qualified_name": "GitHubClient::get_json",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:6b778567a37450e55c01",
+      "node_id": "SN:ba69a503e6210a41bd5d",
+      "operation": "retained",
+      "path": "src/prismcode/intake/fixture.py",
+      "qualified_name": "load_fixture",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:2ac9b806e153683f16b3",
+      "node_id": "SN:31776beb122c49817441",
+      "operation": "retained",
+      "path": "src/prismcode/pipeline.py",
+      "qualified_name": "ReviewAnalyzer::analyze",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:ac3825203b176509f017",
+      "operation": "modified",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "FakeRunner::__call__",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:4b28b5e522e838968b30",
+      "node_id": "SN:e31264b316a88cffb351",
+      "operation": "unresolved",
+      "path": "src/prismcode/llm/labeling.py",
+      "qualified_name": "write_shadow_labeling_packet",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:791ea0f42acc2a2d0e63",
+      "operation": "unresolved",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "_commands",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1f70c5dda43a719ec7f9",
+      "node_id": "SN:e3b4d85dd7e31b56809f",
+      "operation": "retained",
+      "path": "src/prismcode/intake/github.py",
+      "qualified_name": "GitHubPullRequestAdapter",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:34acea9f4f83f15d8995",
+      "operation": "unresolved",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "test_head_and_base_indexes_are_private_and_removed",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:e07680b66a5b2177f906",
+      "operation": "added",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "test_remote_review_rejects_revision_mismatch_and_removes_source",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:cd19a132349ceeb5eb5a",
+      "node_id": "SN:af57309a02448e126ab6",
+      "operation": "unresolved",
+      "path": "tests/test_cli_structural_mapping.py",
+      "qualified_name": "test_cli_stale_index_is_skipped",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:039ae519b3d5a07b5800",
+      "operation": "retained",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "AnalysisInput",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:ef14e4d527e73b0a2d96",
+      "node_id": "SN:d324715ac516f69dd6c6",
+      "operation": "retained",
+      "path": "src/prismcode/cli.py",
+      "qualified_name": "_openai_shadow_provider_from_env",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:2639513d25c07edfc597",
+      "operation": "unresolved",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "ChangedFile",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:51431649d90f2b4c78c3",
+      "node_id": "SN:ac4ddbe869abcda97db5",
+      "operation": "added",
+      "path": "src/prismcode/providers/workspace.py",
+      "qualified_name": "_repository_git_url",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:acae5532a486c6a94a4a",
+      "node_id": "SN:a81e110713aa24f7833a",
+      "operation": "unresolved",
+      "path": "src/prismcode/llm/execution.py",
+      "qualified_name": "unavailable_shadow_execution",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:51431649d90f2b4c78c3",
+      "node_id": "SN:fd734ecf164b6af521ca",
+      "operation": "added",
+      "path": "src/prismcode/providers/workspace.py",
+      "qualified_name": "_run_with_environment",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ef14e4d527e73b0a2d96",
+      "node_id": "SN:113bc0bd065d41cf2176",
+      "operation": "retained",
+      "path": "src/prismcode/cli.py",
+      "qualified_name": "_enrich_github_auth_error",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:cd19a132349ceeb5eb5a",
+      "node_id": "SN:c49ccc61daaa4f6dc73f",
+      "operation": "unresolved",
+      "path": "tests/test_cli_structural_mapping.py",
+      "qualified_name": "test_cli_verbose_prints_structural_diagnostics",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:acae5532a486c6a94a4a",
+      "node_id": "SN:59c4a83dd6d286c6cc88",
+      "operation": "unresolved",
+      "path": "src/prismcode/llm/execution.py",
+      "qualified_name": "write_shadow_execution",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:9435b88dc81d757c519d",
+      "node_id": "SN:f15a44ba11c2a19803bf",
+      "operation": "retained",
+      "path": "src/prismcode/evaluation/core.py",
+      "qualified_name": "evaluate_suite",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:51431649d90f2b4c78c3",
+      "node_id": "SN:e0a0a642df4edcecce4b",
+      "operation": "retained",
+      "path": "src/prismcode/providers/workspace.py",
+      "qualified_name": "_checked",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1f70c5dda43a719ec7f9",
+      "node_id": "SN:80d3610449992578a1f7",
+      "operation": "unresolved",
+      "path": "src/prismcode/intake/github.py",
+      "qualified_name": "GitHubPullRequestAdapter::_load_linked_issues",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:acae5532a486c6a94a4a",
+      "node_id": "SN:bd596fa3b48c56acdcbb",
+      "operation": "retained",
+      "path": "src/prismcode/llm/execution.py",
+      "qualified_name": "execute_shadow_review",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:4b28b5e522e838968b30",
+      "node_id": "SN:0edc6c2b725ea9c2b9b4",
+      "operation": "unresolved",
+      "path": "src/prismcode/llm/labeling.py",
+      "qualified_name": "load_shadow_labeling_packet",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c679cade70653a4179c8",
+      "node_id": "SN:210402b7f47de1845614",
+      "operation": "added",
+      "path": "tests/test_cli_live_workspace.py",
+      "qualified_name": "test_live_cli_repo_root_explicitly_selects_local_workspace::local",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:2ac9b806e153683f16b3",
+      "node_id": "SN:54f59eef0fdd456f4e1f",
+      "operation": "retained",
+      "path": "src/prismcode/pipeline.py",
+      "qualified_name": "DeterministicAnalyzer",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:c679cade70653a4179c8",
+      "node_id": "SN:c7b56e0cdafd7207a1d5",
+      "operation": "added",
+      "path": "tests/test_cli_live_workspace.py",
+      "qualified_name": "test_live_cli_uses_remote_workspace_when_repo_root_is_absent",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:d3f06baf4a8d38de0f4e",
+      "node_id": "SN:791716b3a8cb3d854009",
+      "operation": "retained",
+      "path": "src/prismcode/providers/codegraph.py",
+      "qualified_name": "CodegraphProvider",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:cd19a132349ceeb5eb5a",
+      "node_id": "SN:bd9099fb6df4ed2e75f3",
+      "operation": "unresolved",
+      "path": "tests/test_cli_structural_mapping.py",
+      "qualified_name": "test_cli_prepares_labeling_packet_without_invoking_provider",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:1635f69869b65eb8f6e0",
+      "operation": "added",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "FakeFetchRunner",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:900cb08a99b69560d1de",
+      "operation": "unresolved",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "test_cleanup_failure_still_removes_private_directory",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:4b28b5e522e838968b30",
+      "node_id": "SN:520117468b323acaff3c",
+      "operation": "unresolved",
+      "path": "src/prismcode/llm/labeling.py",
+      "qualified_name": "prepare_shadow_labeling_packet",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:51431649d90f2b4c78c3",
+      "node_id": "SN:8ddfe51bd87b96dec16a",
+      "operation": "unresolved",
+      "path": "src/prismcode/providers/workspace.py",
+      "qualified_name": "urllib.parse",
+      "symbol_kind": "import"
+    },
+    {
+      "file_node_id": "SN:8d644249e69add583ca7",
+      "node_id": "SN:1402e6abd9dbbc2576d2",
+      "operation": "retained",
+      "path": "src/prismcode/llm/openai.py",
+      "qualified_name": "OpenAIShadowConfig",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:acae5532a486c6a94a4a",
+      "node_id": "SN:5b5867605c7a840c36b2",
+      "operation": "retained",
+      "path": "src/prismcode/llm/execution.py",
+      "qualified_name": "execute_shadow_admissions",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:cd19a132349ceeb5eb5a",
+      "node_id": "SN:edcb1317aa5f5fcc9fe7",
+      "operation": "unresolved",
+      "path": "tests/test_cli_structural_mapping.py",
+      "qualified_name": "test_cli_blinded_run_requires_exact_packet_and_complete_labels_before_replay",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:48e5be66da52dd920ef0",
+      "operation": "added",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "test_remote_no_structural_review_fetches_only_head",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ef14e4d527e73b0a2d96",
+      "node_id": "SN:224e74c2539da74d90fc",
+      "operation": "retained",
+      "path": "src/prismcode/cli.py",
+      "qualified_name": "_positive_int",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1f70c5dda43a719ec7f9",
+      "node_id": "SN:ce9dc0df3167959d42c3",
+      "operation": "unresolved",
+      "path": "src/prismcode/intake/github.py",
+      "qualified_name": "GitHubPullRequestAdapter::_load_files",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:cd19a132349ceeb5eb5a",
+      "node_id": "SN:02d056fdaa4a75fba925",
+      "operation": "retained",
+      "path": "tests/test_cli_structural_mapping.py",
+      "qualified_name": "_run_cli",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:cd19a132349ceeb5eb5a",
+      "node_id": "SN:3b7565d676b62e10fc8f",
+      "operation": "unresolved",
+      "path": "tests/test_cli_structural_mapping.py",
+      "qualified_name": "test_cli_runs_available_codegraph_mapping",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:15fee4a667a914118edb",
+      "operation": "added",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "test_remote_review_removes_every_owned_root_after_downstream_failure",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1f70c5dda43a719ec7f9",
+      "node_id": "SN:7ce489e0e1583ebb7ee1",
+      "operation": "retained",
+      "path": "src/prismcode/intake/github.py",
+      "qualified_name": "GitHubClient",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:ef14e4d527e73b0a2d96",
+      "node_id": "SN:e17326fb5baeb2c79e39",
+      "operation": "modified",
+      "path": "src/prismcode/cli.py",
+      "qualified_name": "build_parser",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:b42a6abb614a25065834",
+      "operation": "added",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "test_remote_review_fetches_exact_private_revisions_without_persisting_token",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ef861a5c6adac990706a",
+      "node_id": "SN:51e3fadb18c4a4a50a33",
+      "operation": "unresolved",
+      "path": "tests/test_evaluation.py",
+      "qualified_name": "test_wrong_slot_expectation_fails_the_gate_and_cli",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f67033ea8b1f8a205a24",
+      "node_id": "SN:d1cab996c7b79707a881",
+      "operation": "retained",
+      "path": "src/prismcode/presentation/status.py",
+      "qualified_name": "format_structural_coverage",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:0df2f3d7200aff711eee",
+      "node_id": "SN:9fa24c1bf0c3b2746f5f",
+      "operation": "unresolved",
+      "path": "src/prismcode/changes/hunks.py",
+      "qualified_name": "parse_changed_files",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:2ac9b806e153683f16b3",
+      "node_id": "SN:ed13be5528f17423fb7a",
+      "operation": "retained",
+      "path": "src/prismcode/pipeline.py",
+      "qualified_name": "ReviewAnalyzer",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:1f70c5dda43a719ec7f9",
+      "node_id": "SN:775059ab654ccc2571e9",
+      "operation": "retained",
+      "path": "src/prismcode/intake/github.py",
+      "qualified_name": "GitHubApiError",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:ef861a5c6adac990706a",
+      "node_id": "SN:7f672b59c1d10c6f4ae8",
+      "operation": "unresolved",
+      "path": "tests/test_evaluation.py",
+      "qualified_name": "test_wrong_focus_expectation_fails_the_gate_and_cli",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c679cade70653a4179c8",
+      "node_id": "SN:274261f5ca6a951f3acf",
+      "operation": "added",
+      "path": "tests/test_cli_live_workspace.py",
+      "qualified_name": "_run",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c679cade70653a4179c8",
+      "node_id": "SN:65f2bddea43702f029e9",
+      "operation": "added",
+      "path": "tests/test_cli_live_workspace.py",
+      "qualified_name": "_repository",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:51431649d90f2b4c78c3",
+      "node_id": "SN:4b3329617dfe529df905",
+      "operation": "added",
+      "path": "src/prismcode/providers/workspace.py",
+      "qualified_name": "remote_review_roots",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c679cade70653a4179c8",
+      "node_id": "SN:fbdd2daff35b834c868c",
+      "operation": "added",
+      "path": "tests/test_cli_live_workspace.py",
+      "qualified_name": "test_live_cli_uses_remote_workspace_when_repo_root_is_absent::remote",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:dff11285e8a262400060",
+      "operation": "unresolved",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "test_no_structural_graph_creates_only_private_head_without_codegraph",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:51431649d90f2b4c78c3",
+      "node_id": "SN:286926f75580eb2fd834",
+      "operation": "unresolved",
+      "path": "src/prismcode/providers/workspace.py",
+      "qualified_name": "CommandRunner",
+      "symbol_kind": "variable"
+    },
+    {
+      "file_node_id": "SN:51431649d90f2b4c78c3",
+      "node_id": "SN:92825ae04eca6ca025d5",
+      "operation": "retained",
+      "path": "src/prismcode/providers/workspace.py",
+      "qualified_name": "isolated_review_roots",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:b8843cc1a4484a3cc9d7",
+      "operation": "added",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "test_live_review_workflow_uses_default_remote_workspace",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:9435b88dc81d757c519d",
+      "node_id": "SN:08fd67e9f8826a442f84",
+      "operation": "unresolved",
+      "path": "src/prismcode/evaluation/core.py",
+      "qualified_name": "write_evaluation_json",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:f976c50e2f23dc3a89cc",
+      "operation": "removed",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "test_live_review_workflow_provisions_pr_revision_objects",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:51431649d90f2b4c78c3",
+      "node_id": "SN:40d0b559cd1d46e4ccb2",
+      "operation": "retained",
+      "path": "src/prismcode/providers/workspace.py",
+      "qualified_name": "ReviewRevisionRoots",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:d9a801682e4230235323",
+      "operation": "unresolved",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "test_required_revision_is_validated_before_worktree_creation",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1f70c5dda43a719ec7f9",
+      "node_id": "SN:1b40010c772ba159648b",
+      "operation": "retained",
+      "path": "src/prismcode/intake/github.py",
+      "qualified_name": "GitHubPullRequestAdapter::load",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:cd19a132349ceeb5eb5a",
+      "node_id": "SN:fcce4d6c1c8ee7ade588",
+      "operation": "unresolved",
+      "path": "tests/test_cli_structural_mapping.py",
+      "qualified_name": "test_cli_blinded_run_rejects_packet_drift_before_provider_execution",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1f70c5dda43a719ec7f9",
+      "node_id": "SN:efe6eb3827591e4c92b0",
+      "operation": "unresolved",
+      "path": "src/prismcode/intake/github.py",
+      "qualified_name": "GitHubPullRequestAdapter::_load_verification",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:e9720893ed51042b845f",
+      "node_id": "SN:e80d518af93f0349872e",
+      "operation": "retained",
+      "path": "src/prismcode/evaluation/shadow.py",
+      "qualified_name": "load_human_shadow_labels_from_packet",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:51431649d90f2b4c78c3",
+      "node_id": "SN:f12a3435be353934fe37",
+      "operation": "added",
+      "path": "src/prismcode/providers/workspace.py",
+      "qualified_name": "_git_auth_environment",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:4b879d2d36aec054db6f",
+      "node_id": "SN:759f4a0bb738db1afa53",
+      "operation": "unresolved",
+      "path": "src/prismcode/presentation/html.py",
+      "qualified_name": "write_html",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:51431649d90f2b4c78c3",
+      "node_id": "SN:6bfe73c61cf2d13c8b12",
+      "operation": "unresolved",
+      "path": "src/prismcode/providers/workspace.py",
+      "qualified_name": "_initialize_index",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:51431649d90f2b4c78c3",
+      "node_id": "SN:02284c415b8e355cc6cb",
+      "operation": "added",
+      "path": "src/prismcode/providers/workspace.py",
+      "qualified_name": "EnvironmentCommandRunner",
+      "symbol_kind": "variable"
+    },
+    {
+      "file_node_id": "SN:cd19a132349ceeb5eb5a",
+      "node_id": "SN:50528b6cc09a31a0bdb6",
+      "operation": "unresolved",
+      "path": "tests/test_cli_structural_mapping.py",
+      "qualified_name": "test_cli_partial_index_reports_coverage",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:51431649d90f2b4c78c3",
+      "node_id": "SN:8e928e97e4d077caa345",
+      "operation": "unresolved",
+      "path": "src/prismcode/providers/workspace.py",
+      "qualified_name": "_codegraph_command",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:1f72795cdf2402f7f4cf",
+      "operation": "added",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "FakeFetchRunner::__call__",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:a1425f12fa958e775a2b",
+      "operation": "unresolved",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "SourceRecord",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:919a9740d50b23695404",
+      "node_id": "SN:ecbcae613feb469aa05b",
+      "operation": "unresolved",
+      "path": "src/prismcode/llm/replay.py",
+      "qualified_name": "load_shadow_replay_provider",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c679cade70653a4179c8",
+      "node_id": "SN:af14ac23d3c198f604a8",
+      "operation": "added",
+      "path": "tests/test_cli_live_workspace.py",
+      "qualified_name": "test_live_cli_repo_root_explicitly_selects_local_workspace",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:9435b88dc81d757c519d",
+      "node_id": "SN:55daee53591c05252c53",
+      "operation": "retained",
+      "path": "src/prismcode/evaluation/core.py",
+      "qualified_name": "load_evaluation_suite",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:cd19a132349ceeb5eb5a",
+      "node_id": "SN:21dc75d97e90da94cf57",
+      "operation": "unresolved",
+      "path": "tests/test_cli_structural_mapping.py",
+      "qualified_name": "test_cli_can_explicitly_disable_structural_mapping",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:dd3c7e7152f9e53043bf",
+      "operation": "retained",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "FakeRunner",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:8d644249e69add583ca7",
+      "node_id": "SN:1263e1b2e87375fa2835",
+      "operation": "retained",
+      "path": "src/prismcode/llm/openai.py",
+      "qualified_name": "OpenAIShadowProvider",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:cd19a132349ceeb5eb5a",
+      "node_id": "SN:b104954b725ce2e571c1",
+      "operation": "unresolved",
+      "path": "tests/test_cli_structural_mapping.py",
+      "qualified_name": "test_cli_missing_index_uses_change_relation_fallback",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:aee21fc0ae8412b58509",
+      "operation": "unresolved",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "test_all_private_roots_are_removed_when_review_body_fails",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c679cade70653a4179c8",
+      "node_id": "SN:db7d3201eeda031224a5",
+      "operation": "added",
+      "path": "tests/test_cli_live_workspace.py",
+      "qualified_name": "_packet",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:0f84fdd3d21d6d6a9f66",
+      "node_id": "SN:2c99749e7dea4a21245e",
+      "operation": "unresolved",
+      "path": "src/prismcode/evaluation/comparison.py",
+      "qualified_name": "write_shadow_comparison_html",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:9435b88dc81d757c519d",
+      "node_id": "SN:abdf16878d5de20d1fb4",
+      "operation": "unresolved",
+      "path": "src/prismcode/evaluation/core.py",
+      "qualified_name": "write_evaluation_markdown",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:97bd224117f19ced4372",
+      "operation": "unresolved",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "test_all_private_roots_are_removed_when_base_indexing_fails",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ef861a5c6adac990706a",
+      "node_id": "SN:cf3e356f321c44c0d44e",
+      "operation": "unresolved",
+      "path": "tests/test_evaluation.py",
+      "qualified_name": "test_wrong_assessment_expectation_fails_the_gate_and_cli",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:d3dd8dd378028ccd5d51",
+      "operation": "modified",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "FakeRunner::__init__",
+      "symbol_kind": "method"
+    }
+  ]
+}

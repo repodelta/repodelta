@@ -1,0 +1,43 @@
+{
+  "base_sha": "24108a46e4921f991622200a4ede2d0d3f06d7d8",
+  "candidates": [],
+  "changed_surfaces": [
+    {
+      "additions": 29,
+      "base_path": "README.md",
+      "deletions": 29,
+      "head_path": "README.md",
+      "hunk_headers": [
+        "@@ -4,6 +4,11 @@ RepoDelta turns a pull request into an interactive visual map of what changed",
+        "@@ -197,35 +202,30 @@ generated HTML. Generated reports create hyperlinks only for absolute HTTP and"
+      ],
+      "status": "modified"
+    }
+  ],
+  "coverage": {
+    "base_hunk_count": 0,
+    "base_mapped_hunk_count": 0,
+    "base_state": "available",
+    "base_symbol_count": 0,
+    "complete_seed_count": 0,
+    "hunk_count": 0,
+    "indexed_files": 0,
+    "mapped_hunk_count": 0,
+    "missing_reason": "",
+    "path_count": 0,
+    "provider": "codegraph",
+    "requested_files": 0,
+    "seed_count": 0,
+    "state": "available",
+    "symbol_count": 0,
+    "truncated_seed_count": 0
+  },
+  "head_sha": "d31a174cff0a9ab7e3a53795716c842453d232ed",
+  "pull_request": 245,
+  "relation_ids": [],
+  "relations": [],
+  "repository": "repodelta/repodelta",
+  "schema_version": "structural_correctness_packet.v3",
+  "subjects": [],
+  "symbols": []
+}

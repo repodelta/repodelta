@@ -10,7 +10,7 @@ from typing import Any, Literal, Mapping
 from repodelta.model.contracts import ReviewBrief
 
 
-PACKET_SCHEMA = "structural_correctness_packet.v2"
+PACKET_SCHEMA = "structural_correctness_packet.v3"
 OBSERVATION_SCHEMA = "structural_correctness_observation.v1"
 LABELS_SCHEMA = "structural_correctness_labels.v1"
 
@@ -53,6 +53,26 @@ class ChangedSurface:
 
 
 @dataclass(frozen=True)
+class StructuralCoverageSnapshot:
+    state: str
+    provider: str
+    hunk_count: int
+    mapped_hunk_count: int
+    symbol_count: int
+    path_count: int
+    seed_count: int
+    complete_seed_count: int
+    truncated_seed_count: int
+    requested_files: int
+    indexed_files: int
+    missing_reason: str
+    base_state: str
+    base_mapped_hunk_count: int
+    base_hunk_count: int
+    base_symbol_count: int
+
+
+@dataclass(frozen=True)
 class StructuralSubject:
     subject_id: str
     subject_kind: str
@@ -71,7 +91,7 @@ class StructuralCorrectnessPacket:
     changed_surfaces: tuple[ChangedSurface, ...]
     subjects: tuple[StructuralSubject, ...]
     relation_ids: tuple[str, ...]
-    coverage_state: str
+    coverage: StructuralCoverageSnapshot
     schema_version: str = PACKET_SCHEMA
 
     def __post_init__(self) -> None:
@@ -262,7 +282,9 @@ def prepare_structural_correctness_packet(
                 *(item.id for item in brief.projection.structural_overview.relations),
             ))
         ),
-        coverage_state=brief.overview.structural_coverage.state,
+        coverage=StructuralCoverageSnapshot(
+            **asdict(brief.overview.structural_coverage)
+        ),
     )
 
 
@@ -354,7 +376,7 @@ def load_packet(path: str | Path) -> StructuralCorrectnessPacket:
             for item in _objects(raw, "subjects")
         ),
         relation_ids=_strings(raw.get("relation_ids", [])),
-        coverage_state=_string(raw, "coverage_state"),
+        coverage=_load_coverage(raw.get("coverage")),
         schema_version=_string(raw, "schema_version"),
     )
 
@@ -521,7 +543,13 @@ def _render(packet, observation, labels) -> str:
         focus_rows.append(f"<tr><td>{escape(label.subject_id)}</td><td>{len(projected & expected)}</td><td>{escape(' · '.join(sorted(projected - expected)) or 'none')}</td><td>{escape(' · '.join(sorted(expected - projected)) or 'none')}</td><td>{'yes' if label.unresolved else 'no'}</td></tr>")
     cards = ''.join(f"<div><span>{escape(key)}</span><strong>{value}</strong></div>" for key, value in counts.items())
     title = f"{packet.repository} · PR #{packet.pull_request} · structural correctness"
-    return f"""<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>{escape(title)}</title><style>{_CSS}</style></head><body><main><header><p>Non-authoritative evaluation</p><h1>{escape(title)}</h1><p>Frozen human labels are compared with the canonical structural projection. This report does not change assessment or mergeability.</p><code>{escape(packet.digest)}</code></header><section><h2>File overview</h2><div class='cards'>{cards}</div><table><thead><tr><th>Candidate</th><th>RepoDelta</th><th>Human</th><th>Result</th></tr></thead><tbody>{''.join(rows)}</tbody></table></section><section><h2>Focus membership</h2><table><thead><tr><th>Subject</th><th>Shared</th><th>False inclusion</th><th>False exclusion</th><th>Human unresolved</th></tr></thead><tbody>{''.join(focus_rows)}</tbody></table></section><footer>Coverage: {escape(packet.coverage_state)}</footer></main></body></html>"""
+    coverage = packet.coverage
+    coverage_copy = (
+        f"{coverage.state} · {coverage.mapped_hunk_count}/{coverage.hunk_count} hunks mapped · "
+        f"{coverage.complete_seed_count}/{coverage.seed_count} seeds complete · "
+        f"{coverage.truncated_seed_count} truncated"
+    )
+    return f"""<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>{escape(title)}</title><style>{_CSS}</style></head><body><main><header><p>Non-authoritative evaluation</p><h1>{escape(title)}</h1><p>Packet-bound reference labels are compared with the canonical structural projection. The campaign record owns whether those labels are proposed or human-accepted. This report does not change assessment or mergeability.</p><code>{escape(packet.digest)}</code></header><section><h2>File overview</h2><div class='cards'>{cards}</div><table><thead><tr><th>Candidate</th><th>RepoDelta</th><th>Reference</th><th>Result</th></tr></thead><tbody>{''.join(rows)}</tbody></table></section><section><h2>Focus membership</h2><table><thead><tr><th>Subject</th><th>Shared</th><th>False inclusion</th><th>False exclusion</th><th>Reference unresolved</th></tr></thead><tbody>{''.join(focus_rows)}</tbody></table></section><footer>Coverage: {escape(coverage_copy)}</footer></main></body></html>"""
 
 
 def _mapping(path: str | Path, schema: str) -> Mapping[str, Any]:
@@ -568,6 +596,27 @@ def _optional_non_negative_int(value: Any) -> int | None:
     if isinstance(value, bool) or not isinstance(value, int) or value < 0:
         raise ValueError("expected non-negative integer or null")
     return value
+
+
+def _load_coverage(value: Any) -> StructuralCoverageSnapshot:
+    if not isinstance(value, Mapping):
+        raise ValueError("coverage must be an object")
+    integer_fields = (
+        "hunk_count", "mapped_hunk_count", "symbol_count", "path_count",
+        "seed_count", "complete_seed_count", "truncated_seed_count",
+        "requested_files", "indexed_files", "base_mapped_hunk_count",
+        "base_hunk_count", "base_symbol_count",
+    )
+    integers = {name: _optional_non_negative_int(value.get(name)) for name in integer_fields}
+    if any(item is None for item in integers.values()):
+        raise ValueError("coverage counts must be non-negative integers")
+    return StructuralCoverageSnapshot(
+        state=_string(value, "state"),
+        provider=str(value.get("provider", "")),
+        missing_reason=str(value.get("missing_reason", "")),
+        base_state=_string(value, "base_state"),
+        **integers,  # type: ignore[arg-type]
+    )
 
 
 def _unique(values, name: str) -> None:

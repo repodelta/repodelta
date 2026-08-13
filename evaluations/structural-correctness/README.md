@@ -34,8 +34,9 @@ Packet identity, candidate completeness, subject completeness, file roles,
 focus membership, relation identity, and claimed equivalent focus membership
 are validated before comparison. The packet exposes the bounded candidate
 universe, conclusion-free symbol names and relation endpoints, changed-file
-counts, and at most 32 diff hunk headers per file. It does not expose source
-lines, RepoDelta's selected files, projected roles, or focus memberships.
+counts, at most 32 diff hunk headers per file, and the complete canonical
+structural coverage counters and limits. It does not expose source lines,
+RepoDelta's selected files, projected roles, or focus memberships.
 
 ## Campaign v1 sample
 
@@ -75,3 +76,7 @@ justified when the underlying memberships are correct but insufficiently
 explained. Projection fixes come first when membership is wrong. Coverage
 truthfulness comes first when conclusions exceed observed bounds. Large-change
 clustering comes later when correctness holds but scale prevents comprehension.
+
+Campaign decisions and generated labels remain proposed until the designated
+human acceptance owner reviews and merges their PR. Agent preparation and
+machine validation do not turn proposed labels into human truth.

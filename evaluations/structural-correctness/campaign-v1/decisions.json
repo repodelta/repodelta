@@ -1,0 +1,82 @@
+{
+  "acceptance_owner": "lucybai-dev",
+  "label_status": "proposed_until_maintainer_merge",
+  "prepared_by": "codex-agent",
+  "pull_requests": {
+    "208": {
+      "retained_bridge_paths": [],
+      "retained_context_paths": [],
+      "focus_groups": [
+        {"subjects": ["R1", "R2", "R3", "R4", "R5", "G2", "G3", "T1", "T2", "T4"], "direct_paths": ["src/prismcode/projection/build.py", "tests/test_projection.py"], "context_paths": [], "unresolved": false, "rationale": "Backbone membership authority and its regression evidence."},
+        {"subjects": ["T3"], "direct_paths": ["tests/test_projection.py"], "context_paths": [], "unresolved": false, "rationale": "Counterexample is expressed by the changed regression fixture."},
+        {"subjects": ["G1", "G4"], "direct_paths": [], "context_paths": [], "unresolved": false, "rationale": "Out-of-change boundaries, not positive structural mappings."}
+      ]
+    },
+    "238": {
+      "retained_bridge_paths": ["src/prismcode/model/contracts.py", "src/prismcode/pipeline.py"],
+      "retained_context_paths": [],
+      "focus_groups": [
+        {"subjects": ["R1", "R2", "R4", "R5", "T2", "T3", "T6"], "direct_paths": ["src/prismcode/semantics/criteria.py", "tests/test_semantic_authority.py"], "context_paths": ["src/prismcode/model/contracts.py"], "unresolved": false, "rationale": "Selector extraction and selector-free state behavior."},
+        {"subjects": ["R3", "G3", "T4", "T5"], "direct_paths": ["tests/test_structural_graph.py", "tests/test_transformation_subjects.py"], "context_paths": ["src/prismcode/model/contracts.py", "src/prismcode/pipeline.py"], "unresolved": true, "rationale": "Revision focus is observable, but traversal coverage is truncated."},
+        {"subjects": ["G2", "T7"], "direct_paths": ["src/prismcode/assessment/transformation.py"], "context_paths": ["src/prismcode/model/contracts.py"], "unresolved": false, "rationale": "Assessment preservation is localized to the assessment consumer."},
+        {"subjects": ["T1"], "direct_paths": ["src/prismcode/assessment/transformation.py", "src/prismcode/semantics/criteria.py"], "context_paths": [], "unresolved": false, "rationale": "Before-state explanation spans parser and assessment."},
+        {"subjects": ["G1", "G4"], "direct_paths": [], "context_paths": [], "unresolved": false, "rationale": "Presentation and LLM exclusions are not structural evidence."}
+      ]
+    },
+    "245": {"retained_bridge_paths": [], "retained_context_paths": [], "focus_groups": []},
+    "250": {
+      "retained_bridge_paths": [],
+      "retained_context_paths": ["src/repodelta/intake/github.py"],
+      "focus_groups": [
+        {"subjects": ["R1", "R3", "R4", "T2"], "direct_paths": ["tools/repodelta_bot/cli.py", "tools/repodelta_bot/submit.py", "tests/test_repodelta_bot.py"], "context_paths": [], "unresolved": false, "rationale": "CLI-to-submission production path and its verification."},
+        {"subjects": ["R2", "R5", "G1", "G4", "CC1", "CC2"], "direct_paths": ["tools/repodelta_bot/submit.py", "tests/test_repodelta_bot.py"], "context_paths": [], "unresolved": true, "rationale": "Credential behavior is directly tested, while external cleanup coverage remains bounded."},
+        {"subjects": ["G2", "G3", "T3"], "direct_paths": ["tools/repodelta_bot/submit.py"], "context_paths": ["src/repodelta/intake/github.py"], "unresolved": false, "rationale": "Submission stops before approval/merge and reuses bounded GitHub intake context."},
+        {"subjects": ["T1"], "direct_paths": [], "context_paths": [], "unresolved": false, "rationale": "Authored before-state context, not a head-side structural claim."},
+        {"subjects": ["CC3"], "direct_paths": [], "context_paths": [], "unresolved": true, "rationale": "Real GitHub execution and approval are external runtime evidence."},
+        {"subjects": ["G5", "G6", "G7"], "direct_paths": [], "context_paths": [], "unresolved": false, "rationale": "Explicit out-of-scope statements."}
+      ]
+    },
+    "235": {
+      "retained_bridge_paths": [],
+      "retained_context_paths": ["src/prismcode/intake/github.py", "src/prismcode/providers/codegraph.py"],
+      "focus_groups": [
+        {"subjects": ["R1", "R4", "R5", "T1", "T3", "T6", "T7"], "direct_paths": ["src/prismcode/cli.py", "src/prismcode/providers/workspace.py", "tests/test_cli_live_workspace.py"], "context_paths": [], "unresolved": false, "rationale": "CLI workspace selection and remote/local lifecycle."},
+        {"subjects": ["R2", "R3", "R6", "G1", "G2", "G3", "G4", "G5", "T4", "T5"], "direct_paths": ["src/prismcode/providers/workspace.py", "tests/test_codegraph_workspace.py"], "context_paths": ["src/prismcode/intake/github.py", "src/prismcode/providers/codegraph.py"], "unresolved": true, "rationale": "Workspace security and exact-revision paths are direct, but traversal is truncated."},
+        {"subjects": ["T2", "T8"], "direct_paths": [], "context_paths": [], "unresolved": false, "rationale": "Workflow/documentation change has no structural candidate in this packet."},
+        {"subjects": ["G6"], "direct_paths": [], "context_paths": [], "unresolved": false, "rationale": "Explicit out-of-scope statement."}
+      ]
+    },
+    "262": {
+      "retained_bridge_paths": ["src/repodelta/intake/fixture.py", "src/repodelta/model/contracts.py", "src/repodelta/pipeline.py"],
+      "retained_context_paths": [],
+      "focus_groups": [
+        {"subjects": ["R1", "R2", "R3", "R4", "G1", "G2", "G3", "T1", "T2", "T3"], "direct_paths": ["src/repodelta/presentation/html.py", "tests/test_open_core.py", "tests/test_projection.py", "tests/test_semantic_authority.py", "tests/test_verification_projection.py"], "context_paths": ["src/repodelta/intake/fixture.py", "src/repodelta/model/contracts.py", "src/repodelta/pipeline.py"], "unresolved": true, "rationale": "Unified inspector behavior is covered across renderer and verification tests, while all traversal seeds are truncated."},
+        {"subjects": ["G4", "G5"], "direct_paths": [], "context_paths": [], "unresolved": false, "rationale": "Explicit semantic and LLM exclusions."}
+      ]
+    },
+    "267": {
+      "retained_bridge_paths": ["src/repodelta/pipeline.py", "src/repodelta/projection/architecture.py"],
+      "retained_context_paths": [],
+      "focus_groups": [
+        {"subjects": ["R1", "R2", "R3", "R4", "R5", "G2", "G3", "G4"], "direct_paths": ["src/repodelta/model/contracts.py", "src/repodelta/projection/build.py", "src/repodelta/projection/structural_overview.py", "tests/test_structural_overview.py"], "context_paths": ["src/repodelta/pipeline.py", "src/repodelta/projection/architecture.py"], "unresolved": true, "rationale": "Canonical overview producer and validation are direct; traversal coverage is mostly truncated."},
+        {"subjects": ["R6"], "direct_paths": ["src/repodelta/model/contracts.py", "tests/test_evidence_graph.py", "tests/test_projection.py", "tests/test_verification_projection.py"], "context_paths": [], "unresolved": true, "rationale": "Full-audit preservation spans canonical contracts and sinks."},
+        {"subjects": ["G1"], "direct_paths": ["src/repodelta/presentation/html.py", "tests/test_projection.py"], "context_paths": [], "unresolved": false, "rationale": "Renderer boundary and static signature gate."},
+        {"subjects": ["G5", "G6", "G7", "G8"], "direct_paths": [], "context_paths": [], "unresolved": false, "rationale": "Explicit exclusions."}
+      ]
+    },
+    "240": {
+      "retained_bridge_paths": [],
+      "retained_context_paths": [],
+      "focus_groups": [
+        {"subjects": ["R1", "T1", "T4"], "direct_paths": ["*changed"], "context_paths": [], "unresolved": true, "rationale": "Repository-wide identity migration; scale and traversal truncation prevent exhaustive semantic adjudication."},
+        {"subjects": ["R2", "T2", "T9"], "direct_paths": ["src/repodelta/__init__.py", "src/repodelta/cli.py", "tests/test_product_identity.py"], "context_paths": [], "unresolved": false, "rationale": "Installable package and executable identity."},
+        {"subjects": ["R3", "T3"], "direct_paths": ["src/repodelta/cli.py", "src/repodelta/llm/openai.py", "tests/test_llm_openai_provider.py"], "context_paths": [], "unresolved": true, "rationale": "Configuration namespace spans CLI and provider surfaces."},
+        {"subjects": ["R4", "T6"], "direct_paths": ["src/repodelta/presentation/html.py", "tests/test_product_identity.py"], "context_paths": [], "unresolved": false, "rationale": "Generated report branding and identity gate."},
+        {"subjects": ["R6", "T7"], "direct_paths": ["tests/test_product_identity.py"], "context_paths": [], "unresolved": false, "rationale": "Repository identity gate."},
+        {"subjects": ["T8", "G1"], "direct_paths": ["tests/test_llm_shadow_campaign_v2.py"], "context_paths": [], "unresolved": true, "rationale": "Frozen historical evidence is represented but not exhaustively adjudicated."},
+        {"subjects": ["R5", "G2", "G3", "G4", "G5", "T5"], "direct_paths": [], "context_paths": [], "unresolved": false, "rationale": "Documentation, timing guardrails, or explicit out-of-scope statements without structural candidates."}
+      ]
+    }
+  },
+  "schema_version": "structural_correctness_decisions.v1"
+}
