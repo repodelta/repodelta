@@ -10,7 +10,7 @@ from typing import Any, Literal, Mapping
 from repodelta.model.contracts import ReviewBrief
 
 
-PACKET_SCHEMA = "structural_correctness_packet.v1"
+PACKET_SCHEMA = "structural_correctness_packet.v2"
 OBSERVATION_SCHEMA = "structural_correctness_observation.v1"
 LABELS_SCHEMA = "structural_correctness_labels.v1"
 
@@ -21,6 +21,35 @@ class StructuralCandidate:
     path: str
     operation: str
     member_node_ids: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class StructuralSymbolCandidate:
+    node_id: str
+    file_node_id: str
+    path: str
+    qualified_name: str
+    symbol_kind: str
+    operation: str
+
+
+@dataclass(frozen=True)
+class StructuralRelationCandidate:
+    relation_id: str
+    source_node_id: str
+    target_node_id: str
+    relation: str
+    operation: str
+
+
+@dataclass(frozen=True)
+class ChangedSurface:
+    base_path: str | None
+    head_path: str | None
+    status: str
+    additions: int | None
+    deletions: int | None
+    hunk_headers: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -37,6 +66,9 @@ class StructuralCorrectnessPacket:
     base_sha: str | None
     head_sha: str | None
     candidates: tuple[StructuralCandidate, ...]
+    symbols: tuple[StructuralSymbolCandidate, ...]
+    relations: tuple[StructuralRelationCandidate, ...]
+    changed_surfaces: tuple[ChangedSurface, ...]
     subjects: tuple[StructuralSubject, ...]
     relation_ids: tuple[str, ...]
     coverage_state: str
@@ -47,7 +79,18 @@ class StructuralCorrectnessPacket:
             raise ValueError("invalid structural correctness packet identity")
         _unique((item.file_node_id for item in self.candidates), "candidate files")
         _unique((item.subject_id for item in self.subjects), "subjects")
+        _unique((item.node_id for item in self.symbols), "symbol candidates")
+        _unique((item.relation_id for item in self.relations), "relation candidates")
         _unique(self.relation_ids, "relations")
+        file_ids = {item.file_node_id for item in self.candidates}
+        node_ids = file_ids | {item.node_id for item in self.symbols}
+        if not {item.file_node_id for item in self.symbols} <= file_ids:
+            raise ValueError("symbol candidates contain unknown file identities")
+        if any(
+            item.source_node_id not in node_ids or item.target_node_id not in node_ids
+            for item in self.relations
+        ):
+            raise ValueError("relation candidates contain unknown node identities")
 
     @property
     def digest(self) -> str:
@@ -137,10 +180,12 @@ def prepare_structural_correctness_packet(
     evidence = brief.evidence_catalog.by_id()
     file_nodes = []
     node_path: dict[str, str] = {}
+    node_fact = {}
     for item in graph.nodes:
         fact = evidence.get(item.display_evidence_id)
         if fact is None:
             continue
+        node_fact[item.id] = fact
         path = str(fact.metadata.get("path", ""))
         if path:
             node_path[item.id] = path
@@ -159,12 +204,57 @@ def prepare_structural_correctness_packet(
         )
         for item in file_nodes
     )
+    file_id_by_path = {item.path: item.file_node_id for item in candidates}
+    symbols = tuple(
+        StructuralSymbolCandidate(
+            node_id=item.id,
+            file_node_id=file_id_by_path[node_path[item.id]],
+            path=node_path[item.id],
+            qualified_name=str(
+                node_fact[item.id].metadata.get("qualified_name", "")
+                or node_fact[item.id].summary
+            ),
+            symbol_kind=str(
+                node_fact[item.id].metadata.get("symbol_kind", "unknown")
+            ),
+            operation=item.delta,
+        )
+        for item in graph.nodes
+        if item.id not in {file.id for file in file_nodes}
+        and node_path.get(item.id) in file_id_by_path
+    )
     return StructuralCorrectnessPacket(
         repository=brief.packet.repository,
         pull_request=brief.packet.pull_request,
         base_sha=brief.packet.base_sha,
         head_sha=brief.packet.head_sha,
         candidates=candidates,
+        symbols=symbols,
+        relations=tuple(
+            StructuralRelationCandidate(
+                relation_id=item.id,
+                source_node_id=item.source_node_id,
+                target_node_id=item.target_node_id,
+                relation=item.relation,
+                operation=item.operation,
+            )
+            for item in graph.relation_groups
+        ),
+        changed_surfaces=tuple(
+            ChangedSurface(
+                base_path=item.base_path,
+                head_path=item.head_path,
+                status=item.status,
+                additions=item.additions,
+                deletions=item.deletions,
+                hunk_headers=tuple(
+                    line.strip()
+                    for line in (item.patch or "").splitlines()
+                    if line.startswith("@@")
+                )[:32],
+            )
+            for item in brief.packet.changed_files
+        ),
         subjects=tuple(subjects),
         relation_ids=tuple(
             dict.fromkeys((
@@ -222,6 +312,38 @@ def load_packet(path: str | Path) -> StructuralCorrectnessPacket:
                 member_node_ids=_strings(item.get("member_node_ids", [])),
             )
             for item in _objects(raw, "candidates")
+        ),
+        symbols=tuple(
+            StructuralSymbolCandidate(
+                node_id=_string(item, "node_id"),
+                file_node_id=_string(item, "file_node_id"),
+                path=_string(item, "path"),
+                qualified_name=_string(item, "qualified_name"),
+                symbol_kind=_string(item, "symbol_kind"),
+                operation=_string(item, "operation"),
+            )
+            for item in _objects(raw, "symbols")
+        ),
+        relations=tuple(
+            StructuralRelationCandidate(
+                relation_id=_string(item, "relation_id"),
+                source_node_id=_string(item, "source_node_id"),
+                target_node_id=_string(item, "target_node_id"),
+                relation=_string(item, "relation"),
+                operation=_string(item, "operation"),
+            )
+            for item in _objects(raw, "relations")
+        ),
+        changed_surfaces=tuple(
+            ChangedSurface(
+                base_path=_optional_string(item.get("base_path")),
+                head_path=_optional_string(item.get("head_path")),
+                status=_string(item, "status"),
+                additions=_optional_non_negative_int(item.get("additions")),
+                deletions=_optional_non_negative_int(item.get("deletions")),
+                hunk_headers=_strings(item.get("hunk_headers", [])),
+            )
+            for item in _objects(raw, "changed_surfaces")
         ),
         subjects=tuple(
             StructuralSubject(
@@ -438,6 +560,13 @@ def _optional_string(value: Any) -> str | None:
 def _optional_int(value: Any) -> int | None:
     if value is None: return None
     if isinstance(value, bool) or not isinstance(value, int) or value <= 0: raise ValueError("expected positive integer or null")
+    return value
+
+
+def _optional_non_negative_int(value: Any) -> int | None:
+    if value is None: return None
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        raise ValueError("expected non-negative integer or null")
     return value
 
 
