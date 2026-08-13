@@ -1,4 +1,4 @@
-## Responsibility-closed delivery
+# Responsibility-closed delivery
 
 Treat the repository as responsibility pipelines. A semantic change must:
 
@@ -11,6 +11,18 @@ Each changed boundary has one canonical semantic contract: preserved
 properties, permitted loss, and failure behavior. Representations may differ
 when their mappings preserve that contract. Consumers may adapt or project a
 result, but must not re-decide semantics owned upstream.
+
+Before changing or adding a derived semantic result, record its provenance
+(observed, declared, inferred, or derived), authority scope (domain-wide,
+cross-consumer, consumer-local, or presentation-only), canonical owner, and
+authorized semantic dependencies. Consumer-local projection is allowed when
+its truth is intentionally local; undeclared semantic production is not.
+
+Mutation executes the recorded semantic plan. If implementation evidence
+materially changes the target output, authority, affected contract, selected
+region, or ownership of a derived result, re-plan explicitly before further
+production-boundary mutation. Local helper organization and presentation
+layout do not trigger re-planning when the semantic plan remains valid.
 
 Expand the selected region only when the change invalidates an external
 contract. Every mergeable state must be responsibility-closed,
