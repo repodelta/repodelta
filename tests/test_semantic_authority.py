@@ -337,10 +337,13 @@ def test_pr_acceptance_criteria_are_provisional_without_linked_issue() -> None:
     assert "PR #8 · Acceptance criteria" in html
     assert "pr description" not in html
     assert 'data-verification-subject="R1"' in html
-    assert "<h2>Verification</h2>" in html
+    assert "Assessment &amp; evidence" in html
+    assert '<section class="section verification-workspace">' not in html
     assert '<h2 class="brief-goals-heading" id="brief-goals-heading">Goals</h2>' in html
     assert "Goals · 1 statement" not in html
-    assert html.index("brief-goals-heading") < html.index("<h2>Verification</h2>")
+    assert html.index("brief-goals-heading") < html.index(
+        "Structural delta overview"
+    )
     assert "Preserve deterministic review behavior." in html
     assert "PR introduction · 1 statement" in html
     assert "Introduces a read-only provider boundary." in html
@@ -709,7 +712,7 @@ def test_review_contract_aliases_preserve_source_and_verification_identity() -> 
     html = render_html(brief)
     assert html.count("Verification expectations · 1 statement") == 1
     assert html.index("Verification expectations · 1 statement") < html.index(
-        "<h2>Verification</h2>"
+        "Structural delta overview"
     )
     assert "Verification notes for maintainers" not in html
     assert "Project motivation details" not in html

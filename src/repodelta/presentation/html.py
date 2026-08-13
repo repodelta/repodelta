@@ -9,6 +9,7 @@ from urllib.parse import quote, urlparse, urlunparse
 
 from repodelta.model.contracts import (
     ArchitecturalComponent,
+    EvidenceCatalog,
     EvidenceItem,
     ReviewBrief,
     ReviewProjection,
@@ -181,14 +182,66 @@ def _review_context(brief: ReviewBrief) -> str:
     return f'<div class="brief-context">{content}</div>' if content else ""
 
 
+def _focus_controls(workspace: object, visible_subject_ids: frozenset[str]) -> str:
+    focus_buttons: dict[str, list[str]] = {
+        "R": [], "G": [], "T": [], "CC": []
+    }
+    for entry in getattr(workspace, "matrix", ()):
+        family = "CC" if entry.subject_id.startswith("CC") else entry.subject_id[:1]
+        if family not in focus_buttons:
+            continue
+        focus_buttons[family].append(
+            '<button class="delta-focus'
+            + ("" if entry.subject_id in visible_subject_ids else " no-visible-backbone")
+            + '" type="button" '
+            f'data-focus-target="{escape(entry.subject_id, quote=True)}" '
+            f'title="Inspect {escape(entry.subject_id, quote=True)}">'
+            f'{escape(entry.subject_id)}</button>'
+        )
+    family_labels = {
+        "R": "Requirements",
+        "G": "Guardrails",
+        "T": "Transformations",
+        "CC": "Completion",
+    }
+    focus_families = "".join(
+        '<div class="delta-focus-family">'
+        f'<span>{escape(family_labels[family])}</span>'
+        f'<div>{"".join(focus_buttons[family])}</div></div>'
+        for family in ("R", "G", "T", "CC")
+        if focus_buttons[family]
+    )
+    return (
+        '<div class="delta-focus-controls" role="group" '
+        'aria-label="Structural graph focus">'
+        '<div class="delta-focus-primary">'
+        '<button class="delta-focus active" type="button" '
+        'data-focus-target="overview">Overview</button>'
+        '</div>'
+        f'<div class="delta-focus-families">{focus_families}</div></div>'
+    )
+
+
 def _review_graph(
     graph: ReviewStructuralGraph,
     projection: ReviewProjection,
     brief: ReviewBrief,
 ) -> str:
+    workspace = projection.verification_workspace
     if not graph.nodes:
+        controls = _focus_controls(workspace, frozenset())
+        assessment_inspector = _focus_assessment_inspector(
+            workspace,
+            brief.evidence_catalog,
+            getattr(brief.overview, "empty_review_message", ""),
+        )
         return (
             '<div class="review-structural-graph">'
+            '<div class="delta-graph-heading"><div>'
+            '<h3>Structural delta overview</h3></div>'
+            f'{controls}</div>'
+            f'{assessment_inspector}'
+            '<p class="delta-focus-empty" hidden></p>'
             '<p class="delta-empty">No canonical PR structural facts are available.</p>'
             "</div>"
         )
@@ -227,7 +280,6 @@ def _review_graph(
     relation_group_focus: dict[str, list[str]] = {}
     ownership_edge_focus: dict[str, list[str]] = {}
     placement_focus: dict[str, list[str]] = {}
-    workspace = projection.verification_workspace
     for inspection in workspace.inspections:
         focus_id = inspection.subject_id
         overlay = inspection.structural_overlay
@@ -602,12 +654,7 @@ def _review_graph(
             + "</div>"
         )
 
-    focus_buttons: dict[str, list[str]] = {
-        "R": [], "G": [], "T": [], "CC": []
-    }
-    matrix_by_subject = {
-        item.subject_id: item for item in workspace.matrix
-    }
+    visible_focus_ids: set[str] = set()
     for inspection in workspace.inspections:
         overlay = inspection.structural_overlay
         has_visible_structure = bool(
@@ -617,46 +664,9 @@ def _review_graph(
             or set(overlay.ownership_edge_ids) & set(graph.backbone_ownership_edge_ids)
             or set(overlay.placement_ids) & set(graph.primary_placement_ids)
         )
-        family = (
-            "CC"
-            if inspection.subject_id.startswith("CC")
-            else inspection.subject_id[:1]
-        )
-        if family not in focus_buttons:
-            continue
-        matrix_entry = matrix_by_subject.get(inspection.subject_id)
-        focus_copy = matrix_entry.text if matrix_entry is not None else ""
-        focus_buttons[family].append(
-            '<button class="delta-focus'
-            + ("" if has_visible_structure else " no-visible-backbone")
-            + '" type="button" '
-            f'data-focus-target="{escape(inspection.subject_id, quote=True)}" '
-            f'data-focus-copy="{escape(focus_copy, quote=True)}" '
-            f'title="Focus structural evidence for {escape(inspection.subject_id, quote=True)}">'
-            f'{escape(inspection.subject_id)}</button>'
-        )
-    family_labels = {
-        "R": "Requirements",
-        "G": "Guardrails",
-        "T": "Transformations",
-        "CC": "Completion",
-    }
-    focus_families = "".join(
-        '<div class="delta-focus-family">'
-        f'<span>{escape(family_labels[family])}</span>'
-        f'<div>{"".join(focus_buttons[family])}</div></div>'
-        for family in ("R", "G", "T", "CC")
-        if focus_buttons[family]
-    )
-    controls = (
-        '<div class="delta-focus-controls" role="group" '
-        'aria-label="Structural graph focus">'
-        '<div class="delta-focus-primary">'
-        '<button class="delta-focus active" type="button" '
-        'data-focus-target="overview">Overview</button>'
-        '</div>'
-        f'<div class="delta-focus-families">{focus_families}</div></div>'
-    )
+        if has_visible_structure:
+            visible_focus_ids.add(inspection.subject_id)
+    controls = _focus_controls(workspace, frozenset(visible_focus_ids))
     canvas = (
         '<div class="delta-canvas-scroll"><svg class="delta-canvas" '
         f'viewBox="0 0 {canvas_width} {canvas_height}" '
@@ -750,6 +760,11 @@ def _review_graph(
         if audit_graph or isolated
         else ""
     )
+    assessment_inspector = _focus_assessment_inspector(
+        workspace,
+        brief.evidence_catalog,
+        getattr(brief.overview, "empty_review_message", ""),
+    )
     return (
         '<div class="review-structural-graph">'
         '<div class="delta-graph-heading"><div>'
@@ -764,7 +779,8 @@ def _review_graph(
         f'{len(backbone_ownership_edges)} ownership deltas · '
         f'{len(isolated_nodes)} isolated changed anchors · '
         f'{len(graph.path_evidence_ids)} support refs</div></div>'
-        f'{controls}</div><p class="delta-focus-copy" hidden></p>'
+        f'{controls}</div>'
+        f'{assessment_inspector}'
         '<p class="delta-focus-empty" hidden></p>'
         '<div class="unified-graph-stage">'
         f'{file_overview}{evidence_paths}</div>{audit}'
@@ -2262,26 +2278,21 @@ def _attention(brief: ReviewBrief) -> str:
 
 
 
-def _verification_accordion(brief: ReviewBrief) -> str:
-    workspace = brief.projection.verification_workspace
-    evidence = brief.evidence_catalog.by_id()
+def _focus_assessment_inspector(
+    workspace: object,
+    evidence_catalog: EvidenceCatalog,
+    empty_review_message: str = "",
+) -> str:
+    """Render canonical verification detail inside the structural investigation."""
+    if not getattr(workspace, "matrix", ()):
+        return ""
+    if not hasattr(workspace, "inspections_by_subject_id"):
+        return ""
+    evidence = evidence_catalog.by_id()
     inspections = workspace.inspections_by_subject_id()
-    group_labels = {
-        "requirement": "Requirements",
-        "guardrail": "Guardrails",
-        "transformation_claim": "Transformation claims",
-        "completion_condition": "Completion conditions",
-    }
     rows = []
-    previous_kind = None
     for entry in workspace.matrix:
         inspection = inspections[entry.subject_id]
-        if entry.subject_kind != previous_kind:
-            rows.append(
-                '<div class="verification-group-label">'
-                f'{escape(group_labels[entry.subject_kind])}</div>'
-            )
-            previous_kind = entry.subject_kind
         observed = tuple(
             evidence[item]
             for item in inspection.observed_evidence_ids
@@ -2335,24 +2346,48 @@ def _verification_accordion(brief: ReviewBrief) -> str:
             if inspection.contradicting_evidence_ids
             else "no contradictions"
         )
+        exceptional_reasons = tuple(
+            item.kind.replace("_", " ")
+            for item in inspection.assessment_reasons
+            if entry.status != "demonstrated"
+        )
+        exception_chips = "".join(
+            f'<span>{escape(item)}</span>' for item in dict.fromkeys(exceptional_reasons)
+        )
+        if inspection.contradicting_evidence_ids:
+            exception_chips += '<span>contradicting evidence</span>'
+        if not observed:
+            exception_chips += '<span>no associated evidence</span>'
+        if inspection.structural_disposition.state != "projected":
+            exception_chips += (
+                f'<span>{escape(_structural_focus_label(inspection.structural_disposition.state))}</span>'
+            )
         rows.append(
-            '<details class="verification-item" '
+            '<article class="focus-assessment" hidden '
             f'data-verification-subject="{escape(entry.subject_id, quote=True)}"'
             f' data-structural-focus-message="{escape(focus_empty_copy, quote=True)}"'
-            '><summary>'
-            f'<span class="verification-id">{escape(entry.subject_id)}</span>'
-            '<span class="verification-claim">'
-            f'<span class="verification-title">{escape(entry.text)}</span>'
+            '><div class="focus-assessment-heading">'
+            '<span class="focus-assessment-identity">'
+            f'<b>{escape(entry.subject_id)}</b>'
+            f'<span>{escape(entry.text)}</span>'
             + (
-                f'<span class="verification-source">Source: {source}</span>'
+                f'<small>Source: {source}</small>'
                 if source
                 else ""
             )
             + '</span>'
             f'<span class="status-pill status-{escape(entry.status)}">'
-            f'{escape(entry.status.replace("_", " "))}</span></summary>'
+            f'{escape(entry.status.replace("_", " "))}</span></div>'
+            + (
+                f'<div class="focus-exceptions" aria-label="Visible review exceptions">{exception_chips}</div>'
+                if exception_chips
+                else ""
+            )
+            + '<details class="focus-assessment-detail"><summary>Assessment &amp; evidence'
+            f'<span>{len(inspection.supporting_evidence_ids)} supporting · '
+            f'{escape(contradiction_copy)} · {escape(graph_copy)}</span></summary>'
             '<div class="verification-detail">'
-            '<div><span class="projection-heading">Observed</span>'
+            '<div><span class="projection-heading">Canonical observations</span>'
             + (
                 observed_rows
                 if observed_rows
@@ -2363,18 +2398,18 @@ def _verification_accordion(brief: ReviewBrief) -> str:
             '<span class="verification-coverage">'
             f'{len(inspection.supporting_evidence_ids)} supporting · '
             f'{escape(contradiction_copy)}'
-            f' · {escape(graph_copy)}</span></div></div></details>'
+            f' · {escape(graph_copy)}</span></div></div></details></article>'
         )
-    empty = brief.overview.empty_review_message
     content = "".join(rows)
     return (
-        '<div class="verification-accordion">'
+        '<section class="focus-assessment-inspector" hidden '
+        'aria-live="polite"><h4>Assessment &amp; evidence</h4>'
         + (
             content
             if content
-            else f'<p class="empty-state">{escape(empty or "No verification subject is available.")}</p>'
+            else f'<p class="empty-state">{escape(empty_review_message or "No verification subject is available.")}</p>'
         )
-        + "</div>"
+        + "</section>"
     )
 
 
@@ -2520,7 +2555,6 @@ def render_html(brief: ReviewBrief) -> str:
         brief.projection,
         brief,
     )
-    verification_accordion = _verification_accordion(brief)
     transformation_summary = _transformation_summary(brief)
     coverage_limits = _coverage_limits(brief)
     brief_goals = _brief_goals(brief)
@@ -2534,8 +2568,6 @@ def render_html(brief: ReviewBrief) -> str:
 <title>{escape(packet.title)} · RepoDelta</title>
 <style>
 :root{{color-scheme:dark;--bg:#080c0f;--panel:#10171b;--border:#26373f;--text:#edf3f0;--muted:#9eaaaf;--faint:#6f7d83;--green:#7be3ac;--amber:#e7ca7c;--red:#ef8f91;--blue:#9fcdf0;--shadow:0 22px 64px rgba(0,0,0,.28)}}*{{box-sizing:border-box}}body{{margin:0;color:var(--text);line-height:1.55;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 18% -8%,rgba(69,167,118,.12),transparent 31rem),var(--bg)}}code{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}}.shell{{width:min(1180px,calc(100% - 40px));margin:30px auto 84px}}.topbar{{margin-bottom:22px;font-weight:720}}.brand-mark{{display:inline-block;width:14px;height:14px;margin-right:10px;border:2px solid white;transform:rotate(45deg);border-radius:3px}}.section{{border:2px solid var(--border);border-radius:18px;background:linear-gradient(180deg,rgba(17,24,28,.97),rgba(11,17,21,.98));box-shadow:var(--shadow);padding:28px;margin-bottom:22px}}h1{{font-size:31px;margin:0 0 14px}}h2{{font-size:22px;margin:0 0 14px}}h3{{font-size:16px;margin:0 0 8px}}.meta{{display:flex;flex-wrap:wrap;gap:9px;color:var(--muted);font-size:13px;margin-bottom:16px}}.intent{{max-width:850px;color:#d2dade;font-size:15px}}.source-link,.file-link{{color:#b9dfff;text-decoration:none}}.source-note,.projection-source,.context-source{{display:block;color:var(--faint);font-size:10px;line-height:1.45}}.projection-heading{{display:block;margin-bottom:9px;color:#89979d;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.045em}}.review-structural-graph{{margin-top:24px;padding:18px;border:1px solid rgba(111,128,135,.22);border-radius:12px;background:rgba(5,10,13,.24)}}.delta-graph-heading{{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}}.structural-coverage{{margin-bottom:3px;color:var(--muted);font-size:9px}}.structural-coverage.state-partial,.structural-coverage.state-stale,.structural-coverage.state-missing,.structural-coverage.state-invalid,.structural-coverage.state-error{{color:var(--amber)}}.subgraph-summary{{color:var(--muted);font-size:9px}}.delta-focus-controls{{display:flex;flex:1 1 560px;min-width:0;max-width:720px;flex-wrap:wrap;justify-content:flex-end;gap:5px}}.delta-focus{{border:1px solid rgba(111,128,135,.35);border-radius:999px;padding:4px 9px;background:transparent;color:var(--muted);font:700 9px inherit;cursor:pointer}}.delta-focus:hover,.delta-focus.active{{border-color:var(--green);background:rgba(54,118,87,.20);color:#c9efd6}}.delta-canvas-scroll{{margin-top:14px;overflow-x:auto;border:1px solid rgba(111,128,135,.16);border-radius:10px;background:rgba(3,7,9,.34)}}.delta-canvas{{display:block;min-width:100%;height:auto}}.delta-edge,.structural-container,.delta-node,.isolated-anchor{{transition:opacity .16s ease,filter .16s ease}}.delta-edge path{{fill:none;stroke-width:1.8}}.delta-edge-label-bg{{fill:rgba(3,7,9,.92);stroke:rgba(111,128,135,.24);stroke-width:.7}}.delta-edge-label{{font-size:8px;text-anchor:middle;paint-order:stroke;stroke:var(--bg);stroke-width:2px;stroke-linejoin:round}}.delta-edge.operation-added path{{stroke:var(--green)}}.delta-edge.operation-added text{{fill:var(--green)}}.delta-edge.operation-removed path{{stroke:var(--red);stroke-dasharray:6 5}}.delta-edge.operation-removed text{{fill:var(--red)}}.delta-edge.operation-retained path{{stroke:#73848c}}.delta-edge.operation-retained text{{fill:#94a2a8}}#arrow-added path{{fill:var(--green)}}#arrow-removed path{{fill:var(--red)}}#arrow-retained path{{fill:#73848c}}.structural-container{{fill:rgba(16,27,33,.42);stroke:#354a54;stroke-width:1.1}}.structural-container.operation-added{{stroke:rgba(123,227,172,.52);fill:rgba(54,118,87,.06)}}.structural-container.operation-removed{{stroke:rgba(239,143,145,.5);stroke-dasharray:6 4;fill:rgba(112,43,48,.05)}}.delta-node rect{{fill:#111a1f;stroke:#53656e;stroke-width:1.2}}.delta-node.operation-added rect{{stroke:var(--green);fill:rgba(54,118,87,.14)}}.delta-node.operation-modified rect{{stroke:var(--amber);fill:rgba(106,85,30,.13)}}.delta-node.operation-removed rect{{stroke:var(--red);stroke-dasharray:6 4;fill:rgba(112,43,48,.12)}}.delta-node-kind{{fill:var(--muted);font-size:8px;text-transform:uppercase}}.delta-node-name{{fill:var(--text);font-size:10px;font-weight:700}}.delta-node-path{{fill:var(--faint);font-size:8px}}.focus-muted{{opacity:.13}}.focus-context{{opacity:.7}}.structural-container.focus-context,.structural-container-header.focus-context{{filter:drop-shadow(0 0 2px rgba(159,205,240,.22))}}.focus-active{{opacity:1;filter:drop-shadow(0 0 5px rgba(123,227,172,.35))}}.delta-empty{{margin:14px 0 0;padding:18px;border:1px dashed rgba(111,128,135,.26);border-radius:10px;color:var(--faint);font-size:11px}}.isolated-anchors{{margin-top:12px;border-top:1px solid rgba(111,128,135,.18);padding-top:10px}}.isolated-anchors>summary{{cursor:pointer;color:var(--muted);font-size:10px}}.isolated-anchor-list{{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:9px}}.isolated-anchor{{display:grid;grid-template-columns:auto 1fr auto;gap:4px 7px;min-width:0;padding:8px;border:1px solid rgba(111,128,135,.16);border-left:2px solid var(--amber);border-radius:7px}}.isolated-anchor.operation-added{{border-left-color:var(--green)}}.isolated-anchor.operation-removed{{border-left-color:var(--red);border-style:dashed}}.isolated-anchor-focus,.isolated-anchor-operation,.isolated-anchor-kind{{color:var(--faint);font-size:8px}}.isolated-anchor-operation{{text-transform:uppercase}}.isolated-anchor-kind{{text-align:right}}.isolated-anchor-name{{grid-column:1/-1;overflow-wrap:anywhere;font-size:9px}}.isolated-anchor .projection-source{{grid-column:1/-1}}.context{{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(111,128,135,.24)}}.context>summary{{cursor:pointer;color:var(--muted);font-size:11px}}.context-row{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px;gap:12px;padding:12px 0;border-bottom:1px solid rgba(111,128,135,.18)}}.context-id{{color:#9fcdf0;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace}}.context-copy{{font-size:12px}}.context-authority{{color:var(--muted);font-size:10px;text-align:right}}.context-source{{grid-column:2/-1}}.attention-list,.file-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:var(--amber);font-size:10px;font-weight:700;text-transform:uppercase}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px}}.empty,.empty-state{{color:var(--faint);font-size:12px}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}@media(max-width:950px){{.isolated-anchor-list{{grid-template-columns:repeat(2,minmax(0,1fr))}}}}@media(max-width:600px){{.shell{{width:calc(100% - 18px);margin-top:16px}}.section{{padding:22px 20px}}.attention-row,.context-row{{grid-template-columns:1fr}}.delta-graph-heading{{display:block}}.delta-focus-controls{{max-width:none;justify-content:flex-start;margin-top:10px}}.isolated-anchor-list{{grid-template-columns:1fr}}}}@media print{{:root{{color-scheme:light;--bg:#fff;--panel:#fff;--text:#111;--muted:#444;--faint:#666;--border:#bbb}}body{{background:#fff}}.section{{box-shadow:none;break-inside:avoid}}.delta-focus-controls{{display:none}}.delta-canvas-scroll{{overflow:visible}}}}.delta-graph-heading{{flex-wrap:wrap}}.delta-node.operation-renamed rect{{stroke:var(--blue);stroke-dasharray:8 3;fill:rgba(48,83,110,.14)}}.isolated-anchor.operation-renamed{{border-left-color:var(--blue);border-style:dashed}}.delta-node.operation-retained rect{{stroke:#53656e;fill:#111a1f}}.delta-node.operation-unresolved rect{{stroke:var(--faint);stroke-dasharray:3 3;fill:rgba(111,125,131,.08)}}.isolated-anchor.operation-unresolved{{border-left-color:var(--faint);border-style:dashed}}.structural-container-header,.secondary-placement{{transition:opacity .16s ease,filter .16s ease}}.structural-container-header rect{{fill:#132027;stroke:#58707c;stroke-width:1.1}}.structural-container-header.operation-added rect{{stroke:var(--green);fill:rgba(54,118,87,.14)}}.structural-container-header.operation-modified rect{{stroke:var(--amber);fill:rgba(106,85,30,.13)}}.structural-container-header.operation-removed rect{{stroke:var(--red);stroke-dasharray:6 4;fill:rgba(112,43,48,.12)}}.structural-container-header.operation-unresolved rect{{stroke:var(--faint);stroke-dasharray:3 3}}.secondary-placement rect{{fill:rgba(48,83,110,.18);stroke:var(--blue);stroke-width:.8;stroke-dasharray:3 2}}.secondary-placement text{{fill:var(--blue);font-size:8px}}.delta-focus.no-visible-backbone{{border-style:dashed;color:var(--faint)}}.delta-focus-empty{{margin:12px 0 0;padding:9px 11px;border:1px dashed rgba(111,128,135,.3);border-radius:8px;color:var(--muted);font-size:10px}}
-.delta-focus-copy{{display:grid;grid-template-columns:34px minmax(0,1fr);gap:8px;margin:12px 0 0;padding:8px 10px;border-left:2px solid var(--green);background:rgba(54,118,87,.06);color:var(--muted);font-size:9px}}
-.delta-focus-copy[hidden]{{display:none}}.delta-focus-copy b{{color:var(--green)}}
 .delta-node-marker{{stroke-width:3;stroke-linecap:round}}
 .delta-node.operation-added .delta-node-marker{{stroke:var(--green)}}
 .delta-node.operation-modified .delta-node-marker{{stroke:var(--amber)}}
@@ -2637,16 +2669,13 @@ def render_html(brief: ReviewBrief) -> str:
 .summary-claim{{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:7px;align-items:center;width:100%;margin-top:7px;padding:8px;border:1px solid rgba(111,128,135,.18);border-radius:8px;background:rgba(16,24,28,.72);color:var(--text);font:inherit;text-align:left;cursor:pointer}}
 .summary-claim:hover,.summary-claim:focus{{border-color:var(--green);outline:none}}.summary-claim>span{{color:var(--blue);font:700 8px ui-monospace,SFMono-Regular,Menlo,monospace}}.summary-claim>b{{overflow:hidden;font-size:9px;font-weight:620;text-overflow:ellipsis;white-space:nowrap}}.summary-claim>i{{font-style:normal}}
 .summary-limits{{display:block;margin-top:12px;color:var(--faint);font-size:8px}}
-.verification-accordion{{display:grid;gap:7px}}
 .structural-graph-section .review-structural-graph{{margin:0;padding:0;border:0;background:transparent}}
-.verification-group-label{{margin-top:8px;color:var(--faint);font-size:9px;font-weight:750;text-transform:uppercase;letter-spacing:.07em}}
-.verification-item{{border:1px solid rgba(111,128,135,.2);border-radius:10px;overflow:hidden;background:rgba(3,7,9,.2)}}
-.verification-item[open]{{border-color:rgba(123,227,172,.38)}}
-.verification-item>summary{{display:grid;grid-template-columns:48px minmax(0,1fr) 105px;gap:10px;align-items:center;padding:12px;cursor:pointer;list-style:none}}
-.verification-item>summary::-webkit-details-marker{{display:none}}
-.verification-item>summary:hover{{background:rgba(54,118,87,.1)}}
-.verification-id{{color:var(--green);font:760 10px ui-monospace,SFMono-Regular,Menlo,monospace}}
-.verification-claim{{display:grid;gap:3px;min-width:0}}.verification-title{{font-size:11px;font-weight:620}}.verification-source{{color:var(--faint);font-size:8px}}
+.focus-assessment-inspector{{margin-top:12px;padding:12px;border:1px solid rgba(111,128,135,.22);border-left:2px solid var(--green);background:rgba(3,7,9,.22)}}
+.focus-assessment-inspector[hidden],.focus-assessment[hidden]{{display:none}}.focus-assessment-inspector>h4{{margin:0 0 9px;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.05em}}
+.focus-assessment-heading{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:start}}
+.focus-assessment-identity{{display:grid;grid-template-columns:34px minmax(0,1fr);gap:3px 8px;min-width:0}}.focus-assessment-identity b{{grid-row:1/3;color:var(--green);font:760 10px ui-monospace,SFMono-Regular,Menlo,monospace}}.focus-assessment-identity span{{font-size:11px;font-weight:620}}.focus-assessment-identity small{{color:var(--faint);font-size:8px}}
+.focus-exceptions{{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}}.focus-exceptions span{{padding:3px 7px;border:1px solid rgba(231,202,124,.34);border-radius:999px;background:rgba(106,85,30,.12);color:var(--amber);font-size:8px}}
+.focus-assessment-detail{{margin-top:10px;border-top:1px solid rgba(111,128,135,.18);padding-top:8px}}.focus-assessment-detail>summary{{display:flex;justify-content:space-between;gap:12px;cursor:pointer;color:var(--muted);font-size:9px}}.focus-assessment-detail>summary span{{color:var(--faint);font-size:8px;text-align:right}}
 .status-pill{{display:inline-flex;justify-content:center;padding:4px 7px;border-radius:999px;font-size:8px;font-weight:750;text-transform:uppercase}}
 .status-demonstrated{{background:rgba(54,118,87,.22);color:var(--green)}}.status-partial{{background:rgba(106,85,30,.2);color:var(--amber)}}
 .status-contradicted{{background:rgba(112,43,48,.22);color:var(--red)}}.status-unverified,.status-not_assessed{{background:rgba(111,128,135,.14);color:var(--muted)}}
@@ -2658,7 +2687,7 @@ def render_html(brief: ReviewBrief) -> str:
 .assessment-reasons{{margin:0;padding-left:17px;color:var(--muted);font-size:9px}}.assessment-reasons li+li{{margin-top:7px}}
 .verification-coverage,.display-boundary{{display:block;margin-top:10px;color:var(--faint);font-size:8px}}
 .coverage-limits{{margin-top:14px;padding:0 12px;border:1px solid rgba(111,128,135,.2);border-radius:9px;background:rgba(3,7,9,.2)}}.coverage-limits>summary{{padding:10px 0;cursor:pointer;color:var(--amber);font-size:10px}}
-@media(max-width:800px){{.transformation-strip{{grid-template-columns:1fr}}.summary-arrow{{transform:rotate(90deg)}}.verification-detail{{grid-template-columns:1fr}}.verification-item>summary{{grid-template-columns:42px minmax(0,1fr)}}.verification-item>summary .status-pill{{grid-column:2}}}}
+@media(max-width:800px){{.transformation-strip{{grid-template-columns:1fr}}.summary-arrow{{transform:rotate(90deg)}}.verification-detail{{grid-template-columns:1fr}}.focus-assessment-heading{{grid-template-columns:1fr}}}}
 @media(max-width:760px){{.file-delta-canvas{{min-width:680px}}.file-member-graph{{grid-template-columns:1fr}}.delta-focus-families{{grid-template-columns:1fr}}.delta-focus-family{{grid-template-columns:82px minmax(0,1fr)}}}}
 .file-graph-node,.file-delta-edge{{transition:opacity .16s ease,filter .16s ease}}
 .file-graph-node.focus-muted,.file-delta-edge.focus-muted{{opacity:.12}}
@@ -2714,7 +2743,6 @@ def render_html(brief: ReviewBrief) -> str:
 <section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{brief.overview.changed_file_count} changed files</span><span>·</span><span>{escape(ci_copy)}</span><span>·</span><span>{escape(llm_shadow_copy)}</span></div><h1>{escape(packet.title)}</h1>{primary_context}<span class="source-note">Source: {source_line}</span>{review_context}</section>
 <section class="section structural-graph-section">{review_graph}</section>
 {transformation_summary}
-<section class="section verification-workspace"><h2>Verification</h2><p class="section-intro">Expand one R/G/T/CC subject to compare its authored claim, canonical observations, deterministic assessment, and structural coverage.</p>{verification_accordion}</section>
     {coverage_limits}
 <div class="footer">RepoDelta · {escape(pr_label)} · Schema {escape(brief.schema_version)} · Generated by {escape(brief.generated_by)}</div>
 </main><script>
@@ -2825,22 +2853,14 @@ const activateFocus = (focus) => {{
     item.classList.toggle("active", item.dataset.focusTarget === focus);
   }});
   focusSurfaces.forEach((surface) => {{
-    const focusButton = surface.querySelector(
-      `.delta-focus[data-focus-target="${{CSS.escape(focus)}}"]`
-    );
-    const focusCopy = surface.querySelector(".delta-focus-copy");
-    if (focusCopy) {{
-      const copy = focusButton?.dataset.focusCopy || "";
-      focusCopy.hidden = focus === "overview" || !copy;
-      focusCopy.replaceChildren();
-      if (copy) {{
-        const id = document.createElement("b");
-        const text = document.createElement("span");
-        id.textContent = focus;
-        text.textContent = copy;
-        focusCopy.append(id, text);
-      }}
-    }}
+    const assessmentInspector = surface.querySelector(".focus-assessment-inspector");
+    let selectedAssessment = null;
+    assessmentInspector?.querySelectorAll("[data-verification-subject]").forEach((item) => {{
+      const active = focus !== "overview" && item.dataset.verificationSubject === focus;
+      item.hidden = !active;
+      if (active) selectedAssessment = item;
+    }});
+    if (assessmentInspector) assessmentInspector.hidden = !selectedAssessment;
     const matchedMap = applyAuthoredMapFocus(surface, focus);
     const matchedPath = filterEvidencePaths(surface, focus);
     const empty = surface.querySelector(".delta-focus-empty");
@@ -2848,9 +2868,7 @@ const activateFocus = (focus) => {{
       const show = focus !== "overview" && !matchedMap && !matchedPath;
       empty.hidden = !show;
       empty.textContent = show
-        ? (document.querySelector(
-            `.verification-item[data-verification-subject="${{focus}}"]`
-          )?.dataset.structuralFocusMessage ||
+        ? (selectedAssessment?.dataset.structuralFocusMessage ||
           `${{focus}} has no structural evidence in the default change backbone.`)
         : "";
     }}
@@ -2892,18 +2910,12 @@ document.querySelectorAll("[data-component-target]").forEach((item) => {{
     activateMembers(item);
   }});
 }});
-const verificationItems = document.querySelectorAll(
-  ".verification-item[data-verification-subject]"
-);
 document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
   const interaction = {{ expandedGroup: null }};
   graph.querySelectorAll(".delta-focus").forEach((button) => {{
     button.addEventListener("click", () => {{
       const focus = button.dataset.focusTarget;
       activateFocus(focus);
-      verificationItems.forEach((item) => {{
-        item.open = focus !== "overview" && item.dataset.verificationSubject === focus;
-      }});
     }});
   }});
   graph.querySelectorAll(".evidence-path-row").forEach((row) => {{
@@ -2975,32 +2987,14 @@ document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
     relation.addEventListener("blur", () => setTargetHighlight(false));
   }});
 }});
-verificationItems.forEach((item) => {{
-  item.addEventListener("toggle", () => {{
-    if (!item.open) {{
-      queueMicrotask(() => {{
-        if (![...verificationItems].some((candidate) => candidate.open)) {{
-          activateFocus("overview");
-        }}
-      }});
-      return;
-    }}
-    verificationItems.forEach((other) => {{
-      if (other !== item) other.open = false;
-    }});
-    activateFocus(item.dataset.verificationSubject);
-  }});
-}});
 activateFocus("overview");
 document.querySelectorAll("[data-summary-subject]").forEach((button) => {{
   button.addEventListener("click", () => {{
     const subject = button.dataset.summarySubject;
-    const target = Array.from(document.querySelectorAll(
-      ".verification-item[data-verification-subject]"
-    )).find((item) => item.dataset.verificationSubject === subject);
-    if (!target) return;
-    target.open = true;
-    target.scrollIntoView({{ behavior: "smooth", block: "center" }});
+    activateFocus(subject);
+    document.querySelector(".structural-graph-section")?.scrollIntoView({{
+      behavior: "smooth", block: "start"
+    }});
   }});
 }});
 </script></body></html>"""

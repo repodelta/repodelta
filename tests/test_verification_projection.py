@@ -223,6 +223,13 @@ def test_generic_transition_context_is_explicitly_not_graph_applicable() -> None
         assert inspection.structural_disposition.state == "not_applicable"
     html = render_html(brief)
     assert html.count("Not applicable to the structural graph.") == 2
+    assert '<section class="section verification-workspace">' not in html
+    assert html.count('class="focus-assessment" hidden') == len(workspace.matrix)
+    assert html.count('class="focus-assessment-detail"') == len(workspace.matrix)
+    assert '<details class="focus-assessment-detail" open' not in html
+    for claim in transition_claims:
+        assert f'data-focus-target="{claim.id}"' in html
+        assert f'data-verification-subject="{claim.id}"' in html
 
 
 def test_verification_workspace_is_serialized_for_renderer_consumption() -> None:
@@ -262,7 +269,7 @@ def test_renderer_indexes_typed_summary_into_existing_inspectors() -> None:
     change_id = brief.transformation_contract.change_claim_ids[0]
     completion_id = brief.transformation_contract.completion_condition_claim_ids[0]
 
-    assert html.index("Transformation Summary") < html.index(">Verification</h2>")
+    assert html.index("Structural delta overview") < html.index("Transformation Summary")
     assert '<span class="eyebrow">Base</span>' in html
     assert '<span class="eyebrow">Change</span>' in html
     assert '<span class="eyebrow">Result</span>' in html
@@ -270,5 +277,7 @@ def test_renderer_indexes_typed_summary_into_existing_inspectors() -> None:
     assert f'data-summary-subject="{completion_id}"' in html
     assert html.count(f'data-summary-subject="{change_id}"') == 1
     assert f'data-verification-subject="{change_id}"' in html
+    assert '<section class="section verification-workspace">' not in html
+    assert 'class="focus-assessment-inspector" hidden' in html
     assert "existing deterministic statuses" in html
-    assert "data-summary-subject" in html and "target.open = true" in html
+    assert "data-summary-subject" in html and "activateFocus(subject)" in html

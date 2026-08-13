@@ -22,11 +22,12 @@ def test_fixture_to_requirement_first_html(tmp_path: Path) -> None:
     assert "AI review brief · requirement-first" not in html
     assert "What this PR is trying to do" not in html
     assert ":root{color-scheme:dark" in html
-    assert "Verification" in html
+    assert "Assessment &amp; evidence" in html
     assert "Evidence Appendix" not in html
     assert "Coverage limits" in html
     assert "Transformation Summary" not in html
     assert "Verification Matrix" not in html
+    assert '<section class="section verification-workspace">' not in html
     assert "Evidence Inspector" not in html
     assert "Canonical Change Map" not in html
     assert '<div class="requirements">' not in html
@@ -64,7 +65,7 @@ def test_fixture_to_requirement_first_html(tmp_path: Path) -> None:
     assert "Issue #573 · Acceptance criteria" in html
     assert "#acceptance-criteria" in html
     assert '<span class="projection-heading">Claimed</span>' not in html
-    assert '<span class="verification-source">Source: ' in html
+    assert '<span class="focus-assessment-identity">' in html
     assert '<span class="verification-authority">' not in html
     assert ">linked issue<" not in html
     assert '<span class="block-title">Expected</span>' not in html
