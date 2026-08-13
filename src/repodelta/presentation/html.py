@@ -811,12 +811,12 @@ def _file_structural_overview(
         node_id: _structural_display_fact(node, evidence)
         for node_id, node in backbone_nodes.items()
     }
-    all_file_node_ids = tuple(
+    file_node_ids = tuple(
         node_id
         for node_id, fact in facts.items()
         if fact.metadata.get("symbol_kind") == "file"
     )
-    if not all_file_node_ids:
+    if not file_node_ids:
         return (
             '<div class="file-graph-layer"><p class="file-overview-empty">'
             'No canonical file ownership is available for a collapsed '
@@ -836,7 +836,7 @@ def _file_structural_overview(
         current = node_id
         while current not in visited:
             visited.add(current)
-            if current in all_file_node_ids:
+            if current in file_node_ids:
                 return current
             parent = parent_by_child.get(current)
             if parent is None:
@@ -849,77 +849,12 @@ def _file_structural_overview(
         for node_id in backbone_nodes
         if (file_id := owning_file(node_id)) is not None
     }
-    all_members_by_file: dict[str, list[str]] = {
-        file_id: [] for file_id in all_file_node_ids
+    members_by_file: dict[str, list[str]] = {
+        file_id: [] for file_id in file_node_ids
     }
     for node_id, file_id in file_by_node.items():
         if node_id != file_id:
-            all_members_by_file[file_id].append(node_id)
-
-    changed_file_node_ids = tuple(
-        file_id
-        for file_id in all_file_node_ids
-        if backbone_nodes[file_id].delta != "retained"
-        or any(
-            backbone_nodes[node_id].delta != "retained"
-            for node_id in all_members_by_file[file_id]
-        )
-    )
-    if not changed_file_node_ids:
-        return (
-            '<div class="file-graph-layer"><p class="file-overview-empty">'
-            'No changed file-level structure is available. Retained context '
-            'remains in the full structural audit.</p></div>'
-        )
-
-    all_relation_file_pairs = {
-        (source_file, target_file)
-        for group in backbone_relation_groups
-        if (source_file := file_by_node.get(group.source_node_id)) is not None
-        and (target_file := file_by_node.get(group.target_node_id)) is not None
-        and source_file != target_file
-    }
-    changed_file_id_set = set(changed_file_node_ids)
-    outgoing_files: dict[str, set[str]] = {
-        file_id: set() for file_id in all_file_node_ids
-    }
-    for source_file, target_file in all_relation_file_pairs:
-        outgoing_files[source_file].add(target_file)
-
-    retained_bridge_ids: set[str] = set()
-    for changed_source in changed_file_node_ids:
-        reachable_retained: set[str] = set()
-        pending = list(outgoing_files[changed_source])
-        while pending:
-            candidate = pending.pop()
-            if candidate in changed_file_id_set or candidate in reachable_retained:
-                continue
-            reachable_retained.add(candidate)
-            pending.extend(outgoing_files[candidate])
-        for candidate in reachable_retained:
-            seen = {candidate}
-            candidate_pending = list(outgoing_files[candidate])
-            connects_changed = False
-            while candidate_pending and not connects_changed:
-                target = candidate_pending.pop()
-                if target in changed_file_id_set:
-                    connects_changed = target != changed_source
-                    continue
-                if target in seen:
-                    continue
-                seen.add(target)
-                candidate_pending.extend(outgoing_files[target])
-            if connects_changed:
-                retained_bridge_ids.add(candidate)
-
-    file_node_ids = tuple(
-        file_id
-        for file_id in all_file_node_ids
-        if file_id in changed_file_id_set or file_id in retained_bridge_ids
-    )
-    members_by_file = {
-        file_id: all_members_by_file[file_id] for file_id in file_node_ids
-    }
+            members_by_file[file_id].append(node_id)
 
     alphabetic_files = tuple(sorted(
         file_node_ids,
@@ -928,15 +863,15 @@ def _file_structural_overview(
     verification_file_ids = {
         file_id
         for file_id in alphabetic_files
-        if file_id in changed_file_id_set
         if architectural_components.get(file_id) is not None
         and architectural_components[file_id].layer == "verification"
     }
     relation_file_pairs = {
         (source_file, target_file)
-        for source_file, target_file in all_relation_file_pairs
-        if source_file in file_node_ids
-        and target_file in file_node_ids
+        for group in backbone_relation_groups
+        if (source_file := file_by_node.get(group.source_node_id)) is not None
+        and (target_file := file_by_node.get(group.target_node_id)) is not None
+        and source_file != target_file
     }
 
     def topology_order(file_ids: set[str]) -> tuple[str, ...]:
@@ -985,8 +920,7 @@ def _file_structural_overview(
     ordered_files = (*production_files, *verification_files)
     cell_width, cell_height = 300, 142
     node_width, node_height = 250, 84
-    columns = min(3, max(1, len(production_files)))
-    canvas_width = max(600, columns * cell_width)
+    columns = min(3, max(1, len(production_files), len(verification_files)))
     positions: dict[str, tuple[int, int]] = {}
     production_rows = max(
         1,
@@ -998,88 +932,41 @@ def _file_structural_overview(
             45 + (index // columns) * cell_height,
         )
     verification_start = 55 + production_rows * cell_height
-    verification_columns = min(2, max(1, len(verification_files)))
-    verification_gap = 12
-    verification_inner_width = canvas_width - 80
-    verification_node_width = (
-        verification_inner_width
-        - verification_gap * (verification_columns - 1)
-    ) / verification_columns
-    verification_node_height = 42
+    verification_column_rows: dict[int, int] = {}
     for index, file_id in enumerate(verification_files):
-        column = index % verification_columns
-        row = index // verification_columns
+        target_columns = tuple(sorted({
+            round((positions[target_id][0] - 30) / cell_width)
+            for source_id, target_id in relation_file_pairs
+            if source_id == file_id and target_id in positions
+        }))
+        column = target_columns[0] if target_columns else index % columns
+        row = verification_column_rows.get(column, 0)
+        verification_column_rows[column] = row + 1
         positions[file_id] = (
-            40 + column * (verification_node_width + verification_gap),
-            verification_start + 46 + row * (verification_node_height + 8),
+            30 + column * cell_width,
+            verification_start + 38 + row * cell_height,
         )
     verification_rows = (
-        (len(verification_files) + verification_columns - 1)
-        // verification_columns
+        max(verification_column_rows.values(), default=0)
         if verification_files
         else 0
     )
+    canvas_width = max(330, columns * cell_width)
     canvas_height = (
         65
         + production_rows * cell_height
-        + (
-            72 + verification_rows * (verification_node_height + 8)
-            if verification_files
-            else 0
-        )
+        + (54 + verification_rows * cell_height if verification_files else 0)
     )
 
-    def file_size(file_id: str) -> tuple[float, float]:
-        return (
-            (verification_node_width, verification_node_height)
-            if file_id in verification_file_ids
-            else (node_width, node_height)
-        )
-
     groups_by_id = {item.id: item for item in backbone_relation_groups}
-    displayed_file_id_set = set(file_node_ids)
-    retained_context_group_ids: dict[str, set[str]] = {}
-    retained_context_focuses: dict[str, set[str]] = {}
-    for group in backbone_relation_groups:
-        source_file = file_by_node.get(group.source_node_id)
-        target_file = file_by_node.get(group.target_node_id)
-        if source_file is None or target_file is None or source_file == target_file:
-            continue
-        changed_endpoint = (
-            source_file
-            if source_file in displayed_file_id_set
-            and target_file not in displayed_file_id_set
-            else target_file
-            if target_file in displayed_file_id_set
-            and source_file not in displayed_file_id_set
-            else None
-        )
-        if changed_endpoint is None:
-            continue
-        retained_file = target_file if changed_endpoint == source_file else source_file
-        retained_context_group_ids.setdefault(retained_file, set()).add(group.id)
-        retained_context_focuses.setdefault(retained_file, set()).update(
-            relation_group_focus.get(group.id, ())
-        )
     bundles: dict[tuple[str, str, str], list[str]] = {}
     for group in backbone_relation_groups:
         source_file = file_by_node.get(group.source_node_id)
         target_file = file_by_node.get(group.target_node_id)
         if source_file is None or target_file is None or source_file == target_file:
             continue
-        if (
-            source_file not in displayed_file_id_set
-            or target_file not in displayed_file_id_set
-        ):
-            continue
-        visual_source = (
-            "__verification__"
-            if source_file in verification_file_ids
-            and target_file not in verification_file_ids
-            else source_file
-        )
         bundles.setdefault(
-            (visual_source, target_file, group.operation), []
+            (source_file, target_file, group.operation), []
         ).append(group.id)
 
     def group_focuses(group_ids: list[str]) -> tuple[str, ...]:
@@ -1103,67 +990,45 @@ def _file_structural_overview(
     adjacent_context_nodes: dict[str, set[str]] = {
         file_id: set() for file_id in ordered_files
     }
-    for (visual_source, target_file, operation), group_ids in sorted(
+    for (source_file, target_file, operation), group_ids in sorted(
         bundles.items()
     ):
-        source_files = tuple(dict.fromkeys(
-            file_by_node[groups_by_id[group_id].source_node_id]
-            for group_id in group_ids
-        ))
-        for source_file in source_files:
-            adjacent_groups[source_file].update(group_ids)
+        adjacent_groups[source_file].update(group_ids)
         adjacent_groups[target_file].update(group_ids)
-        for source_file in source_files:
-            adjacent_context_nodes[source_file].update(
-                (target_file, *(
-                    group.target_node_id
-                    for group in backbone_relation_groups
-                    if group.id in group_ids
-                ))
-            )
+        adjacent_context_nodes[source_file].update(
+            (target_file, *(
+                group.target_node_id
+                for group in backbone_relation_groups
+                if group.id in group_ids
+            ))
+        )
         adjacent_context_nodes[target_file].update(
-            (*source_files, *(
+            (source_file, *(
                 group.source_node_id
                 for group in backbone_relation_groups
                 if group.id in group_ids
             ))
         )
-        source_x, source_y = (
-            (canvas_width / 2, verification_start + 8)
-            if visual_source == "__verification__"
-            else positions[visual_source]
-        )
+        source_x, source_y = positions[source_file]
         target_x, target_y = positions[target_file]
-        source_width, source_height = (
-            (0, 0)
-            if visual_source == "__verification__"
-            else file_size(visual_source)
-        )
-        target_width, target_height = file_size(target_file)
         source_center = (
-            source_x + source_width / 2,
-            source_y + source_height / 2,
+            source_x + node_width / 2,
+            source_y + node_height / 2,
         )
         target_center = (
-            target_x + target_width / 2,
-            target_y + target_height / 2,
+            target_x + node_width / 2,
+            target_y + node_height / 2,
         )
         delta_x = target_center[0] - source_center[0]
         delta_y = target_center[1] - source_center[1]
-        source_boundary_scale = min(
-            source_width / 2 / abs(delta_x) if delta_x else float("inf"),
-            source_height / 2 / abs(delta_y) if delta_y else float("inf"),
+        boundary_scale = min(
+            node_width / 2 / abs(delta_x) if delta_x else float("inf"),
+            node_height / 2 / abs(delta_y) if delta_y else float("inf"),
         )
-        if visual_source == "__verification__":
-            source_boundary_scale = 0
-        target_boundary_scale = min(
-            target_width / 2 / abs(delta_x) if delta_x else float("inf"),
-            target_height / 2 / abs(delta_y) if delta_y else float("inf"),
-        )
-        x1 = source_center[0] + delta_x * source_boundary_scale
-        y1 = source_center[1] + delta_y * source_boundary_scale
-        x2 = target_center[0] - delta_x * target_boundary_scale
-        y2 = target_center[1] - delta_y * target_boundary_scale
+        x1 = source_center[0] + delta_x * boundary_scale
+        y1 = source_center[1] + delta_y * boundary_scale
+        x2 = target_center[0] - delta_x * boundary_scale
+        y2 = target_center[1] - delta_y * boundary_scale
         mid_x, mid_y = (x1 + x2) / 2, (y1 + y2) / 2
         horizontal = abs(delta_y) < 1
         label_rect_y = (
@@ -1176,30 +1041,16 @@ def _file_structural_overview(
             groups_by_id[group_id].relation for group_id in group_ids
         ))
         relation_title = " + ".join(relations)
-        exact_edge_count = sum(
-            len(groups_by_id[group_id].member_edge_ids)
-            for group_id in group_ids
-        )
-        operation_label = "existing" if operation == "retained" else operation
-        label = f"{operation_label} {relation_title}"
-        if len(source_files) > 1 or exact_edge_count > 1:
-            label += f" ×{exact_edge_count}"
+        label = f"{relation_title} · {operation}"
         label_width = min(224, max(128, len(label) * 4.5 + 18))
         focuses = group_focuses(group_ids)
         edge_shapes.append(
             f'<g class="file-delta-edge operation-{escape(operation)}" '
-            f'data-source-file="{escape(source_files[0], quote=True)}" '
-            f'data-source-file-ids="{escape(" ".join(source_files), quote=True)}" '
+            f'data-source-file="{escape(source_file, quote=True)}" '
             f'data-target-file="{escape(target_file, quote=True)}" '
             f'data-group-ids="{escape(" ".join(group_ids), quote=True)}" '
             f'data-focuses="{escape(" ".join(focuses), quote=True)}">'
             f'<title>{escape(relation_title)} · {escape(operation)}</title>'
-            + (
-                f'<circle class="file-edge-bus" cx="{x1}" cy="{y1}" r="3"/>'
-                if visual_source == "__verification__"
-                else ""
-            )
-            +
             f'<path d="M{x1} {y1} Q{mid_x} {mid_y - 28} {x2} {y2}" '
             f'marker-end="url(#file-arrow-{escape(operation)})"/>'
             f'<rect x="{mid_x - label_width / 2}" y="{label_rect_y}" '
@@ -1245,14 +1096,8 @@ def _file_structural_overview(
         component = architectural_components.get(file_id)
         layer = component.layer if component is not None else "unclassified"
         x, y = positions[file_id]
-        width, height = file_size(file_id)
-        is_verification = file_id in verification_file_ids
-        is_retained_bridge = file_id in retained_bridge_ids
         file_shapes.append(
-            '<g class="file-graph-node'
-            + (" verification-row" if is_verification else "")
-            + (" retained-bridge" if is_retained_bridge else "")
-            + '" tabindex="0" role="button" '
+            '<g class="file-graph-node" tabindex="0" role="button" '
             f'data-structural-node="{escape(file_id, quote=True)}" '
             f'data-file-node="{escape(file_id, quote=True)}" '
             f'data-focuses="{escape(" ".join(direct_focuses), quote=True)}" '
@@ -1261,20 +1106,12 @@ def _file_structural_overview(
             f'data-context-node-ids="{escape(" ".join(sorted(adjacent_context_nodes[file_id])), quote=True)}" '
             f'data-member-group-ids="{escape(" ".join(sorted(adjacent_groups[file_id])), quote=True)}" '
             f'transform="translate({x} {y})">'
-            f'<rect width="{width}" height="{height}" rx="{7 if is_verification else 11}"/>'
-            + (
-                f'<circle class="verification-change-dot" cx="13" cy="21" r="3"/>'
-                f'<text class="file-node-name" x="23" y="24">{escape(_truncate_label(file_name, 27))}</text>'
-                f'<text class="file-node-operation" x="{width - 13}" y="24" text-anchor="end">{escape(file_node.delta)}</text>'
-                if is_verification
-                else (
-                    f'<text class="file-node-operation" x="13" y="19">{escape(file_node.delta)}</text>'
-                    f'<text class="file-node-layer" x="{width - 13}" y="19">{escape(layer)}</text>'
-                    f'<text class="file-node-name" x="13" y="43">{escape(_truncate_label(file_name, 39))}</text>'
-                    f'<text class="file-node-counts" x="13" y="66">{escape("Existing path bridge" if is_retained_bridge else _truncate_label(count_copy, 48))}</text>'
-                )
-            )
-            + f'<title>{escape(file_name)} · select related focused structure</title></g>'
+            f'<rect width="{node_width}" height="{node_height}" rx="11"/>'
+            f'<text class="file-node-operation" x="13" y="19">{escape(file_node.delta)}</text>'
+            f'<text class="file-node-layer" x="{node_width - 13}" y="19">{escape(layer)}</text>'
+            f'<text class="file-node-name" x="13" y="43">{escape(_truncate_label(file_name, 39))}</text>'
+            f'<text class="file-node-counts" x="13" y="66">{escape(_truncate_label(count_copy, 48))}</text>'
+            f'<title>{escape(file_name)} · select related focused structure</title></g>'
         )
 
     lane_shapes = (
@@ -1282,44 +1119,16 @@ def _file_structural_overview(
         + (
             f'<line class="file-lane-divider" x1="20" y1="{verification_start + 3}" '
             f'x2="{canvas_width - 20}" y2="{verification_start + 3}"/>'
-            f'<rect class="verification-lane-container" x="20" '
-            f'y="{verification_start + 8}" width="{canvas_width - 40}" '
-            f'height="{canvas_height - verification_start - 18}" rx="10"/>'
-            f'<text class="file-lane-label verification" x="40" '
-            f'y="{verification_start + 32}">Verification changes · '
-            f'{len(verification_files)} '
-            f'{"file" if len(verification_files) == 1 else "files"}</text>'
+            f'<text class="file-lane-label verification" x="30" '
+            f'y="{verification_start + 25}">Verification</text>'
             if verification_files
             else ""
         )
     )
-    retained_context = ""
-    if retained_context_group_ids:
-        context_chips = "".join(
-            '<span class="retained-context-chip" '
-            f'data-context-file="{escape(file_id, quote=True)}" '
-            f'data-focuses="{escape(" ".join(sorted(retained_context_focuses.get(file_id, ()))), quote=True)}">'
-            f'{escape(_structural_standalone_name(facts[file_id]))}'
-            f'<small>{len(group_ids)} boundary relation'
-            f'{"s" if len(group_ids) != 1 else ""}</small></span>'
-            for file_id, group_ids in sorted(
-                retained_context_group_ids.items(),
-                key=lambda item: _structural_standalone_name(facts[item[0]]),
-            )
-        )
-        retained_context = (
-            '<details class="retained-boundary-context"><summary>'
-            f'Existing context · {len(retained_context_group_ids)} '
-            f'{"file" if len(retained_context_group_ids) == 1 else "files"}</summary>'
-            '<p>Retained dependencies adjacent to this PR’s changed files. '
-            'Exact relationships remain in the full structural audit.</p>'
-            f'<div>{context_chips}</div></details>'
-        )
     return (
         '<div class="file-graph-layer">'
-        '<p class="file-overview-intro">Changed files and the retained bridge '
-        'files required to keep their structural paths continuous. Other '
-        'retained context stays outside the primary map.</p>'
+        '<p class="file-overview-intro">Changed files and aggregated cross-file '
+        'relations. Select an authored subject to isolate its related structure.</p>'
         '<div class="delta-canvas-scroll"><svg class="file-delta-canvas" '
         f'viewBox="0 0 {canvas_width} {canvas_height}" role="img" '
         'aria-label="File-level structural delta graph"><defs>'
@@ -1327,8 +1136,7 @@ def _file_structural_overview(
         '<marker id="file-arrow-removed" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path fill="#ef8f91" d="M0,0 L0,6 L8,3 z"/></marker>'
         '<marker id="file-arrow-retained" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path fill="#71848d" d="M0,0 L0,6 L8,3 z"/></marker>'
         '</defs>'
-        f'{lane_shapes}{"".join(edge_shapes)}{"".join(file_shapes)}</svg></div>'
-        f'{retained_context}</div>'
+        f'{lane_shapes}{"".join(edge_shapes)}{"".join(file_shapes)}</svg></div></div>'
     )
 
 
@@ -2779,27 +2587,14 @@ def render_html(brief: ReviewBrief) -> str:
 .file-graph-node{{cursor:pointer;outline:none}}
 .file-graph-node rect{{fill:#111a1f;stroke:#53656e;stroke-width:1.2}}
 .file-graph-node:hover rect,.file-graph-node:focus rect{{stroke:var(--green);fill:rgba(54,118,87,.14)}}
-.verification-lane-container{{fill:rgba(48,83,110,.06);stroke:rgba(159,205,240,.22);stroke-width:1}}
-.file-graph-node.verification-row rect{{fill:rgba(9,15,19,.78);stroke:rgba(159,205,240,.28)}}
-.file-graph-node.verification-row .file-node-operation{{fill:var(--muted)}}
-.file-graph-node.retained-bridge rect{{fill:rgba(113,132,141,.06);stroke:#71848d;stroke-dasharray:5 4}}
-.file-graph-node.retained-bridge .file-node-operation{{fill:#94a2a8}}
-.verification-change-dot{{fill:var(--blue)}}
 .file-node-operation{{fill:var(--green);font-size:8px;text-transform:uppercase}}
 .file-node-name{{fill:var(--text);font-size:10px;font-weight:700}}
 .file-node-counts{{fill:var(--faint);font-size:8px}}
-.file-delta-edge>path{{fill:none;stroke:#71848d;stroke-width:1.8}}
-.file-edge-bus{{fill:var(--blue);stroke:#0b1115;stroke-width:1}}
+.file-delta-edge>path{{fill:none;stroke:#71848d;stroke-width:1.4}}
 .file-delta-edge.operation-added>path{{stroke:var(--green)}}
 .file-delta-edge.operation-removed>path{{stroke:var(--red);stroke-dasharray:5 4}}
 .file-delta-edge rect{{fill:#10171b;stroke:rgba(111,128,135,.24)}}
 .file-delta-edge text{{fill:var(--muted);font-size:7px;text-anchor:middle}}
-.retained-boundary-context{{margin-top:10px;padding-top:9px;border-top:1px solid rgba(111,128,135,.18)}}
-.retained-boundary-context>summary{{cursor:pointer;color:var(--muted);font-size:9px}}
-.retained-boundary-context>p{{margin:6px 0;color:var(--faint);font-size:8px}}
-.retained-boundary-context>div{{display:flex;flex-wrap:wrap;gap:5px}}
-.retained-context-chip{{display:inline-flex;gap:6px;align-items:center;padding:4px 7px;border:1px solid rgba(111,128,135,.22);border-radius:999px;color:var(--muted);font:650 8px ui-monospace,SFMono-Regular,Menlo,monospace}}
-.retained-context-chip small{{color:var(--faint);font:7px Inter,ui-sans-serif,system-ui,sans-serif}}
 .file-member-graph{{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px;align-items:start}}
 .file-member-panel{{min-width:0;border:1px solid rgba(111,128,135,.28);border-radius:11px;background:rgba(5,10,13,.34);overflow:hidden}}
 .file-member-panel>header{{display:grid;gap:3px;padding:11px 13px;border-bottom:1px solid rgba(111,128,135,.22);background:rgba(16,27,33,.5)}}
@@ -2894,13 +2689,11 @@ def render_html(brief: ReviewBrief) -> str:
 .coverage-limits{{margin-top:14px;padding:0 12px;border:1px solid rgba(111,128,135,.2);border-radius:9px;background:rgba(3,7,9,.2)}}.coverage-limits>summary{{padding:10px 0;cursor:pointer;color:var(--amber);font-size:10px}}
 @media(max-width:800px){{.transformation-strip{{grid-template-columns:1fr}}.summary-arrow{{transform:rotate(90deg)}}.verification-detail{{grid-template-columns:1fr}}.focus-assessment-heading{{grid-template-columns:1fr}}}}
 @media(max-width:760px){{.file-delta-canvas{{min-width:680px}}.file-member-graph{{grid-template-columns:1fr}}.delta-focus-families{{grid-template-columns:1fr}}.delta-focus-family{{grid-template-columns:82px minmax(0,1fr)}}}}
-.file-graph-node,.file-delta-edge,.retained-context-chip{{transition:opacity .16s ease,filter .16s ease}}
-.file-graph-node.focus-hidden,.file-delta-edge.focus-hidden,.retained-context-chip.focus-hidden{{display:none}}
+.file-graph-node,.file-delta-edge{{transition:opacity .16s ease,filter .16s ease}}
 .file-graph-node.focus-muted,.file-delta-edge.focus-muted{{opacity:.12}}
 .file-graph-node.focus-context,.file-delta-edge.focus-context{{opacity:.52}}
 .file-graph-node.focus-active{{opacity:1;filter:drop-shadow(0 0 5px rgba(123,227,172,.25))}}
 .file-delta-edge.focus-active{{opacity:1;filter:drop-shadow(0 0 3px rgba(123,227,172,.25))}}
-.file-graph-layer.focus-no-map .delta-canvas-scroll,.file-graph-layer.focus-no-map .retained-boundary-context{{display:none}}
 .file-node-layer{{fill:var(--blue);font-size:7px;text-anchor:end;text-transform:uppercase}}
 .file-lane-label{{fill:var(--faint);font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}}
 .file-lane-label.verification{{fill:var(--blue)}}
@@ -2957,26 +2750,22 @@ const tokenSet = (value) => new Set((value || "").split(/\\s+/).filter(Boolean))
 const intersects = (left, right) => [...left].some((item) => right.has(item));
 const focusSurfaces = document.querySelectorAll(".review-structural-graph");
 const clearMapFocus = (surface) => {{
-  surface.querySelectorAll(".file-graph-node, .file-delta-edge, .retained-context-chip").forEach((item) => {{
-    item.classList.remove("focus-hidden", "focus-muted", "focus-context", "focus-active");
+  surface.querySelectorAll(".file-graph-node, .file-delta-edge").forEach((item) => {{
+    item.classList.remove("focus-muted", "focus-context", "focus-active");
   }});
-  surface.querySelector(".file-graph-layer")?.classList.remove("focus-no-map");
 }};
 const applyAuthoredMapFocus = (surface, focus) => {{
   clearMapFocus(surface);
   let matched = false;
-  surface.querySelectorAll(".file-graph-node, .file-delta-edge, .retained-context-chip").forEach((item) => {{
+  surface.querySelectorAll(".file-graph-node, .file-delta-edge").forEach((item) => {{
     const direct = focus === "overview" || tokenSet(item.dataset.focuses).has(focus);
     const contextual = focus !== "overview" && !direct &&
       tokenSet(item.dataset.contextFocuses).has(focus);
     if (focus !== "overview" && (direct || contextual)) matched = true;
-    item.classList.toggle("focus-hidden", focus !== "overview" && !direct && !contextual);
+    item.classList.toggle("focus-muted", !direct && !contextual);
     item.classList.toggle("focus-context", contextual);
     item.classList.toggle("focus-active", focus !== "overview" && direct);
   }});
-  surface.querySelector(".file-graph-layer")?.classList.toggle(
-    "focus-no-map", focus !== "overview" && !matched
-  );
   return matched;
 }};
 const setPathDirection = (surface, direction) => {{
@@ -3153,8 +2942,7 @@ document.querySelectorAll(".review-structural-graph").forEach((graph) => {{
         candidate.classList.toggle("focus-muted", !active);
       }});
       graph.querySelectorAll(".file-delta-edge").forEach((edge) => {{
-        const active = tokenSet(edge.dataset.sourceFileIds).has(fileId) ||
-          edge.dataset.targetFile === fileId;
+        const active = edge.dataset.sourceFile === fileId || edge.dataset.targetFile === fileId;
         edge.classList.toggle("focus-active", active);
         edge.classList.toggle("focus-muted", !active);
       }});
