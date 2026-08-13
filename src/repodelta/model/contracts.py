@@ -3022,6 +3022,67 @@ class ArchitecturalChangeTopology:
                 )
 
 
+StructuralOverviewFileRole = Literal[
+    "changed",
+    "retained_bridge",
+    "retained_context",
+]
+StructuralOverviewLane = Literal["production", "verification"]
+
+
+@dataclass(frozen=True)
+class StructuralOverviewFile:
+    """One canonical file membership in the compact structural overview."""
+
+    file_node_id: str
+    member_node_ids: tuple[str, ...]
+    role: StructuralOverviewFileRole
+    lane: StructuralOverviewLane
+    relation_group_ids: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class StructuralOverviewRelation:
+    """One loss-bounded file relation bundle with canonical members."""
+
+    id: str
+    source_file_node_ids: tuple[str, ...]
+    target_file_node_id: str
+    operation: Literal["added", "removed", "retained"]
+    relations: tuple[str, ...]
+    relation_group_ids: tuple[str, ...]
+    member_edge_ids: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class StructuralOverviewFocus:
+    """Canonical overview membership for one authored review subject."""
+
+    subject_id: str
+    direct_file_node_ids: tuple[str, ...] = ()
+    context_file_node_ids: tuple[str, ...] = ()
+    relation_ids: tuple[str, ...] = ()
+    structural_disposition: StructuralFocusDisposition = (
+        StructuralFocusDisposition()
+    )
+
+
+@dataclass(frozen=True)
+class StructuralOverviewProjection:
+    """Renderer-independent compact view over canonical structural truth."""
+
+    files: tuple[StructuralOverviewFile, ...] = ()
+    relations: tuple[StructuralOverviewRelation, ...] = ()
+    focuses: tuple[StructuralOverviewFocus, ...] = ()
+    schema_version: str = "structural_overview.v1"
+
+    def files_by_id(self) -> dict[str, StructuralOverviewFile]:
+        return {item.file_node_id: item for item in self.files}
+
+    def focuses_by_subject_id(self) -> dict[str, StructuralOverviewFocus]:
+        return {item.subject_id: item for item in self.focuses}
+
+
 @dataclass(frozen=True)
 class StructuralFocusNode:
     node_id: str
@@ -3176,7 +3237,10 @@ class ReviewProjection:
         ArchitecturalChangeTopology()
     )
     verification_workspace: VerificationWorkspace = VerificationWorkspace()
-    schema_version: str = "review_projection.v31"
+    structural_overview: StructuralOverviewProjection = (
+        StructuralOverviewProjection()
+    )
+    schema_version: str = "review_projection.v32"
 
     def validate_consistency(
         self,
