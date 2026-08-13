@@ -37,23 +37,28 @@ universe but not RepoDelta's selected files, roles, or focus memberships.
 
 ## Campaign v1 sample
 
-The first sample is selected by change shape rather than randomly:
-
-| PR | Change shape | Why it is included |
-| --- | --- | --- |
-| #208 | Small structural correction | Tests a compact changed-anchor case. |
-| #238 | Revision-aware state mapping | Tests base/head selectors and focused state semantics. |
-| #245 | Documentation-only framing | Tests structurally inapplicable authored semantics. |
-| #250 | New cross-component feature | Tests production, CLI, credential boundary, and verification structure. |
-| #235 | Remote workspace feature | Tests cross-component runtime and infrastructure paths. |
-| #262 | Presentation and investigation refactor | Tests several focus subjects over shared changed files. |
-| #267 | Canonical projection migration | Tests the contract introduced immediately before this campaign. |
-| #240 | Large mechanical identity migration | Tests scale, rename-like repetition, and the limit of an unclustered overview. |
+The first sample is selected by change shape rather than randomly. Its
+machine-readable identities, categories, purposes, and campaign constraints
+are frozen in [`campaign-v1/manifest.json`](campaign-v1/manifest.json).
 
 The sample must contain human exclusions and unresolved memberships. If these
 real PRs do not expose a retained-bridge or false-inclusion counterexample, a
 small synthetic fixture complements the campaign without replacing the real
 sample.
+
+Once frozen, reproducible campaign artifacts use these directories:
+
+```text
+campaign-v1/
+├── manifest.json
+├── packets/       # blind labeler-facing inputs
+├── labels/        # frozen human truth
+├── observations/  # separately stored RepoDelta projections
+└── results/       # machine-readable summaries and comparison reports
+```
+
+The directories are created when their first frozen artifact is admitted;
+ordinary exploratory output remains under `build/` and is not committed.
 
 ## Reading the result
 
