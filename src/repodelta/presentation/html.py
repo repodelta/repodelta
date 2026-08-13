@@ -856,7 +856,7 @@ def _file_structural_overview(
         if node_id != file_id:
             all_members_by_file[file_id].append(node_id)
 
-    file_node_ids = tuple(
+    changed_file_node_ids = tuple(
         file_id
         for file_id in all_file_node_ids
         if backbone_nodes[file_id].delta != "retained"
@@ -865,12 +865,58 @@ def _file_structural_overview(
             for node_id in all_members_by_file[file_id]
         )
     )
-    if not file_node_ids:
+    if not changed_file_node_ids:
         return (
             '<div class="file-graph-layer"><p class="file-overview-empty">'
             'No changed file-level structure is available. Retained context '
             'remains in the full structural audit.</p></div>'
         )
+
+    all_relation_file_pairs = {
+        (source_file, target_file)
+        for group in backbone_relation_groups
+        if (source_file := file_by_node.get(group.source_node_id)) is not None
+        and (target_file := file_by_node.get(group.target_node_id)) is not None
+        and source_file != target_file
+    }
+    changed_file_id_set = set(changed_file_node_ids)
+    outgoing_files: dict[str, set[str]] = {
+        file_id: set() for file_id in all_file_node_ids
+    }
+    for source_file, target_file in all_relation_file_pairs:
+        outgoing_files[source_file].add(target_file)
+
+    retained_bridge_ids: set[str] = set()
+    for changed_source in changed_file_node_ids:
+        reachable_retained: set[str] = set()
+        pending = list(outgoing_files[changed_source])
+        while pending:
+            candidate = pending.pop()
+            if candidate in changed_file_id_set or candidate in reachable_retained:
+                continue
+            reachable_retained.add(candidate)
+            pending.extend(outgoing_files[candidate])
+        for candidate in reachable_retained:
+            seen = {candidate}
+            candidate_pending = list(outgoing_files[candidate])
+            connects_changed = False
+            while candidate_pending and not connects_changed:
+                target = candidate_pending.pop()
+                if target in changed_file_id_set:
+                    connects_changed = target != changed_source
+                    continue
+                if target in seen:
+                    continue
+                seen.add(target)
+                candidate_pending.extend(outgoing_files[target])
+            if connects_changed:
+                retained_bridge_ids.add(candidate)
+
+    file_node_ids = tuple(
+        file_id
+        for file_id in all_file_node_ids
+        if file_id in changed_file_id_set or file_id in retained_bridge_ids
+    )
     members_by_file = {
         file_id: all_members_by_file[file_id] for file_id in file_node_ids
     }
@@ -882,16 +928,14 @@ def _file_structural_overview(
     verification_file_ids = {
         file_id
         for file_id in alphabetic_files
+        if file_id in changed_file_id_set
         if architectural_components.get(file_id) is not None
         and architectural_components[file_id].layer == "verification"
     }
     relation_file_pairs = {
         (source_file, target_file)
-        for group in backbone_relation_groups
-        if (source_file := file_by_node.get(group.source_node_id)) is not None
-        and (target_file := file_by_node.get(group.target_node_id)) is not None
-        and source_file != target_file
-        and source_file in file_node_ids
+        for source_file, target_file in all_relation_file_pairs
+        if source_file in file_node_ids
         and target_file in file_node_ids
     }
 
@@ -993,7 +1037,7 @@ def _file_structural_overview(
         )
 
     groups_by_id = {item.id: item for item in backbone_relation_groups}
-    changed_file_id_set = set(file_node_ids)
+    displayed_file_id_set = set(file_node_ids)
     retained_context_group_ids: dict[str, set[str]] = {}
     retained_context_focuses: dict[str, set[str]] = {}
     for group in backbone_relation_groups:
@@ -1003,11 +1047,11 @@ def _file_structural_overview(
             continue
         changed_endpoint = (
             source_file
-            if source_file in changed_file_id_set
-            and target_file not in changed_file_id_set
+            if source_file in displayed_file_id_set
+            and target_file not in displayed_file_id_set
             else target_file
-            if target_file in changed_file_id_set
-            and source_file not in changed_file_id_set
+            if target_file in displayed_file_id_set
+            and source_file not in displayed_file_id_set
             else None
         )
         if changed_endpoint is None:
@@ -1024,8 +1068,8 @@ def _file_structural_overview(
         if source_file is None or target_file is None or source_file == target_file:
             continue
         if (
-            source_file not in changed_file_id_set
-            or target_file not in changed_file_id_set
+            source_file not in displayed_file_id_set
+            or target_file not in displayed_file_id_set
         ):
             continue
         visual_source = (
@@ -1203,9 +1247,11 @@ def _file_structural_overview(
         x, y = positions[file_id]
         width, height = file_size(file_id)
         is_verification = file_id in verification_file_ids
+        is_retained_bridge = file_id in retained_bridge_ids
         file_shapes.append(
             '<g class="file-graph-node'
             + (" verification-row" if is_verification else "")
+            + (" retained-bridge" if is_retained_bridge else "")
             + '" tabindex="0" role="button" '
             f'data-structural-node="{escape(file_id, quote=True)}" '
             f'data-file-node="{escape(file_id, quote=True)}" '
@@ -1225,7 +1271,7 @@ def _file_structural_overview(
                     f'<text class="file-node-operation" x="13" y="19">{escape(file_node.delta)}</text>'
                     f'<text class="file-node-layer" x="{width - 13}" y="19">{escape(layer)}</text>'
                     f'<text class="file-node-name" x="13" y="43">{escape(_truncate_label(file_name, 39))}</text>'
-                    f'<text class="file-node-counts" x="13" y="66">{escape(_truncate_label(count_copy, 48))}</text>'
+                    f'<text class="file-node-counts" x="13" y="66">{escape("Existing path bridge" if is_retained_bridge else _truncate_label(count_copy, 48))}</text>'
                 )
             )
             + f'<title>{escape(file_name)} · select related focused structure</title></g>'
@@ -1271,8 +1317,9 @@ def _file_structural_overview(
         )
     return (
         '<div class="file-graph-layer">'
-        '<p class="file-overview-intro">Changed files and their aggregated '
-        'cross-file boundary. Retained context stays outside the primary map.</p>'
+        '<p class="file-overview-intro">Changed files and the retained bridge '
+        'files required to keep their structural paths continuous. Other '
+        'retained context stays outside the primary map.</p>'
         '<div class="delta-canvas-scroll"><svg class="file-delta-canvas" '
         f'viewBox="0 0 {canvas_width} {canvas_height}" role="img" '
         'aria-label="File-level structural delta graph"><defs>'
@@ -2735,6 +2782,8 @@ def render_html(brief: ReviewBrief) -> str:
 .verification-lane-container{{fill:rgba(48,83,110,.06);stroke:rgba(159,205,240,.22);stroke-width:1}}
 .file-graph-node.verification-row rect{{fill:rgba(9,15,19,.78);stroke:rgba(159,205,240,.28)}}
 .file-graph-node.verification-row .file-node-operation{{fill:var(--muted)}}
+.file-graph-node.retained-bridge rect{{fill:rgba(113,132,141,.06);stroke:#71848d;stroke-dasharray:5 4}}
+.file-graph-node.retained-bridge .file-node-operation{{fill:#94a2a8}}
 .verification-change-dot{{fill:var(--blue)}}
 .file-node-operation{{fill:var(--green);font-size:8px;text-transform:uppercase}}
 .file-node-name{{fill:var(--text);font-size:10px;font-weight:700}}

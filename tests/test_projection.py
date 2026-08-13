@@ -382,6 +382,8 @@ def test_file_overview_keeps_retained_context_outside_changed_map() -> None:
     evidence = {
         "F:runtime": file_fact("F:runtime", "src/runtime.py", "code"),
         "F:test": file_fact("F:test", "tests/test_runtime.py", "test"),
+        "F:bridge": file_fact("F:bridge", "src/bridge.py", "code"),
+        "F:sink": file_fact("F:sink", "src/sink.py", "code"),
         "F:context": file_fact("F:context", "src/context.py", "code"),
     }
     nodes = tuple(
@@ -395,6 +397,8 @@ def test_file_overview_keeps_retained_context_outside_changed_map() -> None:
         for name, delta in (
             ("runtime", "modified"),
             ("test", "modified"),
+            ("bridge", "retained"),
+            ("sink", "modified"),
             ("context", "retained"),
         )
     )
@@ -410,6 +414,8 @@ def test_file_overview_keeps_retained_context_outside_changed_map() -> None:
         )
 
     changed_edge = edge("E:test-runtime", "test", "runtime")
+    bridge_entry_edge = edge("E:runtime-bridge", "runtime", "bridge")
+    bridge_exit_edge = edge("E:bridge-sink", "bridge", "sink")
     context_edge = edge("E:runtime-context", "runtime", "context")
     groups = tuple(
         StructuralRelationGroup(
@@ -420,14 +426,24 @@ def test_file_overview_keeps_retained_context_outside_changed_map() -> None:
             operation=item.operation,
             member_edge_ids=(item.id,),
         )
-        for item in (changed_edge, context_edge)
+        for item in (
+            changed_edge,
+            bridge_entry_edge,
+            bridge_exit_edge,
+            context_edge,
+        )
     )
     graph = ReviewStructuralGraph(
         nodes=nodes,
-        edges=(changed_edge, context_edge),
+        edges=(changed_edge, bridge_entry_edge, bridge_exit_edge, context_edge),
         relation_groups=groups,
         backbone_node_ids=tuple(item.id for item in nodes),
-        backbone_edge_ids=(changed_edge.id, context_edge.id),
+        backbone_edge_ids=tuple(item.id for item in (
+            changed_edge,
+            bridge_entry_edge,
+            bridge_exit_edge,
+            context_edge,
+        )),
         backbone_relation_group_ids=tuple(item.id for item in groups),
     )
     components = {
@@ -445,6 +461,13 @@ def test_file_overview_keeps_retained_context_outside_changed_map() -> None:
             node_ids=("N:test",),
             classification_authority="path_convention",
         ),
+        "N:sink": ArchitecturalComponent(
+            id="AC:sink",
+            domain="src",
+            layer="infrastructure",
+            node_ids=("N:sink",),
+            classification_authority="path_convention",
+        ),
     }
 
     html = _file_structural_overview(
@@ -456,10 +479,12 @@ def test_file_overview_keeps_retained_context_outside_changed_map() -> None:
         architectural_components=components,
     )
 
-    assert html.count('class="file-graph-node') == 2
+    assert html.count('class="file-graph-node') == 4
     assert 'class="file-graph-node verification-row"' in html
+    assert 'class="file-graph-node retained-bridge"' in html
+    assert "Existing path bridge" in html
     assert "Verification changes · 1 file" in html
-    assert html.count('class="file-delta-edge operation-retained"') == 1
+    assert html.count('class="file-delta-edge operation-retained"') == 3
     assert "Existing context · 1 file" in html
     assert 'data-context-file="N:context"' in html
 
