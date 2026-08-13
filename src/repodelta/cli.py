@@ -20,6 +20,13 @@ from repodelta.evaluation.core import (
     write_evaluation_markdown,
 )
 from repodelta.evaluation.comparison import write_shadow_comparison_html
+from repodelta.evaluation.structural_correctness import (
+    observe_structural_correctness,
+    prepare_structural_correctness_label_template,
+    prepare_structural_correctness_packet,
+    write_comparison_html as write_structural_correctness_comparison_html,
+    write_json_artifact as write_structural_correctness_artifact,
+)
 from repodelta.evaluation.shadow import load_human_shadow_labels_from_packet
 from repodelta.intake.fixture import load_fixture
 from repodelta.intake.github import GitHubApiError, GitHubClient, GitHubPullRequestAdapter
@@ -268,6 +275,13 @@ def build_parser() -> argparse.ArgumentParser:
         "--llm-shadow-human-labels",
         help="Complete human labels frozen against the labeling packet",
     )
+    review.add_argument(
+        "--structural-correctness-packet-output",
+        help=(
+            "Write a blind structural labeling packet and a separate canonical "
+            "observation artifact without changing the review"
+        ),
+    )
     evaluate = subparsers.add_parser(
         "evaluate",
         help="Evaluate deterministic bindings against an offline golden suite",
@@ -299,6 +313,14 @@ def build_parser() -> argparse.ArgumentParser:
     compare_shadow.add_argument(
         "--output", required=True, help="Destination comparison HTML"
     )
+    compare_structural = subparsers.add_parser(
+        "compare-structural-correctness",
+        help="Render a non-authoritative structural correctness comparison",
+    )
+    compare_structural.add_argument("--labeling-packet", required=True)
+    compare_structural.add_argument("--observation", required=True)
+    compare_structural.add_argument("--human-labels", required=True)
+    compare_structural.add_argument("--output", required=True)
     return parser
 
 
@@ -324,6 +346,19 @@ def main() -> int:
             output = write_shadow_comparison_html(
                 args.labeling_packet,
                 args.execution,
+                args.human_labels,
+                args.output,
+            )
+        except (OSError, ValueError) as exc:
+            print(f"repodelta: error: {exc}", file=sys.stderr)
+            return 2
+        print(output)
+        return 0
+    if args.command == "compare-structural-correctness":
+        try:
+            output = write_structural_correctness_comparison_html(
+                args.labeling_packet,
+                args.observation,
                 args.human_labels,
                 args.output,
             )
@@ -435,6 +470,31 @@ def main() -> int:
                     ),
                 )
             ).analyze(analysis_input)
+            structural_correctness_outputs: tuple[Path, Path, Path] | None = None
+            if args.structural_correctness_packet_output:
+                correctness_packet = prepare_structural_correctness_packet(brief)
+                packet_output = write_structural_correctness_artifact(
+                    correctness_packet,
+                    args.structural_correctness_packet_output,
+                )
+                observation = observe_structural_correctness(
+                    brief, correctness_packet
+                )
+                observation_output = write_structural_correctness_artifact(
+                    observation,
+                    f"{args.structural_correctness_packet_output}.observation.json",
+                )
+                label_template_output = write_structural_correctness_artifact(
+                    prepare_structural_correctness_label_template(
+                        correctness_packet
+                    ),
+                    f"{args.structural_correctness_packet_output}.labels.template.json",
+                )
+                structural_correctness_outputs = (
+                    packet_output,
+                    observation_output,
+                    label_template_output,
+                )
             if args.llm_shadow_replay and not args.llm_shadow:
                 parser.error("--llm-shadow-replay requires --llm-shadow")
             if args.llm_shadow_output and not args.llm_shadow:
@@ -520,6 +580,9 @@ def main() -> int:
     print(output)
     if labeling_output is not None:
         print(labeling_output)
+    if structural_correctness_outputs is not None:
+        for item in structural_correctness_outputs:
+            print(item)
     print(
         format_structural_coverage(brief.overview.structural_coverage),
         file=sys.stderr,
