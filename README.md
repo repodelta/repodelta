@@ -49,14 +49,24 @@ claim from the structure that actually changed. See the
 
 ## Quick start
 
-Live structure-aware reviews require Python 3.11+, Git, and either the external
-[Codegraph](https://github.com/colbymchenry/codegraph) CLI or Node.js with
-`npx`. Install the CLI once in its own isolated environment with
+Live structure-aware reviews require Python 3.11+, Git, and the external
+[CodeGraph](https://github.com/colbymchenry/codegraph) CLI. Install RepoDelta
+once in its own isolated environment with
 [`pipx`](https://pipx.pypa.io/):
 
 ```bash
 pipx install repodelta
 ```
+
+Then either install the supported CodeGraph CLI globally:
+
+```bash
+npm install -g @colbymchenry/codegraph
+```
+
+or make Node.js with `npx` available; RepoDelta will run its tested scoped npm
+package automatically. Do **not** install the unrelated `codegraph` package
+from PyPI.
 
 This installs RepoDelta from PyPI without modifying any target project's
 virtual environment. Contributors can use the editable source installation in

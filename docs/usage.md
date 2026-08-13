@@ -88,9 +88,11 @@ source, worktrees, and indexes after success or failure.
 
 Authentication is supplied only to the fetch subprocess and is not written to
 the remote URL, command arguments, Git configuration, review metadata, or HTML.
-RepoDelta first uses a `codegraph` executable on `PATH`; otherwise it runs
-`npx --yes @colbymchenry/codegraph`. Codegraph is an external MIT-licensed
-runtime and is not bundled in the RepoDelta Python distribution.
+RepoDelta uses an installed `codegraph` executable only after verifying the
+official indexing capability; otherwise it runs its tested
+`@colbymchenry/codegraph` version through `npx`. This is the scoped npm package,
+not the unrelated `codegraph` distribution on PyPI. CodeGraph is an external
+MIT-licensed runtime and is not bundled in the RepoDelta Python distribution.
 
 Use the explicit Codegraph-free path when structural analysis is not wanted:
 
