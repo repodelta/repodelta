@@ -369,6 +369,101 @@ def test_structural_file_overview_pluralizes_classes() -> None:
     assert _structural_kind_count_label("function", 2) == "functions"
 
 
+def test_file_overview_keeps_retained_context_outside_changed_map() -> None:
+    def file_fact(fact_id: str, path: str, classification: str) -> EvidenceItem:
+        return EvidenceItem(
+            id=fact_id,
+            summary=path,
+            kind="symbol",
+            classification=classification,
+            metadata={"qualified_name": path, "symbol_kind": "file", "path": path},
+        )
+
+    evidence = {
+        "F:runtime": file_fact("F:runtime", "src/runtime.py", "code"),
+        "F:test": file_fact("F:test", "tests/test_runtime.py", "test"),
+        "F:context": file_fact("F:context", "src/context.py", "code"),
+    }
+    nodes = tuple(
+        StructuralGraphNode(
+            id=f"N:{name}",
+            review_symbol_id=name,
+            delta=delta,
+            evidence_ids=(f"F:{name}",),
+            display_evidence_id=f"F:{name}",
+        )
+        for name, delta in (
+            ("runtime", "modified"),
+            ("test", "modified"),
+            ("context", "retained"),
+        )
+    )
+
+    def edge(edge_id: str, source: str, target: str) -> StructuralGraphEdge:
+        return StructuralGraphEdge(
+            id=edge_id,
+            source_node_id=f"N:{source}",
+            target_node_id=f"N:{target}",
+            relation="calls",
+            operation="retained",
+            relation_change_evidence_id=f"R:{edge_id}",
+        )
+
+    changed_edge = edge("E:test-runtime", "test", "runtime")
+    context_edge = edge("E:runtime-context", "runtime", "context")
+    groups = tuple(
+        StructuralRelationGroup(
+            id=f"G:{item.id}",
+            source_node_id=item.source_node_id,
+            target_node_id=item.target_node_id,
+            relation=item.relation,
+            operation=item.operation,
+            member_edge_ids=(item.id,),
+        )
+        for item in (changed_edge, context_edge)
+    )
+    graph = ReviewStructuralGraph(
+        nodes=nodes,
+        edges=(changed_edge, context_edge),
+        relation_groups=groups,
+        backbone_node_ids=tuple(item.id for item in nodes),
+        backbone_edge_ids=(changed_edge.id, context_edge.id),
+        backbone_relation_group_ids=tuple(item.id for item in groups),
+    )
+    components = {
+        "N:runtime": ArchitecturalComponent(
+            id="AC:runtime",
+            domain="src",
+            layer="application",
+            node_ids=("N:runtime",),
+            classification_authority="path_convention",
+        ),
+        "N:test": ArchitecturalComponent(
+            id="AC:test",
+            domain="tests",
+            layer="verification",
+            node_ids=("N:test",),
+            classification_authority="path_convention",
+        ),
+    }
+
+    html = _file_structural_overview(
+        graph=graph,
+        backbone_nodes={item.id: item for item in nodes},
+        backbone_relation_groups=groups,
+        placements=(),
+        evidence=evidence,
+        architectural_components=components,
+    )
+
+    assert html.count('class="file-graph-node') == 2
+    assert 'class="file-graph-node verification-row"' in html
+    assert "Verification changes · 1 file" in html
+    assert html.count('class="file-delta-edge operation-retained"') == 1
+    assert "Existing context · 1 file" in html
+    assert 'data-context-file="N:context"' in html
+
+
 def test_evidence_paths_separate_runtime_and_verification_exact_traces() -> None:
     def fact(
         fact_id: str,
