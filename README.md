@@ -34,6 +34,7 @@ boundary and keeps retained structural context explicit.
 
 ![File-level structural delta overview with R/G/T controls](https://raw.githubusercontent.com/repodelta/repodelta/main/docs/assets/repodelta-verification-focus.png)
 
+The image alternates between the default **Overview** and selecting **R1**.
 Selecting a subject opens its authored statement, source, assessment, and
 evidence in the same investigation surface. RepoDelta then separates runtime
 change, verification, and unresolved context before revealing source-linked
