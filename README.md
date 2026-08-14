@@ -47,6 +47,12 @@ stays visible without an invented graph mapping, so a reviewer can distinguish
 a coding agent's claim from the structure that actually changed. See the
 [authoring guide](docs/pull-request-guidelines.md).
 
+Adoption is incremental, not all-or-nothing. RepoDelta recognizes normalized
+common section aliases such as **Requirements**, **Acceptance criteria**,
+**Definition of done**, and **Success criteria**, and uses whichever supported
+sections are present. Missing O/G/T/CC sections do not block a report; they stay
+absent instead of being guessed from unrelated prose.
+
 ## Quick start
 
 Live structure-aware reviews require Python 3.11+, Git, and the external
