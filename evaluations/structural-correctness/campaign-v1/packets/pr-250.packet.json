@@ -1,0 +1,1054 @@
+{
+  "base_sha": "cc570dfe8bd301ebe6dadf73877c73b3975b9b92",
+  "candidates": [
+    {
+      "file_node_id": "SN:cceb9d04772d47435ed3",
+      "member_node_ids": [
+        "SN:3a88d5c9bb545acc56a7",
+        "SN:1d5db7af891a71251a68",
+        "SN:c08e6c43c888af3e9dd4",
+        "SN:1ab2f801caf98d429fb1"
+      ],
+      "operation": "added",
+      "path": "tools/repodelta_bot/cli.py"
+    },
+    {
+      "file_node_id": "SN:22b4b08216bbe93b7f22",
+      "member_node_ids": [],
+      "operation": "added",
+      "path": "tools/repodelta_bot/__init__.py"
+    },
+    {
+      "file_node_id": "SN:1937c9efe9c494398507",
+      "member_node_ids": [
+        "SN:1b3cce23d78a364e40a9",
+        "SN:0e98aac77f9fb874b431",
+        "SN:6737261d34fd7dc1fa9e",
+        "SN:1f5b4a2ee55c6ef72f32",
+        "SN:032ab6b952e529651125",
+        "SN:ba347423dc92c9ac0dc6",
+        "SN:3a51de0d542afc9f9f77",
+        "SN:30f3a2992e5bc67c4c14",
+        "SN:6212f4bd30bf768b8022",
+        "SN:dbb832751a75c0141e72",
+        "SN:d4aac995c733cf495218",
+        "SN:f5068ce1c8dd8bc73a0f",
+        "SN:7446ec41985d80f072b8",
+        "SN:8acb6942a315534f2a82",
+        "SN:a00e9b6fa7b6de79835e",
+        "SN:41b644f4fe321ec33b0c",
+        "SN:59f7970c4526fac6578a",
+        "SN:d1889fbf0a3a9bb17be7",
+        "SN:9111aac7a1cff04885b6",
+        "SN:743795719a2451c99c98",
+        "SN:8fc9551b6fc3152ad7f9"
+      ],
+      "operation": "added",
+      "path": "tests/test_repodelta_bot.py"
+    },
+    {
+      "file_node_id": "SN:ca20b7abbf32ab7ff4ae",
+      "member_node_ids": [
+        "SN:83b6aefc6ab5a2131686",
+        "SN:e72a9199f083e8d184b2",
+        "SN:98c5976f8bf9d630a3bf",
+        "SN:685d462624914d88ccee",
+        "SN:5b6398205e515fdd43b6",
+        "SN:b31cbc9a6dd7c751d622",
+        "SN:79d7a16da500c369d896",
+        "SN:29ece57c3079e46dcbbd",
+        "SN:525c7ab799416c858f39",
+        "SN:6775041f0d09829f2c84",
+        "SN:fabb6889ffa2f399b75a",
+        "SN:f84131015a58b3fa3570",
+        "SN:fc5a6e76da5400a44a62",
+        "SN:248eb25e15cd3d183f62",
+        "SN:79105a3ff714c5098f6f",
+        "SN:37c58eb0a55828b9b79a",
+        "SN:08766b1613bf70473140",
+        "SN:8322b1941e9d3ac15bf1",
+        "SN:5dfd8aa1b6c788319e19",
+        "SN:cd869b5615af2ca4c0f6"
+      ],
+      "operation": "added",
+      "path": "tools/repodelta_bot/submit.py"
+    },
+    {
+      "file_node_id": "SN:36478e3148f831a895d7",
+      "member_node_ids": [
+        "SN:6ce4c84ddcc7b8240e18",
+        "SN:a529a9310105d8730eda"
+      ],
+      "operation": "unresolved",
+      "path": "src/repodelta/intake/github.py"
+    }
+  ],
+  "changed_surfaces": [
+    {
+      "additions": 14,
+      "base_path": "CONTRIBUTING.md",
+      "deletions": 0,
+      "head_path": "CONTRIBUTING.md",
+      "hunk_headers": [
+        "@@ -29,3 +29,17 @@ Opening an Issue or pull request does not grant write or merge access."
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 217,
+      "base_path": null,
+      "deletions": 0,
+      "head_path": "tests/test_repodelta_bot.py",
+      "hunk_headers": [
+        "@@ -0,0 +1,217 @@"
+      ],
+      "status": "added"
+    },
+    {
+      "additions": 6,
+      "base_path": null,
+      "deletions": 0,
+      "head_path": "tools/repodelta-bot",
+      "hunk_headers": [
+        "@@ -0,0 +1,6 @@"
+      ],
+      "status": "added"
+    },
+    {
+      "additions": 1,
+      "base_path": null,
+      "deletions": 0,
+      "head_path": "tools/repodelta_bot/__init__.py",
+      "hunk_headers": [
+        "@@ -0,0 +1 @@"
+      ],
+      "status": "added"
+    },
+    {
+      "additions": 109,
+      "base_path": null,
+      "deletions": 0,
+      "head_path": "tools/repodelta_bot/cli.py",
+      "hunk_headers": [
+        "@@ -0,0 +1,109 @@"
+      ],
+      "status": "added"
+    },
+    {
+      "additions": 289,
+      "base_path": null,
+      "deletions": 0,
+      "head_path": "tools/repodelta_bot/submit.py",
+      "hunk_headers": [
+        "@@ -0,0 +1,289 @@"
+      ],
+      "status": "added"
+    }
+  ],
+  "coverage_state": "available",
+  "head_sha": "4a0464119062e6d3c789e5ee84198c8566645930",
+  "pull_request": 250,
+  "relation_ids": [
+    "SRG:8295d69af2402ba4e7dc",
+    "SRG:83d950c2fa1a5b6c8e73",
+    "SRG:c3a4e6265b53fc30f16f",
+    "SRG:5f14b1bb57324de1837f",
+    "SRG:f05aaa3b617d71d0bc5c",
+    "SRG:f4f12edb5430e4d880f3",
+    "SRG:9b9a57b9493332ea0dd5",
+    "SRG:08ba9be47d3be238e818",
+    "SRG:b27c4fdd0249537243ef",
+    "SRG:b8af285e0707b15c4517",
+    "SRG:2a1e469d1412ac7c6d5a",
+    "SRG:0c802e26bf5ac6d701cd",
+    "SRG:ce3755c50c126788dc20",
+    "SRG:0aa3b0baaf9f4aca6070",
+    "SRG:237643a3cf18f33eab79",
+    "SRG:eecef63fcdaac64691ce",
+    "SRG:64e4c80e005eca0ed79c",
+    "SRG:7a41030e551cbafde5f6",
+    "SRG:a3c53976e53b084e3b6c",
+    "SRG:7b27009d5933f1eeab1b",
+    "SRG:4776e1a131ea0ff209d6",
+    "SRG:bec7c1ae9b93fc1b807e",
+    "SRG:42071f92c076f57f23d9",
+    "SRG:0b8b971f495a249f2aa0",
+    "SRG:50748b26cf87d02eb8f3",
+    "SRG:ec86eba01de16c112cdf",
+    "SRG:3a85cba4c8680b276b0b",
+    "SRG:ee790b9f15d8fa1cbc06",
+    "SRG:3366debacc03249c45ad",
+    "SRG:615f7cb387adfaefad98",
+    "SRG:921c983c2a56cf535a56",
+    "SRG:a826539f761d45b4a3a1",
+    "SRG:6e4e8bd8ada899bde1fc",
+    "SRG:0c15fe73b816154c49d9",
+    "SRG:e7fa4294cca209080729",
+    "SRG:e46ab056de135de442ec",
+    "SRG:cf73a00a936d5cc4007f",
+    "SRG:063dc8ea76661ad8d449",
+    "SRG:e42239fd091557ec0ef9",
+    "SRG:4d91b20e9ee20aec7f94",
+    "SRG:35b74dbb9f07237f9845",
+    "SRG:b9ca337567f0fb85c2a4",
+    "SRG:ede19438f3e11c1a4bf6",
+    "SRG:4f7eec830451116b3886",
+    "SRG:dd34dbd952487f214b8c",
+    "SRG:e2b41b99673f6789be7a",
+    "SRG:86df7b1f5633b4a54ddd",
+    "SRG:54e36a5dd3082471d1b8",
+    "SRG:0ed0c0921b227e561c49",
+    "SRG:0eeb87e562f177a2b3ba",
+    "SRG:a00c8036a9b89e9c5f39",
+    "SRG:5aaebe9e43e77525e3d4",
+    "SRG:0bc62ecfd8c10bb81284",
+    "SOR:b4a54ee1370b58e560b1",
+    "SOR:422b6c9cb3e0689f886d",
+    "SOR:e03600ea3215f5dbfb89"
+  ],
+  "relations": [
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:8295d69af2402ba4e7dc",
+      "source_node_id": "SN:032ab6b952e529651125",
+      "target_node_id": "SN:1f5b4a2ee55c6ef72f32"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:83d950c2fa1a5b6c8e73",
+      "source_node_id": "SN:032ab6b952e529651125",
+      "target_node_id": "SN:dbb832751a75c0141e72"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:c3a4e6265b53fc30f16f",
+      "source_node_id": "SN:1937c9efe9c494398507",
+      "target_node_id": "SN:ca20b7abbf32ab7ff4ae"
+    },
+    {
+      "operation": "added",
+      "relation": "imports",
+      "relation_id": "SRG:5f14b1bb57324de1837f",
+      "source_node_id": "SN:1937c9efe9c494398507",
+      "target_node_id": "SN:ca20b7abbf32ab7ff4ae"
+    },
+    {
+      "operation": "added",
+      "relation": "instantiates",
+      "relation_id": "SRG:f05aaa3b617d71d0bc5c",
+      "source_node_id": "SN:1937c9efe9c494398507",
+      "target_node_id": "SN:ca20b7abbf32ab7ff4ae"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:f4f12edb5430e4d880f3",
+      "source_node_id": "SN:525c7ab799416c858f39",
+      "target_node_id": "SN:08766b1613bf70473140"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:9b9a57b9493332ea0dd5",
+      "source_node_id": "SN:525c7ab799416c858f39",
+      "target_node_id": "SN:6775041f0d09829f2c84"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:08ba9be47d3be238e818",
+      "source_node_id": "SN:525c7ab799416c858f39",
+      "target_node_id": "SN:cd869b5615af2ca4c0f6"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:b27c4fdd0249537243ef",
+      "source_node_id": "SN:5b6398205e515fdd43b6",
+      "target_node_id": "SN:248eb25e15cd3d183f62"
+    },
+    {
+      "operation": "added",
+      "relation": "instantiates",
+      "relation_id": "SRG:b8af285e0707b15c4517",
+      "source_node_id": "SN:5b6398205e515fdd43b6",
+      "target_node_id": "SN:37c58eb0a55828b9b79a"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:2a1e469d1412ac7c6d5a",
+      "source_node_id": "SN:5b6398205e515fdd43b6",
+      "target_node_id": "SN:6775041f0d09829f2c84"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:0c802e26bf5ac6d701cd",
+      "source_node_id": "SN:5b6398205e515fdd43b6",
+      "target_node_id": "SN:83b6aefc6ab5a2131686"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:ce3755c50c126788dc20",
+      "source_node_id": "SN:5b6398205e515fdd43b6",
+      "target_node_id": "SN:98c5976f8bf9d630a3bf"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:0aa3b0baaf9f4aca6070",
+      "source_node_id": "SN:5dfd8aa1b6c788319e19",
+      "target_node_id": "SN:248eb25e15cd3d183f62"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:237643a3cf18f33eab79",
+      "source_node_id": "SN:5dfd8aa1b6c788319e19",
+      "target_node_id": "SN:83b6aefc6ab5a2131686"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:eecef63fcdaac64691ce",
+      "source_node_id": "SN:5dfd8aa1b6c788319e19",
+      "target_node_id": "SN:98c5976f8bf9d630a3bf"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:64e4c80e005eca0ed79c",
+      "source_node_id": "SN:5dfd8aa1b6c788319e19",
+      "target_node_id": "SN:f84131015a58b3fa3570"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:7a41030e551cbafde5f6",
+      "source_node_id": "SN:6212f4bd30bf768b8022",
+      "target_node_id": "SN:d4aac995c733cf495218"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:a3c53976e53b084e3b6c",
+      "source_node_id": "SN:6775041f0d09829f2c84",
+      "target_node_id": "SN:8322b1941e9d3ac15bf1"
+    },
+    {
+      "operation": "added",
+      "relation": "instantiates",
+      "relation_id": "SRG:7b27009d5933f1eeab1b",
+      "source_node_id": "SN:6775041f0d09829f2c84",
+      "target_node_id": "SN:fabb6889ffa2f399b75a"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:4776e1a131ea0ff209d6",
+      "source_node_id": "SN:685d462624914d88ccee",
+      "target_node_id": "SN:79d7a16da500c369d896"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:bec7c1ae9b93fc1b807e",
+      "source_node_id": "SN:685d462624914d88ccee",
+      "target_node_id": "SN:cd869b5615af2ca4c0f6"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:42071f92c076f57f23d9",
+      "source_node_id": "SN:685d462624914d88ccee",
+      "target_node_id": "SN:f84131015a58b3fa3570"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:0b8b971f495a249f2aa0",
+      "source_node_id": "SN:685d462624914d88ccee",
+      "target_node_id": "SN:fc5a6e76da5400a44a62"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:50748b26cf87d02eb8f3",
+      "source_node_id": "SN:79105a3ff714c5098f6f",
+      "target_node_id": "SN:248eb25e15cd3d183f62"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:ec86eba01de16c112cdf",
+      "source_node_id": "SN:79105a3ff714c5098f6f",
+      "target_node_id": "SN:525c7ab799416c858f39"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:3a85cba4c8680b276b0b",
+      "source_node_id": "SN:79105a3ff714c5098f6f",
+      "target_node_id": "SN:5b6398205e515fdd43b6"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:ee790b9f15d8fa1cbc06",
+      "source_node_id": "SN:79105a3ff714c5098f6f",
+      "target_node_id": "SN:5dfd8aa1b6c788319e19"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:3366debacc03249c45ad",
+      "source_node_id": "SN:79105a3ff714c5098f6f",
+      "target_node_id": "SN:685d462624914d88ccee"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:615f7cb387adfaefad98",
+      "source_node_id": "SN:79105a3ff714c5098f6f",
+      "target_node_id": "SN:cd869b5615af2ca4c0f6"
+    },
+    {
+      "operation": "added",
+      "relation": "instantiates",
+      "relation_id": "SRG:921c983c2a56cf535a56",
+      "source_node_id": "SN:8acb6942a315534f2a82",
+      "target_node_id": "SN:6737261d34fd7dc1fa9e"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:a826539f761d45b4a3a1",
+      "source_node_id": "SN:8acb6942a315534f2a82",
+      "target_node_id": "SN:ba347423dc92c9ac0dc6"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:6e4e8bd8ada899bde1fc",
+      "source_node_id": "SN:8acb6942a315534f2a82",
+      "target_node_id": "SN:d4aac995c733cf495218"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:0c15fe73b816154c49d9",
+      "source_node_id": "SN:9111aac7a1cff04885b6",
+      "target_node_id": "SN:1f5b4a2ee55c6ef72f32"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:e7fa4294cca209080729",
+      "source_node_id": "SN:98c5976f8bf9d630a3bf",
+      "target_node_id": "SN:248eb25e15cd3d183f62"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:e46ab056de135de442ec",
+      "source_node_id": "SN:a00e9b6fa7b6de79835e",
+      "target_node_id": "SN:032ab6b952e529651125"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:cf73a00a936d5cc4007f",
+      "source_node_id": "SN:a00e9b6fa7b6de79835e",
+      "target_node_id": "SN:ba347423dc92c9ac0dc6"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:063dc8ea76661ad8d449",
+      "source_node_id": "SN:ba347423dc92c9ac0dc6",
+      "target_node_id": "SN:1f5b4a2ee55c6ef72f32"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:e42239fd091557ec0ef9",
+      "source_node_id": "SN:c08e6c43c888af3e9dd4",
+      "target_node_id": "SN:1ab2f801caf98d429fb1"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:4d91b20e9ee20aec7f94",
+      "source_node_id": "SN:c08e6c43c888af3e9dd4",
+      "target_node_id": "SN:1d5db7af891a71251a68"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:35b74dbb9f07237f9845",
+      "source_node_id": "SN:c08e6c43c888af3e9dd4",
+      "target_node_id": "SN:3a88d5c9bb545acc56a7"
+    },
+    {
+      "operation": "added",
+      "relation": "imports",
+      "relation_id": "SRG:b9ca337567f0fb85c2a4",
+      "source_node_id": "SN:ca20b7abbf32ab7ff4ae",
+      "target_node_id": "SN:29ece57c3079e46dcbbd"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:ede19438f3e11c1a4bf6",
+      "source_node_id": "SN:ca20b7abbf32ab7ff4ae",
+      "target_node_id": "SN:36478e3148f831a895d7"
+    },
+    {
+      "operation": "added",
+      "relation": "imports",
+      "relation_id": "SRG:4f7eec830451116b3886",
+      "source_node_id": "SN:ca20b7abbf32ab7ff4ae",
+      "target_node_id": "SN:e72a9199f083e8d184b2"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:dd34dbd952487f214b8c",
+      "source_node_id": "SN:cceb9d04772d47435ed3",
+      "target_node_id": "SN:c08e6c43c888af3e9dd4"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:e2b41b99673f6789be7a",
+      "source_node_id": "SN:cceb9d04772d47435ed3",
+      "target_node_id": "SN:ca20b7abbf32ab7ff4ae"
+    },
+    {
+      "operation": "added",
+      "relation": "imports",
+      "relation_id": "SRG:86df7b1f5633b4a54ddd",
+      "source_node_id": "SN:cceb9d04772d47435ed3",
+      "target_node_id": "SN:ca20b7abbf32ab7ff4ae"
+    },
+    {
+      "operation": "added",
+      "relation": "instantiates",
+      "relation_id": "SRG:54e36a5dd3082471d1b8",
+      "source_node_id": "SN:cceb9d04772d47435ed3",
+      "target_node_id": "SN:ca20b7abbf32ab7ff4ae"
+    },
+    {
+      "operation": "added",
+      "relation": "instantiates",
+      "relation_id": "SRG:0ed0c0921b227e561c49",
+      "source_node_id": "SN:d4aac995c733cf495218",
+      "target_node_id": "SN:6737261d34fd7dc1fa9e"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:0eeb87e562f177a2b3ba",
+      "source_node_id": "SN:d4aac995c733cf495218",
+      "target_node_id": "SN:8fc9551b6fc3152ad7f9"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:a00c8036a9b89e9c5f39",
+      "source_node_id": "SN:f5068ce1c8dd8bc73a0f",
+      "target_node_id": "SN:ba347423dc92c9ac0dc6"
+    },
+    {
+      "operation": "added",
+      "relation": "instantiates",
+      "relation_id": "SRG:5aaebe9e43e77525e3d4",
+      "source_node_id": "SN:f84131015a58b3fa3570",
+      "target_node_id": "SN:fabb6889ffa2f399b75a"
+    },
+    {
+      "operation": "added",
+      "relation": "instantiates",
+      "relation_id": "SRG:0bc62ecfd8c10bb81284",
+      "source_node_id": "SN:fc5a6e76da5400a44a62",
+      "target_node_id": "SN:fabb6889ffa2f399b75a"
+    }
+  ],
+  "repository": "repodelta/repodelta",
+  "schema_version": "structural_correctness_packet.v2",
+  "subjects": [
+    {
+      "authored_statement": "A maintainer can invoke one documented command from a local checkout to push the current change and create a GitHub pull request under the App identity.",
+      "subject_id": "R1",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "The command obtains a short-lived installation token from a locally held App private key and removes local token material when it exits.",
+      "subject_id": "R2",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "The command can request one or more human reviewers while leaving approval to GitHub's protected-branch rules.",
+      "subject_id": "R3",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "App, installation, repository, branch, base, title, body, and reviewer inputs are explicit or supplied by documented non-secret defaults.",
+      "subject_id": "R4",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "Failures identify the failed stage without printing private keys, JWTs, installation tokens, or credential-bearing URLs.",
+      "subject_id": "R5",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "Private keys and installation tokens never enter the repository, Git remotes, persistent Git configuration, process arguments, generated reports, or PR content.",
+      "subject_id": "G1",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "The tool does not approve or merge pull requests and does not bypass the main ruleset.",
+      "subject_id": "G2",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "The tool does not require organization, administration, secrets, workflow, or checks permissions.",
+      "subject_id": "G3",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "A private key readable by group or other users is rejected.",
+      "subject_id": "G4",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "Managing App managers or distributing private keys.",
+      "subject_id": "G5",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "Automatic approval, merge, release, or workflow modification.",
+      "subject_id": "G6",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "Governing how changes are implemented locally.",
+      "subject_id": "G7",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "RepoDelta's GitHub App could submit a change only through one-off local helper scripts. Those scripts were not a reviewed repository contract, other App managers could not reuse them, and credential cleanup depended on the operator.",
+      "subject_id": "T1",
+      "subject_kind": "transformation_claim"
+    },
+    {
+      "authored_statement": "./tools/repodelta-bot submit is the canonical local App-submission path. It validates an owner-only private key, signs a short-lived App JWT, requests an installation token, supplies that token to Git through an owner-only temporary askpass file, pushes HEAD, creates the PR, and requests human reviewers. Temporary token material is removed on success and failure.",
+      "subject_id": "T2",
+      "subject_kind": "transformation_claim"
+    },
+    {
+      "authored_statement": "The command does not approve or merge. GitHub's protected branch and human maintainer review remain the acceptance authority.",
+      "subject_id": "T3",
+      "subject_kind": "transformation_claim"
+    },
+    {
+      "authored_statement": "Credential containment and cleanup are verified on success and failure.",
+      "subject_id": "CC1",
+      "subject_kind": "completion_condition"
+    },
+    {
+      "authored_statement": "API failures remain bounded and do not echo JWT or token material.",
+      "subject_id": "CC2",
+      "subject_kind": "completion_condition"
+    },
+    {
+      "authored_statement": "A real invocation creates this PR under the GitHub App identity, requests lucybai-dev, passes CI, and remains blocked for human approval.",
+      "subject_id": "CC3",
+      "subject_kind": "completion_condition"
+    }
+  ],
+  "symbols": [
+    {
+      "file_node_id": "SN:1937c9efe9c494398507",
+      "node_id": "SN:1b3cce23d78a364e40a9",
+      "operation": "added",
+      "path": "tests/test_repodelta_bot.py",
+      "qualified_name": "JsonResponse::__init__",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:ca20b7abbf32ab7ff4ae",
+      "node_id": "SN:83b6aefc6ab5a2131686",
+      "operation": "added",
+      "path": "tools/repodelta_bot/submit.py",
+      "qualified_name": "GITHUB_API_URL",
+      "symbol_kind": "variable"
+    },
+    {
+      "file_node_id": "SN:ca20b7abbf32ab7ff4ae",
+      "node_id": "SN:e72a9199f083e8d184b2",
+      "operation": "unresolved",
+      "path": "tools/repodelta_bot/submit.py",
+      "qualified_name": "urllib.request",
+      "symbol_kind": "import"
+    },
+    {
+      "file_node_id": "SN:1937c9efe9c494398507",
+      "node_id": "SN:0e98aac77f9fb874b431",
+      "operation": "added",
+      "path": "tests/test_repodelta_bot.py",
+      "qualified_name": "JsonResponse::read",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:1937c9efe9c494398507",
+      "node_id": "SN:6737261d34fd7dc1fa9e",
+      "operation": "added",
+      "path": "tests/test_repodelta_bot.py",
+      "qualified_name": "JsonResponse",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:1937c9efe9c494398507",
+      "node_id": "SN:1f5b4a2ee55c6ef72f32",
+      "operation": "added",
+      "path": "tests/test_repodelta_bot.py",
+      "qualified_name": "_key",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ca20b7abbf32ab7ff4ae",
+      "node_id": "SN:98c5976f8bf9d630a3bf",
+      "operation": "added",
+      "path": "tools/repodelta_bot/submit.py",
+      "qualified_name": "_request_json",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1937c9efe9c494398507",
+      "node_id": "SN:032ab6b952e529651125",
+      "operation": "added",
+      "path": "tests/test_repodelta_bot.py",
+      "qualified_name": "test_app_jwt_is_short_lived_and_signed_without_shell",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1937c9efe9c494398507",
+      "node_id": "SN:ba347423dc92c9ac0dc6",
+      "operation": "added",
+      "path": "tests/test_repodelta_bot.py",
+      "qualified_name": "_config",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1937c9efe9c494398507",
+      "node_id": "SN:3a51de0d542afc9f9f77",
+      "operation": "added",
+      "path": "tests/test_repodelta_bot.py",
+      "qualified_name": "test_temporary_git_credentials_are_removed_after_use",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:cceb9d04772d47435ed3",
+      "node_id": "SN:3a88d5c9bb545acc56a7",
+      "operation": "added",
+      "path": "tools/repodelta_bot/cli.py",
+      "qualified_name": "build_parser",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ca20b7abbf32ab7ff4ae",
+      "node_id": "SN:685d462624914d88ccee",
+      "operation": "added",
+      "path": "tools/repodelta_bot/submit.py",
+      "qualified_name": "create_app_jwt",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ca20b7abbf32ab7ff4ae",
+      "node_id": "SN:5b6398205e515fdd43b6",
+      "operation": "added",
+      "path": "tools/repodelta_bot/submit.py",
+      "qualified_name": "create_pull_request",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1937c9efe9c494398507",
+      "node_id": "SN:30f3a2992e5bc67c4c14",
+      "operation": "added",
+      "path": "tests/test_repodelta_bot.py",
+      "qualified_name": "test_api_failure_is_bounded_without_credential_text::fake_open",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1937c9efe9c494398507",
+      "node_id": "SN:6212f4bd30bf768b8022",
+      "operation": "added",
+      "path": "tests/test_repodelta_bot.py",
+      "qualified_name": "test_api_failure_is_bounded_without_credential_text",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1937c9efe9c494398507",
+      "node_id": "SN:dbb832751a75c0141e72",
+      "operation": "added",
+      "path": "tests/test_repodelta_bot.py",
+      "qualified_name": "test_app_jwt_is_short_lived_and_signed_without_shell::fake_run",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ca20b7abbf32ab7ff4ae",
+      "node_id": "SN:b31cbc9a6dd7c751d622",
+      "operation": "added",
+      "path": "tools/repodelta_bot/submit.py",
+      "qualified_name": "SubmissionConfig",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:1937c9efe9c494398507",
+      "node_id": "SN:d4aac995c733cf495218",
+      "operation": "added",
+      "path": "tests/test_repodelta_bot.py",
+      "qualified_name": "test_installation_token_is_not_accepted_when_missing",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:cceb9d04772d47435ed3",
+      "node_id": "SN:1d5db7af891a71251a68",
+      "operation": "added",
+      "path": "tools/repodelta_bot/cli.py",
+      "qualified_name": "_current_branch",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ca20b7abbf32ab7ff4ae",
+      "node_id": "SN:79d7a16da500c369d896",
+      "operation": "added",
+      "path": "tools/repodelta_bot/submit.py",
+      "qualified_name": "_encode",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1937c9efe9c494398507",
+      "node_id": "SN:f5068ce1c8dd8bc73a0f",
+      "operation": "added",
+      "path": "tests/test_repodelta_bot.py",
+      "qualified_name": "test_repository_must_use_owner_name_form",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ca20b7abbf32ab7ff4ae",
+      "node_id": "SN:29ece57c3079e46dcbbd",
+      "operation": "unresolved",
+      "path": "tools/repodelta_bot/submit.py",
+      "qualified_name": "urllib.error",
+      "symbol_kind": "import"
+    },
+    {
+      "file_node_id": "SN:1937c9efe9c494398507",
+      "node_id": "SN:7446ec41985d80f072b8",
+      "operation": "added",
+      "path": "tests/test_repodelta_bot.py",
+      "qualified_name": "test_pull_request_creation_requests_human_reviewers::fake_open",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ca20b7abbf32ab7ff4ae",
+      "node_id": "SN:525c7ab799416c858f39",
+      "operation": "added",
+      "path": "tools/repodelta_bot/submit.py",
+      "qualified_name": "push_head",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ca20b7abbf32ab7ff4ae",
+      "node_id": "SN:6775041f0d09829f2c84",
+      "operation": "added",
+      "path": "tools/repodelta_bot/submit.py",
+      "qualified_name": "_validate_repo",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ca20b7abbf32ab7ff4ae",
+      "node_id": "SN:fabb6889ffa2f399b75a",
+      "operation": "added",
+      "path": "tools/repodelta_bot/submit.py",
+      "qualified_name": "SubmissionError",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:ca20b7abbf32ab7ff4ae",
+      "node_id": "SN:f84131015a58b3fa3570",
+      "operation": "added",
+      "path": "tools/repodelta_bot/submit.py",
+      "qualified_name": "_validate_numeric_id",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ca20b7abbf32ab7ff4ae",
+      "node_id": "SN:fc5a6e76da5400a44a62",
+      "operation": "added",
+      "path": "tools/repodelta_bot/submit.py",
+      "qualified_name": "validate_private_key",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1937c9efe9c494398507",
+      "node_id": "SN:8acb6942a315534f2a82",
+      "operation": "added",
+      "path": "tests/test_repodelta_bot.py",
+      "qualified_name": "test_pull_request_creation_requests_human_reviewers",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1937c9efe9c494398507",
+      "node_id": "SN:a00e9b6fa7b6de79835e",
+      "operation": "added",
+      "path": "tests/test_repodelta_bot.py",
+      "qualified_name": "test_git_push_keeps_token_out_of_arguments_and_environment",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1937c9efe9c494398507",
+      "node_id": "SN:41b644f4fe321ec33b0c",
+      "operation": "added",
+      "path": "tests/test_repodelta_bot.py",
+      "qualified_name": "test_git_push_keeps_token_out_of_arguments_and_environment::fake_run",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1937c9efe9c494398507",
+      "node_id": "SN:59f7970c4526fac6578a",
+      "operation": "added",
+      "path": "tests/test_repodelta_bot.py",
+      "qualified_name": "JsonResponse::__enter__",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:ca20b7abbf32ab7ff4ae",
+      "node_id": "SN:248eb25e15cd3d183f62",
+      "operation": "added",
+      "path": "tools/repodelta_bot/submit.py",
+      "qualified_name": "Open",
+      "symbol_kind": "variable"
+    },
+    {
+      "file_node_id": "SN:1937c9efe9c494398507",
+      "node_id": "SN:d1889fbf0a3a9bb17be7",
+      "operation": "added",
+      "path": "tests/test_repodelta_bot.py",
+      "qualified_name": "test_temporary_git_credentials_are_removed_after_failure",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1937c9efe9c494398507",
+      "node_id": "SN:9111aac7a1cff04885b6",
+      "operation": "added",
+      "path": "tests/test_repodelta_bot.py",
+      "qualified_name": "test_private_key_requires_owner_only_permissions",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:36478e3148f831a895d7",
+      "node_id": "SN:6ce4c84ddcc7b8240e18",
+      "operation": "unresolved",
+      "path": "src/repodelta/intake/github.py",
+      "qualified_name": "GitHubPullRequestAdapter",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:ca20b7abbf32ab7ff4ae",
+      "node_id": "SN:79105a3ff714c5098f6f",
+      "operation": "added",
+      "path": "tools/repodelta_bot/submit.py",
+      "qualified_name": "submit_change",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:36478e3148f831a895d7",
+      "node_id": "SN:a529a9310105d8730eda",
+      "operation": "unresolved",
+      "path": "src/repodelta/intake/github.py",
+      "qualified_name": "GitHubPullRequestAdapter::load",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:ca20b7abbf32ab7ff4ae",
+      "node_id": "SN:37c58eb0a55828b9b79a",
+      "operation": "added",
+      "path": "tools/repodelta_bot/submit.py",
+      "qualified_name": "SubmittedPullRequest",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:cceb9d04772d47435ed3",
+      "node_id": "SN:c08e6c43c888af3e9dd4",
+      "operation": "added",
+      "path": "tools/repodelta_bot/cli.py",
+      "qualified_name": "main",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ca20b7abbf32ab7ff4ae",
+      "node_id": "SN:08766b1613bf70473140",
+      "operation": "added",
+      "path": "tools/repodelta_bot/submit.py",
+      "qualified_name": "temporary_git_credentials",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ca20b7abbf32ab7ff4ae",
+      "node_id": "SN:8322b1941e9d3ac15bf1",
+      "operation": "added",
+      "path": "tools/repodelta_bot/submit.py",
+      "qualified_name": "REPOSITORY_PATTERN",
+      "symbol_kind": "variable"
+    },
+    {
+      "file_node_id": "SN:ca20b7abbf32ab7ff4ae",
+      "node_id": "SN:5dfd8aa1b6c788319e19",
+      "operation": "added",
+      "path": "tools/repodelta_bot/submit.py",
+      "qualified_name": "request_installation_token",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1937c9efe9c494398507",
+      "node_id": "SN:743795719a2451c99c98",
+      "operation": "added",
+      "path": "tests/test_repodelta_bot.py",
+      "qualified_name": "JsonResponse::__exit__",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:ca20b7abbf32ab7ff4ae",
+      "node_id": "SN:cd869b5615af2ca4c0f6",
+      "operation": "added",
+      "path": "tools/repodelta_bot/submit.py",
+      "qualified_name": "Run",
+      "symbol_kind": "variable"
+    },
+    {
+      "file_node_id": "SN:cceb9d04772d47435ed3",
+      "node_id": "SN:1ab2f801caf98d429fb1",
+      "operation": "added",
+      "path": "tools/repodelta_bot/cli.py",
+      "qualified_name": "_configured_value",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1937c9efe9c494398507",
+      "node_id": "SN:8fc9551b6fc3152ad7f9",
+      "operation": "added",
+      "path": "tests/test_repodelta_bot.py",
+      "qualified_name": "test_installation_token_is_not_accepted_when_missing::fake_open",
+      "symbol_kind": "function"
+    }
+  ]
+}

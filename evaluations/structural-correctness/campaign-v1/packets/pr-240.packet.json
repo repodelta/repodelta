@@ -1,0 +1,3607 @@
+{
+  "base_sha": "1df2e871cfea589b7efbbe14a43c2e0ba128cea0",
+  "candidates": [
+    {
+      "file_node_id": "SN:50b54190c20c72b61899",
+      "member_node_ids": [],
+      "operation": "modified",
+      "path": "tests/test_migration_assessment.py"
+    },
+    {
+      "file_node_id": "SN:9e87d7b9b0c1a386b75f",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/routing/semantics.py"
+    },
+    {
+      "file_node_id": "SN:1b799329b3afda1942cd",
+      "member_node_ids": [],
+      "operation": "modified",
+      "path": "tests/test_structural_navigation.py"
+    },
+    {
+      "file_node_id": "SN:1dfe633360b09b369567",
+      "member_node_ids": [
+        "SN:af9530a3c482c37e3f1d"
+      ],
+      "operation": "renamed",
+      "path": "src/repodelta/presentation/html.py"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "member_node_ids": [
+        "SN:ce30a29a4c65eaa83412",
+        "SN:5857164efbf2a276c31f"
+      ],
+      "operation": "modified",
+      "path": "tests/test_projection.py"
+    },
+    {
+      "file_node_id": "SN:fe178a3ea1dc3658e9d6",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/closure/scanning.py"
+    },
+    {
+      "file_node_id": "SN:6a7db4980ab15832dbd5",
+      "member_node_ids": [
+        "SN:0c89200287f78d1c3bfd",
+        "SN:dd8897d132ae68153aa0"
+      ],
+      "operation": "modified",
+      "path": "tests/test_pipeline_architecture.py"
+    },
+    {
+      "file_node_id": "SN:0cb2fb7561d88270fa5e",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/providers/mapping.py"
+    },
+    {
+      "file_node_id": "SN:b4ccbc727bd5dfdac04c",
+      "member_node_ids": [
+        "SN:5b70c8db1d015573fc0f",
+        "SN:c5136fe5fe2196f498e0",
+        "SN:8021ad6b6262d0868a7a",
+        "SN:9aaa3d3b423e26b453c7"
+      ],
+      "operation": "renamed",
+      "path": "src/repodelta/intake/github.py"
+    },
+    {
+      "file_node_id": "SN:3864aa37b831556978cc",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/convergence/ordering.py"
+    },
+    {
+      "file_node_id": "SN:42d7fc3ccbe3e506acfe",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/changes/hunks.py"
+    },
+    {
+      "file_node_id": "SN:178c6ea1b2d1a81cec62",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/llm/admission.py"
+    },
+    {
+      "file_node_id": "SN:421b8872cff2f3947057",
+      "member_node_ids": [],
+      "operation": "modified",
+      "path": "tests/test_llm_shadow_labeling.py"
+    },
+    {
+      "file_node_id": "SN:511675d340f0a581bf05",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/llm/execution.py"
+    },
+    {
+      "file_node_id": "SN:92c6b002d457e680f9c0",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/projection/structural_navigation.py"
+    },
+    {
+      "file_node_id": "SN:45178716ef8c3f400fd5",
+      "member_node_ids": [],
+      "operation": "modified",
+      "path": "tests/test_structural_replacement_candidates.py"
+    },
+    {
+      "file_node_id": "SN:476abc02585252df8b05",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/facts/lexical.py"
+    },
+    {
+      "file_node_id": "SN:b5464eff8b301cb07f93",
+      "member_node_ids": [],
+      "operation": "modified",
+      "path": "tests/test_structural_relation_groups.py"
+    },
+    {
+      "file_node_id": "SN:a1eafc9ba09a873cca6e",
+      "member_node_ids": [],
+      "operation": "modified",
+      "path": "tests/test_github_adapter.py"
+    },
+    {
+      "file_node_id": "SN:a065ad3210587aafcb4d",
+      "member_node_ids": [
+        "SN:5df35248a15eb98ecf2f"
+      ],
+      "operation": "modified",
+      "path": "tests/test_transformation_subjects.py"
+    },
+    {
+      "file_node_id": "SN:dd606cfecc342057f4dd",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/routing/candidates.py"
+    },
+    {
+      "file_node_id": "SN:997d4dee6eba8e326246",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/llm/packet.py"
+    },
+    {
+      "file_node_id": "SN:ac110e568958ef160af3",
+      "member_node_ids": [
+        "SN:e61c2876cf55bd899616"
+      ],
+      "operation": "added",
+      "path": "src/repodelta/__init__.py"
+    },
+    {
+      "file_node_id": "SN:c714bdf5d95d64d29333",
+      "member_node_ids": [
+        "SN:2ac75cb091541d04eb3e"
+      ],
+      "operation": "modified",
+      "path": "tests/test_transformation_closure.py"
+    },
+    {
+      "file_node_id": "SN:aef5956b203526bafa40",
+      "member_node_ids": [
+        "SN:b0df3781d8dcbffe77df",
+        "SN:b22470c39650db9930c0",
+        "SN:7e87c364f43827990953"
+      ],
+      "operation": "renamed",
+      "path": "src/repodelta/cli.py"
+    },
+    {
+      "file_node_id": "SN:aac9c45ef6468251538e",
+      "member_node_ids": [],
+      "operation": "modified",
+      "path": "tests/test_structural_relation_changes.py"
+    },
+    {
+      "file_node_id": "SN:b89570f946bc99427e67",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/providers/codegraph.py"
+    },
+    {
+      "file_node_id": "SN:6aa2370b8b12d48ebb78",
+      "member_node_ids": [],
+      "operation": "modified",
+      "path": "tests/test_convergence.py"
+    },
+    {
+      "file_node_id": "SN:9ba772e81952ce3adf9b",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/assessment/migration.py"
+    },
+    {
+      "file_node_id": "SN:2ea8f3385a4078007a59",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/llm/provider.py"
+    },
+    {
+      "file_node_id": "SN:f238a5f8f8eb04a7c426",
+      "member_node_ids": [
+        "SN:cef7ccb821c858bc77ec"
+      ],
+      "operation": "modified",
+      "path": "tests/test_transformation_assessment.py"
+    },
+    {
+      "file_node_id": "SN:c679cade70653a4179c8",
+      "member_node_ids": [
+        "SN:65f2bddea43702f029e9",
+        "SN:274261f5ca6a951f3acf"
+      ],
+      "operation": "modified",
+      "path": "tests/test_cli_live_workspace.py"
+    },
+    {
+      "file_node_id": "SN:428c5b2228ae93521c5f",
+      "member_node_ids": [
+        "SN:5fa953461a066467ec92"
+      ],
+      "operation": "modified",
+      "path": "tests/test_llm_shadow_campaign_v2.py"
+    },
+    {
+      "file_node_id": "SN:b2ff9cc996a5c0747781",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/routing/association.py"
+    },
+    {
+      "file_node_id": "SN:678917a3b60ca075eb43",
+      "member_node_ids": [
+        "SN:fe732a55cf2fc4f6c90c",
+        "SN:fec998be27e1a25511dd",
+        "SN:7db32d93cf18714d88ec",
+        "SN:7fe45a8bb2693e7bb4b5",
+        "SN:a85cc59e3f0bef976149",
+        "SN:0bab1bb24d28fb3ac418",
+        "SN:89e14a246b548d1a0bc8",
+        "SN:f0a5f000d552fea0bf5c",
+        "SN:e97a6d222ff3cc601566"
+      ],
+      "operation": "added",
+      "path": "tests/test_product_identity.py"
+    },
+    {
+      "file_node_id": "SN:29dc93e5340f35073be0",
+      "member_node_ids": [],
+      "operation": "modified",
+      "path": "tests/test_llm_shadow_admission.py"
+    },
+    {
+      "file_node_id": "SN:dc6d0774af514668636e",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/presentation/status.py"
+    },
+    {
+      "file_node_id": "SN:4afd468a8dc18d0a7be3",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/llm/__init__.py"
+    },
+    {
+      "file_node_id": "SN:547608171365d95e44f3",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/routing/relations.py"
+    },
+    {
+      "file_node_id": "SN:4461847a6d2a997327a6",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/assessment/transformation.py"
+    },
+    {
+      "file_node_id": "SN:cd19a132349ceeb5eb5a",
+      "member_node_ids": [
+        "SN:6b685cdf6a23d051dd52",
+        "SN:bd9099fb6df4ed2e75f3",
+        "SN:02d056fdaa4a75fba925"
+      ],
+      "operation": "modified",
+      "path": "tests/test_cli_structural_mapping.py"
+    },
+    {
+      "file_node_id": "SN:30c7ee659ac4a27568d0",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/llm/runner.py"
+    },
+    {
+      "file_node_id": "SN:038a8459887947589eb2",
+      "member_node_ids": [],
+      "operation": "modified",
+      "path": "tests/test_llm_shadow_convergence.py"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "member_node_ids": [
+        "SN:e07680b66a5b2177f906",
+        "SN:d3dd8dd378028ccd5d51",
+        "SN:48e5be66da52dd920ef0",
+        "SN:b42a6abb614a25065834",
+        "SN:dd3c7e7152f9e53043bf",
+        "SN:b8843cc1a4484a3cc9d7"
+      ],
+      "operation": "modified",
+      "path": "tests/test_codegraph_workspace.py"
+    },
+    {
+      "file_node_id": "SN:a52b8f4ad9ce90c94de3",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/semantics/criteria.py"
+    },
+    {
+      "file_node_id": "SN:1b19b1f7c729fd4dfb76",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/llm/replay.py"
+    },
+    {
+      "file_node_id": "SN:98953925c8e3c7870cfc",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/projection/verification.py"
+    },
+    {
+      "file_node_id": "SN:b8300b58e52e9cb0da43",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/assessment/__init__.py"
+    },
+    {
+      "file_node_id": "SN:23f3671fb2b03d2dca66",
+      "member_node_ids": [
+        "SN:a052580806bff7e9425a",
+        "SN:98dc1444ddd3227a6232",
+        "SN:e5c5f37fd85a7c49185e"
+      ],
+      "operation": "modified",
+      "path": "tests/test_llm_shadow_comparison.py"
+    },
+    {
+      "file_node_id": "SN:c2b5ad42a4df9b8a3d16",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/projection/overview.py"
+    },
+    {
+      "file_node_id": "SN:6e509beb482309e18449",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/projection/build.py"
+    },
+    {
+      "file_node_id": "SN:7f2ab446106f9a7a6e74",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/convergence/structural.py"
+    },
+    {
+      "file_node_id": "SN:94e77247b649271feaf6",
+      "member_node_ids": [],
+      "operation": "modified",
+      "path": "tests/test_evidence_graph.py"
+    },
+    {
+      "file_node_id": "SN:74b07dca1ed3717b6c74",
+      "member_node_ids": [],
+      "operation": "modified",
+      "path": "tests/test_verification_projection.py"
+    },
+    {
+      "file_node_id": "SN:e1c6be29ccc5261ebc89",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/routing/transformation_subjects.py"
+    },
+    {
+      "file_node_id": "SN:ef861a5c6adac990706a",
+      "member_node_ids": [
+        "SN:7f672b59c1d10c6f4ae8",
+        "SN:51e3fadb18c4a4a50a33",
+        "SN:cf3e356f321c44c0d44e"
+      ],
+      "operation": "modified",
+      "path": "tests/test_evaluation.py"
+    },
+    {
+      "file_node_id": "SN:05ac0ec2fe08c171194b",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/convergence/transformation.py"
+    },
+    {
+      "file_node_id": "SN:a00f18cc2fd691b64ddd",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/evaluation/shadow.py"
+    },
+    {
+      "file_node_id": "SN:8101e8abbab4a6c05f2b",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/model/predicate_refs.py"
+    },
+    {
+      "file_node_id": "SN:910f80ce5603a47658e9",
+      "member_node_ids": [],
+      "operation": "modified",
+      "path": "tests/test_llm_shadow_execution.py"
+    },
+    {
+      "file_node_id": "SN:812dcea242136da183a1",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/facts/transformation.py"
+    },
+    {
+      "file_node_id": "SN:53896cd807c75ff57448",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/routing/transformation.py"
+    },
+    {
+      "file_node_id": "SN:153e8a4593165e30d01d",
+      "member_node_ids": [
+        "SN:9ac674e272c6dcfd09e6",
+        "SN:24bc917153f7a26fb404"
+      ],
+      "operation": "modified",
+      "path": "tests/test_llm_shadow_contract.py"
+    },
+    {
+      "file_node_id": "SN:a0e90584a4442c646cbc",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/projection/architecture.py"
+    },
+    {
+      "file_node_id": "SN:275968857bc2d222c8c2",
+      "member_node_ids": [],
+      "operation": "modified",
+      "path": "tests/test_llm_shadow_campaign.py"
+    },
+    {
+      "file_node_id": "SN:c13fbb8af4504882a1b5",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/pipeline.py"
+    },
+    {
+      "file_node_id": "SN:4c5a8c95644d39649748",
+      "member_node_ids": [
+        "SN:c9993135c4809468ebaf"
+      ],
+      "operation": "renamed",
+      "path": "src/repodelta/evaluation/core.py"
+    },
+    {
+      "file_node_id": "SN:01348353fb7fa22f210e",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/llm/convergence.py"
+    },
+    {
+      "file_node_id": "SN:f659f43bae6986a72a5f",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/providers/structural.py"
+    },
+    {
+      "file_node_id": "SN:5780003953b657578df6",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/intake/fixture.py"
+    },
+    {
+      "file_node_id": "SN:7bf202bb41620f4396af",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/facts/path_profile.py"
+    },
+    {
+      "file_node_id": "SN:344dbfb82cde9449a355",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/convergence/core.py"
+    },
+    {
+      "file_node_id": "SN:3f6d1f3e38f31a742903",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/facts/catalog.py"
+    },
+    {
+      "file_node_id": "SN:3bb765cebf8078255e1c",
+      "member_node_ids": [],
+      "operation": "modified",
+      "path": "tests/test_association.py"
+    },
+    {
+      "file_node_id": "SN:171358a98ddd7180df34",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/semantics/review.py"
+    },
+    {
+      "file_node_id": "SN:83858b3bdd73c8b3c143",
+      "member_node_ids": [],
+      "operation": "modified",
+      "path": "tests/test_llm_shadow_packet.py"
+    },
+    {
+      "file_node_id": "SN:53141fc8a3eebabaa143",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/routing/coverage.py"
+    },
+    {
+      "file_node_id": "SN:61d2acd939f7ba91aafe",
+      "member_node_ids": [
+        "SN:39bd492ab70f0642fe9a"
+      ],
+      "operation": "renamed",
+      "path": "src/repodelta/llm/openai.py"
+    },
+    {
+      "file_node_id": "SN:ad353c971eee14ccdf09",
+      "member_node_ids": [
+        "SN:6cb1882afafb25fc2133"
+      ],
+      "operation": "modified",
+      "path": "tests/test_observed_transformation.py"
+    },
+    {
+      "file_node_id": "SN:d0eaed28df77609ef4a5",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/projection/structural_groups.py"
+    },
+    {
+      "file_node_id": "SN:850592bfde17f84bbdd7",
+      "member_node_ids": [
+        "SN:e13ddd13ac0415756885"
+      ],
+      "operation": "renamed",
+      "path": "src/repodelta/evaluation/comparison.py"
+    },
+    {
+      "file_node_id": "SN:f2df16bc9ec130fc402f",
+      "member_node_ids": [],
+      "operation": "modified",
+      "path": "tests/test_open_core.py"
+    },
+    {
+      "file_node_id": "SN:c6449d004827075859b3",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/closure/planning.py"
+    },
+    {
+      "file_node_id": "SN:c576820df260dccaf610",
+      "member_node_ids": [
+        "SN:b9b5a167bdd5abe109b8"
+      ],
+      "operation": "renamed",
+      "path": "src/repodelta/model/contracts.py"
+    },
+    {
+      "file_node_id": "SN:3f881c64e737adf18462",
+      "member_node_ids": [
+        "SN:4f6cf6e450ac7393340a"
+      ],
+      "operation": "modified",
+      "path": "tests/test_transformation_alignment.py"
+    },
+    {
+      "file_node_id": "SN:a8e3a88846c786598e4c",
+      "member_node_ids": [
+        "SN:6a2f25fd76287696671e",
+        "SN:e222d6da9178cbd37c92",
+        "SN:435927c58d226e9c9bd7"
+      ],
+      "operation": "modified",
+      "path": "tests/test_closure_scanning.py"
+    },
+    {
+      "file_node_id": "SN:2eb6be5bd1c720ffbd70",
+      "member_node_ids": [
+        "SN:daa8bf4ce9bd8b99859f",
+        "SN:ad321aca895eccfa62e1",
+        "SN:7a9f88060c0ba98a8c99",
+        "SN:c05f18677a67380bf877",
+        "SN:2ee1f894d761c21123bd"
+      ],
+      "operation": "modified",
+      "path": "tests/test_llm_openai_provider.py"
+    },
+    {
+      "file_node_id": "SN:4d32d2ad019fa97d46df",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/routing/focus_anchors.py"
+    },
+    {
+      "file_node_id": "SN:81608d232f7fa5b2a4bb",
+      "member_node_ids": [],
+      "operation": "modified",
+      "path": "tests/test_cli_github_auth.py"
+    },
+    {
+      "file_node_id": "SN:7230784e32dfc4ec387f",
+      "member_node_ids": [],
+      "operation": "modified",
+      "path": "tests/test_llm_shadow_runner.py"
+    },
+    {
+      "file_node_id": "SN:f128b8753633763507b9",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/llm/labeling.py"
+    },
+    {
+      "file_node_id": "SN:ae7121776b87c1b88668",
+      "member_node_ids": [
+        "SN:30b3fbed5ef39a8c8dff",
+        "SN:e82301aa309ebdda6ac8"
+      ],
+      "operation": "modified",
+      "path": "tests/test_structural_graph.py"
+    },
+    {
+      "file_node_id": "SN:b3dc3ec2353dea260c07",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/facts/__init__.py"
+    },
+    {
+      "file_node_id": "SN:e959adff908b409e2653",
+      "member_node_ids": [],
+      "operation": "renamed",
+      "path": "src/repodelta/model/structural_refs.py"
+    },
+    {
+      "file_node_id": "SN:c7750a41071b05e05447",
+      "member_node_ids": [
+        "SN:e5c678a185d2a3457ab4",
+        "SN:884f425030e5517661bc"
+      ],
+      "operation": "renamed",
+      "path": "src/repodelta/providers/workspace.py"
+    },
+    {
+      "file_node_id": "SN:f450393f209be274e259",
+      "member_node_ids": [],
+      "operation": "modified",
+      "path": "tests/test_overview.py"
+    },
+    {
+      "file_node_id": "SN:2da99e62c33cb61215fb",
+      "member_node_ids": [],
+      "operation": "modified",
+      "path": "tests/test_structural_ownership_changes.py"
+    },
+    {
+      "file_node_id": "SN:fb59d4c4600b15c3c61b",
+      "member_node_ids": [
+        "SN:a36e3b02f7f28d74894b",
+        "SN:9c01f53bc2a0ab548e0f"
+      ],
+      "operation": "modified",
+      "path": "tests/test_semantic_authority.py"
+    },
+    {
+      "file_node_id": "SN:d0d2a8ecf37f73d992b5",
+      "member_node_ids": [
+        "SN:3a6272aa1f68f3154188"
+      ],
+      "operation": "removed",
+      "path": "src/prismcode/__init__.py"
+    },
+    {
+      "file_node_id": "SN:6c022751b11ca540c9e9",
+      "member_node_ids": [
+        "SN:18905dad25b06e44ae4a",
+        "SN:0632f461131ee09969d7"
+      ],
+      "operation": "modified",
+      "path": "tests/test_closure_planning.py"
+    }
+  ],
+  "changed_surfaces": [
+    {
+      "additions": 2,
+      "base_path": ".github/workflows/ci.yml",
+      "deletions": 2,
+      "head_path": ".github/workflows/ci.yml",
+      "hunk_headers": [
+        "@@ -19,10 +19,10 @@ jobs:"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 6,
+      "base_path": ".github/workflows/review.yml",
+      "deletions": 6,
+      "head_path": ".github/workflows/review.yml",
+      "hunk_headers": [
+        "@@ -1,4 +1,4 @@",
+        "@@ -7,7 +7,7 @@ on:",
+        "@@ -27,20 +27,20 @@ jobs:",
+        "@@ -49,7 +49,7 @@ jobs:"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 1,
+      "base_path": "LICENSE",
+      "deletions": 1,
+      "head_path": "LICENSE",
+      "hunk_headers": [
+        "@@ -1,6 +1,6 @@"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 43,
+      "base_path": "README.md",
+      "deletions": 40,
+      "head_path": "README.md",
+      "hunk_headers": [
+        "@@ -1,6 +1,6 @@",
+        "@@ -10,31 +10,31 @@ It sits after a human or coding agent has written code and opened a PR:",
+        "@@ -44,49 +44,52 @@ claim from the structure that actually changed. See the",
+        "@@ -99,51 +102,51 @@ Enterprise Server, name both the API endpoint and the host explicitly trusted",
+        "@@ -157,11 +160,11 @@ The shadow result never changes the formal report, assessment, or merge",
+        "@@ -181,7 +184,7 @@ commands and safety boundary; current and planned experiments are tracked in",
+        "@@ -192,19 +195,19 @@ Tokens are read from environment variables or the authenticated `gh` CLI and",
+        "@@ -218,12 +221,12 @@ responsibility boundaries, implementation transitions, verification, and"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 4,
+      "base_path": "docs/architecture.md",
+      "deletions": 4,
+      "head_path": "docs/architecture.md",
+      "hunk_headers": [
+        "@@ -1,6 +1,6 @@",
+        "@@ -433,6 +433,6 @@ signature or proof of GitHub origin."
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 0,
+      "base_path": "docs/assets/prismcode-report-overview.jpg",
+      "deletions": 0,
+      "head_path": null,
+      "hunk_headers": [],
+      "status": "removed"
+    },
+    {
+      "additions": 0,
+      "base_path": null,
+      "deletions": 0,
+      "head_path": "docs/assets/repodelta-report-overview.jpg",
+      "hunk_headers": [],
+      "status": "added"
+    },
+    {
+      "additions": 0,
+      "base_path": "docs/assets/prismcode-structural-graph.webp",
+      "deletions": 0,
+      "head_path": "docs/assets/repodelta-structural-graph.webp",
+      "hunk_headers": [],
+      "status": "renamed"
+    },
+    {
+      "additions": 0,
+      "base_path": "docs/assets/prismcode-verification-focus.png",
+      "deletions": 0,
+      "head_path": "docs/assets/repodelta-verification-focus.png",
+      "hunk_headers": [],
+      "status": "renamed"
+    },
+    {
+      "additions": 3,
+      "base_path": "docs/evaluation.md",
+      "deletions": 3,
+      "head_path": "docs/evaluation.md",
+      "hunk_headers": [
+        "@@ -1,11 +1,11 @@",
+        "@@ -122,7 +122,7 @@ to advance. Pre-execution human labels must cover every request and validate"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 18,
+      "base_path": "docs/llm-shadow.md",
+      "deletions": 18,
+      "head_path": "docs/llm-shadow.md",
+      "hunk_headers": [
+        "@@ -1,39 +1,39 @@",
+        "@@ -47,7 +47,7 @@ Omitting `--llm-shadow` performs no provider call and writes no shadow artifact.",
+        "@@ -61,7 +61,7 @@ model answer.",
+        "@@ -80,7 +80,7 @@ After execution, compare the frozen human labels, deterministic selection, and",
+        "@@ -117,7 +117,7 @@ semantic role, but never an acceptance conclusion. Unknown identities,"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 2,
+      "base_path": "docs/provenance.md",
+      "deletions": 2,
+      "head_path": "docs/provenance.md",
+      "hunk_headers": [
+        "@@ -23,10 +23,10 @@ The default live structural path invokes"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 1,
+      "base_path": "docs/pull-request-guidelines.md",
+      "deletions": 1,
+      "head_path": "docs/pull-request-guidelines.md",
+      "hunk_headers": [
+        "@@ -17,7 +17,7 @@ Use `Before` and `After` for general state transitions. Use the more specific"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 1,
+      "base_path": "docs/review-retrieval-design.md",
+      "deletions": 1,
+      "head_path": "docs/review-retrieval-design.md",
+      "hunk_headers": [
+        "@@ -5,7 +5,7 @@ the reasoning and target data flow before any LLM reranker is considered."
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 23,
+      "base_path": "docs/usage.md",
+      "deletions": 12,
+      "head_path": "docs/usage.md",
+      "hunk_headers": [
+        "@@ -1,10 +1,21 @@",
+        "@@ -23,7 +34,7 @@ pytest -q",
+        "@@ -36,10 +47,10 @@ See [Fixture schema](fixture-schema.md) for the versioned input contract.",
+        "@@ -68,22 +79,22 @@ and authority mapping is documented under",
+        "@@ -113,20 +124,20 @@ Enterprise host must also be trusted with"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 7,
+      "base_path": "pyproject.toml",
+      "deletions": 3,
+      "head_path": "pyproject.toml",
+      "hunk_headers": [
+        "@@ -3,20 +3,24 @@ requires = [\"setuptools>=77.0.3\"]"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 0,
+      "base_path": "src/prismcode/__init__.py",
+      "deletions": 3,
+      "head_path": null,
+      "hunk_headers": [
+        "@@ -1,3 +0,0 @@"
+      ],
+      "status": "removed"
+    },
+    {
+      "additions": 3,
+      "base_path": null,
+      "deletions": 0,
+      "head_path": "src/repodelta/__init__.py",
+      "hunk_headers": [
+        "@@ -0,0 +1,3 @@"
+      ],
+      "status": "added"
+    },
+    {
+      "additions": 1,
+      "base_path": "src/prismcode/assessment/__init__.py",
+      "deletions": 1,
+      "head_path": "src/repodelta/assessment/__init__.py",
+      "hunk_headers": [
+        "@@ -1,5 +1,5 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 1,
+      "base_path": "src/prismcode/assessment/migration.py",
+      "deletions": 1,
+      "head_path": "src/repodelta/assessment/migration.py",
+      "hunk_headers": [
+        "@@ -2,7 +2,7 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 4,
+      "base_path": "src/prismcode/assessment/transformation.py",
+      "deletions": 4,
+      "head_path": "src/repodelta/assessment/transformation.py",
+      "hunk_headers": [
+        "@@ -3,8 +3,8 @@",
+        "@@ -22,8 +22,8 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 0,
+      "base_path": "src/prismcode/changes/__init__.py",
+      "deletions": 0,
+      "head_path": "src/repodelta/changes/__init__.py",
+      "hunk_headers": [],
+      "status": "renamed"
+    },
+    {
+      "additions": 1,
+      "base_path": "src/prismcode/changes/hunks.py",
+      "deletions": 1,
+      "head_path": "src/repodelta/changes/hunks.py",
+      "hunk_headers": [
+        "@@ -4,7 +4,7 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 28,
+      "base_path": "src/prismcode/cli.py",
+      "deletions": 28,
+      "head_path": "src/repodelta/cli.py",
+      "hunk_headers": [
+        "@@ -9,32 +9,32 @@",
+        "@@ -93,7 +93,7 @@ def _resolve_github_token(env_name: str | None, api_url: str) -> str | None:",
+        "@@ -103,30 +103,30 @@ def _openai_shadow_provider_from_env() -> OpenAIShadowProvider | None:",
+        "@@ -195,19 +195,19 @@ def _enrich_github_auth_error(",
+        "@@ -314,7 +314,7 @@ def main() -> int:",
+        "@@ -328,7 +328,7 @@ def main() -> int:",
+        "@@ -514,7 +514,7 @@ def main() -> int:"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 0,
+      "base_path": "src/prismcode/closure/__init__.py",
+      "deletions": 0,
+      "head_path": "src/repodelta/closure/__init__.py",
+      "hunk_headers": [],
+      "status": "renamed"
+    },
+    {
+      "additions": 1,
+      "base_path": "src/prismcode/closure/planning.py",
+      "deletions": 1,
+      "head_path": "src/repodelta/closure/planning.py",
+      "hunk_headers": [
+        "@@ -3,7 +3,7 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 2,
+      "base_path": "src/prismcode/closure/scanning.py",
+      "deletions": 2,
+      "head_path": "src/repodelta/closure/scanning.py",
+      "hunk_headers": [
+        "@@ -7,8 +7,8 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 0,
+      "base_path": "src/prismcode/convergence/__init__.py",
+      "deletions": 0,
+      "head_path": "src/repodelta/convergence/__init__.py",
+      "hunk_headers": [],
+      "status": "renamed"
+    },
+    {
+      "additions": 3,
+      "base_path": "src/prismcode/convergence/core.py",
+      "deletions": 3,
+      "head_path": "src/repodelta/convergence/core.py",
+      "hunk_headers": [
+        "@@ -2,9 +2,9 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 1,
+      "base_path": "src/prismcode/convergence/ordering.py",
+      "deletions": 1,
+      "head_path": "src/repodelta/convergence/ordering.py",
+      "hunk_headers": [
+        "@@ -1,6 +1,6 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 3,
+      "base_path": "src/prismcode/convergence/structural.py",
+      "deletions": 3,
+      "head_path": "src/repodelta/convergence/structural.py",
+      "hunk_headers": [
+        "@@ -2,13 +2,13 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 2,
+      "base_path": "src/prismcode/convergence/transformation.py",
+      "deletions": 2,
+      "head_path": "src/repodelta/convergence/transformation.py",
+      "hunk_headers": [
+        "@@ -2,8 +2,8 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 0,
+      "base_path": "src/prismcode/evaluation/__init__.py",
+      "deletions": 0,
+      "head_path": "src/repodelta/evaluation/__init__.py",
+      "hunk_headers": [],
+      "status": "renamed"
+    },
+    {
+      "additions": 6,
+      "base_path": "src/prismcode/evaluation/comparison.py",
+      "deletions": 6,
+      "head_path": "src/repodelta/evaluation/comparison.py",
+      "hunk_headers": [
+        "@@ -4,7 +4,7 @@",
+        "@@ -13,18 +13,18 @@",
+        "@@ -122,7 +122,7 @@ def _render(inputs: ShadowComparisonInputs) -> str:"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 7,
+      "base_path": "src/prismcode/evaluation/core.py",
+      "deletions": 7,
+      "head_path": "src/repodelta/evaluation/core.py",
+      "hunk_headers": [
+        "@@ -5,7 +5,7 @@",
+        "@@ -17,9 +17,9 @@",
+        "@@ -40,8 +40,8 @@",
+        "@@ -874,7 +874,7 @@ def write_evaluation_markdown("
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 3,
+      "base_path": "src/prismcode/evaluation/shadow.py",
+      "deletions": 3,
+      "head_path": "src/repodelta/evaluation/shadow.py",
+      "hunk_headers": [
+        "@@ -5,16 +5,16 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 1,
+      "base_path": "src/prismcode/facts/__init__.py",
+      "deletions": 1,
+      "head_path": "src/repodelta/facts/__init__.py",
+      "hunk_headers": [
+        "@@ -1,4 +1,4 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 5,
+      "base_path": "src/prismcode/facts/catalog.py",
+      "deletions": 5,
+      "head_path": "src/repodelta/facts/catalog.py",
+      "hunk_headers": [
+        "@@ -5,7 +5,7 @@",
+        "@@ -31,13 +31,13 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 2,
+      "base_path": "src/prismcode/facts/lexical.py",
+      "deletions": 2,
+      "head_path": "src/repodelta/facts/lexical.py",
+      "hunk_headers": [
+        "@@ -2,8 +2,8 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 1,
+      "base_path": "src/prismcode/facts/path_profile.py",
+      "deletions": 1,
+      "head_path": "src/repodelta/facts/path_profile.py",
+      "hunk_headers": [
+        "@@ -2,7 +2,7 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 1,
+      "base_path": "src/prismcode/facts/transformation.py",
+      "deletions": 1,
+      "head_path": "src/repodelta/facts/transformation.py",
+      "hunk_headers": [
+        "@@ -1,6 +1,6 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 0,
+      "base_path": "src/prismcode/intake/__init__.py",
+      "deletions": 0,
+      "head_path": "src/repodelta/intake/__init__.py",
+      "hunk_headers": [],
+      "status": "renamed"
+    },
+    {
+      "additions": 1,
+      "base_path": "src/prismcode/intake/fixture.py",
+      "deletions": 1,
+      "head_path": "src/repodelta/intake/fixture.py",
+      "hunk_headers": [
+        "@@ -4,7 +4,7 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 4,
+      "base_path": "src/prismcode/intake/github.py",
+      "deletions": 4,
+      "head_path": "src/repodelta/intake/github.py",
+      "hunk_headers": [
+        "@@ -9,7 +9,7 @@",
+        "@@ -21,7 +21,7 @@",
+        "@@ -100,7 +100,7 @@ def get_json(self, path: str, query: Mapping[str, str | int] | None = None) -> J",
+        "@@ -123,7 +123,7 @@ def post_graphql(self, query: str, variables: Mapping[str, object]) -> JsonValue"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 8,
+      "base_path": "src/prismcode/llm/__init__.py",
+      "deletions": 8,
+      "head_path": "src/repodelta/llm/__init__.py",
+      "hunk_headers": [
+        "@@ -1,13 +1,13 @@",
+        "@@ -16,13 +16,13 @@",
+        "@@ -32,22 +32,22 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 4,
+      "base_path": "src/prismcode/llm/admission.py",
+      "deletions": 4,
+      "head_path": "src/repodelta/llm/admission.py",
+      "hunk_headers": [
+        "@@ -5,14 +5,14 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 0,
+      "base_path": "src/prismcode/llm/contracts.py",
+      "deletions": 0,
+      "head_path": "src/repodelta/llm/contracts.py",
+      "hunk_headers": [],
+      "status": "renamed"
+    },
+    {
+      "additions": 2,
+      "base_path": "src/prismcode/llm/convergence.py",
+      "deletions": 2,
+      "head_path": "src/repodelta/llm/convergence.py",
+      "hunk_headers": [
+        "@@ -3,13 +3,13 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 5,
+      "base_path": "src/prismcode/llm/execution.py",
+      "deletions": 5,
+      "head_path": "src/repodelta/llm/execution.py",
+      "hunk_headers": [
+        "@@ -5,7 +5,7 @@",
+        "@@ -14,24 +14,24 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 4,
+      "base_path": "src/prismcode/llm/labeling.py",
+      "deletions": 4,
+      "head_path": "src/repodelta/llm/labeling.py",
+      "hunk_headers": [
+        "@@ -5,21 +5,21 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 3,
+      "base_path": "src/prismcode/llm/openai.py",
+      "deletions": 3,
+      "head_path": "src/repodelta/llm/openai.py",
+      "hunk_headers": [
+        "@@ -8,15 +8,15 @@",
+        "@@ -205,7 +205,7 @@ def _response_format("
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 2,
+      "base_path": "src/prismcode/llm/packet.py",
+      "deletions": 2,
+      "head_path": "src/repodelta/llm/packet.py",
+      "hunk_headers": [
+        "@@ -3,8 +3,8 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 1,
+      "base_path": "src/prismcode/llm/provider.py",
+      "deletions": 1,
+      "head_path": "src/repodelta/llm/provider.py",
+      "hunk_headers": [
+        "@@ -5,7 +5,7 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 2,
+      "base_path": "src/prismcode/llm/replay.py",
+      "deletions": 2,
+      "head_path": "src/repodelta/llm/replay.py",
+      "hunk_headers": [
+        "@@ -5,13 +5,13 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 2,
+      "base_path": "src/prismcode/llm/runner.py",
+      "deletions": 2,
+      "head_path": "src/repodelta/llm/runner.py",
+      "hunk_headers": [
+        "@@ -4,13 +4,13 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 0,
+      "base_path": "src/prismcode/model/__init__.py",
+      "deletions": 0,
+      "head_path": "src/repodelta/model/__init__.py",
+      "hunk_headers": [],
+      "status": "renamed"
+    },
+    {
+      "additions": 3,
+      "base_path": "src/prismcode/model/contracts.py",
+      "deletions": 3,
+      "head_path": "src/repodelta/model/contracts.py",
+      "hunk_headers": [
+        "@@ -7,8 +7,8 @@",
+        "@@ -3913,7 +3913,7 @@ class ReviewBrief:"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 1,
+      "base_path": "src/prismcode/model/predicate_refs.py",
+      "deletions": 1,
+      "head_path": "src/repodelta/model/predicate_refs.py",
+      "hunk_headers": [
+        "@@ -2,7 +2,7 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 1,
+      "base_path": "src/prismcode/model/structural_refs.py",
+      "deletions": 1,
+      "head_path": "src/repodelta/model/structural_refs.py",
+      "hunk_headers": [
+        "@@ -1,6 +1,6 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 15,
+      "base_path": "src/prismcode/pipeline.py",
+      "deletions": 15,
+      "head_path": "src/repodelta/pipeline.py",
+      "hunk_headers": [
+        "@@ -2,27 +2,27 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 0,
+      "base_path": "src/prismcode/presentation/__init__.py",
+      "deletions": 0,
+      "head_path": "src/repodelta/presentation/__init__.py",
+      "hunk_headers": [],
+      "status": "renamed"
+    },
+    {
+      "additions": 4,
+      "base_path": "src/prismcode/presentation/html.py",
+      "deletions": 4,
+      "head_path": "src/repodelta/presentation/html.py",
+      "hunk_headers": [
+        "@@ -6,7 +6,7 @@",
+        "@@ -1313,7 +1313,7 @@ def render_html(brief: ReviewBrief) -> str:",
+        "@@ -1370,13 +1370,13 @@ def render_html(brief: ReviewBrief) -> str:"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 1,
+      "base_path": "src/prismcode/presentation/status.py",
+      "deletions": 1,
+      "head_path": "src/repodelta/presentation/status.py",
+      "hunk_headers": [
+        "@@ -1,6 +1,6 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 0,
+      "base_path": "src/prismcode/projection/__init__.py",
+      "deletions": 0,
+      "head_path": "src/repodelta/projection/__init__.py",
+      "hunk_headers": [],
+      "status": "renamed"
+    },
+    {
+      "additions": 1,
+      "base_path": "src/prismcode/projection/architecture.py",
+      "deletions": 1,
+      "head_path": "src/repodelta/projection/architecture.py",
+      "hunk_headers": [
+        "@@ -4,7 +4,7 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 6,
+      "base_path": "src/prismcode/projection/build.py",
+      "deletions": 6,
+      "head_path": "src/repodelta/projection/build.py",
+      "hunk_headers": [
+        "@@ -3,7 +3,7 @@",
+        "@@ -33,17 +33,17 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 2,
+      "base_path": "src/prismcode/projection/overview.py",
+      "deletions": 2,
+      "head_path": "src/repodelta/projection/overview.py",
+      "hunk_headers": [
+        "@@ -3,7 +3,7 @@",
+        "@@ -18,7 +18,7 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 1,
+      "base_path": "src/prismcode/projection/structural_groups.py",
+      "deletions": 1,
+      "head_path": "src/repodelta/projection/structural_groups.py",
+      "hunk_headers": [
+        "@@ -3,7 +3,7 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 1,
+      "base_path": "src/prismcode/projection/structural_navigation.py",
+      "deletions": 1,
+      "head_path": "src/repodelta/projection/structural_navigation.py",
+      "hunk_headers": [
+        "@@ -4,7 +4,7 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 1,
+      "base_path": "src/prismcode/projection/verification.py",
+      "deletions": 1,
+      "head_path": "src/repodelta/projection/verification.py",
+      "hunk_headers": [
+        "@@ -1,6 +1,6 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 0,
+      "base_path": "src/prismcode/providers/__init__.py",
+      "deletions": 0,
+      "head_path": "src/repodelta/providers/__init__.py",
+      "hunk_headers": [],
+      "status": "renamed"
+    },
+    {
+      "additions": 3,
+      "base_path": "src/prismcode/providers/codegraph.py",
+      "deletions": 3,
+      "head_path": "src/repodelta/providers/codegraph.py",
+      "hunk_headers": [
+        "@@ -6,9 +6,9 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 3,
+      "base_path": "src/prismcode/providers/mapping.py",
+      "deletions": 3,
+      "head_path": "src/repodelta/providers/mapping.py",
+      "hunk_headers": [
+        "@@ -3,9 +3,9 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 2,
+      "base_path": "src/prismcode/providers/structural.py",
+      "deletions": 2,
+      "head_path": "src/repodelta/providers/structural.py",
+      "hunk_headers": [
+        "@@ -3,8 +3,8 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 4,
+      "base_path": "src/prismcode/providers/workspace.py",
+      "deletions": 4,
+      "head_path": "src/repodelta/providers/workspace.py",
+      "hunk_headers": [
+        "@@ -197,7 +197,7 @@ def isolated_review_roots(",
+        "@@ -312,11 +312,11 @@ def remote_review_roots("
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 0,
+      "base_path": "src/prismcode/routing/__init__.py",
+      "deletions": 0,
+      "head_path": "src/repodelta/routing/__init__.py",
+      "hunk_headers": [],
+      "status": "renamed"
+    },
+    {
+      "additions": 3,
+      "base_path": "src/prismcode/routing/association.py",
+      "deletions": 3,
+      "head_path": "src/repodelta/routing/association.py",
+      "hunk_headers": [
+        "@@ -3,14 +3,14 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 7,
+      "base_path": "src/prismcode/routing/candidates.py",
+      "deletions": 7,
+      "head_path": "src/repodelta/routing/candidates.py",
+      "hunk_headers": [
+        "@@ -2,11 +2,11 @@",
+        "@@ -20,14 +20,14 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 2,
+      "base_path": "src/prismcode/routing/coverage.py",
+      "deletions": 2,
+      "head_path": "src/repodelta/routing/coverage.py",
+      "hunk_headers": [
+        "@@ -1,7 +1,7 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 4,
+      "base_path": "src/prismcode/routing/focus_anchors.py",
+      "deletions": 4,
+      "head_path": "src/repodelta/routing/focus_anchors.py",
+      "hunk_headers": [
+        "@@ -2,20 +2,20 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 1,
+      "base_path": "src/prismcode/routing/relations.py",
+      "deletions": 1,
+      "head_path": "src/repodelta/routing/relations.py",
+      "hunk_headers": [
+        "@@ -3,7 +3,7 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 2,
+      "base_path": "src/prismcode/routing/semantics.py",
+      "deletions": 2,
+      "head_path": "src/repodelta/routing/semantics.py",
+      "hunk_headers": [
+        "@@ -2,15 +2,15 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 4,
+      "base_path": "src/prismcode/routing/transformation.py",
+      "deletions": 4,
+      "head_path": "src/repodelta/routing/transformation.py",
+      "hunk_headers": [
+        "@@ -1,7 +1,7 @@",
+        "@@ -15,12 +15,12 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 2,
+      "base_path": "src/prismcode/routing/transformation_subjects.py",
+      "deletions": 2,
+      "head_path": "src/repodelta/routing/transformation_subjects.py",
+      "hunk_headers": [
+        "@@ -1,6 +1,6 @@",
+        "@@ -10,7 +10,7 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 0,
+      "base_path": "src/prismcode/semantics/__init__.py",
+      "deletions": 0,
+      "head_path": "src/repodelta/semantics/__init__.py",
+      "hunk_headers": [],
+      "status": "renamed"
+    },
+    {
+      "additions": 1,
+      "base_path": "src/prismcode/semantics/criteria.py",
+      "deletions": 1,
+      "head_path": "src/repodelta/semantics/criteria.py",
+      "hunk_headers": [
+        "@@ -3,7 +3,7 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 2,
+      "base_path": "src/prismcode/semantics/review.py",
+      "deletions": 2,
+      "head_path": "src/repodelta/semantics/review.py",
+      "hunk_headers": [
+        "@@ -3,8 +3,8 @@"
+      ],
+      "status": "renamed"
+    },
+    {
+      "additions": 5,
+      "base_path": "tests/test_association.py",
+      "deletions": 5,
+      "head_path": "tests/test_association.py",
+      "hunk_headers": [
+        "@@ -1,17 +1,17 @@"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 2,
+      "base_path": "tests/test_cli_github_auth.py",
+      "deletions": 2,
+      "head_path": "tests/test_cli_github_auth.py",
+      "hunk_headers": [
+        "@@ -4,8 +4,8 @@"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 5,
+      "base_path": "tests/test_cli_live_workspace.py",
+      "deletions": 5,
+      "head_path": "tests/test_cli_live_workspace.py",
+      "hunk_headers": [
+        "@@ -7,9 +7,9 @@",
+        "@@ -28,7 +28,7 @@ def _repository(tmp_path: Path) -> tuple[Path, str]:",
+        "@@ -82,7 +82,7 @@ def _run("
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 5,
+      "base_path": "tests/test_cli_structural_mapping.py",
+      "deletions": 5,
+      "head_path": "tests/test_cli_structural_mapping.py",
+      "hunk_headers": [
+        "@@ -9,8 +9,8 @@",
+        "@@ -122,7 +122,7 @@ def _run_cli(",
+        "@@ -178,7 +178,7 @@ def test_cli_shadow_without_provider_is_unavailable_and_fail_closed(",
+        "@@ -210,7 +210,7 @@ def test_cli_prepares_labeling_packet_without_invoking_provider("
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 9,
+      "base_path": "tests/test_closure_planning.py",
+      "deletions": 9,
+      "head_path": "tests/test_closure_planning.py",
+      "hunk_headers": [
+        "@@ -2,8 +2,8 @@",
+        "@@ -14,9 +14,9 @@",
+        "@@ -246,7 +246,7 @@ def test_unmarked_removal_does_not_reconstruct_executable_targets() -> None:",
+        "@@ -269,9 +269,9 @@ def test_planning_conjoins_exact_target_with_path_scope() -> None:",
+        "@@ -283,6 +283,6 @@ def test_planning_conjoins_exact_target_with_path_scope() -> None:"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 20,
+      "base_path": "tests/test_closure_scanning.py",
+      "deletions": 20,
+      "head_path": "tests/test_closure_scanning.py",
+      "hunk_headers": [
+        "@@ -3,13 +3,13 @@",
+        "@@ -19,12 +19,12 @@",
+        "@@ -45,7 +45,7 @@ def _repository(tmp_path: Path, files: dict[str, str]) -> tuple[Path, str]:",
+        "@@ -286,7 +286,7 @@ def test_removal_scan_preserves_base_head_transition_and_path_profiles(",
+        "@@ -393,10 +393,10 @@ def test_scoped_removal_ignores_same_symbol_outside_declared_path(",
+        "@@ -408,11 +408,11 @@ def test_scoped_removal_ignores_same_symbol_outside_declared_path(",
+        "@@ -431,7 +431,7 @@ def test_scoped_removal_ignores_same_symbol_outside_declared_path(",
+        "@@ -451,7 +451,7 @@ def test_scoped_removal_ignores_same_symbol_outside_declared_path(",
+        "@@ -471,7 +471,7 @@ def test_scoped_removal_ignores_same_symbol_outside_declared_path("
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 10,
+      "base_path": "tests/test_codegraph_workspace.py",
+      "deletions": 10,
+      "head_path": "tests/test_codegraph_workspace.py",
+      "hunk_headers": [
+        "@@ -9,7 +9,7 @@",
+        "@@ -25,8 +25,8 @@ def __init__(",
+        "@@ -269,7 +269,7 @@ def test_live_review_workflow_uses_default_remote_workspace() -> None:",
+        "@@ -301,8 +301,8 @@ def test_remote_review_fetches_exact_private_revisions_without_persisting_token(",
+        "@@ -355,8 +355,8 @@ def test_remote_no_structural_review_fetches_only_head() -> None:",
+        "@@ -372,8 +372,8 @@ def test_remote_review_rejects_revision_mismatch_and_removes_source() -> None:"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 2,
+      "base_path": "tests/test_convergence.py",
+      "deletions": 2,
+      "head_path": "tests/test_convergence.py",
+      "hunk_headers": [
+        "@@ -2,8 +2,8 @@"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 5,
+      "base_path": "tests/test_evaluation.py",
+      "deletions": 5,
+      "head_path": "tests/test_evaluation.py",
+      "hunk_headers": [
+        "@@ -7,8 +7,8 @@",
+        "@@ -112,7 +112,7 @@ def test_wrong_slot_expectation_fails_the_gate_and_cli(",
+        "@@ -282,7 +282,7 @@ def test_wrong_assessment_expectation_fails_the_gate_and_cli(",
+        "@@ -318,7 +318,7 @@ def test_wrong_focus_expectation_fails_the_gate_and_cli("
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 6,
+      "base_path": "tests/test_evidence_graph.py",
+      "deletions": 6,
+      "head_path": "tests/test_evidence_graph.py",
+      "hunk_headers": [
+        "@@ -4,8 +4,8 @@",
+        "@@ -15,10 +15,10 @@"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 5,
+      "base_path": "tests/test_github_adapter.py",
+      "deletions": 5,
+      "head_path": "tests/test_github_adapter.py",
+      "hunk_headers": [
+        "@@ -4,11 +4,11 @@"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 22,
+      "base_path": "tests/test_llm_openai_provider.py",
+      "deletions": 22,
+      "head_path": "tests/test_llm_openai_provider.py",
+      "hunk_headers": [
+        "@@ -5,8 +5,8 @@",
+        "@@ -247,7 +247,7 @@ def fail(*_args, **_kwargs):",
+        "@@ -274,7 +274,7 @@ def test_openai_transport_classifies_url_failures_without_reason_text(",
+        "@@ -300,7 +300,7 @@ def read(self):",
+        "@@ -335,16 +335,16 @@ def test_cli_config_requires_explicit_key_and_model(",
+        "@@ -356,28 +356,28 @@ def test_cli_config_rejects_invalid_execution_policy_env("
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 4,
+      "base_path": "tests/test_llm_shadow_admission.py",
+      "deletions": 4,
+      "head_path": "tests/test_llm_shadow_admission.py",
+      "hunk_headers": [
+        "@@ -2,16 +2,16 @@"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 2,
+      "base_path": "tests/test_llm_shadow_campaign.py",
+      "deletions": 2,
+      "head_path": "tests/test_llm_shadow_campaign.py",
+      "hunk_headers": [
+        "@@ -2,14 +2,14 @@"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 5,
+      "base_path": "tests/test_llm_shadow_campaign_v2.py",
+      "deletions": 4,
+      "head_path": "tests/test_llm_shadow_campaign_v2.py",
+      "hunk_headers": [
+        "@@ -5,14 +5,14 @@",
+        "@@ -62,7 +62,8 @@ def test_campaign_v2_freezes_complete_pre_execution_reference_labels() -> None:"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 6,
+      "base_path": "tests/test_llm_shadow_comparison.py",
+      "deletions": 6,
+      "head_path": "tests/test_llm_shadow_comparison.py",
+      "hunk_headers": [
+        "@@ -6,12 +6,12 @@",
+        "@@ -28,7 +28,7 @@",
+        "@@ -72,7 +72,7 @@ def test_comparison_html_is_stable_and_exposes_semantic_recovery(",
+        "@@ -112,7 +112,7 @@ def test_compare_shadow_cli_renders_offline_report("
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 6,
+      "base_path": "tests/test_llm_shadow_contract.py",
+      "deletions": 6,
+      "head_path": "tests/test_llm_shadow_contract.py",
+      "hunk_headers": [
+        "@@ -4,14 +4,14 @@",
+        "@@ -206,27 +206,27 @@ def test_candidate_membership_is_upstream_owned_and_bounded() -> None:"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 2,
+      "base_path": "tests/test_llm_shadow_convergence.py",
+      "deletions": 2,
+      "head_path": "tests/test_llm_shadow_convergence.py",
+      "hunk_headers": [
+        "@@ -1,7 +1,7 @@"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 3,
+      "base_path": "tests/test_llm_shadow_execution.py",
+      "deletions": 3,
+      "head_path": "tests/test_llm_shadow_execution.py",
+      "hunk_headers": [
+        "@@ -6,7 +6,7 @@",
+        "@@ -18,13 +18,13 @@"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 2,
+      "base_path": "tests/test_llm_shadow_labeling.py",
+      "deletions": 2,
+      "head_path": "tests/test_llm_shadow_labeling.py",
+      "hunk_headers": [
+        "@@ -6,8 +6,8 @@"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 2,
+      "base_path": "tests/test_llm_shadow_packet.py",
+      "deletions": 2,
+      "head_path": "tests/test_llm_shadow_packet.py",
+      "hunk_headers": [
+        "@@ -1,10 +1,10 @@"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 1,
+      "base_path": "tests/test_llm_shadow_runner.py",
+      "deletions": 1,
+      "head_path": "tests/test_llm_shadow_runner.py",
+      "hunk_headers": [
+        "@@ -6,7 +6,7 @@"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 2,
+      "base_path": "tests/test_migration_assessment.py",
+      "deletions": 2,
+      "head_path": "tests/test_migration_assessment.py",
+      "hunk_headers": [
+        "@@ -2,8 +2,8 @@"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 6,
+      "base_path": "tests/test_observed_transformation.py",
+      "deletions": 6,
+      "head_path": "tests/test_observed_transformation.py",
+      "hunk_headers": [
+        "@@ -4,18 +4,18 @@",
+        "@@ -114,7 +114,7 @@ def test_observed_transformation_rejects_a_missing_canonical_lane_member() -> No"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 4,
+      "base_path": "tests/test_open_core.py",
+      "deletions": 4,
+      "head_path": "tests/test_open_core.py",
+      "hunk_headers": [
+        "@@ -3,15 +3,15 @@"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 4,
+      "base_path": "tests/test_overview.py",
+      "deletions": 4,
+      "head_path": "tests/test_overview.py",
+      "hunk_headers": [
+        "@@ -2,25 +2,25 @@"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 6,
+      "base_path": "tests/test_pipeline_architecture.py",
+      "deletions": 6,
+      "head_path": "tests/test_pipeline_architecture.py",
+      "hunk_headers": [
+        "@@ -4,13 +4,13 @@",
+        "@@ -79,7 +79,7 @@ def test_stage_dependencies_follow_the_canonical_pipeline() -> None:"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 55,
+      "base_path": null,
+      "deletions": 0,
+      "head_path": "tests/test_product_identity.py",
+      "hunk_headers": [
+        "@@ -0,0 +1,55 @@"
+      ],
+      "status": "added"
+    },
+    {
+      "additions": 20,
+      "base_path": "tests/test_projection.py",
+      "deletions": 20,
+      "head_path": "tests/test_projection.py",
+      "hunk_headers": [
+        "@@ -6,8 +6,8 @@",
+        "@@ -47,24 +47,24 @@",
+        "@@ -73,18 +73,18 @@",
+        "@@ -160,26 +160,26 @@ def test_architectural_topology_groups_canonical_nodes_and_cross_component_flow(",
+        "@@ -230,7 +230,7 @@ def test_architectural_component_owns_internal_graph_relation_membership() -> No"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 9,
+      "base_path": "tests/test_semantic_authority.py",
+      "deletions": 9,
+      "head_path": "tests/test_semantic_authority.py",
+      "hunk_headers": [
+        "@@ -1,17 +1,17 @@",
+        "@@ -751,8 +751,8 @@ def test_context_and_typed_claims_use_the_canonical_binding_path() -> None:",
+        "@@ -1027,7 +1027,7 @@ def test_transformation_predicates_preserve_path_scope_role() -> None:",
+        "@@ -1040,7 +1040,7 @@ def test_transformation_predicates_preserve_path_scope_role() -> None:"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 9,
+      "base_path": "tests/test_structural_graph.py",
+      "deletions": 9,
+      "head_path": "tests/test_structural_graph.py",
+      "hunk_headers": [
+        "@@ -8,9 +8,9 @@",
+        "@@ -20,8 +20,8 @@",
+        "@@ -32,8 +32,8 @@",
+        "@@ -1564,7 +1564,7 @@ def test_live_review_checkout_must_match_expected_head(",
+        "@@ -1596,7 +1596,7 @@ def test_stale_base_revision_preserves_head_and_excludes_base_facts("
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 3,
+      "base_path": "tests/test_structural_navigation.py",
+      "deletions": 3,
+      "head_path": "tests/test_structural_navigation.py",
+      "hunk_headers": [
+        "@@ -2,14 +2,14 @@"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 4,
+      "base_path": "tests/test_structural_ownership_changes.py",
+      "deletions": 4,
+      "head_path": "tests/test_structural_ownership_changes.py",
+      "hunk_headers": [
+        "@@ -1,9 +1,9 @@"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 4,
+      "base_path": "tests/test_structural_relation_changes.py",
+      "deletions": 4,
+      "head_path": "tests/test_structural_relation_changes.py",
+      "hunk_headers": [
+        "@@ -1,9 +1,9 @@"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 2,
+      "base_path": "tests/test_structural_relation_groups.py",
+      "deletions": 2,
+      "head_path": "tests/test_structural_relation_groups.py",
+      "hunk_headers": [
+        "@@ -1,11 +1,11 @@"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 4,
+      "base_path": "tests/test_structural_replacement_candidates.py",
+      "deletions": 4,
+      "head_path": "tests/test_structural_replacement_candidates.py",
+      "hunk_headers": [
+        "@@ -4,15 +4,15 @@"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 3,
+      "base_path": "tests/test_transformation_alignment.py",
+      "deletions": 3,
+      "head_path": "tests/test_transformation_alignment.py",
+      "hunk_headers": [
+        "@@ -4,15 +4,15 @@",
+        "@@ -128,7 +128,7 @@ def test_alignment_validation_rejects_unknown_or_duplicate_truth() -> None:"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 9,
+      "base_path": "tests/test_transformation_assessment.py",
+      "deletions": 9,
+      "head_path": "tests/test_transformation_assessment.py",
+      "hunk_headers": [
+        "@@ -4,11 +4,11 @@",
+        "@@ -30,15 +30,15 @@",
+        "@@ -1344,7 +1344,7 @@ def test_assessment_validation_rejects_unknown_binding_truth() -> None:"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 6,
+      "base_path": "tests/test_transformation_closure.py",
+      "deletions": 6,
+      "head_path": "tests/test_transformation_closure.py",
+      "hunk_headers": [
+        "@@ -1,10 +1,10 @@",
+        "@@ -24,9 +24,9 @@",
+        "@@ -240,7 +240,7 @@ def test_closure_truncates_only_at_complete_path_identity_boundaries() -> None:"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 6,
+      "base_path": "tests/test_transformation_subjects.py",
+      "deletions": 6,
+      "head_path": "tests/test_transformation_subjects.py",
+      "hunk_headers": [
+        "@@ -4,8 +4,8 @@",
+        "@@ -16,9 +16,9 @@",
+        "@@ -202,7 +202,7 @@ def test_subject_selection_rejects_parallel_match_and_diagnostic_truth() -> None"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 4,
+      "base_path": "tests/test_verification_projection.py",
+      "deletions": 4,
+      "head_path": "tests/test_verification_projection.py",
+      "hunk_headers": [
+        "@@ -1,6 +1,6 @@",
+        "@@ -25,9 +25,9 @@"
+      ],
+      "status": "modified"
+    }
+  ],
+  "coverage_state": "available",
+  "head_sha": "9ff881482852432943f41c022f0de78d5d82b3cc",
+  "pull_request": 240,
+  "relation_ids": [
+    "SRG:e8405c1eb3f9d192e51e",
+    "SRG:f9bbf728163a009d799b",
+    "SRG:ac622c81896c17d66bd9",
+    "SRG:964ef4431db929043297",
+    "SRG:7a684e15c8133696dfc7",
+    "SRG:a9bd22d229231810976e",
+    "SRG:4322e3c367229731b32c",
+    "SRG:f2823d4af5227618c151",
+    "SRG:5b52139d85578101a484",
+    "SRG:2b932a81456ed750146e",
+    "SRG:b9b8baa13bb17c4e3741",
+    "SRG:9f071ab417d2bc6aef44",
+    "SRG:373eec4d9cf4f19bf730",
+    "SRG:5fa11d46eecec12274fb",
+    "SRG:a8349b9aa7cf01dbc249",
+    "SRG:7cdd9f850cfad8b75e74",
+    "SRG:00e75baf034b09705173",
+    "SRG:90a059449c793ca16dfd",
+    "SRG:11c1c8d9cfaf7483cfd6",
+    "SRG:5310b477bb6dfc8e036d",
+    "SRG:cf897de535a91e0f22cc",
+    "SRG:54c21fb7fba78da5bab2",
+    "SRG:a3a8d218377e204ecc8b",
+    "SRG:75060c947652785627b3",
+    "SRG:0d3c48d40ee946799148",
+    "SRG:b53115d8609d4fd6c6f5",
+    "SRG:839cbe47feb5a14e3482",
+    "SRG:bbf6f69de43b7d3d24fc",
+    "SRG:61d637308fe0463943e4",
+    "SRG:8a90ec01f450cb205ee9",
+    "SRG:67d2fd0a352fc6365f93",
+    "SRG:256a4d51fa50fe3a5f66",
+    "SRG:079837523b92f47b61dc",
+    "SRG:a793ef7155c3639a1320",
+    "SRG:c6089aa459159558b580",
+    "SRG:e8382439b75b2f4e0b2b",
+    "SRG:8a9d160cc54ee9923580",
+    "SRG:70e54b8c437c0a665e70",
+    "SRG:25dd57a4e9964c9f7012",
+    "SRG:84b81a2857a3d7d53c1d",
+    "SRG:c0dc3dc10e12d53280a3",
+    "SRG:b5ec2af058e81f9c5992",
+    "SRG:191857cc5216c2a34751",
+    "SRG:ad84dfcf133f8e28f641",
+    "SRG:ca4b70b0e0b537e6e7b9",
+    "SRG:679f9378ce29d1927054",
+    "SRG:79fe76d3952e9bda4566",
+    "SRG:7c1d311bcd50c511f5af",
+    "SRG:7c402fc35fa1704b43cb",
+    "SRG:08e39788654c4e336a7d",
+    "SRG:31f8f5fc3df7e21c3a7f",
+    "SRG:b82f49324dd401984957",
+    "SRG:481eb1edaccf3fec0b34",
+    "SRG:4895eec9f3290402353d",
+    "SRG:f284449183e8fcdcd540",
+    "SRG:30c34393c6da9833dd5f",
+    "SRG:b212076c3974ccc6fa92",
+    "SRG:dbc01a93c457ddbfe434",
+    "SRG:f583098319b45674d121",
+    "SRG:3fd723df0fffbefe3906",
+    "SRG:1d99e8f0fcf13abab236",
+    "SRG:f97ef32a362deffd8b7c",
+    "SRG:bc9c4544cbcfc3b7e9c6",
+    "SRG:9d30f43de4505588538f",
+    "SRG:4d84bbd158c90f34cdbf",
+    "SRG:9a87866298d7751d9e7d",
+    "SRG:c37cbb66ba278cb3f936",
+    "SRG:7730c3232855aeaafed2",
+    "SRG:77f992192d43db3b16db",
+    "SRG:644063212d8d6a64362b",
+    "SRG:ba3af101acf25e2fd73e",
+    "SRG:175958bf2036bf19443d",
+    "SRG:cc2a066808ca124d9a21",
+    "SRG:21c6196bde3b0caaacfa",
+    "SRG:6527b3854219a745d699",
+    "SRG:291ee5a7c852bb6455c0",
+    "SRG:1893a93bc639782d9308",
+    "SRG:292f92eeed8634c2e4eb",
+    "SRG:480ea394e21496264216",
+    "SRG:9e826c2f719b9c7f2775",
+    "SRG:2a9afe0572144d7cf7f8",
+    "SRG:7d2545e0dd02261d8a2e",
+    "SRG:630b01009e994c31126d",
+    "SRG:688e08710f4b00f7989b",
+    "SRG:0bff6e23e8eaabbcb968",
+    "SRG:e64cec14ae0c59bc41bc",
+    "SRG:47daffcf69e86a084504",
+    "SRG:ee4cfc400c41e2401d2f",
+    "SRG:bbb9b00ddefa40ce3940",
+    "SRG:eeec9b56e23c6e8cb528",
+    "SRG:e763cd489dd58db241b0",
+    "SRG:fdd71ec49f9b720a9e11",
+    "SRG:97e4aad21a182886070c",
+    "SRG:1879b052373e02802670",
+    "SRG:41e179b5c57dd8ff743e",
+    "SRG:d411b361cd226673b121",
+    "SRG:7af2f23a394994df23fc",
+    "SRG:0c63554d535f5fada1ec",
+    "SRG:5d0f44943436ec07ce28",
+    "SRG:9d58681f1fc77f31cf99",
+    "SRG:616c41f3b5d8958d1ae5",
+    "SRG:f1244d56bf0676962d6b",
+    "SRG:c626681d340927869292",
+    "SOR:779ffe3317821ade8645",
+    "SOR:2cc93096f0b5726c1a68",
+    "SOR:acaf9d63af11f3f4de2c",
+    "SOR:d4249f014c481e736df4",
+    "SOR:559f99ee481baf48dc0c",
+    "SOR:e97a4fdace7600c72844",
+    "SOR:5aba6c84298507e5f557",
+    "SOR:20575bb469363f55aa90",
+    "SOR:919add01a72156c1d67b",
+    "SOR:57e857f72c1cf29062d0",
+    "SOR:891397560f8f2e9bfeba",
+    "SOR:fa1a42532859751301ff",
+    "SOR:a439cdbfad0a101ebdec",
+    "SOR:0ad113517a45d86f2128",
+    "SOR:ea54fef20a62f4c9de51",
+    "SOR:f86d2a27ca51848537e9",
+    "SOR:f23e04b0caadc9f01e52",
+    "SOR:7a3b4123edfc2c92d5c6",
+    "SOR:741d122bad9a2dda72da",
+    "SOR:fcb8e4d380b960b87717",
+    "SOR:eb8fdbecb6978e93bcda",
+    "SOR:da7c9b9c3d5d29501968",
+    "SOR:ce776ddc95508bab3df2",
+    "SOR:74be900f523d3d526ddd",
+    "SOR:ebd5e0527c3ba0085922",
+    "SOR:9c74c97d90c665c1342d",
+    "SOR:782046aee20ccac503e8",
+    "SOR:509fd315d6bb81633566",
+    "SOR:3a263c7f2a08042df42c",
+    "SOR:80eaa536c437c560df94",
+    "SOR:03ffc58ac82c8a057c2d",
+    "SOR:bbc6421211f3e0be1b75",
+    "SOR:ef3e935aada92f4a1ba7",
+    "SOR:125c62c7d230ff0691bb",
+    "SOR:052a4c1d879b6da778f3",
+    "SOR:eabcedd6966b3cd6a337",
+    "SOR:565d659db9fc9bae45b6",
+    "SOR:afb25b41434478eb749b",
+    "SOR:5e3cdd509a8fbf5f4170",
+    "SOR:833736a6f6e0b1f95b7e",
+    "SOR:302e82bc291390314192",
+    "SOR:1b747982edbb3440e40e",
+    "SOR:3d032f95480e286d9536",
+    "SOR:2db7a9fb0cf982e4e2e3",
+    "SOR:c30ebbadf3bd1e7f76ce",
+    "SOR:d35f3334d4cc89a97af0",
+    "SOR:dcd22164c837ee06ab6d",
+    "SOR:c338ee7d7b45492cfa89",
+    "SOR:48f7a9c56989683e9d21",
+    "SOR:24a42d4a9d5e6333d468",
+    "SOR:c3da28595bdf7aa3951e",
+    "SOR:65b27c65512fb787903c",
+    "SOR:e48f6d5d28c7218ff1cd",
+    "SOR:176f82f4c27402810b50",
+    "SOR:8cb90720c17cae333523",
+    "SOR:5b9acf1cafb037a667a9",
+    "SOR:0275e2843d03357c9fd4",
+    "SOR:1274ae9b0b1063c972cd",
+    "SOR:b8fa66777efe91dc833c",
+    "SOR:415c7651e2f31e94eda0",
+    "SOR:2562762537b4891b5fad",
+    "SOR:0aabba7f6a0931e8577d",
+    "SOR:99df796e999d806abe8f",
+    "SOR:15691927344f2b0f876d",
+    "SOR:dc60156d55f5620ca6e7",
+    "SOR:d78f4da5520464f2931c"
+  ],
+  "relations": [
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:e8405c1eb3f9d192e51e",
+      "source_node_id": "SN:01348353fb7fa22f210e",
+      "target_node_id": "SN:53896cd807c75ff57448"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:f9bbf728163a009d799b",
+      "source_node_id": "SN:038a8459887947589eb2",
+      "target_node_id": "SN:01348353fb7fa22f210e"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:ac622c81896c17d66bd9",
+      "source_node_id": "SN:05ac0ec2fe08c171194b",
+      "target_node_id": "SN:c576820df260dccaf610"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:964ef4431db929043297",
+      "source_node_id": "SN:0bab1bb24d28fb3ac418",
+      "target_node_id": "SN:89e14a246b548d1a0bc8"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:7a684e15c8133696dfc7",
+      "source_node_id": "SN:0bab1bb24d28fb3ac418",
+      "target_node_id": "SN:e97a6d222ff3cc601566"
+    },
+    {
+      "operation": "retained",
+      "relation": "references",
+      "relation_id": "SRG:a9bd22d229231810976e",
+      "source_node_id": "SN:0c89200287f78d1c3bfd",
+      "target_node_id": "SN:dd8897d132ae68153aa0"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:4322e3c367229731b32c",
+      "source_node_id": "SN:153e8a4593165e30d01d",
+      "target_node_id": "SN:4afd468a8dc18d0a7be3"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:f2823d4af5227618c151",
+      "source_node_id": "SN:178c6ea1b2d1a81cec62",
+      "target_node_id": "SN:01348353fb7fa22f210e"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:5b52139d85578101a484",
+      "source_node_id": "SN:178c6ea1b2d1a81cec62",
+      "target_node_id": "SN:997d4dee6eba8e326246"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:2b932a81456ed750146e",
+      "source_node_id": "SN:1a5471da8621916f448b",
+      "target_node_id": "SN:1dfe633360b09b369567"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:b9b8baa13bb17c4e3741",
+      "source_node_id": "SN:23f3671fb2b03d2dca66",
+      "target_node_id": "SN:aef5956b203526bafa40"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:9f071ab417d2bc6aef44",
+      "source_node_id": "SN:275968857bc2d222c8c2",
+      "target_node_id": "SN:a00f18cc2fd691b64ddd"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:373eec4d9cf4f19bf730",
+      "source_node_id": "SN:29dc93e5340f35073be0",
+      "target_node_id": "SN:4afd468a8dc18d0a7be3"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:5fa11d46eecec12274fb",
+      "source_node_id": "SN:2eb6be5bd1c720ffbd70",
+      "target_node_id": "SN:aef5956b203526bafa40"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:a8349b9aa7cf01dbc249",
+      "source_node_id": "SN:2eb6be5bd1c720ffbd70",
+      "target_node_id": "SN:aef5956b203526bafa40"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:7cdd9f850cfad8b75e74",
+      "source_node_id": "SN:344dbfb82cde9449a355",
+      "target_node_id": "SN:3864aa37b831556978cc"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:00e75baf034b09705173",
+      "source_node_id": "SN:344dbfb82cde9449a355",
+      "target_node_id": "SN:7f2ab446106f9a7a6e74"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:90a059449c793ca16dfd",
+      "source_node_id": "SN:3bb765cebf8078255e1c",
+      "target_node_id": "SN:476abc02585252df8b05"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:11c1c8d9cfaf7483cfd6",
+      "source_node_id": "SN:3f6d1f3e38f31a742903",
+      "target_node_id": "SN:42d7fc3ccbe3e506acfe"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:5310b477bb6dfc8e036d",
+      "source_node_id": "SN:3f6d1f3e38f31a742903",
+      "target_node_id": "SN:476abc02585252df8b05"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:cf897de535a91e0f22cc",
+      "source_node_id": "SN:421b8872cff2f3947057",
+      "target_node_id": "SN:a00f18cc2fd691b64ddd"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:54c21fb7fba78da5bab2",
+      "source_node_id": "SN:428c5b2228ae93521c5f",
+      "target_node_id": "SN:850592bfde17f84bbdd7"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:a3a8d218377e204ecc8b",
+      "source_node_id": "SN:42d7fc3ccbe3e506acfe",
+      "target_node_id": "SN:c576820df260dccaf610"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:75060c947652785627b3",
+      "source_node_id": "SN:435927c58d226e9c9bd7",
+      "target_node_id": "SN:e222d6da9178cbd37c92"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:0d3c48d40ee946799148",
+      "source_node_id": "SN:4461847a6d2a997327a6",
+      "target_node_id": "SN:8101e8abbab4a6c05f2b"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:b53115d8609d4fd6c6f5",
+      "source_node_id": "SN:4461847a6d2a997327a6",
+      "target_node_id": "SN:e959adff908b409e2653"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:839cbe47feb5a14e3482",
+      "source_node_id": "SN:4afd468a8dc18d0a7be3",
+      "target_node_id": "SN:1b19b1f7c729fd4dfb76"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:bbf6f69de43b7d3d24fc",
+      "source_node_id": "SN:4afd468a8dc18d0a7be3",
+      "target_node_id": "SN:2ea8f3385a4078007a59"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:61d637308fe0463943e4",
+      "source_node_id": "SN:4afd468a8dc18d0a7be3",
+      "target_node_id": "SN:30c7ee659ac4a27568d0"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:8a90ec01f450cb205ee9",
+      "source_node_id": "SN:4afd468a8dc18d0a7be3",
+      "target_node_id": "SN:61d2acd939f7ba91aafe"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:67d2fd0a352fc6365f93",
+      "source_node_id": "SN:4c5a8c95644d39649748",
+      "target_node_id": "SN:c576820df260dccaf610"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:256a4d51fa50fe3a5f66",
+      "source_node_id": "SN:4c5a8c95644d39649748",
+      "target_node_id": "SN:f659f43bae6986a72a5f"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:079837523b92f47b61dc",
+      "source_node_id": "SN:50b54190c20c72b61899",
+      "target_node_id": "SN:9ba772e81952ce3adf9b"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:a793ef7155c3639a1320",
+      "source_node_id": "SN:6a2f25fd76287696671e",
+      "target_node_id": "SN:e222d6da9178cbd37c92"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:c6089aa459159558b580",
+      "source_node_id": "SN:6a7db4980ab15832dbd5",
+      "target_node_id": "SN:42d7fc3ccbe3e506acfe"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:e8382439b75b2f4e0b2b",
+      "source_node_id": "SN:6aa2370b8b12d48ebb78",
+      "target_node_id": "SN:344dbfb82cde9449a355"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:8a9d160cc54ee9923580",
+      "source_node_id": "SN:6b685cdf6a23d051dd52",
+      "target_node_id": "SN:02d056fdaa4a75fba925"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:70e54b8c437c0a665e70",
+      "source_node_id": "SN:6c022751b11ca540c9e9",
+      "target_node_id": "SN:1dfe633360b09b369567"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:25dd57a4e9964c9f7012",
+      "source_node_id": "SN:6e509beb482309e18449",
+      "target_node_id": "SN:92c6b002d457e680f9c0"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:84b81a2857a3d7d53c1d",
+      "source_node_id": "SN:6e509beb482309e18449",
+      "target_node_id": "SN:98953925c8e3c7870cfc"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:c0dc3dc10e12d53280a3",
+      "source_node_id": "SN:6e509beb482309e18449",
+      "target_node_id": "SN:d0eaed28df77609ef4a5"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:b5ec2af058e81f9c5992",
+      "source_node_id": "SN:7230784e32dfc4ec387f",
+      "target_node_id": "SN:4afd468a8dc18d0a7be3"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:191857cc5216c2a34751",
+      "source_node_id": "SN:7db32d93cf18714d88ec",
+      "target_node_id": "SN:0bab1bb24d28fb3ac418"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:ad84dfcf133f8e28f641",
+      "source_node_id": "SN:81608d232f7fa5b2a4bb",
+      "target_node_id": "SN:aef5956b203526bafa40"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:ca4b70b0e0b537e6e7b9",
+      "source_node_id": "SN:83858b3bdd73c8b3c143",
+      "target_node_id": "SN:997d4dee6eba8e326246"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:679f9378ce29d1927054",
+      "source_node_id": "SN:850592bfde17f84bbdd7",
+      "target_node_id": "SN:178c6ea1b2d1a81cec62"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:79fe76d3952e9bda4566",
+      "source_node_id": "SN:850592bfde17f84bbdd7",
+      "target_node_id": "SN:511675d340f0a581bf05"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:7c1d311bcd50c511f5af",
+      "source_node_id": "SN:850592bfde17f84bbdd7",
+      "target_node_id": "SN:f128b8753633763507b9"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:7c402fc35fa1704b43cb",
+      "source_node_id": "SN:910f80ce5603a47658e9",
+      "target_node_id": "SN:4afd468a8dc18d0a7be3"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:08e39788654c4e336a7d",
+      "source_node_id": "SN:94e77247b649271feaf6",
+      "target_node_id": "SN:42d7fc3ccbe3e506acfe"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:31f8f5fc3df7e21c3a7f",
+      "source_node_id": "SN:9ba772e81952ce3adf9b",
+      "target_node_id": "SN:c576820df260dccaf610"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:b82f49324dd401984957",
+      "source_node_id": "SN:a052580806bff7e9425a",
+      "target_node_id": "SN:98dc1444ddd3227a6232"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:481eb1edaccf3fec0b34",
+      "source_node_id": "SN:a0e90584a4442c646cbc",
+      "target_node_id": "SN:c576820df260dccaf610"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:4895eec9f3290402353d",
+      "source_node_id": "SN:a1eafc9ba09a873cca6e",
+      "target_node_id": "SN:1dfe633360b09b369567"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:f284449183e8fcdcd540",
+      "source_node_id": "SN:a52b8f4ad9ce90c94de3",
+      "target_node_id": "SN:c576820df260dccaf610"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:30c34393c6da9833dd5f",
+      "source_node_id": "SN:a85cc59e3f0bef976149",
+      "target_node_id": "SN:7fe45a8bb2693e7bb4b5"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:b212076c3974ccc6fa92",
+      "source_node_id": "SN:a8e3a88846c786598e4c",
+      "target_node_id": "SN:1dfe633360b09b369567"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:dbc01a93c457ddbfe434",
+      "source_node_id": "SN:ad353c971eee14ccdf09",
+      "target_node_id": "SN:42d7fc3ccbe3e506acfe"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:f583098319b45674d121",
+      "source_node_id": "SN:aef5956b203526bafa40",
+      "target_node_id": "SN:0cb2fb7561d88270fa5e"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:3fd723df0fffbefe3906",
+      "source_node_id": "SN:aef5956b203526bafa40",
+      "target_node_id": "SN:1dfe633360b09b369567"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:1d99e8f0fcf13abab236",
+      "source_node_id": "SN:aef5956b203526bafa40",
+      "target_node_id": "SN:4afd468a8dc18d0a7be3"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:f97ef32a362deffd8b7c",
+      "source_node_id": "SN:aef5956b203526bafa40",
+      "target_node_id": "SN:4c5a8c95644d39649748"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:bc9c4544cbcfc3b7e9c6",
+      "source_node_id": "SN:aef5956b203526bafa40",
+      "target_node_id": "SN:5780003953b657578df6"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:9d30f43de4505588538f",
+      "source_node_id": "SN:aef5956b203526bafa40",
+      "target_node_id": "SN:850592bfde17f84bbdd7"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:4d84bbd158c90f34cdbf",
+      "source_node_id": "SN:aef5956b203526bafa40",
+      "target_node_id": "SN:a00f18cc2fd691b64ddd"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:9a87866298d7751d9e7d",
+      "source_node_id": "SN:aef5956b203526bafa40",
+      "target_node_id": "SN:b22470c39650db9930c0"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:c37cbb66ba278cb3f936",
+      "source_node_id": "SN:aef5956b203526bafa40",
+      "target_node_id": "SN:b4ccbc727bd5dfdac04c"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:7730c3232855aeaafed2",
+      "source_node_id": "SN:aef5956b203526bafa40",
+      "target_node_id": "SN:b89570f946bc99427e67"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:77f992192d43db3b16db",
+      "source_node_id": "SN:aef5956b203526bafa40",
+      "target_node_id": "SN:c13fbb8af4504882a1b5"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:644063212d8d6a64362b",
+      "source_node_id": "SN:aef5956b203526bafa40",
+      "target_node_id": "SN:c7750a41071b05e05447"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:ba3af101acf25e2fd73e",
+      "source_node_id": "SN:aef5956b203526bafa40",
+      "target_node_id": "SN:dc6d0774af514668636e"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:175958bf2036bf19443d",
+      "source_node_id": "SN:aef5956b203526bafa40",
+      "target_node_id": "SN:fe178a3ea1dc3658e9d6"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:cc2a066808ca124d9a21",
+      "source_node_id": "SN:b22470c39650db9930c0",
+      "target_node_id": "SN:7e87c364f43827990953"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:21c6196bde3b0caaacfa",
+      "source_node_id": "SN:b22470c39650db9930c0",
+      "target_node_id": "SN:b0df3781d8dcbffe77df"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:6527b3854219a745d699",
+      "source_node_id": "SN:b2ff9cc996a5c0747781",
+      "target_node_id": "SN:476abc02585252df8b05"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:291ee5a7c852bb6455c0",
+      "source_node_id": "SN:b3dc3ec2353dea260c07",
+      "target_node_id": "SN:812dcea242136da183a1"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:1893a93bc639782d9308",
+      "source_node_id": "SN:b8300b58e52e9cb0da43",
+      "target_node_id": "SN:4461847a6d2a997327a6"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:292f92eeed8634c2e4eb",
+      "source_node_id": "SN:bd9099fb6df4ed2e75f3",
+      "target_node_id": "SN:02d056fdaa4a75fba925"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:480ea394e21496264216",
+      "source_node_id": "SN:c13fbb8af4504882a1b5",
+      "target_node_id": "SN:171358a98ddd7180df34"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:9e826c2f719b9c7f2775",
+      "source_node_id": "SN:c13fbb8af4504882a1b5",
+      "target_node_id": "SN:6e509beb482309e18449"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:2a9afe0572144d7cf7f8",
+      "source_node_id": "SN:c13fbb8af4504882a1b5",
+      "target_node_id": "SN:c2b5ad42a4df9b8a3d16"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:7d2545e0dd02261d8a2e",
+      "source_node_id": "SN:c13fbb8af4504882a1b5",
+      "target_node_id": "SN:dd606cfecc342057f4dd"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:630b01009e994c31126d",
+      "source_node_id": "SN:c13fbb8af4504882a1b5",
+      "target_node_id": "SN:e1c6be29ccc5261ebc89"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:688e08710f4b00f7989b",
+      "source_node_id": "SN:c6449d004827075859b3",
+      "target_node_id": "SN:c576820df260dccaf610"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:0bff6e23e8eaabbcb968",
+      "source_node_id": "SN:c679cade70653a4179c8",
+      "target_node_id": "SN:aef5956b203526bafa40"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:e64cec14ae0c59bc41bc",
+      "source_node_id": "SN:c679cade70653a4179c8",
+      "target_node_id": "SN:aef5956b203526bafa40"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:47daffcf69e86a084504",
+      "source_node_id": "SN:cd19a132349ceeb5eb5a",
+      "target_node_id": "SN:aef5956b203526bafa40"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:ee4cfc400c41e2401d2f",
+      "source_node_id": "SN:cd19a132349ceeb5eb5a",
+      "target_node_id": "SN:aef5956b203526bafa40"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:bbb9b00ddefa40ce3940",
+      "source_node_id": "SN:dd606cfecc342057f4dd",
+      "target_node_id": "SN:4d32d2ad019fa97d46df"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:eeec9b56e23c6e8cb528",
+      "source_node_id": "SN:dd606cfecc342057f4dd",
+      "target_node_id": "SN:53141fc8a3eebabaa143"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:e763cd489dd58db241b0",
+      "source_node_id": "SN:dd606cfecc342057f4dd",
+      "target_node_id": "SN:547608171365d95e44f3"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:fdd71ec49f9b720a9e11",
+      "source_node_id": "SN:dd606cfecc342057f4dd",
+      "target_node_id": "SN:9e87d7b9b0c1a386b75f"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:97e4aad21a182886070c",
+      "source_node_id": "SN:e5c5f37fd85a7c49185e",
+      "target_node_id": "SN:98dc1444ddd3227a6232"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:1879b052373e02802670",
+      "source_node_id": "SN:ee9f732179c0e1633115",
+      "target_node_id": "SN:c7750a41071b05e05447"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:41e179b5c57dd8ff743e",
+      "source_node_id": "SN:ee9f732179c0e1633115",
+      "target_node_id": "SN:c7750a41071b05e05447"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:d411b361cd226673b121",
+      "source_node_id": "SN:ef861a5c6adac990706a",
+      "target_node_id": "SN:aef5956b203526bafa40"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:7af2f23a394994df23fc",
+      "source_node_id": "SN:ef861a5c6adac990706a",
+      "target_node_id": "SN:aef5956b203526bafa40"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:0c63554d535f5fada1ec",
+      "source_node_id": "SN:f0a5f000d552fea0bf5c",
+      "target_node_id": "SN:7fe45a8bb2693e7bb4b5"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:5d0f44943436ec07ce28",
+      "source_node_id": "SN:f2df16bc9ec130fc402f",
+      "target_node_id": "SN:1dfe633360b09b369567"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:9d58681f1fc77f31cf99",
+      "source_node_id": "SN:f450393f209be274e259",
+      "target_node_id": "SN:c576820df260dccaf610"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:616c41f3b5d8958d1ae5",
+      "source_node_id": "SN:fe178a3ea1dc3658e9d6",
+      "target_node_id": "SN:7bf202bb41620f4396af"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:f1244d56bf0676962d6b",
+      "source_node_id": "SN:fe732a55cf2fc4f6c90c",
+      "target_node_id": "SN:7fe45a8bb2693e7bb4b5"
+    },
+    {
+      "operation": "added",
+      "relation": "references",
+      "relation_id": "SRG:c626681d340927869292",
+      "source_node_id": "SN:fec998be27e1a25511dd",
+      "target_node_id": "SN:7fe45a8bb2693e7bb4b5"
+    }
+  ],
+  "repository": "repodelta/repodelta",
+  "schema_version": "structural_correctness_packet.v2",
+  "subjects": [
+    {
+      "authored_statement": "The installable Python distribution, import package, executable command, generated report brand, supported environment variables, documentation, tests, fixtures that describe current interfaces, and GitHub workflows use RepoDelta consistently.",
+      "subject_id": "R1",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "A fresh installation exposes repodelta and does not require or advertise a prismcode executable or import package.",
+      "subject_id": "R2",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "Supported LLM and workflow configuration uses the REPODELTA_ namespace.",
+      "subject_id": "R3",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "Generated HTML and newly generated artifacts identify RepoDelta without changing deterministic review semantics.",
+      "subject_id": "R4",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "Current documentation distinguishes the temporary GitHub installation path from the future PyPI repodelta release.",
+      "subject_id": "R5",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "Repository checks fail if a stale supported PrismCode product identity or live import/command path is reintroduced.",
+      "subject_id": "R6",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "Preserve historical PR, Issue, commit, and recorded campaign evidence rather than rewriting their original source text or old repository paths.",
+      "subject_id": "G1",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "Do not change review, assessment, graph, LLM-shadow, or security semantics as part of the rename.",
+      "subject_id": "G2",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "Do not rename the GitHub repository before the rename tree is merged; existing links must remain usable during the transition.",
+      "subject_id": "G3",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "Do not claim that the PyPI package, GitHub organization, or domain has been reserved until registration actually succeeds.",
+      "subject_id": "G4",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "Rewriting historical GitHub records and recorded evidence, purchasing a domain, publishing to PyPI, renaming or transferring the GitHub repository, and changing product behavior beyond identity migration.",
+      "subject_id": "G5",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "The distribution, Python package, CLI, environment variables, generated HTML, workflows, documentation, and README assets still exposed the crowded PrismCode name. A mechanical global rewrite would also falsify frozen evaluation packets, source provenance, and historical PR/Issue references.",
+      "subject_id": "T1",
+      "subject_kind": "transformation_claim"
+    },
+    {
+      "authored_statement": "publishes the distribution and Python package as repodelta version 0.1.0;",
+      "subject_id": "T2",
+      "subject_kind": "transformation_claim"
+    },
+    {
+      "authored_statement": "exposes only the repodelta CLI and REPODELTA_LLM_ configuration surface;",
+      "subject_id": "T3",
+      "subject_kind": "transformation_claim"
+    },
+    {
+      "authored_statement": "migrates imports, runtime identifiers, temporary workspace/ref namespaces, workflows, tests, generated HTML branding, docs, license text, links, and README assets;",
+      "subject_id": "T4",
+      "subject_kind": "transformation_claim"
+    },
+    {
+      "authored_statement": "updates onboarding to the future repodelta/repodelta repository identity and a one-time isolated pipx installation;",
+      "subject_id": "T5",
+      "subject_kind": "transformation_claim"
+    },
+    {
+      "authored_statement": "regenerates the README overview from a real report produced by the renamed package;",
+      "subject_id": "T6",
+      "subject_kind": "transformation_claim"
+    },
+    {
+      "authored_statement": "adds a repository identity gate that rejects stale supported identity while explicitly allowing provenance and frozen evaluation artifacts;",
+      "subject_id": "T7",
+      "subject_kind": "transformation_claim"
+    },
+    {
+      "authored_statement": "preserves historical repository names, paths, PR/Issue URLs, and labeling/observation packets where changing them would alter evidence identity.",
+      "subject_id": "T8",
+      "subject_kind": "transformation_claim"
+    },
+    {
+      "authored_statement": "This is an intentional clean pre-launch break. There is no legacy executable, import package, or environment-variable alias.",
+      "subject_id": "T9",
+      "subject_kind": "transformation_claim"
+    }
+  ],
+  "symbols": [
+    {
+      "file_node_id": "SN:678917a3b60ca075eb43",
+      "node_id": "SN:fe732a55cf2fc4f6c90c",
+      "operation": "added",
+      "path": "tests/test_product_identity.py",
+      "qualified_name": "CURRENT_TEXT_ROOTS",
+      "symbol_kind": "variable"
+    },
+    {
+      "file_node_id": "SN:cd19a132349ceeb5eb5a",
+      "node_id": "SN:6b685cdf6a23d051dd52",
+      "operation": "modified",
+      "path": "tests/test_cli_structural_mapping.py",
+      "qualified_name": "test_cli_shadow_without_provider_is_unavailable_and_fail_closed",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:a8e3a88846c786598e4c",
+      "node_id": "SN:6a2f25fd76287696671e",
+      "operation": "modified",
+      "path": "tests/test_closure_scanning.py",
+      "qualified_name": "test_scoped_removal_ignores_same_symbol_outside_declared_path",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "node_id": "SN:ce30a29a4c65eaa83412",
+      "operation": "modified",
+      "path": "tests/test_projection.py",
+      "qualified_name": "test_architectural_component_owns_internal_graph_relation_membership",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:aef5956b203526bafa40",
+      "node_id": "SN:b0df3781d8dcbffe77df",
+      "operation": "renamed",
+      "path": "src/repodelta/cli.py",
+      "qualified_name": "_openai_shadow_provider_from_env",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:aef5956b203526bafa40",
+      "node_id": "SN:b22470c39650db9930c0",
+      "operation": "renamed",
+      "path": "src/repodelta/cli.py",
+      "qualified_name": "main",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:23f3671fb2b03d2dca66",
+      "node_id": "SN:a052580806bff7e9425a",
+      "operation": "modified",
+      "path": "tests/test_llm_shadow_comparison.py",
+      "qualified_name": "test_compare_shadow_cli_renders_offline_report",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:153e8a4593165e30d01d",
+      "node_id": "SN:9ac674e272c6dcfd09e6",
+      "operation": "modified",
+      "path": "tests/test_llm_shadow_contract.py",
+      "qualified_name": "test_shadow_candidate_membership_has_one_production_authority",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:850592bfde17f84bbdd7",
+      "node_id": "SN:e13ddd13ac0415756885",
+      "operation": "renamed",
+      "path": "src/repodelta/evaluation/comparison.py",
+      "qualified_name": "_render",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:a8e3a88846c786598e4c",
+      "node_id": "SN:e222d6da9178cbd37c92",
+      "operation": "modified",
+      "path": "tests/test_closure_scanning.py",
+      "qualified_name": "_repository",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:428c5b2228ae93521c5f",
+      "node_id": "SN:5fa953461a066467ec92",
+      "operation": "modified",
+      "path": "tests/test_llm_shadow_campaign_v2.py",
+      "qualified_name": "test_campaign_v2_freezes_complete_pre_execution_reference_labels",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:b4ccbc727bd5dfdac04c",
+      "node_id": "SN:5b70c8db1d015573fc0f",
+      "operation": "renamed",
+      "path": "src/repodelta/intake/github.py",
+      "qualified_name": "GitHubClient::get_json",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:3f881c64e737adf18462",
+      "node_id": "SN:4f6cf6e450ac7393340a",
+      "operation": "modified",
+      "path": "tests/test_transformation_alignment.py",
+      "qualified_name": "test_pipeline_builds_transformation_alignment_once",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:6a7db4980ab15832dbd5",
+      "node_id": "SN:0c89200287f78d1c3bfd",
+      "operation": "modified",
+      "path": "tests/test_pipeline_architecture.py",
+      "qualified_name": "test_stage_dependencies_follow_the_canonical_pipeline",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:678917a3b60ca075eb43",
+      "node_id": "SN:fec998be27e1a25511dd",
+      "operation": "added",
+      "path": "tests/test_product_identity.py",
+      "qualified_name": "CURRENT_TEXT_FILES",
+      "symbol_kind": "variable"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "node_id": "SN:5857164efbf2a276c31f",
+      "operation": "modified",
+      "path": "tests/test_projection.py",
+      "qualified_name": "test_architectural_topology_groups_canonical_nodes_and_cross_component_flow",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:2eb6be5bd1c720ffbd70",
+      "node_id": "SN:daa8bf4ce9bd8b99859f",
+      "operation": "modified",
+      "path": "tests/test_llm_openai_provider.py",
+      "qualified_name": "test_openai_transport_classifies_url_failures_without_reason_text",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ef861a5c6adac990706a",
+      "node_id": "SN:7f672b59c1d10c6f4ae8",
+      "operation": "modified",
+      "path": "tests/test_evaluation.py",
+      "qualified_name": "test_wrong_focus_expectation_fails_the_gate_and_cli",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ad353c971eee14ccdf09",
+      "node_id": "SN:6cb1882afafb25fc2133",
+      "operation": "modified",
+      "path": "tests/test_observed_transformation.py",
+      "qualified_name": "test_pipeline_reconstructs_observed_state_once",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:e07680b66a5b2177f906",
+      "operation": "modified",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "test_remote_review_rejects_revision_mismatch_and_removes_source",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f238a5f8f8eb04a7c426",
+      "node_id": "SN:cef7ccb821c858bc77ec",
+      "operation": "modified",
+      "path": "tests/test_transformation_assessment.py",
+      "qualified_name": "test_pipeline_builds_transformation_assessment_once",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ae7121776b87c1b88668",
+      "node_id": "SN:30b3fbed5ef39a8c8dff",
+      "operation": "modified",
+      "path": "tests/test_structural_graph.py",
+      "qualified_name": "test_live_review_checkout_must_match_expected_head",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:2eb6be5bd1c720ffbd70",
+      "node_id": "SN:ad321aca895eccfa62e1",
+      "operation": "modified",
+      "path": "tests/test_llm_openai_provider.py",
+      "qualified_name": "test_cli_config_rejects_invalid_execution_policy_env",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c679cade70653a4179c8",
+      "node_id": "SN:65f2bddea43702f029e9",
+      "operation": "modified",
+      "path": "tests/test_cli_live_workspace.py",
+      "qualified_name": "_repository",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:678917a3b60ca075eb43",
+      "node_id": "SN:7db32d93cf18714d88ec",
+      "operation": "added",
+      "path": "tests/test_product_identity.py",
+      "qualified_name": "test_supported_tree_has_one_repodelta_product_identity",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:61d2acd939f7ba91aafe",
+      "node_id": "SN:39bd492ab70f0642fe9a",
+      "operation": "renamed",
+      "path": "src/repodelta/llm/openai.py",
+      "qualified_name": "_response_format",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:b4ccbc727bd5dfdac04c",
+      "node_id": "SN:c5136fe5fe2196f498e0",
+      "operation": "retained",
+      "path": "src/repodelta/intake/github.py",
+      "qualified_name": "GitHubClient",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:cd19a132349ceeb5eb5a",
+      "node_id": "SN:bd9099fb6df4ed2e75f3",
+      "operation": "modified",
+      "path": "tests/test_cli_structural_mapping.py",
+      "qualified_name": "test_cli_prepares_labeling_packet_without_invoking_provider",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:d3dd8dd378028ccd5d51",
+      "operation": "modified",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "FakeRunner::__init__",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:2eb6be5bd1c720ffbd70",
+      "node_id": "SN:7a9f88060c0ba98a8c99",
+      "operation": "modified",
+      "path": "tests/test_llm_openai_provider.py",
+      "qualified_name": "test_cli_config_requires_explicit_key_and_model",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1dfe633360b09b369567",
+      "node_id": "SN:af9530a3c482c37e3f1d",
+      "operation": "renamed",
+      "path": "src/repodelta/presentation/html.py",
+      "qualified_name": "render_html",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:6c022751b11ca540c9e9",
+      "node_id": "SN:18905dad25b06e44ae4a",
+      "operation": "modified",
+      "path": "tests/test_closure_planning.py",
+      "qualified_name": "test_unmarked_removal_does_not_reconstruct_executable_targets",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:2eb6be5bd1c720ffbd70",
+      "node_id": "SN:c05f18677a67380bf877",
+      "operation": "modified",
+      "path": "tests/test_llm_openai_provider.py",
+      "qualified_name": "test_openai_transport_classifies_response_decode_without_body_text",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:b4ccbc727bd5dfdac04c",
+      "node_id": "SN:8021ad6b6262d0868a7a",
+      "operation": "renamed",
+      "path": "src/repodelta/intake/github.py",
+      "qualified_name": "_LINKED_ISSUES_QUERY",
+      "symbol_kind": "variable"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:48e5be66da52dd920ef0",
+      "operation": "modified",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "test_remote_no_structural_review_fetches_only_head",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:678917a3b60ca075eb43",
+      "node_id": "SN:7fe45a8bb2693e7bb4b5",
+      "operation": "added",
+      "path": "tests/test_product_identity.py",
+      "qualified_name": "ROOT",
+      "symbol_kind": "variable"
+    },
+    {
+      "file_node_id": "SN:23f3671fb2b03d2dca66",
+      "node_id": "SN:98dc1444ddd3227a6232",
+      "operation": "modified",
+      "path": "tests/test_llm_shadow_comparison.py",
+      "qualified_name": "_packet",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:cd19a132349ceeb5eb5a",
+      "node_id": "SN:02d056fdaa4a75fba925",
+      "operation": "modified",
+      "path": "tests/test_cli_structural_mapping.py",
+      "qualified_name": "_run_cli",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c7750a41071b05e05447",
+      "node_id": "SN:e5c678a185d2a3457ab4",
+      "operation": "renamed",
+      "path": "src/repodelta/providers/workspace.py",
+      "qualified_name": "remote_review_roots",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:fb59d4c4600b15c3c61b",
+      "node_id": "SN:a36e3b02f7f28d74894b",
+      "operation": "modified",
+      "path": "tests/test_semantic_authority.py",
+      "qualified_name": "test_context_and_typed_claims_use_the_canonical_binding_path",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:b42a6abb614a25065834",
+      "operation": "modified",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "test_remote_review_fetches_exact_private_revisions_without_persisting_token",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:fb59d4c4600b15c3c61b",
+      "node_id": "SN:9c01f53bc2a0ab548e0f",
+      "operation": "modified",
+      "path": "tests/test_semantic_authority.py",
+      "qualified_name": "test_transformation_predicates_preserve_path_scope_role",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:23f3671fb2b03d2dca66",
+      "node_id": "SN:e5c5f37fd85a7c49185e",
+      "operation": "modified",
+      "path": "tests/test_llm_shadow_comparison.py",
+      "qualified_name": "test_comparison_html_is_stable_and_exposes_semantic_recovery",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:678917a3b60ca075eb43",
+      "node_id": "SN:a85cc59e3f0bef976149",
+      "operation": "added",
+      "path": "tests/test_product_identity.py",
+      "qualified_name": "HISTORICAL_TEXT_ROOTS",
+      "symbol_kind": "variable"
+    },
+    {
+      "file_node_id": "SN:ef861a5c6adac990706a",
+      "node_id": "SN:51e3fadb18c4a4a50a33",
+      "operation": "modified",
+      "path": "tests/test_evaluation.py",
+      "qualified_name": "test_wrong_slot_expectation_fails_the_gate_and_cli",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ac110e568958ef160af3",
+      "node_id": "SN:e61c2876cf55bd899616",
+      "operation": "added",
+      "path": "src/repodelta/__init__.py",
+      "qualified_name": "__version__",
+      "symbol_kind": "variable"
+    },
+    {
+      "file_node_id": "SN:6c022751b11ca540c9e9",
+      "node_id": "SN:0632f461131ee09969d7",
+      "operation": "modified",
+      "path": "tests/test_closure_planning.py",
+      "qualified_name": "test_planning_conjoins_exact_target_with_path_scope",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c679cade70653a4179c8",
+      "node_id": "SN:274261f5ca6a951f3acf",
+      "operation": "modified",
+      "path": "tests/test_cli_live_workspace.py",
+      "qualified_name": "_run",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:aef5956b203526bafa40",
+      "node_id": "SN:7e87c364f43827990953",
+      "operation": "renamed",
+      "path": "src/repodelta/cli.py",
+      "qualified_name": "build_parser",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:b4ccbc727bd5dfdac04c",
+      "node_id": "SN:9aaa3d3b423e26b453c7",
+      "operation": "renamed",
+      "path": "src/repodelta/intake/github.py",
+      "qualified_name": "GitHubClient::post_graphql",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:ae7121776b87c1b88668",
+      "node_id": "SN:e82301aa309ebdda6ac8",
+      "operation": "modified",
+      "path": "tests/test_structural_graph.py",
+      "qualified_name": "test_stale_base_revision_preserves_head_and_excludes_base_facts",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:dd3c7e7152f9e53043bf",
+      "operation": "retained",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "FakeRunner",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:6a7db4980ab15832dbd5",
+      "node_id": "SN:dd8897d132ae68153aa0",
+      "operation": "modified",
+      "path": "tests/test_pipeline_architecture.py",
+      "qualified_name": "SOURCE",
+      "symbol_kind": "variable"
+    },
+    {
+      "file_node_id": "SN:ee9f732179c0e1633115",
+      "node_id": "SN:b8843cc1a4484a3cc9d7",
+      "operation": "modified",
+      "path": "tests/test_codegraph_workspace.py",
+      "qualified_name": "test_live_review_workflow_uses_default_remote_workspace",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:678917a3b60ca075eb43",
+      "node_id": "SN:0bab1bb24d28fb3ac418",
+      "operation": "added",
+      "path": "tests/test_product_identity.py",
+      "qualified_name": "_current_text_paths",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:678917a3b60ca075eb43",
+      "node_id": "SN:89e14a246b548d1a0bc8",
+      "operation": "added",
+      "path": "tests/test_product_identity.py",
+      "qualified_name": "TEXT_SUFFIXES",
+      "symbol_kind": "variable"
+    },
+    {
+      "file_node_id": "SN:c7750a41071b05e05447",
+      "node_id": "SN:884f425030e5517661bc",
+      "operation": "renamed",
+      "path": "src/repodelta/providers/workspace.py",
+      "qualified_name": "isolated_review_roots",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:4c5a8c95644d39649748",
+      "node_id": "SN:c9993135c4809468ebaf",
+      "operation": "renamed",
+      "path": "src/repodelta/evaluation/core.py",
+      "qualified_name": "write_evaluation_markdown",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:a8e3a88846c786598e4c",
+      "node_id": "SN:435927c58d226e9c9bd7",
+      "operation": "modified",
+      "path": "tests/test_closure_scanning.py",
+      "qualified_name": "test_removal_scan_preserves_base_head_transition_and_path_profiles",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:153e8a4593165e30d01d",
+      "node_id": "SN:24bc917153f7a26fb404",
+      "operation": "modified",
+      "path": "tests/test_llm_shadow_contract.py",
+      "qualified_name": "test_shadow_contract_has_only_cli_execution_authority",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c714bdf5d95d64d29333",
+      "node_id": "SN:2ac75cb091541d04eb3e",
+      "operation": "modified",
+      "path": "tests/test_transformation_closure.py",
+      "qualified_name": "test_pipeline_builds_transformation_closure_once",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:678917a3b60ca075eb43",
+      "node_id": "SN:f0a5f000d552fea0bf5c",
+      "operation": "added",
+      "path": "tests/test_product_identity.py",
+      "qualified_name": "HISTORICAL_TEXT_FILES",
+      "symbol_kind": "variable"
+    },
+    {
+      "file_node_id": "SN:c576820df260dccaf610",
+      "node_id": "SN:b9b5a167bdd5abe109b8",
+      "operation": "renamed",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "ReviewBrief",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:ef861a5c6adac990706a",
+      "node_id": "SN:cf3e356f321c44c0d44e",
+      "operation": "modified",
+      "path": "tests/test_evaluation.py",
+      "qualified_name": "test_wrong_assessment_expectation_fails_the_gate_and_cli",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:a065ad3210587aafcb4d",
+      "node_id": "SN:5df35248a15eb98ecf2f",
+      "operation": "modified",
+      "path": "tests/test_transformation_subjects.py",
+      "qualified_name": "test_pipeline_builds_transformation_subject_selection_once",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:2eb6be5bd1c720ffbd70",
+      "node_id": "SN:2ee1f894d761c21123bd",
+      "operation": "modified",
+      "path": "tests/test_llm_openai_provider.py",
+      "qualified_name": "test_openai_transport_classifies_http_failures_without_response_text",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:d0d2a8ecf37f73d992b5",
+      "node_id": "SN:3a6272aa1f68f3154188",
+      "operation": "removed",
+      "path": "src/prismcode/__init__.py",
+      "qualified_name": "__version__",
+      "symbol_kind": "variable"
+    },
+    {
+      "file_node_id": "SN:678917a3b60ca075eb43",
+      "node_id": "SN:e97a6d222ff3cc601566",
+      "operation": "added",
+      "path": "tests/test_product_identity.py",
+      "qualified_name": "_is_historical",
+      "symbol_kind": "function"
+    }
+  ]
+}
