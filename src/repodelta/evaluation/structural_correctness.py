@@ -7,12 +7,16 @@ from html import escape
 from pathlib import Path
 from typing import Any, Literal, Mapping
 
-from repodelta.model.contracts import ReviewBrief
+from repodelta.model.contracts import (
+    ReviewBrief,
+    StructuralOverviewFocus,
+    VerificationEvidenceInspection,
+)
 
 
 PACKET_SCHEMA = "structural_correctness_packet.v2"
-OBSERVATION_SCHEMA = "structural_correctness_observation.v1"
-LABELS_SCHEMA = "structural_correctness_labels.v1"
+OBSERVATION_SCHEMA = "structural_correctness_observation.v2"
+LABELS_SCHEMA = "structural_correctness_labels.v2"
 
 
 @dataclass(frozen=True)
@@ -111,6 +115,9 @@ class ObservedFocus:
     context_file_node_ids: tuple[str, ...]
     relation_ids: tuple[str, ...]
     disposition_state: str
+    direct_node_ids: tuple[str, ...] = ()
+    context_node_ids: tuple[str, ...] = ()
+    exact_relation_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -138,6 +145,9 @@ class HumanFocusLabel:
     context_file_node_ids: tuple[str, ...] = ()
     unresolved: bool = False
     equivalent_to: tuple[str, ...] = ()
+    direct_node_ids: tuple[str, ...] = ()
+    context_node_ids: tuple[str, ...] = ()
+    relation_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -274,19 +284,74 @@ def observe_structural_correctness(
     if current != packet:
         raise ValueError("structural correctness packet does not match current review")
     overview = brief.projection.structural_overview
+    inspections = {
+        item.subject_id: item
+        for item in brief.projection.verification_workspace.inspections
+    }
+    relation_group_by_edge_id = {
+        edge_id: group.id
+        for group in brief.projection.review_graph.relation_groups
+        for edge_id in group.member_edge_ids
+    }
     return StructuralCorrectnessObservation(
         packet_digest=packet.digest,
         files=tuple(ObservedFile(item.file_node_id, item.role) for item in overview.files),
         focuses=tuple(
-            ObservedFocus(
-                item.subject_id,
-                item.direct_file_node_ids,
-                item.context_file_node_ids,
-                item.relation_ids,
-                item.structural_disposition.state,
+            _observe_focus(
+                item,
+                inspections.get(item.subject_id),
+                relation_group_by_edge_id,
             )
             for item in overview.focuses
         ),
+    )
+
+
+def _observe_focus(
+    overview_focus: StructuralOverviewFocus,
+    inspection: VerificationEvidenceInspection | None,
+    relation_group_by_edge_id: Mapping[str, str],
+) -> ObservedFocus:
+    overlay = inspection.structural_overlay if inspection is not None else None
+    direct_node_ids = ()
+    context_node_ids = ()
+    exact_relation_ids = ()
+    if overlay is not None:
+        direct_node_ids = tuple(
+            sorted(
+                item.node_id
+                for item in overlay.nodes
+                if item.role != "intermediate"
+            )
+        )
+        context_node_ids = tuple(
+            sorted(
+                item.node_id
+                for item in overlay.nodes
+                if item.role == "intermediate"
+            )
+        )
+        exact_relation_ids = tuple(
+            sorted(
+                {
+                    *overlay.relation_group_ids,
+                    *(
+                        relation_group_by_edge_id[edge_id]
+                        for edge_id in overlay.edge_ids
+                        if edge_id in relation_group_by_edge_id
+                    ),
+                }
+            )
+        )
+    return ObservedFocus(
+        overview_focus.subject_id,
+        overview_focus.direct_file_node_ids,
+        overview_focus.context_file_node_ids,
+        overview_focus.relation_ids,
+        overview_focus.structural_disposition.state,
+        direct_node_ids,
+        context_node_ids,
+        exact_relation_ids,
     )
 
 
@@ -374,6 +439,9 @@ def load_observation(path: str | Path) -> StructuralCorrectnessObservation:
                 _strings(item.get("context_file_node_ids", [])),
                 _strings(item.get("relation_ids", [])),
                 _string(item, "disposition_state"),
+                _strings(item.get("direct_node_ids", [])),
+                _strings(item.get("context_node_ids", [])),
+                _strings(item.get("exact_relation_ids", [])),
             )
             for item in _objects(raw, "focuses")
         ),
@@ -402,6 +470,9 @@ def load_labels(
                 _strings(item.get("context_file_node_ids", [])),
                 bool(item.get("unresolved", False)),
                 _strings(item.get("equivalent_to", [])),
+                _strings(item.get("direct_node_ids", [])),
+                _strings(item.get("context_node_ids", [])),
+                _strings(item.get("relation_ids", [])),
             )
             for item in _objects(raw, "focuses")
         ),
@@ -435,6 +506,8 @@ def _validate_labels(
     if labels.packet_digest != packet.digest:
         raise ValueError("structural labels do not match frozen packet")
     candidate_ids = {item.file_node_id for item in packet.candidates}
+    node_ids = candidate_ids | {item.node_id for item in packet.symbols}
+    relation_ids = {item.relation_id for item in packet.relations}
     subject_ids = {item.subject_id for item in packet.subjects}
     _unique((item.file_node_id for item in labels.files), "file labels")
     _unique((item.subject_id for item in labels.focuses), "focus labels")
@@ -453,11 +526,23 @@ def _validate_labels(
         if item.disposition != "included" and item.role is not None:
             raise ValueError("excluded or unresolved file cannot carry a role")
     for item in labels.focuses:
-        memberships = {*item.direct_file_node_ids, *item.context_file_node_ids}
-        if not memberships <= candidate_ids:
+        file_memberships = {
+            *item.direct_file_node_ids,
+            *item.context_file_node_ids,
+        }
+        node_memberships = {*item.direct_node_ids, *item.context_node_ids}
+        if not file_memberships <= candidate_ids:
             raise ValueError("focus labels contain unknown candidate files")
+        if not node_memberships <= node_ids:
+            raise ValueError("focus labels contain unknown candidate nodes")
+        if not set(item.relation_ids) <= relation_ids:
+            raise ValueError("focus labels contain unknown candidate relations")
         if set(item.direct_file_node_ids) & set(item.context_file_node_ids):
             raise ValueError("focus direct and context memberships must be distinct")
+        if set(item.direct_node_ids) & set(item.context_node_ids):
+            raise ValueError(
+                "focus direct and context node memberships must be distinct"
+            )
         if not set(item.equivalent_to) <= subject_ids - {item.subject_id}:
             raise ValueError("focus equivalence contains unknown subjects")
         for peer_id in item.equivalent_to:
@@ -466,10 +551,16 @@ def _validate_labels(
                 set(item.direct_file_node_ids),
                 set(item.context_file_node_ids),
                 item.unresolved,
+                set(item.direct_node_ids),
+                set(item.context_node_ids),
+                set(item.relation_ids),
             ) != (
                 set(peer.direct_file_node_ids),
                 set(peer.context_file_node_ids),
                 peer.unresolved,
+                set(peer.direct_node_ids),
+                set(peer.context_node_ids),
+                set(peer.relation_ids),
             ):
                 raise ValueError("equivalent focuses must have equal human memberships")
 
@@ -479,6 +570,8 @@ def _validate_observation(
     packet: StructuralCorrectnessPacket,
 ) -> None:
     candidate_ids = {item.file_node_id for item in packet.candidates}
+    node_ids = candidate_ids | {item.node_id for item in packet.symbols}
+    exact_relation_ids = {item.relation_id for item in packet.relations}
     subject_ids = {item.subject_id for item in packet.subjects}
     _unique((item.file_node_id for item in observation.files), "observed files")
     _unique((item.subject_id for item in observation.focuses), "observed focuses")
@@ -496,6 +589,16 @@ def _validate_observation(
             raise ValueError("observed direct and context memberships must be distinct")
         if not set(item.relation_ids) <= set(packet.relation_ids):
             raise ValueError("structural observation focus contains unknown relations")
+        if not set((*item.direct_node_ids, *item.context_node_ids)) <= node_ids:
+            raise ValueError("structural observation focus contains unknown nodes")
+        if set(item.direct_node_ids) & set(item.context_node_ids):
+            raise ValueError(
+                "observed direct and context node memberships must be distinct"
+            )
+        if not set(item.exact_relation_ids) <= exact_relation_ids:
+            raise ValueError(
+                "structural observation focus contains unknown exact relations"
+            )
 
 
 def _render(packet, observation, labels) -> str:
@@ -516,12 +619,85 @@ def _render(packet, observation, labels) -> str:
     observed_focus = {item.subject_id: item for item in observation.focuses}
     for label in labels.focuses:
         observed = observed_focus.get(label.subject_id)
-        projected = set((*observed.direct_file_node_ids, *observed.context_file_node_ids)) if observed else set()
-        expected = set((*label.direct_file_node_ids, *label.context_file_node_ids))
-        focus_rows.append(f"<tr><td>{escape(label.subject_id)}</td><td>{len(projected & expected)}</td><td>{escape(' · '.join(sorted(projected - expected)) or 'none')}</td><td>{escape(' · '.join(sorted(expected - projected)) or 'none')}</td><td>{'yes' if label.unresolved else 'no'}</td></tr>")
+        file_result = _role_comparison(
+            observed.direct_file_node_ids if observed else (),
+            observed.context_file_node_ids if observed else (),
+            label.direct_file_node_ids,
+            label.context_file_node_ids,
+        )
+        node_result = _role_comparison(
+            observed.direct_node_ids if observed else (),
+            observed.context_node_ids if observed else (),
+            label.direct_node_ids,
+            label.context_node_ids,
+        )
+        projected_relations = set(observed.exact_relation_ids if observed else ())
+        expected_relations = set(label.relation_ids)
+        relation_result = _set_comparison(
+            projected_relations,
+            expected_relations,
+        )
+        focus_rows.append(
+            "<tr>"
+            f"<td>{escape(label.subject_id)}</td>"
+            f"<td>{_comparison_html(file_result)}</td>"
+            f"<td>{_comparison_html(node_result)}</td>"
+            f"<td>{_comparison_html(relation_result)}</td>"
+            f"<td>{'yes' if label.unresolved else 'no'}</td>"
+            "</tr>"
+        )
     cards = ''.join(f"<div><span>{escape(key)}</span><strong>{value}</strong></div>" for key, value in counts.items())
     title = f"{packet.repository} · PR #{packet.pull_request} · structural correctness"
-    return f"""<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>{escape(title)}</title><style>{_CSS}</style></head><body><main><header><p>Non-authoritative evaluation</p><h1>{escape(title)}</h1><p>Frozen human labels are compared with the canonical structural projection. This report does not change assessment or mergeability.</p><code>{escape(packet.digest)}</code></header><section><h2>File overview</h2><div class='cards'>{cards}</div><table><thead><tr><th>Candidate</th><th>RepoDelta</th><th>Human</th><th>Result</th></tr></thead><tbody>{''.join(rows)}</tbody></table></section><section><h2>Focus membership</h2><table><thead><tr><th>Subject</th><th>Shared</th><th>False inclusion</th><th>False exclusion</th><th>Human unresolved</th></tr></thead><tbody>{''.join(focus_rows)}</tbody></table></section><footer>Coverage: {escape(packet.coverage_state)}</footer></main></body></html>"""
+    return f"""<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>{escape(title)}</title><style>{_CSS}</style></head><body><main><header><p>Non-authoritative evaluation</p><h1>{escape(title)}</h1><p>Frozen human labels are compared with the canonical structural projection. File, node-role, and exact-relation truth remain distinct. This report does not change assessment or mergeability.</p><code>{escape(packet.digest)}</code></header><section><h2>File overview</h2><div class='cards'>{cards}</div><table><thead><tr><th>Candidate</th><th>RepoDelta</th><th>Human</th><th>Result</th></tr></thead><tbody>{''.join(rows)}</tbody></table></section><section><h2>Focus membership</h2><table><thead><tr><th>Subject</th><th>Files</th><th>Nodes and roles</th><th>Exact relations</th><th>Human unresolved</th></tr></thead><tbody>{''.join(focus_rows)}</tbody></table></section><footer>Coverage: {escape(packet.coverage_state)}</footer></main></body></html>"""
+
+
+def _role_comparison(
+    observed_direct,
+    observed_context,
+    expected_direct,
+    expected_context,
+):
+    observed = {
+        **{item: "direct" for item in observed_direct},
+        **{item: "context" for item in observed_context},
+    }
+    expected = {
+        **{item: "direct" for item in expected_direct},
+        **{item: "context" for item in expected_context},
+    }
+    shared = {
+        item for item in observed.keys() & expected.keys()
+        if observed[item] == expected[item]
+    }
+    role_disagreements = {
+        f"{item} ({observed[item]}→{expected[item]})"
+        for item in observed.keys() & expected.keys()
+        if observed[item] != expected[item]
+    }
+    return {
+        "shared": shared,
+        "false inclusion": observed.keys() - expected.keys(),
+        "false exclusion": expected.keys() - observed.keys(),
+        "role disagreement": role_disagreements,
+    }
+
+
+def _set_comparison(observed, expected):
+    return {
+        "shared": observed & expected,
+        "false inclusion": observed - expected,
+        "false exclusion": expected - observed,
+        "role disagreement": set(),
+    }
+
+
+def _comparison_html(result):
+    parts = [f"shared {len(result['shared'])}"]
+    for key in ("false inclusion", "false exclusion", "role disagreement"):
+        values = sorted(result[key])
+        if values:
+            parts.append(f"{key}: {' · '.join(values)}")
+    return "<br>".join(escape(item) for item in parts)
 
 
 def _mapping(path: str | Path, schema: str) -> Mapping[str, Any]:
