@@ -1,0 +1,1225 @@
+{
+  "base_sha": "504e61579387092f5b02dffb2ca26c5fed6b8271",
+  "candidates": [
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "member_node_ids": [
+        "SN:9c926f5950f88e50331a",
+        "SN:ed36f53c613afa834aa6",
+        "SN:a3c6ef0db6d8fbb72da5",
+        "SN:3fa93a82bd95f9e201a7",
+        "SN:c033e6e31be5b3be7dec",
+        "SN:070c5c236cf017f15fb6",
+        "SN:df1414d93c9640c7efc2",
+        "SN:51c24c73bde89d40669a",
+        "SN:37a3f84572c25e3cbbd4",
+        "SN:a2b1d5e5a21c2497b9c1",
+        "SN:473f603d478751e24b92",
+        "SN:a3d4b9349331e480ccc9",
+        "SN:b354b5e17ac12b9551ab"
+      ],
+      "operation": "modified",
+      "path": "tests/test_projection.py"
+    },
+    {
+      "file_node_id": "SN:665951494d1c8e374edd",
+      "member_node_ids": [
+        "SN:bdae3fe69c898961150f",
+        "SN:d32f8aa7eb21a3a4adc8",
+        "SN:61d7b232761f0e1b40ed"
+      ],
+      "operation": "unresolved",
+      "path": "src/prismcode/closure/scanning.py"
+    },
+    {
+      "file_node_id": "SN:ece7ed8c9b82a81f5dba",
+      "member_node_ids": [],
+      "operation": "unresolved",
+      "path": "src/prismcode/convergence/ordering.py"
+    },
+    {
+      "file_node_id": "SN:755e03647af1338c3011",
+      "member_node_ids": [
+        "SN:4cfa28ce57045bd4f809"
+      ],
+      "operation": "unresolved",
+      "path": "src/prismcode/routing/candidates.py"
+    },
+    {
+      "file_node_id": "SN:c714bdf5d95d64d29333",
+      "member_node_ids": [
+        "SN:77121bf785083a774261"
+      ],
+      "operation": "unresolved",
+      "path": "tests/test_transformation_closure.py"
+    },
+    {
+      "file_node_id": "SN:6af5b48c3f70822751ed",
+      "member_node_ids": [
+        "SN:d390a50ebe69eba065dd"
+      ],
+      "operation": "unresolved",
+      "path": "src/prismcode/routing/relations.py"
+    },
+    {
+      "file_node_id": "SN:225343e0e40bf0830a66",
+      "member_node_ids": [
+        "SN:c606392331fdefaa5749"
+      ],
+      "operation": "unresolved",
+      "path": "src/prismcode/assessment/transformation.py"
+    },
+    {
+      "file_node_id": "SN:1fc90bfe85b0589b4486",
+      "member_node_ids": [
+        "SN:002a6a2870f15b60d71a"
+      ],
+      "operation": "retained",
+      "path": "src/prismcode/projection/verification.py"
+    },
+    {
+      "file_node_id": "SN:9e1818eae7c7db47c672",
+      "member_node_ids": [
+        "SN:a3fe6bc80d290af51229",
+        "SN:a414dfedbe88b38165e0"
+      ],
+      "operation": "retained",
+      "path": "src/prismcode/projection/overview.py"
+    },
+    {
+      "file_node_id": "SN:d7eb1983e5d77d727e89",
+      "member_node_ids": [
+        "SN:e15cab18e86e70f99ade"
+      ],
+      "operation": "retained",
+      "path": "src/prismcode/convergence/core.py"
+    },
+    {
+      "file_node_id": "SN:4b879d2d36aec054db6f",
+      "member_node_ids": [
+        "SN:0921a0fa26fe8d18e2dd"
+      ],
+      "operation": "unresolved",
+      "path": "src/prismcode/presentation/html.py"
+    },
+    {
+      "file_node_id": "SN:31a8b26a3b18862b579a",
+      "member_node_ids": [],
+      "operation": "unresolved",
+      "path": "src/prismcode/convergence/structural.py"
+    },
+    {
+      "file_node_id": "SN:95e9ae79b3966ac4ccfe",
+      "member_node_ids": [
+        "SN:32ebced8120db69f929e",
+        "SN:ecad981cc93122e38885",
+        "SN:09332362e45a8f116f64",
+        "SN:15d822320a776d208f50",
+        "SN:7aefee796888031a0700",
+        "SN:74f09685dc7d47165461",
+        "SN:32b7b4ac99c2ef983326",
+        "SN:e0ab5042bc9453753bcc"
+      ],
+      "operation": "modified",
+      "path": "src/prismcode/projection/build.py"
+    },
+    {
+      "file_node_id": "SN:0df2f3d7200aff711eee",
+      "member_node_ids": [
+        "SN:9fa24c1bf0c3b2746f5f"
+      ],
+      "operation": "unresolved",
+      "path": "src/prismcode/changes/hunks.py"
+    },
+    {
+      "file_node_id": "SN:f493ed0c2caf1e591c9d",
+      "member_node_ids": [
+        "SN:5fd0ac949f1566f5a461"
+      ],
+      "operation": "unresolved",
+      "path": "src/prismcode/routing/transformation_subjects.py"
+    },
+    {
+      "file_node_id": "SN:a690b8e9dd8f6c37997c",
+      "member_node_ids": [
+        "SN:0de9de09fc59d355162d"
+      ],
+      "operation": "unresolved",
+      "path": "src/prismcode/convergence/transformation.py"
+    },
+    {
+      "file_node_id": "SN:362b5f6f49742897c078",
+      "member_node_ids": [
+        "SN:369a998610053e538366"
+      ],
+      "operation": "unresolved",
+      "path": "src/prismcode/projection/architecture.py"
+    },
+    {
+      "file_node_id": "SN:2ac9b806e153683f16b3",
+      "member_node_ids": [
+        "SN:db6410ee1f6a9e61b324",
+        "SN:54f59eef0fdd456f4e1f"
+      ],
+      "operation": "retained",
+      "path": "src/prismcode/pipeline.py"
+    },
+    {
+      "file_node_id": "SN:9435b88dc81d757c519d",
+      "member_node_ids": [
+        "SN:f15a44ba11c2a19803bf"
+      ],
+      "operation": "unresolved",
+      "path": "src/prismcode/evaluation/core.py"
+    },
+    {
+      "file_node_id": "SN:4f4da188942a81a168c2",
+      "member_node_ids": [
+        "SN:297f4fd4f7c3f37a464f"
+      ],
+      "operation": "unresolved",
+      "path": "src/prismcode/facts/catalog.py"
+    },
+    {
+      "file_node_id": "SN:82e26565c5359e7aa776",
+      "member_node_ids": [
+        "SN:4053bab85b4ffaabd37d"
+      ],
+      "operation": "unresolved",
+      "path": "src/prismcode/semantics/review.py"
+    },
+    {
+      "file_node_id": "SN:d7ed0fa445ec958ddb92",
+      "member_node_ids": [
+        "SN:2ed4c81be6451e268f76"
+      ],
+      "operation": "unresolved",
+      "path": "src/prismcode/closure/planning.py"
+    },
+    {
+      "file_node_id": "SN:cf2fae0c7197e05e4b45",
+      "member_node_ids": [
+        "SN:083ca64d6d2a00c70f76"
+      ],
+      "operation": "unresolved",
+      "path": "src/prismcode/facts/transformation.py"
+    },
+    {
+      "file_node_id": "SN:6aa2370b8b12d48ebb78",
+      "member_node_ids": [
+        "SN:6a7660d6723aa615903b"
+      ],
+      "operation": "unresolved",
+      "path": "tests/test_convergence.py"
+    },
+    {
+      "file_node_id": "SN:bdf8a073a75f9c75c97b",
+      "member_node_ids": [
+        "SN:b8be1eed1ba73378b0ca"
+      ],
+      "operation": "unresolved",
+      "path": "src/prismcode/model/structural_refs.py"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "member_node_ids": [
+        "SN:0d25a940127b8a09a2b9",
+        "SN:d7817cdd2fe7c52bc39e",
+        "SN:e0f566150e37781fa3a0",
+        "SN:7fde768326d5b10302de",
+        "SN:2e467b0cf726b1e0946f",
+        "SN:ddbafd59c33144cb3170",
+        "SN:4f6abfce36264d7d285f",
+        "SN:d8551c12f6997fd3e0c2",
+        "SN:227fe8619be3b5f55c1b",
+        "SN:af40ece2fbfe6036d0a9",
+        "SN:c457b890a8284f718512",
+        "SN:63a12d24063af0c22617",
+        "SN:5593553a4a0c1fb25619",
+        "SN:e4e4e777d4ef6e0d8569",
+        "SN:145b9edaae9cc86f5d86",
+        "SN:647bf929da7ceae3db58",
+        "SN:4d9c98c9bec686d2b813",
+        "SN:80df9811b0b79c233ac6",
+        "SN:9fedf27572541c37e5ea",
+        "SN:f89967c8b9f6f9cf8fa2",
+        "SN:19029cba4f79079332fb",
+        "SN:8afbbac65cae43d0067e",
+        "SN:4323b86b969f4b837e97",
+        "SN:603f0fdb5f61bb158dec",
+        "SN:cb73fba31de39d117481",
+        "SN:6da21f37665824c087a0",
+        "SN:a857ccdc80ce980daff7",
+        "SN:f457de99924797b5ea9c",
+        "SN:8dcbd6fd57ab11723b03",
+        "SN:be8210cbdcd806b27d50",
+        "SN:f1569ddd74dd5363b661",
+        "SN:501985dbf65635d8981e",
+        "SN:10f0572e125a7f49d589",
+        "SN:0ccdcdc019e8390c728d",
+        "SN:ab9a3ffff5ca427baf1c"
+      ],
+      "operation": "retained",
+      "path": "src/prismcode/model/contracts.py"
+    },
+    {
+      "file_node_id": "SN:f5ec1649b8b6e3f108fb",
+      "member_node_ids": [],
+      "operation": "unresolved",
+      "path": "src/prismcode/routing/focus_anchors.py"
+    },
+    {
+      "file_node_id": "SN:672f9fd3789baaaea1f6",
+      "member_node_ids": [
+        "SN:20765d29f18329ef18ff"
+      ],
+      "operation": "unresolved",
+      "path": "src/prismcode/projection/structural_navigation.py"
+    },
+    {
+      "file_node_id": "SN:57b7e5d1a9cee09b5660",
+      "member_node_ids": [
+        "SN:7a50fa33b718f19bd8c9"
+      ],
+      "operation": "unresolved",
+      "path": "src/prismcode/projection/structural_groups.py"
+    },
+    {
+      "file_node_id": "SN:53a6b5cdf5c8f4d138ff",
+      "member_node_ids": [
+        "SN:3efe0d98ebd647d4fe40"
+      ],
+      "operation": "unresolved",
+      "path": "src/prismcode/routing/transformation.py"
+    }
+  ],
+  "changed_surfaces": [
+    {
+      "additions": 6,
+      "base_path": "src/prismcode/projection/build.py",
+      "deletions": 10,
+      "head_path": "src/prismcode/projection/build.py",
+      "hunk_headers": [
+        "@@ -326,7 +326,6 @@ def build_review_projection(",
+        "@@ -439,19 +438,16 @@ def _canonical_backbone_seed_node_ids("
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 42,
+      "base_path": "tests/test_projection.py",
+      "deletions": 27,
+      "head_path": "tests/test_projection.py",
+      "hunk_headers": [
+        "@@ -829,6 +829,7 @@ def relation(",
+        "@@ -844,6 +845,7 @@ def relation(",
+        "@@ -853,6 +855,18 @@ def relation(",
+        "@@ -995,6 +1009,20 @@ def relation(",
+        "@@ -1070,6 +1098,8 @@ def relation(",
+        "@@ -1103,6 +1133,8 @@ def relation(",
+        "@@ -1119,6 +1151,8 @@ def relation(",
+        "@@ -1131,6 +1165,8 @@ def relation(",
+        "@@ -1434,29 +1470,7 @@ def test_change_backbone_keeps_one_hop_retained_support_from_direct_seed() -> No",
+        "@@ -1465,12 +1479,14 @@ def test_canonical_backbone_seeds_include_rg_and_transformation_anchors() -> Non",
+        "@@ -1495,8 +1511,7 @@ def test_canonical_backbone_seeds_include_rg_and_transformation_anchors() -> Non"
+      ],
+      "status": "modified"
+    }
+  ],
+  "coverage_state": "available",
+  "head_sha": "e6d94bd9c414a09c1027aac0bc658ba025ddf3ad",
+  "pull_request": 208,
+  "relation_ids": [
+    "SRG:4257483d00b180dd305e",
+    "SRG:06bd17faad8d4bc3c114",
+    "SRG:798efd3c76bdddcd4a5c",
+    "SRG:76e7799e9720fdf7b684",
+    "SRG:622089e388c43cff609a",
+    "SRG:49a8213a8573d09e9917",
+    "SRG:dc9807504d9ee685a9e0",
+    "SRG:6c4a540577d575393aaf",
+    "SRG:d8bc8af3074c8c9a14a4",
+    "SRG:1619d4e12124c51e2943",
+    "SRG:0d668a197b71bcac6e9d",
+    "SRG:2ed2b46af665eb4e639a",
+    "SRG:117ba7aa50cb0c75094d",
+    "SRG:3abfbadd81d024b9f452",
+    "SRG:1ff920091de717ed1eab",
+    "SRG:3377145ab713c10b4ffd",
+    "SRG:6d660aafd447af4b7efe",
+    "SRG:c89d469195dac5307848",
+    "SOR:394fc87907bb68e9103a",
+    "SOR:cc2b124829b1b388b0f3"
+  ],
+  "relations": [
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:4257483d00b180dd305e",
+      "source_node_id": "SN:09332362e45a8f116f64",
+      "target_node_id": "SN:32ebced8120db69f929e"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:06bd17faad8d4bc3c114",
+      "source_node_id": "SN:09332362e45a8f116f64",
+      "target_node_id": "SN:7aefee796888031a0700"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:798efd3c76bdddcd4a5c",
+      "source_node_id": "SN:09332362e45a8f116f64",
+      "target_node_id": "SN:e0ab5042bc9453753bcc"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:76e7799e9720fdf7b684",
+      "source_node_id": "SN:09332362e45a8f116f64",
+      "target_node_id": "SN:ecad981cc93122e38885"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:622089e388c43cff609a",
+      "source_node_id": "SN:1a5471da8621916f448b",
+      "target_node_id": "SN:95e9ae79b3966ac4ccfe"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:49a8213a8573d09e9917",
+      "source_node_id": "SN:1a5471da8621916f448b",
+      "target_node_id": "SN:95e9ae79b3966ac4ccfe"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:dc9807504d9ee685a9e0",
+      "source_node_id": "SN:1a5471da8621916f448b",
+      "target_node_id": "SN:95e9ae79b3966ac4ccfe"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:6c4a540577d575393aaf",
+      "source_node_id": "SN:1a5471da8621916f448b",
+      "target_node_id": "SN:9e1818eae7c7db47c672"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:d8bc8af3074c8c9a14a4",
+      "source_node_id": "SN:1a5471da8621916f448b",
+      "target_node_id": "SN:f63087ace0914f7968f6"
+    },
+    {
+      "operation": "added",
+      "relation": "instantiates",
+      "relation_id": "SRG:1619d4e12124c51e2943",
+      "source_node_id": "SN:1a5471da8621916f448b",
+      "target_node_id": "SN:f63087ace0914f7968f6"
+    },
+    {
+      "operation": "retained",
+      "relation": "instantiates",
+      "relation_id": "SRG:0d668a197b71bcac6e9d",
+      "source_node_id": "SN:1a5471da8621916f448b",
+      "target_node_id": "SN:f63087ace0914f7968f6"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:2ed2b46af665eb4e639a",
+      "source_node_id": "SN:2ac9b806e153683f16b3",
+      "target_node_id": "SN:95e9ae79b3966ac4ccfe"
+    },
+    {
+      "operation": "retained",
+      "relation": "instantiates",
+      "relation_id": "SRG:117ba7aa50cb0c75094d",
+      "source_node_id": "SN:7fde768326d5b10302de",
+      "target_node_id": "SN:af40ece2fbfe6036d0a9"
+    },
+    {
+      "operation": "retained",
+      "relation": "instantiates",
+      "relation_id": "SRG:3abfbadd81d024b9f452",
+      "source_node_id": "SN:7fde768326d5b10302de",
+      "target_node_id": "SN:e0f566150e37781fa3a0"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:1ff920091de717ed1eab",
+      "source_node_id": "SN:95e9ae79b3966ac4ccfe",
+      "target_node_id": "SN:f63087ace0914f7968f6"
+    },
+    {
+      "operation": "retained",
+      "relation": "imports",
+      "relation_id": "SRG:3377145ab713c10b4ffd",
+      "source_node_id": "SN:95e9ae79b3966ac4ccfe",
+      "target_node_id": "SN:f63087ace0914f7968f6"
+    },
+    {
+      "operation": "retained",
+      "relation": "instantiates",
+      "relation_id": "SRG:6d660aafd447af4b7efe",
+      "source_node_id": "SN:95e9ae79b3966ac4ccfe",
+      "target_node_id": "SN:f63087ace0914f7968f6"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:c89d469195dac5307848",
+      "source_node_id": "SN:a2b1d5e5a21c2497b9c1",
+      "target_node_id": "SN:c033e6e31be5b3be7dec"
+    }
+  ],
+  "repository": "repodelta/repodelta",
+  "schema_version": "structural_correctness_packet.v2",
+  "subjects": [
+    {
+      "authored_statement": "A selected direct changed structural anchor is eligible for default backbone membership regardless of whether its focus-relative evidence annotation is primary, test support, or documentation support.",
+      "subject_id": "R1",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "Focus-relative evidence annotation remains available for reviewer explanation and presentation, but cannot add, remove, or suppress structural backbone membership.",
+      "subject_id": "R2",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "The same membership contract applies to Issue R/G and PR Transformation/Completion subjects.",
+      "subject_id": "R3",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "Intermediate, retained-context, and merely reachable support nodes remain outside the default backbone unless canonical backbone rules independently include them.",
+      "subject_id": "R4",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "The graph retains direct production and direct test changes together when both are selected.",
+      "subject_id": "R5",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "Do not change Codegraph collection, traversal budgets, changed-anchor association, assessment, LLM behavior, or graph layout.",
+      "subject_id": "G1",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "Do not promote all reachable structural support nodes.",
+      "subject_id": "G2",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "Do not introduce a second backbone producer or renderer-side membership decision.",
+      "subject_id": "G3",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "Traversal convergence, support-path relevance, LLM inference, assessment semantics, and visual-layout redesign.",
+      "subject_id": "G4",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "R/G selected structural overlays \u2192 inspect primary evidence role \u2192 backbone seed",
+      "subject_id": "T1",
+      "subject_kind": "transformation_claim"
+    },
+    {
+      "authored_statement": "T/CC selected structural overlays \u2192 inspect changed-anchor node role \u2192 backbone seed",
+      "subject_id": "T2",
+      "subject_kind": "transformation_claim"
+    },
+    {
+      "authored_statement": "A directly changed test anchor was classified as test support and therefore omitted from the R/G backbone despite being selected and structurally mapped.",
+      "subject_id": "T3",
+      "subject_kind": "transformation_claim"
+    },
+    {
+      "authored_statement": "R/G and T/CC selected structural overlays \u2192 changed-anchor node role \u2192 canonical seed derivation \u2192 _change_backbone \u2192 ReviewStructuralGraph \u2192 renderer",
+      "subject_id": "T4",
+      "subject_kind": "transformation_claim"
+    }
+  ],
+  "symbols": [
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "node_id": "SN:9c926f5950f88e50331a",
+      "operation": "retained",
+      "path": "tests/test_projection.py",
+      "qualified_name": "test_review_graph_renders_complete_focus_union",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:0d25a940127b8a09a2b9",
+      "operation": "retained",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "ClosureScanPlanSet::by_statement_id",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:57b7e5d1a9cee09b5660",
+      "node_id": "SN:7a50fa33b718f19bd8c9",
+      "operation": "unresolved",
+      "path": "src/prismcode/projection/structural_groups.py",
+      "qualified_name": "project_structural_relation_groups",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:672f9fd3789baaaea1f6",
+      "node_id": "SN:20765d29f18329ef18ff",
+      "operation": "unresolved",
+      "path": "src/prismcode/projection/structural_navigation.py",
+      "qualified_name": "project_structural_navigation",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:6af5b48c3f70822751ed",
+      "node_id": "SN:d390a50ebe69eba065dd",
+      "operation": "unresolved",
+      "path": "src/prismcode/routing/relations.py",
+      "qualified_name": "projection_relation",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:d7817cdd2fe7c52bc39e",
+      "operation": "retained",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "ProjectionCandidateSet",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:e0f566150e37781fa3a0",
+      "operation": "retained",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "StructuralFocusOverlay",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:7fde768326d5b10302de",
+      "operation": "retained",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "CanonicalChangeMapEntry",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:95e9ae79b3966ac4ccfe",
+      "node_id": "SN:32ebced8120db69f929e",
+      "operation": "retained",
+      "path": "src/prismcode/projection/build.py",
+      "qualified_name": "_is_structural_relation",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:95e9ae79b3966ac4ccfe",
+      "node_id": "SN:ecad981cc93122e38885",
+      "operation": "retained",
+      "path": "src/prismcode/projection/build.py",
+      "qualified_name": "_change_backbone",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:95e9ae79b3966ac4ccfe",
+      "node_id": "SN:09332362e45a8f116f64",
+      "operation": "modified",
+      "path": "src/prismcode/projection/build.py",
+      "qualified_name": "build_review_projection",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:2e467b0cf726b1e0946f",
+      "operation": "retained",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "DiagnosticPresentation",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:ddbafd59c33144cb3170",
+      "operation": "unresolved",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "ObservedTransformation",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:95e9ae79b3966ac4ccfe",
+      "node_id": "SN:15d822320a776d208f50",
+      "operation": "unresolved",
+      "path": "src/prismcode/projection/build.py",
+      "qualified_name": "_structural_disposition_state",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "node_id": "SN:ed36f53c613afa834aa6",
+      "operation": "unresolved",
+      "path": "tests/test_projection.py",
+      "qualified_name": "test_every_requirement_is_routed_without_a_global_statement_budget",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:4f6abfce36264d7d285f",
+      "operation": "unresolved",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "ReviewSourcePacket",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:d7ed0fa445ec958ddb92",
+      "node_id": "SN:2ed4c81be6451e268f76",
+      "operation": "unresolved",
+      "path": "src/prismcode/closure/planning.py",
+      "qualified_name": "compile_closure_scan_plans",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:95e9ae79b3966ac4ccfe",
+      "node_id": "SN:7aefee796888031a0700",
+      "operation": "retained",
+      "path": "src/prismcode/projection/build.py",
+      "qualified_name": "_merge_structural_members",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1fc90bfe85b0589b4486",
+      "node_id": "SN:002a6a2870f15b60d71a",
+      "operation": "unresolved",
+      "path": "src/prismcode/projection/verification.py",
+      "qualified_name": "project_verification_workspace",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:d8551c12f6997fd3e0c2",
+      "operation": "retained",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "StructuralFocusNode",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:227fe8619be3b5f55c1b",
+      "operation": "retained",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "ReviewSlice",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:af40ece2fbfe6036d0a9",
+      "operation": "retained",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "StructuralFocusDisposition",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:c457b890a8284f718512",
+      "operation": "unresolved",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "TransformationAlignment",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:63a12d24063af0c22617",
+      "operation": "retained",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "TransformationStructuralTopologyGroup",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:5593553a4a0c1fb25619",
+      "operation": "retained",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "EvidenceCatalog",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:9e1818eae7c7db47c672",
+      "node_id": "SN:a3fe6bc80d290af51229",
+      "operation": "unresolved",
+      "path": "src/prismcode/projection/overview.py",
+      "qualified_name": "build_review_overview",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:e4e4e777d4ef6e0d8569",
+      "operation": "unresolved",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "TransformationContract",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:665951494d1c8e374edd",
+      "node_id": "SN:bdae3fe69c898961150f",
+      "operation": "unresolved",
+      "path": "src/prismcode/closure/scanning.py",
+      "qualified_name": "unavailable_scan_results",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:2ac9b806e153683f16b3",
+      "node_id": "SN:db6410ee1f6a9e61b324",
+      "operation": "retained",
+      "path": "src/prismcode/pipeline.py",
+      "qualified_name": "DeterministicAnalyzer::analyze",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:665951494d1c8e374edd",
+      "node_id": "SN:d32f8aa7eb21a3a4adc8",
+      "operation": "unresolved",
+      "path": "src/prismcode/closure/scanning.py",
+      "qualified_name": "ClosureScanner",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:145b9edaae9cc86f5d86",
+      "operation": "retained",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "ProjectionRelation",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:2ac9b806e153683f16b3",
+      "node_id": "SN:54f59eef0fdd456f4e1f",
+      "operation": "retained",
+      "path": "src/prismcode/pipeline.py",
+      "qualified_name": "DeterministicAnalyzer",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:225343e0e40bf0830a66",
+      "node_id": "SN:c606392331fdefaa5749",
+      "operation": "unresolved",
+      "path": "src/prismcode/assessment/transformation.py",
+      "qualified_name": "assess_transformation",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "node_id": "SN:a3c6ef0db6d8fbb72da5",
+      "operation": "unresolved",
+      "path": "tests/test_projection.py",
+      "qualified_name": "test_projection_uses_review_relevant_structural_closure::symbol",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:647bf929da7ceae3db58",
+      "operation": "unresolved",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "CandidateConvergence::validate_consistency",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:4d9c98c9bec686d2b813",
+      "operation": "retained",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "ReviewProjection::validate_consistency",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:d7eb1983e5d77d727e89",
+      "node_id": "SN:e15cab18e86e70f99ade",
+      "operation": "retained",
+      "path": "src/prismcode/convergence/core.py",
+      "qualified_name": "converge_candidates",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:80df9811b0b79c233ac6",
+      "operation": "retained",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "ReviewProjection",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:9fedf27572541c37e5ea",
+      "operation": "retained",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "ClosureScanPlanSet",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "node_id": "SN:3fa93a82bd95f9e201a7",
+      "operation": "modified",
+      "path": "tests/test_projection.py",
+      "qualified_name": "test_projection_uses_review_relevant_structural_closure",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:f89967c8b9f6f9cf8fa2",
+      "operation": "retained",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "DiagnosticPresentation::ids_by_focus",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "node_id": "SN:c033e6e31be5b3be7dec",
+      "operation": "retained",
+      "path": "tests/test_projection.py",
+      "qualified_name": "_build_projection",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:4f4da188942a81a168c2",
+      "node_id": "SN:297f4fd4f7c3f37a464f",
+      "operation": "unresolved",
+      "path": "src/prismcode/facts/catalog.py",
+      "qualified_name": "build_evidence_catalog",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:cf2fae0c7197e05e4b45",
+      "node_id": "SN:083ca64d6d2a00c70f76",
+      "operation": "unresolved",
+      "path": "src/prismcode/facts/transformation.py",
+      "qualified_name": "reconstruct_observed_transformation",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:53a6b5cdf5c8f4d138ff",
+      "node_id": "SN:3efe0d98ebd647d4fe40",
+      "operation": "unresolved",
+      "path": "src/prismcode/routing/transformation.py",
+      "qualified_name": "build_transformation_alignment",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:95e9ae79b3966ac4ccfe",
+      "node_id": "SN:74f09685dc7d47165461",
+      "operation": "unresolved",
+      "path": "src/prismcode/projection/build.py",
+      "qualified_name": "_structural_node_id",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:0df2f3d7200aff711eee",
+      "node_id": "SN:9fa24c1bf0c3b2746f5f",
+      "operation": "unresolved",
+      "path": "src/prismcode/changes/hunks.py",
+      "qualified_name": "parse_changed_files",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:19029cba4f79079332fb",
+      "operation": "unresolved",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "TransformationStructuralTopology",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:95e9ae79b3966ac4ccfe",
+      "node_id": "SN:32b7b4ac99c2ef983326",
+      "operation": "unresolved",
+      "path": "src/prismcode/projection/build.py",
+      "qualified_name": "_structural_focus_overlay",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:9435b88dc81d757c519d",
+      "node_id": "SN:f15a44ba11c2a19803bf",
+      "operation": "unresolved",
+      "path": "src/prismcode/evaluation/core.py",
+      "qualified_name": "evaluate_suite",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:82e26565c5359e7aa776",
+      "node_id": "SN:4053bab85b4ffaabd37d",
+      "operation": "unresolved",
+      "path": "src/prismcode/semantics/review.py",
+      "qualified_name": "extract_packet_semantics",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "node_id": "SN:070c5c236cf017f15fb6",
+      "operation": "retained",
+      "path": "tests/test_projection.py",
+      "qualified_name": "test_review_graph_renders_complete_focus_union::overlay",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:8afbbac65cae43d0067e",
+      "operation": "retained",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "EvidenceCatalog::by_id",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "node_id": "SN:df1414d93c9640c7efc2",
+      "operation": "unresolved",
+      "path": "tests/test_projection.py",
+      "qualified_name": "test_isolated_symbol_and_standalone_document_keep_distinct_canonical_forms",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:4323b86b969f4b837e97",
+      "operation": "unresolved",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "EvidenceItem",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:603f0fdb5f61bb158dec",
+      "operation": "unresolved",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "Requirement",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:665951494d1c8e374edd",
+      "node_id": "SN:61d7b232761f0e1b40ed",
+      "operation": "unresolved",
+      "path": "src/prismcode/closure/scanning.py",
+      "qualified_name": "ClosureScanner::scan",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "node_id": "SN:51c24c73bde89d40669a",
+      "operation": "unresolved",
+      "path": "tests/test_projection.py",
+      "qualified_name": "_with_verification_overlays",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:cb73fba31de39d117481",
+      "operation": "unresolved",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "CandidateConvergence",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:95e9ae79b3966ac4ccfe",
+      "node_id": "SN:e0ab5042bc9453753bcc",
+      "operation": "modified",
+      "path": "src/prismcode/projection/build.py",
+      "qualified_name": "_canonical_backbone_seed_node_ids",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:bdf8a073a75f9c75c97b",
+      "node_id": "SN:b8be1eed1ba73378b0ca",
+      "operation": "unresolved",
+      "path": "src/prismcode/model/structural_refs.py",
+      "qualified_name": "review_symbol_id",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:6da21f37665824c087a0",
+      "operation": "unresolved",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "ReviewBrief",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "node_id": "SN:37a3f84572c25e3cbbd4",
+      "operation": "added",
+      "path": "tests/test_projection.py",
+      "qualified_name": "test_canonical_backbone_seeds_include_all_direct_changed_anchors",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:a857ccdc80ce980daff7",
+      "operation": "unresolved",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "ProjectionCandidateSet::validate_consistency",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:9e1818eae7c7db47c672",
+      "node_id": "SN:a414dfedbe88b38165e0",
+      "operation": "retained",
+      "path": "src/prismcode/projection/overview.py",
+      "qualified_name": "project_diagnostic_presentation",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:f457de99924797b5ea9c",
+      "operation": "unresolved",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "StructuralRelationChangeIdentity",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:c714bdf5d95d64d29333",
+      "node_id": "SN:77121bf785083a774261",
+      "operation": "unresolved",
+      "path": "tests/test_transformation_closure.py",
+      "qualified_name": "test_closure_projection_is_the_shared_graph_authority",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "node_id": "SN:a2b1d5e5a21c2497b9c1",
+      "operation": "retained",
+      "path": "tests/test_projection.py",
+      "qualified_name": "test_canonical_ownership_projects_recursive_shared_focus_hierarchy",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:6aa2370b8b12d48ebb78",
+      "node_id": "SN:6a7660d6723aa615903b",
+      "operation": "unresolved",
+      "path": "tests/test_convergence.py",
+      "qualified_name": "_relation",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:8dcbd6fd57ab11723b03",
+      "operation": "unresolved",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "TransformationAssessment",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "node_id": "SN:473f603d478751e24b92",
+      "operation": "modified",
+      "path": "tests/test_projection.py",
+      "qualified_name": "test_projection_uses_review_relevant_structural_closure::relation",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:362b5f6f49742897c078",
+      "node_id": "SN:369a998610053e538366",
+      "operation": "unresolved",
+      "path": "src/prismcode/projection/architecture.py",
+      "qualified_name": "project_architectural_change_topology",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:be8210cbdcd806b27d50",
+      "operation": "unresolved",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "Requirement::validate_consistency",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:755e03647af1338c3011",
+      "node_id": "SN:4cfa28ce57045bd4f809",
+      "operation": "unresolved",
+      "path": "src/prismcode/routing/candidates.py",
+      "qualified_name": "build_projection_candidates",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:f1569ddd74dd5363b661",
+      "operation": "unresolved",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "ReviewSourcePacket::validate_consistency",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:a690b8e9dd8f6c37997c",
+      "node_id": "SN:0de9de09fc59d355162d",
+      "operation": "unresolved",
+      "path": "src/prismcode/convergence/transformation.py",
+      "qualified_name": "converge_transformation_closure",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:501985dbf65635d8981e",
+      "operation": "unresolved",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "ProjectionCandidateGroup",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "node_id": "SN:a3d4b9349331e480ccc9",
+      "operation": "unresolved",
+      "path": "tests/test_projection.py",
+      "qualified_name": "test_canonical_backbone_seeds_include_rg_and_transformation_anchors",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:10f0572e125a7f49d589",
+      "operation": "unresolved",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "ReviewStructuralGraph",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:f493ed0c2caf1e591c9d",
+      "node_id": "SN:5fd0ac949f1566f5a461",
+      "operation": "unresolved",
+      "path": "src/prismcode/routing/transformation_subjects.py",
+      "qualified_name": "select_transformation_subjects",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:0ccdcdc019e8390c728d",
+      "operation": "retained",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "ProjectionCandidateSet::by_id",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:f63087ace0914f7968f6",
+      "node_id": "SN:ab9a3ffff5ca427baf1c",
+      "operation": "unresolved",
+      "path": "src/prismcode/model/contracts.py",
+      "qualified_name": "StructuralCoverage",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:4b879d2d36aec054db6f",
+      "node_id": "SN:0921a0fa26fe8d18e2dd",
+      "operation": "unresolved",
+      "path": "src/prismcode/presentation/html.py",
+      "qualified_name": "_review_graph",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "node_id": "SN:b354b5e17ac12b9551ab",
+      "operation": "unresolved",
+      "path": "tests/test_projection.py",
+      "qualified_name": "test_projection_uses_review_relevant_structural_closure::path",
+      "symbol_kind": "function"
+    }
+  ]
+}
