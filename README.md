@@ -32,14 +32,14 @@ The Brief carries Issue objectives (`O`), requirements (`R`), and guardrails
 conditions (`CC`). The default **Overview** starts with the changed-file
 boundary and keeps retained structural context explicit.
 
-![File-level structural delta overview with R/G/T controls](https://raw.githubusercontent.com/repodelta/repodelta/main/docs/assets/repodelta-structural-overview.jpg)
+![File-level structural delta overview with R/G/T controls](https://raw.githubusercontent.com/repodelta/repodelta/main/docs/assets/repodelta-verification-focus.png)
 
 Selecting a subject opens its authored statement, source, assessment, and
 evidence in the same investigation surface. RepoDelta then separates runtime
 change, verification, and unresolved context before revealing source-linked
 symbols and exact relationships.
 
-![Focused R1 structure with runtime, verification, and unresolved context](https://raw.githubusercontent.com/repodelta/repodelta/main/docs/assets/repodelta-focused-structure.jpg)
+![Focused R1 structure with runtime, verification, and unresolved context](https://raw.githubusercontent.com/repodelta/repodelta/main/docs/assets/repodelta-structural-graph.webp)
 
 For `T` and `CC`, a concrete file or symbol named in a Markdown code span can
 focus the associated code and relationships. Selector-free or unmatched prose
