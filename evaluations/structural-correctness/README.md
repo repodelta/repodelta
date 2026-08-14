@@ -31,11 +31,14 @@ repodelta compare-structural-correctness \
 ```
 
 Packet identity, candidate completeness, subject completeness, file roles,
-focus membership, relation identity, and claimed equivalent focus membership
-are validated before comparison. The packet exposes the bounded candidate
-universe, conclusion-free symbol names and relation endpoints, changed-file
-counts, and at most 32 diff hunk headers per file. It does not expose source
-lines, RepoDelta's selected files, projected roles, or focus memberships.
+direct-versus-context focus membership, exact relation identity, and claimed
+equivalent focus membership are validated before comparison. Focus truth is
+recorded separately at file, canonical node, and exact relation-group levels;
+agreement at one level cannot conceal an error at another. The packet exposes
+the bounded candidate universe, conclusion-free symbol names and relation
+endpoints, changed-file counts, and at most 32 diff hunk headers per file. It
+does not expose source lines, RepoDelta's selected files, projected roles, or
+focus memberships.
 
 ## Campaign v1 sample
 
@@ -66,9 +69,10 @@ ordinary exploratory output remains under `build/` and is not committed.
 
 File comparison distinguishes exact agreement, false inclusion, false
 exclusion, role disagreement, and human-unresolved cases. Focus comparison
-reports shared membership and false inclusions/exclusions independently for
-each subject. `complete` or `available` remains bounded to the coverage surface
-recorded in the packet; it is never interpreted as complete repository truth.
+reports those outcomes independently for file membership, canonical node role,
+and exact relations for each subject. `complete` or `available` remains bounded
+to the coverage surface recorded in the packet; it is never interpreted as
+complete repository truth.
 
 Campaign findings determine the next product change. Provenance labels are
 justified when the underlying memberships are correct but insufficiently

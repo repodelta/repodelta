@@ -86,7 +86,14 @@ def _labels(packet: StructuralCorrectnessPacket) -> StructuralCorrectnessLabels:
             HumanFileLabel("F:c", "excluded"),
         ),
         focuses=(
-            HumanFocusLabel("R1", ("F:a",), ("F:b",)),
+            HumanFocusLabel(
+                "R1",
+                ("F:a",),
+                ("F:b",),
+                direct_node_ids=("S:a",),
+                context_node_ids=("S:b",),
+                relation_ids=("REL:1",),
+            ),
             HumanFocusLabel("G1", unresolved=True),
         ),
     )
@@ -101,7 +108,16 @@ def _observation(packet: StructuralCorrectnessPacket):
             ObservedFile("F:c", "changed"),
         ),
         focuses=(
-            ObservedFocus("R1", ("F:a", "F:c"), ("F:b",), ("REL:1",), "mapped"),
+            ObservedFocus(
+                "R1",
+                ("F:a", "F:c"),
+                ("F:b",),
+                ("REL:1",),
+                "mapped",
+                ("S:a", "S:c"),
+                ("S:b",),
+                ("REL:1",),
+            ),
             ObservedFocus("G1", (), (), (), "not_applicable"),
         ),
     )
@@ -222,6 +238,9 @@ def test_comparison_exposes_false_inclusion_role_disagreement_and_focus_error(
     assert "role disagreement" in html
     assert "false inclusion" in html
     assert "F:c" in html
+    assert "S:c" in html
+    assert "Nodes and roles" in html
+    assert "Exact relations" in html
     assert "Non-authoritative evaluation" in html
     assert "does not change assessment or mergeability" in html
 
@@ -254,6 +273,54 @@ def test_labels_reject_unknown_subject_and_file(tmp_path) -> None:
 
     with pytest.raises(ValueError, match="unknown candidate"):
         load_labels(labels_path, packet)
+
+
+def test_labels_reject_unknown_focus_node_and_relation(tmp_path) -> None:
+    packet, _, _, labels_path = _write_inputs(tmp_path)
+    raw = json.loads(labels_path.read_text())
+    raw["focuses"][0]["direct_node_ids"] = ["S:unknown"]
+    labels_path.write_text(json.dumps(raw))
+
+    with pytest.raises(ValueError, match="unknown candidate nodes"):
+        load_labels(labels_path, packet)
+
+    raw = json.loads(write_json_artifact(_labels(packet), labels_path).read_text())
+    raw["focuses"][0]["relation_ids"] = ["REL:unknown"]
+    labels_path.write_text(json.dumps(raw))
+
+    with pytest.raises(ValueError, match="unknown candidate relations"):
+        load_labels(labels_path, packet)
+
+
+def test_comparison_does_not_hide_node_role_or_relation_errors_behind_file_agreement(
+    tmp_path,
+) -> None:
+    packet, packet_path, observation_path, labels_path = _write_inputs(tmp_path)
+    observation = replace(
+        _observation(packet),
+        focuses=(
+            ObservedFocus(
+                "R1",
+                ("F:a",),
+                ("F:b",),
+                ("REL:1",),
+                "mapped",
+                ("S:b",),
+                ("S:a",),
+                (),
+            ),
+            _observation(packet).focuses[1],
+        ),
+    )
+    write_json_artifact(observation, observation_path)
+
+    html = write_comparison_html(
+        packet_path, observation_path, labels_path, tmp_path / "comparison.html"
+    ).read_text()
+
+    assert "S:a (context→direct)" in html
+    assert "S:b (direct→context)" in html
+    assert "false exclusion: REL:1" in html
 
 
 def test_labels_reject_false_equivalent_projection_claim(tmp_path) -> None:
