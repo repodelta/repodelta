@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import tomllib
 from pathlib import Path
+
+from repodelta import __version__
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -34,6 +37,12 @@ def test_supported_tree_has_one_repodelta_product_identity() -> None:
     assert stale_paths == []
     assert (ROOT / "src" / "repodelta" / "cli.py").is_file()
     assert not (ROOT / "src" / stale_identity).exists()
+
+
+def test_runtime_version_matches_distribution_metadata() -> None:
+    metadata = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+
+    assert __version__ == metadata["project"]["version"]
 
 
 def _current_text_paths() -> tuple[Path, ...]:
