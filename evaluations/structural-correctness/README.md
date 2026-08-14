@@ -51,6 +51,10 @@ real PRs do not expose a retained-bridge or false-inclusion counterexample, a
 small synthetic fixture complements the campaign without replacing the real
 sample.
 
+Campaign v1 is complete. Its [findings](campaign-v1/results/findings.md) and
+[machine-checked summary](campaign-v1/results/summary.json) select correction
+of the underlying focus projection as the next investment.
+
 Once frozen, reproducible campaign artifacts use these directories:
 
 ```text

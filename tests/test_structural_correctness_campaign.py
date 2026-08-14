@@ -3,10 +3,17 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from repodelta.evaluation.structural_correctness import (
+    load_labels,
+    load_observation,
+    load_packet,
+)
+
 
 MANIFEST = Path(
     "evaluations/structural-correctness/campaign-v1/manifest.json"
 )
+CAMPAIGN = MANIFEST.parent
 
 
 def test_campaign_v1_manifest_freezes_diverse_real_pr_sample() -> None:
@@ -41,3 +48,158 @@ def test_campaign_v1_manifest_freezes_diverse_real_pr_sample() -> None:
 def test_campaign_material_is_separate_from_product_documentation() -> None:
     assert Path("evaluations/structural-correctness/README.md").is_file()
     assert not Path("docs/structural-correctness.md").exists()
+
+
+def test_campaign_v1_freezes_complete_separate_inputs_and_results() -> None:
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    excluded_files = 0
+    unresolved_focuses = 0
+
+    for sample in manifest["samples"]:
+        pull_request = sample["pull_request"]
+        packet = load_packet(CAMPAIGN / "packets" / f"pr-{pull_request}.packet.json")
+        labels = load_labels(
+            CAMPAIGN / "labels" / f"pr-{pull_request}.labels.json",
+            packet,
+        )
+        observation = load_observation(
+            CAMPAIGN
+            / "observations"
+            / f"pr-{pull_request}.observation.json"
+        )
+
+        assert observation.packet_digest == packet.digest
+        assert (CAMPAIGN / "results" / f"pr-{pull_request}.comparison.html").is_file()
+        excluded_files += sum(
+            item.disposition == "excluded" for item in labels.files
+        )
+        unresolved_focuses += sum(item.unresolved for item in labels.focuses)
+
+    assert excluded_files > 0
+    assert unresolved_focuses > 0
+
+
+def test_campaign_v1_summary_is_derived_from_frozen_truth() -> None:
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    summary = json.loads(
+        (CAMPAIGN / "results" / "summary.json").read_text(encoding="utf-8")
+    )
+    expected_rows = []
+
+    for sample in manifest["samples"]:
+        pull_request = sample["pull_request"]
+        packet = load_packet(CAMPAIGN / "packets" / f"pr-{pull_request}.packet.json")
+        labels = load_labels(
+            CAMPAIGN / "labels" / f"pr-{pull_request}.labels.json",
+            packet,
+        )
+        observation = load_observation(
+            CAMPAIGN
+            / "observations"
+            / f"pr-{pull_request}.observation.json"
+        )
+        expected_rows.append(
+            _campaign_row(pull_request, labels, observation)
+        )
+
+    assert summary["sample_count"] == len(expected_rows)
+    assert summary["per_pull_request"] == expected_rows
+    assert summary["focuses_resolved"] == sum(
+        row["focuses_resolved"] for row in expected_rows
+    )
+    assert summary["focuses_unresolved"] == sum(
+        row["focuses_unresolved"] for row in expected_rows
+    )
+    assert summary["overview"] == {
+        "false_inclusions": sum(
+            row["overview_false_inclusions"] for row in expected_rows
+        ),
+        "false_exclusions": sum(
+            row["overview_false_exclusions"] for row in expected_rows
+        ),
+        "role_disagreements": sum(
+            row["overview_role_disagreements"] for row in expected_rows
+        ),
+    }
+    assert summary["focus_nodes"] == {
+        "false_inclusions": sum(
+            row["node_false_inclusions"] for row in expected_rows
+        ),
+        "false_exclusions": sum(
+            row["node_false_exclusions"] for row in expected_rows
+        ),
+        "role_disagreements": sum(
+            row["node_role_disagreements"] for row in expected_rows
+        ),
+    }
+    assert summary["focus_exact_relations"] == {
+        "false_inclusions": sum(
+            row["relation_false_inclusions"] for row in expected_rows
+        ),
+        "false_exclusions": sum(
+            row["relation_false_exclusions"] for row in expected_rows
+        ),
+    }
+    assert summary["next_investment"] == "correct_underlying_projection"
+
+
+def _campaign_row(pull_request, labels, observation):
+    observed_files = {item.file_node_id: item for item in observation.files}
+    row = {
+        "pull_request": pull_request,
+        "overview_false_inclusions": 0,
+        "overview_false_exclusions": 0,
+        "overview_role_disagreements": 0,
+        "focuses_resolved": 0,
+        "focuses_unresolved": 0,
+        "node_false_inclusions": 0,
+        "node_false_exclusions": 0,
+        "node_role_disagreements": 0,
+        "relation_false_inclusions": 0,
+        "relation_false_exclusions": 0,
+    }
+    for expected in labels.files:
+        observed = observed_files.get(expected.file_node_id)
+        if expected.disposition == "unresolved":
+            continue
+        if observed is None and expected.disposition == "included":
+            row["overview_false_exclusions"] += 1
+        elif observed is not None and expected.disposition == "excluded":
+            row["overview_false_inclusions"] += 1
+        elif observed is not None and observed.role != expected.role:
+            row["overview_role_disagreements"] += 1
+
+    observed_focuses = {item.subject_id: item for item in observation.focuses}
+    for expected in labels.focuses:
+        if expected.unresolved:
+            row["focuses_unresolved"] += 1
+            continue
+        row["focuses_resolved"] += 1
+        observed = observed_focuses[expected.subject_id]
+        observed_roles = {
+            **{item: "direct" for item in observed.direct_node_ids},
+            **{item: "context" for item in observed.context_node_ids},
+        }
+        expected_roles = {
+            **{item: "direct" for item in expected.direct_node_ids},
+            **{item: "context" for item in expected.context_node_ids},
+        }
+        shared_ids = observed_roles.keys() & expected_roles.keys()
+        row["node_false_inclusions"] += len(
+            observed_roles.keys() - expected_roles.keys()
+        )
+        row["node_false_exclusions"] += len(
+            expected_roles.keys() - observed_roles.keys()
+        )
+        row["node_role_disagreements"] += sum(
+            observed_roles[item] != expected_roles[item] for item in shared_ids
+        )
+        observed_relations = set(observed.exact_relation_ids)
+        expected_relations = set(expected.relation_ids)
+        row["relation_false_inclusions"] += len(
+            observed_relations - expected_relations
+        )
+        row["relation_false_exclusions"] += len(
+            expected_relations - observed_relations
+        )
+    return row
