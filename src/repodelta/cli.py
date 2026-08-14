@@ -325,7 +325,7 @@ def build_parser() -> argparse.ArgumentParser:
         dest="reference_labels",
         required=True,
         help=(
-            "Proposed or adjudicated reference labels JSON; "
+            "Proposed or independently verified reference labels JSON; "
             "--human-labels remains a compatibility alias"
         ),
     )

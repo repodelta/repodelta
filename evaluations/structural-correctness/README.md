@@ -1,10 +1,12 @@
 # Structural correctness campaign
 
 This evaluation checks whether the canonical changed-file overview and each
-R/G/T/CC structural focus agree with frozen proposed or human-adjudicated
-reference labels. It is separate from the production review: neither a label
-nor a comparison result can change an assessment, verification status, or
-merge decision.
+R/G/T/CC structural focus agree with frozen proposed or independently verified
+reference labels. A verifier may be a person, an AI system, or a controlled
+combination; authority comes from reproducible evidence and separation from the
+RepoDelta projection under test, not from verifier identity. It is separate
+from the production review: neither a label nor a comparison result can change
+an assessment, verification status, or merge decision.
 
 ## Blind workflow
 
@@ -21,8 +23,10 @@ repodelta review \
 
 Freeze `pr-267.packet.json`, complete the generated
 `pr-267.packet.json.labels.template.json` without opening the observation, and
-save it as a proposed reference artifact. A separate adjudication may bind the
-exact proposal digest after human review. Then render the comparison:
+save it as a proposed reference artifact. A separate verification pass may bind
+the exact proposal digest only when it records its verifier, method, evidence,
+and isolation from the RepoDelta output under test. Conflicting or insufficient
+evidence remains unresolved. Then render the comparison:
 
 ```bash
 repodelta compare-structural-correctness \
@@ -57,7 +61,7 @@ Campaign v1 records a proposed baseline. Its
 [reconciliation](campaign-v1/reconciliation.md) explains the authority and
 coverage limits that must be resolved before treating its
 [findings](campaign-v1/results/findings.md) or
-[machine-checked summary](campaign-v1/results/summary.json) as adjudicated
+[machine-checked summary](campaign-v1/results/summary.json) as verified
 accuracy measurements.
 
 Once frozen, reproducible campaign artifacts use these directories:
@@ -66,7 +70,7 @@ Once frozen, reproducible campaign artifacts use these directories:
 campaign-v1/
 ├── manifest.json
 ├── packets/       # blind labeler-facing inputs
-├── labels/        # frozen proposed or adjudicated reference
+├── labels/        # frozen proposed or independently verified reference
 ├── observations/  # separately stored RepoDelta projections
 └── results/       # machine-readable summaries and comparison reports
 ```

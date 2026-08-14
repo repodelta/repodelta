@@ -4,8 +4,8 @@ The frozen proposed reference labels and separately generated canonical
 observations indicate that the next investment should be correction of the
 underlying focus projection, not richer provenance labels, workflow semantics,
 or large-change clustering. These agent-prepared labels are not independently
-human-adjudicated accuracy truth. This conclusion is evaluation-only and does
-not change a production assessment.
+verified accuracy truth. This conclusion is evaluation-only and does not change
+a production assessment.
 
 ## Result
 

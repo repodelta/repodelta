@@ -6,8 +6,8 @@ from dataclasses import replace
 import pytest
 
 from repodelta.evaluation.structural_correctness import (
-    HumanFileLabel,
-    HumanFocusLabel,
+    ReferenceFileLabel,
+    ReferenceFocusLabel,
     ObservedFile,
     ObservedFocus,
     ReferenceAuthority,
@@ -20,7 +20,7 @@ from repodelta.evaluation.structural_correctness import (
     StructuralCorrectnessObservation,
     StructuralCorrectnessPacket,
     StructuralSubject,
-    adjudicate_structural_correctness_labels,
+    verify_structural_correctness_labels,
     load_labels,
     prepare_structural_correctness_packet,
     prepare_structural_correctness_label_template,
@@ -107,12 +107,12 @@ def _labels(packet: StructuralCorrectnessPacket) -> StructuralCorrectnessLabels:
     return StructuralCorrectnessLabels(
         packet_digest=packet.digest,
         files=(
-            HumanFileLabel("F:a", "included", "changed"),
-            HumanFileLabel("F:b", "included", "retained_bridge"),
-            HumanFileLabel("F:c", "excluded"),
+            ReferenceFileLabel("F:a", "included", "changed"),
+            ReferenceFileLabel("F:b", "included", "retained_bridge"),
+            ReferenceFileLabel("F:c", "excluded"),
         ),
         focuses=(
-            HumanFocusLabel(
+            ReferenceFocusLabel(
                 "R1",
                 ("F:a",),
                 ("F:b",),
@@ -120,7 +120,7 @@ def _labels(packet: StructuralCorrectnessPacket) -> StructuralCorrectnessLabels:
                 context_node_ids=("S:b",),
                 relation_ids=("REL:1",),
             ),
-            HumanFocusLabel("G1", unresolved=True),
+            ReferenceFocusLabel("G1", unresolved=True),
         ),
     )
 
@@ -341,21 +341,51 @@ def test_comparison_exposes_false_inclusion_role_disagreement_and_focus_error(
     assert "complete for admitted direct seeds" in html
 
 
-def test_adjudication_binds_the_exact_proposed_decision() -> None:
+def test_independent_verification_binds_the_exact_proposed_decision() -> None:
     proposed = _labels(_packet())
-    adjudicated = adjudicate_structural_correctness_labels(
+    verified = verify_structural_correctness_labels(
         proposed,
-        accepted_by="maintainer",
+        verified_by="independent-review-agent",
+        verification_method="source-and-relation counterexample review",
+        verification_evidence=("evidence://source-review/1",),
+        system_under_test_isolated=True,
     )
 
-    assert adjudicated.authority.status == "adjudicated"
+    assert verified.authority.status == "verified"
 
     with pytest.raises(ValueError, match="exact proposed decision"):
         replace(
             proposed,
             authority=ReferenceAuthority(
-                "adjudicated", "other-preparer", "maintainer", proposed.proposal_digest
+                status="verified",
+                proposed_by="other-proposer",
+                verified_by="independent-review-agent",
+                verification_method="source review",
+                verification_evidence=("evidence://source-review/1",),
+                system_under_test_isolated=True,
+                proposal_digest=proposed.proposal_digest,
             ),
+        )
+
+
+def test_verification_requires_evidence_and_system_isolation() -> None:
+    proposed = _labels(_packet())
+
+    with pytest.raises(ValueError, match="independently bind"):
+        verify_structural_correctness_labels(
+            proposed,
+            verified_by="review-agent",
+            verification_method="source review",
+            verification_evidence=(),
+            system_under_test_isolated=True,
+        )
+    with pytest.raises(ValueError, match="independently bind"):
+        verify_structural_correctness_labels(
+            proposed,
+            verified_by="review-agent",
+            verification_method="source review",
+            verification_evidence=("evidence://source-review/1",),
+            system_under_test_isolated=False,
         )
 
 
@@ -526,7 +556,7 @@ def test_labels_reject_false_equivalent_projection_claim(tmp_path) -> None:
     raw["focuses"][0]["equivalent_to"] = ["G1"]
     labels_path.write_text(json.dumps(raw))
 
-    with pytest.raises(ValueError, match="equal human memberships"):
+    with pytest.raises(ValueError, match="equal reference memberships"):
         load_labels(labels_path, packet)
 
 

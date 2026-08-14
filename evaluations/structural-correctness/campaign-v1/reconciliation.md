@@ -1,7 +1,7 @@
 # Campaign v1 reconciliation
 
-Campaign v1 is a proposed reference baseline, not independently adjudicated
-human truth. PR #281 preserved a useful node-role and exact-relation comparison,
+Campaign v1 is a proposed reference baseline, not independently verified truth.
+PR #281 preserved a useful node-role and exact-relation comparison,
 but its labels were prepared by an agent and the v2 packet recorded only the
 review-wide coverage state. Maintainer merge accepted the repository change; it
 did not establish that every reference membership had been independently
@@ -21,6 +21,8 @@ relation false inclusions under the finer #281 comparison. Those counts are a
 reconciliation diagnostic, not a product accuracy claim.
 
 Future campaign output must bind complete review coverage, exact per-seed
-mapping, and explicit proposed/adjudicated reference authority. Focus coverage
+mapping, and explicit proposed/verified reference authority. Verification may
+be performed by a person or AI, but must record reproducible evidence and remain
+isolated from the RepoDelta projection being evaluated. Focus coverage
 is derived only from seeds admitted by that reference decision; aggregate
 truncation alone cannot resolve or invalidate a focus.

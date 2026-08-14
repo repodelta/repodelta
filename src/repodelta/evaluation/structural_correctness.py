@@ -205,14 +205,14 @@ LabelDisposition = Literal["included", "excluded", "unresolved"]
 
 
 @dataclass(frozen=True)
-class HumanFileLabel:
+class ReferenceFileLabel:
     file_node_id: str
     disposition: LabelDisposition
     role: str | None = None
 
 
 @dataclass(frozen=True)
-class HumanFocusLabel:
+class ReferenceFocusLabel:
     subject_id: str
     direct_file_node_ids: tuple[str, ...] = ()
     context_file_node_ids: tuple[str, ...] = ()
@@ -225,17 +225,20 @@ class HumanFocusLabel:
 
 @dataclass(frozen=True)
 class ReferenceAuthority:
-    status: Literal["proposed", "adjudicated"]
-    prepared_by: str
-    accepted_by: str = ""
+    status: Literal["proposed", "verified"]
+    proposed_by: str
+    verified_by: str = ""
+    verification_method: str = ""
+    verification_evidence: tuple[str, ...] = ()
+    system_under_test_isolated: bool = False
     proposal_digest: str = ""
 
 
 @dataclass(frozen=True)
 class StructuralCorrectnessLabels:
     packet_digest: str
-    files: tuple[HumanFileLabel, ...]
-    focuses: tuple[HumanFocusLabel, ...]
+    files: tuple[ReferenceFileLabel, ...]
+    focuses: tuple[ReferenceFocusLabel, ...]
     authority: ReferenceAuthority = ReferenceAuthority(
         "proposed", "unassigned"
     )
@@ -248,7 +251,7 @@ class StructuralCorrectnessLabels:
                 "packet_digest": self.packet_digest,
                 "files": [asdict(item) for item in self.files],
                 "focuses": [asdict(item) for item in self.focuses],
-                "prepared_by": self.authority.prepared_by,
+                "proposed_by": self.authority.proposed_by,
             },
             sort_keys=True,
             separators=(",", ":"),
@@ -259,55 +262,68 @@ class StructuralCorrectnessLabels:
         if self.schema_version not in {LABELS_SCHEMA, LEGACY_LABELS_SCHEMA}:
             raise ValueError("invalid structural correctness labels identity")
         authority = self.authority
-        if not authority.prepared_by:
-            raise ValueError("reference authority requires a preparer")
+        if not authority.proposed_by:
+            raise ValueError("reference authority requires a proposer")
         if authority.status == "proposed" and (
-            authority.accepted_by or authority.proposal_digest
+            authority.verified_by
+            or authority.verification_method
+            or authority.verification_evidence
+            or authority.system_under_test_isolated
+            or authority.proposal_digest
         ):
-            raise ValueError("proposed reference cannot claim adjudication")
-        if authority.status == "adjudicated" and (
-            not authority.accepted_by
+            raise ValueError("proposed reference cannot claim verification")
+        if authority.status == "verified" and (
+            not authority.verified_by
+            or not authority.verification_method
+            or not authority.verification_evidence
+            or not authority.system_under_test_isolated
             or authority.proposal_digest != self.proposal_digest
         ):
             raise ValueError(
-                "adjudication must bind the exact proposed decision identity"
+                "verification must independently bind the exact proposed decision identity"
             )
 
 
 def prepare_structural_correctness_label_template(
     packet: StructuralCorrectnessPacket,
     *,
-    prepared_by: str = "unassigned",
+    proposed_by: str = "unassigned",
 ) -> StructuralCorrectnessLabels:
     return StructuralCorrectnessLabels(
         packet_digest=packet.digest,
         files=tuple(
-            HumanFileLabel(item.file_node_id, "unresolved")
+            ReferenceFileLabel(item.file_node_id, "unresolved")
             for item in packet.candidates
         ),
         focuses=tuple(
-            HumanFocusLabel(item.subject_id, unresolved=True)
+            ReferenceFocusLabel(item.subject_id, unresolved=True)
             for item in packet.subjects
         ),
-        authority=ReferenceAuthority("proposed", prepared_by),
+        authority=ReferenceAuthority("proposed", proposed_by),
     )
 
 
-def adjudicate_structural_correctness_labels(
+def verify_structural_correctness_labels(
     labels: StructuralCorrectnessLabels,
     *,
-    accepted_by: str,
+    verified_by: str,
+    verification_method: str,
+    verification_evidence: tuple[str, ...],
+    system_under_test_isolated: bool,
 ) -> StructuralCorrectnessLabels:
     if labels.authority.status != "proposed":
-        raise ValueError("only a proposed reference can be adjudicated")
-    if not accepted_by.strip():
-        raise ValueError("adjudication requires an acceptance owner")
+        raise ValueError("only a proposed reference can be verified")
     return replace(
         labels,
         authority=ReferenceAuthority(
-            status="adjudicated",
-            prepared_by=labels.authority.prepared_by,
-            accepted_by=accepted_by.strip(),
+            status="verified",
+            proposed_by=labels.authority.proposed_by,
+            verified_by=verified_by.strip(),
+            verification_method=verification_method.strip(),
+            verification_evidence=tuple(
+                item.strip() for item in verification_evidence if item.strip()
+            ),
+            system_under_test_isolated=system_under_test_isolated,
             proposal_digest=labels.proposal_digest,
         ),
     )
@@ -668,7 +684,7 @@ def load_labels(
     labels = StructuralCorrectnessLabels(
         packet_digest=_string(raw, "packet_digest"),
         files=tuple(
-            HumanFileLabel(
+            ReferenceFileLabel(
                 _string(item, "file_node_id"),
                 _string(item, "disposition"),  # type: ignore[arg-type]
                 _optional_string(item.get("role")),
@@ -676,7 +692,7 @@ def load_labels(
             for item in _objects(raw, "files")
         ),
         focuses=tuple(
-            HumanFocusLabel(
+            ReferenceFocusLabel(
                 _string(item, "subject_id"),
                 _strings(item.get("direct_file_node_ids", [])),
                 _strings(item.get("context_file_node_ids", [])),
@@ -779,7 +795,7 @@ def _validate_labels(
                 set(peer.context_node_ids),
                 set(peer.relation_ids),
             ):
-                raise ValueError("equivalent focuses must have equal human memberships")
+                raise ValueError("equivalent focuses must have equal reference memberships")
 
 
 def _validate_observation(
@@ -875,11 +891,12 @@ def _render(packet, observation, labels) -> str:
     )
     authority = labels.authority
     authority_summary = (
-        f"{authority.status} reference prepared by {authority.prepared_by}"
+        f"{authority.status} reference proposed by {authority.proposed_by}"
         + (
-            f" · adjudicated by {authority.accepted_by}"
-            if authority.status == "adjudicated"
-            else " · not human-adjudicated"
+            f" · independently verified by {authority.verified_by}"
+            f" via {authority.verification_method}"
+            if authority.status == "verified"
+            else " · not independently verified"
         )
     )
     return f"""<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>{escape(title)}</title><style>{_CSS}</style></head><body><main><header><p>Non-authoritative evaluation</p><h1>{escape(title)}</h1><p>{escape(authority_summary)}. File, node-role, exact-relation, and coverage truth remain distinct. This report does not change assessment or mergeability.</p><code>{escape(packet.digest)}</code></header><section><h2>File overview</h2><div class='cards'>{cards}</div><table><thead><tr><th>Candidate</th><th>RepoDelta</th><th>Reference</th><th>Result</th></tr></thead><tbody>{''.join(rows)}</tbody></table></section><section><h2>Focus membership</h2><table><thead><tr><th>Subject</th><th>Files</th><th>Nodes and roles</th><th>Exact relations</th><th>Reference unresolved</th><th>Reference coverage</th></tr></thead><tbody>{''.join(focus_rows)}</tbody></table></section><footer>Coverage: {escape(coverage_summary)}</footer></main></body></html>"""
@@ -887,7 +904,7 @@ def _render(packet, observation, labels) -> str:
 
 def _focus_coverage(
     packet: StructuralCorrectnessPacket,
-    label: HumanFocusLabel,
+    label: ReferenceFocusLabel,
 ) -> str:
     if label.unresolved:
         return "reference unresolved"
@@ -1046,12 +1063,18 @@ def _load_reference_authority(value: Any) -> ReferenceAuthority:
     if not isinstance(value, Mapping):
         raise ValueError("reference authority must be an object")
     status = value.get("status")
-    if status not in {"proposed", "adjudicated"}:
+    if status not in {"proposed", "verified"}:
         raise ValueError("reference authority has an invalid status")
+    isolated = value.get("system_under_test_isolated", False)
+    if not isinstance(isolated, bool):
+        raise ValueError("reference authority isolation must be a boolean")
     return ReferenceAuthority(
         status=status,
-        prepared_by=_string(value, "prepared_by"),
-        accepted_by=str(value.get("accepted_by", "")),
+        proposed_by=_string(value, "proposed_by"),
+        verified_by=str(value.get("verified_by", "")),
+        verification_method=str(value.get("verification_method", "")),
+        verification_evidence=_strings(value.get("verification_evidence", [])),
+        system_under_test_isolated=isolated,
         proposal_digest=str(value.get("proposal_digest", "")),
     )
 
