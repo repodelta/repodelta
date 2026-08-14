@@ -27,24 +27,24 @@ and current-head checks a reviewer can actually inspect.
 
 ![RepoDelta Brief with an Issue-backed goal](https://raw.githubusercontent.com/repodelta/repodelta/main/docs/assets/repodelta-report-overview.jpg)
 
-RepoDelta carries Issue objectives (`O`), requirements (`R`), and guardrails
-(`G`) into source-linked review rows alongside PR-authored transformation
-claims.
+The Brief carries Issue objectives (`O`), requirements (`R`), and guardrails
+(`G`) alongside PR-authored transformation claims (`T`) and completion
+conditions (`CC`). The default **Overview** starts with the changed-file
+boundary and keeps retained structural context explicit.
 
-![Issue requirements and guardrails in the Verification section](https://raw.githubusercontent.com/repodelta/repodelta/main/docs/assets/repodelta-verification-focus.png)
+![File-level structural delta overview with R/G/T controls](https://raw.githubusercontent.com/repodelta/repodelta/main/docs/assets/repodelta-structural-overview.jpg)
 
-Expanding a row shows its observations and assessment and focuses the graph
-below. The animation alternates between **All** and **R4**: graph membership
-stays fixed while the associated structure is highlighted.
+Selecting a subject opens its authored statement, source, assessment, and
+evidence in the same investigation surface. RepoDelta then separates runtime
+change, verification, and unresolved context before revealing source-linked
+symbols and exact relationships.
 
-![Structural graph changing from All to an R4-focused view](https://raw.githubusercontent.com/repodelta/repodelta/main/docs/assets/repodelta-structural-graph.webp)
+![Focused R1 structure with runtime, verification, and unresolved context](https://raw.githubusercontent.com/repodelta/repodelta/main/docs/assets/repodelta-focused-structure.jpg)
 
-RepoDelta also carries PR-authored transformation claims (`T`) and completion
-conditions (`CC`) into the same inspection flow. When a claim names a concrete
-file or symbol in a Markdown code span, selecting it focuses the associated
-code and relationships. Selector-free or unmatched prose stays visible without
-an invented graph mapping, so a reviewer can distinguish a coding agent's
-claim from the structure that actually changed. See the
+For `T` and `CC`, a concrete file or symbol named in a Markdown code span can
+focus the associated code and relationships. Selector-free or unmatched prose
+stays visible without an invented graph mapping, so a reviewer can distinguish
+a coding agent's claim from the structure that actually changed. See the
 [authoring guide](docs/pull-request-guidelines.md).
 
 ## Quick start
