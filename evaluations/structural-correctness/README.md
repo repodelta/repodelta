@@ -1,9 +1,10 @@
 # Structural correctness campaign
 
 This evaluation checks whether the canonical changed-file overview and each
-R/G/T/CC structural focus agree with frozen human labels. It is separate from
-the production review: neither a label nor a comparison result can change an
-assessment, verification status, or merge decision.
+R/G/T/CC structural focus agree with frozen proposed or human-adjudicated
+reference labels. It is separate from the production review: neither a label
+nor a comparison result can change an assessment, verification status, or
+merge decision.
 
 ## Blind workflow
 
@@ -20,13 +21,14 @@ repodelta review \
 
 Freeze `pr-267.packet.json`, complete the generated
 `pr-267.packet.json.labels.template.json` without opening the observation, and
-save it as the human-label artifact. Then render the standalone comparison:
+save it as a proposed reference artifact. A separate adjudication may bind the
+exact proposal digest after human review. Then render the comparison:
 
 ```bash
 repodelta compare-structural-correctness \
   --labeling-packet build/pr-267.packet.json \
   --observation build/pr-267.packet.json.observation.json \
-  --human-labels build/pr-267.labels.json \
+  --reference-labels build/pr-267.labels.json \
   --output build/pr-267-structural-comparison.html
 ```
 
@@ -46,14 +48,17 @@ The first sample is selected by change shape rather than randomly. Its
 machine-readable identities, categories, purposes, and campaign constraints
 are frozen in [`campaign-v1/manifest.json`](campaign-v1/manifest.json).
 
-The sample must contain human exclusions and unresolved memberships. If these
+The sample must contain reference exclusions and unresolved memberships. If these
 real PRs do not expose a retained-bridge or false-inclusion counterexample, a
 small synthetic fixture complements the campaign without replacing the real
 sample.
 
-Campaign v1 is complete. Its [findings](campaign-v1/results/findings.md) and
-[machine-checked summary](campaign-v1/results/summary.json) select correction
-of the underlying focus projection as the next investment.
+Campaign v1 records a proposed baseline. Its
+[reconciliation](campaign-v1/reconciliation.md) explains the authority and
+coverage limits that must be resolved before treating its
+[findings](campaign-v1/results/findings.md) or
+[machine-checked summary](campaign-v1/results/summary.json) as adjudicated
+accuracy measurements.
 
 Once frozen, reproducible campaign artifacts use these directories:
 
@@ -61,7 +66,7 @@ Once frozen, reproducible campaign artifacts use these directories:
 campaign-v1/
 ├── manifest.json
 ├── packets/       # blind labeler-facing inputs
-├── labels/        # frozen human truth
+├── labels/        # frozen proposed or adjudicated reference
 ├── observations/  # separately stored RepoDelta projections
 └── results/       # machine-readable summaries and comparison reports
 ```
@@ -72,7 +77,7 @@ ordinary exploratory output remains under `build/` and is not committed.
 ## Reading the result
 
 File comparison distinguishes exact agreement, false inclusion, false
-exclusion, role disagreement, and human-unresolved cases. Focus comparison
+exclusion, role disagreement, and reference-unresolved cases. Focus comparison
 reports those outcomes independently for file membership, canonical node role,
 and exact relations for each subject. `complete` or `available` remains bounded
 to the coverage surface recorded in the packet; it is never interpreted as

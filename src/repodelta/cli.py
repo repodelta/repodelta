@@ -319,7 +319,16 @@ def build_parser() -> argparse.ArgumentParser:
     )
     compare_structural.add_argument("--labeling-packet", required=True)
     compare_structural.add_argument("--observation", required=True)
-    compare_structural.add_argument("--human-labels", required=True)
+    compare_structural.add_argument(
+        "--reference-labels",
+        "--human-labels",
+        dest="reference_labels",
+        required=True,
+        help=(
+            "Proposed or adjudicated reference labels JSON; "
+            "--human-labels remains a compatibility alias"
+        ),
+    )
     compare_structural.add_argument("--output", required=True)
     return parser
 
@@ -359,7 +368,7 @@ def main() -> int:
             output = write_structural_correctness_comparison_html(
                 args.labeling_packet,
                 args.observation,
-                args.human_labels,
+                args.reference_labels,
                 args.output,
             )
         except (OSError, ValueError) as exc:

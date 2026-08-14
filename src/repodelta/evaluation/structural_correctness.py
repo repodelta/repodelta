@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from html import escape
 from pathlib import Path
 from typing import Any, Literal, Mapping
@@ -14,9 +14,11 @@ from repodelta.model.contracts import (
 )
 
 
-PACKET_SCHEMA = "structural_correctness_packet.v2"
+PACKET_SCHEMA = "structural_correctness_packet.v3"
+LEGACY_PACKET_SCHEMA = "structural_correctness_packet.v2"
 OBSERVATION_SCHEMA = "structural_correctness_observation.v2"
-LABELS_SCHEMA = "structural_correctness_labels.v2"
+LABELS_SCHEMA = "structural_correctness_labels.v3"
+LEGACY_LABELS_SCHEMA = "structural_correctness_labels.v2"
 
 
 @dataclass(frozen=True)
@@ -57,6 +59,68 @@ class ChangedSurface:
 
 
 @dataclass(frozen=True)
+class StructuralSeedCoverage:
+    provider_symbol_id: str
+    node_id: str | None
+    state: Literal["complete", "truncated", "unknown"]
+
+
+@dataclass(frozen=True)
+class StructuralCoverageSnapshot:
+    state: str
+    provider: str
+    hunk_count: int
+    mapped_hunk_count: int
+    symbol_count: int
+    path_count: int
+    seed_count: int
+    complete_seed_count: int
+    truncated_seed_count: int
+    requested_files: int
+    indexed_files: int
+    missing_reason: str
+    base_state: str
+    base_mapped_hunk_count: int
+    base_hunk_count: int
+    base_symbol_count: int
+    seed_mapping_state: Literal["complete", "incomplete", "legacy_unavailable"]
+    seeds: tuple[StructuralSeedCoverage, ...] = ()
+
+    def __post_init__(self) -> None:
+        counts = (
+            self.hunk_count,
+            self.mapped_hunk_count,
+            self.symbol_count,
+            self.path_count,
+            self.seed_count,
+            self.complete_seed_count,
+            self.truncated_seed_count,
+            self.requested_files,
+            self.indexed_files,
+            self.base_mapped_hunk_count,
+            self.base_hunk_count,
+            self.base_symbol_count,
+        )
+        if any(isinstance(item, bool) or item < 0 for item in counts):
+            raise ValueError("coverage counts must be non-negative integers")
+        if self.mapped_hunk_count > self.hunk_count:
+            raise ValueError("mapped hunk coverage cannot exceed hunk count")
+        if self.complete_seed_count + self.truncated_seed_count > self.seed_count:
+            raise ValueError("disposed seed coverage cannot exceed seed count")
+        if len({item.provider_symbol_id for item in self.seeds}) != len(self.seeds):
+            raise ValueError("coverage contains duplicate seed identities")
+        if self.seed_mapping_state == "complete" and (
+            len(self.seeds) != self.seed_count
+            or sum(item.state == "complete" for item in self.seeds)
+            != self.complete_seed_count
+            or sum(item.state == "truncated" for item in self.seeds)
+            != self.truncated_seed_count
+            or any(item.node_id is None for item in self.seeds)
+        ):
+            raise ValueError("complete seed mapping must dispose every exact seed")
+
+
+@dataclass(frozen=True)
 class StructuralSubject:
     subject_id: str
     subject_kind: str
@@ -75,11 +139,11 @@ class StructuralCorrectnessPacket:
     changed_surfaces: tuple[ChangedSurface, ...]
     subjects: tuple[StructuralSubject, ...]
     relation_ids: tuple[str, ...]
-    coverage_state: str
+    coverage: StructuralCoverageSnapshot
     schema_version: str = PACKET_SCHEMA
 
     def __post_init__(self) -> None:
-        if self.schema_version != PACKET_SCHEMA or not self.repository:
+        if self.schema_version not in {PACKET_SCHEMA, LEGACY_PACKET_SCHEMA} or not self.repository:
             raise ValueError("invalid structural correctness packet identity")
         _unique((item.file_node_id for item in self.candidates), "candidate files")
         _unique((item.subject_id for item in self.subjects), "subjects")
@@ -95,10 +159,19 @@ class StructuralCorrectnessPacket:
             for item in self.relations
         ):
             raise ValueError("relation candidates contain unknown node identities")
+        if any(
+            item.node_id is not None and item.node_id not in node_ids
+            for item in self.coverage.seeds
+        ):
+            raise ValueError("coverage contains unknown seed node identities")
 
     @property
     def digest(self) -> str:
-        payload = json.dumps(asdict(self), sort_keys=True, separators=(",", ":"))
+        raw = asdict(self)
+        if self.schema_version == LEGACY_PACKET_SCHEMA:
+            raw["coverage_state"] = self.coverage.state
+            raw.pop("coverage")
+        payload = json.dumps(raw, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(payload.encode()).hexdigest()
 
 
@@ -151,15 +224,60 @@ class HumanFocusLabel:
 
 
 @dataclass(frozen=True)
+class ReferenceAuthority:
+    status: Literal["proposed", "adjudicated"]
+    prepared_by: str
+    accepted_by: str = ""
+    proposal_digest: str = ""
+
+
+@dataclass(frozen=True)
 class StructuralCorrectnessLabels:
     packet_digest: str
     files: tuple[HumanFileLabel, ...]
     focuses: tuple[HumanFocusLabel, ...]
+    authority: ReferenceAuthority = ReferenceAuthority(
+        "proposed", "unassigned"
+    )
     schema_version: str = LABELS_SCHEMA
+
+    @property
+    def proposal_digest(self) -> str:
+        payload = json.dumps(
+            {
+                "packet_digest": self.packet_digest,
+                "files": [asdict(item) for item in self.files],
+                "focuses": [asdict(item) for item in self.focuses],
+                "prepared_by": self.authority.prepared_by,
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        return hashlib.sha256(payload.encode()).hexdigest()
+
+    def __post_init__(self) -> None:
+        if self.schema_version not in {LABELS_SCHEMA, LEGACY_LABELS_SCHEMA}:
+            raise ValueError("invalid structural correctness labels identity")
+        authority = self.authority
+        if not authority.prepared_by:
+            raise ValueError("reference authority requires a preparer")
+        if authority.status == "proposed" and (
+            authority.accepted_by or authority.proposal_digest
+        ):
+            raise ValueError("proposed reference cannot claim adjudication")
+        if authority.status == "adjudicated" and (
+            not authority.accepted_by
+            or authority.proposal_digest != self.proposal_digest
+        ):
+            raise ValueError(
+                "adjudication must bind the exact proposed decision identity"
+            )
 
 
 def prepare_structural_correctness_label_template(
     packet: StructuralCorrectnessPacket,
+    *,
+    prepared_by: str = "unassigned",
 ) -> StructuralCorrectnessLabels:
     return StructuralCorrectnessLabels(
         packet_digest=packet.digest,
@@ -170,6 +288,27 @@ def prepare_structural_correctness_label_template(
         focuses=tuple(
             HumanFocusLabel(item.subject_id, unresolved=True)
             for item in packet.subjects
+        ),
+        authority=ReferenceAuthority("proposed", prepared_by),
+    )
+
+
+def adjudicate_structural_correctness_labels(
+    labels: StructuralCorrectnessLabels,
+    *,
+    accepted_by: str,
+) -> StructuralCorrectnessLabels:
+    if labels.authority.status != "proposed":
+        raise ValueError("only a proposed reference can be adjudicated")
+    if not accepted_by.strip():
+        raise ValueError("adjudication requires an acceptance owner")
+    return replace(
+        labels,
+        authority=ReferenceAuthority(
+            status="adjudicated",
+            prepared_by=labels.authority.prepared_by,
+            accepted_by=accepted_by.strip(),
+            proposal_digest=labels.proposal_digest,
         ),
     )
 
@@ -233,6 +372,7 @@ def prepare_structural_correctness_packet(
         if item.id not in {file.id for file in file_nodes}
         and node_path.get(item.id) in file_id_by_path
     )
+    coverage = _coverage_snapshot(brief, graph.nodes)
     return StructuralCorrectnessPacket(
         repository=brief.packet.repository,
         pull_request=brief.packet.pull_request,
@@ -272,7 +412,73 @@ def prepare_structural_correctness_packet(
                 *(item.id for item in brief.projection.structural_overview.relations),
             ))
         ),
-        coverage_state=brief.overview.structural_coverage.state,
+        coverage=coverage,
+    )
+
+
+def _coverage_snapshot(brief: ReviewBrief, graph_nodes) -> StructuralCoverageSnapshot:
+    coverage = brief.overview.structural_coverage
+    node_id_by_review_symbol_id = {
+        item.review_symbol_id: item.id for item in graph_nodes
+    }
+    truncated_provider_ids = {
+        affected_id
+        for diagnostic in brief.projection_candidates.diagnostics
+        if diagnostic.scope == "review"
+        and diagnostic.slot == "structural_path"
+        and diagnostic.state == "budget_truncated"
+        for affected_id in diagnostic.affected_ids
+    }
+    seed_facts = tuple(
+        item
+        for item in brief.evidence_catalog.items
+        if item.kind == "symbol"
+        and item.changed
+        and item.revision_side == "head"
+        and item.metadata.get("symbol_id")
+        and item.metadata.get("review_symbol_id")
+    )
+    seeds = tuple(
+        StructuralSeedCoverage(
+            provider_symbol_id=str(item.metadata["symbol_id"]),
+            node_id=node_id_by_review_symbol_id.get(
+                str(item.metadata["review_symbol_id"])
+            ),
+            state=(
+                "truncated"
+                if item.metadata["symbol_id"] in truncated_provider_ids
+                else "complete"
+            ),
+        )
+        for item in seed_facts
+    )
+    mapping_complete = (
+        len(seeds) == coverage.seed_count
+        and sum(item.state == "complete" for item in seeds)
+        == coverage.complete_seed_count
+        and sum(item.state == "truncated" for item in seeds)
+        == coverage.truncated_seed_count
+        and all(item.node_id is not None for item in seeds)
+    )
+    return StructuralCoverageSnapshot(
+        state=coverage.state,
+        provider=coverage.provider,
+        hunk_count=coverage.hunk_count,
+        mapped_hunk_count=coverage.mapped_hunk_count,
+        symbol_count=coverage.symbol_count,
+        path_count=coverage.path_count,
+        seed_count=coverage.seed_count,
+        complete_seed_count=coverage.complete_seed_count,
+        truncated_seed_count=coverage.truncated_seed_count,
+        requested_files=coverage.requested_files,
+        indexed_files=coverage.indexed_files,
+        missing_reason=coverage.missing_reason,
+        base_state=coverage.base_state,
+        base_mapped_hunk_count=coverage.base_mapped_hunk_count,
+        base_hunk_count=coverage.base_hunk_count,
+        base_symbol_count=coverage.base_symbol_count,
+        seed_mapping_state="complete" if mapping_complete else "incomplete",
+        seeds=seeds,
     )
 
 
@@ -363,7 +569,8 @@ def write_json_artifact(value: object, output: str | Path) -> Path:
 
 
 def load_packet(path: str | Path) -> StructuralCorrectnessPacket:
-    raw = _mapping(path, PACKET_SCHEMA)
+    raw = _mapping_one_of(path, {PACKET_SCHEMA, LEGACY_PACKET_SCHEMA})
+    schema_version = _string(raw, "schema_version")
     return StructuralCorrectnessPacket(
         repository=_string(raw, "repository"),
         pull_request=_optional_int(raw.get("pull_request")),
@@ -419,8 +626,12 @@ def load_packet(path: str | Path) -> StructuralCorrectnessPacket:
             for item in _objects(raw, "subjects")
         ),
         relation_ids=_strings(raw.get("relation_ids", [])),
-        coverage_state=_string(raw, "coverage_state"),
-        schema_version=_string(raw, "schema_version"),
+        coverage=(
+            _load_coverage(raw.get("coverage"))
+            if schema_version == PACKET_SCHEMA
+            else _legacy_coverage(_string(raw, "coverage_state"))
+        ),
+        schema_version=schema_version,
     )
 
 
@@ -452,7 +663,8 @@ def load_observation(path: str | Path) -> StructuralCorrectnessObservation:
 def load_labels(
     path: str | Path, packet: StructuralCorrectnessPacket
 ) -> StructuralCorrectnessLabels:
-    raw = _mapping(path, LABELS_SCHEMA)
+    raw = _mapping_one_of(path, {LABELS_SCHEMA, LEGACY_LABELS_SCHEMA})
+    schema_version = _string(raw, "schema_version")
     labels = StructuralCorrectnessLabels(
         packet_digest=_string(raw, "packet_digest"),
         files=tuple(
@@ -476,7 +688,12 @@ def load_labels(
             )
             for item in _objects(raw, "focuses")
         ),
-        schema_version=_string(raw, "schema_version"),
+        authority=(
+            _load_reference_authority(raw.get("authority"))
+            if schema_version == LABELS_SCHEMA
+            else ReferenceAuthority("proposed", "legacy-unverified")
+        ),
+        schema_version=schema_version,
     )
     _validate_labels(labels, packet)
     return labels
@@ -637,6 +854,7 @@ def _render(packet, observation, labels) -> str:
             projected_relations,
             expected_relations,
         )
+        focus_coverage = _focus_coverage(packet, label)
         focus_rows.append(
             "<tr>"
             f"<td>{escape(label.subject_id)}</td>"
@@ -644,11 +862,59 @@ def _render(packet, observation, labels) -> str:
             f"<td>{_comparison_html(node_result)}</td>"
             f"<td>{_comparison_html(relation_result)}</td>"
             f"<td>{'yes' if label.unresolved else 'no'}</td>"
+            f"<td>{escape(focus_coverage)}</td>"
             "</tr>"
         )
     cards = ''.join(f"<div><span>{escape(key)}</span><strong>{value}</strong></div>" for key, value in counts.items())
     title = f"{packet.repository} · PR #{packet.pull_request} · structural correctness"
-    return f"""<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>{escape(title)}</title><style>{_CSS}</style></head><body><main><header><p>Non-authoritative evaluation</p><h1>{escape(title)}</h1><p>Frozen human labels are compared with the canonical structural projection. File, node-role, and exact-relation truth remain distinct. This report does not change assessment or mergeability.</p><code>{escape(packet.digest)}</code></header><section><h2>File overview</h2><div class='cards'>{cards}</div><table><thead><tr><th>Candidate</th><th>RepoDelta</th><th>Human</th><th>Result</th></tr></thead><tbody>{''.join(rows)}</tbody></table></section><section><h2>Focus membership</h2><table><thead><tr><th>Subject</th><th>Files</th><th>Nodes and roles</th><th>Exact relations</th><th>Human unresolved</th></tr></thead><tbody>{''.join(focus_rows)}</tbody></table></section><footer>Coverage: {escape(packet.coverage_state)}</footer></main></body></html>"""
+    coverage = packet.coverage
+    coverage_summary = (
+        f"{coverage.state} · {coverage.mapped_hunk_count}/{coverage.hunk_count} "
+        f"hunks mapped · {coverage.complete_seed_count}/{coverage.seed_count} "
+        f"seeds complete · mapping {coverage.seed_mapping_state}"
+    )
+    authority = labels.authority
+    authority_summary = (
+        f"{authority.status} reference prepared by {authority.prepared_by}"
+        + (
+            f" · adjudicated by {authority.accepted_by}"
+            if authority.status == "adjudicated"
+            else " · not human-adjudicated"
+        )
+    )
+    return f"""<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>{escape(title)}</title><style>{_CSS}</style></head><body><main><header><p>Non-authoritative evaluation</p><h1>{escape(title)}</h1><p>{escape(authority_summary)}. File, node-role, exact-relation, and coverage truth remain distinct. This report does not change assessment or mergeability.</p><code>{escape(packet.digest)}</code></header><section><h2>File overview</h2><div class='cards'>{cards}</div><table><thead><tr><th>Candidate</th><th>RepoDelta</th><th>Reference</th><th>Result</th></tr></thead><tbody>{''.join(rows)}</tbody></table></section><section><h2>Focus membership</h2><table><thead><tr><th>Subject</th><th>Files</th><th>Nodes and roles</th><th>Exact relations</th><th>Reference unresolved</th><th>Reference coverage</th></tr></thead><tbody>{''.join(focus_rows)}</tbody></table></section><footer>Coverage: {escape(coverage_summary)}</footer></main></body></html>"""
+
+
+def _focus_coverage(
+    packet: StructuralCorrectnessPacket,
+    label: HumanFocusLabel,
+) -> str:
+    if label.unresolved:
+        return "reference unresolved"
+    memberships = {
+        *label.direct_file_node_ids,
+        *label.context_file_node_ids,
+        *label.direct_node_ids,
+        *label.context_node_ids,
+        *label.relation_ids,
+    }
+    if not memberships:
+        return "not required for empty reference"
+    if packet.coverage.seed_mapping_state != "complete":
+        return "unknown · exact seed mapping unavailable"
+    direct_nodes = set(label.direct_node_ids)
+    relevant = tuple(
+        item
+        for item in packet.coverage.seeds
+        if item.node_id in direct_nodes
+    )
+    if not relevant:
+        return "unknown · no admitted direct seed"
+    if any(item.state == "truncated" for item in relevant):
+        return "limited · admitted seed truncated"
+    if any(item.state == "unknown" for item in relevant):
+        return "unknown · admitted seed state unavailable"
+    return "complete for admitted direct seeds"
 
 
 def _role_comparison(
@@ -707,6 +973,103 @@ def _mapping(path: str | Path, schema: str) -> Mapping[str, Any]:
     return raw
 
 
+def _mapping_one_of(
+    path: str | Path,
+    schemas: set[str],
+) -> Mapping[str, Any]:
+    raw = json.loads(Path(path).read_text())
+    if not isinstance(raw, Mapping) or raw.get("schema_version") not in schemas:
+        raise ValueError(
+            "artifact must use one of schema versions " + ", ".join(sorted(schemas))
+        )
+    return raw
+
+
+def _legacy_coverage(state: str) -> StructuralCoverageSnapshot:
+    return StructuralCoverageSnapshot(
+        state=state,
+        provider="",
+        hunk_count=0,
+        mapped_hunk_count=0,
+        symbol_count=0,
+        path_count=0,
+        seed_count=0,
+        complete_seed_count=0,
+        truncated_seed_count=0,
+        requested_files=0,
+        indexed_files=0,
+        missing_reason="",
+        base_state="unavailable",
+        base_mapped_hunk_count=0,
+        base_hunk_count=0,
+        base_symbol_count=0,
+        seed_mapping_state="legacy_unavailable",
+    )
+
+
+def _load_coverage(value: Any) -> StructuralCoverageSnapshot:
+    if not isinstance(value, Mapping):
+        raise ValueError("coverage must be an object")
+    seeds = tuple(
+        StructuralSeedCoverage(
+            provider_symbol_id=_string(item, "provider_symbol_id"),
+            node_id=_optional_string(item.get("node_id")),
+            state=_coverage_seed_state(item.get("state")),
+        )
+        for item in _objects(value, "seeds")
+    )
+    return StructuralCoverageSnapshot(
+        state=_string(value, "state"),
+        provider=str(value.get("provider", "")),
+        hunk_count=_non_negative_int(value.get("hunk_count")),
+        mapped_hunk_count=_non_negative_int(value.get("mapped_hunk_count")),
+        symbol_count=_non_negative_int(value.get("symbol_count")),
+        path_count=_non_negative_int(value.get("path_count")),
+        seed_count=_non_negative_int(value.get("seed_count")),
+        complete_seed_count=_non_negative_int(value.get("complete_seed_count")),
+        truncated_seed_count=_non_negative_int(value.get("truncated_seed_count")),
+        requested_files=_non_negative_int(value.get("requested_files")),
+        indexed_files=_non_negative_int(value.get("indexed_files")),
+        missing_reason=str(value.get("missing_reason", "")),
+        base_state=_string(value, "base_state"),
+        base_mapped_hunk_count=_non_negative_int(
+            value.get("base_mapped_hunk_count")
+        ),
+        base_hunk_count=_non_negative_int(value.get("base_hunk_count")),
+        base_symbol_count=_non_negative_int(value.get("base_symbol_count")),
+        seed_mapping_state=_seed_mapping_state(value.get("seed_mapping_state")),
+        seeds=seeds,
+    )
+
+
+def _load_reference_authority(value: Any) -> ReferenceAuthority:
+    if not isinstance(value, Mapping):
+        raise ValueError("reference authority must be an object")
+    status = value.get("status")
+    if status not in {"proposed", "adjudicated"}:
+        raise ValueError("reference authority has an invalid status")
+    return ReferenceAuthority(
+        status=status,
+        prepared_by=_string(value, "prepared_by"),
+        accepted_by=str(value.get("accepted_by", "")),
+        proposal_digest=str(value.get("proposal_digest", "")),
+    )
+
+
+def _coverage_seed_state(value: Any) -> Literal["complete", "truncated", "unknown"]:
+    if value not in {"complete", "truncated", "unknown"}:
+        raise ValueError("coverage seed has an invalid state")
+    return value
+
+
+def _seed_mapping_state(
+    value: Any,
+) -> Literal["complete", "incomplete", "legacy_unavailable"]:
+    if value not in {"complete", "incomplete", "legacy_unavailable"}:
+        raise ValueError("coverage has an invalid seed mapping state")
+    return value
+
+
 def _objects(raw: Mapping[str, Any], name: str) -> list[Mapping[str, Any]]:
     value = raw.get(name)
     if not isinstance(value, list) or any(not isinstance(item, Mapping) for item in value):
@@ -744,6 +1107,13 @@ def _optional_non_negative_int(value: Any) -> int | None:
     if isinstance(value, bool) or not isinstance(value, int) or value < 0:
         raise ValueError("expected non-negative integer or null")
     return value
+
+
+def _non_negative_int(value: Any) -> int:
+    result = _optional_non_negative_int(value)
+    if result is None:
+        raise ValueError("expected non-negative integer")
+    return result
 
 
 def _unique(values, name: str) -> None:
