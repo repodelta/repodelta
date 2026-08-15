@@ -103,6 +103,7 @@ def test_campaign_v1_summary_is_derived_from_frozen_truth() -> None:
         )
 
     assert summary["sample_count"] == len(expected_rows)
+    assert summary["reference_status"] == "proposed_agent_prepared"
     assert summary["per_pull_request"] == expected_rows
     assert summary["focuses_resolved"] == sum(
         row["focuses_resolved"] for row in expected_rows

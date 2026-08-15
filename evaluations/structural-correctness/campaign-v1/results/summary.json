@@ -1,6 +1,7 @@
 {
   "schema_version": "structural_correctness_campaign_summary.v1",
   "campaign": "campaign-v1",
+  "reference_status": "proposed_agent_prepared",
   "sample_count": 8,
   "focuses_resolved": 110,
   "focuses_unresolved": 3,

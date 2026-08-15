@@ -6,27 +6,34 @@ from dataclasses import replace
 import pytest
 
 from repodelta.evaluation.structural_correctness import (
-    HumanFileLabel,
-    HumanFocusLabel,
+    ReferenceFileLabel,
+    ReferenceFocusLabel,
     ObservedFile,
     ObservedFocus,
+    ReferenceAuthority,
     StructuralCandidate,
+    StructuralCoverageSnapshot,
     StructuralRelationCandidate,
+    StructuralSeedCoverage,
     StructuralSymbolCandidate,
     StructuralCorrectnessLabels,
     StructuralCorrectnessObservation,
     StructuralCorrectnessPacket,
     StructuralSubject,
+    verify_structural_correctness_labels,
     load_labels,
     prepare_structural_correctness_packet,
     prepare_structural_correctness_label_template,
     write_comparison_html,
     write_json_artifact,
 )
+from repodelta.cli import build_parser
 from repodelta.model.contracts import (
     ChangedFile,
     EvidenceCatalog,
     EvidenceItem,
+    ProjectionCandidateSet,
+    ProjectionDiagnostic,
     ReviewBrief,
     ReviewOverview,
     ReviewProjection,
@@ -73,7 +80,26 @@ def _packet() -> StructuralCorrectnessPacket:
             StructuralSubject("G1", "guardrail", "Do not change c."),
         ),
         relation_ids=("REL:1",),
-        coverage_state="available",
+        coverage=StructuralCoverageSnapshot(
+            "available",
+            "codegraph",
+            1,
+            1,
+            3,
+            1,
+            1,
+            1,
+            0,
+            3,
+            3,
+            "",
+            "available",
+            1,
+            1,
+            3,
+            "complete",
+            (StructuralSeedCoverage("provider:a", "S:a", "complete"),),
+        ),
     )
 
 
@@ -81,12 +107,12 @@ def _labels(packet: StructuralCorrectnessPacket) -> StructuralCorrectnessLabels:
     return StructuralCorrectnessLabels(
         packet_digest=packet.digest,
         files=(
-            HumanFileLabel("F:a", "included", "changed"),
-            HumanFileLabel("F:b", "included", "retained_bridge"),
-            HumanFileLabel("F:c", "excluded"),
+            ReferenceFileLabel("F:a", "included", "changed"),
+            ReferenceFileLabel("F:b", "included", "retained_bridge"),
+            ReferenceFileLabel("F:c", "excluded"),
         ),
         focuses=(
-            HumanFocusLabel(
+            ReferenceFocusLabel(
                 "R1",
                 ("F:a",),
                 ("F:b",),
@@ -94,7 +120,7 @@ def _labels(packet: StructuralCorrectnessPacket) -> StructuralCorrectnessLabels:
                 context_node_ids=("S:b",),
                 relation_ids=("REL:1",),
             ),
-            HumanFocusLabel("G1", unresolved=True),
+            ReferenceFocusLabel("G1", unresolved=True),
         ),
     )
 
@@ -145,6 +171,39 @@ def test_label_template_is_complete_but_blind() -> None:
     assert '"qualified_name": "run"' in serialized
 
 
+def test_structural_comparison_names_reference_authority_without_breaking_alias() -> None:
+    parser = build_parser()
+    current = parser.parse_args(
+        [
+            "compare-structural-correctness",
+            "--labeling-packet",
+            "packet.json",
+            "--observation",
+            "observation.json",
+            "--reference-labels",
+            "labels.json",
+            "--output",
+            "comparison.html",
+        ]
+    )
+    legacy = parser.parse_args(
+        [
+            "compare-structural-correctness",
+            "--labeling-packet",
+            "packet.json",
+            "--observation",
+            "observation.json",
+            "--human-labels",
+            "labels.json",
+            "--output",
+            "comparison.html",
+        ]
+    )
+
+    assert current.reference_labels == "labels.json"
+    assert legacy.reference_labels == "labels.json"
+
+
 def test_packet_exposes_bounded_structural_facts_without_projected_answers() -> None:
     file_fact = EvidenceItem(
         id="EV:file",
@@ -162,7 +221,13 @@ def test_packet_exposes_bounded_structural_facts_without_projected_answers() -> 
         summary="run",
         kind="symbol",
         classification="code",
+        revision_side="head",
+        operation="modified",
+        role="revision_fact",
+        changed=True,
         metadata={
+            "symbol_id": "provider:a",
+            "review_symbol_id": "symbol:a",
             "path": "src/a.py",
             "qualified_name": "run",
             "symbol_kind": "function",
@@ -209,8 +274,33 @@ def test_packet_exposes_bounded_structural_facts_without_projected_answers() -> 
                 relation_groups=(relation,),
             )
         ),
+        projection_candidates=ProjectionCandidateSet(
+            diagnostics=(
+                ProjectionDiagnostic(
+                    focus_statement_id="review",
+                    slot="structural_path",
+                    state="budget_truncated",
+                    message="Traversal stopped at the bounded seed limit.",
+                    affected_ids=("provider:a",),
+                    scope="review",
+                ),
+            )
+        ),
         overview=ReviewOverview(
-            "open", "not_observed", 1, StructuralCoverage("available")
+            "open",
+            "not_observed",
+            1,
+            StructuralCoverage(
+                "available",
+                provider="codegraph",
+                hunk_count=1,
+                mapped_hunk_count=1,
+                symbol_count=1,
+                seed_count=1,
+                truncated_seed_count=1,
+                requested_files=1,
+                indexed_files=1,
+            ),
         ),
     )
 
@@ -220,6 +310,10 @@ def test_packet_exposes_bounded_structural_facts_without_projected_answers() -> 
     assert packet.symbols[0].qualified_name == "run"
     assert packet.relations[0].source_node_id == "F:a"
     assert packet.changed_surfaces[0].hunk_headers == ("@@ -1,2 +1,4 @@",)
+    assert packet.coverage.seed_mapping_state == "complete"
+    assert packet.coverage.seeds == (
+        StructuralSeedCoverage("provider:a", "S:a", "truncated"),
+    )
     assert "secret implementation line" not in serialized
     assert "direct_file_node_ids" not in serialized
     assert "retained_bridge" not in serialized
@@ -243,6 +337,139 @@ def test_comparison_exposes_false_inclusion_role_disagreement_and_focus_error(
     assert "Exact relations" in html
     assert "Non-authoritative evaluation" in html
     assert "does not change assessment or mergeability" in html
+    assert "proposed reference" in html
+    assert "complete for admitted direct seeds" in html
+
+
+def test_independent_verification_binds_the_exact_proposed_decision() -> None:
+    proposed = _labels(_packet())
+    verified = verify_structural_correctness_labels(
+        proposed,
+        verified_by="independent-review-agent",
+        verification_method="source-and-relation counterexample review",
+        verification_evidence=("evidence://source-review/1",),
+        system_under_test_isolated=True,
+    )
+
+    assert verified.authority.status == "verified"
+
+    with pytest.raises(ValueError, match="exact proposed decision"):
+        replace(
+            proposed,
+            authority=ReferenceAuthority(
+                status="verified",
+                proposed_by="other-proposer",
+                verified_by="independent-review-agent",
+                verification_method="source review",
+                verification_evidence=("evidence://source-review/1",),
+                system_under_test_isolated=True,
+                proposal_digest=proposed.proposal_digest,
+            ),
+        )
+
+
+def test_verification_requires_evidence_and_system_isolation() -> None:
+    proposed = _labels(_packet())
+
+    with pytest.raises(ValueError, match="independently bind"):
+        verify_structural_correctness_labels(
+            proposed,
+            verified_by="review-agent",
+            verification_method="source review",
+            verification_evidence=(),
+            system_under_test_isolated=True,
+        )
+    with pytest.raises(ValueError, match="independently bind"):
+        verify_structural_correctness_labels(
+            proposed,
+            verified_by="review-agent",
+            verification_method="source review",
+            verification_evidence=("evidence://source-review/1",),
+            system_under_test_isolated=False,
+        )
+
+
+def test_coverage_rejects_inconsistent_and_unknown_seed_identity() -> None:
+    packet = _packet()
+    with pytest.raises(ValueError, match="disposed seed coverage"):
+        replace(
+            packet.coverage,
+            seed_count=0,
+        )
+    with pytest.raises(ValueError, match="unknown seed node"):
+        replace(
+            packet,
+            coverage=replace(
+                packet.coverage,
+                seeds=(
+                    StructuralSeedCoverage(
+                        "provider:unknown", "S:unknown", "complete"
+                    ),
+                ),
+            ),
+        )
+
+
+def test_focus_coverage_does_not_apply_review_wide_truncation_to_empty_focus(
+    tmp_path,
+) -> None:
+    packet = _packet()
+    packet = replace(
+        packet,
+        coverage=replace(
+            packet.coverage,
+            seed_count=2,
+            complete_seed_count=1,
+            truncated_seed_count=1,
+            seeds=(
+                StructuralSeedCoverage("provider:a", "S:a", "truncated"),
+                StructuralSeedCoverage("provider:c", "S:c", "complete"),
+            ),
+        ),
+    )
+    labels = replace(
+        _labels(packet),
+        focuses=(
+            _labels(packet).focuses[0],
+            replace(_labels(packet).focuses[1], unresolved=False),
+        ),
+    )
+    packet_path = write_json_artifact(packet, tmp_path / "packet.json")
+    labels_path = write_json_artifact(labels, tmp_path / "labels.json")
+    observation_path = write_json_artifact(
+        _observation(packet), tmp_path / "observation.json"
+    )
+
+    html = write_comparison_html(
+        packet_path, observation_path, labels_path, tmp_path / "comparison.html"
+    ).read_text()
+
+    assert "limited · admitted seed truncated" in html
+    assert "not required for empty reference" in html
+
+    complete_focus_labels = replace(
+        labels,
+        focuses=(
+            replace(
+                labels.focuses[0],
+                direct_file_node_ids=("F:c",),
+                context_file_node_ids=(),
+                direct_node_ids=("S:c",),
+                context_node_ids=(),
+                relation_ids=(),
+            ),
+            labels.focuses[1],
+        ),
+    )
+    write_json_artifact(complete_focus_labels, labels_path)
+    complete_html = write_comparison_html(
+        packet_path,
+        observation_path,
+        labels_path,
+        tmp_path / "complete-comparison.html",
+    ).read_text()
+
+    assert "complete for admitted direct seeds" in complete_html
 
 
 def test_labels_reject_stale_packet_identity(tmp_path) -> None:
@@ -329,7 +556,7 @@ def test_labels_reject_false_equivalent_projection_claim(tmp_path) -> None:
     raw["focuses"][0]["equivalent_to"] = ["G1"]
     labels_path.write_text(json.dumps(raw))
 
-    with pytest.raises(ValueError, match="equal human memberships"):
+    with pytest.raises(ValueError, match="equal reference memberships"):
         load_labels(labels_path, packet)
 
 

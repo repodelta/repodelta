@@ -1,24 +1,26 @@
 # Campaign v1 findings
 
-The frozen human labels and separately generated canonical observations show
-that the next investment must be correction of the underlying focus projection,
-not richer provenance labels, workflow semantics, or large-change clustering.
-This conclusion is evaluation-only and does not change a production assessment.
+The frozen proposed reference labels and separately generated canonical
+observations indicate that the next investment should be correction of the
+underlying focus projection, not richer provenance labels, workflow semantics,
+or large-change clustering. These agent-prepared labels are not independently
+verified accuracy truth. This conclusion is evaluation-only and does not change
+a production assessment.
 
 ## Result
 
-The eight-PR sample contains 110 resolved and 3 human-unresolved focus
-judgements. The default overview had 34 false file inclusions, no false
+The eight-PR proposed baseline contains 110 resolved and 3 unresolved focus
+judgements. The default overview had 34 proposed false file inclusions, no false
 exclusions, and no role disagreements. Focus projections had 1,458 false node
 inclusions, 170 false node exclusions, 13 node-role disagreements, 684 false
 exact-relation inclusions, and 49 false exact-relation exclusions. Detailed,
 machine-checked totals are in [`summary.json`](summary.json); each PR also has a
 standalone comparison report in this directory.
 
-Two negative controls bound the conclusion. PR #245, a documentation-only
+Two negative controls bound the proposed conclusion. PR #245, a documentation-only
 change, correctly produced an empty structural result. PR #240's 100-file
-mechanical-migration overview matched the human file set, while three broad
-focuses remained human-unresolved and the resolved focuses still over-selected
+mechanical-migration overview matched the proposed file set, while three broad
+focuses remained unresolved and the resolved focuses still over-selected
 nodes. Structural collection can therefore produce useful overview truth; the
 dominant failure is focus membership rather than universal collection failure.
 
@@ -32,7 +34,7 @@ The counterexamples identify two independent upstream failure classes:
    distinctiveness does not establish that a symbol implements, constrains,
    removes, or verifies the selected subject. In PR #262, G5 is an out-of-scope
    statement about evidence collection and LLM behavior; the canonical result
-   projected 31 nodes where the frozen human label is empty. In PR #240, broad
+   projected 31 nodes where the proposed reference is empty. In PR #240, broad
    migration wording similarly admitted large direct sets.
 2. **Closure preserves reachability without a necessary-context contract.**
    `convergence/structural.py` unions selected paths and every relation change
