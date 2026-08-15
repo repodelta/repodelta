@@ -740,7 +740,8 @@ def _validate_labels(
         raise ValueError("structural labels do not match frozen packet")
     candidate_ids = {item.file_node_id for item in packet.candidates}
     node_ids = candidate_ids | {item.node_id for item in packet.symbols}
-    relation_ids = {item.relation_id for item in packet.relations}
+    relation_by_id = {item.relation_id: item for item in packet.relations}
+    relation_ids = set(relation_by_id)
     subject_ids = {item.subject_id for item in packet.subjects}
     _unique((item.file_node_id for item in labels.files), "file labels")
     _unique((item.subject_id for item in labels.focuses), "focus labels")
@@ -770,6 +771,17 @@ def _validate_labels(
             raise ValueError("focus labels contain unknown candidate nodes")
         if not set(item.relation_ids) <= relation_ids:
             raise ValueError("focus labels contain unknown candidate relations")
+        if labels.schema_version == LABELS_SCHEMA:
+            admitted_memberships = file_memberships | node_memberships
+            for relation_id in item.relation_ids:
+                relation = relation_by_id[relation_id]
+                if not {
+                    relation.source_node_id,
+                    relation.target_node_id,
+                } <= admitted_memberships:
+                    raise ValueError(
+                        "focus exact relations require both reference endpoints"
+                    )
         if set(item.direct_file_node_ids) & set(item.context_file_node_ids):
             raise ValueError("focus direct and context memberships must be distinct")
         if set(item.direct_node_ids) & set(item.context_node_ids):

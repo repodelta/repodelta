@@ -1,0 +1,1512 @@
+{
+  "base_sha": "42a28d7883304dbd0f272a5de0011d8b7410e1e7",
+  "candidates": [
+    {
+      "file_node_id": "SN:35333e11a01be990424c",
+      "member_node_ids": [
+        "SN:0d18f6e0798a737a797d"
+      ],
+      "operation": "retained",
+      "path": "src/repodelta/projection/structural_groups.py"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "member_node_ids": [
+        "SN:7262aab0b698406942a7",
+        "SN:9c926f5950f88e50331a",
+        "SN:b9147320f7cc4299f067",
+        "SN:070c5c236cf017f15fb6",
+        "SN:4ef25065f3dc3a308971",
+        "SN:df1cc0927c1617734b78",
+        "SN:0bdcc4ff455ba951fac0",
+        "SN:c66cc26bd154e4dba658",
+        "SN:9caebf5ac975d54164ab",
+        "SN:d17f5eef0d0f5dd5a426"
+      ],
+      "operation": "modified",
+      "path": "tests/test_projection.py"
+    },
+    {
+      "file_node_id": "SN:a1eafc9ba09a873cca6e",
+      "member_node_ids": [
+        "SN:289eb3edbb22e24b7c8f",
+        "SN:51229bef12d58bdbd055",
+        "SN:968e4d595188a480e6a5"
+      ],
+      "operation": "unresolved",
+      "path": "tests/test_github_adapter.py"
+    },
+    {
+      "file_node_id": "SN:2426a3989cb2a97d2842",
+      "member_node_ids": [
+        "SN:479fd3afb412259fb6b2",
+        "SN:487dfdfb2490e8d713df",
+        "SN:369e78d18fa3ca651f83",
+        "SN:92fa4012b31ebd2bd8ab",
+        "SN:62a4d4939434efba2b85",
+        "SN:d5da6e686780098e88fb",
+        "SN:2bc86e49396166b63833",
+        "SN:62e102c5d38925729082",
+        "SN:57a536ec2156ebf6e379",
+        "SN:04a6b663dcf6c3ab94ba",
+        "SN:7dd3de33b373a4a03e9c",
+        "SN:491e9b2d0ef54d5ef533",
+        "SN:1cc2eacc0f4983e93433",
+        "SN:4fac749eaaf8ea027c40",
+        "SN:3a738b073bed5edc6b52",
+        "SN:e5b7fa1fcafb4c77ce3f",
+        "SN:bf5acc632465583efb76",
+        "SN:b744df315511f825ad02",
+        "SN:b7870bfade03c992f6af",
+        "SN:5cfece2f33ff785f0ef8",
+        "SN:3b3fd6e980400fe1d379",
+        "SN:fc49051fbe0f9fa0be2e",
+        "SN:b8d4254dc3828c940fbb"
+      ],
+      "operation": "modified",
+      "path": "src/repodelta/presentation/html.py"
+    },
+    {
+      "file_node_id": "SN:74b07dca1ed3717b6c74",
+      "member_node_ids": [
+        "SN:49822239b3a4261fa1a3",
+        "SN:69fe86be4087ee523fea",
+        "SN:d2e389bfa55c339d1f0c"
+      ],
+      "operation": "modified",
+      "path": "tests/test_verification_projection.py"
+    },
+    {
+      "file_node_id": "SN:9aab5a0eeda50d759051",
+      "member_node_ids": [
+        "SN:451b49bf85c7d9112a7d"
+      ],
+      "operation": "retained",
+      "path": "src/repodelta/projection/architecture.py"
+    },
+    {
+      "file_node_id": "SN:425cd7d28397fdf34234",
+      "member_node_ids": [],
+      "operation": "unresolved",
+      "path": "src/repodelta/cli.py"
+    },
+    {
+      "file_node_id": "SN:f8af5ffcd0e06b5b9103",
+      "member_node_ids": [
+        "SN:3fffc2c1c0b27a3456a7",
+        "SN:cbb4c4509b5e774ab78c"
+      ],
+      "operation": "retained",
+      "path": "src/repodelta/convergence/core.py"
+    },
+    {
+      "file_node_id": "SN:5363295026f74f9d16fb",
+      "member_node_ids": [
+        "SN:85f064edb9ad42b6723e"
+      ],
+      "operation": "retained",
+      "path": "src/repodelta/intake/fixture.py"
+    },
+    {
+      "file_node_id": "SN:f2df16bc9ec130fc402f",
+      "member_node_ids": [
+        "SN:6555144fcb0994ee3cd4"
+      ],
+      "operation": "modified",
+      "path": "tests/test_open_core.py"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "member_node_ids": [
+        "SN:7314010a807fc020c212",
+        "SN:f637ad1c36b0e06a1f13",
+        "SN:92c9d5dbcee421f357df",
+        "SN:59e7d8895b907877f10b",
+        "SN:aed00f330ad5308bc4de",
+        "SN:95397e501b6ea3d2ee7e",
+        "SN:d997bf4b08afcc68a152",
+        "SN:08dac7b627aab985e4b5",
+        "SN:6c435b5c65a7081f7546",
+        "SN:975f62d2d019c2f2d4ff",
+        "SN:b785351474b7ea1b0b15",
+        "SN:00fb461ed997c8f2a150",
+        "SN:ec1f06e9e6898c9e20ec",
+        "SN:7d7dd1159226220d9e70",
+        "SN:c1902f3999b2d89df394",
+        "SN:09b79530969b486baab7",
+        "SN:2356a4af2099d503f01e",
+        "SN:95d447aae2d3ffb3d295",
+        "SN:6b52490102efd119dd8a",
+        "SN:4fe45dbc1413b2124d73",
+        "SN:59403c03623131f3c19e",
+        "SN:c4eae366aac253930142",
+        "SN:587d52c3156a0940e5b2",
+        "SN:0efe8535bcac66b4b40f",
+        "SN:741cbc497d036fc4637f",
+        "SN:8bb40962f72d4014c2be",
+        "SN:5be36c11d57b919357d6",
+        "SN:77a2cccabfa2a8d960dd",
+        "SN:f3e2edfb5ab7d4b43fa8"
+      ],
+      "operation": "retained",
+      "path": "src/repodelta/model/contracts.py"
+    },
+    {
+      "file_node_id": "SN:a8e3a88846c786598e4c",
+      "member_node_ids": [
+        "SN:82228b756e2bee2d371f"
+      ],
+      "operation": "retained",
+      "path": "tests/test_closure_scanning.py"
+    },
+    {
+      "file_node_id": "SN:4a6123cee9d71c406ec7",
+      "member_node_ids": [
+        "SN:e2c069b1e3cdcaf848d4"
+      ],
+      "operation": "retained",
+      "path": "src/repodelta/evaluation/core.py"
+    },
+    {
+      "file_node_id": "SN:ae7121776b87c1b88668",
+      "member_node_ids": [
+        "SN:1191c260686900356c91",
+        "SN:59e72fb1eec546c285d5"
+      ],
+      "operation": "retained",
+      "path": "tests/test_structural_graph.py"
+    },
+    {
+      "file_node_id": "SN:e483bd3ca6e26ea0e415",
+      "member_node_ids": [
+        "SN:160178608609167cc356",
+        "SN:b5e255129037f02651fc",
+        "SN:d887afd062ac8e0bb1de"
+      ],
+      "operation": "retained",
+      "path": "src/repodelta/pipeline.py"
+    },
+    {
+      "file_node_id": "SN:fb59d4c4600b15c3c61b",
+      "member_node_ids": [
+        "SN:442a4d2b45546315cd50",
+        "SN:abf417d0fba6b4e83048",
+        "SN:bdcdc50c53174c6c89f0",
+        "SN:75b3d0969bc3a6934d05"
+      ],
+      "operation": "modified",
+      "path": "tests/test_semantic_authority.py"
+    }
+  ],
+  "changed_surfaces": [
+    {
+      "additions": 132,
+      "base_path": "src/repodelta/presentation/html.py",
+      "deletions": 138,
+      "head_path": "src/repodelta/presentation/html.py",
+      "hunk_headers": [
+        "@@ -9,6 +9,7 @@",
+        "@@ -181,14 +182,66 @@ def _review_context(brief: ReviewBrief) -> str:",
+        "@@ -227,7 +280,6 @@ def _review_graph(",
+        "@@ -602,12 +654,7 @@ def _review_graph(",
+        "@@ -617,46 +664,9 @@ def _review_graph(",
+        "@@ -750,6 +760,11 @@ def _review_graph(",
+        "@@ -764,7 +779,8 @@ def _review_graph(",
+        "@@ -2262,26 +2278,21 @@ def _attention(brief: ReviewBrief) -> str:",
+        "@@ -2335,24 +2346,48 @@ def _verification_accordion(brief: ReviewBrief) -> str:",
+        "@@ -2363,18 +2398,18 @@ def _verification_accordion(brief: ReviewBrief) -> str:",
+        "@@ -2520,7 +2555,6 @@ def render_html(brief: ReviewBrief) -> str:",
+        "@@ -2534,8 +2568,6 @@ def render_html(brief: ReviewBrief) -> str:",
+        "@@ -2637,16 +2669,13 @@ def render_html(brief: ReviewBrief) -> str:",
+        "@@ -2658,7 +2687,7 @@ def render_html(brief: ReviewBrief) -> str:",
+        "@@ -2714,7 +2743,6 @@ def render_html(brief: ReviewBrief) -> str:",
+        "@@ -2825,32 +2853,22 @@ def render_html(brief: ReviewBrief) -> str:",
+        "@@ -2892,18 +2910,12 @@ def render_html(brief: ReviewBrief) -> str:",
+        "@@ -2975,32 +2987,14 @@ def render_html(brief: ReviewBrief) -> str:"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 3,
+      "base_path": "tests/test_open_core.py",
+      "deletions": 2,
+      "head_path": "tests/test_open_core.py",
+      "hunk_headers": [
+        "@@ -22,11 +22,12 @@ def test_fixture_to_requirement_first_html(tmp_path: Path) -> None:",
+        "@@ -64,7 +65,7 @@ def test_fixture_to_requirement_first_html(tmp_path: Path) -> None:"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 5,
+      "base_path": "tests/test_projection.py",
+      "deletions": 8,
+      "head_path": "tests/test_projection.py",
+      "hunk_headers": [
+        "@@ -1117,12 +1117,10 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:",
+        "@@ -2074,8 +2072,7 @@ def overlay(focus_id: str, *focus_node_ids: str) -> ReviewSlice:",
+        "@@ -2805,7 +2802,7 @@ def test_selection_and_rendering_are_byte_stable() -> None:",
+        "@@ -3054,7 +3051,7 @@ def test_focus_evidence_roles_are_routed_before_convergence_and_presentation() -"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 6,
+      "base_path": "tests/test_semantic_authority.py",
+      "deletions": 3,
+      "head_path": "tests/test_semantic_authority.py",
+      "hunk_headers": [
+        "@@ -337,10 +337,13 @@ def test_pr_acceptance_criteria_are_provisional_without_linked_issue() -> None:",
+        "@@ -709,7 +712,7 @@ def test_review_contract_aliases_preserve_source_and_verification_identity() ->"
+      ],
+      "status": "modified"
+    },
+    {
+      "additions": 11,
+      "base_path": "tests/test_verification_projection.py",
+      "deletions": 2,
+      "head_path": "tests/test_verification_projection.py",
+      "hunk_headers": [
+        "@@ -223,6 +223,13 @@ def test_generic_transition_context_is_explicitly_not_graph_applicable() -> None",
+        "@@ -262,13 +269,15 @@ def test_renderer_indexes_typed_summary_into_existing_inspectors() -> None:"
+      ],
+      "status": "modified"
+    }
+  ],
+  "coverage": {
+    "base_hunk_count": 24,
+    "base_mapped_hunk_count": 24,
+    "base_state": "available",
+    "base_symbol_count": 24,
+    "complete_seed_count": 0,
+    "hunk_count": 23,
+    "indexed_files": 5,
+    "mapped_hunk_count": 23,
+    "missing_reason": "",
+    "path_count": 120,
+    "provider": "codegraph",
+    "requested_files": 5,
+    "seed_count": 14,
+    "seed_mapping_state": "complete",
+    "seeds": [
+      {
+        "node_id": "SN:9c926f5950f88e50331a",
+        "provider_symbol_id": "function:7969d1661afaac6daeaf87eb0f5861d8",
+        "state": "truncated"
+      },
+      {
+        "node_id": "SN:b9147320f7cc4299f067",
+        "provider_symbol_id": "function:98220d8963aaf833ea97196e311867a1",
+        "state": "truncated"
+      },
+      {
+        "node_id": "SN:04a6b663dcf6c3ab94ba",
+        "provider_symbol_id": "function:ead8064fc68219f79f5fe26553344907",
+        "state": "truncated"
+      },
+      {
+        "node_id": "SN:abf417d0fba6b4e83048",
+        "provider_symbol_id": "function:5b5a6ed913d0b47d7b5eda0e16ec459c",
+        "state": "truncated"
+      },
+      {
+        "node_id": "SN:2426a3989cb2a97d2842",
+        "provider_symbol_id": "file:src/repodelta/presentation/html.py",
+        "state": "truncated"
+      },
+      {
+        "node_id": "SN:d2e389bfa55c339d1f0c",
+        "provider_symbol_id": "function:8925719cf1988f969f3dbe220ce607b4",
+        "state": "truncated"
+      },
+      {
+        "node_id": "SN:3b3fd6e980400fe1d379",
+        "provider_symbol_id": "function:aaffdfc48f8590bea3b2c3d5c93dbcbd",
+        "state": "truncated"
+      },
+      {
+        "node_id": "SN:6555144fcb0994ee3cd4",
+        "provider_symbol_id": "function:ec18ecae13920c47ce2ad842f0bef5ee",
+        "state": "truncated"
+      },
+      {
+        "node_id": "SN:0bdcc4ff455ba951fac0",
+        "provider_symbol_id": "function:0dd2030b99ec529b724b0dd660959843",
+        "state": "truncated"
+      },
+      {
+        "node_id": "SN:9caebf5ac975d54164ab",
+        "provider_symbol_id": "function:527974fc77148bb912d30c6477bb8515",
+        "state": "truncated"
+      },
+      {
+        "node_id": "SN:69fe86be4087ee523fea",
+        "provider_symbol_id": "function:162b2cddf4b86263b62e2fce76e7b44c",
+        "state": "truncated"
+      },
+      {
+        "node_id": "SN:bdcdc50c53174c6c89f0",
+        "provider_symbol_id": "function:32ed808f6e3b40c0ca27a3fef5c3bd69",
+        "state": "truncated"
+      },
+      {
+        "node_id": "SN:b8d4254dc3828c940fbb",
+        "provider_symbol_id": "function:f9c6b25b93178df4d05e785f4b0d654d",
+        "state": "truncated"
+      },
+      {
+        "node_id": "SN:e5b7fa1fcafb4c77ce3f",
+        "provider_symbol_id": "function:41e0dbd092bafffbc024e725d41ed4d6",
+        "state": "truncated"
+      }
+    ],
+    "state": "available",
+    "symbol_count": 25,
+    "truncated_seed_count": 14
+  },
+  "head_sha": "24cba6759ddf3cc787a5675754bd1d057c755411",
+  "pull_request": 262,
+  "relation_ids": [
+    "SRG:cc8e2f4af36a27beeaa3",
+    "SRG:c94fdd8dd707bd2846b7",
+    "SRG:7dd0004ec3823c224694",
+    "SRG:b9897a82218d0e8b5c45",
+    "SRG:ab35e3723279cf9c8b2a",
+    "SRG:f95d27f79f02fe4a9ef2",
+    "SRG:2ff2910ee60397275426",
+    "SRG:1c0bf72035f048d688dc",
+    "SRG:4e6aa39de1e8924fed72",
+    "SRG:86c4b31f40391e6f6cb4",
+    "SRG:469631cd43d67acec650",
+    "SRG:8cac8584a3d89be0ab4c",
+    "SRG:a6a20b33304d04d5f284",
+    "SRG:4c316313c0f81dff9811",
+    "SRG:b39edd8b955d108d413c",
+    "SRG:79e2be9d24b1106c3209",
+    "SRG:0cc5820e48a5e9c053ab",
+    "SRG:760ea49c611cec86f404",
+    "SRG:534bd1d84c451cc0f7a1",
+    "SRG:cfb9a9cab04f68cdf3a3",
+    "SRG:769681e5ecd6ec9f1234",
+    "SRG:fd4f76874e938e52801c",
+    "SRG:7f5e048db1ce32a09de2",
+    "SRG:b76a4675d813df50e203",
+    "SRG:a1e55e7003f804b59935",
+    "SRG:f34a07c089114ecfab9e",
+    "SRG:c4f7b57227370f16b704",
+    "SRG:06f5943e450e3d1256be",
+    "SRG:aa5b03dc155a7b3640e3",
+    "SRG:97993b809582d8088e8e",
+    "SRG:cad7b1533deeaa09199f",
+    "SRG:68aa35b51deb444bd4b8",
+    "SRG:a06c3d7acd6d0504e1c4",
+    "SRG:4ff9dab47fd285dc4c61",
+    "SRG:1697ee626a7db65575c9",
+    "SRG:4005338363cfe4864fb9",
+    "SRG:0a4b624d61982d077e13",
+    "SRG:0fa29349d1afdd5e711a",
+    "SRG:2f20e071c88afc3fbcd3",
+    "SRG:d05a1cfc715b0865b2b7",
+    "SRG:1908465fc87b6d72a79e",
+    "SRG:016121d1611b94b62cc4",
+    "SRG:e7b9a60909cdc937bb2d",
+    "SRG:459a81c44176f80abaf2",
+    "SRG:39462ffd8942357417c4",
+    "SRG:9856f6add3eaa69919a3",
+    "SRG:2fb857e6f06dd9f4f9fb",
+    "SRG:8d965c75a643333fb816",
+    "SRG:c777b2b1f1948eeda3eb",
+    "SOR:d1303b4bee3e24a406f9"
+  ],
+  "relations": [
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:cc8e2f4af36a27beeaa3",
+      "source_node_id": "SN:1a5471da8621916f448b",
+      "target_node_id": "SN:2426a3989cb2a97d2842"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:c94fdd8dd707bd2846b7",
+      "source_node_id": "SN:1a5471da8621916f448b",
+      "target_node_id": "SN:35333e11a01be990424c"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:7dd0004ec3823c224694",
+      "source_node_id": "SN:1a5471da8621916f448b",
+      "target_node_id": "SN:4a6123cee9d71c406ec7"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:b9897a82218d0e8b5c45",
+      "source_node_id": "SN:1a5471da8621916f448b",
+      "target_node_id": "SN:5363295026f74f9d16fb"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:ab35e3723279cf9c8b2a",
+      "source_node_id": "SN:1a5471da8621916f448b",
+      "target_node_id": "SN:9aab5a0eeda50d759051"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:f95d27f79f02fe4a9ef2",
+      "source_node_id": "SN:1a5471da8621916f448b",
+      "target_node_id": "SN:c5fd44cc021359995303"
+    },
+    {
+      "operation": "retained",
+      "relation": "instantiates",
+      "relation_id": "SRG:2ff2910ee60397275426",
+      "source_node_id": "SN:1a5471da8621916f448b",
+      "target_node_id": "SN:c5fd44cc021359995303"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:1c0bf72035f048d688dc",
+      "source_node_id": "SN:1a5471da8621916f448b",
+      "target_node_id": "SN:e483bd3ca6e26ea0e415"
+    },
+    {
+      "operation": "retained",
+      "relation": "instantiates",
+      "relation_id": "SRG:4e6aa39de1e8924fed72",
+      "source_node_id": "SN:1a5471da8621916f448b",
+      "target_node_id": "SN:e483bd3ca6e26ea0e415"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:86c4b31f40391e6f6cb4",
+      "source_node_id": "SN:1a5471da8621916f448b",
+      "target_node_id": "SN:f8af5ffcd0e06b5b9103"
+    },
+    {
+      "operation": "retained",
+      "relation": "instantiates",
+      "relation_id": "SRG:469631cd43d67acec650",
+      "source_node_id": "SN:1a5471da8621916f448b",
+      "target_node_id": "SN:f8af5ffcd0e06b5b9103"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:8cac8584a3d89be0ab4c",
+      "source_node_id": "SN:2426a3989cb2a97d2842",
+      "target_node_id": "SN:c5fd44cc021359995303"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:a6a20b33304d04d5f284",
+      "source_node_id": "SN:3b3fd6e980400fe1d379",
+      "target_node_id": "SN:369e78d18fa3ca651f83"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:4c316313c0f81dff9811",
+      "source_node_id": "SN:3b3fd6e980400fe1d379",
+      "target_node_id": "SN:57a536ec2156ebf6e379"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:b39edd8b955d108d413c",
+      "source_node_id": "SN:3b3fd6e980400fe1d379",
+      "target_node_id": "SN:7dd3de33b373a4a03e9c"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:79e2be9d24b1106c3209",
+      "source_node_id": "SN:3b3fd6e980400fe1d379",
+      "target_node_id": "SN:bf5acc632465583efb76"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:0cc5820e48a5e9c053ab",
+      "source_node_id": "SN:3b3fd6e980400fe1d379",
+      "target_node_id": "SN:d5da6e686780098e88fb"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:760ea49c611cec86f404",
+      "source_node_id": "SN:3b3fd6e980400fe1d379",
+      "target_node_id": "SN:e5b7fa1fcafb4c77ce3f"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:534bd1d84c451cc0f7a1",
+      "source_node_id": "SN:74b07dca1ed3717b6c74",
+      "target_node_id": "SN:2426a3989cb2a97d2842"
+    },
+    {
+      "operation": "retained",
+      "relation": "instantiates",
+      "relation_id": "SRG:cfb9a9cab04f68cdf3a3",
+      "source_node_id": "SN:74b07dca1ed3717b6c74",
+      "target_node_id": "SN:c5fd44cc021359995303"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:769681e5ecd6ec9f1234",
+      "source_node_id": "SN:74b07dca1ed3717b6c74",
+      "target_node_id": "SN:e483bd3ca6e26ea0e415"
+    },
+    {
+      "operation": "retained",
+      "relation": "instantiates",
+      "relation_id": "SRG:fd4f76874e938e52801c",
+      "source_node_id": "SN:74b07dca1ed3717b6c74",
+      "target_node_id": "SN:e483bd3ca6e26ea0e415"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:7f5e048db1ce32a09de2",
+      "source_node_id": "SN:9c926f5950f88e50331a",
+      "target_node_id": "SN:070c5c236cf017f15fb6"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:b76a4675d813df50e203",
+      "source_node_id": "SN:9c926f5950f88e50331a",
+      "target_node_id": "SN:7262aab0b698406942a7"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:a1e55e7003f804b59935",
+      "source_node_id": "SN:9c926f5950f88e50331a",
+      "target_node_id": "SN:c66cc26bd154e4dba658"
+    },
+    {
+      "operation": "retained",
+      "relation": "references",
+      "relation_id": "SRG:f34a07c089114ecfab9e",
+      "source_node_id": "SN:9caebf5ac975d54164ab",
+      "target_node_id": "SN:4ef25065f3dc3a308971"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:c4f7b57227370f16b704",
+      "source_node_id": "SN:9caebf5ac975d54164ab",
+      "target_node_id": "SN:df1cc0927c1617734b78"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:06f5943e450e3d1256be",
+      "source_node_id": "SN:a8e3a88846c786598e4c",
+      "target_node_id": "SN:2426a3989cb2a97d2842"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:aa5b03dc155a7b3640e3",
+      "source_node_id": "SN:abf417d0fba6b4e83048",
+      "target_node_id": "SN:442a4d2b45546315cd50"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:97993b809582d8088e8e",
+      "source_node_id": "SN:ae7121776b87c1b88668",
+      "target_node_id": "SN:2426a3989cb2a97d2842"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:cad7b1533deeaa09199f",
+      "source_node_id": "SN:bdcdc50c53174c6c89f0",
+      "target_node_id": "SN:442a4d2b45546315cd50"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:68aa35b51deb444bd4b8",
+      "source_node_id": "SN:d2e389bfa55c339d1f0c",
+      "target_node_id": "SN:49822239b3a4261fa1a3"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:a06c3d7acd6d0504e1c4",
+      "source_node_id": "SN:e5b7fa1fcafb4c77ce3f",
+      "target_node_id": "SN:2bc86e49396166b63833"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:4ff9dab47fd285dc4c61",
+      "source_node_id": "SN:e5b7fa1fcafb4c77ce3f",
+      "target_node_id": "SN:3a738b073bed5edc6b52"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:1697ee626a7db65575c9",
+      "source_node_id": "SN:e5b7fa1fcafb4c77ce3f",
+      "target_node_id": "SN:479fd3afb412259fb6b2"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:4005338363cfe4864fb9",
+      "source_node_id": "SN:e5b7fa1fcafb4c77ce3f",
+      "target_node_id": "SN:487dfdfb2490e8d713df"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:0a4b624d61982d077e13",
+      "source_node_id": "SN:e5b7fa1fcafb4c77ce3f",
+      "target_node_id": "SN:92fa4012b31ebd2bd8ab"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:0fa29349d1afdd5e711a",
+      "source_node_id": "SN:e5b7fa1fcafb4c77ce3f",
+      "target_node_id": "SN:b7870bfade03c992f6af"
+    },
+    {
+      "operation": "added",
+      "relation": "calls",
+      "relation_id": "SRG:2f20e071c88afc3fbcd3",
+      "source_node_id": "SN:e5b7fa1fcafb4c77ce3f",
+      "target_node_id": "SN:b8d4254dc3828c940fbb"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:d05a1cfc715b0865b2b7",
+      "source_node_id": "SN:e5b7fa1fcafb4c77ce3f",
+      "target_node_id": "SN:fc49051fbe0f9fa0be2e"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:1908465fc87b6d72a79e",
+      "source_node_id": "SN:f2df16bc9ec130fc402f",
+      "target_node_id": "SN:2426a3989cb2a97d2842"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:016121d1611b94b62cc4",
+      "source_node_id": "SN:f2df16bc9ec130fc402f",
+      "target_node_id": "SN:5363295026f74f9d16fb"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:e7b9a60909cdc937bb2d",
+      "source_node_id": "SN:f2df16bc9ec130fc402f",
+      "target_node_id": "SN:e483bd3ca6e26ea0e415"
+    },
+    {
+      "operation": "retained",
+      "relation": "instantiates",
+      "relation_id": "SRG:459a81c44176f80abaf2",
+      "source_node_id": "SN:f2df16bc9ec130fc402f",
+      "target_node_id": "SN:e483bd3ca6e26ea0e415"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:39462ffd8942357417c4",
+      "source_node_id": "SN:fb59d4c4600b15c3c61b",
+      "target_node_id": "SN:2426a3989cb2a97d2842"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:9856f6add3eaa69919a3",
+      "source_node_id": "SN:fb59d4c4600b15c3c61b",
+      "target_node_id": "SN:c5fd44cc021359995303"
+    },
+    {
+      "operation": "retained",
+      "relation": "instantiates",
+      "relation_id": "SRG:2fb857e6f06dd9f4f9fb",
+      "source_node_id": "SN:fb59d4c4600b15c3c61b",
+      "target_node_id": "SN:c5fd44cc021359995303"
+    },
+    {
+      "operation": "retained",
+      "relation": "calls",
+      "relation_id": "SRG:8d965c75a643333fb816",
+      "source_node_id": "SN:fb59d4c4600b15c3c61b",
+      "target_node_id": "SN:e483bd3ca6e26ea0e415"
+    },
+    {
+      "operation": "retained",
+      "relation": "instantiates",
+      "relation_id": "SRG:c777b2b1f1948eeda3eb",
+      "source_node_id": "SN:fb59d4c4600b15c3c61b",
+      "target_node_id": "SN:e483bd3ca6e26ea0e415"
+    }
+  ],
+  "repository": "repodelta/repodelta",
+  "schema_version": "structural_correctness_packet.v3",
+  "subjects": [
+    {
+      "authored_statement": "Selecting an R/G/T/CC subject in the structural investigation surface shows its authored statement, canonical assessment, observations, and source in the same inspector.",
+      "subject_id": "R1",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "Assessment and evidence detail is progressively disclosed by default, while the assessment state and any contradiction, missing evidence, incomplete collection, or other exceptional condition remain visible without expansion.",
+      "subject_id": "R2",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "A subject without structural mapping remains available and shows its authored statement and non-structural evidence; absence from the graph must not remove it from review.",
+      "subject_id": "R3",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "The page has one canonical R/G/T/CC investigation entry rather than a second repeated Verification section.",
+      "subject_id": "R4",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "Preserve verification_workspace, assessment authority, verification-matrix data, source identity, and coverage semantics.",
+      "subject_id": "G1",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "The structural graph may consume and focus canonical verification results but must not derive or re-decide assessment state.",
+      "subject_id": "G2",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "Do not classify absent structural mapping as absent authored or verification evidence.",
+      "subject_id": "G3",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "Assessment, observation, association, graph-membership, collection, or acceptance semantics.",
+      "subject_id": "G4",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "New evidence collection or LLM behavior.",
+      "subject_id": "G5",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "The structural surface rendered R/G/T/CC focus buttons and a short authored-copy row, while a second page-level Verification section rendered the canonical assessment, observations, source, and structural disposition. JavaScript synchronized both entry points. Subjects without structural facts survived only because the repeated Verification section remained present.",
+      "subject_id": "T1",
+      "subject_kind": "transformation_claim"
+    },
+    {
+      "authored_statement": "Selecting R/G/T/CC now reveals one inspector inside the structural investigation surface. It shows the authored statement, source, canonical status, visible exception chips, and a collapsed Assessment & evidence detail containing canonical observations and reasons. The old authored-copy row, bottom Verification section, and cross-entry synchronization are removed.",
+      "subject_id": "T2",
+      "subject_kind": "transformation_claim"
+    },
+    {
+      "authored_statement": "The focus controls are projected from the complete verification matrix even when the review graph has no nodes. Subjects without structural mapping therefore retain their authored statement, status, non-structural evidence, and explicit structural disposition.",
+      "subject_id": "T3",
+      "subject_kind": "transformation_claim"
+    }
+  ],
+  "symbols": [
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:7314010a807fc020c212",
+      "operation": "unresolved",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "Requirement",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:f637ad1c36b0e06a1f13",
+      "operation": "retained",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "ReviewProjection",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:5363295026f74f9d16fb",
+      "node_id": "SN:85f064edb9ad42b6723e",
+      "operation": "retained",
+      "path": "src/repodelta/intake/fixture.py",
+      "qualified_name": "load_fixture",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:2426a3989cb2a97d2842",
+      "node_id": "SN:479fd3afb412259fb6b2",
+      "operation": "retained",
+      "path": "src/repodelta/presentation/html.py",
+      "qualified_name": "_sources",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "node_id": "SN:7262aab0b698406942a7",
+      "operation": "retained",
+      "path": "tests/test_projection.py",
+      "qualified_name": "test_review_graph_renders_complete_focus_union::symbol",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:2426a3989cb2a97d2842",
+      "node_id": "SN:487dfdfb2490e8d713df",
+      "operation": "retained",
+      "path": "src/repodelta/presentation/html.py",
+      "qualified_name": "_structural_compound_layout",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:92c9d5dbcee421f357df",
+      "operation": "unresolved",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "ReviewStatement",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "node_id": "SN:9c926f5950f88e50331a",
+      "operation": "modified",
+      "path": "tests/test_projection.py",
+      "qualified_name": "test_review_graph_renders_complete_focus_union",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:9aab5a0eeda50d759051",
+      "node_id": "SN:451b49bf85c7d9112a7d",
+      "operation": "retained",
+      "path": "src/repodelta/projection/architecture.py",
+      "qualified_name": "project_architectural_change_topology",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:59e7d8895b907877f10b",
+      "operation": "retained",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "ReviewSourcePacket",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:74b07dca1ed3717b6c74",
+      "node_id": "SN:49822239b3a4261fa1a3",
+      "operation": "retained",
+      "path": "tests/test_verification_projection.py",
+      "qualified_name": "_mixed_packet",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "node_id": "SN:b9147320f7cc4299f067",
+      "operation": "modified",
+      "path": "tests/test_projection.py",
+      "qualified_name": "test_focus_evidence_roles_are_routed_before_convergence_and_presentation",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:2426a3989cb2a97d2842",
+      "node_id": "SN:369e78d18fa3ca651f83",
+      "operation": "retained",
+      "path": "src/repodelta/presentation/html.py",
+      "qualified_name": "_source",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:aed00f330ad5308bc4de",
+      "operation": "unresolved",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "ProjectionRelation",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:95397e501b6ea3d2ee7e",
+      "operation": "retained",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "CandidateConvergence",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:2426a3989cb2a97d2842",
+      "node_id": "SN:92fa4012b31ebd2bd8ab",
+      "operation": "retained",
+      "path": "src/repodelta/presentation/html.py",
+      "qualified_name": "_architectural_chip",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:2426a3989cb2a97d2842",
+      "node_id": "SN:62a4d4939434efba2b85",
+      "operation": "unresolved",
+      "path": "src/repodelta/presentation/html.py",
+      "qualified_name": "_structural_kind_class",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:a1eafc9ba09a873cca6e",
+      "node_id": "SN:289eb3edbb22e24b7c8f",
+      "operation": "unresolved",
+      "path": "tests/test_github_adapter.py",
+      "qualified_name": "test_github_adapter_collects_only_source_facts",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:35333e11a01be990424c",
+      "node_id": "SN:0d18f6e0798a737a797d",
+      "operation": "retained",
+      "path": "src/repodelta/projection/structural_groups.py",
+      "qualified_name": "project_structural_relation_groups",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:2426a3989cb2a97d2842",
+      "node_id": "SN:d5da6e686780098e88fb",
+      "operation": "retained",
+      "path": "src/repodelta/presentation/html.py",
+      "qualified_name": "_review_context",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:d997bf4b08afcc68a152",
+      "operation": "unresolved",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "EvidenceItem",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:e483bd3ca6e26ea0e415",
+      "node_id": "SN:160178608609167cc356",
+      "operation": "retained",
+      "path": "src/repodelta/pipeline.py",
+      "qualified_name": "DeterministicAnalyzer",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:2426a3989cb2a97d2842",
+      "node_id": "SN:2bc86e49396166b63833",
+      "operation": "retained",
+      "path": "src/repodelta/presentation/html.py",
+      "qualified_name": "_evidence_paths",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:2426a3989cb2a97d2842",
+      "node_id": "SN:62e102c5d38925729082",
+      "operation": "unresolved",
+      "path": "src/repodelta/presentation/html.py",
+      "qualified_name": "_structural_display_fact",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:08dac7b627aab985e4b5",
+      "operation": "retained",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "ReviewBrief::to_dict",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:e483bd3ca6e26ea0e415",
+      "node_id": "SN:b5e255129037f02651fc",
+      "operation": "retained",
+      "path": "src/repodelta/pipeline.py",
+      "qualified_name": "ReviewAnalyzer",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:6c435b5c65a7081f7546",
+      "operation": "retained",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "VerificationWorkspace",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:2426a3989cb2a97d2842",
+      "node_id": "SN:57a536ec2156ebf6e379",
+      "operation": "retained",
+      "path": "src/repodelta/presentation/html.py",
+      "qualified_name": "_transformation_summary",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:fb59d4c4600b15c3c61b",
+      "node_id": "SN:442a4d2b45546315cd50",
+      "operation": "retained",
+      "path": "tests/test_semantic_authority.py",
+      "qualified_name": "_packet",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "node_id": "SN:070c5c236cf017f15fb6",
+      "operation": "retained",
+      "path": "tests/test_projection.py",
+      "qualified_name": "test_review_graph_renders_complete_focus_union::overlay",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ae7121776b87c1b88668",
+      "node_id": "SN:1191c260686900356c91",
+      "operation": "retained",
+      "path": "tests/test_structural_graph.py",
+      "qualified_name": "test_explicit_state_claim_selectors_focus_the_expected_revision_symbols",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:2426a3989cb2a97d2842",
+      "node_id": "SN:04a6b663dcf6c3ab94ba",
+      "operation": "unresolved",
+      "path": "src/repodelta/presentation/html.py",
+      "qualified_name": "_focus_assessment_inspector",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:2426a3989cb2a97d2842",
+      "node_id": "SN:7dd3de33b373a4a03e9c",
+      "operation": "retained",
+      "path": "src/repodelta/presentation/html.py",
+      "qualified_name": "_brief_goals",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:975f62d2d019c2f2d4ff",
+      "operation": "retained",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "CandidateConvergence::selected_relation_ids",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:a8e3a88846c786598e4c",
+      "node_id": "SN:82228b756e2bee2d371f",
+      "operation": "retained",
+      "path": "tests/test_closure_scanning.py",
+      "qualified_name": "test_complete_zero_match_is_an_observation_not_absence",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:ae7121776b87c1b88668",
+      "node_id": "SN:59e72fb1eec546c285d5",
+      "operation": "retained",
+      "path": "tests/test_structural_graph.py",
+      "qualified_name": "test_exact_counterpart_ownership_connects_modified_member",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:2426a3989cb2a97d2842",
+      "node_id": "SN:491e9b2d0ef54d5ef533",
+      "operation": "unresolved",
+      "path": "src/repodelta/presentation/html.py",
+      "qualified_name": "_verification_accordion",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:fb59d4c4600b15c3c61b",
+      "node_id": "SN:abf417d0fba6b4e83048",
+      "operation": "modified",
+      "path": "tests/test_semantic_authority.py",
+      "qualified_name": "test_pr_acceptance_criteria_are_provisional_without_linked_issue",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:4a6123cee9d71c406ec7",
+      "node_id": "SN:e2c069b1e3cdcaf848d4",
+      "operation": "retained",
+      "path": "src/repodelta/evaluation/core.py",
+      "qualified_name": "load_evaluation_suite",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:2426a3989cb2a97d2842",
+      "node_id": "SN:1cc2eacc0f4983e93433",
+      "operation": "retained",
+      "path": "src/repodelta/presentation/html.py",
+      "qualified_name": "write_html",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:b785351474b7ea1b0b15",
+      "operation": "retained",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "ReviewSourcePacket::with_revision",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:2426a3989cb2a97d2842",
+      "node_id": "SN:4fac749eaaf8ea027c40",
+      "operation": "unresolved",
+      "path": "src/repodelta/presentation/html.py",
+      "qualified_name": "_structural_edge_path",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:00fb461ed997c8f2a150",
+      "operation": "retained",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "AnalysisInput",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:2426a3989cb2a97d2842",
+      "node_id": "SN:3a738b073bed5edc6b52",
+      "operation": "retained",
+      "path": "src/repodelta/presentation/html.py",
+      "qualified_name": "_file_structural_overview",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "node_id": "SN:4ef25065f3dc3a308971",
+      "operation": "retained",
+      "path": "tests/test_projection.py",
+      "qualified_name": "SUITE",
+      "symbol_kind": "variable"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "node_id": "SN:df1cc0927c1617734b78",
+      "operation": "retained",
+      "path": "tests/test_projection.py",
+      "qualified_name": "_selected_targets",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:ec1f06e9e6898c9e20ec",
+      "operation": "retained",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "CanonicalChangeMapEntry",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:fb59d4c4600b15c3c61b",
+      "node_id": "SN:bdcdc50c53174c6c89f0",
+      "operation": "modified",
+      "path": "tests/test_semantic_authority.py",
+      "qualified_name": "test_review_contract_aliases_preserve_source_and_verification_identity",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:7d7dd1159226220d9e70",
+      "operation": "retained",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "ClosureScanPlanSet",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:c1902f3999b2d89df394",
+      "operation": "unresolved",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "EvidenceCatalog::by_id",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:09b79530969b486baab7",
+      "operation": "retained",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "EvidenceCatalog",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:2426a3989cb2a97d2842",
+      "node_id": "SN:e5b7fa1fcafb4c77ce3f",
+      "operation": "modified",
+      "path": "src/repodelta/presentation/html.py",
+      "qualified_name": "_review_graph",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:fb59d4c4600b15c3c61b",
+      "node_id": "SN:75b3d0969bc3a6934d05",
+      "operation": "unresolved",
+      "path": "tests/test_semantic_authority.py",
+      "qualified_name": "test_linked_issue_goals_replace_pr_introduction_in_brief_header",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f8af5ffcd0e06b5b9103",
+      "node_id": "SN:3fffc2c1c0b27a3456a7",
+      "operation": "retained",
+      "path": "src/repodelta/convergence/core.py",
+      "qualified_name": "converge_candidates",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:2426a3989cb2a97d2842",
+      "node_id": "SN:bf5acc632465583efb76",
+      "operation": "retained",
+      "path": "src/repodelta/presentation/html.py",
+      "qualified_name": "_coverage_limits",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:2356a4af2099d503f01e",
+      "operation": "unresolved",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "ProjectionCandidateSet",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:95d447aae2d3ffb3d295",
+      "operation": "retained",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "ChangedFile",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:2426a3989cb2a97d2842",
+      "node_id": "SN:b744df315511f825ad02",
+      "operation": "retained",
+      "path": "src/repodelta/presentation/html.py",
+      "qualified_name": "_structural_focus_label",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f8af5ffcd0e06b5b9103",
+      "node_id": "SN:cbb4c4509b5e774ab78c",
+      "operation": "retained",
+      "path": "src/repodelta/convergence/core.py",
+      "qualified_name": "ConvergencePolicy",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:a1eafc9ba09a873cca6e",
+      "node_id": "SN:51229bef12d58bdbd055",
+      "operation": "unresolved",
+      "path": "tests/test_github_adapter.py",
+      "qualified_name": "test_github_adapter_reports_file_cap_without_inferring_requirements",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:e483bd3ca6e26ea0e415",
+      "node_id": "SN:d887afd062ac8e0bb1de",
+      "operation": "retained",
+      "path": "src/repodelta/pipeline.py",
+      "qualified_name": "ReviewAnalyzer::analyze",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:74b07dca1ed3717b6c74",
+      "node_id": "SN:69fe86be4087ee523fea",
+      "operation": "modified",
+      "path": "tests/test_verification_projection.py",
+      "qualified_name": "test_generic_transition_context_is_explicitly_not_graph_applicable",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:2426a3989cb2a97d2842",
+      "node_id": "SN:b7870bfade03c992f6af",
+      "operation": "retained",
+      "path": "src/repodelta/presentation/html.py",
+      "qualified_name": "_file_member_graph",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:6b52490102efd119dd8a",
+      "operation": "unresolved",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "ArchitecturalComponent",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:4fe45dbc1413b2124d73",
+      "operation": "retained",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "ClosureScanPlanSet::by_id",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:2426a3989cb2a97d2842",
+      "node_id": "SN:5cfece2f33ff785f0ef8",
+      "operation": "retained",
+      "path": "src/repodelta/presentation/html.py",
+      "qualified_name": "_structural_focus_empty_label",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:59403c03623131f3c19e",
+      "operation": "retained",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "VerificationWorkspace::inspections_by_subject_id",
+      "symbol_kind": "method"
+    },
+    {
+      "file_node_id": "SN:74b07dca1ed3717b6c74",
+      "node_id": "SN:d2e389bfa55c339d1f0c",
+      "operation": "modified",
+      "path": "tests/test_verification_projection.py",
+      "qualified_name": "test_renderer_indexes_typed_summary_into_existing_inspectors",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:c4eae366aac253930142",
+      "operation": "unresolved",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "StructuralGraphPlacement",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:587d52c3156a0940e5b2",
+      "operation": "unresolved",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "SourceRef",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:2426a3989cb2a97d2842",
+      "node_id": "SN:3b3fd6e980400fe1d379",
+      "operation": "modified",
+      "path": "src/repodelta/presentation/html.py",
+      "qualified_name": "render_html",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:f2df16bc9ec130fc402f",
+      "node_id": "SN:6555144fcb0994ee3cd4",
+      "operation": "modified",
+      "path": "tests/test_open_core.py",
+      "qualified_name": "test_fixture_to_requirement_first_html",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "node_id": "SN:0bdcc4ff455ba951fac0",
+      "operation": "modified",
+      "path": "tests/test_projection.py",
+      "qualified_name": "test_selection_and_rendering_are_byte_stable",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:0efe8535bcac66b4b40f",
+      "operation": "unresolved",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "StructuralGraphEdge",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "node_id": "SN:c66cc26bd154e4dba658",
+      "operation": "retained",
+      "path": "tests/test_projection.py",
+      "qualified_name": "test_review_graph_renders_complete_focus_union::relation_change",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:741cbc497d036fc4637f",
+      "operation": "retained",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "ReviewBrief",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "node_id": "SN:9caebf5ac975d54164ab",
+      "operation": "modified",
+      "path": "tests/test_projection.py",
+      "qualified_name": "test_codegraph_context_only_expands_selected_exact_anchor",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:8bb40962f72d4014c2be",
+      "operation": "unresolved",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "StructuralGraphNode",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:2426a3989cb2a97d2842",
+      "node_id": "SN:fc49051fbe0f9fa0be2e",
+      "operation": "retained",
+      "path": "src/repodelta/presentation/html.py",
+      "qualified_name": "_architectural_chip_html",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:2426a3989cb2a97d2842",
+      "node_id": "SN:b8d4254dc3828c940fbb",
+      "operation": "added",
+      "path": "src/repodelta/presentation/html.py",
+      "qualified_name": "_focus_controls",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:a1eafc9ba09a873cca6e",
+      "node_id": "SN:968e4d595188a480e6a5",
+      "operation": "unresolved",
+      "path": "tests/test_github_adapter.py",
+      "qualified_name": "test_github_graphql_linked_issue_supplies_primary_acceptance_criteria",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:5be36c11d57b919357d6",
+      "operation": "unresolved",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "SourceRecord",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:77a2cccabfa2a8d960dd",
+      "operation": "unresolved",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "ReviewStructuralGraph",
+      "symbol_kind": "class"
+    },
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "node_id": "SN:d17f5eef0d0f5dd5a426",
+      "operation": "unresolved",
+      "path": "tests/test_projection.py",
+      "qualified_name": "test_identical_focus_graphs_share_one_review_graph",
+      "symbol_kind": "function"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "node_id": "SN:f3e2edfb5ab7d4b43fa8",
+      "operation": "unresolved",
+      "path": "src/repodelta/model/contracts.py",
+      "qualified_name": "ReviewSlice",
+      "symbol_kind": "class"
+    }
+  ]
+}

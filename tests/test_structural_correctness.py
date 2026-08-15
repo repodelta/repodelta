@@ -560,6 +560,24 @@ def test_labels_reject_false_equivalent_projection_claim(tmp_path) -> None:
         load_labels(labels_path, packet)
 
 
+def test_labels_reject_exact_relation_without_both_reference_endpoints(
+    tmp_path,
+) -> None:
+    packet = _packet()
+    labels = _labels(packet)
+    invalid = replace(
+        labels,
+        focuses=(
+            replace(labels.focuses[0], context_node_ids=()),
+            labels.focuses[1],
+        ),
+    )
+    labels_path = write_json_artifact(invalid, tmp_path / "labels.json")
+
+    with pytest.raises(ValueError, match="both reference endpoints"):
+        load_labels(labels_path, packet)
+
+
 def test_comparison_rejects_observation_for_another_packet(tmp_path) -> None:
     packet, packet_path, observation_path, labels_path = _write_inputs(tmp_path)
     observation = replace(_observation(packet), packet_digest="other")
