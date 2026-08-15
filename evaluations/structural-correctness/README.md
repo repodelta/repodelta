@@ -92,3 +92,13 @@ justified when the underlying memberships are correct but insufficiently
 explained. Projection fixes come first when membership is wrong. Coverage
 truthfulness comes first when conclusions exceed observed bounds. Large-change
 clustering comes later when correctness holds but scale prevents comprehension.
+
+## Campaign v1.1
+
+[`campaign-v1-1`](campaign-v1-1/) preserves v1 as historical proposed evidence
+and regenerates the same eight-PR sample under the v3 packet and independently
+verified reference contract. Its
+[`verification record`](campaign-v1-1/verification.md) documents source-review
+isolation and a relation-endpoint defect corrected before reference freeze. The
+[`findings`](campaign-v1-1/results/findings.md) retain the focus over-selection
+direction while bounding recall claims by per-focus traversal coverage.

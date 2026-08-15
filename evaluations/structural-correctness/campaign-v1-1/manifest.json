@@ -1,0 +1,53 @@
+{
+  "campaign_id": "structural-correctness-v1.1",
+  "repository": "repodelta/repodelta",
+  "reference_contract": {
+    "authority": "independently_verified",
+    "observation_isolated_until_reference_freeze": true,
+    "relation_endpoints_required": true,
+    "unresolved_preserved": true
+  },
+  "samples": [
+    {
+      "pull_request": 208,
+      "change_shape": "small_structural_correction",
+      "purpose": "Compact changed-anchor case"
+    },
+    {
+      "pull_request": 238,
+      "change_shape": "revision_aware_state_mapping",
+      "purpose": "Base/head selectors and focused state semantics"
+    },
+    {
+      "pull_request": 245,
+      "change_shape": "documentation_only",
+      "purpose": "Structurally inapplicable authored semantics"
+    },
+    {
+      "pull_request": 250,
+      "change_shape": "new_cross_component_feature",
+      "purpose": "Production, CLI, credential-boundary, and verification structure"
+    },
+    {
+      "pull_request": 235,
+      "change_shape": "remote_workspace_feature",
+      "purpose": "Cross-component runtime and infrastructure paths"
+    },
+    {
+      "pull_request": 262,
+      "change_shape": "presentation_investigation_refactor",
+      "purpose": "Several focus subjects over shared changed files"
+    },
+    {
+      "pull_request": 267,
+      "change_shape": "canonical_projection_migration",
+      "purpose": "Contract introduced immediately before the campaign"
+    },
+    {
+      "pull_request": 240,
+      "change_shape": "large_mechanical_identity_migration",
+      "purpose": "Scale, rename-like repetition, and an unclustered overview"
+    }
+  ],
+  "schema_version": "structural_correctness_campaign_manifest.v1"
+}

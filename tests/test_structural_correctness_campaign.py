@@ -14,6 +14,10 @@ MANIFEST = Path(
     "evaluations/structural-correctness/campaign-v1/manifest.json"
 )
 CAMPAIGN = MANIFEST.parent
+V1_1_MANIFEST = Path(
+    "evaluations/structural-correctness/campaign-v1-1/manifest.json"
+)
+V1_1_CAMPAIGN = V1_1_MANIFEST.parent
 
 
 def test_campaign_v1_manifest_freezes_diverse_real_pr_sample() -> None:
@@ -144,6 +148,119 @@ def test_campaign_v1_summary_is_derived_from_frozen_truth() -> None:
     assert summary["next_investment"] == "correct_underlying_projection"
 
 
+def test_campaign_v1_1_binds_verified_references_before_comparison() -> None:
+    manifest = json.loads(V1_1_MANIFEST.read_text(encoding="utf-8"))
+
+    assert manifest["campaign_id"] == "structural-correctness-v1.1"
+    assert manifest["reference_contract"] == {
+        "authority": "independently_verified",
+        "observation_isolated_until_reference_freeze": True,
+        "relation_endpoints_required": True,
+        "unresolved_preserved": True,
+    }
+    for sample in manifest["samples"]:
+        pull_request = sample["pull_request"]
+        packet = load_packet(
+            V1_1_CAMPAIGN / "packets" / f"pr-{pull_request}.packet.json"
+        )
+        proposal = load_labels(
+            V1_1_CAMPAIGN / "proposals" / f"pr-{pull_request}.proposal.json",
+            packet,
+        )
+        reference = load_labels(
+            V1_1_CAMPAIGN / "references" / f"pr-{pull_request}.reference.json",
+            packet,
+        )
+        observation = load_observation(
+            V1_1_CAMPAIGN
+            / "observations"
+            / f"pr-{pull_request}.observation.json"
+        )
+
+        assert proposal.authority.status == "proposed"
+        assert reference.authority.status == "verified"
+        assert reference.authority.proposal_digest == proposal.proposal_digest
+        assert reference.authority.system_under_test_isolated is True
+        assert reference.authority.verification_evidence
+        assert observation.packet_digest == packet.digest
+        assert (
+            V1_1_CAMPAIGN
+            / "results"
+            / f"pr-{pull_request}.comparison.html"
+        ).is_file()
+
+
+def test_campaign_v1_1_summary_is_derived_from_verified_references() -> None:
+    manifest = json.loads(V1_1_MANIFEST.read_text(encoding="utf-8"))
+    summary = json.loads(
+        (V1_1_CAMPAIGN / "results" / "summary.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    expected_rows = []
+    for sample in manifest["samples"]:
+        pull_request = sample["pull_request"]
+        packet = load_packet(
+            V1_1_CAMPAIGN / "packets" / f"pr-{pull_request}.packet.json"
+        )
+        labels = load_labels(
+            V1_1_CAMPAIGN / "references" / f"pr-{pull_request}.reference.json",
+            packet,
+        )
+        observation = load_observation(
+            V1_1_CAMPAIGN
+            / "observations"
+            / f"pr-{pull_request}.observation.json"
+        )
+        row = _campaign_row(pull_request, labels, observation)
+        row["focus_coverage"] = _focus_coverage_counts(packet, labels)
+        expected_rows.append(row)
+
+    assert summary["reference_status"] == "independently_verified"
+    assert summary["sample_count"] == len(expected_rows)
+    assert summary["per_pull_request"] == expected_rows
+    assert summary["focuses_resolved"] == sum(
+        row["focuses_resolved"] for row in expected_rows
+    )
+    assert summary["focuses_unresolved"] == sum(
+        row["focuses_unresolved"] for row in expected_rows
+    )
+    assert summary["focus_coverage"] == {
+        key: sum(row["focus_coverage"][key] for row in expected_rows)
+        for key in ("complete", "limited", "empty", "unknown", "unresolved")
+    }
+    assert summary["overview"] == {
+        "false_inclusions": sum(
+            row["overview_false_inclusions"] for row in expected_rows
+        ),
+        "false_exclusions": sum(
+            row["overview_false_exclusions"] for row in expected_rows
+        ),
+        "role_disagreements": sum(
+            row["overview_role_disagreements"] for row in expected_rows
+        ),
+    }
+    assert summary["focus_nodes"] == {
+        "false_inclusions": sum(
+            row["node_false_inclusions"] for row in expected_rows
+        ),
+        "false_exclusions": sum(
+            row["node_false_exclusions"] for row in expected_rows
+        ),
+        "role_disagreements": sum(
+            row["node_role_disagreements"] for row in expected_rows
+        ),
+    }
+    assert summary["focus_exact_relations"] == {
+        "false_inclusions": sum(
+            row["relation_false_inclusions"] for row in expected_rows
+        ),
+        "false_exclusions": sum(
+            row["relation_false_exclusions"] for row in expected_rows
+        ),
+    }
+
+
 def _campaign_row(pull_request, labels, observation):
     observed_files = {item.file_node_id: item for item in observation.files}
     row = {
@@ -204,3 +321,41 @@ def _campaign_row(pull_request, labels, observation):
             expected_relations - observed_relations
         )
     return row
+
+
+def _focus_coverage_counts(packet, labels):
+    counts = {
+        "complete": 0,
+        "limited": 0,
+        "empty": 0,
+        "unknown": 0,
+        "unresolved": 0,
+    }
+    seed_states = {item.node_id: item.state for item in packet.coverage.seeds}
+    for focus in labels.focuses:
+        if focus.unresolved:
+            counts["unresolved"] += 1
+            continue
+        memberships = {
+            *focus.direct_file_node_ids,
+            *focus.context_file_node_ids,
+            *focus.direct_node_ids,
+            *focus.context_node_ids,
+            *focus.relation_ids,
+        }
+        states = [
+            seed_states[item]
+            for item in focus.direct_node_ids
+            if item in seed_states
+        ]
+        if not memberships:
+            counts["empty"] += 1
+        elif packet.coverage.seed_mapping_state != "complete" or not states:
+            counts["unknown"] += 1
+        elif "truncated" in states:
+            counts["limited"] += 1
+        elif "unknown" in states:
+            counts["unknown"] += 1
+        else:
+            counts["complete"] += 1
+    return counts

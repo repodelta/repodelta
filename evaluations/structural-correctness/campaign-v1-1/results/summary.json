@@ -1,0 +1,191 @@
+{
+  "schema_version": "structural_correctness_campaign_summary.v2",
+  "campaign": "campaign-v1-1",
+  "reference_status": "independently_verified",
+  "sample_count": 8,
+  "focuses_resolved": 110,
+  "focuses_unresolved": 3,
+  "focus_coverage": {
+    "complete": 3,
+    "limited": 78,
+    "empty": 29,
+    "unknown": 0,
+    "unresolved": 3
+  },
+  "overview": {
+    "false_inclusions": 34,
+    "false_exclusions": 0,
+    "role_disagreements": 0
+  },
+  "focus_nodes": {
+    "false_inclusions": 1453,
+    "false_exclusions": 176,
+    "role_disagreements": 14
+  },
+  "focus_exact_relations": {
+    "false_inclusions": 684,
+    "false_exclusions": 49
+  },
+  "per_pull_request": [
+    {
+      "pull_request": 208,
+      "overview_false_inclusions": 2,
+      "overview_false_exclusions": 0,
+      "overview_role_disagreements": 0,
+      "focuses_resolved": 13,
+      "focuses_unresolved": 0,
+      "node_false_inclusions": 63,
+      "node_false_exclusions": 15,
+      "node_role_disagreements": 2,
+      "relation_false_inclusions": 46,
+      "relation_false_exclusions": 4,
+      "focus_coverage": {
+        "complete": 0,
+        "limited": 10,
+        "empty": 3,
+        "unknown": 0,
+        "unresolved": 0
+      }
+    },
+    {
+      "pull_request": 238,
+      "overview_false_inclusions": 7,
+      "overview_false_exclusions": 0,
+      "overview_role_disagreements": 0,
+      "focuses_resolved": 16,
+      "focuses_unresolved": 0,
+      "node_false_inclusions": 274,
+      "node_false_exclusions": 21,
+      "node_role_disagreements": 2,
+      "relation_false_inclusions": 96,
+      "relation_false_exclusions": 4,
+      "focus_coverage": {
+        "complete": 0,
+        "limited": 14,
+        "empty": 2,
+        "unknown": 0,
+        "unresolved": 0
+      }
+    },
+    {
+      "pull_request": 245,
+      "overview_false_inclusions": 0,
+      "overview_false_exclusions": 0,
+      "overview_role_disagreements": 0,
+      "focuses_resolved": 0,
+      "focuses_unresolved": 0,
+      "node_false_inclusions": 0,
+      "node_false_exclusions": 0,
+      "node_role_disagreements": 0,
+      "relation_false_inclusions": 0,
+      "relation_false_exclusions": 0,
+      "focus_coverage": {
+        "complete": 0,
+        "limited": 0,
+        "empty": 0,
+        "unknown": 0,
+        "unresolved": 0
+      }
+    },
+    {
+      "pull_request": 250,
+      "overview_false_inclusions": 1,
+      "overview_false_exclusions": 0,
+      "overview_role_disagreements": 0,
+      "focuses_resolved": 18,
+      "focuses_unresolved": 0,
+      "node_false_inclusions": 81,
+      "node_false_exclusions": 43,
+      "node_role_disagreements": 3,
+      "relation_false_inclusions": 59,
+      "relation_false_exclusions": 16,
+      "focus_coverage": {
+        "complete": 0,
+        "limited": 12,
+        "empty": 6,
+        "unknown": 0,
+        "unresolved": 0
+      }
+    },
+    {
+      "pull_request": 235,
+      "overview_false_inclusions": 12,
+      "overview_false_exclusions": 0,
+      "overview_role_disagreements": 0,
+      "focuses_resolved": 20,
+      "focuses_unresolved": 0,
+      "node_false_inclusions": 280,
+      "node_false_exclusions": 33,
+      "node_role_disagreements": 3,
+      "relation_false_inclusions": 183,
+      "relation_false_exclusions": 11,
+      "focus_coverage": {
+        "complete": 2,
+        "limited": 15,
+        "empty": 3,
+        "unknown": 0,
+        "unresolved": 0
+      }
+    },
+    {
+      "pull_request": 262,
+      "overview_false_inclusions": 9,
+      "overview_false_exclusions": 0,
+      "overview_role_disagreements": 0,
+      "focuses_resolved": 12,
+      "focuses_unresolved": 0,
+      "node_false_inclusions": 200,
+      "node_false_exclusions": 21,
+      "node_role_disagreements": 0,
+      "relation_false_inclusions": 126,
+      "relation_false_exclusions": 5,
+      "focus_coverage": {
+        "complete": 0,
+        "limited": 10,
+        "empty": 2,
+        "unknown": 0,
+        "unresolved": 0
+      }
+    },
+    {
+      "pull_request": 267,
+      "overview_false_inclusions": 3,
+      "overview_false_exclusions": 0,
+      "overview_role_disagreements": 0,
+      "focuses_resolved": 14,
+      "focuses_unresolved": 0,
+      "node_false_inclusions": 144,
+      "node_false_exclusions": 28,
+      "node_role_disagreements": 0,
+      "relation_false_inclusions": 85,
+      "relation_false_exclusions": 9,
+      "focus_coverage": {
+        "complete": 0,
+        "limited": 10,
+        "empty": 4,
+        "unknown": 0,
+        "unresolved": 0
+      }
+    },
+    {
+      "pull_request": 240,
+      "overview_false_inclusions": 0,
+      "overview_false_exclusions": 0,
+      "overview_role_disagreements": 0,
+      "focuses_resolved": 17,
+      "focuses_unresolved": 3,
+      "node_false_inclusions": 411,
+      "node_false_exclusions": 15,
+      "node_role_disagreements": 4,
+      "relation_false_inclusions": 89,
+      "relation_false_exclusions": 0,
+      "focus_coverage": {
+        "complete": 1,
+        "limited": 7,
+        "empty": 9,
+        "unknown": 0,
+        "unresolved": 3
+      }
+    }
+  ]
+}
