@@ -19,6 +19,8 @@ from repodelta.model.contracts import (
     StructuralGraphEdge,
     StructuralGraphNode,
     StructuralGraphPlacement,
+    StructuralFocusMembership,
+    StructuralFocusOverlay,
     StructuralNavigationTarget,
     StructuralOverviewProjection,
     StructuralRelationGroup,
@@ -52,6 +54,7 @@ class _EvidencePathSegment:
     kind: str
     node_ids: tuple[str, ...]
     edge_ids: tuple[str, ...]
+    membership_counts: tuple[tuple[str, int], ...]
 
 
 def _safe_href(value: str | None) -> str | None:
@@ -277,7 +280,9 @@ def _review_graph(
         ownership_edges[edge_id]
         for edge_id in graph.backbone_ownership_edge_ids
     )
-    node_focus: dict[str, list[tuple[str, str]]] = {}
+    node_focus: dict[
+        str, list[tuple[str, StructuralFocusMembership]]
+    ] = {}
     edge_focus: dict[str, list[str]] = {}
     relation_group_focus: dict[str, list[str]] = {}
     ownership_edge_focus: dict[str, list[str]] = {}
@@ -292,7 +297,7 @@ def _review_graph(
                     f"{node.node_id}"
                 )
             node_focus.setdefault(node.node_id, []).append(
-                (focus_id, node.role)
+                (focus_id, node)
             )
         for group_id in overlay.relation_group_ids:
             if group_id not in relation_groups:
@@ -367,8 +372,8 @@ def _review_graph(
         kind_class = _structural_kind_class(fact)
         direct_focuses = tuple(
             focus_id
-            for focus_id, role in node_focus.get(container.node_id, ())
-            if role != "intermediate"
+            for focus_id, membership in node_focus.get(container.node_id, ())
+            if membership.is_direct_mapping
         )
         contextual_focuses = tuple(
             dict.fromkeys(
@@ -376,15 +381,15 @@ def _review_graph(
                 for focus_id in (
                     *(
                         item_focus_id
-                        for item_focus_id, role in node_focus.get(
+                        for item_focus_id, membership in node_focus.get(
                             container.node_id, ()
                         )
-                        if role == "intermediate"
+                        if not membership.is_direct_mapping
                     ),
                     *(
                         item_focus_id
                         for node_id in container.descendant_node_ids
-                        for item_focus_id, _role in node_focus.get(node_id, ())
+                        for item_focus_id, _membership in node_focus.get(node_id, ())
                     ),
                 )
                 if focus_id not in direct_focuses
@@ -396,6 +401,7 @@ def _review_graph(
             f'data-structural-node="{escape(parent_node.id, quote=True)}" '
             f'data-focuses="{escape(" ".join(direct_focuses), quote=True)}" '
             f'data-context-focuses="{escape(" ".join(contextual_focuses), quote=True)}" '
+            f'data-focus-memberships="{escape(_focus_membership_data(node_focus.get(container.node_id, ())), quote=True)}" '
             f'x="{container.x}" y="{container.y}" '
             f'width="{container.width}" height="{container.height}" rx="14">'
             f"<title>{escape(parent_node.review_symbol_id)} ownership container</title>"
@@ -407,6 +413,7 @@ def _review_graph(
             f'data-structural-node="{escape(parent_node.id, quote=True)}" '
             f'data-focuses="{escape(" ".join(direct_focuses), quote=True)}" '
             f'data-context-focuses="{escape(" ".join(contextual_focuses), quote=True)}" '
+            f'data-focus-memberships="{escape(_focus_membership_data(node_focus.get(container.node_id, ())), quote=True)}" '
             f'transform="translate({container.x + 12} {container.y + 12})">'
             f'<rect width="{container.width - 24}" height="42" rx="8"/>'
             f'<text class="delta-node-kind" x="11" y="15">'
@@ -584,13 +591,13 @@ def _review_graph(
         kind_class = _structural_kind_class(fact)
         direct_focuses = " ".join(
             focus_id
-            for focus_id, role in node_focus.get(node.id, ())
-            if role != "intermediate"
+            for focus_id, membership in node_focus.get(node.id, ())
+            if membership.is_direct_mapping
         )
         contextual_focuses = " ".join(
             focus_id
-            for focus_id, role in node_focus.get(node.id, ())
-            if role == "intermediate"
+            for focus_id, membership in node_focus.get(node.id, ())
+            if not membership.is_direct_mapping
         )
         content = (
             f'<g class="delta-node {kind_class} operation-{escape(node.delta)}'
@@ -603,6 +610,7 @@ def _review_graph(
             f'data-structural-node="{escape(node.id, quote=True)}" '
             f'data-focuses="{escape(direct_focuses, quote=True)}" '
             f'data-context-focuses="{escape(contextual_focuses, quote=True)}" '
+            f'data-focus-memberships="{escape(_focus_membership_data(node_focus.get(node.id, ())), quote=True)}" '
             f'transform="translate({x} {y})">'
             '<rect width="210" height="72" rx="10"/>'
             '<line class="delta-node-marker" x1="2" y1="11" x2="2" y2="61"/>'
@@ -636,13 +644,14 @@ def _review_graph(
             continue
         sources = _sources(fact, brief)
         focuses = ", ".join(
-            focus_id for focus_id, _role in node_focus.get(node.id, ())
+            focus_id for focus_id, _membership in node_focus.get(node.id, ())
         )
         kind = str(fact.metadata.get("symbol_kind", "symbol")).replace("_", " ")
         isolated_rows.append(
             f'<div class="isolated-anchor operation-{escape(node.delta)}" '
             f'data-structural-node="{escape(node.id, quote=True)}" '
-            f'data-focuses="{escape(" ".join(item[0] for item in node_focus.get(node.id, ())), quote=True)}">'
+            f'data-focuses="{escape(" ".join(item[0] for item in node_focus.get(node.id, ())), quote=True)}" '
+            f'data-focus-memberships="{escape(_focus_membership_data(node_focus.get(node.id, ())), quote=True)}">'
             f'<span class="isolated-anchor-focus">{escape(focuses)}</span>'
             f'<span class="isolated-anchor-operation">{escape(node.delta)}</span>'
             f'<span class="isolated-anchor-name">{escape(_structural_standalone_name(fact))}</span>'
@@ -1235,7 +1244,12 @@ def _evidence_paths(
             if (
                 focus_node.node_id not in backbone_nodes
                 or focus_node.node_id in covered_node_ids
-                or focus_node.role == "intermediate"
+                or focus_node.structural_role in {
+                    "connector",
+                    "relation_endpoint",
+                    "placement_ancestor",
+                    "ownership_ancestor",
+                }
             ):
                 continue
             node_id = focus_node.node_id
@@ -1266,6 +1280,22 @@ def _evidence_paths(
             )))
             if not node_ids:
                 continue
+            segment_node_ids = set(node_ids)
+            segment_edge_ids = {
+                edge.id for edge in selected_kind_edges
+            }
+            membership_counts = Counter(
+                membership.membership_class
+                for membership in overlay.memberships
+                if (
+                    membership.member_kind == "node"
+                    and membership.member_id in segment_node_ids
+                )
+                or (
+                    membership.member_kind == "edge"
+                    and membership.member_id in segment_edge_ids
+                )
+            )
             segments.append(
                 _EvidencePathSegment(
                     id=f"{focus_id}:{kind}",
@@ -1273,6 +1303,17 @@ def _evidence_paths(
                     kind=kind,
                     node_ids=node_ids,
                     edge_ids=tuple(edge.id for edge in selected_kind_edges),
+                    membership_counts=tuple(
+                        (membership_class, membership_counts[membership_class])
+                        for membership_class in (
+                            "asserted",
+                            "matched",
+                            "suggested",
+                            "context",
+                            "unresolved",
+                        )
+                        if membership_counts[membership_class]
+                    ),
                 )
             )
 
@@ -1398,6 +1439,13 @@ def _evidence_paths(
         "context": "Structural context",
         "unresolved": "Unresolved context",
     }
+    membership_labels = {
+        "asserted": "Asserted",
+        "matched": "Matched",
+        "suggested": "Suggested",
+        "context": "Context",
+        "unresolved": "Unresolved",
+    }
     rows = []
     traces = []
     for segment in segments:
@@ -1433,16 +1481,24 @@ def _evidence_paths(
         if segment.edge_ids:
             summary_parts.append('<span class="evidence-path-arrow">→</span>')
             summary_parts.append('<code>…</code>')
+        membership_chips = "".join(
+            '<span class="focus-membership-chip '
+            f'membership-{escape(membership_class)}">'
+            f'{escape(membership_labels[membership_class])} · {count}</span>'
+            for membership_class, count in segment.membership_counts
+        )
         rows.append(
             '<button class="evidence-path-row" type="button" '
             f'data-path-id="{escape(segment.id, quote=True)}" '
             f'data-path-kind="{escape(segment.kind, quote=True)}" '
+            f'data-membership-classes="{escape(" ".join(item[0] for item in segment.membership_counts), quote=True)}" '
             f'data-focuses="{escape(" ".join(segment.focus_ids), quote=True)}" '
             f'data-file-node-ids="{escape(" ".join(file_node_ids), quote=True)}" '
             f'data-group-ids="{escape(" ".join(group_ids), quote=True)}" '
             'aria-pressed="false">'
             f'<span class="evidence-path-kind">{labels[segment.kind]}</span>'
-            f'<span class="evidence-path-main">{"".join(summary_parts)}</span>'
+            f'<span class="evidence-path-main">{"".join(summary_parts)}'
+            f'<span class="focus-membership-chips">{membership_chips}</span></span>'
             '<span class="evidence-path-action">Inspect</span></button>'
         )
         relations = tuple(edge_by_id[edge_id].relation for edge_id in segment.edge_ids)
@@ -1482,21 +1538,33 @@ def _evidence_paths(
 
 def _aggregate_node_focus(
     node_ids: tuple[str, ...],
-    node_focus: dict[str, list[tuple[str, str]]],
+    node_focus: dict[
+        str, list[tuple[str, StructuralFocusMembership]]
+    ],
 ) -> tuple[tuple[str, ...], tuple[str, ...]]:
     direct = {
         focus_id
         for node_id in node_ids
-        for focus_id, role in node_focus.get(node_id, ())
-        if role != "intermediate"
+        for focus_id, membership in node_focus.get(node_id, ())
+        if membership.is_direct_mapping
     }
     contextual = {
         focus_id
         for node_id in node_ids
-        for focus_id, role in node_focus.get(node_id, ())
-        if role == "intermediate" and focus_id not in direct
+        for focus_id, membership in node_focus.get(node_id, ())
+        if not membership.is_direct_mapping and focus_id not in direct
     }
     return tuple(sorted(direct)), tuple(sorted(contextual))
+
+
+def _focus_membership_data(
+    values: tuple[tuple[str, StructuralFocusMembership], ...]
+    | list[tuple[str, StructuralFocusMembership]],
+) -> str:
+    return " ".join(
+        f"{focus_id}:{membership.membership_class}"
+        for focus_id, membership in values
+    )
 
 
 def _structural_kind_count_label(kind: str, count: int) -> str:
@@ -1517,7 +1585,9 @@ def _file_member_graph(
     placements: tuple[StructuralGraphPlacement, ...],
     evidence: dict[str, EvidenceItem],
     architectural_components: dict[str, ArchitecturalComponent],
-    node_focus: dict[str, list[tuple[str, str]]],
+    node_focus: dict[
+        str, list[tuple[str, StructuralFocusMembership]]
+    ],
     edge_focus: dict[str, list[str]],
     relation_group_focus: dict[str, list[str]],
 ) -> str:
@@ -1750,12 +1820,14 @@ def _file_member_graph(
         node_direct_focuses, context_focuses = _aggregate_node_focus(
             (file_id, *member_ids), node_focus
         )
-        direct_focuses = tuple(dict.fromkeys((
-            *node_direct_focuses,
+        direct_focuses = node_direct_focuses
+        context_focuses = tuple(dict.fromkeys((
+            *context_focuses,
             *(
                 focus_id
                 for node_id in (file_id, *member_ids)
                 for focus_id in edge_focus_by_node.get(node_id, ())
+                if focus_id not in node_direct_focuses
             ),
         )))
         rows = []
@@ -1786,9 +1858,14 @@ def _file_member_graph(
             node_direct, contextual = _aggregate_node_focus(
                 (node_id,), node_focus
             )
-            direct = tuple(dict.fromkeys((
-                *node_direct,
-                *edge_focus_by_node.get(node_id, ()),
+            direct = node_direct
+            contextual = tuple(dict.fromkeys((
+                *contextual,
+                *(
+                    focus_id
+                    for focus_id in edge_focus_by_node.get(node_id, ())
+                    if focus_id not in node_direct
+                ),
             )))
             relations = "".join(
                 render_member_relation(edge, file_id)
@@ -1824,6 +1901,7 @@ def _file_member_graph(
                 f'data-parent-node="{escape(parent_id or "", quote=True)}" '
                 f'data-focuses="{escape(" ".join(direct), quote=True)}" '
                 f'data-context-focuses="{escape(" ".join(contextual), quote=True)}" '
+                f'data-focus-memberships="{escape(_focus_membership_data(node_focus.get(node_id, ())), quote=True)}" '
                 f'aria-label="{escape(aria_label, quote=True)}">'
                 '<div class="member-line-main">'
                 f'{operation}{node_label}'
@@ -1847,7 +1925,8 @@ def _file_member_graph(
             '<section class="file-member-panel" '
             f'data-structural-node="{escape(file_id, quote=True)}" '
             f'data-focuses="{escape(" ".join(direct_focuses), quote=True)}" '
-            f'data-context-focuses="{escape(" ".join(context_focuses), quote=True)}">'
+            f'data-context-focuses="{escape(" ".join(context_focuses), quote=True)}" '
+            f'data-focus-memberships="{escape(_focus_membership_data(tuple(item for node_id in (file_id, *member_ids) for item in node_focus.get(node_id, ()))), quote=True)}">'
             '<header><div class="file-header-meta"><span>file · '
             f'{escape(backbone_nodes[file_id].delta)}'
             f'{" · isolated" if isolated_file else ""}</span>'
@@ -2363,6 +2442,9 @@ def _focus_assessment_inspector(
             exception_chips += (
                 f'<span>{escape(_structural_focus_label(inspection.structural_disposition.state))}</span>'
             )
+        membership_summary = _focus_membership_summary(
+            inspection.structural_overlay
+        )
         rows.append(
             '<article class="focus-assessment" hidden '
             f'data-verification-subject="{escape(entry.subject_id, quote=True)}"'
@@ -2379,6 +2461,7 @@ def _focus_assessment_inspector(
             + '</span>'
             f'<span class="status-pill status-{escape(entry.status)}">'
             f'{escape(entry.status.replace("_", " "))}</span></div>'
+            f'{membership_summary}'
             + (
                 f'<div class="focus-exceptions" aria-label="Visible review exceptions">{exception_chips}</div>'
                 if exception_chips
@@ -2411,6 +2494,62 @@ def _focus_assessment_inspector(
             else f'<p class="empty-state">{escape(empty_review_message or "No verification subject is available.")}</p>'
         )
         + "</section>"
+    )
+
+
+def _focus_membership_summary(overlay: StructuralFocusOverlay) -> str:
+    labels = {
+        "asserted": "Asserted mapping",
+        "matched": "Deterministic match",
+        "suggested": "Heuristic suggestion",
+        "context": "Structural context",
+        "unresolved": "Unresolved",
+    }
+    chips = []
+    for membership_class in (
+        "asserted",
+        "matched",
+        "suggested",
+        "context",
+        "unresolved",
+    ):
+        memberships = tuple(
+            item
+            for item in overlay.memberships
+            if item.membership_class == membership_class
+        )
+        if not memberships:
+            continue
+        producers = tuple(dict.fromkeys(
+            provenance.producer
+            for item in memberships
+            for provenance in item.provenance
+            if provenance.admission_class == membership_class
+        ))
+        source_ids = tuple(dict.fromkeys(
+            source_id
+            for item in memberships
+            for provenance in item.provenance
+            if provenance.admission_class == membership_class
+            for source_id in provenance.source_ids
+        ))
+        title = (
+            f'Producer: {", ".join(producers)} · '
+            f'Sources: {", ".join(source_ids)}'
+        )
+        chips.append(
+            '<span class="focus-membership-chip '
+            f'membership-{escape(membership_class)}" '
+            f'title="{escape(title, quote=True)}">'
+            f'{escape(labels[membership_class])} · {len(memberships)}</span>'
+        )
+    if not chips:
+        return ""
+    return (
+        '<div class="focus-membership-summary" '
+        'aria-label="Canonical focus membership">'
+        '<small>Focus membership</small>'
+        f'<span class="focus-membership-chips">{"".join(chips)}</span></div>'
     )
 
 
@@ -2688,6 +2827,14 @@ def render_html(brief: ReviewBrief) -> str:
 .focus-assessment-inspector[hidden],.focus-assessment[hidden]{{display:none}}.focus-assessment-inspector>h4{{margin:0 0 9px;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.05em}}
 .focus-assessment-heading{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:start}}
 .focus-assessment-identity{{display:grid;grid-template-columns:34px minmax(0,1fr);gap:3px 8px;min-width:0}}.focus-assessment-identity b{{grid-row:1/3;color:var(--green);font:760 10px ui-monospace,SFMono-Regular,Menlo,monospace}}.focus-assessment-identity span{{font-size:11px;font-weight:620}}.focus-assessment-identity small{{color:var(--faint);font-size:8px}}
+.focus-membership-summary{{display:flex;gap:9px;align-items:center;margin-top:9px;color:var(--faint)}}
+.focus-membership-summary>small{{font-size:8px;white-space:nowrap}}
+.focus-membership-chips{{display:flex;min-width:0;gap:5px;align-items:center;flex-wrap:wrap}}
+.focus-membership-chip{{display:inline-flex;align-items:center;padding:2px 6px;border:1px solid rgba(111,128,135,.28);border-radius:999px;color:var(--muted);font-size:7px;line-height:1.3;white-space:nowrap}}
+.focus-membership-chip.membership-asserted{{border-color:rgba(123,227,172,.58);color:var(--green)}}
+.focus-membership-chip.membership-matched{{border-color:rgba(114,181,255,.55);color:var(--blue)}}
+.focus-membership-chip.membership-suggested{{border-style:dashed;border-color:rgba(225,190,105,.52);color:#e1be69}}
+.focus-membership-chip.membership-unresolved{{border-style:dashed;color:var(--faint)}}
 .focus-exceptions{{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}}.focus-exceptions span{{padding:3px 7px;border:1px solid rgba(231,202,124,.34);border-radius:999px;background:rgba(106,85,30,.12);color:var(--amber);font-size:8px}}
 .focus-assessment-detail{{margin-top:10px;border-top:1px solid rgba(111,128,135,.18);padding-top:8px}}.focus-assessment-detail>summary{{display:flex;justify-content:space-between;gap:12px;cursor:pointer;color:var(--muted);font-size:9px}}.focus-assessment-detail>summary span{{color:var(--faint);font-size:8px;text-align:right}}
 .status-pill{{display:inline-flex;justify-content:center;padding:4px 7px;border-radius:999px;font-size:8px;font-weight:750;text-transform:uppercase}}
@@ -2726,6 +2873,7 @@ def render_html(brief: ReviewBrief) -> str:
 .evidence-path-row.active{{box-shadow:inset 2px 0 var(--green)}}
 .evidence-path-kind{{color:var(--blue);font-size:8px;font-weight:720;text-transform:uppercase}}
 .evidence-path-main{{display:flex;min-width:0;align-items:center;gap:7px;overflow:hidden}}
+.evidence-path-main>.focus-membership-chips{{margin-left:auto;flex-wrap:nowrap}}
 .evidence-path-main code{{overflow:hidden;color:var(--text);font-size:9px;text-overflow:ellipsis;white-space:nowrap}}
 .evidence-path-arrow{{flex:0 0 auto;color:var(--green)}}.evidence-path-plus{{color:var(--faint)}}
 .evidence-path-action{{color:var(--faint);font-size:8px;white-space:nowrap}}

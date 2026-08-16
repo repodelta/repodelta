@@ -270,10 +270,10 @@ def _derive_structural_overview(
             file_id = file_by_node.get(focus_node.node_id)
             if file_id not in overview_files:
                 continue
-            if focus_node.role == "intermediate":
-                context_files.add(file_id)
-            else:
+            if focus_node.is_direct_mapping:
                 direct_files.add(file_id)
+            else:
+                context_files.add(file_id)
         overlay_group_ids = set(inspection.structural_overlay.relation_group_ids)
         overlay_group_ids.update(
             group_id
@@ -285,11 +285,6 @@ def _derive_structural_overview(
             for group_id in overlay_group_ids
             if group_id in relation_id_by_group_id
         }
-        for relation in relation_items:
-            if relation.id not in relation_ids:
-                continue
-            direct_files.update(relation.source_file_node_ids)
-            direct_files.add(relation.target_file_node_id)
         context_files -= direct_files
         focus_items.append(
             StructuralOverviewFocus(

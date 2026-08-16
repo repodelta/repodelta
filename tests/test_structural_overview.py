@@ -9,8 +9,9 @@ from repodelta.model.contracts import (
     EvidenceItem,
     ReviewStructuralGraph,
     StructuralFocusDisposition,
-    StructuralFocusNode,
+    StructuralFocusMembership,
     StructuralFocusOverlay,
+    StructuralFocusProvenance,
     StructuralGraphEdge,
     StructuralGraphNode,
     StructuralRelationGroup,
@@ -22,6 +23,22 @@ from repodelta.projection.structural_overview import (
     project_structural_overview,
     validate_structural_overview,
 )
+
+
+def _focus_member(kind, identity, membership_class, role):
+    return StructuralFocusMembership(
+        member_kind=kind,
+        member_id=identity,
+        membership_class=membership_class,
+        structural_role=role,
+        provenance=(
+            StructuralFocusProvenance(
+                producer="test_fixture",
+                admission_class=membership_class,
+                source_ids=(identity,),
+            ),
+        ),
+    )
 
 
 def _overview_fixture() -> tuple[
@@ -95,15 +112,25 @@ def _overview_fixture() -> tuple[
         VerificationEvidenceInspection(
             id="VEI:R1",
             subject_id="R1",
-            structural_overlay=StructuralFocusOverlay(
-                nodes=(
-                    StructuralFocusNode("N:A", "changed_anchor"),
-                    StructuralFocusNode("N:B", "intermediate"),
-                    StructuralFocusNode("N:C", "runtime_context"),
+            structural_overlay=StructuralFocusOverlay(memberships=(
+                _focus_member("node", "N:A", "matched", "changed_anchor"),
+                _focus_member("node", "N:B", "context", "connector"),
+                _focus_member("node", "N:C", "context", "runtime_context"),
+                _focus_member("edge", "E:A:B", "context", "relation_endpoint"),
+                _focus_member("edge", "E:B:C", "context", "relation_endpoint"),
+                _focus_member(
+                    "relation_group",
+                    "G:E:A:B",
+                    "context",
+                    "relation_endpoint",
                 ),
-                edge_ids=("E:A:B", "E:B:C"),
-                relation_group_ids=("G:E:A:B", "G:E:B:C"),
-            ),
+                _focus_member(
+                    "relation_group",
+                    "G:E:B:C",
+                    "context",
+                    "relation_endpoint",
+                ),
+            )),
             structural_disposition=StructuralFocusDisposition(state="projected"),
         ),
         VerificationEvidenceInspection(
@@ -139,8 +166,8 @@ def test_overview_preserves_retained_bridge_but_not_adjacent_context() -> None:
         "E:B:C",
     }
     focus = overview.focuses_by_subject_id()["R1"]
-    assert set(focus.direct_file_node_ids) == {"N:A", "N:B", "N:C"}
-    assert focus.context_file_node_ids == ()
+    assert set(focus.direct_file_node_ids) == {"N:A"}
+    assert set(focus.context_file_node_ids) == {"N:B", "N:C"}
     assert overview.focuses_by_subject_id()["G1"].structural_disposition.state == (
         "not_applicable"
     )

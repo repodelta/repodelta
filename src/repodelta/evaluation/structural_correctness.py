@@ -543,14 +543,14 @@ def _observe_focus(
             sorted(
                 item.node_id
                 for item in overlay.nodes
-                if item.role != "intermediate"
+                if item.is_direct_mapping
             )
         )
         context_node_ids = tuple(
             sorted(
                 item.node_id
                 for item in overlay.nodes
-                if item.role == "intermediate"
+                if not item.is_direct_mapping
             )
         )
         exact_relation_ids = tuple(

@@ -304,6 +304,7 @@ def test_closure_projection_is_the_shared_graph_authority() -> None:
         packet=packet,
         focus_statements=(),
         transformation_contract=contract,
+        transformation_subject_selection=selection,
         observed_transformation=ObservedTransformation(),
         transformation_structural_closure=closure,
         transformation_alignment=TransformationAlignment(),
@@ -335,6 +336,27 @@ def test_closure_projection_is_the_shared_graph_authority() -> None:
         "E:relation:service-store",
     }
     assert set(overlay.ownership_edge_ids) == {"E:ownership:module-adapter"}
+    memberships_by_review_id = {
+        node.review_symbol_id: next(
+            membership
+            for membership in overlay.nodes
+            if membership.node_id == node.id
+        )
+        for node in graph.nodes
+        if node.id in {item.node_id for item in overlay.nodes}
+    }
+    assert memberships_by_review_id["adapter"].membership_class == "asserted"
+    assert {
+        item.producer
+        for item in memberships_by_review_id["adapter"].provenance
+    } == {"transformation_selector", "relation_endpoint"}
+    assert memberships_by_review_id["adapter"].structural_role == (
+        "changed_anchor"
+    )
+    assert {
+        memberships_by_review_id[review_id].membership_class
+        for review_id in ("service", "store", "module")
+    } == {"context"}
     assert projection.verification_workspace.inspections_by_subject_id()[
         "T1"
     ].structural_overlay == overlay

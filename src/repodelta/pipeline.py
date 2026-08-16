@@ -126,6 +126,7 @@ class DeterministicAnalyzer:
             packet=packet,
             focus_statements=requirements,
             transformation_contract=semantics.transformation_contract,
+            transformation_subject_selection=transformation_subject_selection,
             observed_transformation=observed_transformation,
             transformation_structural_closure=transformation_structural_closure,
             transformation_alignment=transformation_alignment,

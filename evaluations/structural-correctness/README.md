@@ -46,7 +46,7 @@ endpoints, changed-file counts, and at most 32 diff hunk headers per file. It
 does not expose source lines, RepoDelta's selected files, projected roles, or
 focus memberships.
 
-## Campaign v1 sample
+## Campaign v1 (superseded proposal)
 
 The first sample is selected by change shape rather than randomly. Its
 machine-readable identities, categories, purposes, and campaign constraints
@@ -57,7 +57,9 @@ real PRs do not expose a retained-bridge or false-inclusion counterexample, a
 small synthetic fixture complements the campaign without replacing the real
 sample.
 
-Campaign v1 records a proposed baseline. Its
+Campaign v1 records the original proposed baseline and is retained only as
+historical method evidence. It is superseded by campaign v1.1 and must not be
+used as the current correctness authority. Its
 [reconciliation](campaign-v1/reconciliation.md) explains the authority and
 coverage limits that must be resolved before treating its
 [findings](campaign-v1/results/findings.md) or
@@ -87,11 +89,13 @@ and exact relations for each subject. `complete` or `available` remains bounded
 to the coverage surface recorded in the packet; it is never interpreted as
 complete repository truth.
 
-Campaign findings determine the next product change. Provenance labels are
-justified when the underlying memberships are correct but insufficiently
-explained. Projection fixes come first when membership is wrong. Coverage
-truthfulness comes first when conclusions exceed observed bounds. Large-change
-clustering comes later when correctness holds but scale prevents comprehension.
+Campaign findings determine retrieval changes. Typed production provenance may
+be added without changing selection when it prevents context from being
+misrepresented as a direct mapping; that is a truth-boundary correction, not an
+accuracy claim. Any candidate, path, or closure policy change must be compared
+again with the current verified baseline. Coverage truthfulness comes first
+when conclusions exceed observed bounds, and large-change clustering comes
+later when correctness holds but scale prevents comprehension.
 
 ## Campaign v1.1
 
@@ -102,3 +106,5 @@ verified reference contract. Its
 isolation and a relation-endpoint defect corrected before reference freeze. The
 [`findings`](campaign-v1-1/results/findings.md) retain the focus over-selection
 direction while bounding recall claims by per-focus traversal coverage.
+Campaign v1.1 is the sole current structural-correctness baseline; there is no
+campaign v1.2.
