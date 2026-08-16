@@ -11,7 +11,8 @@ an assessment, verification status, or merge decision.
 ## Blind workflow
 
 Generate the ordinary report, a labeler-facing packet, a separately stored
-canonical observation, and a complete unresolved label template:
+canonical observation and producer-attribution artifact, and a complete
+unresolved label template:
 
 ```bash
 repodelta review \
@@ -35,6 +36,30 @@ repodelta compare-structural-correctness \
   --reference-labels build/pr-267.labels.json \
   --output build/pr-267-structural-comparison.html
 ```
+
+The review command also writes
+`pr-267.packet.json.attribution.json`. Keep it isolated with the observation;
+it contains RepoDelta's selected focus membership and is not a blind-labeling
+input. Each projected node and exact relation records complete producer paths
+from an admitted R/G association or T/CC selector through structural paths,
+relation endpoints, and presentation ancestry. A membership whose production
+path cannot be reconstructed remains explicitly unsupported.
+
+Replay one producer counterfactual after the reference is frozen:
+
+```bash
+repodelta compare-structural-attribution \
+  --labeling-packet build/pr-267.packet.json \
+  --observation build/pr-267.packet.json.observation.json \
+  --attribution build/pr-267.packet.json.attribution.json \
+  --reference-labels build/pr-267.labels.json \
+  --disable-producer distinctive_phrase \
+  --output build/pr-267-without-distinctive-phrase.json
+```
+
+The replay removes a membership only when every recorded producer path depends
+on a disabled class. It does not rerun production selection, infer missing
+paths, change coverage, or write a RepoDelta assessment.
 
 Packet identity, candidate completeness, subject completeness, file roles,
 direct-versus-context focus membership, exact relation identity, and claimed

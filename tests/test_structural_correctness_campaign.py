@@ -1,8 +1,13 @@
 from __future__ import annotations
 
 import json
+from dataclasses import asdict
 from pathlib import Path
 
+from repodelta.evaluation.focus_attribution import (
+    load_structural_focus_attribution,
+    summarize_attribution_campaign,
+)
 from repodelta.evaluation.structural_correctness import (
     load_labels,
     load_observation,
@@ -18,6 +23,10 @@ V1_1_MANIFEST = Path(
     "evaluations/structural-correctness/campaign-v1-1/manifest.json"
 )
 V1_1_CAMPAIGN = V1_1_MANIFEST.parent
+V1_2_MANIFEST = Path(
+    "evaluations/structural-correctness/campaign-v1-2/manifest.json"
+)
+V1_2_CAMPAIGN = V1_2_MANIFEST.parent
 
 
 def test_campaign_v1_manifest_freezes_diverse_real_pr_sample() -> None:
@@ -259,6 +268,103 @@ def test_campaign_v1_1_summary_is_derived_from_verified_references() -> None:
             row["relation_false_exclusions"] for row in expected_rows
         ),
     }
+
+
+def test_campaign_v1_2_attributes_unchanged_production_observations() -> None:
+    manifest = json.loads(V1_2_MANIFEST.read_text(encoding="utf-8"))
+    source_manifest = json.loads(V1_1_MANIFEST.read_text(encoding="utf-8"))
+
+    assert manifest["campaign_id"] == "structural-correctness-v1.2"
+    assert manifest["pull_requests"] == [
+        item["pull_request"] for item in source_manifest["samples"]
+    ]
+    assert manifest["contract"] == {
+        "production_output_unchanged": True,
+        "packet_and_observation_digest_equality_required": True,
+        "reference_isolated_from_attribution_derivation": True,
+        "unsupported_production_paths_fail_closed": True,
+        "counterfactual_replay_only_removes_recorded_producer_paths": True,
+    }
+
+    cases = []
+    for pull_request in manifest["pull_requests"]:
+        packet = load_packet(
+            V1_1_CAMPAIGN / "packets" / f"pr-{pull_request}.packet.json"
+        )
+        observation = load_observation(
+            V1_1_CAMPAIGN
+            / "observations"
+            / f"pr-{pull_request}.observation.json"
+        )
+        reference = load_labels(
+            V1_1_CAMPAIGN
+            / "references"
+            / f"pr-{pull_request}.reference.json",
+            packet,
+        )
+        attribution = load_structural_focus_attribution(
+            V1_2_CAMPAIGN
+            / "attributions"
+            / f"pr-{pull_request}.attribution.json"
+        )
+
+        assert observation.packet_digest == packet.digest
+        assert attribution.packet_digest == packet.digest
+        assert all(
+            not membership.unsupported_reason
+            for focus in attribution.focuses
+            for membership in focus.memberships
+        )
+        cases.append((packet, observation, attribution, reference))
+
+    expected = json.loads(
+        (V1_2_CAMPAIGN / "results" / "summary.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    actual = json.loads(
+        json.dumps(asdict(summarize_attribution_campaign(cases)))
+    )
+    assert actual == expected
+
+
+def test_campaign_v1_2_counterfactuals_expose_distinct_producer_risks() -> None:
+    summary = json.loads(
+        (V1_2_CAMPAIGN / "results" / "summary.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    baseline = {item["subject_kind"]: item for item in summary["baseline"]}
+    counterfactuals = {
+        item["producer_class"]: {
+            outcome["subject_kind"]: outcome for outcome in item["outcomes"]
+        }
+        for item in summary["counterfactuals"]
+    }
+
+    path_requirement = counterfactuals["structural_path"]["requirement"]
+    assert path_requirement["node_false_inclusions"] == (
+        baseline["requirement"]["node_false_inclusions"] - 189
+    )
+    assert path_requirement["node_false_exclusions"] == (
+        baseline["requirement"]["node_false_exclusions"] + 2
+    )
+
+    phrase_requirement = counterfactuals["distinctive_phrase"]["requirement"]
+    assert phrase_requirement["node_false_inclusions"] == (
+        baseline["requirement"]["node_false_inclusions"] - 516
+    )
+    assert phrase_requirement["node_false_exclusions"] == (
+        baseline["requirement"]["node_false_exclusions"] + 79
+    )
+
+    selector_claim = counterfactuals["transformation_selector"][
+        "transformation_claim"
+    ]
+    assert selector_claim["node_false_inclusions"] == 0
+    assert counterfactuals["transformation_selector"]["requirement"] == (
+        baseline["requirement"]
+    )
 
 
 def _campaign_row(pull_request, labels, observation):

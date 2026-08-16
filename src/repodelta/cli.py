@@ -20,7 +20,16 @@ from repodelta.evaluation.core import (
     write_evaluation_markdown,
 )
 from repodelta.evaluation.comparison import write_shadow_comparison_html
+from repodelta.evaluation.focus_attribution import (
+    attribute_structural_focus,
+    load_structural_focus_attribution,
+    replay_focus_counterfactual,
+    write_attribution_json,
+)
 from repodelta.evaluation.structural_correctness import (
+    load_labels as load_structural_correctness_labels,
+    load_observation as load_structural_correctness_observation,
+    load_packet as load_structural_correctness_packet,
     observe_structural_correctness,
     prepare_structural_correctness_label_template,
     prepare_structural_correctness_packet,
@@ -330,6 +339,21 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     compare_structural.add_argument("--output", required=True)
+    compare_attribution = subparsers.add_parser(
+        "compare-structural-attribution",
+        help="Replay a non-authoritative focus-producer counterfactual",
+    )
+    compare_attribution.add_argument("--labeling-packet", required=True)
+    compare_attribution.add_argument("--observation", required=True)
+    compare_attribution.add_argument("--attribution", required=True)
+    compare_attribution.add_argument("--reference-labels", required=True)
+    compare_attribution.add_argument(
+        "--disable-producer",
+        action="append",
+        default=[],
+        help="Producer class to remove from every recorded attribution path",
+    )
+    compare_attribution.add_argument("--output", required=True)
     return parser
 
 
@@ -371,6 +395,29 @@ def main() -> int:
                 args.reference_labels,
                 args.output,
             )
+        except (OSError, ValueError) as exc:
+            print(f"repodelta: error: {exc}", file=sys.stderr)
+            return 2
+        print(output)
+        return 0
+    if args.command == "compare-structural-attribution":
+        try:
+            packet = load_structural_correctness_packet(args.labeling_packet)
+            observation = load_structural_correctness_observation(
+                args.observation
+            )
+            attribution = load_structural_focus_attribution(args.attribution)
+            labels = load_structural_correctness_labels(
+                args.reference_labels, packet
+            )
+            report = replay_focus_counterfactual(
+                packet,
+                observation,
+                attribution,
+                labels,
+                disabled_producer_classes=args.disable_producer,
+            )
+            output = write_attribution_json(report, args.output)
         except (OSError, ValueError) as exc:
             print(f"repodelta: error: {exc}", file=sys.stderr)
             return 2
@@ -479,7 +526,7 @@ def main() -> int:
                     ),
                 )
             ).analyze(analysis_input)
-            structural_correctness_outputs: tuple[Path, Path, Path] | None = None
+            structural_correctness_outputs: tuple[Path, ...] | None = None
             if args.structural_correctness_packet_output:
                 correctness_packet = prepare_structural_correctness_packet(brief)
                 packet_output = write_structural_correctness_artifact(
@@ -499,10 +546,19 @@ def main() -> int:
                     ),
                     f"{args.structural_correctness_packet_output}.labels.template.json",
                 )
+                attribution_output = write_attribution_json(
+                    attribute_structural_focus(
+                        brief,
+                        correctness_packet,
+                        observation,
+                    ),
+                    f"{args.structural_correctness_packet_output}.attribution.json",
+                )
                 structural_correctness_outputs = (
                     packet_output,
                     observation_output,
                     label_template_output,
+                    attribution_output,
                 )
             if args.llm_shadow_replay and not args.llm_shadow:
                 parser.error("--llm-shadow-replay requires --llm-shadow")

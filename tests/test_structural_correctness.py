@@ -5,6 +5,18 @@ from dataclasses import replace
 
 import pytest
 
+from repodelta.evaluation.focus_attribution import (
+    AttributionPath,
+    AttributionStep,
+    FocusAttribution,
+    MembershipAttribution,
+    StructuralFocusAttribution,
+    attribute_structural_focus,
+    load_structural_focus_attribution,
+    replay_focus_counterfactual,
+    summarize_attribution_campaign,
+    write_attribution_json,
+)
 from repodelta.evaluation.structural_correctness import (
     ReferenceFileLabel,
     ReferenceFocusLabel,
@@ -29,10 +41,14 @@ from repodelta.evaluation.structural_correctness import (
 )
 from repodelta.cli import build_parser
 from repodelta.model.contracts import (
+    AssociationReason,
+    CandidateConvergence,
+    ConvergenceGroup,
     ChangedFile,
     EvidenceCatalog,
     EvidenceItem,
     ProjectionCandidateSet,
+    ProjectionCandidateGroup,
     ProjectionDiagnostic,
     ReviewBrief,
     ReviewOverview,
@@ -43,8 +59,16 @@ from repodelta.model.contracts import (
     StructuralCoverage,
     StructuralGraphEdge,
     StructuralGraphNode,
+    StructuralFocusNode,
+    StructuralFocusOverlay,
     StructuralRelationGroup,
+    TransformationStructuralClosure,
+    TransformationStructuralClosureGroup,
+    VerificationEvidenceInspection,
+    VerificationMatrixEntry,
+    VerificationWorkspace,
 )
+from repodelta.routing.relations import projection_relation
 
 
 def _packet() -> StructuralCorrectnessPacket:
@@ -204,6 +228,30 @@ def test_structural_comparison_names_reference_authority_without_breaking_alias(
     assert legacy.reference_labels == "labels.json"
 
 
+def test_structural_attribution_counterfactual_accepts_repeatable_producers() -> None:
+    args = build_parser().parse_args(
+        [
+            "compare-structural-attribution",
+            "--labeling-packet",
+            "packet.json",
+            "--observation",
+            "observation.json",
+            "--attribution",
+            "attribution.json",
+            "--reference-labels",
+            "reference.json",
+            "--disable-producer",
+            "distinctive_phrase",
+            "--disable-producer",
+            "claim_bridge",
+            "--output",
+            "counterfactual.json",
+        ]
+    )
+
+    assert args.disable_producer == ["distinctive_phrase", "claim_bridge"]
+
+
 def test_packet_exposes_bounded_structural_facts_without_projected_answers() -> None:
     file_fact = EvidenceItem(
         id="EV:file",
@@ -339,6 +387,358 @@ def test_comparison_exposes_false_inclusion_role_disagreement_and_focus_error(
     assert "does not change assessment or mergeability" in html
     assert "proposed reference" in html
     assert "complete for admitted direct seeds" in html
+
+
+def test_focus_attribution_replay_removes_only_memberships_dependent_on_producer(
+    tmp_path,
+) -> None:
+    packet = _packet()
+    observation = _observation(packet)
+    attribution = StructuralFocusAttribution(
+        packet.digest,
+        (
+            FocusAttribution(
+                "R1",
+                (
+                    MembershipAttribution(
+                        "node",
+                        "S:a",
+                        "direct",
+                        (
+                            AttributionPath(
+                                (AttributionStep("exact_identifier", ("PR:a",)),)
+                            ),
+                        ),
+                    ),
+                    MembershipAttribution(
+                        "node",
+                        "S:b",
+                        "context",
+                        (
+                            AttributionPath(
+                                (
+                                    AttributionStep(
+                                        "exact_identifier", ("PR:a",)
+                                    ),
+                                    AttributionStep(
+                                        "structural_path", ("PR:path",)
+                                    ),
+                                )
+                            ),
+                        ),
+                    ),
+                    MembershipAttribution(
+                        "node",
+                        "S:c",
+                        "direct",
+                        (
+                            AttributionPath(
+                                (
+                                    AttributionStep(
+                                        "distinctive_phrase", ("PR:c",)
+                                    ),
+                                )
+                            ),
+                        ),
+                    ),
+                    MembershipAttribution(
+                        "exact_relation",
+                        "REL:1",
+                        "relation",
+                        (
+                            AttributionPath(
+                                (
+                                    AttributionStep(
+                                        "exact_identifier", ("PR:a",)
+                                    ),
+                                    AttributionStep(
+                                        "structural_path", ("PR:path",)
+                                    ),
+                                    AttributionStep(
+                                        "exact_relation", ("E:1",)
+                                    ),
+                                )
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+            FocusAttribution("G1", ()),
+        ),
+    )
+
+    baseline = replay_focus_counterfactual(
+        packet, observation, attribution, _labels(packet)
+    )
+    without_phrase = replay_focus_counterfactual(
+        packet,
+        observation,
+        attribution,
+        _labels(packet),
+        disabled_producer_classes=("distinctive_phrase",),
+    )
+    without_paths = replay_focus_counterfactual(
+        packet,
+        observation,
+        attribution,
+        _labels(packet),
+        disabled_producer_classes=("structural_path",),
+    )
+
+    requirement = next(
+        item for item in baseline.outcomes if item.subject_kind == "requirement"
+    )
+    requirement_without_phrase = next(
+        item
+        for item in without_phrase.outcomes
+        if item.subject_kind == "requirement"
+    )
+    requirement_without_paths = next(
+        item
+        for item in without_paths.outcomes
+        if item.subject_kind == "requirement"
+    )
+    assert requirement.node_false_inclusions == 1
+    assert requirement_without_phrase.node_false_inclusions == 0
+    assert requirement_without_phrase.node_false_exclusions == 0
+    assert requirement_without_paths.node_false_exclusions == 1
+    assert requirement_without_paths.relation_false_exclusions == 1
+
+    path = write_attribution_json(attribution, tmp_path / "attribution.json")
+    assert load_structural_focus_attribution(path) == attribution
+
+    campaign = summarize_attribution_campaign(
+        ((packet, observation, attribution, _labels(packet)),)
+    )
+    assert campaign.baseline == baseline.outcomes
+    assert {item.producer_class for item in campaign.counterfactuals} == {
+        "distinctive_phrase",
+        "exact_identifier",
+        "exact_relation",
+        "structural_path",
+    }
+
+
+def test_focus_attribution_requires_unsupported_membership_to_be_explicit() -> None:
+    with pytest.raises(ValueError, match="supported or explicitly unsupported"):
+        MembershipAttribution("node", "S:a", "direct")
+
+    unsupported = MembershipAttribution(
+        "node",
+        "S:a",
+        "direct",
+        unsupported_reason="No supported producer path was preserved.",
+    )
+    assert not unsupported.paths
+
+
+def test_focus_attribution_reads_selected_requirement_anchor_without_redeciding() -> None:
+    packet = _packet()
+    anchor_fact = EvidenceItem(
+        id="EV:anchor",
+        summary="run",
+        kind="symbol",
+        classification="code",
+        profile="production",
+        revision_side="head",
+        operation="modified",
+        role="changed_anchor",
+        changed=True,
+        metadata={
+            "symbol_id": "provider:a",
+            "review_symbol_id": "review:a",
+            "path": "src/a.py",
+            "qualified_name": "run",
+            "symbol_kind": "function",
+        },
+    )
+    relation = projection_relation(
+        "R1",
+        "changed_anchor",
+        "evidence",
+        anchor_fact.id,
+        "exact_identifier",
+        (AssociationReason("exact_identifier", "Exact symbol identity."),),
+    )
+    overlay = StructuralFocusOverlay(
+        nodes=(StructuralFocusNode("S:a", "changed_anchor", (relation.id,)),)
+    )
+    projection = ReviewProjection(
+        review_graph=ReviewStructuralGraph(
+            nodes=(
+                StructuralGraphNode(
+                    "S:a", "review:a", "modified", (anchor_fact.id,), anchor_fact.id
+                ),
+            )
+        ),
+        verification_workspace=VerificationWorkspace(
+            matrix=(
+                VerificationMatrixEntry(
+                    "VM:R1",
+                    "R1",
+                    "requirement",
+                    "Keep the path continuous.",
+                    "github_issue",
+                    "not_assessed",
+                    "VEI:R1",
+                ),
+                VerificationMatrixEntry(
+                    "VM:G1",
+                    "G1",
+                    "guardrail",
+                    "Do not change c.",
+                    "github_issue",
+                    "not_assessed",
+                    "VEI:G1",
+                ),
+            ),
+            inspections=(
+                VerificationEvidenceInspection(
+                    "VEI:R1", "R1", structural_overlay=overlay
+                ),
+                VerificationEvidenceInspection("VEI:G1", "G1"),
+            ),
+        ),
+    )
+    candidates = ProjectionCandidateSet(
+        relations=(relation,),
+        groups=(
+            ProjectionCandidateGroup("R1", "generic", (relation.id,)),
+            ProjectionCandidateGroup("G1", "guardrail"),
+        ),
+    )
+    convergence = CandidateConvergence(
+        groups=(
+            ConvergenceGroup("R1", (relation.id,)),
+            ConvergenceGroup("G1"),
+        )
+    )
+    brief = ReviewBrief(
+        packet=ReviewSourcePacket(
+            repository="repodelta/repodelta",
+            pull_request=1,
+            title="Inspect the change",
+            source_records=(),
+        ),
+        intent=ReviewStatement("O1", "Inspect the change."),
+        requirements=(),
+        evidence_catalog=EvidenceCatalog((anchor_fact,)),
+        projection_candidates=candidates,
+        candidate_convergence=convergence,
+        projection=projection,
+    )
+    observation = StructuralCorrectnessObservation(
+        packet.digest,
+        (),
+        (
+            ObservedFocus(
+                "R1", (), (), (), "projected", ("S:a",), (), ()
+            ),
+            ObservedFocus("G1", (), (), (), "unavailable"),
+        ),
+    )
+
+    attribution = attribute_structural_focus(brief, packet, observation)
+
+    membership = attribution.focuses[0].memberships[0]
+    assert membership.member_id == "S:a"
+    assert membership.paths[0].steps == (
+        AttributionStep("exact_identifier", (relation.id,)),
+    )
+
+
+def test_focus_attribution_keeps_transformation_selector_authority_distinct() -> None:
+    packet = replace(
+        _packet(),
+        subjects=(StructuralSubject("T1", "change", "Change run()."),),
+    )
+    anchor_fact = EvidenceItem(
+        id="EV:transformation-anchor",
+        summary="run",
+        kind="symbol",
+        classification="code",
+        profile="production",
+        revision_side="head",
+        operation="modified",
+        role="changed_anchor",
+        changed=True,
+        metadata={
+            "symbol_id": "provider:a",
+            "review_symbol_id": "review:a",
+            "path": "src/a.py",
+            "qualified_name": "run",
+            "symbol_kind": "function",
+        },
+    )
+    overlay = StructuralFocusOverlay(
+        nodes=(StructuralFocusNode("S:a", "changed_anchor"),)
+    )
+    brief = ReviewBrief(
+        packet=ReviewSourcePacket(
+            repository="repodelta/repodelta",
+            pull_request=1,
+            title="Inspect the change",
+            source_records=(),
+        ),
+        intent=ReviewStatement("O1", "Inspect the change."),
+        requirements=(),
+        evidence_catalog=EvidenceCatalog((anchor_fact,)),
+        transformation_structural_closure=TransformationStructuralClosure(
+            groups=(
+                TransformationStructuralClosureGroup(
+                    "T1",
+                    seed_evidence_ids=(anchor_fact.id,),
+                    review_symbol_ids=("review:a",),
+                ),
+            )
+        ),
+        projection=ReviewProjection(
+            review_graph=ReviewStructuralGraph(
+                nodes=(
+                    StructuralGraphNode(
+                        "S:a",
+                        "review:a",
+                        "modified",
+                        (anchor_fact.id,),
+                        anchor_fact.id,
+                    ),
+                )
+            ),
+            verification_workspace=VerificationWorkspace(
+                matrix=(
+                    VerificationMatrixEntry(
+                        "VM:T1",
+                        "T1",
+                        "change",
+                        "Change run().",
+                        "pr_description",
+                        "not_assessed",
+                        "VEI:T1",
+                    ),
+                ),
+                inspections=(
+                    VerificationEvidenceInspection(
+                        "VEI:T1", "T1", structural_overlay=overlay
+                    ),
+                ),
+            ),
+        ),
+    )
+    observation = StructuralCorrectnessObservation(
+        packet.digest,
+        (),
+        (
+            ObservedFocus(
+                "T1", (), (), (), "projected", ("S:a",), (), ()
+            ),
+        ),
+    )
+
+    attribution = attribute_structural_focus(brief, packet, observation)
+
+    assert attribution.focuses[0].memberships[0].paths[0].steps == (
+        AttributionStep("transformation_selector", (anchor_fact.id,)),
+    )
 
 
 def test_independent_verification_binds_the_exact_proposed_decision() -> None:

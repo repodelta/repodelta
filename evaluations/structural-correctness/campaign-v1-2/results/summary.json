@@ -1,0 +1,502 @@
+{
+  "baseline": [
+    {
+      "focus_count": 3,
+      "node_false_exclusions": 14,
+      "node_false_inclusions": 0,
+      "node_role_disagreements": 0,
+      "relation_false_exclusions": 4,
+      "relation_false_inclusions": 0,
+      "subject_kind": "completion_condition",
+      "unresolved_count": 0,
+      "unsupported_membership_count": 0
+    },
+    {
+      "focus_count": 39,
+      "node_false_exclusions": 37,
+      "node_false_inclusions": 220,
+      "node_role_disagreements": 1,
+      "relation_false_exclusions": 7,
+      "relation_false_inclusions": 133,
+      "subject_kind": "guardrail",
+      "unresolved_count": 0,
+      "unsupported_membership_count": 0
+    },
+    {
+      "focus_count": 37,
+      "node_false_exclusions": 63,
+      "node_false_inclusions": 706,
+      "node_role_disagreements": 4,
+      "relation_false_exclusions": 18,
+      "relation_false_inclusions": 414,
+      "subject_kind": "requirement",
+      "unresolved_count": 1,
+      "unsupported_membership_count": 0
+    },
+    {
+      "focus_count": 34,
+      "node_false_exclusions": 62,
+      "node_false_inclusions": 527,
+      "node_role_disagreements": 9,
+      "relation_false_exclusions": 20,
+      "relation_false_inclusions": 137,
+      "subject_kind": "transformation_claim",
+      "unresolved_count": 2,
+      "unsupported_membership_count": 0
+    }
+  ],
+  "counterfactuals": [
+    {
+      "outcomes": [
+        {
+          "focus_count": 3,
+          "node_false_exclusions": 14,
+          "node_false_inclusions": 0,
+          "node_role_disagreements": 0,
+          "relation_false_exclusions": 4,
+          "relation_false_inclusions": 0,
+          "subject_kind": "completion_condition",
+          "unresolved_count": 0,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 39,
+          "node_false_exclusions": 49,
+          "node_false_inclusions": 37,
+          "node_role_disagreements": 1,
+          "relation_false_exclusions": 10,
+          "relation_false_inclusions": 28,
+          "subject_kind": "guardrail",
+          "unresolved_count": 0,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 37,
+          "node_false_exclusions": 66,
+          "node_false_inclusions": 652,
+          "node_role_disagreements": 3,
+          "relation_false_exclusions": 18,
+          "relation_false_inclusions": 405,
+          "subject_kind": "requirement",
+          "unresolved_count": 1,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 34,
+          "node_false_exclusions": 62,
+          "node_false_inclusions": 527,
+          "node_role_disagreements": 9,
+          "relation_false_exclusions": 20,
+          "relation_false_inclusions": 137,
+          "subject_kind": "transformation_claim",
+          "unresolved_count": 2,
+          "unsupported_membership_count": 0
+        }
+      ],
+      "producer_class": "claim_bridge"
+    },
+    {
+      "outcomes": [
+        {
+          "focus_count": 3,
+          "node_false_exclusions": 14,
+          "node_false_inclusions": 0,
+          "node_role_disagreements": 0,
+          "relation_false_exclusions": 4,
+          "relation_false_inclusions": 0,
+          "subject_kind": "completion_condition",
+          "unresolved_count": 0,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 39,
+          "node_false_exclusions": 37,
+          "node_false_inclusions": 220,
+          "node_role_disagreements": 1,
+          "relation_false_exclusions": 7,
+          "relation_false_inclusions": 133,
+          "subject_kind": "guardrail",
+          "unresolved_count": 0,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 37,
+          "node_false_exclusions": 142,
+          "node_false_inclusions": 190,
+          "node_role_disagreements": 1,
+          "relation_false_exclusions": 33,
+          "relation_false_inclusions": 153,
+          "subject_kind": "requirement",
+          "unresolved_count": 1,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 34,
+          "node_false_exclusions": 62,
+          "node_false_inclusions": 527,
+          "node_role_disagreements": 9,
+          "relation_false_exclusions": 20,
+          "relation_false_inclusions": 137,
+          "subject_kind": "transformation_claim",
+          "unresolved_count": 2,
+          "unsupported_membership_count": 0
+        }
+      ],
+      "producer_class": "distinctive_phrase"
+    },
+    {
+      "outcomes": [
+        {
+          "focus_count": 3,
+          "node_false_exclusions": 14,
+          "node_false_inclusions": 0,
+          "node_role_disagreements": 0,
+          "relation_false_exclusions": 4,
+          "relation_false_inclusions": 0,
+          "subject_kind": "completion_condition",
+          "unresolved_count": 0,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 39,
+          "node_false_exclusions": 39,
+          "node_false_inclusions": 187,
+          "node_role_disagreements": 0,
+          "relation_false_exclusions": 8,
+          "relation_false_inclusions": 114,
+          "subject_kind": "guardrail",
+          "unresolved_count": 0,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 37,
+          "node_false_exclusions": 67,
+          "node_false_inclusions": 668,
+          "node_role_disagreements": 4,
+          "relation_false_exclusions": 18,
+          "relation_false_inclusions": 406,
+          "subject_kind": "requirement",
+          "unresolved_count": 1,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 34,
+          "node_false_exclusions": 62,
+          "node_false_inclusions": 527,
+          "node_role_disagreements": 9,
+          "relation_false_exclusions": 20,
+          "relation_false_inclusions": 137,
+          "subject_kind": "transformation_claim",
+          "unresolved_count": 2,
+          "unsupported_membership_count": 0
+        }
+      ],
+      "producer_class": "exact_identifier"
+    },
+    {
+      "outcomes": [
+        {
+          "focus_count": 3,
+          "node_false_exclusions": 14,
+          "node_false_inclusions": 0,
+          "node_role_disagreements": 0,
+          "relation_false_exclusions": 4,
+          "relation_false_inclusions": 0,
+          "subject_kind": "completion_condition",
+          "unresolved_count": 0,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 39,
+          "node_false_exclusions": 37,
+          "node_false_inclusions": 220,
+          "node_role_disagreements": 1,
+          "relation_false_exclusions": 13,
+          "relation_false_inclusions": 0,
+          "subject_kind": "guardrail",
+          "unresolved_count": 0,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 37,
+          "node_false_exclusions": 63,
+          "node_false_inclusions": 706,
+          "node_role_disagreements": 4,
+          "relation_false_exclusions": 59,
+          "relation_false_inclusions": 0,
+          "subject_kind": "requirement",
+          "unresolved_count": 1,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 34,
+          "node_false_exclusions": 62,
+          "node_false_inclusions": 527,
+          "node_role_disagreements": 9,
+          "relation_false_exclusions": 26,
+          "relation_false_inclusions": 0,
+          "subject_kind": "transformation_claim",
+          "unresolved_count": 2,
+          "unsupported_membership_count": 0
+        }
+      ],
+      "producer_class": "exact_relation"
+    },
+    {
+      "outcomes": [
+        {
+          "focus_count": 3,
+          "node_false_exclusions": 14,
+          "node_false_inclusions": 0,
+          "node_role_disagreements": 0,
+          "relation_false_exclusions": 4,
+          "relation_false_inclusions": 0,
+          "subject_kind": "completion_condition",
+          "unresolved_count": 0,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 39,
+          "node_false_exclusions": 37,
+          "node_false_inclusions": 220,
+          "node_role_disagreements": 1,
+          "relation_false_exclusions": 7,
+          "relation_false_inclusions": 133,
+          "subject_kind": "guardrail",
+          "unresolved_count": 0,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 37,
+          "node_false_exclusions": 63,
+          "node_false_inclusions": 706,
+          "node_role_disagreements": 4,
+          "relation_false_exclusions": 18,
+          "relation_false_inclusions": 414,
+          "subject_kind": "requirement",
+          "unresolved_count": 1,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 34,
+          "node_false_exclusions": 62,
+          "node_false_inclusions": 525,
+          "node_role_disagreements": 9,
+          "relation_false_exclusions": 20,
+          "relation_false_inclusions": 137,
+          "subject_kind": "transformation_claim",
+          "unresolved_count": 2,
+          "unsupported_membership_count": 0
+        }
+      ],
+      "producer_class": "ownership_ancestor"
+    },
+    {
+      "outcomes": [
+        {
+          "focus_count": 3,
+          "node_false_exclusions": 14,
+          "node_false_inclusions": 0,
+          "node_role_disagreements": 0,
+          "relation_false_exclusions": 4,
+          "relation_false_inclusions": 0,
+          "subject_kind": "completion_condition",
+          "unresolved_count": 0,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 39,
+          "node_false_exclusions": 37,
+          "node_false_inclusions": 216,
+          "node_role_disagreements": 1,
+          "relation_false_exclusions": 7,
+          "relation_false_inclusions": 133,
+          "subject_kind": "guardrail",
+          "unresolved_count": 0,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 37,
+          "node_false_exclusions": 63,
+          "node_false_inclusions": 687,
+          "node_role_disagreements": 4,
+          "relation_false_exclusions": 18,
+          "relation_false_inclusions": 414,
+          "subject_kind": "requirement",
+          "unresolved_count": 1,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 34,
+          "node_false_exclusions": 62,
+          "node_false_inclusions": 511,
+          "node_role_disagreements": 9,
+          "relation_false_exclusions": 20,
+          "relation_false_inclusions": 137,
+          "subject_kind": "transformation_claim",
+          "unresolved_count": 2,
+          "unsupported_membership_count": 0
+        }
+      ],
+      "producer_class": "placement_ancestor"
+    },
+    {
+      "outcomes": [
+        {
+          "focus_count": 3,
+          "node_false_exclusions": 14,
+          "node_false_inclusions": 0,
+          "node_role_disagreements": 0,
+          "relation_false_exclusions": 4,
+          "relation_false_inclusions": 0,
+          "subject_kind": "completion_condition",
+          "unresolved_count": 0,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 39,
+          "node_false_exclusions": 37,
+          "node_false_inclusions": 220,
+          "node_role_disagreements": 1,
+          "relation_false_exclusions": 7,
+          "relation_false_inclusions": 133,
+          "subject_kind": "guardrail",
+          "unresolved_count": 0,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 37,
+          "node_false_exclusions": 63,
+          "node_false_inclusions": 706,
+          "node_role_disagreements": 4,
+          "relation_false_exclusions": 18,
+          "relation_false_inclusions": 414,
+          "subject_kind": "requirement",
+          "unresolved_count": 1,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 34,
+          "node_false_exclusions": 62,
+          "node_false_inclusions": 527,
+          "node_role_disagreements": 9,
+          "relation_false_exclusions": 20,
+          "relation_false_inclusions": 137,
+          "subject_kind": "transformation_claim",
+          "unresolved_count": 2,
+          "unsupported_membership_count": 0
+        }
+      ],
+      "producer_class": "relation_endpoint"
+    },
+    {
+      "outcomes": [
+        {
+          "focus_count": 3,
+          "node_false_exclusions": 14,
+          "node_false_inclusions": 0,
+          "node_role_disagreements": 0,
+          "relation_false_exclusions": 4,
+          "relation_false_inclusions": 0,
+          "subject_kind": "completion_condition",
+          "unresolved_count": 0,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 39,
+          "node_false_exclusions": 38,
+          "node_false_inclusions": 103,
+          "node_role_disagreements": 0,
+          "relation_false_exclusions": 7,
+          "relation_false_inclusions": 130,
+          "subject_kind": "guardrail",
+          "unresolved_count": 0,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 37,
+          "node_false_exclusions": 65,
+          "node_false_inclusions": 517,
+          "node_role_disagreements": 2,
+          "relation_false_exclusions": 19,
+          "relation_false_inclusions": 398,
+          "subject_kind": "requirement",
+          "unresolved_count": 1,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 34,
+          "node_false_exclusions": 69,
+          "node_false_inclusions": 338,
+          "node_role_disagreements": 2,
+          "relation_false_exclusions": 20,
+          "relation_false_inclusions": 135,
+          "subject_kind": "transformation_claim",
+          "unresolved_count": 2,
+          "unsupported_membership_count": 0
+        }
+      ],
+      "producer_class": "structural_path"
+    },
+    {
+      "outcomes": [
+        {
+          "focus_count": 3,
+          "node_false_exclusions": 14,
+          "node_false_inclusions": 0,
+          "node_role_disagreements": 0,
+          "relation_false_exclusions": 4,
+          "relation_false_inclusions": 0,
+          "subject_kind": "completion_condition",
+          "unresolved_count": 0,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 39,
+          "node_false_exclusions": 37,
+          "node_false_inclusions": 220,
+          "node_role_disagreements": 1,
+          "relation_false_exclusions": 7,
+          "relation_false_inclusions": 133,
+          "subject_kind": "guardrail",
+          "unresolved_count": 0,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 37,
+          "node_false_exclusions": 63,
+          "node_false_inclusions": 706,
+          "node_role_disagreements": 4,
+          "relation_false_exclusions": 18,
+          "relation_false_inclusions": 414,
+          "subject_kind": "requirement",
+          "unresolved_count": 1,
+          "unsupported_membership_count": 0
+        },
+        {
+          "focus_count": 34,
+          "node_false_exclusions": 91,
+          "node_false_inclusions": 0,
+          "node_role_disagreements": 0,
+          "relation_false_exclusions": 26,
+          "relation_false_inclusions": 0,
+          "subject_kind": "transformation_claim",
+          "unresolved_count": 2,
+          "unsupported_membership_count": 0
+        }
+      ],
+      "producer_class": "transformation_selector"
+    }
+  ],
+  "packet_digests": [
+    "d0f86cce67cc01b6a483d5343949947bc03e5479f252d4b8b5f3bd8a401196bf",
+    "d24193cd8fa4982a526d167a4bb9a17de93438f910dffe7a1ceabdcbbd4bedc3",
+    "c439f75d8e6d8d03cc82efad6975fb4ce112ada699871ef187bf2a2a574504c4",
+    "7fbfeab34c4b6cb778a83aac682a39d391db3d6ea5cc9c614b6bd107edd2cdf6",
+    "209df0d0b0fd43874530b491e0912f32d13232d5b97b507035b1a1471807b534",
+    "56a6084269535c7d3d7cd9a69669363625f2194a2fdac2a159985562b15a763b",
+    "d71944788aa7fbe75fd43b3b7b1820bb9b170b7beb3421fc48aedfc6a0c6587f",
+    "09b07291b2a6a2c4f74cc57ed9b8b99c347eecc48bb3a93eeb08dab9fd73606f"
+  ],
+  "schema_version": "structural_focus_attribution_campaign.v1"
+}

@@ -1,0 +1,14 @@
+{
+  "schema_version": "structural_focus_attribution_campaign_manifest.v1",
+  "campaign_id": "structural-correctness-v1.2",
+  "repository": "repodelta/repodelta",
+  "source_campaign": "../campaign-v1-1",
+  "contract": {
+    "production_output_unchanged": true,
+    "packet_and_observation_digest_equality_required": true,
+    "reference_isolated_from_attribution_derivation": true,
+    "unsupported_production_paths_fail_closed": true,
+    "counterfactual_replay_only_removes_recorded_producer_paths": true
+  },
+  "pull_requests": [208, 238, 245, 250, 235, 262, 267, 240]
+}

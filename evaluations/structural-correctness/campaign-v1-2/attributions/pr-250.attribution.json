@@ -1,0 +1,5549 @@
+{
+  "focuses": [
+    {
+      "memberships": [
+        {
+          "member_id": "SN:032ab6b952e529651125",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:3051fe6cbf8d42752b4d"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:12605e6c7ab0f11dae39"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:071df7100d172577755c",
+                    "PR:9ae6160c6dd579a223fb"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:1937c9efe9c494398507",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:1eb7f6260cca8ae7f6ae"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:da8ac39a306ff879fa62"
+                  ]
+                },
+                {
+                  "producer_class": "ownership_ancestor",
+                  "source_ids": [
+                    "E:structural_ownership_change:7eccc10ba60b829c86ce"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:da8ac39a306ff879fa62"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:14e6b6374ceb203f42e0"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:12605e6c7ab0f11dae39",
+                    "PR:4cfd0ac33a9a342f12fb",
+                    "PR:c53789a1e8f91d374217"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:2487bf6945e9548edb66",
+                    "E:structural_path:8aadbb94cb27c7709bf9",
+                    "E:structural_path:bd2642463857bedbf8c3",
+                    "PR:42796b2b2010c898d765",
+                    "PR:9e55d7150da24fcb1dc6",
+                    "PR:c9471d001042681e8e83"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:22b4b08216bbe93b7f22",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:280b8ddc1cad9466f3f8"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:36478e3148f831a895d7",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:3bd7476003c2396c1380"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:6e814e0bef3181d9dc6d",
+                    "PR:e0b56e7fdb8ec4f89e12"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:af9da4f2a228d3943158"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:89d55a116ef53f02847c"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:3a88d5c9bb545acc56a7",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:23e03af54c6284752ee9"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:41b644f4fe321ec33b0c",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:cf41bdb989befb583a9c"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:525c7ab799416c858f39",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:191a907e99d87828ca92",
+                    "PR:7bc9962b520e8de88572"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:1cf5fb39c8f80af8461e",
+                    "E:structural_path:203e6a05e35de70e6686",
+                    "E:structural_path:87ac0722abee402553cc",
+                    "E:structural_path:dd7a3eff5b8d1b94ce50",
+                    "PR:233b45386c03db54d9f9",
+                    "PR:457dac681fcd6557bb63",
+                    "PR:47cc8407b795f1f91849",
+                    "PR:8a77f206702b8758e2ae"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:abfb7216bb8e8422e4df"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:5b6398205e515fdd43b6",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:1eb7f6260cca8ae7f6ae",
+                    "PR:7bc9962b520e8de88572",
+                    "PR:cddf800b13418e918290"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:33fc34318112db68a8a7",
+                    "E:structural_path:bd2642463857bedbf8c3",
+                    "E:structural_path:e66bd7d236518b086179",
+                    "E:structural_path:f419cdb4a0fde29c4861",
+                    "PR:8fb0e849c0c9053a3c32",
+                    "PR:c1ce45aa314c48240896",
+                    "PR:c9471d001042681e8e83",
+                    "PR:dcf8b0451bcf49273e72"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:4cfd0ac33a9a342f12fb"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:5dfd8aa1b6c788319e19",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:7bc9962b520e8de88572"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:fbff251c9f70123a06d8",
+                    "PR:b0c1cd964e5c148f2546"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:5167e381a7921774a7f3"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:6212f4bd30bf768b8022",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:da8ac39a306ff879fa62"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:6775041f0d09829f2c84",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:dc33002d797fe5caea9f"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:685d462624914d88ccee",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:1eb7f6260cca8ae7f6ae",
+                    "PR:3051fe6cbf8d42752b4d",
+                    "PR:7bc9962b520e8de88572"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:071df7100d172577755c",
+                    "E:structural_path:2487bf6945e9548edb66",
+                    "E:structural_path:50be8c3fc3677e3f8441",
+                    "PR:9ae6160c6dd579a223fb",
+                    "PR:9e55d7150da24fcb1dc6",
+                    "PR:a420007adbd0166878b4"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:12605e6c7ab0f11dae39"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:6ce4c84ddcc7b8240e18",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:3bd7476003c2396c1380"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:6e814e0bef3181d9dc6d",
+                    "PR:e0b56e7fdb8ec4f89e12"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:af9da4f2a228d3943158"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:7446ec41985d80f072b8",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:72f7b3ad4a6956118451"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:79105a3ff714c5098f6f",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:7bc9962b520e8de88572"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:12605e6c7ab0f11dae39",
+                    "PR:4cfd0ac33a9a342f12fb",
+                    "PR:5167e381a7921774a7f3",
+                    "PR:abfb7216bb8e8422e4df"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:203e6a05e35de70e6686",
+                    "E:structural_path:50be8c3fc3677e3f8441",
+                    "E:structural_path:87ac0722abee402553cc",
+                    "E:structural_path:e66bd7d236518b086179",
+                    "E:structural_path:f419cdb4a0fde29c4861",
+                    "E:structural_path:fbff251c9f70123a06d8",
+                    "PR:47cc8407b795f1f91849",
+                    "PR:8a77f206702b8758e2ae",
+                    "PR:8fb0e849c0c9053a3c32",
+                    "PR:a420007adbd0166878b4",
+                    "PR:b0c1cd964e5c148f2546",
+                    "PR:c1ce45aa314c48240896"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:8acb6942a315534f2a82",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:cddf800b13418e918290"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:4cfd0ac33a9a342f12fb"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:33fc34318112db68a8a7",
+                    "PR:dcf8b0451bcf49273e72"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:98c5976f8bf9d630a3bf",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:3bd7476003c2396c1380"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:a00e9b6fa7b6de79835e",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:191a907e99d87828ca92"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:abfb7216bb8e8422e4df"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:1cf5fb39c8f80af8461e",
+                    "E:structural_path:dd7a3eff5b8d1b94ce50",
+                    "PR:233b45386c03db54d9f9",
+                    "PR:457dac681fcd6557bb63"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:a529a9310105d8730eda",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:3bd7476003c2396c1380"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:6e814e0bef3181d9dc6d",
+                    "PR:e0b56e7fdb8ec4f89e12"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:ca20b7abbf32ab7ff4ae",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:7bc9962b520e8de88572"
+                  ]
+                },
+                {
+                  "producer_class": "ownership_ancestor",
+                  "source_ids": [
+                    "E:structural_ownership_change:2d05eec5de85e1fa75a0"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:7bc9962b520e8de88572"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:5f74474f5d5774cfb01b"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:12605e6c7ab0f11dae39",
+                    "PR:3bd7476003c2396c1380",
+                    "PR:4cfd0ac33a9a342f12fb",
+                    "PR:5167e381a7921774a7f3",
+                    "PR:9f8e716c43e0948c81a5",
+                    "PR:abfb7216bb8e8422e4df",
+                    "PR:c53789a1e8f91d374217",
+                    "PR:dc33002d797fe5caea9f"
+                  ]
+                },
+                {
+                  "producer_class": "ownership_ancestor",
+                  "source_ids": [
+                    "E:structural_ownership_change:0d292295d7ef0da21df5",
+                    "E:structural_ownership_change:16e739cf7d02a396dcf0",
+                    "E:structural_ownership_change:5275e526de38593f0f3c",
+                    "E:structural_ownership_change:9832013a81df801301ea",
+                    "E:structural_ownership_change:bdc10b8cac6abe98f7f5",
+                    "E:structural_ownership_change:cef25cc714838a86c7c4",
+                    "E:structural_ownership_change:d05fb12a139fcd14c39b",
+                    "E:structural_ownership_change:d6ed54908a363d9f5fe0"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:12605e6c7ab0f11dae39",
+                    "PR:3bd7476003c2396c1380",
+                    "PR:4cfd0ac33a9a342f12fb",
+                    "PR:5167e381a7921774a7f3",
+                    "PR:9f8e716c43e0948c81a5",
+                    "PR:abfb7216bb8e8422e4df",
+                    "PR:c53789a1e8f91d374217",
+                    "PR:dc33002d797fe5caea9f"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:1b498b9f2c446c9ec778",
+                    "SP:2d70d114a4db1ed4d71e",
+                    "SP:435b2255ea9fe62f5139",
+                    "SP:6d47c82b0cfab83eab1b",
+                    "SP:710dae3d1092b7883f69",
+                    "SP:86270dc57244c3956ef9",
+                    "SP:8ed95613b7accc7f9f9a",
+                    "SP:9bbd7c8671ae4561df4d"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:cceb9d04772d47435ed3",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:23e03af54c6284752ee9"
+                  ]
+                },
+                {
+                  "producer_class": "ownership_ancestor",
+                  "source_ids": [
+                    "E:structural_ownership_change:92740e3db5ad19041816"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:23e03af54c6284752ee9"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:8637ac4d207be401cdff"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:f84131015a58b3fa3570",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:9f8e716c43e0948c81a5"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:fc5a6e76da5400a44a62",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:1eb7f6260cca8ae7f6ae"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:8aadbb94cb27c7709bf9",
+                    "PR:42796b2b2010c898d765"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:c53789a1e8f91d374217"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:0b8b971f495a249f2aa0",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:1eb7f6260cca8ae7f6ae",
+                    "PR:3051fe6cbf8d42752b4d",
+                    "PR:7bc9962b520e8de88572"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:071df7100d172577755c",
+                    "E:structural_path:2487bf6945e9548edb66",
+                    "E:structural_path:50be8c3fc3677e3f8441",
+                    "E:structural_path:8aadbb94cb27c7709bf9",
+                    "PR:42796b2b2010c898d765",
+                    "PR:9ae6160c6dd579a223fb",
+                    "PR:9e55d7150da24fcb1dc6",
+                    "PR:a420007adbd0166878b4"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:a134149fc4c2e5dfa9bf"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:12605e6c7ab0f11dae39",
+                    "PR:c53789a1e8f91d374217"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:a134149fc4c2e5dfa9bf"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:2a1e469d1412ac7c6d5a",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:1eb7f6260cca8ae7f6ae",
+                    "PR:7bc9962b520e8de88572",
+                    "PR:cddf800b13418e918290"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:33fc34318112db68a8a7",
+                    "E:structural_path:bd2642463857bedbf8c3",
+                    "E:structural_path:e66bd7d236518b086179",
+                    "E:structural_path:f419cdb4a0fde29c4861",
+                    "PR:8fb0e849c0c9053a3c32",
+                    "PR:c1ce45aa314c48240896",
+                    "PR:c9471d001042681e8e83",
+                    "PR:dcf8b0451bcf49273e72"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:7102fa6461f22f062664"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:4cfd0ac33a9a342f12fb",
+                    "PR:dc33002d797fe5caea9f"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:7102fa6461f22f062664"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:3366debacc03249c45ad",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:7bc9962b520e8de88572"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:c5e71af7bb4d89f9273e"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:12605e6c7ab0f11dae39"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:c5e71af7bb4d89f9273e"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:3a85cba4c8680b276b0b",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:7bc9962b520e8de88572"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:bf40b5b3fc81531c04e3"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:4cfd0ac33a9a342f12fb"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:bf40b5b3fc81531c04e3"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:42071f92c076f57f23d9",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:1eb7f6260cca8ae7f6ae",
+                    "PR:3051fe6cbf8d42752b4d",
+                    "PR:7bc9962b520e8de88572"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:071df7100d172577755c",
+                    "E:structural_path:2487bf6945e9548edb66",
+                    "E:structural_path:50be8c3fc3677e3f8441",
+                    "PR:9ae6160c6dd579a223fb",
+                    "PR:9e55d7150da24fcb1dc6",
+                    "PR:a420007adbd0166878b4"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:cdd29b4340dd602ed532"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:12605e6c7ab0f11dae39",
+                    "PR:9f8e716c43e0948c81a5"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:cdd29b4340dd602ed532"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:5f14b1bb57324de1837f",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:1eb7f6260cca8ae7f6ae"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:34a788331de1873de5e5",
+                    "E:structural_relation_change:614912763275dc659d18",
+                    "E:structural_relation_change:fb19077a1dddfa15bbb3"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:12605e6c7ab0f11dae39",
+                    "PR:4cfd0ac33a9a342f12fb",
+                    "PR:c53789a1e8f91d374217"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:34a788331de1873de5e5",
+                    "E:structural_relation_change:614912763275dc659d18",
+                    "E:structural_relation_change:fb19077a1dddfa15bbb3"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:64e4c80e005eca0ed79c",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:7bc9962b520e8de88572"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:fbff251c9f70123a06d8",
+                    "PR:b0c1cd964e5c148f2546"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:ff975c3241c9fb581826"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:5167e381a7921774a7f3",
+                    "PR:9f8e716c43e0948c81a5"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:ff975c3241c9fb581826"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:9b9a57b9493332ea0dd5",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:191a907e99d87828ca92",
+                    "PR:7bc9962b520e8de88572"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:1cf5fb39c8f80af8461e",
+                    "E:structural_path:203e6a05e35de70e6686",
+                    "E:structural_path:87ac0722abee402553cc",
+                    "E:structural_path:dd7a3eff5b8d1b94ce50",
+                    "PR:233b45386c03db54d9f9",
+                    "PR:457dac681fcd6557bb63",
+                    "PR:47cc8407b795f1f91849",
+                    "PR:8a77f206702b8758e2ae"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:792d9801874c635cbd65"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:abfb7216bb8e8422e4df",
+                    "PR:dc33002d797fe5caea9f"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:792d9801874c635cbd65"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:c3a4e6265b53fc30f16f",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:191a907e99d87828ca92",
+                    "PR:3051fe6cbf8d42752b4d",
+                    "PR:cddf800b13418e918290"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:6e86a6a2e3557a3aa063",
+                    "E:structural_relation_change:714656fa89ee883d0176",
+                    "E:structural_relation_change:d37233d7d2d91f8445e0"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:12605e6c7ab0f11dae39",
+                    "PR:4cfd0ac33a9a342f12fb",
+                    "PR:5167e381a7921774a7f3",
+                    "PR:abfb7216bb8e8422e4df",
+                    "PR:da8ac39a306ff879fa62"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:50b38e2e7a2064321e60",
+                    "E:structural_relation_change:6e86a6a2e3557a3aa063",
+                    "E:structural_relation_change:714656fa89ee883d0176",
+                    "E:structural_relation_change:d37233d7d2d91f8445e0"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:ce3755c50c126788dc20",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:1eb7f6260cca8ae7f6ae",
+                    "PR:7bc9962b520e8de88572",
+                    "PR:cddf800b13418e918290"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:33fc34318112db68a8a7",
+                    "E:structural_path:bd2642463857bedbf8c3",
+                    "E:structural_path:e66bd7d236518b086179",
+                    "E:structural_path:f419cdb4a0fde29c4861",
+                    "PR:8fb0e849c0c9053a3c32",
+                    "PR:c1ce45aa314c48240896",
+                    "PR:c9471d001042681e8e83",
+                    "PR:dcf8b0451bcf49273e72"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:299aad582eeb597b89ff"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:3bd7476003c2396c1380",
+                    "PR:4cfd0ac33a9a342f12fb"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:299aad582eeb597b89ff"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:ec86eba01de16c112cdf",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:7bc9962b520e8de88572"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:3a3b5cf84ce2126d516d"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:abfb7216bb8e8422e4df"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:3a3b5cf84ce2126d516d"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:ede19438f3e11c1a4bf6",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:3bd7476003c2396c1380"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:6ed0b17dbe48974987ba"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:ee790b9f15d8fa1cbc06",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:7bc9962b520e8de88572"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:630eb59ee68b855913b0"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:5167e381a7921774a7f3"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:630eb59ee68b855913b0"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:eecef63fcdaac64691ce",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:7bc9962b520e8de88572"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:fbff251c9f70123a06d8",
+                    "PR:b0c1cd964e5c148f2546"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:36b7cb9b0670458cfe4d"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:3bd7476003c2396c1380",
+                    "PR:5167e381a7921774a7f3"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:36b7cb9b0670458cfe4d"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        }
+      ],
+      "subject_id": "R1"
+    },
+    {
+      "memberships": [
+        {
+          "member_id": "SN:032ab6b952e529651125",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:289993ae5da7b38664a4"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:1937c9efe9c494398507",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:a30bc0fb1e1dffdde5da"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:3a51de0d542afc9f9f77",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:0b5f2cddd72a4ebe739a"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:3a88d5c9bb545acc56a7",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:4172abd0fe5c5dcaf416"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:41b644f4fe321ec33b0c",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:f1e01fb40e9035ab2217"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:5dfd8aa1b6c788319e19",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:60b3a15fe6b7c1c5f229"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:6212f4bd30bf768b8022",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:9590e7e818899e42dd61"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:79105a3ff714c5098f6f",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:74c5c0eb2e125c321d2b"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:8acb6942a315534f2a82",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:c7e1b5bf5be98ac93dba"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:8fc9551b6fc3152ad7f9",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:30fdd1b1f108132bd6b0"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:a00e9b6fa7b6de79835e",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:3d46a05d1164b1d8b2a6"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:b31cbc9a6dd7c751d622",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:6743b0e6fb1123df4b0e"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:ba347423dc92c9ac0dc6",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:15bc72ac103c17ed3853"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:c08e6c43c888af3e9dd4",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:f40a50d17a1603e16a70"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:ca20b7abbf32ab7ff4ae",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:60b3a15fe6b7c1c5f229",
+                    "PR:6743b0e6fb1123df4b0e",
+                    "PR:74c5c0eb2e125c321d2b"
+                  ]
+                },
+                {
+                  "producer_class": "ownership_ancestor",
+                  "source_ids": [
+                    "E:structural_ownership_change:2d05eec5de85e1fa75a0",
+                    "E:structural_ownership_change:748e610773066e2021eb",
+                    "E:structural_ownership_change:d6ed54908a363d9f5fe0"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:60b3a15fe6b7c1c5f229",
+                    "PR:6743b0e6fb1123df4b0e",
+                    "PR:74c5c0eb2e125c321d2b"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:5f74474f5d5774cfb01b",
+                    "SP:83210077358f7ee0e820",
+                    "SP:8ed95613b7accc7f9f9a"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:cceb9d04772d47435ed3",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:4172abd0fe5c5dcaf416",
+                    "PR:f40a50d17a1603e16a70"
+                  ]
+                },
+                {
+                  "producer_class": "ownership_ancestor",
+                  "source_ids": [
+                    "E:structural_ownership_change:40434192d932ad184aff",
+                    "E:structural_ownership_change:92740e3db5ad19041816"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:4172abd0fe5c5dcaf416",
+                    "PR:f40a50d17a1603e16a70"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:2f9889b531d6258b7b67",
+                    "SP:8637ac4d207be401cdff"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:d1889fbf0a3a9bb17be7",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:ce553bd488b9c2d1dd47"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:d4aac995c733cf495218",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:d0156a345e590cee1b07"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:dbb832751a75c0141e72",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:ef7a7a1af4a64bf6b4ab"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:0eeb87e562f177a2b3ba",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:30fdd1b1f108132bd6b0",
+                    "PR:d0156a345e590cee1b07"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:15f1050574441ff12de4"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:35b74dbb9f07237f9845",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:4172abd0fe5c5dcaf416",
+                    "PR:f40a50d17a1603e16a70"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:2471501665c1acf8f9b1"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:54e36a5dd3082471d1b8",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:6743b0e6fb1123df4b0e",
+                    "PR:f40a50d17a1603e16a70"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:16b8b6dc898bc989986b"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:5f14b1bb57324de1837f",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:6743b0e6fb1123df4b0e",
+                    "PR:a30bc0fb1e1dffdde5da"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:008e59c9e24324945c33"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:6e4e8bd8ada899bde1fc",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:30fdd1b1f108132bd6b0",
+                    "PR:c7e1b5bf5be98ac93dba"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:f0daa238ff50487ac712"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:7a41030e551cbafde5f6",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:30fdd1b1f108132bd6b0",
+                    "PR:9590e7e818899e42dd61"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:d128b7728560ed1b2e08"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:83d950c2fa1a5b6c8e73",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:289993ae5da7b38664a4",
+                    "PR:ef7a7a1af4a64bf6b4ab"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:c7fcca153c4bd3a98ac1"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:a826539f761d45b4a3a1",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:15bc72ac103c17ed3853",
+                    "PR:c7e1b5bf5be98ac93dba"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:16f204e1d12e60be60d8"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:c3a4e6265b53fc30f16f",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:60b3a15fe6b7c1c5f229",
+                    "PR:9590e7e818899e42dd61",
+                    "PR:d0156a345e590cee1b07"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:50b38e2e7a2064321e60",
+                    "E:structural_relation_change:ecec6257bc36ddf933f7"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:cf73a00a936d5cc4007f",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:15bc72ac103c17ed3853",
+                    "PR:3d46a05d1164b1d8b2a6"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:ba61ce21ae3549d84299"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:e2b41b99673f6789be7a",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:74c5c0eb2e125c321d2b",
+                    "PR:f40a50d17a1603e16a70"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:c7a4f8bfb9704d497c97"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:e46ab056de135de442ec",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:3d46a05d1164b1d8b2a6",
+                    "PR:ef7a7a1af4a64bf6b4ab"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:17f6b761042af19a5e83"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:ee790b9f15d8fa1cbc06",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:60b3a15fe6b7c1c5f229",
+                    "PR:74c5c0eb2e125c321d2b"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:630eb59ee68b855913b0"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:f05aaa3b617d71d0bc5c",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:15bc72ac103c17ed3853",
+                    "PR:6743b0e6fb1123df4b0e"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:0fa0d885d202fdcdae59"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        }
+      ],
+      "subject_id": "R2"
+    },
+    {
+      "memberships": [
+        {
+          "member_id": "SN:1937c9efe9c494398507",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:4df92fb8a2597fe6d02a",
+                    "PR:f29ce022707d998a94b5"
+                  ]
+                },
+                {
+                  "producer_class": "ownership_ancestor",
+                  "source_ids": [
+                    "E:structural_ownership_change:07f4a39f9b923422a8fc",
+                    "E:structural_ownership_change:2fab76fd26827e9fc537"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:4df92fb8a2597fe6d02a",
+                    "PR:f29ce022707d998a94b5"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:7784bab303b1b03fe338",
+                    "SP:b2470391c5d133bbe00e"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:98f5d36d798882b51c8b"
+                  ]
+                },
+                {
+                  "producer_class": "ownership_ancestor",
+                  "source_ids": [
+                    "E:structural_ownership_change:7eccc10ba60b829c86ce"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:98f5d36d798882b51c8b"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:14e6b6374ceb203f42e0"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:22b4b08216bbe93b7f22",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:67e61b0ce0c4f965de72"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:36478e3148f831a895d7",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:9c8c19f41583341055de"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:6e814e0bef3181d9dc6d",
+                    "PR:41f6c844245b2c34c91c"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:af9da4f2a228d3943158"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:89d55a116ef53f02847c"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:3a88d5c9bb545acc56a7",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:c237bfa3a93f5860a86c"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:5181353648808ccc8114",
+                    "E:structural_path:db71b472508a55a7e863",
+                    "PR:ab1922ad068c9e8e5287",
+                    "PR:bce5d5d16f43f2a034dd"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:cc75751389fd4e3c9bc7"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:525c7ab799416c858f39",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:f29ce022707d998a94b5"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:1cf5fb39c8f80af8461e",
+                    "E:structural_path:dd7a3eff5b8d1b94ce50",
+                    "PR:7af89efc5face64ecca6",
+                    "PR:f1aeb78cf9529ea80cfa"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:ff8ad4815158fdba7409"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:5b6398205e515fdd43b6",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:4df92fb8a2597fe6d02a"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:33fc34318112db68a8a7",
+                    "PR:d2e130558d6115e1a576"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:8f5fdf68ab86974334fb"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:5dfd8aa1b6c788319e19",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:f7ee96fb6c79627f643c"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:6212f4bd30bf768b8022",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:98f5d36d798882b51c8b"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:6775041f0d09829f2c84",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:6c114830a9c0b845506a"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:685d462624914d88ccee",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:56e17e9a26b8affe85ee"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:6ce4c84ddcc7b8240e18",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:9c8c19f41583341055de"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:6e814e0bef3181d9dc6d",
+                    "PR:41f6c844245b2c34c91c"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:af9da4f2a228d3943158"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:7446ec41985d80f072b8",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:f5dab1503fcd1dde4f29"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:8acb6942a315534f2a82",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:4df92fb8a2597fe6d02a"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:8f5fdf68ab86974334fb"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:33fc34318112db68a8a7",
+                    "PR:d2e130558d6115e1a576"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:98c5976f8bf9d630a3bf",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:9c8c19f41583341055de"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:a00e9b6fa7b6de79835e",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:f29ce022707d998a94b5"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:ff8ad4815158fdba7409"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:1cf5fb39c8f80af8461e",
+                    "E:structural_path:dd7a3eff5b8d1b94ce50",
+                    "PR:7af89efc5face64ecca6",
+                    "PR:f1aeb78cf9529ea80cfa"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:a529a9310105d8730eda",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:9c8c19f41583341055de"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:6e814e0bef3181d9dc6d",
+                    "PR:41f6c844245b2c34c91c"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:c08e6c43c888af3e9dd4",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:c237bfa3a93f5860a86c"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:cc75751389fd4e3c9bc7"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:5181353648808ccc8114",
+                    "E:structural_path:db71b472508a55a7e863",
+                    "PR:ab1922ad068c9e8e5287",
+                    "PR:bce5d5d16f43f2a034dd"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:ca20b7abbf32ab7ff4ae",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:4df92fb8a2597fe6d02a",
+                    "PR:f29ce022707d998a94b5"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:1cf5fb39c8f80af8461e",
+                    "E:structural_path:33fc34318112db68a8a7",
+                    "E:structural_path:dd7a3eff5b8d1b94ce50",
+                    "PR:7af89efc5face64ecca6",
+                    "PR:d2e130558d6115e1a576",
+                    "PR:f1aeb78cf9529ea80cfa"
+                  ]
+                },
+                {
+                  "producer_class": "ownership_ancestor",
+                  "source_ids": [
+                    "E:structural_ownership_change:bdc10b8cac6abe98f7f5",
+                    "E:structural_ownership_change:d05fb12a139fcd14c39b"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:4df92fb8a2597fe6d02a",
+                    "PR:f29ce022707d998a94b5"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:1cf5fb39c8f80af8461e",
+                    "E:structural_path:33fc34318112db68a8a7",
+                    "E:structural_path:dd7a3eff5b8d1b94ce50",
+                    "PR:7af89efc5face64ecca6",
+                    "PR:d2e130558d6115e1a576",
+                    "PR:f1aeb78cf9529ea80cfa"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:1b498b9f2c446c9ec778",
+                    "SP:435b2255ea9fe62f5139"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:29bebcbab2c124b5dafd",
+                    "PR:56e17e9a26b8affe85ee",
+                    "PR:6c114830a9c0b845506a",
+                    "PR:8c9cd9ad6ab1a57b86a5",
+                    "PR:8f5fdf68ab86974334fb",
+                    "PR:9c8c19f41583341055de",
+                    "PR:f7ee96fb6c79627f643c",
+                    "PR:ff8ad4815158fdba7409"
+                  ]
+                },
+                {
+                  "producer_class": "ownership_ancestor",
+                  "source_ids": [
+                    "E:structural_ownership_change:0d292295d7ef0da21df5",
+                    "E:structural_ownership_change:16e739cf7d02a396dcf0",
+                    "E:structural_ownership_change:5275e526de38593f0f3c",
+                    "E:structural_ownership_change:9832013a81df801301ea",
+                    "E:structural_ownership_change:bdc10b8cac6abe98f7f5",
+                    "E:structural_ownership_change:cef25cc714838a86c7c4",
+                    "E:structural_ownership_change:d05fb12a139fcd14c39b",
+                    "E:structural_ownership_change:d6ed54908a363d9f5fe0"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:29bebcbab2c124b5dafd",
+                    "PR:56e17e9a26b8affe85ee",
+                    "PR:6c114830a9c0b845506a",
+                    "PR:8c9cd9ad6ab1a57b86a5",
+                    "PR:8f5fdf68ab86974334fb",
+                    "PR:9c8c19f41583341055de",
+                    "PR:f7ee96fb6c79627f643c",
+                    "PR:ff8ad4815158fdba7409"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:1b498b9f2c446c9ec778",
+                    "SP:2d70d114a4db1ed4d71e",
+                    "SP:435b2255ea9fe62f5139",
+                    "SP:6d47c82b0cfab83eab1b",
+                    "SP:710dae3d1092b7883f69",
+                    "SP:86270dc57244c3956ef9",
+                    "SP:8ed95613b7accc7f9f9a",
+                    "SP:9bbd7c8671ae4561df4d"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:cceb9d04772d47435ed3",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:c237bfa3a93f5860a86c"
+                  ]
+                },
+                {
+                  "producer_class": "ownership_ancestor",
+                  "source_ids": [
+                    "E:structural_ownership_change:40434192d932ad184aff"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:c237bfa3a93f5860a86c"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:2f9889b531d6258b7b67"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:cc75751389fd4e3c9bc7"
+                  ]
+                },
+                {
+                  "producer_class": "ownership_ancestor",
+                  "source_ids": [
+                    "E:structural_ownership_change:92740e3db5ad19041816"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:cc75751389fd4e3c9bc7"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:8637ac4d207be401cdff"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:f84131015a58b3fa3570",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:29bebcbab2c124b5dafd"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:fc5a6e76da5400a44a62",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:8c9cd9ad6ab1a57b86a5"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:0b8b971f495a249f2aa0",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:56e17e9a26b8affe85ee",
+                    "PR:8c9cd9ad6ab1a57b86a5"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:a134149fc4c2e5dfa9bf"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:2a1e469d1412ac7c6d5a",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:4df92fb8a2597fe6d02a"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:33fc34318112db68a8a7",
+                    "PR:d2e130558d6115e1a576"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:7102fa6461f22f062664"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:6c114830a9c0b845506a",
+                    "PR:8f5fdf68ab86974334fb"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:7102fa6461f22f062664"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:35b74dbb9f07237f9845",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:c237bfa3a93f5860a86c"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:2471501665c1acf8f9b1"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:cc75751389fd4e3c9bc7"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:2471501665c1acf8f9b1"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:42071f92c076f57f23d9",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:29bebcbab2c124b5dafd",
+                    "PR:56e17e9a26b8affe85ee"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:cdd29b4340dd602ed532"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:64e4c80e005eca0ed79c",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:29bebcbab2c124b5dafd",
+                    "PR:f7ee96fb6c79627f643c"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:ff975c3241c9fb581826"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:9b9a57b9493332ea0dd5",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:f29ce022707d998a94b5"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:1cf5fb39c8f80af8461e",
+                    "E:structural_path:dd7a3eff5b8d1b94ce50",
+                    "PR:7af89efc5face64ecca6",
+                    "PR:f1aeb78cf9529ea80cfa"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:792d9801874c635cbd65"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:6c114830a9c0b845506a",
+                    "PR:ff8ad4815158fdba7409"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:792d9801874c635cbd65"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:c3a4e6265b53fc30f16f",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:4df92fb8a2597fe6d02a",
+                    "PR:f29ce022707d998a94b5"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:6e86a6a2e3557a3aa063",
+                    "E:structural_relation_change:714656fa89ee883d0176"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:8f5fdf68ab86974334fb",
+                    "PR:98f5d36d798882b51c8b",
+                    "PR:f7ee96fb6c79627f643c",
+                    "PR:ff8ad4815158fdba7409"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:50b38e2e7a2064321e60",
+                    "E:structural_relation_change:6e86a6a2e3557a3aa063",
+                    "E:structural_relation_change:714656fa89ee883d0176"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:ce3755c50c126788dc20",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:4df92fb8a2597fe6d02a"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:33fc34318112db68a8a7",
+                    "PR:d2e130558d6115e1a576"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:299aad582eeb597b89ff"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:8f5fdf68ab86974334fb",
+                    "PR:9c8c19f41583341055de"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:299aad582eeb597b89ff"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:ede19438f3e11c1a4bf6",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:9c8c19f41583341055de"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:6ed0b17dbe48974987ba"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:eecef63fcdaac64691ce",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "exact_identifier",
+                  "source_ids": [
+                    "PR:9c8c19f41583341055de",
+                    "PR:f7ee96fb6c79627f643c"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:36b7cb9b0670458cfe4d"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        }
+      ],
+      "subject_id": "R3"
+    },
+    {
+      "memberships": [
+        {
+          "member_id": "SN:1937c9efe9c494398507",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:2ce5bbf79b6d1dd51ece",
+                    "PR:e60523884578aa2f925a"
+                  ]
+                },
+                {
+                  "producer_class": "ownership_ancestor",
+                  "source_ids": [
+                    "E:structural_ownership_change:207df44688d43c673444",
+                    "E:structural_ownership_change:7eccc10ba60b829c86ce"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:2ce5bbf79b6d1dd51ece",
+                    "PR:e60523884578aa2f925a"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:14e6b6374ceb203f42e0",
+                    "SP:586bba287041d7b7c97a"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:3a88d5c9bb545acc56a7",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:da0f5d2ea0f84bde3fa1"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:5b6398205e515fdd43b6",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:a276cc2417becfe182a5"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:6212f4bd30bf768b8022",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:e60523884578aa2f925a"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:b31cbc9a6dd7c751d622",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:359c95f1afcd5b023898"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:ba347423dc92c9ac0dc6",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:2ce5bbf79b6d1dd51ece"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:c08e6c43c888af3e9dd4",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:f1500b1d82c213670482"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:ca20b7abbf32ab7ff4ae",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:359c95f1afcd5b023898",
+                    "PR:a276cc2417becfe182a5"
+                  ]
+                },
+                {
+                  "producer_class": "ownership_ancestor",
+                  "source_ids": [
+                    "E:structural_ownership_change:748e610773066e2021eb",
+                    "E:structural_ownership_change:bdc10b8cac6abe98f7f5"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:359c95f1afcd5b023898",
+                    "PR:a276cc2417becfe182a5"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:435b2255ea9fe62f5139",
+                    "SP:83210077358f7ee0e820"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:cceb9d04772d47435ed3",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:da0f5d2ea0f84bde3fa1",
+                    "PR:f1500b1d82c213670482"
+                  ]
+                },
+                {
+                  "producer_class": "ownership_ancestor",
+                  "source_ids": [
+                    "E:structural_ownership_change:40434192d932ad184aff",
+                    "E:structural_ownership_change:92740e3db5ad19041816"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:da0f5d2ea0f84bde3fa1",
+                    "PR:f1500b1d82c213670482"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:2f9889b531d6258b7b67",
+                    "SP:8637ac4d207be401cdff"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:35b74dbb9f07237f9845",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:da0f5d2ea0f84bde3fa1",
+                    "PR:f1500b1d82c213670482"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:2471501665c1acf8f9b1"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:54e36a5dd3082471d1b8",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:359c95f1afcd5b023898",
+                    "PR:f1500b1d82c213670482"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:16b8b6dc898bc989986b"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:f05aaa3b617d71d0bc5c",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:2ce5bbf79b6d1dd51ece",
+                    "PR:359c95f1afcd5b023898"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:0fa0d885d202fdcdae59"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        }
+      ],
+      "subject_id": "R4"
+    },
+    {
+      "memberships": [
+        {
+          "member_id": "SN:1937c9efe9c494398507",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:a2cf8ae228719d5e3e5b"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:36478e3148f831a895d7",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:1d7e319f56b4554fe951"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:6e814e0bef3181d9dc6d",
+                    "PR:8c66adea4fae4ff51c0c"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:af9da4f2a228d3943158"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:89d55a116ef53f02847c"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:3a88d5c9bb545acc56a7",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:f0ed4d601d15c8455564"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:525c7ab799416c858f39",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:cefe99ed872f6b4a37df"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:5b6398205e515fdd43b6",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:5c32422b40465b157aa7"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:5dfd8aa1b6c788319e19",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:8342efcf79a027e8db1f"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:6212f4bd30bf768b8022",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:acd70a69876f8d78cf60"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:6ce4c84ddcc7b8240e18",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:1d7e319f56b4554fe951"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:6e814e0bef3181d9dc6d",
+                    "PR:8c66adea4fae4ff51c0c"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:af9da4f2a228d3943158"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:79105a3ff714c5098f6f",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:5719b8ee7ac56fdc1ca0"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:98c5976f8bf9d630a3bf",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:1d7e319f56b4554fe951"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:a529a9310105d8730eda",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:1d7e319f56b4554fe951"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:6e814e0bef3181d9dc6d",
+                    "PR:8c66adea4fae4ff51c0c"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:b31cbc9a6dd7c751d622",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:6a7f9dd6f83cfd555c94"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:ba347423dc92c9ac0dc6",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:2cf956999f4c299b84d2"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:c08e6c43c888af3e9dd4",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:a224e917ea865d592400"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:ca20b7abbf32ab7ff4ae",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:1d7e319f56b4554fe951",
+                    "PR:5719b8ee7ac56fdc1ca0",
+                    "PR:5c32422b40465b157aa7",
+                    "PR:6a7f9dd6f83cfd555c94",
+                    "PR:8342efcf79a027e8db1f",
+                    "PR:cefe99ed872f6b4a37df"
+                  ]
+                },
+                {
+                  "producer_class": "ownership_ancestor",
+                  "source_ids": [
+                    "E:structural_ownership_change:2d05eec5de85e1fa75a0",
+                    "E:structural_ownership_change:748e610773066e2021eb",
+                    "E:structural_ownership_change:9832013a81df801301ea",
+                    "E:structural_ownership_change:bdc10b8cac6abe98f7f5",
+                    "E:structural_ownership_change:d05fb12a139fcd14c39b",
+                    "E:structural_ownership_change:d6ed54908a363d9f5fe0"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:1d7e319f56b4554fe951",
+                    "PR:5719b8ee7ac56fdc1ca0",
+                    "PR:5c32422b40465b157aa7",
+                    "PR:6a7f9dd6f83cfd555c94",
+                    "PR:8342efcf79a027e8db1f",
+                    "PR:cefe99ed872f6b4a37df"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:1b498b9f2c446c9ec778",
+                    "SP:435b2255ea9fe62f5139",
+                    "SP:5f74474f5d5774cfb01b",
+                    "SP:83210077358f7ee0e820",
+                    "SP:8ed95613b7accc7f9f9a",
+                    "SP:9bbd7c8671ae4561df4d"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:cceb9d04772d47435ed3",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:a224e917ea865d592400",
+                    "PR:f0ed4d601d15c8455564"
+                  ]
+                },
+                {
+                  "producer_class": "ownership_ancestor",
+                  "source_ids": [
+                    "E:structural_ownership_change:40434192d932ad184aff",
+                    "E:structural_ownership_change:92740e3db5ad19041816"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:a224e917ea865d592400",
+                    "PR:f0ed4d601d15c8455564"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:2f9889b531d6258b7b67",
+                    "SP:8637ac4d207be401cdff"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:35b74dbb9f07237f9845",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:a224e917ea865d592400",
+                    "PR:f0ed4d601d15c8455564"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:2471501665c1acf8f9b1"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:3a85cba4c8680b276b0b",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:5719b8ee7ac56fdc1ca0",
+                    "PR:5c32422b40465b157aa7"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:bf40b5b3fc81531c04e3"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:54e36a5dd3082471d1b8",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:6a7f9dd6f83cfd555c94",
+                    "PR:a224e917ea865d592400"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:16b8b6dc898bc989986b"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:5f14b1bb57324de1837f",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:5c32422b40465b157aa7",
+                    "PR:6a7f9dd6f83cfd555c94",
+                    "PR:a2cf8ae228719d5e3e5b"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:008e59c9e24324945c33",
+                    "E:structural_relation_change:614912763275dc659d18"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:c3a4e6265b53fc30f16f",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:8342efcf79a027e8db1f",
+                    "PR:acd70a69876f8d78cf60"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:50b38e2e7a2064321e60"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:ce3755c50c126788dc20",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:1d7e319f56b4554fe951",
+                    "PR:5c32422b40465b157aa7"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:299aad582eeb597b89ff"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:e2b41b99673f6789be7a",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:5719b8ee7ac56fdc1ca0",
+                    "PR:a224e917ea865d592400"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:c7a4f8bfb9704d497c97"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:ec86eba01de16c112cdf",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:5719b8ee7ac56fdc1ca0",
+                    "PR:cefe99ed872f6b4a37df"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:3a3b5cf84ce2126d516d"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:ede19438f3e11c1a4bf6",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:1d7e319f56b4554fe951"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:6ed0b17dbe48974987ba"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:ee790b9f15d8fa1cbc06",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:5719b8ee7ac56fdc1ca0",
+                    "PR:8342efcf79a027e8db1f"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:630eb59ee68b855913b0"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:eecef63fcdaac64691ce",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:1d7e319f56b4554fe951",
+                    "PR:8342efcf79a027e8db1f"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:36b7cb9b0670458cfe4d"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:f05aaa3b617d71d0bc5c",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "distinctive_phrase",
+                  "source_ids": [
+                    "PR:2cf956999f4c299b84d2",
+                    "PR:6a7f9dd6f83cfd555c94"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:0fa0d885d202fdcdae59"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        }
+      ],
+      "subject_id": "R5"
+    },
+    {
+      "memberships": [],
+      "subject_id": "G1"
+    },
+    {
+      "memberships": [],
+      "subject_id": "G2"
+    },
+    {
+      "memberships": [],
+      "subject_id": "G3"
+    },
+    {
+      "memberships": [],
+      "subject_id": "G4"
+    },
+    {
+      "memberships": [],
+      "subject_id": "G5"
+    },
+    {
+      "memberships": [],
+      "subject_id": "G6"
+    },
+    {
+      "memberships": [],
+      "subject_id": "G7"
+    },
+    {
+      "memberships": [],
+      "subject_id": "T1"
+    },
+    {
+      "memberships": [
+        {
+          "member_id": "SN:032ab6b952e529651125",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:1ba9f09385635f56b04c"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:6ee924140e74d14b83ce"
+                  ]
+                },
+                {
+                  "producer_class": "ownership_ancestor",
+                  "source_ids": [
+                    "E:structural_ownership_change:58bfdd037622814940c9"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:1ba9f09385635f56b04c"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:6ee924140e74d14b83ce"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:8867e56a75da7c789818"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:08766b1613bf70473140",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:8b9d46f1cce8649ec3c0"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:4bf84fdfb068c3963919",
+                    "E:structural_path:633e64b4768df33aece9"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:1937c9efe9c494398507",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:6574676f03a777406a84"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:1ab2f801caf98d429fb1",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:c385c3bcc522b69bd13c"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:35fd086c49031dbfa905",
+                    "E:structural_path:5f0286495b1f23f22dee"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:1f5b4a2ee55c6ef72f32",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:6e2523b4c3486769140a"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:222f32a5befbc3fc77d1"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:248eb25e15cd3d183f62",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:0d018a0b496c2b2eab51",
+                    "E:structural_change:678e2981a23fff67030e"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:0bda92fe8283def62e53",
+                    "E:structural_path:76650066df7857774b7d"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:3a88d5c9bb545acc56a7",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:9ab4a168003716950ddb"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:525c7ab799416c858f39",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:8b9d46f1cce8649ec3c0"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:5b6398205e515fdd43b6",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:0d018a0b496c2b2eab51"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:6737261d34fd7dc1fa9e",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:a486332c5d83c847016e"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:7bed6070d7d0771b9292"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:6775041f0d09829f2c84",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:0d018a0b496c2b2eab51",
+                    "E:structural_change:8b9d46f1cce8649ec3c0"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:130a6637705ba56fe57e",
+                    "E:structural_path:23b20f6805a14143b7c2",
+                    "E:structural_path:3f95ea3615519359f84b",
+                    "E:structural_path:7b740b790d198112558c"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:685d462624914d88ccee",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:6574676f03a777406a84",
+                    "E:structural_change:678e2981a23fff67030e"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:2487bf6945e9548edb66",
+                    "E:structural_path:50be8c3fc3677e3f8441"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:79105a3ff714c5098f6f",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:678e2981a23fff67030e"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:83b6aefc6ab5a2131686",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:0d018a0b496c2b2eab51"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:33bf05d097a731b04034"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:8acb6942a315534f2a82",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:a486332c5d83c847016e"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:98c5976f8bf9d630a3bf",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:0d018a0b496c2b2eab51"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:1cb83fbe7057f6b9e296"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:a00e9b6fa7b6de79835e",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:1ba9f09385635f56b04c"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:b31cbc9a6dd7c751d622",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:e9628d1c685777cdbc1f"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:ba347423dc92c9ac0dc6",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:6e2523b4c3486769140a"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:c08e6c43c888af3e9dd4",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:c385c3bcc522b69bd13c"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:ca20b7abbf32ab7ff4ae",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:0d018a0b496c2b2eab51",
+                    "E:structural_change:678e2981a23fff67030e",
+                    "E:structural_change:8b9d46f1cce8649ec3c0",
+                    "E:structural_change:e9628d1c685777cdbc1f"
+                  ]
+                },
+                {
+                  "producer_class": "ownership_ancestor",
+                  "source_ids": [
+                    "E:structural_ownership_change:2d05eec5de85e1fa75a0",
+                    "E:structural_ownership_change:748e610773066e2021eb",
+                    "E:structural_ownership_change:bdc10b8cac6abe98f7f5",
+                    "E:structural_ownership_change:d05fb12a139fcd14c39b"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:0d018a0b496c2b2eab51",
+                    "E:structural_change:678e2981a23fff67030e",
+                    "E:structural_change:8b9d46f1cce8649ec3c0",
+                    "E:structural_change:e9628d1c685777cdbc1f"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:1b498b9f2c446c9ec778",
+                    "SP:435b2255ea9fe62f5139",
+                    "SP:5f74474f5d5774cfb01b",
+                    "SP:83210077358f7ee0e820"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:6574676f03a777406a84"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:455a813edfae4f199bbf"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:cceb9d04772d47435ed3",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:9ab4a168003716950ddb",
+                    "E:structural_change:c385c3bcc522b69bd13c"
+                  ]
+                },
+                {
+                  "producer_class": "ownership_ancestor",
+                  "source_ids": [
+                    "E:structural_ownership_change:40434192d932ad184aff",
+                    "E:structural_ownership_change:92740e3db5ad19041816"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:9ab4a168003716950ddb",
+                    "E:structural_change:c385c3bcc522b69bd13c"
+                  ]
+                },
+                {
+                  "producer_class": "placement_ancestor",
+                  "source_ids": [
+                    "SP:2f9889b531d6258b7b67",
+                    "SP:8637ac4d207be401cdff"
+                  ]
+                }
+              ]
+            },
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:c385c3bcc522b69bd13c"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:83e3541194594aced98f"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:dbb832751a75c0141e72",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:1ba9f09385635f56b04c"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:6ee924140e74d14b83ce"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:f5068ce1c8dd8bc73a0f",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:f822794be06182374264"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "direct",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SN:fabb6889ffa2f399b75a",
+          "member_kind": "node",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:6574676f03a777406a84"
+                  ]
+                },
+                {
+                  "producer_class": "structural_path",
+                  "source_ids": [
+                    "E:structural_path:0ad199b5d1ad2b259341"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "context",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:063dc8ea76661ad8d449",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:6e2523b4c3486769140a"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:33ae35268038c05aab52"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:0c802e26bf5ac6d701cd",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:0d018a0b496c2b2eab51"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:5b278f40c6b0c7327ecf"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:2a1e469d1412ac7c6d5a",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:0d018a0b496c2b2eab51"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:7102fa6461f22f062664"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:3366debacc03249c45ad",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:678e2981a23fff67030e"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:c5e71af7bb4d89f9273e"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:35b74dbb9f07237f9845",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:9ab4a168003716950ddb",
+                    "E:structural_change:c385c3bcc522b69bd13c"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:2471501665c1acf8f9b1"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:50748b26cf87d02eb8f3",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:678e2981a23fff67030e"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:2ad512c12b4b0b652127"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:5f14b1bb57324de1837f",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:6574676f03a777406a84"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:34a788331de1873de5e5",
+                    "E:structural_relation_change:d180e7e0e56ab64b3ae0",
+                    "E:structural_relation_change:f035743c0e80a0bd9e36"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:921c983c2a56cf535a56",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:a486332c5d83c847016e"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:7b57a31d10c5d24b323d"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:9b9a57b9493332ea0dd5",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:8b9d46f1cce8649ec3c0"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:792d9801874c635cbd65"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:a00c8036a9b89e9c5f39",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:6e2523b4c3486769140a",
+                    "E:structural_change:f822794be06182374264"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:5d2278dbe64f59e5d849"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:a826539f761d45b4a3a1",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:6e2523b4c3486769140a",
+                    "E:structural_change:a486332c5d83c847016e"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:16f204e1d12e60be60d8"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:b27c4fdd0249537243ef",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:0d018a0b496c2b2eab51"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:d88696452d477496fbe4"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:c3a4e6265b53fc30f16f",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:0d018a0b496c2b2eab51",
+                    "E:structural_change:1ba9f09385635f56b04c",
+                    "E:structural_change:8b9d46f1cce8649ec3c0",
+                    "E:structural_change:a486332c5d83c847016e",
+                    "E:structural_change:f822794be06182374264"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:5f0f0948972eb86b1f47",
+                    "E:structural_relation_change:6e86a6a2e3557a3aa063",
+                    "E:structural_relation_change:714656fa89ee883d0176"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:ce3755c50c126788dc20",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:0d018a0b496c2b2eab51"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:299aad582eeb597b89ff"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:cf73a00a936d5cc4007f",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:1ba9f09385635f56b04c",
+                    "E:structural_change:6e2523b4c3486769140a"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:ba61ce21ae3549d84299"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:dd34dbd952487f214b8c",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:c385c3bcc522b69bd13c"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:d215100f0516f6c4bccf"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:e42239fd091557ec0ef9",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:c385c3bcc522b69bd13c"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:7790bbe2f75249efd430"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:e46ab056de135de442ec",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:1ba9f09385635f56b04c"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:17f6b761042af19a5e83"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:ec86eba01de16c112cdf",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:678e2981a23fff67030e",
+                    "E:structural_change:8b9d46f1cce8649ec3c0"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:3a3b5cf84ce2126d516d"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        },
+        {
+          "member_id": "SRG:f4f12edb5430e4d880f3",
+          "member_kind": "exact_relation",
+          "paths": [
+            {
+              "steps": [
+                {
+                  "producer_class": "transformation_selector",
+                  "source_ids": [
+                    "E:structural_change:8b9d46f1cce8649ec3c0"
+                  ]
+                },
+                {
+                  "producer_class": "exact_relation",
+                  "source_ids": [
+                    "E:structural_relation_change:95ca298c513dc4770b5c"
+                  ]
+                }
+              ]
+            }
+          ],
+          "role": "relation",
+          "unsupported_reason": ""
+        }
+      ],
+      "subject_id": "T2"
+    },
+    {
+      "memberships": [],
+      "subject_id": "T3"
+    },
+    {
+      "memberships": [],
+      "subject_id": "CC1"
+    },
+    {
+      "memberships": [],
+      "subject_id": "CC2"
+    },
+    {
+      "memberships": [],
+      "subject_id": "CC3"
+    }
+  ],
+  "packet_digest": "7fbfeab34c4b6cb778a83aac682a39d391db3d6ea5cc9c614b6bd107edd2cdf6",
+  "schema_version": "structural_focus_attribution.v1"
+}
