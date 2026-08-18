@@ -227,30 +227,28 @@ must be named explicitly before RepoDelta will send it a token.
 
 ## Build with us
 
-RepoDelta is open to anyone interested in exploring how software development
-should evolve in an AI-native world—how intent is captured, changes are
-produced and independently verified, and where human judgment and authority
-should remain.
+RepoDelta is open to anyone who wants to make code changes easier to understand
+and govern. Bring a useful feature, improve an existing capability, add an
+integration or evaluation case, or simply open an Issue with an idea worth
+exploring.
 
-You can contribute by improving an existing capability, trying RepoDelta on
-real changes, adding an integration or evaluation case, or bringing a workflow
-problem worth exploring.
-
-Our current approach connects Issue-authored objectives, requirements, and
-guardrails (`O/R/G`) with PR-authored transformation claims and completion
-conditions (`T/CC`), then compares them with the observed change. See
-[AGENTS.md](AGENTS.md) and the repository guides for
+Building RepoDelta is also how we explore better coding workflows for an
+agent-native era. Our current approach connects Issue-authored objectives,
+requirements, and guardrails (`O/R/G`) with PR-authored transformation claims
+and completion conditions (`T/CC`), then checks both against the observed change.
+It begins in [AGENTS.md](AGENTS.md) and the repository's guides for
 [Issues](docs/issue-guidelines.md),
 [agent changes](docs/agent-change-protocol.md),
 [commits](docs/commit-message-guidelines.md), and
-[pull requests](docs/pull-request-guidelines.md).
+[pull requests](docs/pull-request-guidelines.md)—but it is not the only approach
+we welcome. If you have a better method, bring it, test it on real changes, and
+help us learn from the result.
 
-For concrete bugs, features, integrations, or implementation work, use
-[Issues](https://github.com/repodelta/repodelta/issues).
-
-For broader questions about AI-native software development, independent
-verification, and the role of human judgment and authority, join
-[GitHub Discussions](https://github.com/repodelta/repodelta/discussions).
+Whether you want to extend RepoDelta, connect a source such as
+[Jira](https://github.com/repodelta/repodelta/issues/233), or challenge how the
+project itself is built, you are welcome here. Start with the
+[open Issues](https://github.com/repodelta/repodelta/issues) or open a focused
+Issue of your own.
 
 ## License
 
