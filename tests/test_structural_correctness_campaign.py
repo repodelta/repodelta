@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from repodelta.evaluation.structural_correctness import (
+    build_selection_invariance_baseline,
     load_labels,
     load_observation,
     load_packet,
@@ -126,22 +127,7 @@ def test_campaign_v1_summary_is_derived_from_frozen_truth() -> None:
             row["overview_role_disagreements"] for row in expected_rows
         ),
     }
-    assert summary["focus_nodes"] == {
-        "false_inclusions": sum(
-            row["node_membership_false_inclusions"] for row in expected_rows
-        ),
-        "false_exclusions": sum(
-            row["node_membership_false_exclusions"] for row in expected_rows
-        ),
-        "role_disagreements": sum(
-            row["node_role_disagreements"] for row in expected_rows
-        ),
-    }
-    assert summary["focus_role_comparison"] == {
-        "false_inclusions": sum(row["node_false_inclusions"] for row in expected_rows),
-        "false_exclusions": sum(row["node_false_exclusions"] for row in expected_rows),
-        "role_disagreements": sum(row["node_role_disagreements"] for row in expected_rows),
-    }
+    _assert_v3_dimensions(summary, expected_rows)
     assert summary["focus_exact_relations"] == {
         "false_inclusions": sum(
             row["relation_false_inclusions"] for row in expected_rows
@@ -245,22 +231,7 @@ def test_campaign_v1_1_summary_is_derived_from_verified_references() -> None:
             row["overview_role_disagreements"] for row in expected_rows
         ),
     }
-    assert summary["focus_nodes"] == {
-        "false_inclusions": sum(
-            row["node_membership_false_inclusions"] for row in expected_rows
-        ),
-        "false_exclusions": sum(
-            row["node_membership_false_exclusions"] for row in expected_rows
-        ),
-        "role_disagreements": sum(
-            row["node_role_disagreements"] for row in expected_rows
-        ),
-    }
-    assert summary["focus_role_comparison"] == {
-        "false_inclusions": sum(row["node_false_inclusions"] for row in expected_rows),
-        "false_exclusions": sum(row["node_false_exclusions"] for row in expected_rows),
-        "role_disagreements": sum(row["node_role_disagreements"] for row in expected_rows),
-    }
+    _assert_v3_dimensions(summary, expected_rows)
     assert summary["focus_exact_relations"] == {
         "false_inclusions": sum(
             row["relation_false_inclusions"] for row in expected_rows
@@ -269,9 +240,14 @@ def test_campaign_v1_1_summary_is_derived_from_verified_references() -> None:
             row["relation_false_exclusions"] for row in expected_rows
         ),
     }
+    assert summary["selection_invariance"] == _selection_invariance_summary()
 
 
 def test_campaign_v1_1_selection_invariance_is_machine_checked() -> None:
+    assert _selection_invariance_summary()["focuses_checked"] == 113
+
+
+def _selection_invariance_summary() -> dict[str, int | str]:
     baseline = json.loads(
         (
             V1_1_CAMPAIGN
@@ -280,6 +256,18 @@ def test_campaign_v1_1_selection_invariance_is_machine_checked() -> None:
         ).read_text(encoding="utf-8")
     )
     assert baseline["schema_version"] == "structural_focus_selection_invariance.v1"
+    assert baseline["baseline_commit"] == "090377e"
+    assert baseline["source_commit"] == "090377e11a2897fcc5e6a5dcf0fbf00355c08de0"
+    pull_requests = tuple(
+        item["pull_request"]
+        for item in json.loads(V1_1_MANIFEST.read_text(encoding="utf-8"))["samples"]
+    )
+    assert baseline == build_selection_invariance_baseline(
+        repo_root=Path.cwd(),
+        baseline_commit=baseline["baseline_commit"],
+        campaign_root=V1_1_CAMPAIGN,
+        pull_requests=pull_requests,
+    )
     current_by_pr = {}
     for sample in json.loads(V1_1_MANIFEST.read_text(encoding="utf-8"))["samples"]:
         pull_request = sample["pull_request"]
@@ -309,7 +297,88 @@ def test_campaign_v1_1_selection_invariance_is_machine_checked() -> None:
             )
             assert observed.disposition_state == expected["disposition_state"]
             checked += 1
-    assert checked == 113
+    return {
+        "status": "passed",
+        "baseline_commit": baseline["baseline_commit"],
+        "source_commit": baseline["source_commit"],
+        "pull_requests": len(baseline["per_pull_request"]),
+        "focuses_checked": checked,
+        "file_universes_checked": checked,
+        "node_universes_checked": checked,
+        "relations_checked": checked,
+        "dispositions_checked": checked,
+    }
+
+
+def _assert_v3_dimensions(summary, expected_rows) -> None:
+    assert summary["schema_version"] == "structural_correctness_campaign_summary.v4"
+    assert "focus_nodes" not in summary
+    assert summary["selected_membership"] == {
+        "files": {
+            "false_inclusions": sum(
+                row["file_membership_false_inclusions"] for row in expected_rows
+            ),
+            "false_exclusions": sum(
+                row["file_membership_false_exclusions"] for row in expected_rows
+            ),
+        },
+        "nodes": {
+            "false_inclusions": sum(
+                row["node_membership_false_inclusions"] for row in expected_rows
+            ),
+            "false_exclusions": sum(
+                row["node_membership_false_exclusions"] for row in expected_rows
+            ),
+        },
+    }
+    assert summary["claimed_direct"] == {
+        "files": {
+            "false_inclusions": sum(
+                row["file_claimed_direct_false_inclusions"] for row in expected_rows
+            ),
+            "false_exclusions": sum(
+                row["file_claimed_direct_false_exclusions"] for row in expected_rows
+            ),
+        },
+        "nodes": {
+            "false_inclusions": sum(
+                row["node_claimed_direct_false_inclusions"] for row in expected_rows
+            ),
+            "false_exclusions": sum(
+                row["node_claimed_direct_false_exclusions"] for row in expected_rows
+            ),
+        },
+    }
+    assert summary["structural_context"] == {
+        "files": {
+            "false_inclusions": sum(
+                row["file_context_false_inclusions"] for row in expected_rows
+            ),
+            "false_exclusions": sum(
+                row["file_context_false_exclusions"] for row in expected_rows
+            ),
+        },
+        "nodes": {
+            "false_inclusions": sum(
+                row["node_context_false_inclusions"] for row in expected_rows
+            ),
+            "false_exclusions": sum(
+                row["node_context_false_exclusions"] for row in expected_rows
+            ),
+        },
+    }
+    assert summary["suggestions"] == {
+        "files_observed": sum(row["file_suggestion_count"] for row in expected_rows),
+        "nodes_observed": sum(row["node_suggestion_count"] for row in expected_rows),
+        "focuses_with_suggestions": sum(
+            row["focuses_with_suggestions"] for row in expected_rows
+        ),
+    }
+    assert summary["legacy_role_comparison"] == {
+        "false_inclusions": sum(row["node_false_inclusions"] for row in expected_rows),
+        "false_exclusions": sum(row["node_false_exclusions"] for row in expected_rows),
+        "role_disagreements": sum(row["node_role_disagreements"] for row in expected_rows),
+    }
 
 
 def _campaign_row(pull_request, labels, observation):
@@ -338,6 +407,7 @@ def _campaign_row(pull_request, labels, observation):
         "file_context_false_inclusions": 0,
         "file_context_false_exclusions": 0,
         "file_suggestion_count": 0,
+        "focuses_with_suggestions": 0,
         "relation_false_inclusions": 0,
         "relation_false_exclusions": 0,
     }
@@ -431,6 +501,8 @@ def _campaign_row(pull_request, labels, observation):
             set(expected.context_file_node_ids) - set(observed.context_file_node_ids)
         )
         row["file_suggestion_count"] += len(observed.suggested_file_node_ids)
+        if observed.suggested_node_ids or observed.suggested_file_node_ids:
+            row["focuses_with_suggestions"] += 1
     return row
 
 

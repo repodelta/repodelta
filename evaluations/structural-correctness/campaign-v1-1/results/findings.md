@@ -40,9 +40,12 @@ The separated dimensions are:
   direct/suggested/unresolved file categories; member-level provenance remains
   available in the HTML inspection.
 - Suggestions observed: **465 node suggestions** and **199 file suggestions**
-  across **7** focuses. Suggestions are reported as an epistemic/provenance
+  across **43 resolved focus rows**. Suggestions are reported as an epistemic/provenance
   behavior; they are not promoted to direct mappings and are not relabeled as
   context.
+- Production unresolved memberships remain a separate observed dimension in
+  the comparison HTML. They are reported, not compared to frozen direct/context
+  labels or silently folded into structural context.
 
 The legacy binary role comparison is retained only as a diagnostic: 1,101 / 289
 node false inclusions/exclusions and 12 role disagreements. It is not the

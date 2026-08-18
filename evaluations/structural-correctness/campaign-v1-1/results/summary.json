@@ -1,5 +1,5 @@
 {
-  "schema_version": "structural_correctness_campaign_summary.v3",
+  "schema_version": "structural_correctness_campaign_summary.v4",
   "campaign": "campaign-v1-1",
   "reference_status": "independently_verified",
   "sample_count": 8,
@@ -16,16 +16,6 @@
     "false_inclusions": 34,
     "false_exclusions": 0,
     "role_disagreements": 0
-  },
-  "focus_nodes": {
-    "false_inclusions": 1453,
-    "false_exclusions": 176,
-    "role_disagreements": 12
-  },
-  "focus_role_comparison": {
-    "false_inclusions": 1101,
-    "false_exclusions": 289,
-    "role_disagreements": 12
   },
   "focus_exact_relations": {
     "false_inclusions": 684,
@@ -64,7 +54,7 @@
   "suggestions": {
     "files_observed": 199,
     "nodes_observed": 465,
-    "focuses_with_suggestions": 7
+    "focuses_with_suggestions": 43
   },
   "selection_invariance": {
     "status": "passed",
@@ -74,7 +64,8 @@
     "file_universes_checked": 113,
     "node_universes_checked": 113,
     "relations_checked": 113,
-    "dispositions_checked": 113
+    "dispositions_checked": 113,
+    "source_commit": "090377e11a2897fcc5e6a5dcf0fbf00355c08de0"
   },
   "per_pull_request": [
     {
@@ -109,7 +100,8 @@
         "empty": 3,
         "unknown": 0,
         "unresolved": 0
-      }
+      },
+      "focuses_with_suggestions": 5
     },
     {
       "pull_request": 238,
@@ -143,7 +135,8 @@
         "empty": 2,
         "unknown": 0,
         "unresolved": 0
-      }
+      },
+      "focuses_with_suggestions": 7
     },
     {
       "pull_request": 245,
@@ -177,7 +170,8 @@
         "empty": 0,
         "unknown": 0,
         "unresolved": 0
-      }
+      },
+      "focuses_with_suggestions": 0
     },
     {
       "pull_request": 250,
@@ -211,7 +205,8 @@
         "empty": 6,
         "unknown": 0,
         "unresolved": 0
-      }
+      },
+      "focuses_with_suggestions": 5
     },
     {
       "pull_request": 235,
@@ -245,7 +240,8 @@
         "empty": 3,
         "unknown": 0,
         "unresolved": 0
-      }
+      },
+      "focuses_with_suggestions": 7
     },
     {
       "pull_request": 262,
@@ -279,7 +275,8 @@
         "empty": 2,
         "unknown": 0,
         "unresolved": 0
-      }
+      },
+      "focuses_with_suggestions": 8
     },
     {
       "pull_request": 267,
@@ -313,7 +310,8 @@
         "empty": 4,
         "unknown": 0,
         "unresolved": 0
-      }
+      },
+      "focuses_with_suggestions": 6
     },
     {
       "pull_request": 240,
@@ -347,8 +345,14 @@
         "empty": 9,
         "unknown": 0,
         "unresolved": 3
-      }
+      },
+      "focuses_with_suggestions": 5
     }
   ],
-  "next_investment": "correct_underlying_projection"
+  "next_investment": "correct_underlying_projection",
+  "legacy_role_comparison": {
+    "false_inclusions": 1101,
+    "false_exclusions": 289,
+    "role_disagreements": 12
+  }
 }

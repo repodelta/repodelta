@@ -1,5 +1,5 @@
 {
-  "schema_version": "structural_correctness_campaign_summary.v3",
+  "schema_version": "structural_correctness_campaign_summary.v4",
   "campaign": "campaign-v1",
   "reference_status": "proposed_agent_prepared",
   "sample_count": 8,
@@ -9,16 +9,6 @@
     "false_inclusions": 34,
     "false_exclusions": 0,
     "role_disagreements": 0
-  },
-  "focus_nodes": {
-    "false_inclusions": 1458,
-    "false_exclusions": 170,
-    "role_disagreements": 13
-  },
-  "focus_role_comparison": {
-    "false_inclusions": 1458,
-    "false_exclusions": 170,
-    "role_disagreements": 13
   },
   "focus_exact_relations": {
     "false_inclusions": 684,
@@ -85,7 +75,8 @@
       "file_context_false_exclusions": 0,
       "file_suggestion_count": 0,
       "relation_false_inclusions": 46,
-      "relation_false_exclusions": 4
+      "relation_false_exclusions": 4,
+      "focuses_with_suggestions": 0
     },
     {
       "pull_request": 238,
@@ -112,7 +103,8 @@
       "file_context_false_exclusions": 0,
       "file_suggestion_count": 0,
       "relation_false_inclusions": 96,
-      "relation_false_exclusions": 4
+      "relation_false_exclusions": 4,
+      "focuses_with_suggestions": 0
     },
     {
       "pull_request": 245,
@@ -139,7 +131,8 @@
       "file_context_false_exclusions": 0,
       "file_suggestion_count": 0,
       "relation_false_inclusions": 0,
-      "relation_false_exclusions": 0
+      "relation_false_exclusions": 0,
+      "focuses_with_suggestions": 0
     },
     {
       "pull_request": 250,
@@ -166,7 +159,8 @@
       "file_context_false_exclusions": 0,
       "file_suggestion_count": 0,
       "relation_false_inclusions": 59,
-      "relation_false_exclusions": 16
+      "relation_false_exclusions": 16,
+      "focuses_with_suggestions": 0
     },
     {
       "pull_request": 235,
@@ -193,7 +187,8 @@
       "file_context_false_exclusions": 3,
       "file_suggestion_count": 0,
       "relation_false_inclusions": 183,
-      "relation_false_exclusions": 11
+      "relation_false_exclusions": 11,
+      "focuses_with_suggestions": 0
     },
     {
       "pull_request": 262,
@@ -220,7 +215,8 @@
       "file_context_false_exclusions": 0,
       "file_suggestion_count": 0,
       "relation_false_inclusions": 126,
-      "relation_false_exclusions": 5
+      "relation_false_exclusions": 5,
+      "focuses_with_suggestions": 0
     },
     {
       "pull_request": 267,
@@ -247,7 +243,8 @@
       "file_context_false_exclusions": 0,
       "file_suggestion_count": 0,
       "relation_false_inclusions": 85,
-      "relation_false_exclusions": 9
+      "relation_false_exclusions": 9,
+      "focuses_with_suggestions": 0
     },
     {
       "pull_request": 240,
@@ -274,8 +271,14 @@
       "file_context_false_exclusions": 0,
       "file_suggestion_count": 0,
       "relation_false_inclusions": 89,
-      "relation_false_exclusions": 0
+      "relation_false_exclusions": 0,
+      "focuses_with_suggestions": 0
     }
   ],
-  "next_investment": "correct_underlying_projection"
+  "next_investment": "correct_underlying_projection",
+  "legacy_role_comparison": {
+    "false_inclusions": 1458,
+    "false_exclusions": 170,
+    "role_disagreements": 13
+  }
 }

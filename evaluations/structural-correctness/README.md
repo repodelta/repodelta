@@ -107,7 +107,17 @@ verified reference contract. Its
 isolation and a relation-endpoint defect corrected before reference freeze. Its
 [`selection invariance baseline`](campaign-v1-1/results/selection-invariance-baseline.json)
 checks selected file/node universes, exact relation IDs, and dispositions
-directly against the pre-provenance observation. The
+directly against the pre-provenance observation. It is reproducible from the
+pinned pre-#289 commit and records each source observation's Git blob identity:
+
+```bash
+PYTHONPATH=src python \
+  evaluations/structural-correctness/campaign-v1-1/\
+  generate_selection_invariance_baseline.py \
+  --baseline-commit 090377e
+```
+
+The
 [`findings`](campaign-v1-1/results/findings.md) retain the focus over-selection
 direction while separating provenance behavior from semantic reference roles
 and bounding recall claims by per-focus traversal coverage.

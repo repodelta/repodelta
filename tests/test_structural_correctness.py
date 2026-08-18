@@ -341,6 +341,38 @@ def test_comparison_exposes_false_inclusion_role_disagreement_and_focus_error(
     assert "complete for admitted direct seeds" in html
 
 
+def test_comparison_exposes_observed_unresolved_membership_separately(
+    tmp_path,
+) -> None:
+    packet = _packet()
+    labels = _labels(packet)
+    observation = _observation(packet)
+    observation = replace(
+        observation,
+        focuses=(
+            observation.focuses[0],
+            replace(
+                observation.focuses[1],
+                unresolved_file_node_ids=("F:c",),
+                unresolved_node_ids=("S:c",),
+            ),
+        ),
+    )
+    packet_path = write_json_artifact(packet, tmp_path / "packet.json")
+    observation_path = write_json_artifact(
+        observation, tmp_path / "observation.json"
+    )
+    labels_path = write_json_artifact(labels, tmp_path / "labels.json")
+
+    html = write_comparison_html(
+        packet_path, observation_path, labels_path, tmp_path / "comparison.html"
+    ).read_text()
+
+    assert "<b>Unresolved</b>" in html
+    assert "F:c" in html
+    assert "S:c" in html
+
+
 def test_independent_verification_binds_the_exact_proposed_decision() -> None:
     proposed = _labels(_packet())
     verified = verify_structural_correctness_labels(

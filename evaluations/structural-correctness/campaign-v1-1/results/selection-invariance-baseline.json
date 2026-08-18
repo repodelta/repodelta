@@ -1,6 +1,6 @@
 {
   "baseline_commit": "090377e",
-  "description": "Pre-#289 selected membership baseline; compares selected universes and exact relations, not provenance buckets.",
+  "description": "Pre-provenance selected membership baseline; compares selected universes and exact relations, not provenance buckets.",
   "per_pull_request": [
     {
       "focuses": [
@@ -248,7 +248,8 @@
           "subject_id": "T4"
         }
       ],
-      "pull_request": 208
+      "pull_request": 208,
+      "source_blob": "4671a12a6f6b9b061fd35d36e5f9d5c1d8e01d5a"
     },
     {
       "focuses": [
@@ -865,11 +866,13 @@
           "subject_id": "T7"
         }
       ],
-      "pull_request": 238
+      "pull_request": 238,
+      "source_blob": "3a1ea0d1e0e4b2a4449dbec8270df4c7bd6b309b"
     },
     {
       "focuses": [],
-      "pull_request": 245
+      "pull_request": 245,
+      "source_blob": "cf4365e144c01f6b94ee958e3d2de4b67a7deb14"
     },
     {
       "focuses": [
@@ -1227,7 +1230,8 @@
           "subject_id": "CC3"
         }
       ],
-      "pull_request": 250
+      "pull_request": 250,
+      "source_blob": "0d822e642fd6d52b0f70fedd875ac12dfd8b6281"
     },
     {
       "focuses": [
@@ -1989,7 +1993,8 @@
           "subject_id": "T8"
         }
       ],
-      "pull_request": 235
+      "pull_request": 235,
+      "source_blob": "8a68457e43c54c2b08aea8df3218ae0180e5f92b"
     },
     {
       "focuses": [
@@ -2542,7 +2547,8 @@
           "subject_id": "T3"
         }
       ],
-      "pull_request": 262
+      "pull_request": 262,
+      "source_blob": "b961510e90b3fc63312c141e82f30b68f685600c"
     },
     {
       "focuses": [
@@ -2968,7 +2974,8 @@
           "subject_id": "G8"
         }
       ],
-      "pull_request": 267
+      "pull_request": 267,
+      "source_blob": "651e3c491b46d69517738c5149b52c7a70f947b1"
     },
     {
       "focuses": [
@@ -3976,8 +3983,60 @@
           "subject_id": "T9"
         }
       ],
-      "pull_request": 240
+      "pull_request": 240,
+      "source_blob": "333348d61b292e753e9bc4926098f1575b7c6c01"
     }
   ],
-  "schema_version": "structural_focus_selection_invariance.v1"
+  "schema_version": "structural_focus_selection_invariance.v1",
+  "source_commit": "090377e11a2897fcc5e6a5dcf0fbf00355c08de0",
+  "source_observations": [
+    {
+      "blob": "4671a12a6f6b9b061fd35d36e5f9d5c1d8e01d5a",
+      "path": "evaluations/structural-correctness/campaign-v1-1/observations/pr-208.observation.json",
+      "pull_request": 208,
+      "schema_version": "structural_correctness_observation.v2"
+    },
+    {
+      "blob": "3a1ea0d1e0e4b2a4449dbec8270df4c7bd6b309b",
+      "path": "evaluations/structural-correctness/campaign-v1-1/observations/pr-238.observation.json",
+      "pull_request": 238,
+      "schema_version": "structural_correctness_observation.v2"
+    },
+    {
+      "blob": "cf4365e144c01f6b94ee958e3d2de4b67a7deb14",
+      "path": "evaluations/structural-correctness/campaign-v1-1/observations/pr-245.observation.json",
+      "pull_request": 245,
+      "schema_version": "structural_correctness_observation.v2"
+    },
+    {
+      "blob": "0d822e642fd6d52b0f70fedd875ac12dfd8b6281",
+      "path": "evaluations/structural-correctness/campaign-v1-1/observations/pr-250.observation.json",
+      "pull_request": 250,
+      "schema_version": "structural_correctness_observation.v2"
+    },
+    {
+      "blob": "8a68457e43c54c2b08aea8df3218ae0180e5f92b",
+      "path": "evaluations/structural-correctness/campaign-v1-1/observations/pr-235.observation.json",
+      "pull_request": 235,
+      "schema_version": "structural_correctness_observation.v2"
+    },
+    {
+      "blob": "b961510e90b3fc63312c141e82f30b68f685600c",
+      "path": "evaluations/structural-correctness/campaign-v1-1/observations/pr-262.observation.json",
+      "pull_request": 262,
+      "schema_version": "structural_correctness_observation.v2"
+    },
+    {
+      "blob": "651e3c491b46d69517738c5149b52c7a70f947b1",
+      "path": "evaluations/structural-correctness/campaign-v1-1/observations/pr-267.observation.json",
+      "pull_request": 267,
+      "schema_version": "structural_correctness_observation.v2"
+    },
+    {
+      "blob": "333348d61b292e753e9bc4926098f1575b7c6c01",
+      "path": "evaluations/structural-correctness/campaign-v1-1/observations/pr-240.observation.json",
+      "pull_request": 240,
+      "schema_version": "structural_correctness_observation.v2"
+    }
+  ]
 }

@@ -3209,8 +3209,9 @@ class StructuralFocusMembership:
         """Return the producer-owned direct-mapping boundary.
 
         Asserted selectors and deterministic matches are direct mappings.
-        Suggestions remain review candidates, and structural or unresolved
-        members remain context; consumers must not promote either category.
+        Suggestions remain review candidates, structural members remain
+        context, and unresolved members remain unresolved; consumers must not
+        promote any of these categories to direct mapping.
         """
 
         return self.membership_class in {"asserted", "matched"}
