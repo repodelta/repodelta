@@ -643,14 +643,18 @@ def _review_graph(
         if fact.metadata.get("symbol_kind") == "file":
             continue
         sources = _sources(fact, brief)
+        direct_focuses, contextual_focuses = _aggregate_node_focus(
+            (node.id,), node_focus
+        )
         focuses = ", ".join(
-            focus_id for focus_id, _membership in node_focus.get(node.id, ())
+            dict.fromkeys((*direct_focuses, *contextual_focuses))
         )
         kind = str(fact.metadata.get("symbol_kind", "symbol")).replace("_", " ")
         isolated_rows.append(
             f'<div class="isolated-anchor operation-{escape(node.delta)}" '
             f'data-structural-node="{escape(node.id, quote=True)}" '
-            f'data-focuses="{escape(" ".join(item[0] for item in node_focus.get(node.id, ())), quote=True)}" '
+            f'data-focuses="{escape(" ".join(direct_focuses), quote=True)}" '
+            f'data-context-focuses="{escape(" ".join(contextual_focuses), quote=True)}" '
             f'data-focus-memberships="{escape(_focus_membership_data(node_focus.get(node.id, ())), quote=True)}">'
             f'<span class="isolated-anchor-focus">{escape(focuses)}</span>'
             f'<span class="isolated-anchor-operation">{escape(node.delta)}</span>'

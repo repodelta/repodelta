@@ -23,38 +23,39 @@
   ],
   "focuses": [
     {
-      "context_file_node_ids": [],
+      "context_file_node_ids": [
+        "SN:36478e3148f831a895d7"
+      ],
       "context_node_ids": [
+        "SN:032ab6b952e529651125",
+        "SN:1937c9efe9c494398507",
         "SN:36478e3148f831a895d7",
+        "SN:41b644f4fe321ec33b0c",
         "SN:6ce4c84ddcc7b8240e18",
+        "SN:7446ec41985d80f072b8",
+        "SN:79105a3ff714c5098f6f",
+        "SN:8acb6942a315534f2a82",
+        "SN:a00e9b6fa7b6de79835e",
+        "SN:a529a9310105d8730eda",
         "SN:ca20b7abbf32ab7ff4ae",
         "SN:cceb9d04772d47435ed3"
       ],
       "direct_file_node_ids": [
         "SN:1937c9efe9c494398507",
         "SN:22b4b08216bbe93b7f22",
-        "SN:36478e3148f831a895d7",
         "SN:ca20b7abbf32ab7ff4ae",
         "SN:cceb9d04772d47435ed3"
       ],
       "direct_node_ids": [
-        "SN:032ab6b952e529651125",
-        "SN:1937c9efe9c494398507",
         "SN:22b4b08216bbe93b7f22",
         "SN:3a88d5c9bb545acc56a7",
-        "SN:41b644f4fe321ec33b0c",
         "SN:525c7ab799416c858f39",
         "SN:5b6398205e515fdd43b6",
         "SN:5dfd8aa1b6c788319e19",
         "SN:6212f4bd30bf768b8022",
         "SN:6775041f0d09829f2c84",
         "SN:685d462624914d88ccee",
-        "SN:7446ec41985d80f072b8",
-        "SN:79105a3ff714c5098f6f",
-        "SN:8acb6942a315534f2a82",
         "SN:98c5976f8bf9d630a3bf",
-        "SN:a00e9b6fa7b6de79835e",
-        "SN:a529a9310105d8730eda",
         "SN:f84131015a58b3fa3570",
         "SN:fc5a6e76da5400a44a62"
       ],
@@ -82,17 +83,12 @@
       "subject_id": "R1"
     },
     {
-      "context_file_node_ids": [],
-      "context_node_ids": [
-        "SN:ca20b7abbf32ab7ff4ae",
-        "SN:cceb9d04772d47435ed3"
-      ],
-      "direct_file_node_ids": [
+      "context_file_node_ids": [
         "SN:1937c9efe9c494398507",
         "SN:ca20b7abbf32ab7ff4ae",
         "SN:cceb9d04772d47435ed3"
       ],
-      "direct_node_ids": [
+      "context_node_ids": [
         "SN:032ab6b952e529651125",
         "SN:1937c9efe9c494398507",
         "SN:3a51de0d542afc9f9f77",
@@ -107,10 +103,14 @@
         "SN:b31cbc9a6dd7c751d622",
         "SN:ba347423dc92c9ac0dc6",
         "SN:c08e6c43c888af3e9dd4",
+        "SN:ca20b7abbf32ab7ff4ae",
+        "SN:cceb9d04772d47435ed3",
         "SN:d1889fbf0a3a9bb17be7",
         "SN:d4aac995c733cf495218",
         "SN:dbb832751a75c0141e72"
       ],
+      "direct_file_node_ids": [],
+      "direct_node_ids": [],
       "disposition_state": "projected",
       "exact_relation_ids": [
         "SRG:0eeb87e562f177a2b3ba",
@@ -135,18 +135,24 @@
       "subject_id": "R2"
     },
     {
-      "context_file_node_ids": [],
+      "context_file_node_ids": [
+        "SN:36478e3148f831a895d7"
+      ],
       "context_node_ids": [
         "SN:1937c9efe9c494398507",
         "SN:36478e3148f831a895d7",
         "SN:6ce4c84ddcc7b8240e18",
+        "SN:7446ec41985d80f072b8",
+        "SN:8acb6942a315534f2a82",
+        "SN:a00e9b6fa7b6de79835e",
+        "SN:a529a9310105d8730eda",
+        "SN:c08e6c43c888af3e9dd4",
         "SN:ca20b7abbf32ab7ff4ae",
         "SN:cceb9d04772d47435ed3"
       ],
       "direct_file_node_ids": [
         "SN:1937c9efe9c494398507",
         "SN:22b4b08216bbe93b7f22",
-        "SN:36478e3148f831a895d7",
         "SN:ca20b7abbf32ab7ff4ae",
         "SN:cceb9d04772d47435ed3"
       ],
@@ -159,12 +165,7 @@
         "SN:6212f4bd30bf768b8022",
         "SN:6775041f0d09829f2c84",
         "SN:685d462624914d88ccee",
-        "SN:7446ec41985d80f072b8",
-        "SN:8acb6942a315534f2a82",
         "SN:98c5976f8bf9d630a3bf",
-        "SN:a00e9b6fa7b6de79835e",
-        "SN:a529a9310105d8730eda",
-        "SN:c08e6c43c888af3e9dd4",
         "SN:f84131015a58b3fa3570",
         "SN:fc5a6e76da5400a44a62"
       ],
@@ -188,25 +189,24 @@
       "subject_id": "R3"
     },
     {
-      "context_file_node_ids": [],
+      "context_file_node_ids": [
+        "SN:1937c9efe9c494398507",
+        "SN:ca20b7abbf32ab7ff4ae",
+        "SN:cceb9d04772d47435ed3"
+      ],
       "context_node_ids": [
         "SN:1937c9efe9c494398507",
-        "SN:ca20b7abbf32ab7ff4ae",
-        "SN:cceb9d04772d47435ed3"
-      ],
-      "direct_file_node_ids": [
-        "SN:1937c9efe9c494398507",
-        "SN:ca20b7abbf32ab7ff4ae",
-        "SN:cceb9d04772d47435ed3"
-      ],
-      "direct_node_ids": [
         "SN:3a88d5c9bb545acc56a7",
         "SN:5b6398205e515fdd43b6",
         "SN:6212f4bd30bf768b8022",
         "SN:b31cbc9a6dd7c751d622",
         "SN:ba347423dc92c9ac0dc6",
-        "SN:c08e6c43c888af3e9dd4"
+        "SN:c08e6c43c888af3e9dd4",
+        "SN:ca20b7abbf32ab7ff4ae",
+        "SN:cceb9d04772d47435ed3"
       ],
+      "direct_file_node_ids": [],
+      "direct_node_ids": [],
       "disposition_state": "projected",
       "exact_relation_ids": [
         "SRG:35b74dbb9f07237f9845",
@@ -220,33 +220,32 @@
       "subject_id": "R4"
     },
     {
-      "context_file_node_ids": [],
+      "context_file_node_ids": [
+        "SN:1937c9efe9c494398507",
+        "SN:36478e3148f831a895d7",
+        "SN:ca20b7abbf32ab7ff4ae",
+        "SN:cceb9d04772d47435ed3"
+      ],
       "context_node_ids": [
-        "SN:36478e3148f831a895d7",
-        "SN:6ce4c84ddcc7b8240e18",
-        "SN:ca20b7abbf32ab7ff4ae",
-        "SN:cceb9d04772d47435ed3"
-      ],
-      "direct_file_node_ids": [
         "SN:1937c9efe9c494398507",
         "SN:36478e3148f831a895d7",
-        "SN:ca20b7abbf32ab7ff4ae",
-        "SN:cceb9d04772d47435ed3"
-      ],
-      "direct_node_ids": [
-        "SN:1937c9efe9c494398507",
         "SN:3a88d5c9bb545acc56a7",
         "SN:525c7ab799416c858f39",
         "SN:5b6398205e515fdd43b6",
         "SN:5dfd8aa1b6c788319e19",
         "SN:6212f4bd30bf768b8022",
+        "SN:6ce4c84ddcc7b8240e18",
         "SN:79105a3ff714c5098f6f",
         "SN:98c5976f8bf9d630a3bf",
         "SN:a529a9310105d8730eda",
         "SN:b31cbc9a6dd7c751d622",
         "SN:ba347423dc92c9ac0dc6",
-        "SN:c08e6c43c888af3e9dd4"
+        "SN:c08e6c43c888af3e9dd4",
+        "SN:ca20b7abbf32ab7ff4ae",
+        "SN:cceb9d04772d47435ed3"
       ],
+      "direct_file_node_ids": [],
+      "direct_node_ids": [],
       "disposition_state": "projected",
       "exact_relation_ids": [
         "SRG:35b74dbb9f07237f9845",

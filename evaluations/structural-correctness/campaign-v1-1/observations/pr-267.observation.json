@@ -47,34 +47,24 @@
   ],
   "focuses": [
     {
-      "context_file_node_ids": [],
+      "context_file_node_ids": [
+        "SN:0424c2e320e290572013",
+        "SN:1016ddfbaffbe0aff559",
+        "SN:1a5471da8621916f448b",
+        "SN:2426a3989cb2a97d2842",
+        "SN:74b07dca1ed3717b6c74",
+        "SN:9aab5a0eeda50d759051",
+        "SN:c5fd44cc021359995303",
+        "SN:e483bd3ca6e26ea0e415"
+      ],
       "context_node_ids": [
         "SN:0424c2e320e290572013",
+        "SN:08dac7b627aab985e4b5",
         "SN:09b79530969b486baab7",
         "SN:1016ddfbaffbe0aff559",
         "SN:1a5471da8621916f448b",
-        "SN:2426a3989cb2a97d2842",
-        "SN:741cbc497d036fc4637f",
-        "SN:74b07dca1ed3717b6c74",
-        "SN:9aab5a0eeda50d759051",
-        "SN:b5e255129037f02651fc",
-        "SN:c5fd44cc021359995303",
-        "SN:e483bd3ca6e26ea0e415"
-      ],
-      "direct_file_node_ids": [
-        "SN:0424c2e320e290572013",
-        "SN:1016ddfbaffbe0aff559",
-        "SN:1a5471da8621916f448b",
-        "SN:2426a3989cb2a97d2842",
-        "SN:74b07dca1ed3717b6c74",
-        "SN:94e77247b649271feaf6",
-        "SN:9aab5a0eeda50d759051",
-        "SN:c5fd44cc021359995303",
-        "SN:e483bd3ca6e26ea0e415"
-      ],
-      "direct_node_ids": [
-        "SN:08dac7b627aab985e4b5",
         "SN:2380d52ce46c588ff706",
+        "SN:2426a3989cb2a97d2842",
         "SN:3a738b073bed5edc6b52",
         "SN:3f027f11e0341d0de0a1",
         "SN:451b49bf85c7d9112a7d",
@@ -82,23 +72,31 @@
         "SN:543ff43b3e5eeab71613",
         "SN:6904460cc4e09f715dce",
         "SN:6ca8c7c3f63e6030f55a",
+        "SN:741cbc497d036fc4637f",
+        "SN:74b07dca1ed3717b6c74",
         "SN:89fff3edee9994df99f2",
         "SN:92fa4012b31ebd2bd8ab",
         "SN:93ec5f652b50cda4913b",
+        "SN:9aab5a0eeda50d759051",
         "SN:9caebf5ac975d54164ab",
         "SN:ae049f36b6e35fe43a22",
+        "SN:b5e255129037f02651fc",
         "SN:b8d4254dc3828c940fbb",
         "SN:c1902f3999b2d89df394",
+        "SN:c5fd44cc021359995303",
         "SN:cb7ee03d07a731b92b5e",
         "SN:cc0c8a0045a6fe1e8112",
         "SN:d887afd062ac8e0bb1de",
         "SN:da5397a88d8f4040b729",
         "SN:da715a5d1d6fd4915e50",
         "SN:df1cc0927c1617734b78",
+        "SN:e483bd3ca6e26ea0e415",
         "SN:e5b7fa1fcafb4c77ce3f",
         "SN:e73c3e724e4afb3c2224",
         "SN:fc49051fbe0f9fa0be2e"
       ],
+      "direct_file_node_ids": [],
+      "direct_node_ids": [],
       "disposition_state": "projected",
       "exact_relation_ids": [
         "SRG:08da4d4fe3d86b83575b",
@@ -131,27 +129,21 @@
       "subject_id": "R1"
     },
     {
-      "context_file_node_ids": [],
+      "context_file_node_ids": [
+        "SN:0424c2e320e290572013",
+        "SN:1016ddfbaffbe0aff559",
+        "SN:1a5471da8621916f448b",
+        "SN:2426a3989cb2a97d2842",
+        "SN:9aab5a0eeda50d759051",
+        "SN:c5fd44cc021359995303"
+      ],
       "context_node_ids": [
         "SN:0424c2e320e290572013",
         "SN:09b79530969b486baab7",
         "SN:1016ddfbaffbe0aff559",
-        "SN:1a5471da8621916f448b",
-        "SN:2426a3989cb2a97d2842",
-        "SN:7d7dd1159226220d9e70",
-        "SN:9aab5a0eeda50d759051",
-        "SN:c5fd44cc021359995303"
-      ],
-      "direct_file_node_ids": [
-        "SN:0424c2e320e290572013",
-        "SN:1016ddfbaffbe0aff559",
-        "SN:1a5471da8621916f448b",
-        "SN:2426a3989cb2a97d2842",
-        "SN:9aab5a0eeda50d759051",
-        "SN:c5fd44cc021359995303"
-      ],
-      "direct_node_ids": [
         "SN:19cd2582561d6e9791c8",
+        "SN:1a5471da8621916f448b",
+        "SN:2426a3989cb2a97d2842",
         "SN:3a738b073bed5edc6b52",
         "SN:3f027f11e0341d0de0a1",
         "SN:42bd3794fafc30153100",
@@ -161,17 +153,22 @@
         "SN:62694386d20493a8b93a",
         "SN:6904460cc4e09f715dce",
         "SN:6ca8c7c3f63e6030f55a",
+        "SN:7d7dd1159226220d9e70",
         "SN:89fff3edee9994df99f2",
         "SN:92fa4012b31ebd2bd8ab",
+        "SN:9aab5a0eeda50d759051",
         "SN:ae049f36b6e35fe43a22",
         "SN:b7870bfade03c992f6af",
         "SN:c1902f3999b2d89df394",
+        "SN:c5fd44cc021359995303",
         "SN:cc0c8a0045a6fe1e8112",
         "SN:da5397a88d8f4040b729",
         "SN:da715a5d1d6fd4915e50",
         "SN:e5b7fa1fcafb4c77ce3f",
         "SN:fc49051fbe0f9fa0be2e"
       ],
+      "direct_file_node_ids": [],
+      "direct_node_ids": [],
       "disposition_state": "projected",
       "exact_relation_ids": [
         "SRG:0a4b624d61982d077e13",
@@ -200,25 +197,20 @@
       "subject_id": "R2"
     },
     {
-      "context_file_node_ids": [],
+      "context_file_node_ids": [
+        "SN:0424c2e320e290572013",
+        "SN:1016ddfbaffbe0aff559",
+        "SN:1a5471da8621916f448b",
+        "SN:2426a3989cb2a97d2842",
+        "SN:9aab5a0eeda50d759051",
+        "SN:c5fd44cc021359995303"
+      ],
       "context_node_ids": [
         "SN:0424c2e320e290572013",
         "SN:09b79530969b486baab7",
         "SN:1016ddfbaffbe0aff559",
         "SN:1a5471da8621916f448b",
         "SN:2426a3989cb2a97d2842",
-        "SN:9aab5a0eeda50d759051",
-        "SN:c5fd44cc021359995303"
-      ],
-      "direct_file_node_ids": [
-        "SN:0424c2e320e290572013",
-        "SN:1016ddfbaffbe0aff559",
-        "SN:1a5471da8621916f448b",
-        "SN:2426a3989cb2a97d2842",
-        "SN:9aab5a0eeda50d759051",
-        "SN:c5fd44cc021359995303"
-      ],
-      "direct_node_ids": [
         "SN:3a738b073bed5edc6b52",
         "SN:3b3fd6e980400fe1d379",
         "SN:451b49bf85c7d9112a7d",
@@ -226,9 +218,11 @@
         "SN:6904460cc4e09f715dce",
         "SN:7dd3de33b373a4a03e9c",
         "SN:89fff3edee9994df99f2",
+        "SN:9aab5a0eeda50d759051",
         "SN:ae049f36b6e35fe43a22",
         "SN:bf5acc632465583efb76",
         "SN:c1902f3999b2d89df394",
+        "SN:c5fd44cc021359995303",
         "SN:cb7ee03d07a731b92b5e",
         "SN:d5da6e686780098e88fb",
         "SN:d72a3845dd3e700ef2bd",
@@ -236,6 +230,8 @@
         "SN:da715a5d1d6fd4915e50",
         "SN:e73c3e724e4afb3c2224"
       ],
+      "direct_file_node_ids": [],
+      "direct_node_ids": [],
       "disposition_state": "projected",
       "exact_relation_ids": [
         "SRG:08da4d4fe3d86b83575b",
@@ -256,26 +252,21 @@
       "subject_id": "R3"
     },
     {
-      "context_file_node_ids": [],
+      "context_file_node_ids": [
+        "SN:0424c2e320e290572013",
+        "SN:1016ddfbaffbe0aff559",
+        "SN:1a5471da8621916f448b",
+        "SN:2426a3989cb2a97d2842",
+        "SN:9aab5a0eeda50d759051",
+        "SN:c5fd44cc021359995303"
+      ],
       "context_node_ids": [
         "SN:0424c2e320e290572013",
         "SN:09b79530969b486baab7",
         "SN:1016ddfbaffbe0aff559",
-        "SN:1a5471da8621916f448b",
-        "SN:2426a3989cb2a97d2842",
-        "SN:9aab5a0eeda50d759051",
-        "SN:c5fd44cc021359995303"
-      ],
-      "direct_file_node_ids": [
-        "SN:0424c2e320e290572013",
-        "SN:1016ddfbaffbe0aff559",
-        "SN:1a5471da8621916f448b",
-        "SN:2426a3989cb2a97d2842",
-        "SN:9aab5a0eeda50d759051",
-        "SN:c5fd44cc021359995303"
-      ],
-      "direct_node_ids": [
         "SN:19cd2582561d6e9791c8",
+        "SN:1a5471da8621916f448b",
+        "SN:2426a3989cb2a97d2842",
         "SN:3a738b073bed5edc6b52",
         "SN:3f027f11e0341d0de0a1",
         "SN:42bd3794fafc30153100",
@@ -286,14 +277,18 @@
         "SN:6ca8c7c3f63e6030f55a",
         "SN:7ccf02543c1154f94fd5",
         "SN:89fff3edee9994df99f2",
+        "SN:9aab5a0eeda50d759051",
         "SN:ae049f36b6e35fe43a22",
         "SN:b7870bfade03c992f6af",
         "SN:bcf3a6f0186446f5f61f",
         "SN:c1902f3999b2d89df394",
+        "SN:c5fd44cc021359995303",
         "SN:cc0c8a0045a6fe1e8112",
         "SN:cfde61f968af432ceae5",
         "SN:da5397a88d8f4040b729"
       ],
+      "direct_file_node_ids": [],
+      "direct_node_ids": [],
       "disposition_state": "projected",
       "exact_relation_ids": [
         "SRG:0f776440514379b936cf",
@@ -320,28 +315,23 @@
       "subject_id": "R4"
     },
     {
-      "context_file_node_ids": [],
+      "context_file_node_ids": [
+        "SN:0424c2e320e290572013",
+        "SN:1016ddfbaffbe0aff559",
+        "SN:1a5471da8621916f448b",
+        "SN:2426a3989cb2a97d2842",
+        "SN:35333e11a01be990424c",
+        "SN:9aab5a0eeda50d759051",
+        "SN:c5fd44cc021359995303"
+      ],
       "context_node_ids": [
         "SN:0424c2e320e290572013",
-        "SN:1016ddfbaffbe0aff559",
-        "SN:1a5471da8621916f448b",
-        "SN:2426a3989cb2a97d2842",
-        "SN:35333e11a01be990424c",
-        "SN:9aab5a0eeda50d759051",
-        "SN:c5fd44cc021359995303"
-      ],
-      "direct_file_node_ids": [
-        "SN:0424c2e320e290572013",
-        "SN:1016ddfbaffbe0aff559",
-        "SN:1a5471da8621916f448b",
-        "SN:2426a3989cb2a97d2842",
-        "SN:35333e11a01be990424c",
-        "SN:9aab5a0eeda50d759051",
-        "SN:c5fd44cc021359995303"
-      ],
-      "direct_node_ids": [
         "SN:0d18f6e0798a737a797d",
+        "SN:1016ddfbaffbe0aff559",
         "SN:19cd2582561d6e9791c8",
+        "SN:1a5471da8621916f448b",
+        "SN:2426a3989cb2a97d2842",
+        "SN:35333e11a01be990424c",
         "SN:3a738b073bed5edc6b52",
         "SN:3b3fd6e980400fe1d379",
         "SN:3f027f11e0341d0de0a1",
@@ -351,6 +341,7 @@
         "SN:62694386d20493a8b93a",
         "SN:6ca8c7c3f63e6030f55a",
         "SN:89fff3edee9994df99f2",
+        "SN:9aab5a0eeda50d759051",
         "SN:9c926f5950f88e50331a",
         "SN:9caebf5ac975d54164ab",
         "SN:a2b1d5e5a21c2497b9c1",
@@ -358,11 +349,14 @@
         "SN:b7870bfade03c992f6af",
         "SN:b8d4254dc3828c940fbb",
         "SN:bcf3a6f0186446f5f61f",
+        "SN:c5fd44cc021359995303",
         "SN:cfde61f968af432ceae5",
         "SN:da5397a88d8f4040b729",
         "SN:e5b7fa1fcafb4c77ce3f",
         "SN:e5c53c5a5891a300fe10"
       ],
+      "direct_file_node_ids": [],
+      "direct_node_ids": [],
       "disposition_state": "projected",
       "exact_relation_ids": [
         "SRG:107d881b922b11d2bf87",
@@ -387,29 +381,23 @@
       "subject_id": "R5"
     },
     {
-      "context_file_node_ids": [],
+      "context_file_node_ids": [
+        "SN:0424c2e320e290572013",
+        "SN:1016ddfbaffbe0aff559",
+        "SN:1a5471da8621916f448b",
+        "SN:2426a3989cb2a97d2842",
+        "SN:2a5ebf5ffbe8d8d219da",
+        "SN:94e77247b649271feaf6",
+        "SN:9aab5a0eeda50d759051",
+        "SN:c5fd44cc021359995303"
+      ],
       "context_node_ids": [
         "SN:0424c2e320e290572013",
         "SN:1016ddfbaffbe0aff559",
-        "SN:1a5471da8621916f448b",
-        "SN:2426a3989cb2a97d2842",
-        "SN:2a5ebf5ffbe8d8d219da",
-        "SN:94e77247b649271feaf6",
-        "SN:9aab5a0eeda50d759051",
-        "SN:c5fd44cc021359995303"
-      ],
-      "direct_file_node_ids": [
-        "SN:0424c2e320e290572013",
-        "SN:1016ddfbaffbe0aff559",
-        "SN:1a5471da8621916f448b",
-        "SN:2426a3989cb2a97d2842",
-        "SN:2a5ebf5ffbe8d8d219da",
-        "SN:94e77247b649271feaf6",
-        "SN:9aab5a0eeda50d759051",
-        "SN:c5fd44cc021359995303"
-      ],
-      "direct_node_ids": [
         "SN:19cd2582561d6e9791c8",
+        "SN:1a5471da8621916f448b",
+        "SN:2426a3989cb2a97d2842",
+        "SN:2a5ebf5ffbe8d8d219da",
         "SN:3a738b073bed5edc6b52",
         "SN:3f027f11e0341d0de0a1",
         "SN:42bd3794fafc30153100",
@@ -423,16 +411,21 @@
         "SN:7ccf02543c1154f94fd5",
         "SN:89fff3edee9994df99f2",
         "SN:93ec5f652b50cda4913b",
+        "SN:94e77247b649271feaf6",
+        "SN:9aab5a0eeda50d759051",
         "SN:a2b1d5e5a21c2497b9c1",
         "SN:a6cbe5a013f33936a911",
         "SN:ae049f36b6e35fe43a22",
         "SN:bcf3a6f0186446f5f61f",
+        "SN:c5fd44cc021359995303",
         "SN:cc0c8a0045a6fe1e8112",
         "SN:cfde61f968af432ceae5",
         "SN:da5397a88d8f4040b729",
         "SN:e5c53c5a5891a300fe10",
         "SN:f828a99b97e49c237175"
       ],
+      "direct_file_node_ids": [],
+      "direct_node_ids": [],
       "disposition_state": "projected",
       "exact_relation_ids": [
         "SRG:0f776440514379b936cf",

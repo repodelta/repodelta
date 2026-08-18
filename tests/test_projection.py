@@ -1297,6 +1297,7 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
     assert 'data-path-kind="unresolved"' in html
     assert "Heuristic suggestion · 1" in html
     assert 'data-focus-memberships="R1:suggested"' in html
+    assert 'data-focuses="" data-context-focuses="R1" data-focus-memberships="R1:suggested"' in html
     assert "Change topology" not in html
     assert 'class="architectural-chip-html ' in html
     assert 'data-component-target="' in html

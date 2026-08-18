@@ -7,6 +7,7 @@ from repodelta.model.contracts import (
     StructuralFocusOverlay,
     StructuralFocusProvenance,
 )
+from repodelta.projection.build import _association_membership_class
 
 
 def _provenance(admission_class: str, source_id: str = "source"):
@@ -114,3 +115,8 @@ def test_overlay_rejects_two_authorities_for_one_member() -> None:
     )
     with pytest.raises(ValueError, match="duplicate memberships"):
         StructuralFocusOverlay(memberships=(membership, membership))
+
+
+def test_current_head_cannot_become_changed_anchor_membership() -> None:
+    with pytest.raises(ValueError, match="verification applicability"):
+        _association_membership_class("current_head")

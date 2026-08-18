@@ -1120,12 +1120,17 @@ def _association_membership_class(
 ) -> StructuralFocusMembershipClass:
     if association in {"provided_association", "explicit_reference"}:
         return "asserted"
-    if association in {"exact_identifier", "current_head"}:
+    if association == "exact_identifier":
         return "matched"
     if association in {"distinctive_phrase", "claim_bridge"}:
         return "suggested"
     if association == "structural_bridge":
         return "context"
+    if association == "current_head":
+        raise ValueError(
+            "current_head is verification applicability, not a changed-anchor "
+            "membership association"
+        )
     raise ValueError(f"unsupported structural association: {association}")
 
 
