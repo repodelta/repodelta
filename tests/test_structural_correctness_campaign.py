@@ -390,11 +390,29 @@ def _rebuild_selection_invariance_baseline(baseline, pull_requests):
     except subprocess.CalledProcessError:
         # CI's shallow checkout may omit the pinned ancestor. Fetch only that
         # immutable commit, then rerun the same source-bound generator.
-        subprocess.run(
-            ["git", "fetch", "--no-tags", "origin", baseline["baseline_commit"]],
-            check=True,
-            capture_output=True,
-        )
+        try:
+            subprocess.run(
+                ["git", "fetch", "--no-tags", "origin", baseline["baseline_commit"]],
+                check=True,
+                capture_output=True,
+            )
+        except subprocess.CalledProcessError:
+            # The pinned commit predates the remote PR ref in some CI
+            # checkouts. The committed byte-for-byte extraction remains the
+            # same source artifact and is verified by its Git blob identities.
+            return build_selection_invariance_baseline(
+                repo_root=Path.cwd(),
+                baseline_commit=baseline["baseline_commit"],
+                campaign_root=V1_1_CAMPAIGN,
+                pull_requests=pull_requests,
+                source_snapshot_root=(
+                    V1_1_CAMPAIGN
+                    / "results"
+                    / "baseline-sources"
+                    / baseline["baseline_commit"]
+                ),
+                source_commit=baseline["source_commit"],
+            )
         return build_selection_invariance_baseline(
             repo_root=Path.cwd(),
             baseline_commit=baseline["baseline_commit"],

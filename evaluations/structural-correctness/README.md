@@ -121,5 +121,9 @@ The
 [`findings`](campaign-v1-1/results/findings.md) retain the focus over-selection
 direction while separating provenance behavior from semantic reference roles
 and bounding recall claims by per-focus traversal coverage.
+The repository also keeps a byte-for-byte extraction under
+`campaign-v1-1/results/baseline-sources/090377e/` so a shallow CI checkout can
+verify the same recorded Git blob identities when the historical commit is not
+available locally.
 Campaign v1.1 is the sole current structural-correctness baseline; there is no
 campaign v1.2.

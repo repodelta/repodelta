@@ -1,0 +1,672 @@
+{
+  "files": [
+    {
+      "file_node_id": "SN:1a5471da8621916f448b",
+      "role": "changed"
+    },
+    {
+      "file_node_id": "SN:2426a3989cb2a97d2842",
+      "role": "changed"
+    },
+    {
+      "file_node_id": "SN:35333e11a01be990424c",
+      "role": "retained_context"
+    },
+    {
+      "file_node_id": "SN:4a6123cee9d71c406ec7",
+      "role": "retained_context"
+    },
+    {
+      "file_node_id": "SN:5363295026f74f9d16fb",
+      "role": "retained_context"
+    },
+    {
+      "file_node_id": "SN:74b07dca1ed3717b6c74",
+      "role": "changed"
+    },
+    {
+      "file_node_id": "SN:9aab5a0eeda50d759051",
+      "role": "retained_context"
+    },
+    {
+      "file_node_id": "SN:a8e3a88846c786598e4c",
+      "role": "retained_context"
+    },
+    {
+      "file_node_id": "SN:ae7121776b87c1b88668",
+      "role": "retained_context"
+    },
+    {
+      "file_node_id": "SN:c5fd44cc021359995303",
+      "role": "retained_context"
+    },
+    {
+      "file_node_id": "SN:e483bd3ca6e26ea0e415",
+      "role": "retained_context"
+    },
+    {
+      "file_node_id": "SN:f2df16bc9ec130fc402f",
+      "role": "changed"
+    },
+    {
+      "file_node_id": "SN:f8af5ffcd0e06b5b9103",
+      "role": "retained_context"
+    },
+    {
+      "file_node_id": "SN:fb59d4c4600b15c3c61b",
+      "role": "changed"
+    }
+  ],
+  "focuses": [
+    {
+      "context_file_node_ids": [],
+      "context_node_ids": [
+        "SN:1a5471da8621916f448b",
+        "SN:2426a3989cb2a97d2842",
+        "SN:5363295026f74f9d16fb",
+        "SN:74b07dca1ed3717b6c74",
+        "SN:9aab5a0eeda50d759051",
+        "SN:f2df16bc9ec130fc402f",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "direct_file_node_ids": [
+        "SN:1a5471da8621916f448b",
+        "SN:2426a3989cb2a97d2842",
+        "SN:5363295026f74f9d16fb",
+        "SN:74b07dca1ed3717b6c74",
+        "SN:9aab5a0eeda50d759051",
+        "SN:f2df16bc9ec130fc402f",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "direct_node_ids": [
+        "SN:04a6b663dcf6c3ab94ba",
+        "SN:0bdcc4ff455ba951fac0",
+        "SN:3b3fd6e980400fe1d379",
+        "SN:451b49bf85c7d9112a7d",
+        "SN:479fd3afb412259fb6b2",
+        "SN:487dfdfb2490e8d713df",
+        "SN:491e9b2d0ef54d5ef533",
+        "SN:49822239b3a4261fa1a3",
+        "SN:6555144fcb0994ee3cd4",
+        "SN:69fe86be4087ee523fea",
+        "SN:7262aab0b698406942a7",
+        "SN:85f064edb9ad42b6723e",
+        "SN:9c926f5950f88e50331a",
+        "SN:9caebf5ac975d54164ab",
+        "SN:abf417d0fba6b4e83048",
+        "SN:b8d4254dc3828c940fbb",
+        "SN:b9147320f7cc4299f067",
+        "SN:bdcdc50c53174c6c89f0",
+        "SN:d2e389bfa55c339d1f0c",
+        "SN:e5b7fa1fcafb4c77ce3f"
+      ],
+      "disposition_state": "projected",
+      "exact_relation_ids": [
+        "SRG:016121d1611b94b62cc4",
+        "SRG:1697ee626a7db65575c9",
+        "SRG:1908465fc87b6d72a79e",
+        "SRG:2f20e071c88afc3fbcd3",
+        "SRG:39462ffd8942357417c4",
+        "SRG:4005338363cfe4864fb9",
+        "SRG:534bd1d84c451cc0f7a1",
+        "SRG:68aa35b51deb444bd4b8",
+        "SRG:760ea49c611cec86f404",
+        "SRG:ab35e3723279cf9c8b2a",
+        "SRG:b76a4675d813df50e203",
+        "SRG:b9897a82218d0e8b5c45",
+        "SRG:cc8e2f4af36a27beeaa3"
+      ],
+      "relation_ids": [
+        "SOR:d1303b4bee3e24a406f9"
+      ],
+      "subject_id": "R1"
+    },
+    {
+      "context_file_node_ids": [],
+      "context_node_ids": [
+        "SN:1a5471da8621916f448b",
+        "SN:2426a3989cb2a97d2842",
+        "SN:4a6123cee9d71c406ec7",
+        "SN:5363295026f74f9d16fb",
+        "SN:74b07dca1ed3717b6c74",
+        "SN:c5fd44cc021359995303",
+        "SN:e483bd3ca6e26ea0e415",
+        "SN:f2df16bc9ec130fc402f",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "direct_file_node_ids": [
+        "SN:1a5471da8621916f448b",
+        "SN:2426a3989cb2a97d2842",
+        "SN:4a6123cee9d71c406ec7",
+        "SN:5363295026f74f9d16fb",
+        "SN:74b07dca1ed3717b6c74",
+        "SN:c5fd44cc021359995303",
+        "SN:e483bd3ca6e26ea0e415",
+        "SN:f2df16bc9ec130fc402f",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "direct_node_ids": [
+        "SN:00fb461ed997c8f2a150",
+        "SN:04a6b663dcf6c3ab94ba",
+        "SN:160178608609167cc356",
+        "SN:1cc2eacc0f4983e93433",
+        "SN:2bc86e49396166b63833",
+        "SN:3b3fd6e980400fe1d379",
+        "SN:442a4d2b45546315cd50",
+        "SN:479fd3afb412259fb6b2",
+        "SN:487dfdfb2490e8d713df",
+        "SN:491e9b2d0ef54d5ef533",
+        "SN:4ef25065f3dc3a308971",
+        "SN:6555144fcb0994ee3cd4",
+        "SN:69fe86be4087ee523fea",
+        "SN:85f064edb9ad42b6723e",
+        "SN:92fa4012b31ebd2bd8ab",
+        "SN:9caebf5ac975d54164ab",
+        "SN:abf417d0fba6b4e83048",
+        "SN:e2c069b1e3cdcaf848d4",
+        "SN:e5b7fa1fcafb4c77ce3f"
+      ],
+      "disposition_state": "projected",
+      "exact_relation_ids": [
+        "SRG:016121d1611b94b62cc4",
+        "SRG:0a4b624d61982d077e13",
+        "SRG:1697ee626a7db65575c9",
+        "SRG:1908465fc87b6d72a79e",
+        "SRG:2fb857e6f06dd9f4f9fb",
+        "SRG:39462ffd8942357417c4",
+        "SRG:4005338363cfe4864fb9",
+        "SRG:459a81c44176f80abaf2",
+        "SRG:4e6aa39de1e8924fed72",
+        "SRG:534bd1d84c451cc0f7a1",
+        "SRG:760ea49c611cec86f404",
+        "SRG:7dd0004ec3823c224694",
+        "SRG:a06c3d7acd6d0504e1c4",
+        "SRG:aa5b03dc155a7b3640e3",
+        "SRG:b9897a82218d0e8b5c45",
+        "SRG:c777b2b1f1948eeda3eb",
+        "SRG:cc8e2f4af36a27beeaa3",
+        "SRG:f34a07c089114ecfab9e"
+      ],
+      "relation_ids": [
+        "SOR:d1303b4bee3e24a406f9"
+      ],
+      "subject_id": "R2"
+    },
+    {
+      "context_file_node_ids": [],
+      "context_node_ids": [
+        "SN:1a5471da8621916f448b",
+        "SN:2426a3989cb2a97d2842",
+        "SN:5363295026f74f9d16fb",
+        "SN:74b07dca1ed3717b6c74",
+        "SN:9aab5a0eeda50d759051",
+        "SN:e483bd3ca6e26ea0e415",
+        "SN:f2df16bc9ec130fc402f",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "direct_file_node_ids": [
+        "SN:1a5471da8621916f448b",
+        "SN:2426a3989cb2a97d2842",
+        "SN:5363295026f74f9d16fb",
+        "SN:74b07dca1ed3717b6c74",
+        "SN:9aab5a0eeda50d759051",
+        "SN:e483bd3ca6e26ea0e415",
+        "SN:f2df16bc9ec130fc402f",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "direct_node_ids": [
+        "SN:04a6b663dcf6c3ab94ba",
+        "SN:160178608609167cc356",
+        "SN:2bc86e49396166b63833",
+        "SN:3b3fd6e980400fe1d379",
+        "SN:451b49bf85c7d9112a7d",
+        "SN:479fd3afb412259fb6b2",
+        "SN:487dfdfb2490e8d713df",
+        "SN:491e9b2d0ef54d5ef533",
+        "SN:49822239b3a4261fa1a3",
+        "SN:6555144fcb0994ee3cd4",
+        "SN:69fe86be4087ee523fea",
+        "SN:7262aab0b698406942a7",
+        "SN:85f064edb9ad42b6723e",
+        "SN:92fa4012b31ebd2bd8ab",
+        "SN:9c926f5950f88e50331a",
+        "SN:9caebf5ac975d54164ab",
+        "SN:abf417d0fba6b4e83048",
+        "SN:b8d4254dc3828c940fbb",
+        "SN:bdcdc50c53174c6c89f0",
+        "SN:d2e389bfa55c339d1f0c",
+        "SN:e5b7fa1fcafb4c77ce3f"
+      ],
+      "disposition_state": "projected",
+      "exact_relation_ids": [
+        "SRG:016121d1611b94b62cc4",
+        "SRG:0a4b624d61982d077e13",
+        "SRG:1697ee626a7db65575c9",
+        "SRG:1908465fc87b6d72a79e",
+        "SRG:2f20e071c88afc3fbcd3",
+        "SRG:39462ffd8942357417c4",
+        "SRG:4005338363cfe4864fb9",
+        "SRG:459a81c44176f80abaf2",
+        "SRG:4e6aa39de1e8924fed72",
+        "SRG:534bd1d84c451cc0f7a1",
+        "SRG:68aa35b51deb444bd4b8",
+        "SRG:760ea49c611cec86f404",
+        "SRG:a06c3d7acd6d0504e1c4",
+        "SRG:ab35e3723279cf9c8b2a",
+        "SRG:b76a4675d813df50e203",
+        "SRG:b9897a82218d0e8b5c45",
+        "SRG:c777b2b1f1948eeda3eb",
+        "SRG:cc8e2f4af36a27beeaa3",
+        "SRG:fd4f76874e938e52801c"
+      ],
+      "relation_ids": [
+        "SOR:d1303b4bee3e24a406f9"
+      ],
+      "subject_id": "R3"
+    },
+    {
+      "context_file_node_ids": [],
+      "context_node_ids": [
+        "SN:2426a3989cb2a97d2842",
+        "SN:5363295026f74f9d16fb",
+        "SN:74b07dca1ed3717b6c74",
+        "SN:b5e255129037f02651fc",
+        "SN:c5fd44cc021359995303",
+        "SN:e483bd3ca6e26ea0e415",
+        "SN:f2df16bc9ec130fc402f",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "direct_file_node_ids": [
+        "SN:1a5471da8621916f448b",
+        "SN:2426a3989cb2a97d2842",
+        "SN:5363295026f74f9d16fb",
+        "SN:74b07dca1ed3717b6c74",
+        "SN:c5fd44cc021359995303",
+        "SN:e483bd3ca6e26ea0e415",
+        "SN:f2df16bc9ec130fc402f",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "direct_node_ids": [
+        "SN:00fb461ed997c8f2a150",
+        "SN:04a6b663dcf6c3ab94ba",
+        "SN:160178608609167cc356",
+        "SN:1cc2eacc0f4983e93433",
+        "SN:2bc86e49396166b63833",
+        "SN:3b3fd6e980400fe1d379",
+        "SN:442a4d2b45546315cd50",
+        "SN:479fd3afb412259fb6b2",
+        "SN:487dfdfb2490e8d713df",
+        "SN:491e9b2d0ef54d5ef533",
+        "SN:49822239b3a4261fa1a3",
+        "SN:6555144fcb0994ee3cd4",
+        "SN:69fe86be4087ee523fea",
+        "SN:85f064edb9ad42b6723e",
+        "SN:92fa4012b31ebd2bd8ab",
+        "SN:abf417d0fba6b4e83048",
+        "SN:b8d4254dc3828c940fbb",
+        "SN:d2e389bfa55c339d1f0c",
+        "SN:d887afd062ac8e0bb1de",
+        "SN:e5b7fa1fcafb4c77ce3f"
+      ],
+      "disposition_state": "projected",
+      "exact_relation_ids": [
+        "SRG:016121d1611b94b62cc4",
+        "SRG:0a4b624d61982d077e13",
+        "SRG:1697ee626a7db65575c9",
+        "SRG:1908465fc87b6d72a79e",
+        "SRG:2f20e071c88afc3fbcd3",
+        "SRG:2fb857e6f06dd9f4f9fb",
+        "SRG:39462ffd8942357417c4",
+        "SRG:4005338363cfe4864fb9",
+        "SRG:459a81c44176f80abaf2",
+        "SRG:534bd1d84c451cc0f7a1",
+        "SRG:68aa35b51deb444bd4b8",
+        "SRG:760ea49c611cec86f404",
+        "SRG:769681e5ecd6ec9f1234",
+        "SRG:8d965c75a643333fb816",
+        "SRG:a06c3d7acd6d0504e1c4",
+        "SRG:aa5b03dc155a7b3640e3",
+        "SRG:c777b2b1f1948eeda3eb",
+        "SRG:cfb9a9cab04f68cdf3a3",
+        "SRG:e7b9a60909cdc937bb2d",
+        "SRG:fd4f76874e938e52801c"
+      ],
+      "relation_ids": [
+        "SOR:d1303b4bee3e24a406f9"
+      ],
+      "subject_id": "R4"
+    },
+    {
+      "context_file_node_ids": [],
+      "context_node_ids": [
+        "SN:1a5471da8621916f448b",
+        "SN:2426a3989cb2a97d2842",
+        "SN:4a6123cee9d71c406ec7",
+        "SN:5363295026f74f9d16fb",
+        "SN:9aab5a0eeda50d759051",
+        "SN:c5fd44cc021359995303",
+        "SN:e483bd3ca6e26ea0e415",
+        "SN:f2df16bc9ec130fc402f",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "direct_file_node_ids": [
+        "SN:1a5471da8621916f448b",
+        "SN:2426a3989cb2a97d2842",
+        "SN:4a6123cee9d71c406ec7",
+        "SN:5363295026f74f9d16fb",
+        "SN:74b07dca1ed3717b6c74",
+        "SN:9aab5a0eeda50d759051",
+        "SN:c5fd44cc021359995303",
+        "SN:e483bd3ca6e26ea0e415",
+        "SN:f2df16bc9ec130fc402f",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "direct_node_ids": [
+        "SN:00fb461ed997c8f2a150",
+        "SN:04a6b663dcf6c3ab94ba",
+        "SN:160178608609167cc356",
+        "SN:1cc2eacc0f4983e93433",
+        "SN:2bc86e49396166b63833",
+        "SN:3b3fd6e980400fe1d379",
+        "SN:442a4d2b45546315cd50",
+        "SN:451b49bf85c7d9112a7d",
+        "SN:479fd3afb412259fb6b2",
+        "SN:487dfdfb2490e8d713df",
+        "SN:491e9b2d0ef54d5ef533",
+        "SN:4ef25065f3dc3a308971",
+        "SN:6555144fcb0994ee3cd4",
+        "SN:7262aab0b698406942a7",
+        "SN:85f064edb9ad42b6723e",
+        "SN:92fa4012b31ebd2bd8ab",
+        "SN:9c926f5950f88e50331a",
+        "SN:9caebf5ac975d54164ab",
+        "SN:abf417d0fba6b4e83048",
+        "SN:b8d4254dc3828c940fbb",
+        "SN:e2c069b1e3cdcaf848d4",
+        "SN:e5b7fa1fcafb4c77ce3f"
+      ],
+      "disposition_state": "projected",
+      "exact_relation_ids": [
+        "SRG:016121d1611b94b62cc4",
+        "SRG:0a4b624d61982d077e13",
+        "SRG:1697ee626a7db65575c9",
+        "SRG:1908465fc87b6d72a79e",
+        "SRG:2f20e071c88afc3fbcd3",
+        "SRG:2fb857e6f06dd9f4f9fb",
+        "SRG:39462ffd8942357417c4",
+        "SRG:4005338363cfe4864fb9",
+        "SRG:459a81c44176f80abaf2",
+        "SRG:4e6aa39de1e8924fed72",
+        "SRG:760ea49c611cec86f404",
+        "SRG:7dd0004ec3823c224694",
+        "SRG:a06c3d7acd6d0504e1c4",
+        "SRG:aa5b03dc155a7b3640e3",
+        "SRG:ab35e3723279cf9c8b2a",
+        "SRG:b76a4675d813df50e203",
+        "SRG:b9897a82218d0e8b5c45",
+        "SRG:c777b2b1f1948eeda3eb",
+        "SRG:cc8e2f4af36a27beeaa3",
+        "SRG:f34a07c089114ecfab9e"
+      ],
+      "relation_ids": [
+        "SOR:d1303b4bee3e24a406f9"
+      ],
+      "subject_id": "G1"
+    },
+    {
+      "context_file_node_ids": [],
+      "context_node_ids": [
+        "SN:1a5471da8621916f448b",
+        "SN:2426a3989cb2a97d2842",
+        "SN:4a6123cee9d71c406ec7",
+        "SN:5363295026f74f9d16fb",
+        "SN:74b07dca1ed3717b6c74",
+        "SN:9aab5a0eeda50d759051",
+        "SN:f2df16bc9ec130fc402f",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "direct_file_node_ids": [
+        "SN:1a5471da8621916f448b",
+        "SN:2426a3989cb2a97d2842",
+        "SN:4a6123cee9d71c406ec7",
+        "SN:5363295026f74f9d16fb",
+        "SN:74b07dca1ed3717b6c74",
+        "SN:9aab5a0eeda50d759051",
+        "SN:f2df16bc9ec130fc402f",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "direct_node_ids": [
+        "SN:04a6b663dcf6c3ab94ba",
+        "SN:1cc2eacc0f4983e93433",
+        "SN:2bc86e49396166b63833",
+        "SN:3b3fd6e980400fe1d379",
+        "SN:442a4d2b45546315cd50",
+        "SN:451b49bf85c7d9112a7d",
+        "SN:479fd3afb412259fb6b2",
+        "SN:487dfdfb2490e8d713df",
+        "SN:491e9b2d0ef54d5ef533",
+        "SN:6555144fcb0994ee3cd4",
+        "SN:69fe86be4087ee523fea",
+        "SN:7262aab0b698406942a7",
+        "SN:85f064edb9ad42b6723e",
+        "SN:92fa4012b31ebd2bd8ab",
+        "SN:9c926f5950f88e50331a",
+        "SN:9caebf5ac975d54164ab",
+        "SN:abf417d0fba6b4e83048",
+        "SN:b8d4254dc3828c940fbb",
+        "SN:e2c069b1e3cdcaf848d4",
+        "SN:e5b7fa1fcafb4c77ce3f"
+      ],
+      "disposition_state": "projected",
+      "exact_relation_ids": [
+        "SRG:016121d1611b94b62cc4",
+        "SRG:0a4b624d61982d077e13",
+        "SRG:1697ee626a7db65575c9",
+        "SRG:1908465fc87b6d72a79e",
+        "SRG:2f20e071c88afc3fbcd3",
+        "SRG:39462ffd8942357417c4",
+        "SRG:4005338363cfe4864fb9",
+        "SRG:534bd1d84c451cc0f7a1",
+        "SRG:760ea49c611cec86f404",
+        "SRG:7dd0004ec3823c224694",
+        "SRG:a06c3d7acd6d0504e1c4",
+        "SRG:aa5b03dc155a7b3640e3",
+        "SRG:ab35e3723279cf9c8b2a",
+        "SRG:b76a4675d813df50e203",
+        "SRG:b9897a82218d0e8b5c45",
+        "SRG:cc8e2f4af36a27beeaa3"
+      ],
+      "relation_ids": [
+        "SOR:d1303b4bee3e24a406f9"
+      ],
+      "subject_id": "G2"
+    },
+    {
+      "context_file_node_ids": [],
+      "context_node_ids": [
+        "SN:1a5471da8621916f448b",
+        "SN:2426a3989cb2a97d2842",
+        "SN:4a6123cee9d71c406ec7",
+        "SN:5363295026f74f9d16fb",
+        "SN:74b07dca1ed3717b6c74",
+        "SN:9aab5a0eeda50d759051",
+        "SN:f2df16bc9ec130fc402f",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "direct_file_node_ids": [
+        "SN:1a5471da8621916f448b",
+        "SN:2426a3989cb2a97d2842",
+        "SN:4a6123cee9d71c406ec7",
+        "SN:5363295026f74f9d16fb",
+        "SN:74b07dca1ed3717b6c74",
+        "SN:9aab5a0eeda50d759051",
+        "SN:f2df16bc9ec130fc402f",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "direct_node_ids": [
+        "SN:04a6b663dcf6c3ab94ba",
+        "SN:1cc2eacc0f4983e93433",
+        "SN:2bc86e49396166b63833",
+        "SN:3b3fd6e980400fe1d379",
+        "SN:442a4d2b45546315cd50",
+        "SN:451b49bf85c7d9112a7d",
+        "SN:479fd3afb412259fb6b2",
+        "SN:487dfdfb2490e8d713df",
+        "SN:491e9b2d0ef54d5ef533",
+        "SN:6555144fcb0994ee3cd4",
+        "SN:69fe86be4087ee523fea",
+        "SN:7262aab0b698406942a7",
+        "SN:85f064edb9ad42b6723e",
+        "SN:92fa4012b31ebd2bd8ab",
+        "SN:9c926f5950f88e50331a",
+        "SN:9caebf5ac975d54164ab",
+        "SN:abf417d0fba6b4e83048",
+        "SN:b8d4254dc3828c940fbb",
+        "SN:e2c069b1e3cdcaf848d4",
+        "SN:e5b7fa1fcafb4c77ce3f"
+      ],
+      "disposition_state": "projected",
+      "exact_relation_ids": [
+        "SRG:016121d1611b94b62cc4",
+        "SRG:0a4b624d61982d077e13",
+        "SRG:1697ee626a7db65575c9",
+        "SRG:1908465fc87b6d72a79e",
+        "SRG:2f20e071c88afc3fbcd3",
+        "SRG:39462ffd8942357417c4",
+        "SRG:4005338363cfe4864fb9",
+        "SRG:534bd1d84c451cc0f7a1",
+        "SRG:760ea49c611cec86f404",
+        "SRG:7dd0004ec3823c224694",
+        "SRG:a06c3d7acd6d0504e1c4",
+        "SRG:aa5b03dc155a7b3640e3",
+        "SRG:ab35e3723279cf9c8b2a",
+        "SRG:b76a4675d813df50e203",
+        "SRG:b9897a82218d0e8b5c45",
+        "SRG:cc8e2f4af36a27beeaa3"
+      ],
+      "relation_ids": [
+        "SOR:d1303b4bee3e24a406f9"
+      ],
+      "subject_id": "G3"
+    },
+    {
+      "context_file_node_ids": [],
+      "context_node_ids": [],
+      "direct_file_node_ids": [],
+      "direct_node_ids": [],
+      "disposition_state": "non_structural_only",
+      "exact_relation_ids": [],
+      "relation_ids": [],
+      "subject_id": "G4"
+    },
+    {
+      "context_file_node_ids": [],
+      "context_node_ids": [
+        "SN:1a5471da8621916f448b",
+        "SN:2426a3989cb2a97d2842",
+        "SN:4a6123cee9d71c406ec7",
+        "SN:5363295026f74f9d16fb",
+        "SN:9aab5a0eeda50d759051",
+        "SN:c5fd44cc021359995303",
+        "SN:e483bd3ca6e26ea0e415",
+        "SN:f2df16bc9ec130fc402f",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "direct_file_node_ids": [
+        "SN:1a5471da8621916f448b",
+        "SN:2426a3989cb2a97d2842",
+        "SN:4a6123cee9d71c406ec7",
+        "SN:5363295026f74f9d16fb",
+        "SN:74b07dca1ed3717b6c74",
+        "SN:9aab5a0eeda50d759051",
+        "SN:c5fd44cc021359995303",
+        "SN:e483bd3ca6e26ea0e415",
+        "SN:f2df16bc9ec130fc402f",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "direct_node_ids": [
+        "SN:00fb461ed997c8f2a150",
+        "SN:04a6b663dcf6c3ab94ba",
+        "SN:160178608609167cc356",
+        "SN:1cc2eacc0f4983e93433",
+        "SN:2bc86e49396166b63833",
+        "SN:3b3fd6e980400fe1d379",
+        "SN:442a4d2b45546315cd50",
+        "SN:451b49bf85c7d9112a7d",
+        "SN:479fd3afb412259fb6b2",
+        "SN:487dfdfb2490e8d713df",
+        "SN:491e9b2d0ef54d5ef533",
+        "SN:4ef25065f3dc3a308971",
+        "SN:6555144fcb0994ee3cd4",
+        "SN:7262aab0b698406942a7",
+        "SN:85f064edb9ad42b6723e",
+        "SN:92fa4012b31ebd2bd8ab",
+        "SN:9c926f5950f88e50331a",
+        "SN:9caebf5ac975d54164ab",
+        "SN:abf417d0fba6b4e83048",
+        "SN:b8d4254dc3828c940fbb",
+        "SN:e2c069b1e3cdcaf848d4",
+        "SN:e5b7fa1fcafb4c77ce3f"
+      ],
+      "disposition_state": "projected",
+      "exact_relation_ids": [
+        "SRG:016121d1611b94b62cc4",
+        "SRG:0a4b624d61982d077e13",
+        "SRG:1697ee626a7db65575c9",
+        "SRG:1908465fc87b6d72a79e",
+        "SRG:2f20e071c88afc3fbcd3",
+        "SRG:2fb857e6f06dd9f4f9fb",
+        "SRG:39462ffd8942357417c4",
+        "SRG:4005338363cfe4864fb9",
+        "SRG:459a81c44176f80abaf2",
+        "SRG:4e6aa39de1e8924fed72",
+        "SRG:760ea49c611cec86f404",
+        "SRG:7dd0004ec3823c224694",
+        "SRG:a06c3d7acd6d0504e1c4",
+        "SRG:aa5b03dc155a7b3640e3",
+        "SRG:ab35e3723279cf9c8b2a",
+        "SRG:b76a4675d813df50e203",
+        "SRG:b9897a82218d0e8b5c45",
+        "SRG:c777b2b1f1948eeda3eb",
+        "SRG:cc8e2f4af36a27beeaa3",
+        "SRG:f34a07c089114ecfab9e"
+      ],
+      "relation_ids": [
+        "SOR:d1303b4bee3e24a406f9"
+      ],
+      "subject_id": "G5"
+    },
+    {
+      "context_file_node_ids": [],
+      "context_node_ids": [],
+      "direct_file_node_ids": [],
+      "direct_node_ids": [],
+      "disposition_state": "not_applicable",
+      "exact_relation_ids": [],
+      "relation_ids": [],
+      "subject_id": "T1"
+    },
+    {
+      "context_file_node_ids": [],
+      "context_node_ids": [],
+      "direct_file_node_ids": [],
+      "direct_node_ids": [],
+      "disposition_state": "not_applicable",
+      "exact_relation_ids": [],
+      "relation_ids": [],
+      "subject_id": "T2"
+    },
+    {
+      "context_file_node_ids": [],
+      "context_node_ids": [],
+      "direct_file_node_ids": [],
+      "direct_node_ids": [],
+      "disposition_state": "not_applicable",
+      "exact_relation_ids": [],
+      "relation_ids": [],
+      "subject_id": "T3"
+    }
+  ],
+  "packet_digest": "56a6084269535c7d3d7cd9a69669363625f2194a2fdac2a159985562b15a763b",
+  "schema_version": "structural_correctness_observation.v2"
+}

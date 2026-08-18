@@ -232,6 +232,8 @@ def build_selection_invariance_baseline(
     baseline_commit: str,
     campaign_root: str | Path,
     pull_requests: Sequence[int],
+    source_snapshot_root: str | Path | None = None,
+    source_commit: str | None = None,
 ) -> dict[str, Any]:
     """Rebuild the pre-provenance selected-universe baseline from Git.
 
@@ -245,7 +247,21 @@ def build_selection_invariance_baseline(
     campaign = Path(campaign_root)
     if campaign.is_absolute():
         campaign = campaign.resolve().relative_to(root)
-    source_commit = _git_output(root, "rev-parse", f"{baseline_commit}^{{commit}}")
+    snapshot_root = (
+        Path(source_snapshot_root).resolve()
+        if source_snapshot_root is not None
+        else None
+    )
+    if snapshot_root is None:
+        resolved_source_commit = _git_output(
+            root, "rev-parse", f"{baseline_commit}^{{commit}}"
+        )
+    else:
+        resolved_source_commit = source_commit
+        if not resolved_source_commit:
+            raise ValueError(
+                "source_snapshot_root requires the pinned source commit"
+            )
     source_observations = []
     per_pull_request = []
     for pull_request in pull_requests:
@@ -254,8 +270,18 @@ def build_selection_invariance_baseline(
             / "observations"
             / f"pr-{pull_request}.observation.json"
         ).as_posix()
-        blob = _git_output(root, "rev-parse", f"{baseline_commit}:{relative_path}")
-        raw = json.loads(_git_output(root, "show", f"{baseline_commit}:{relative_path}"))
+        if snapshot_root is None:
+            source_bytes = _git_output_bytes(
+                root, "show", f"{baseline_commit}:{relative_path}"
+            )
+            blob = _git_output(
+                root, "rev-parse", f"{baseline_commit}:{relative_path}"
+            )
+        else:
+            source_path = snapshot_root / Path(relative_path).name
+            source_bytes = source_path.read_bytes()
+            blob = _git_blob_id(source_bytes)
+        raw = json.loads(source_bytes)
         observation = _observation_from_mapping(raw)
         source_observations.append(
             {
@@ -286,7 +312,7 @@ def build_selection_invariance_baseline(
     return {
         "schema_version": SELECTION_INVARIANCE_SCHEMA,
         "baseline_commit": baseline_commit,
-        "source_commit": source_commit,
+        "source_commit": resolved_source_commit,
         "source_observations": source_observations,
         "description": (
             "Pre-provenance selected membership baseline; compares selected "
@@ -801,13 +827,21 @@ def _observation_from_mapping(
 
 
 def _git_output(repo_root: Path, *arguments: str) -> str:
+    return _git_output_bytes(repo_root, *arguments).decode().strip()
+
+
+def _git_output_bytes(repo_root: Path, *arguments: str) -> bytes:
     result = subprocess.run(
         ["git", "-C", str(repo_root), *arguments],
         check=True,
         capture_output=True,
-        text=True,
     )
-    return result.stdout.strip()
+    return result.stdout
+
+
+def _git_blob_id(value: bytes) -> str:
+    header = f"blob {len(value)}\0".encode("ascii")
+    return hashlib.sha1(header + value).hexdigest()
 
 
 def load_labels(
