@@ -235,9 +235,9 @@ def test_verification_workspace_is_serialized_for_renderer_consumption() -> None
     brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=_mixed_packet()))
     serialized = brief.to_dict()["projection"]
 
-    assert serialized["schema_version"] == "review_projection.v33"
+    assert serialized["schema_version"] == "review_projection.v34"
     assert serialized["structural_overview"]["schema_version"] == (
-        "structural_overview.v1"
+        "structural_overview.v2"
     )
     assert serialized["verification_workspace"]["schema_version"] == (
         "verification_workspace.v8"

@@ -370,37 +370,25 @@ def _review_graph(
         path_label, name_label = _structural_label_parts(full_name)
         kind = str(fact.metadata.get("symbol_kind", "symbol")).replace("_", " ")
         kind_class = _structural_kind_class(fact)
-        direct_focuses = tuple(
-            focus_id
-            for focus_id, membership in node_focus.get(container.node_id, ())
-            if membership.is_direct_mapping
+        direct_focuses, suggested_focuses, own_context_focuses, unresolved_focuses = (
+            _aggregate_node_focus((container.node_id,), node_focus)
         )
-        contextual_focuses = tuple(
-            dict.fromkeys(
+        contextual_focuses = tuple(sorted({
+            *own_context_focuses,
+            *(
                 focus_id
-                for focus_id in (
-                    *(
-                        item_focus_id
-                        for item_focus_id, membership in node_focus.get(
-                            container.node_id, ()
-                        )
-                        if not membership.is_direct_mapping
-                    ),
-                    *(
-                        item_focus_id
-                        for node_id in container.descendant_node_ids
-                        for item_focus_id, _membership in node_focus.get(node_id, ())
-                    ),
-                )
-                if focus_id not in direct_focuses
-            )
-        )
+                for node_id in container.descendant_node_ids
+                for focus_id, _membership in node_focus.get(node_id, ())
+            ),
+        }))
         container_shapes.append(
             f'<rect class="structural-container {kind_class} '
             f'operation-{escape(parent_node.delta)}" '
             f'data-structural-node="{escape(parent_node.id, quote=True)}" '
             f'data-focuses="{escape(" ".join(direct_focuses), quote=True)}" '
+            f'data-suggested-focuses="{escape(" ".join(suggested_focuses), quote=True)}" '
             f'data-context-focuses="{escape(" ".join(contextual_focuses), quote=True)}" '
+            f'data-unresolved-focuses="{escape(" ".join(unresolved_focuses), quote=True)}" '
             f'data-focus-memberships="{escape(_focus_membership_data(node_focus.get(container.node_id, ())), quote=True)}" '
             f'x="{container.x}" y="{container.y}" '
             f'width="{container.width}" height="{container.height}" rx="14">'
@@ -412,7 +400,9 @@ def _review_graph(
             f'operation-{escape(parent_node.delta)}" '
             f'data-structural-node="{escape(parent_node.id, quote=True)}" '
             f'data-focuses="{escape(" ".join(direct_focuses), quote=True)}" '
+            f'data-suggested-focuses="{escape(" ".join(suggested_focuses), quote=True)}" '
             f'data-context-focuses="{escape(" ".join(contextual_focuses), quote=True)}" '
+            f'data-unresolved-focuses="{escape(" ".join(unresolved_focuses), quote=True)}" '
             f'data-focus-memberships="{escape(_focus_membership_data(node_focus.get(container.node_id, ())), quote=True)}" '
             f'transform="translate({container.x + 12} {container.y + 12})">'
             f'<rect width="{container.width - 24}" height="42" rx="8"/>'
@@ -589,16 +579,12 @@ def _review_graph(
         path_label, name_label = _structural_label_parts(full_name)
         kind = str(fact.metadata.get("symbol_kind", "symbol")).replace("_", " ")
         kind_class = _structural_kind_class(fact)
-        direct_focuses = " ".join(
-            focus_id
-            for focus_id, membership in node_focus.get(node.id, ())
-            if membership.is_direct_mapping
-        )
-        contextual_focuses = " ".join(
-            focus_id
-            for focus_id, membership in node_focus.get(node.id, ())
-            if not membership.is_direct_mapping
-        )
+        (
+            direct_focuses,
+            suggested_focuses,
+            contextual_focuses,
+            unresolved_focuses,
+        ) = _aggregate_node_focus((node.id,), node_focus)
         content = (
             f'<g class="delta-node {kind_class} operation-{escape(node.delta)}'
             + (
@@ -608,8 +594,10 @@ def _review_graph(
             )
             + '" '
             f'data-structural-node="{escape(node.id, quote=True)}" '
-            f'data-focuses="{escape(direct_focuses, quote=True)}" '
-            f'data-context-focuses="{escape(contextual_focuses, quote=True)}" '
+            f'data-focuses="{escape(" ".join(direct_focuses), quote=True)}" '
+            f'data-suggested-focuses="{escape(" ".join(suggested_focuses), quote=True)}" '
+            f'data-context-focuses="{escape(" ".join(contextual_focuses), quote=True)}" '
+            f'data-unresolved-focuses="{escape(" ".join(unresolved_focuses), quote=True)}" '
             f'data-focus-memberships="{escape(_focus_membership_data(node_focus.get(node.id, ())), quote=True)}" '
             f'transform="translate({x} {y})">'
             '<rect width="210" height="72" rx="10"/>'
@@ -643,18 +631,27 @@ def _review_graph(
         if fact.metadata.get("symbol_kind") == "file":
             continue
         sources = _sources(fact, brief)
-        direct_focuses, contextual_focuses = _aggregate_node_focus(
+        (
+            direct_focuses,
+            suggested_focuses,
+            contextual_focuses,
+            unresolved_focuses,
+        ) = _aggregate_node_focus(
             (node.id,), node_focus
         )
         focuses = ", ".join(
-            dict.fromkeys((*direct_focuses, *contextual_focuses))
+            dict.fromkeys(
+                (*direct_focuses, *suggested_focuses, *contextual_focuses, *unresolved_focuses)
+            )
         )
         kind = str(fact.metadata.get("symbol_kind", "symbol")).replace("_", " ")
         isolated_rows.append(
             f'<div class="isolated-anchor operation-{escape(node.delta)}" '
             f'data-structural-node="{escape(node.id, quote=True)}" '
             f'data-focuses="{escape(" ".join(direct_focuses), quote=True)}" '
+            f'data-suggested-focuses="{escape(" ".join(suggested_focuses), quote=True)}" '
             f'data-context-focuses="{escape(" ".join(contextual_focuses), quote=True)}" '
+            f'data-unresolved-focuses="{escape(" ".join(unresolved_focuses), quote=True)}" '
             f'data-focus-memberships="{escape(_focus_membership_data(node_focus.get(node.id, ())), quote=True)}">'
             f'<span class="isolated-anchor-focus">{escape(focuses)}</span>'
             f'<span class="isolated-anchor-operation">{escape(node.delta)}</span>'
@@ -673,7 +670,9 @@ def _review_graph(
         focus.subject_id
         for focus in projection.structural_overview.focuses
         if focus.direct_file_node_ids
+        or focus.suggested_file_node_ids
         or focus.context_file_node_ids
+        or focus.unresolved_file_node_ids
         or focus.relation_ids
     }
     controls = _focus_controls(workspace, frozenset(visible_focus_ids))
@@ -1052,11 +1051,20 @@ def _file_structural_overview(
             for focus in overview.focuses
             if file_id in focus.direct_file_node_ids
         )
+        suggested_focuses = tuple(
+            focus.subject_id
+            for focus in overview.focuses
+            if file_id in focus.suggested_file_node_ids
+        )
         context_focuses = tuple(
             focus.subject_id
             for focus in overview.focuses
             if file_id in focus.context_file_node_ids
-            and focus.subject_id not in direct_focuses
+        )
+        unresolved_focuses = tuple(
+            focus.subject_id
+            for focus in overview.focuses
+            if file_id in focus.unresolved_file_node_ids
         )
         file_name = _structural_standalone_name(file_fact)
         overview_file = visible_files[file_id]
@@ -1073,7 +1081,9 @@ def _file_structural_overview(
             f'data-structural-node="{escape(file_id, quote=True)}" '
             f'data-file-node="{escape(file_id, quote=True)}" '
             f'data-focuses="{escape(" ".join(direct_focuses), quote=True)}" '
+            f'data-suggested-focuses="{escape(" ".join(suggested_focuses), quote=True)}" '
             f'data-context-focuses="{escape(" ".join(context_focuses), quote=True)}" '
+            f'data-unresolved-focuses="{escape(" ".join(unresolved_focuses), quote=True)}" '
             f'data-member-node-ids="{escape(" ".join((file_id, *member_ids)), quote=True)}" '
             f'data-context-node-ids="{escape(" ".join(overview_file.context_file_node_ids), quote=True)}" '
             f'data-member-group-ids="{escape(" ".join(overview_file.relation_group_ids), quote=True)}" '
@@ -1118,7 +1128,10 @@ def _file_structural_overview(
         context_chips = "".join(
             '<span class="retained-context-chip" '
             f'data-context-file="{escape(item.file_node_id, quote=True)}" '
-            f'data-focuses="{escape(" ".join(focus.subject_id for focus in overview.focuses if item.file_node_id in focus.direct_file_node_ids), quote=True)}">'
+            f'data-focuses="{escape(" ".join(focus.subject_id for focus in overview.focuses if item.file_node_id in focus.direct_file_node_ids), quote=True)}" '
+            f'data-suggested-focuses="{escape(" ".join(focus.subject_id for focus in overview.focuses if item.file_node_id in focus.suggested_file_node_ids), quote=True)}" '
+            f'data-context-focuses="{escape(" ".join(focus.subject_id for focus in overview.focuses if item.file_node_id in focus.context_file_node_ids), quote=True)}" '
+            f'data-unresolved-focuses="{escape(" ".join(focus.subject_id for focus in overview.focuses if item.file_node_id in focus.unresolved_file_node_ids), quote=True)}">'
             f'{escape(_structural_standalone_name(facts[item.file_node_id]))}'
             f'<small>{len(item.relation_group_ids)} boundary relation'
             f'{"s" if len(item.relation_group_ids) != 1 else ""}</small></span>'
@@ -1545,20 +1558,42 @@ def _aggregate_node_focus(
     node_focus: dict[
         str, list[tuple[str, StructuralFocusMembership]]
     ],
-) -> tuple[tuple[str, ...], tuple[str, ...]]:
+) -> tuple[
+    tuple[str, ...],
+    tuple[str, ...],
+    tuple[str, ...],
+    tuple[str, ...],
+]:
     direct = {
         focus_id
         for node_id in node_ids
         for focus_id, membership in node_focus.get(node_id, ())
         if membership.is_direct_mapping
     }
+    suggested = {
+        focus_id
+        for node_id in node_ids
+        for focus_id, membership in node_focus.get(node_id, ())
+        if membership.is_suggested
+    }
     contextual = {
         focus_id
         for node_id in node_ids
         for focus_id, membership in node_focus.get(node_id, ())
-        if not membership.is_direct_mapping and focus_id not in direct
+        if membership.is_context
     }
-    return tuple(sorted(direct)), tuple(sorted(contextual))
+    unresolved = {
+        focus_id
+        for node_id in node_ids
+        for focus_id, membership in node_focus.get(node_id, ())
+        if membership.is_unresolved
+    }
+    return (
+        tuple(sorted(direct)),
+        tuple(sorted(suggested)),
+        tuple(sorted(contextual)),
+        tuple(sorted(unresolved)),
+    )
 
 
 def _focus_membership_data(
@@ -1821,7 +1856,12 @@ def _file_member_graph(
         ):
             member_depth[member_id] = 0
             member_ids.append(member_id)
-        node_direct_focuses, context_focuses = _aggregate_node_focus(
+        (
+            node_direct_focuses,
+            suggested_focuses,
+            context_focuses,
+            unresolved_focuses,
+        ) = _aggregate_node_focus(
             (file_id, *member_ids), node_focus
         )
         direct_focuses = node_direct_focuses
@@ -1859,7 +1899,7 @@ def _file_member_graph(
                 parent_label = _structural_symbol_label(
                     facts[parent_id], parent_name
                 )
-            node_direct, contextual = _aggregate_node_focus(
+            node_direct, suggested, contextual, unresolved = _aggregate_node_focus(
                 (node_id,), node_focus
             )
             direct = node_direct
@@ -1904,7 +1944,9 @@ def _file_member_graph(
                 f'data-structural-node="{escape(node_id, quote=True)}" '
                 f'data-parent-node="{escape(parent_id or "", quote=True)}" '
                 f'data-focuses="{escape(" ".join(direct), quote=True)}" '
+                f'data-suggested-focuses="{escape(" ".join(suggested), quote=True)}" '
                 f'data-context-focuses="{escape(" ".join(contextual), quote=True)}" '
+                f'data-unresolved-focuses="{escape(" ".join(unresolved), quote=True)}" '
                 f'data-focus-memberships="{escape(_focus_membership_data(node_focus.get(node_id, ())), quote=True)}" '
                 f'aria-label="{escape(aria_label, quote=True)}">'
                 '<div class="member-line-main">'
@@ -1929,7 +1971,9 @@ def _file_member_graph(
             '<section class="file-member-panel" '
             f'data-structural-node="{escape(file_id, quote=True)}" '
             f'data-focuses="{escape(" ".join(direct_focuses), quote=True)}" '
+            f'data-suggested-focuses="{escape(" ".join(suggested_focuses), quote=True)}" '
             f'data-context-focuses="{escape(" ".join(context_focuses), quote=True)}" '
+            f'data-unresolved-focuses="{escape(" ".join(unresolved_focuses), quote=True)}" '
             f'data-focus-memberships="{escape(_focus_membership_data(tuple(item for node_id in (file_id, *member_ids) for item in node_focus.get(node_id, ()))), quote=True)}">'
             '<header><div class="file-header-meta"><span>file · '
             f'{escape(backbone_nodes[file_id].delta)}'
@@ -2713,6 +2757,8 @@ def render_html(brief: ReviewBrief) -> str:
 <style>
 :root{{color-scheme:dark;--bg:#080c0f;--panel:#10171b;--border:#26373f;--text:#edf3f0;--muted:#9eaaaf;--faint:#6f7d83;--green:#7be3ac;--amber:#e7ca7c;--red:#ef8f91;--blue:#9fcdf0;--shadow:0 22px 64px rgba(0,0,0,.28)}}*{{box-sizing:border-box}}body{{margin:0;color:var(--text);line-height:1.55;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 18% -8%,rgba(69,167,118,.12),transparent 31rem),var(--bg)}}code{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}}.shell{{width:min(1180px,calc(100% - 40px));margin:30px auto 84px}}.topbar{{margin-bottom:22px;font-weight:720}}.brand-mark{{display:inline-block;width:14px;height:14px;margin-right:10px;border:2px solid white;transform:rotate(45deg);border-radius:3px}}.section{{border:2px solid var(--border);border-radius:18px;background:linear-gradient(180deg,rgba(17,24,28,.97),rgba(11,17,21,.98));box-shadow:var(--shadow);padding:28px;margin-bottom:22px}}h1{{font-size:31px;margin:0 0 14px}}h2{{font-size:22px;margin:0 0 14px}}h3{{font-size:16px;margin:0 0 8px}}.meta{{display:flex;flex-wrap:wrap;gap:9px;color:var(--muted);font-size:13px;margin-bottom:16px}}.intent{{max-width:850px;color:#d2dade;font-size:15px}}.source-link,.file-link{{color:#b9dfff;text-decoration:none}}.source-note,.projection-source,.context-source{{display:block;color:var(--faint);font-size:10px;line-height:1.45}}.projection-heading{{display:block;margin-bottom:9px;color:#89979d;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.045em}}.review-structural-graph{{margin-top:24px;padding:18px;border:1px solid rgba(111,128,135,.22);border-radius:12px;background:rgba(5,10,13,.24)}}.delta-graph-heading{{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}}.structural-coverage{{margin-bottom:3px;color:var(--muted);font-size:9px}}.structural-coverage.state-partial,.structural-coverage.state-stale,.structural-coverage.state-missing,.structural-coverage.state-invalid,.structural-coverage.state-error{{color:var(--amber)}}.subgraph-summary{{color:var(--muted);font-size:9px}}.delta-focus-controls{{display:flex;flex:1 1 560px;min-width:0;max-width:720px;flex-wrap:wrap;justify-content:flex-end;gap:5px}}.delta-focus{{border:1px solid rgba(111,128,135,.35);border-radius:999px;padding:4px 9px;background:transparent;color:var(--muted);font:700 9px inherit;cursor:pointer}}.delta-focus:hover,.delta-focus.active{{border-color:var(--green);background:rgba(54,118,87,.20);color:#c9efd6}}.delta-canvas-scroll{{margin-top:14px;overflow-x:auto;border:1px solid rgba(111,128,135,.16);border-radius:10px;background:rgba(3,7,9,.34)}}.delta-canvas{{display:block;min-width:100%;height:auto}}.delta-edge,.structural-container,.delta-node,.isolated-anchor{{transition:opacity .16s ease,filter .16s ease}}.delta-edge path{{fill:none;stroke-width:1.8}}.delta-edge-label-bg{{fill:rgba(3,7,9,.92);stroke:rgba(111,128,135,.24);stroke-width:.7}}.delta-edge-label{{font-size:8px;text-anchor:middle;paint-order:stroke;stroke:var(--bg);stroke-width:2px;stroke-linejoin:round}}.delta-edge.operation-added path{{stroke:var(--green)}}.delta-edge.operation-added text{{fill:var(--green)}}.delta-edge.operation-removed path{{stroke:var(--red);stroke-dasharray:6 5}}.delta-edge.operation-removed text{{fill:var(--red)}}.delta-edge.operation-retained path{{stroke:#73848c}}.delta-edge.operation-retained text{{fill:#94a2a8}}#arrow-added path{{fill:var(--green)}}#arrow-removed path{{fill:var(--red)}}#arrow-retained path{{fill:#73848c}}.structural-container{{fill:rgba(16,27,33,.42);stroke:#354a54;stroke-width:1.1}}.structural-container.operation-added{{stroke:rgba(123,227,172,.52);fill:rgba(54,118,87,.06)}}.structural-container.operation-removed{{stroke:rgba(239,143,145,.5);stroke-dasharray:6 4;fill:rgba(112,43,48,.05)}}.delta-node rect{{fill:#111a1f;stroke:#53656e;stroke-width:1.2}}.delta-node.operation-added rect{{stroke:var(--green);fill:rgba(54,118,87,.14)}}.delta-node.operation-modified rect{{stroke:var(--amber);fill:rgba(106,85,30,.13)}}.delta-node.operation-removed rect{{stroke:var(--red);stroke-dasharray:6 4;fill:rgba(112,43,48,.12)}}.delta-node-kind{{fill:var(--muted);font-size:8px;text-transform:uppercase}}.delta-node-name{{fill:var(--text);font-size:10px;font-weight:700}}.delta-node-path{{fill:var(--faint);font-size:8px}}.focus-muted{{opacity:.13}}.focus-context{{opacity:.7}}.structural-container.focus-context,.structural-container-header.focus-context{{filter:drop-shadow(0 0 2px rgba(159,205,240,.22))}}.focus-active{{opacity:1;filter:drop-shadow(0 0 5px rgba(123,227,172,.35))}}.delta-empty{{margin:14px 0 0;padding:18px;border:1px dashed rgba(111,128,135,.26);border-radius:10px;color:var(--faint);font-size:11px}}.isolated-anchors{{margin-top:12px;border-top:1px solid rgba(111,128,135,.18);padding-top:10px}}.isolated-anchors>summary{{cursor:pointer;color:var(--muted);font-size:10px}}.isolated-anchor-list{{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:9px}}.isolated-anchor{{display:grid;grid-template-columns:auto 1fr auto;gap:4px 7px;min-width:0;padding:8px;border:1px solid rgba(111,128,135,.16);border-left:2px solid var(--amber);border-radius:7px}}.isolated-anchor.operation-added{{border-left-color:var(--green)}}.isolated-anchor.operation-removed{{border-left-color:var(--red);border-style:dashed}}.isolated-anchor-focus,.isolated-anchor-operation,.isolated-anchor-kind{{color:var(--faint);font-size:8px}}.isolated-anchor-operation{{text-transform:uppercase}}.isolated-anchor-kind{{text-align:right}}.isolated-anchor-name{{grid-column:1/-1;overflow-wrap:anywhere;font-size:9px}}.isolated-anchor .projection-source{{grid-column:1/-1}}.context{{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(111,128,135,.24)}}.context>summary{{cursor:pointer;color:var(--muted);font-size:11px}}.context-row{{display:grid;grid-template-columns:48px minmax(0,1fr) 120px;gap:12px;padding:12px 0;border-bottom:1px solid rgba(111,128,135,.18)}}.context-id{{color:#9fcdf0;font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace}}.context-copy{{font-size:12px}}.context-authority{{color:var(--muted);font-size:10px;text-align:right}}.context-source{{grid-column:2/-1}}.attention-list,.file-list{{border-top:1px solid rgba(111,128,135,.24)}}.attention-row{{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.attention-kind{{color:var(--amber);font-size:10px;font-weight:700;text-transform:uppercase}}.attention-copy{{color:#cbd4d7;font-size:12px}}.file-row{{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;padding:14px 0;border-bottom:1px solid rgba(111,128,135,.24)}}.file-name{{font-size:13px;font-weight:650}}.file-path{{display:block;color:var(--faint);font-size:10px}}.file-state{{color:var(--muted);font-size:10px}}.empty,.empty-state{{color:var(--faint);font-size:12px}}.footer{{margin-top:26px;color:var(--faint);font-size:12px;text-align:center}}@media(max-width:950px){{.isolated-anchor-list{{grid-template-columns:repeat(2,minmax(0,1fr))}}}}@media(max-width:600px){{.shell{{width:calc(100% - 18px);margin-top:16px}}.section{{padding:22px 20px}}.attention-row,.context-row{{grid-template-columns:1fr}}.delta-graph-heading{{display:block}}.delta-focus-controls{{max-width:none;justify-content:flex-start;margin-top:10px}}.isolated-anchor-list{{grid-template-columns:1fr}}}}@media print{{:root{{color-scheme:light;--bg:#fff;--panel:#fff;--text:#111;--muted:#444;--faint:#666;--border:#bbb}}body{{background:#fff}}.section{{box-shadow:none;break-inside:avoid}}.delta-focus-controls{{display:none}}.delta-canvas-scroll{{overflow:visible}}}}.delta-graph-heading{{flex-wrap:wrap}}.delta-node.operation-renamed rect{{stroke:var(--blue);stroke-dasharray:8 3;fill:rgba(48,83,110,.14)}}.isolated-anchor.operation-renamed{{border-left-color:var(--blue);border-style:dashed}}.delta-node.operation-retained rect{{stroke:#53656e;fill:#111a1f}}.delta-node.operation-unresolved rect{{stroke:var(--faint);stroke-dasharray:3 3;fill:rgba(111,125,131,.08)}}.isolated-anchor.operation-unresolved{{border-left-color:var(--faint);border-style:dashed}}.structural-container-header,.secondary-placement{{transition:opacity .16s ease,filter .16s ease}}.structural-container-header rect{{fill:#132027;stroke:#58707c;stroke-width:1.1}}.structural-container-header.operation-added rect{{stroke:var(--green);fill:rgba(54,118,87,.14)}}.structural-container-header.operation-modified rect{{stroke:var(--amber);fill:rgba(106,85,30,.13)}}.structural-container-header.operation-removed rect{{stroke:var(--red);stroke-dasharray:6 4;fill:rgba(112,43,48,.12)}}.structural-container-header.operation-unresolved rect{{stroke:var(--faint);stroke-dasharray:3 3}}.secondary-placement rect{{fill:rgba(48,83,110,.18);stroke:var(--blue);stroke-width:.8;stroke-dasharray:3 2}}.secondary-placement text{{fill:var(--blue);font-size:8px}}.delta-focus.no-visible-backbone{{border-style:dashed;color:var(--faint)}}.delta-focus-empty{{margin:12px 0 0;padding:9px 11px;border:1px dashed rgba(111,128,135,.3);border-radius:8px;color:var(--muted);font-size:10px}}
 .delta-node-marker{{stroke-width:3;stroke-linecap:round}}
+.focus-suggested{{opacity:.78;filter:drop-shadow(0 0 3px rgba(231,202,124,.3))}}
+.focus-unresolved{{opacity:.52;filter:drop-shadow(0 0 2px rgba(111,128,135,.25))}}
 .delta-node.operation-added .delta-node-marker{{stroke:var(--green)}}
 .delta-node.operation-modified .delta-node-marker{{stroke:var(--amber)}}
 .delta-node.operation-removed .delta-node-marker{{stroke:var(--red)}}
@@ -2858,6 +2904,8 @@ def render_html(brief: ReviewBrief) -> str:
 .file-graph-node.focus-hidden,.file-delta-edge.focus-hidden,.retained-context-chip.focus-hidden{{display:none}}
 .file-graph-node.focus-muted,.file-delta-edge.focus-muted{{opacity:.12}}
 .file-graph-node.focus-context,.file-delta-edge.focus-context{{opacity:.52}}
+.file-graph-node.focus-suggested,.file-delta-edge.focus-suggested{{opacity:.78;filter:drop-shadow(0 0 3px rgba(231,202,124,.3))}}
+.file-graph-node.focus-unresolved,.file-delta-edge.focus-unresolved{{opacity:.52;filter:drop-shadow(0 0 2px rgba(111,128,135,.25))}}
 .file-graph-node.focus-active{{opacity:1;filter:drop-shadow(0 0 5px rgba(123,227,172,.25))}}
 .file-delta-edge.focus-active{{opacity:1;filter:drop-shadow(0 0 3px rgba(123,227,172,.25))}}
 .file-graph-layer.focus-no-map .delta-canvas-scroll,.file-graph-layer.focus-no-map .retained-boundary-context{{display:none}}
@@ -2919,7 +2967,10 @@ const intersects = (left, right) => [...left].some((item) => right.has(item));
 const focusSurfaces = document.querySelectorAll(".review-structural-graph");
 const clearMapFocus = (surface) => {{
   surface.querySelectorAll(".file-graph-node, .file-delta-edge, .retained-context-chip").forEach((item) => {{
-    item.classList.remove("focus-hidden", "focus-muted", "focus-context", "focus-active");
+    item.classList.remove(
+      "focus-hidden", "focus-muted", "focus-context", "focus-active",
+      "focus-suggested", "focus-unresolved"
+    );
   }});
   surface.querySelector(".file-graph-layer")?.classList.remove("focus-no-map");
 }};
@@ -2927,10 +2978,19 @@ const applyAuthoredMapFocus = (surface, focus) => {{
   clearMapFocus(surface);
   surface.querySelectorAll(".file-graph-node, .file-delta-edge, .retained-context-chip").forEach((item) => {{
     const direct = focus === "overview" || tokenSet(item.dataset.focuses).has(focus);
-    const contextual = focus !== "overview" && !direct &&
+    const suggested = focus !== "overview" && !direct &&
+      tokenSet(item.dataset.suggestedFocuses).has(focus);
+    const contextual = focus !== "overview" && !direct && !suggested &&
       tokenSet(item.dataset.contextFocuses).has(focus);
-    item.classList.toggle("focus-hidden", focus !== "overview" && !direct && !contextual);
+    const unresolved = focus !== "overview" && !direct && !suggested && !contextual &&
+      tokenSet(item.dataset.unresolvedFocuses).has(focus);
+    item.classList.toggle(
+      "focus-hidden", focus !== "overview" &&
+        !direct && !suggested && !contextual && !unresolved
+    );
     item.classList.toggle("focus-context", contextual);
+    item.classList.toggle("focus-suggested", suggested);
+    item.classList.toggle("focus-unresolved", unresolved);
     item.classList.toggle("focus-active", focus !== "overview" && direct);
   }});
   const control = surface.querySelector(`[data-focus-target="${{focus}}"]`);

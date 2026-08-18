@@ -3082,11 +3082,22 @@ class StructuralOverviewFocus:
 
     subject_id: str
     direct_file_node_ids: tuple[str, ...] = ()
+    suggested_file_node_ids: tuple[str, ...] = ()
     context_file_node_ids: tuple[str, ...] = ()
+    unresolved_file_node_ids: tuple[str, ...] = ()
     relation_ids: tuple[str, ...] = ()
     structural_disposition: StructuralFocusDisposition = (
         StructuralFocusDisposition()
     )
+
+    @property
+    def selected_file_node_ids(self) -> tuple[str, ...]:
+        return tuple(sorted({
+            *self.direct_file_node_ids,
+            *self.suggested_file_node_ids,
+            *self.context_file_node_ids,
+            *self.unresolved_file_node_ids,
+        }))
 
 
 @dataclass(frozen=True)
@@ -3096,7 +3107,7 @@ class StructuralOverviewProjection:
     files: tuple[StructuralOverviewFile, ...] = ()
     relations: tuple[StructuralOverviewRelation, ...] = ()
     focuses: tuple[StructuralOverviewFocus, ...] = ()
-    schema_version: str = "structural_overview.v1"
+    schema_version: str = "structural_overview.v2"
 
     def files_by_id(self) -> dict[str, StructuralOverviewFile]:
         return {item.file_node_id: item for item in self.files}
@@ -3203,6 +3214,18 @@ class StructuralFocusMembership:
         """
 
         return self.membership_class in {"asserted", "matched"}
+
+    @property
+    def is_suggested(self) -> bool:
+        return self.membership_class == "suggested"
+
+    @property
+    def is_context(self) -> bool:
+        return self.membership_class == "context"
+
+    @property
+    def is_unresolved(self) -> bool:
+        return self.membership_class == "unresolved"
 
 @dataclass(frozen=True)
 class StructuralFocusOverlay:
@@ -3392,7 +3415,7 @@ class ReviewProjection:
     structural_overview: StructuralOverviewProjection = (
         StructuralOverviewProjection()
     )
-    schema_version: str = "review_projection.v33"
+    schema_version: str = "review_projection.v34"
 
     def validate_consistency(
         self,
@@ -4130,7 +4153,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "repodelta-open-core"
-    schema_version: str = "review_brief.v56"
+    schema_version: str = "review_brief.v57"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

@@ -84,10 +84,11 @@ ordinary exploratory output remains under `build/` and is not committed.
 
 File comparison distinguishes exact agreement, false inclusion, false
 exclusion, role disagreement, and reference-unresolved cases. Focus comparison
-reports those outcomes independently for file membership, canonical node role,
-and exact relations for each subject. `complete` or `available` remains bounded
-to the coverage surface recorded in the packet; it is never interpreted as
-complete repository truth.
+keeps selected membership, claimed-direct, suggestion behavior, structural
+context, and exact relations as separate dimensions for each subject. A
+suggestion is not promoted to direct mapping and is not silently relabeled as
+context. `complete` or `available` remains bounded to the coverage surface
+recorded in the packet; it is never interpreted as complete repository truth.
 
 Campaign findings determine retrieval changes. Typed production provenance may
 be added without changing selection when it prevents context from being
@@ -103,8 +104,12 @@ later when correctness holds but scale prevents comprehension.
 and regenerates the same eight-PR sample under the v3 packet and independently
 verified reference contract. Its
 [`verification record`](campaign-v1-1/verification.md) documents source-review
-isolation and a relation-endpoint defect corrected before reference freeze. The
+isolation and a relation-endpoint defect corrected before reference freeze. Its
+[`selection invariance baseline`](campaign-v1-1/results/selection-invariance-baseline.json)
+checks selected file/node universes, exact relation IDs, and dispositions
+directly against the pre-provenance observation. The
 [`findings`](campaign-v1-1/results/findings.md) retain the focus over-selection
-direction while bounding recall claims by per-focus traversal coverage.
+direction while separating provenance behavior from semantic reference roles
+and bounding recall claims by per-focus traversal coverage.
 Campaign v1.1 is the sole current structural-correctness baseline; there is no
 campaign v1.2.

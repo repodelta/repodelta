@@ -1297,7 +1297,7 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
     assert 'data-path-kind="unresolved"' in html
     assert "Heuristic suggestion · 1" in html
     assert 'data-focus-memberships="R1:suggested"' in html
-    assert 'data-focuses="" data-context-focuses="R1" data-focus-memberships="R1:suggested"' in html
+    assert 'data-focuses="" data-suggested-focuses="R1" data-context-focuses="" data-unresolved-focuses="" data-focus-memberships="R1:suggested"' in html
     assert "Change topology" not in html
     assert 'class="architectural-chip-html ' in html
     assert 'data-component-target="' in html
@@ -2263,7 +2263,7 @@ def test_review_graph_renders_complete_focus_union() -> None:
     assert html.count('class="delta-node kind-') == 4
     assert html.count('class="isolated-anchor operation-') == 1
     assert html.count('class="delta-edge operation-') == 3
-    assert 'data-focuses="R1 R2 G1"' in html
+    assert 'data-focuses="G1 R1 R2"' in html
     assert html.count('data-focus-target="overview"') == 1
     assert html.count('data-focus-target="R1"') == 1
     assert html.count('data-focus-target="R2"') == 1

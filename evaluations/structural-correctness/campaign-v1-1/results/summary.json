@@ -1,5 +1,5 @@
 {
-  "schema_version": "structural_correctness_campaign_summary.v2",
+  "schema_version": "structural_correctness_campaign_summary.v3",
   "campaign": "campaign-v1-1",
   "reference_status": "independently_verified",
   "sample_count": 8,
@@ -20,11 +20,61 @@
   "focus_nodes": {
     "false_inclusions": 1453,
     "false_exclusions": 176,
-    "role_disagreements": 125
+    "role_disagreements": 12
+  },
+  "focus_role_comparison": {
+    "false_inclusions": 1101,
+    "false_exclusions": 289,
+    "role_disagreements": 12
   },
   "focus_exact_relations": {
     "false_inclusions": 684,
     "false_exclusions": 49
+  },
+  "selected_membership": {
+    "files": {
+      "false_inclusions": 458,
+      "false_exclusions": 77
+    },
+    "nodes": {
+      "false_inclusions": 1453,
+      "false_exclusions": 176
+    }
+  },
+  "claimed_direct": {
+    "files": {
+      "false_inclusions": 217,
+      "false_exclusions": 169
+    },
+    "nodes": {
+      "false_inclusions": 352,
+      "false_exclusions": 289
+    }
+  },
+  "structural_context": {
+    "files": {
+      "false_inclusions": 151,
+      "false_exclusions": 3
+    },
+    "nodes": {
+      "false_inclusions": 761,
+      "false_exclusions": 12
+    }
+  },
+  "suggestions": {
+    "files_observed": 199,
+    "nodes_observed": 465,
+    "focuses_with_suggestions": 7
+  },
+  "selection_invariance": {
+    "status": "passed",
+    "baseline_commit": "090377e",
+    "pull_requests": 8,
+    "focuses_checked": 113,
+    "file_universes_checked": 113,
+    "node_universes_checked": 113,
+    "relations_checked": 113,
+    "dispositions_checked": 113
   },
   "per_pull_request": [
     {
@@ -34,9 +84,23 @@
       "overview_role_disagreements": 0,
       "focuses_resolved": 13,
       "focuses_unresolved": 0,
-      "node_false_inclusions": 63,
-      "node_false_exclusions": 15,
-      "node_role_disagreements": 8,
+      "node_false_inclusions": 55,
+      "node_false_exclusions": 22,
+      "node_role_disagreements": 1,
+      "node_membership_false_inclusions": 63,
+      "node_membership_false_exclusions": 15,
+      "node_claimed_direct_false_inclusions": 0,
+      "node_claimed_direct_false_exclusions": 22,
+      "node_context_false_inclusions": 56,
+      "node_context_false_exclusions": 1,
+      "node_suggestion_count": 15,
+      "file_membership_false_inclusions": 7,
+      "file_membership_false_exclusions": 9,
+      "file_claimed_direct_false_inclusions": 0,
+      "file_claimed_direct_false_exclusions": 17,
+      "file_context_false_inclusions": 6,
+      "file_context_false_exclusions": 0,
+      "file_suggestion_count": 9,
       "relation_false_inclusions": 46,
       "relation_false_exclusions": 4,
       "focus_coverage": {
@@ -54,9 +118,23 @@
       "overview_role_disagreements": 0,
       "focuses_resolved": 16,
       "focuses_unresolved": 0,
-      "node_false_inclusions": 274,
-      "node_false_exclusions": 21,
-      "node_role_disagreements": 11,
+      "node_false_inclusions": 259,
+      "node_false_exclusions": 30,
+      "node_role_disagreements": 2,
+      "node_membership_false_inclusions": 274,
+      "node_membership_false_exclusions": 21,
+      "node_claimed_direct_false_inclusions": 6,
+      "node_claimed_direct_false_exclusions": 32,
+      "node_context_false_inclusions": 255,
+      "node_context_false_exclusions": 0,
+      "node_suggestion_count": 24,
+      "file_membership_false_inclusions": 62,
+      "file_membership_false_exclusions": 11,
+      "file_claimed_direct_false_inclusions": 6,
+      "file_claimed_direct_false_exclusions": 26,
+      "file_context_false_inclusions": 48,
+      "file_context_false_exclusions": 0,
+      "file_suggestion_count": 23,
       "relation_false_inclusions": 96,
       "relation_false_exclusions": 4,
       "focus_coverage": {
@@ -77,6 +155,20 @@
       "node_false_inclusions": 0,
       "node_false_exclusions": 0,
       "node_role_disagreements": 0,
+      "node_membership_false_inclusions": 0,
+      "node_membership_false_exclusions": 0,
+      "node_claimed_direct_false_inclusions": 0,
+      "node_claimed_direct_false_exclusions": 0,
+      "node_context_false_inclusions": 0,
+      "node_context_false_exclusions": 0,
+      "node_suggestion_count": 0,
+      "file_membership_false_inclusions": 0,
+      "file_membership_false_exclusions": 0,
+      "file_claimed_direct_false_inclusions": 0,
+      "file_claimed_direct_false_exclusions": 0,
+      "file_context_false_inclusions": 0,
+      "file_context_false_exclusions": 0,
+      "file_suggestion_count": 0,
       "relation_false_inclusions": 0,
       "relation_false_exclusions": 0,
       "focus_coverage": {
@@ -94,9 +186,23 @@
       "overview_role_disagreements": 0,
       "focuses_resolved": 18,
       "focuses_unresolved": 0,
-      "node_false_inclusions": 81,
-      "node_false_exclusions": 43,
-      "node_role_disagreements": 17,
+      "node_false_inclusions": 50,
+      "node_false_exclusions": 57,
+      "node_role_disagreements": 3,
+      "node_membership_false_inclusions": 81,
+      "node_membership_false_exclusions": 43,
+      "node_claimed_direct_false_inclusions": 18,
+      "node_claimed_direct_false_exclusions": 60,
+      "node_context_false_inclusions": 35,
+      "node_context_false_exclusions": 0,
+      "node_suggestion_count": 45,
+      "file_membership_false_inclusions": 9,
+      "file_membership_false_exclusions": 11,
+      "file_claimed_direct_false_inclusions": 4,
+      "file_claimed_direct_false_exclusions": 18,
+      "file_context_false_inclusions": 3,
+      "file_context_false_exclusions": 0,
+      "file_suggestion_count": 13,
       "relation_false_inclusions": 59,
       "relation_false_exclusions": 16,
       "focus_coverage": {
@@ -114,9 +220,23 @@
       "overview_role_disagreements": 0,
       "focuses_resolved": 20,
       "focuses_unresolved": 0,
-      "node_false_inclusions": 280,
-      "node_false_exclusions": 33,
-      "node_role_disagreements": 23,
+      "node_false_inclusions": 171,
+      "node_false_exclusions": 54,
+      "node_role_disagreements": 2,
+      "node_membership_false_inclusions": 280,
+      "node_membership_false_exclusions": 33,
+      "node_claimed_direct_false_inclusions": 11,
+      "node_claimed_direct_false_exclusions": 45,
+      "node_context_false_inclusions": 162,
+      "node_context_false_exclusions": 11,
+      "node_suggestion_count": 130,
+      "file_membership_false_inclusions": 50,
+      "file_membership_false_exclusions": 15,
+      "file_claimed_direct_false_inclusions": 6,
+      "file_claimed_direct_false_exclusions": 26,
+      "file_context_false_inclusions": 37,
+      "file_context_false_exclusions": 3,
+      "file_suggestion_count": 25,
       "relation_false_inclusions": 183,
       "relation_false_exclusions": 11,
       "focus_coverage": {
@@ -134,9 +254,23 @@
       "overview_role_disagreements": 0,
       "focuses_resolved": 12,
       "focuses_unresolved": 0,
-      "node_false_inclusions": 200,
-      "node_false_exclusions": 21,
-      "node_role_disagreements": 29,
+      "node_false_inclusions": 151,
+      "node_false_exclusions": 50,
+      "node_role_disagreements": 0,
+      "node_membership_false_inclusions": 200,
+      "node_membership_false_exclusions": 21,
+      "node_claimed_direct_false_inclusions": 2,
+      "node_claimed_direct_false_exclusions": 50,
+      "node_context_false_inclusions": 149,
+      "node_context_false_exclusions": 0,
+      "node_suggestion_count": 78,
+      "file_membership_false_inclusions": 46,
+      "file_membership_false_exclusions": 8,
+      "file_claimed_direct_false_inclusions": 0,
+      "file_claimed_direct_false_exclusions": 29,
+      "file_context_false_inclusions": 31,
+      "file_context_false_exclusions": 0,
+      "file_suggestion_count": 37,
       "relation_false_inclusions": 126,
       "relation_false_exclusions": 5,
       "focus_coverage": {
@@ -154,9 +288,23 @@
       "overview_role_disagreements": 0,
       "focuses_resolved": 14,
       "focuses_unresolved": 0,
-      "node_false_inclusions": 144,
-      "node_false_exclusions": 28,
-      "node_role_disagreements": 28,
+      "node_false_inclusions": 80,
+      "node_false_exclusions": 56,
+      "node_role_disagreements": 0,
+      "node_membership_false_inclusions": 144,
+      "node_membership_false_exclusions": 28,
+      "node_claimed_direct_false_inclusions": 0,
+      "node_claimed_direct_false_exclusions": 56,
+      "node_context_false_inclusions": 80,
+      "node_context_false_exclusions": 0,
+      "node_suggestion_count": 92,
+      "file_membership_false_inclusions": 19,
+      "file_membership_false_exclusions": 10,
+      "file_claimed_direct_false_inclusions": 0,
+      "file_claimed_direct_false_exclusions": 33,
+      "file_context_false_inclusions": 9,
+      "file_context_false_exclusions": 0,
+      "file_suggestion_count": 33,
       "relation_false_inclusions": 85,
       "relation_false_exclusions": 9,
       "focus_coverage": {
@@ -174,9 +322,23 @@
       "overview_role_disagreements": 0,
       "focuses_resolved": 17,
       "focuses_unresolved": 3,
-      "node_false_inclusions": 411,
-      "node_false_exclusions": 15,
-      "node_role_disagreements": 9,
+      "node_false_inclusions": 335,
+      "node_false_exclusions": 20,
+      "node_role_disagreements": 4,
+      "node_membership_false_inclusions": 411,
+      "node_membership_false_exclusions": 15,
+      "node_claimed_direct_false_inclusions": 315,
+      "node_claimed_direct_false_exclusions": 24,
+      "node_context_false_inclusions": 24,
+      "node_context_false_exclusions": 0,
+      "node_suggestion_count": 81,
+      "file_membership_false_inclusions": 265,
+      "file_membership_false_exclusions": 13,
+      "file_claimed_direct_false_inclusions": 201,
+      "file_claimed_direct_false_exclusions": 20,
+      "file_context_false_inclusions": 17,
+      "file_context_false_exclusions": 0,
+      "file_suggestion_count": 59,
       "relation_false_inclusions": 89,
       "relation_false_exclusions": 0,
       "focus_coverage": {
@@ -187,5 +349,6 @@
         "unresolved": 3
       }
     }
-  ]
+  ],
+  "next_investment": "correct_underlying_projection"
 }

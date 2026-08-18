@@ -128,14 +128,19 @@ def test_campaign_v1_summary_is_derived_from_frozen_truth() -> None:
     }
     assert summary["focus_nodes"] == {
         "false_inclusions": sum(
-            row["node_false_inclusions"] for row in expected_rows
+            row["node_membership_false_inclusions"] for row in expected_rows
         ),
         "false_exclusions": sum(
-            row["node_false_exclusions"] for row in expected_rows
+            row["node_membership_false_exclusions"] for row in expected_rows
         ),
         "role_disagreements": sum(
             row["node_role_disagreements"] for row in expected_rows
         ),
+    }
+    assert summary["focus_role_comparison"] == {
+        "false_inclusions": sum(row["node_false_inclusions"] for row in expected_rows),
+        "false_exclusions": sum(row["node_false_exclusions"] for row in expected_rows),
+        "role_disagreements": sum(row["node_role_disagreements"] for row in expected_rows),
     }
     assert summary["focus_exact_relations"] == {
         "false_inclusions": sum(
@@ -242,14 +247,19 @@ def test_campaign_v1_1_summary_is_derived_from_verified_references() -> None:
     }
     assert summary["focus_nodes"] == {
         "false_inclusions": sum(
-            row["node_false_inclusions"] for row in expected_rows
+            row["node_membership_false_inclusions"] for row in expected_rows
         ),
         "false_exclusions": sum(
-            row["node_false_exclusions"] for row in expected_rows
+            row["node_membership_false_exclusions"] for row in expected_rows
         ),
         "role_disagreements": sum(
             row["node_role_disagreements"] for row in expected_rows
         ),
+    }
+    assert summary["focus_role_comparison"] == {
+        "false_inclusions": sum(row["node_false_inclusions"] for row in expected_rows),
+        "false_exclusions": sum(row["node_false_exclusions"] for row in expected_rows),
+        "role_disagreements": sum(row["node_role_disagreements"] for row in expected_rows),
     }
     assert summary["focus_exact_relations"] == {
         "false_inclusions": sum(
@@ -259,6 +269,47 @@ def test_campaign_v1_1_summary_is_derived_from_verified_references() -> None:
             row["relation_false_exclusions"] for row in expected_rows
         ),
     }
+
+
+def test_campaign_v1_1_selection_invariance_is_machine_checked() -> None:
+    baseline = json.loads(
+        (
+            V1_1_CAMPAIGN
+            / "results"
+            / "selection-invariance-baseline.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert baseline["schema_version"] == "structural_focus_selection_invariance.v1"
+    current_by_pr = {}
+    for sample in json.loads(V1_1_MANIFEST.read_text(encoding="utf-8"))["samples"]:
+        pull_request = sample["pull_request"]
+        observation = load_observation(
+            V1_1_CAMPAIGN
+            / "observations"
+            / f"pr-{pull_request}.observation.json"
+        )
+        current_by_pr[pull_request] = {
+            item.subject_id: item for item in observation.focuses
+        }
+    checked = 0
+    for sample in baseline["per_pull_request"]:
+        pull_request = sample["pull_request"]
+        current = current_by_pr[pull_request]
+        assert {item["subject_id"] for item in sample["focuses"]} == set(current)
+        for expected in sample["focuses"]:
+            observed = current[expected["subject_id"]]
+            assert set(observed.selected_file_node_ids) == set(
+                expected["selected_file_node_ids"]
+            )
+            assert set(observed.selected_node_ids) == set(
+                expected["selected_node_ids"]
+            )
+            assert set(observed.exact_relation_ids) == set(
+                expected["exact_relation_ids"]
+            )
+            assert observed.disposition_state == expected["disposition_state"]
+            checked += 1
+    assert checked == 113
 
 
 def _campaign_row(pull_request, labels, observation):
@@ -273,6 +324,20 @@ def _campaign_row(pull_request, labels, observation):
         "node_false_inclusions": 0,
         "node_false_exclusions": 0,
         "node_role_disagreements": 0,
+        "node_membership_false_inclusions": 0,
+        "node_membership_false_exclusions": 0,
+        "node_claimed_direct_false_inclusions": 0,
+        "node_claimed_direct_false_exclusions": 0,
+        "node_context_false_inclusions": 0,
+        "node_context_false_exclusions": 0,
+        "node_suggestion_count": 0,
+        "file_membership_false_inclusions": 0,
+        "file_membership_false_exclusions": 0,
+        "file_claimed_direct_false_inclusions": 0,
+        "file_claimed_direct_false_exclusions": 0,
+        "file_context_false_inclusions": 0,
+        "file_context_false_exclusions": 0,
+        "file_suggestion_count": 0,
         "relation_false_inclusions": 0,
         "relation_false_exclusions": 0,
     }
@@ -312,6 +377,29 @@ def _campaign_row(pull_request, labels, observation):
         row["node_role_disagreements"] += sum(
             observed_roles[item] != expected_roles[item] for item in shared_ids
         )
+        expected_node_selected = set(expected.direct_node_ids) | set(
+            expected.context_node_ids
+        )
+        observed_node_selected = set(observed.selected_node_ids)
+        row["node_membership_false_inclusions"] += len(
+            observed_node_selected - expected_node_selected
+        )
+        row["node_membership_false_exclusions"] += len(
+            expected_node_selected - observed_node_selected
+        )
+        row["node_claimed_direct_false_inclusions"] += len(
+            set(observed.direct_node_ids) - set(expected.direct_node_ids)
+        )
+        row["node_claimed_direct_false_exclusions"] += len(
+            set(expected.direct_node_ids) - set(observed.direct_node_ids)
+        )
+        row["node_context_false_inclusions"] += len(
+            set(observed.context_node_ids) - set(expected.context_node_ids)
+        )
+        row["node_context_false_exclusions"] += len(
+            set(expected.context_node_ids) - set(observed.context_node_ids)
+        )
+        row["node_suggestion_count"] += len(observed.suggested_node_ids)
         observed_relations = set(observed.exact_relation_ids)
         expected_relations = set(expected.relation_ids)
         row["relation_false_inclusions"] += len(
@@ -320,6 +408,29 @@ def _campaign_row(pull_request, labels, observation):
         row["relation_false_exclusions"] += len(
             expected_relations - observed_relations
         )
+        expected_file_selected = set(expected.direct_file_node_ids) | set(
+            expected.context_file_node_ids
+        )
+        observed_file_selected = set(observed.selected_file_node_ids)
+        row["file_membership_false_inclusions"] += len(
+            observed_file_selected - expected_file_selected
+        )
+        row["file_membership_false_exclusions"] += len(
+            expected_file_selected - observed_file_selected
+        )
+        row["file_claimed_direct_false_inclusions"] += len(
+            set(observed.direct_file_node_ids) - set(expected.direct_file_node_ids)
+        )
+        row["file_claimed_direct_false_exclusions"] += len(
+            set(expected.direct_file_node_ids) - set(observed.direct_file_node_ids)
+        )
+        row["file_context_false_inclusions"] += len(
+            set(observed.context_file_node_ids) - set(expected.context_file_node_ids)
+        )
+        row["file_context_false_exclusions"] += len(
+            set(expected.context_file_node_ids) - set(observed.context_file_node_ids)
+        )
+        row["file_suggestion_count"] += len(observed.suggested_file_node_ids)
     return row
 
 
