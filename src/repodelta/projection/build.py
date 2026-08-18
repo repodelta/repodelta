@@ -19,17 +19,23 @@ from repodelta.model.contracts import (
     ReviewSourcePacket,
     ReviewSlice,
     ReviewStructuralGraph,
-    StructuralFocusNode,
+    StructuralFocusMembership,
+    StructuralFocusMembershipClass,
+    StructuralFocusProvenance,
     StructuralFocusDisposition,
     StructuralFocusOverlay,
+    StructuralFocusRole,
     StructuralGraphEdge,
     StructuralGraphNode,
     StructuralGraphOwnershipEdge,
     StructuralGraphPlacement,
+    StructuralRelationGroup,
     TransformationAlignment,
     TransformationAssessment,
     TransformationContract,
     TransformationStructuralClosure,
+    TransformationStructuralClosureGroup,
+    TransformationSubjectSelection,
     TransformationStructuralTopology,
     TransformationStructuralTopologyGroup,
 )
@@ -49,11 +55,23 @@ from repodelta.projection.structural_overview import (
 from repodelta.projection.verification import project_verification_workspace
 
 
-_ROLE_ORDER = {
+_STRUCTURAL_ROLE_ORDER = {
     "changed_anchor": 0,
     "runtime_context": 1,
     "test_context": 2,
-    "intermediate": 3,
+    "connector": 3,
+    "relation_endpoint": 4,
+    "placement_ancestor": 5,
+    "ownership_ancestor": 6,
+    "unresolved": 7,
+}
+
+_MEMBERSHIP_CLASS_ORDER = {
+    "asserted": 0,
+    "matched": 1,
+    "suggested": 2,
+    "context": 3,
+    "unresolved": 4,
 }
 
 
@@ -68,6 +86,7 @@ def build_review_projection(
     packet: ReviewSourcePacket | None = None,
     focus_statements: tuple[Requirement, ...],
     transformation_contract: TransformationContract,
+    transformation_subject_selection: TransformationSubjectSelection,
     observed_transformation: ObservedTransformation,
     transformation_structural_closure: TransformationStructuralClosure,
     transformation_alignment: TransformationAlignment,
@@ -306,6 +325,13 @@ def build_review_projection(
                 selected_ownership_change_evidence_ids=(
                     closure_group.ownership_change_evidence_ids
                 ),
+                anchor_provenance_by_review_id=(
+                    _transformation_anchor_provenance(
+                        closure_group,
+                        evidence,
+                        transformation_subject_selection,
+                    )
+                ),
             )
         )
         _validate_structural_members_are_canonical(
@@ -370,21 +396,25 @@ def build_review_projection(
         evidence=evidence,
         packet=packet,
     )
+    relation_groups_by_id = {
+        item.id: item for item in relation_groups.groups
+    }
     slices = [
         replace(
             review_slice,
             change_map=replace(
                 review_slice.change_map,
-                structural_overlay=replace(
+                structural_overlay=_with_relation_group_memberships(
                     review_slice.change_map.structural_overlay,
-                    relation_group_ids=tuple(
+                    tuple(
                         dict.fromkeys(
                             relation_groups.group_id_by_edge_id[edge_id]
                             for edge_id in (
                                 review_slice.change_map.structural_overlay.edge_ids
                             )
                         )
-                    )
+                    ),
+                    relation_groups_by_id,
                 ),
             ),
         )
@@ -394,14 +424,15 @@ def build_review_projection(
         groups=tuple(
             replace(
                 group,
-                structural_overlay=replace(
+                structural_overlay=_with_relation_group_memberships(
                     group.structural_overlay,
-                    relation_group_ids=tuple(
+                    tuple(
                         dict.fromkeys(
                             relation_groups.group_id_by_edge_id[edge_id]
                             for edge_id in group.structural_overlay.edge_ids
                         )
                     ),
+                    relation_groups_by_id,
                 ),
             )
             for group in transformation_topology_groups
@@ -687,6 +718,9 @@ def _project_structural_selection(
     selected_review_symbol_ids: tuple[str, ...] = (),
     anchor_review_symbol_ids: tuple[str, ...] = (),
     selected_ownership_change_evidence_ids: tuple[str, ...] | None = None,
+    anchor_provenance_by_review_id: dict[
+        str, tuple[StructuralFocusProvenance, ...]
+    ] | None = None,
 ) -> tuple[
     StructuralFocusOverlay,
     tuple[StructuralGraphNode, ...],
@@ -699,13 +733,19 @@ def _project_structural_selection(
     path_relation_by_evidence_id = {
         relation.target_id: relation for relation in path_relations
     }
-    selected_path_ids = set(path_relation_by_evidence_id) | set(
-        selected_path_evidence_ids
-    )
+    selected_path_id_order = tuple(dict.fromkeys((
+        *path_relation_by_evidence_id,
+        *selected_path_evidence_ids,
+    )))
+    selected_path_ids = set(selected_path_id_order)
     symbols_by_review_id = _symbols_by_review_id(evidence)
     relation_ids_by_review_id: dict[str, list[str]] = {}
-    role_by_review_id: dict[str, str] = {}
+    structural_role_by_review_id: dict[str, StructuralFocusRole] = {}
+    provenance_by_review_id: dict[
+        str, list[StructuralFocusProvenance]
+    ] = {}
     anchor_nodes: dict[str, StructuralGraphNode] = {}
+    anchor_provenance_by_review_id = anchor_provenance_by_review_id or {}
 
     for role, selected_relations in (
         ("changed_anchor", anchor_relations),
@@ -723,10 +763,27 @@ def _project_structural_selection(
             if review_id is None:
                 continue
             relation_ids_by_review_id.setdefault(review_id, []).append(relation.id)
-            previous_role = role_by_review_id.get(review_id, "intermediate")
-            role_by_review_id[review_id] = min(
+            previous_role = structural_role_by_review_id.get(
+                review_id, "unresolved"
+            )
+            structural_role_by_review_id[review_id] = min(
                 (previous_role, role),
-                key=_ROLE_ORDER.__getitem__,
+                key=_STRUCTURAL_ROLE_ORDER.__getitem__,
+            )
+            provenance_by_review_id.setdefault(review_id, []).append(
+                StructuralFocusProvenance(
+                    producer=(
+                        "requirement_association"
+                        if role == "changed_anchor"
+                        else role
+                    ),
+                    admission_class=(
+                        _association_membership_class(relation.association)
+                        if role == "changed_anchor"
+                        else "context"
+                    ),
+                    source_ids=(relation.id, relation.target_id),
+                )
             )
             if role == "changed_anchor":
                 anchor_nodes[review_id] = _node_for_review_symbol(
@@ -747,11 +804,34 @@ def _project_structural_selection(
                 symbols_by_review_id=symbols_by_review_id,
                 changed_files=changed_files,
             )
-        role_by_review_id[review_id] = (
-            "changed_anchor"
-            if review_id in set(anchor_review_symbol_ids)
-            else role_by_review_id.get(review_id, "intermediate")
-        )
+        if review_id in set(anchor_review_symbol_ids):
+            structural_role_by_review_id[review_id] = "changed_anchor"
+            provenance_by_review_id.setdefault(review_id, []).extend(
+                anchor_provenance_by_review_id.get(
+                    review_id,
+                    (
+                        StructuralFocusProvenance(
+                            producer="canonical_changed_structure",
+                            admission_class="matched",
+                            source_ids=_review_symbol_source_ids(
+                                review_id, evidence
+                            ),
+                        ),
+                    ),
+                )
+            )
+        else:
+            structural_role_by_review_id.setdefault(review_id, "connector")
+            provenance_by_review_id.setdefault(review_id, []).append(
+                StructuralFocusProvenance(
+                    producer="structural_path",
+                    admission_class="context",
+                    source_ids=(
+                        selected_path_id_order
+                        or _review_symbol_source_ids(review_id, evidence)
+                    ),
+                )
+            )
     node_path_evidence_ids: dict[str, list[str]] = {
         review_id: [] for review_id in anchor_nodes
     }
@@ -761,7 +841,6 @@ def _project_structural_selection(
     for review_id in nodes_by_review_id:
         node_path_evidence_ids.setdefault(review_id, [])
         node_path_relation_ids.setdefault(review_id, [])
-    edge_ids = []
     overlay_path_relation_ids = []
     for relation_change_id in dict.fromkeys(relation_change_evidence_ids):
         relation_change = evidence.get(relation_change_id)
@@ -811,7 +890,19 @@ def _project_structural_selection(
             node_path_relation_ids.setdefault(review_id, []).extend(
                 support_relation_ids
             )
-        edge_ids.append(relation_change.id)
+            structural_role_by_review_id.setdefault(
+                review_id, "relation_endpoint"
+            )
+            provenance_by_review_id.setdefault(review_id, []).append(
+                StructuralFocusProvenance(
+                    producer="relation_endpoint",
+                    admission_class="context",
+                    source_ids=tuple(dict.fromkeys((
+                        relation_change.id,
+                        *supporting_path_ids,
+                    ))),
+                )
+            )
         overlay_path_relation_ids.extend(support_relation_ids)
         edges.append(
             StructuralGraphEdge(
@@ -830,7 +921,6 @@ def _project_structural_selection(
         )
 
     placements = []
-    placement_ids = []
     placements_by_child, nodes_by_placement_id = _placements_by_child(evidence)
     frontier = list(nodes_by_review_id)
     expanded: set[str] = set()
@@ -851,11 +941,19 @@ def _project_structural_selection(
                 node_path_evidence_ids.setdefault(parent_review_id, [])
                 node_path_relation_ids.setdefault(parent_review_id, [])
                 frontier.append(parent_review_id)
-            placement_ids.append(placement.id)
             placements.append(placement)
+            structural_role_by_review_id.setdefault(
+                parent_review_id, "placement_ancestor"
+            )
+            provenance_by_review_id.setdefault(parent_review_id, []).append(
+                StructuralFocusProvenance(
+                    producer="placement_ancestor",
+                    admission_class="context",
+                    source_ids=(placement.id,),
+                )
+            )
 
     ownership_edges = []
-    ownership_edge_ids = []
     ownership_by_child = _ownership_changes_by_child(
         evidence,
         selected_ids=selected_ownership_change_evidence_ids,
@@ -881,7 +979,16 @@ def _project_structural_selection(
                 node_path_evidence_ids.setdefault(parent_review_id, [])
                 node_path_relation_ids.setdefault(parent_review_id, [])
                 frontier.append(parent_review_id)
-            ownership_edge_ids.append(ownership_change.id)
+            structural_role_by_review_id.setdefault(
+                parent_review_id, "ownership_ancestor"
+            )
+            provenance_by_review_id.setdefault(parent_review_id, []).append(
+                StructuralFocusProvenance(
+                    producer="ownership_ancestor",
+                    admission_class="context",
+                    source_ids=(ownership_change.id,),
+                )
+            )
             ownership_edges.append(
                 StructuralGraphOwnershipEdge(
                     id=ownership_change.id,
@@ -908,10 +1015,15 @@ def _project_structural_selection(
         )
         for review_id, node in nodes_by_review_id.items()
     )
-    overlay_nodes = tuple(
-        StructuralFocusNode(
-            node_id=node.id,
-            role=role_by_review_id.get(review_id, "intermediate"),
+    node_memberships = tuple(
+        StructuralFocusMembership(
+            member_kind="node",
+            member_id=node.id,
+            membership_class=_strongest_membership_class(provenance),
+            structural_role=structural_role_by_review_id.get(
+                review_id, "unresolved"
+            ),
+            provenance=provenance,
             relation_ids=tuple(
                 dict.fromkeys(relation_ids_by_review_id.get(review_id, ()))
             ),
@@ -920,13 +1032,80 @@ def _project_structural_selection(
             ),
         )
         for review_id, node in zip(nodes_by_review_id, graph_nodes, strict=True)
+        for provenance in (
+            _canonical_focus_provenance(
+                provenance_by_review_id.get(
+                    review_id,
+                    (
+                        StructuralFocusProvenance(
+                            producer="unresolved",
+                            admission_class="unresolved",
+                            source_ids=(node.id,),
+                        ),
+                    ),
+                )
+            ),
+        )
+    )
+    edge_memberships = tuple(
+        StructuralFocusMembership(
+            member_kind="edge",
+            member_id=edge.id,
+            membership_class="context",
+            structural_role="relation_endpoint",
+            provenance=(
+                StructuralFocusProvenance(
+                    producer="relation_endpoint",
+                    admission_class="context",
+                    source_ids=tuple(dict.fromkeys((
+                        edge.relation_change_evidence_id,
+                        *edge.path_evidence_ids,
+                    ))),
+                ),
+            ),
+        )
+        for edge in edges
+    )
+    ownership_memberships = tuple(
+        StructuralFocusMembership(
+            member_kind="ownership_edge",
+            member_id=edge.id,
+            membership_class="context",
+            structural_role="ownership_ancestor",
+            provenance=(
+                StructuralFocusProvenance(
+                    producer="ownership_ancestor",
+                    admission_class="context",
+                    source_ids=(edge.ownership_change_evidence_id,),
+                ),
+            ),
+        )
+        for edge in ownership_edges
+    )
+    placement_memberships = tuple(
+        StructuralFocusMembership(
+            member_kind="placement",
+            member_id=placement.id,
+            membership_class="context",
+            structural_role="placement_ancestor",
+            provenance=(
+                StructuralFocusProvenance(
+                    producer="placement_ancestor",
+                    admission_class="context",
+                    source_ids=(placement.id,),
+                ),
+            ),
+        )
+        for placement in placements
     )
     return (
         StructuralFocusOverlay(
-            nodes=overlay_nodes,
-            edge_ids=tuple(edge_ids),
-            ownership_edge_ids=tuple(dict.fromkeys(ownership_edge_ids)),
-            placement_ids=tuple(dict.fromkeys(placement_ids)),
+            memberships=(
+                *node_memberships,
+                *edge_memberships,
+                *ownership_memberships,
+                *placement_memberships,
+            ),
             path_relation_ids=tuple(dict.fromkeys(overlay_path_relation_ids)),
         ),
         graph_nodes,
@@ -934,6 +1113,121 @@ def _project_structural_selection(
         tuple(ownership_edges),
         tuple(placements),
     )
+
+
+def _association_membership_class(
+    association: str,
+) -> StructuralFocusMembershipClass:
+    if association in {"provided_association", "explicit_reference"}:
+        return "asserted"
+    if association == "exact_identifier":
+        return "matched"
+    if association in {"distinctive_phrase", "claim_bridge"}:
+        return "suggested"
+    if association == "structural_bridge":
+        return "context"
+    if association == "current_head":
+        raise ValueError(
+            "current_head is verification applicability, not a changed-anchor "
+            "membership association"
+        )
+    raise ValueError(f"unsupported structural association: {association}")
+
+
+def _review_symbol_source_ids(
+    review_id: str,
+    evidence: dict[str, EvidenceItem],
+) -> tuple[str, ...]:
+    source_ids = tuple(
+        item.id
+        for item in evidence.values()
+        if review_symbol_id(item) == review_id
+    )
+    return source_ids or (review_id,)
+
+
+def _canonical_focus_provenance(
+    provenance: tuple[StructuralFocusProvenance, ...]
+    | list[StructuralFocusProvenance],
+) -> tuple[StructuralFocusProvenance, ...]:
+    return tuple(dict.fromkeys(provenance))
+
+
+def _strongest_membership_class(
+    provenance: tuple[StructuralFocusProvenance, ...],
+) -> StructuralFocusMembershipClass:
+    return min(
+        (item.admission_class for item in provenance),
+        key=_MEMBERSHIP_CLASS_ORDER.__getitem__,
+    )
+
+
+def _with_relation_group_memberships(
+    overlay: StructuralFocusOverlay,
+    group_ids: tuple[str, ...],
+    relation_groups: dict[str, StructuralRelationGroup],
+) -> StructuralFocusOverlay:
+    edge_ids = set(overlay.edge_ids)
+    memberships = tuple(
+        StructuralFocusMembership(
+            member_kind="relation_group",
+            member_id=group_id,
+            membership_class="context",
+            structural_role="relation_endpoint",
+            provenance=(
+                StructuralFocusProvenance(
+                    producer="relation_group",
+                    admission_class="context",
+                    source_ids=tuple(dict.fromkeys((
+                        group_id,
+                        *(
+                            edge_id
+                            for edge_id in relation_groups[group_id].member_edge_ids
+                            if edge_id in edge_ids
+                        ),
+                    ))),
+                ),
+            ),
+        )
+        for group_id in group_ids
+    )
+    return replace(
+        overlay,
+        memberships=(*overlay.memberships, *memberships),
+    )
+
+
+def _transformation_anchor_provenance(
+    closure_group: TransformationStructuralClosureGroup,
+    evidence: dict[str, EvidenceItem],
+    selection: TransformationSubjectSelection,
+) -> dict[str, tuple[StructuralFocusProvenance, ...]]:
+    matches = {item.id: item for item in selection.matches}
+    provenance_by_review_id: dict[str, list[StructuralFocusProvenance]] = {}
+    for match_id in closure_group.subject_match_ids:
+        match = matches.get(match_id)
+        if match is None or match.evidence_id not in closure_group.seed_evidence_ids:
+            raise ValueError(
+                f"{closure_group.claim_id}: transformation closure references "
+                f"missing subject match {match_id}"
+            )
+        fact = evidence.get(match.evidence_id)
+        review_id = review_symbol_id(fact) if fact is not None else None
+        if review_id is None:
+            raise ValueError(
+                f"{match_id}: transformation subject has no structural identity"
+            )
+        provenance_by_review_id.setdefault(review_id, []).append(
+            StructuralFocusProvenance(
+                producer="transformation_selector",
+                admission_class="asserted",
+                source_ids=(match.id, match.evidence_id),
+            )
+        )
+    return {
+        review_id: _canonical_focus_provenance(provenance)
+        for review_id, provenance in provenance_by_review_id.items()
+    }
 
 
 def _merge_structural_members(

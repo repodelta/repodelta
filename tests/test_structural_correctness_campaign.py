@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
 
 from repodelta.evaluation.structural_correctness import (
+    build_selection_invariance_baseline,
     load_labels,
     load_observation,
     load_packet,
@@ -126,17 +128,7 @@ def test_campaign_v1_summary_is_derived_from_frozen_truth() -> None:
             row["overview_role_disagreements"] for row in expected_rows
         ),
     }
-    assert summary["focus_nodes"] == {
-        "false_inclusions": sum(
-            row["node_false_inclusions"] for row in expected_rows
-        ),
-        "false_exclusions": sum(
-            row["node_false_exclusions"] for row in expected_rows
-        ),
-        "role_disagreements": sum(
-            row["node_role_disagreements"] for row in expected_rows
-        ),
-    }
+    _assert_v3_dimensions(summary, expected_rows)
     assert summary["focus_exact_relations"] == {
         "false_inclusions": sum(
             row["relation_false_inclusions"] for row in expected_rows
@@ -240,17 +232,7 @@ def test_campaign_v1_1_summary_is_derived_from_verified_references() -> None:
             row["overview_role_disagreements"] for row in expected_rows
         ),
     }
-    assert summary["focus_nodes"] == {
-        "false_inclusions": sum(
-            row["node_false_inclusions"] for row in expected_rows
-        ),
-        "false_exclusions": sum(
-            row["node_false_exclusions"] for row in expected_rows
-        ),
-        "role_disagreements": sum(
-            row["node_role_disagreements"] for row in expected_rows
-        ),
-    }
+    _assert_v3_dimensions(summary, expected_rows)
     assert summary["focus_exact_relations"] == {
         "false_inclusions": sum(
             row["relation_false_inclusions"] for row in expected_rows
@@ -259,6 +241,184 @@ def test_campaign_v1_1_summary_is_derived_from_verified_references() -> None:
             row["relation_false_exclusions"] for row in expected_rows
         ),
     }
+    assert summary["selection_invariance"] == _selection_invariance_summary()
+
+
+def test_campaign_v1_1_selection_invariance_is_machine_checked() -> None:
+    assert _selection_invariance_summary()["focuses_checked"] == 113
+
+
+def _selection_invariance_summary() -> dict[str, int | str]:
+    baseline = json.loads(
+        (
+            V1_1_CAMPAIGN
+            / "results"
+            / "selection-invariance-baseline.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert baseline["schema_version"] == "structural_focus_selection_invariance.v1"
+    assert baseline["baseline_commit"] == "090377e"
+    assert baseline["source_commit"] == "090377e11a2897fcc5e6a5dcf0fbf00355c08de0"
+    pull_requests = tuple(
+        item["pull_request"]
+        for item in json.loads(V1_1_MANIFEST.read_text(encoding="utf-8"))["samples"]
+    )
+    assert baseline == _rebuild_selection_invariance_baseline(
+        baseline, pull_requests
+    )
+    current_by_pr = {}
+    for sample in json.loads(V1_1_MANIFEST.read_text(encoding="utf-8"))["samples"]:
+        pull_request = sample["pull_request"]
+        observation = load_observation(
+            V1_1_CAMPAIGN
+            / "observations"
+            / f"pr-{pull_request}.observation.json"
+        )
+        current_by_pr[pull_request] = {
+            item.subject_id: item for item in observation.focuses
+        }
+    checked = 0
+    for sample in baseline["per_pull_request"]:
+        pull_request = sample["pull_request"]
+        current = current_by_pr[pull_request]
+        assert {item["subject_id"] for item in sample["focuses"]} == set(current)
+        for expected in sample["focuses"]:
+            observed = current[expected["subject_id"]]
+            assert set(observed.selected_file_node_ids) == set(
+                expected["selected_file_node_ids"]
+            )
+            assert set(observed.selected_node_ids) == set(
+                expected["selected_node_ids"]
+            )
+            assert set(observed.exact_relation_ids) == set(
+                expected["exact_relation_ids"]
+            )
+            assert observed.disposition_state == expected["disposition_state"]
+            checked += 1
+    return {
+        "status": "passed",
+        "baseline_commit": baseline["baseline_commit"],
+        "source_commit": baseline["source_commit"],
+        "pull_requests": len(baseline["per_pull_request"]),
+        "focuses_checked": checked,
+        "file_universes_checked": checked,
+        "node_universes_checked": checked,
+        "relations_checked": checked,
+        "dispositions_checked": checked,
+    }
+
+
+def _assert_v3_dimensions(summary, expected_rows) -> None:
+    assert summary["schema_version"] == "structural_correctness_campaign_summary.v4"
+    assert "focus_nodes" not in summary
+    assert summary["selected_membership"] == {
+        "files": {
+            "false_inclusions": sum(
+                row["file_membership_false_inclusions"] for row in expected_rows
+            ),
+            "false_exclusions": sum(
+                row["file_membership_false_exclusions"] for row in expected_rows
+            ),
+        },
+        "nodes": {
+            "false_inclusions": sum(
+                row["node_membership_false_inclusions"] for row in expected_rows
+            ),
+            "false_exclusions": sum(
+                row["node_membership_false_exclusions"] for row in expected_rows
+            ),
+        },
+    }
+    assert summary["claimed_direct"] == {
+        "files": {
+            "false_inclusions": sum(
+                row["file_claimed_direct_false_inclusions"] for row in expected_rows
+            ),
+            "false_exclusions": sum(
+                row["file_claimed_direct_false_exclusions"] for row in expected_rows
+            ),
+        },
+        "nodes": {
+            "false_inclusions": sum(
+                row["node_claimed_direct_false_inclusions"] for row in expected_rows
+            ),
+            "false_exclusions": sum(
+                row["node_claimed_direct_false_exclusions"] for row in expected_rows
+            ),
+        },
+    }
+    assert summary["structural_context"] == {
+        "files": {
+            "false_inclusions": sum(
+                row["file_context_false_inclusions"] for row in expected_rows
+            ),
+            "false_exclusions": sum(
+                row["file_context_false_exclusions"] for row in expected_rows
+            ),
+        },
+        "nodes": {
+            "false_inclusions": sum(
+                row["node_context_false_inclusions"] for row in expected_rows
+            ),
+            "false_exclusions": sum(
+                row["node_context_false_exclusions"] for row in expected_rows
+            ),
+        },
+    }
+    assert summary["suggestions"] == {
+        "files_observed": sum(row["file_suggestion_count"] for row in expected_rows),
+        "nodes_observed": sum(row["node_suggestion_count"] for row in expected_rows),
+        "focuses_with_suggestions": sum(
+            row["focuses_with_suggestions"] for row in expected_rows
+        ),
+    }
+    assert summary["legacy_role_comparison"] == {
+        "false_inclusions": sum(row["node_false_inclusions"] for row in expected_rows),
+        "false_exclusions": sum(row["node_false_exclusions"] for row in expected_rows),
+        "role_disagreements": sum(row["node_role_disagreements"] for row in expected_rows),
+    }
+
+
+def _rebuild_selection_invariance_baseline(baseline, pull_requests):
+    try:
+        return build_selection_invariance_baseline(
+            repo_root=Path.cwd(),
+            baseline_commit=baseline["baseline_commit"],
+            campaign_root=V1_1_CAMPAIGN,
+            pull_requests=pull_requests,
+        )
+    except subprocess.CalledProcessError:
+        # CI's shallow checkout may omit the pinned ancestor. Fetch only that
+        # immutable commit, then rerun the same source-bound generator.
+        try:
+            subprocess.run(
+                ["git", "fetch", "--no-tags", "origin", baseline["baseline_commit"]],
+                check=True,
+                capture_output=True,
+            )
+        except subprocess.CalledProcessError:
+            # The pinned commit predates the remote PR ref in some CI
+            # checkouts. The committed byte-for-byte extraction remains the
+            # same source artifact and is verified by its Git blob identities.
+            return build_selection_invariance_baseline(
+                repo_root=Path.cwd(),
+                baseline_commit=baseline["baseline_commit"],
+                campaign_root=V1_1_CAMPAIGN,
+                pull_requests=pull_requests,
+                source_snapshot_root=(
+                    V1_1_CAMPAIGN
+                    / "results"
+                    / "baseline-sources"
+                    / baseline["baseline_commit"]
+                ),
+                source_commit=baseline["source_commit"],
+            )
+        return build_selection_invariance_baseline(
+            repo_root=Path.cwd(),
+            baseline_commit=baseline["baseline_commit"],
+            campaign_root=V1_1_CAMPAIGN,
+            pull_requests=pull_requests,
+        )
 
 
 def _campaign_row(pull_request, labels, observation):
@@ -273,6 +433,21 @@ def _campaign_row(pull_request, labels, observation):
         "node_false_inclusions": 0,
         "node_false_exclusions": 0,
         "node_role_disagreements": 0,
+        "node_membership_false_inclusions": 0,
+        "node_membership_false_exclusions": 0,
+        "node_claimed_direct_false_inclusions": 0,
+        "node_claimed_direct_false_exclusions": 0,
+        "node_context_false_inclusions": 0,
+        "node_context_false_exclusions": 0,
+        "node_suggestion_count": 0,
+        "file_membership_false_inclusions": 0,
+        "file_membership_false_exclusions": 0,
+        "file_claimed_direct_false_inclusions": 0,
+        "file_claimed_direct_false_exclusions": 0,
+        "file_context_false_inclusions": 0,
+        "file_context_false_exclusions": 0,
+        "file_suggestion_count": 0,
+        "focuses_with_suggestions": 0,
         "relation_false_inclusions": 0,
         "relation_false_exclusions": 0,
     }
@@ -312,6 +487,29 @@ def _campaign_row(pull_request, labels, observation):
         row["node_role_disagreements"] += sum(
             observed_roles[item] != expected_roles[item] for item in shared_ids
         )
+        expected_node_selected = set(expected.direct_node_ids) | set(
+            expected.context_node_ids
+        )
+        observed_node_selected = set(observed.selected_node_ids)
+        row["node_membership_false_inclusions"] += len(
+            observed_node_selected - expected_node_selected
+        )
+        row["node_membership_false_exclusions"] += len(
+            expected_node_selected - observed_node_selected
+        )
+        row["node_claimed_direct_false_inclusions"] += len(
+            set(observed.direct_node_ids) - set(expected.direct_node_ids)
+        )
+        row["node_claimed_direct_false_exclusions"] += len(
+            set(expected.direct_node_ids) - set(observed.direct_node_ids)
+        )
+        row["node_context_false_inclusions"] += len(
+            set(observed.context_node_ids) - set(expected.context_node_ids)
+        )
+        row["node_context_false_exclusions"] += len(
+            set(expected.context_node_ids) - set(observed.context_node_ids)
+        )
+        row["node_suggestion_count"] += len(observed.suggested_node_ids)
         observed_relations = set(observed.exact_relation_ids)
         expected_relations = set(expected.relation_ids)
         row["relation_false_inclusions"] += len(
@@ -320,6 +518,31 @@ def _campaign_row(pull_request, labels, observation):
         row["relation_false_exclusions"] += len(
             expected_relations - observed_relations
         )
+        expected_file_selected = set(expected.direct_file_node_ids) | set(
+            expected.context_file_node_ids
+        )
+        observed_file_selected = set(observed.selected_file_node_ids)
+        row["file_membership_false_inclusions"] += len(
+            observed_file_selected - expected_file_selected
+        )
+        row["file_membership_false_exclusions"] += len(
+            expected_file_selected - observed_file_selected
+        )
+        row["file_claimed_direct_false_inclusions"] += len(
+            set(observed.direct_file_node_ids) - set(expected.direct_file_node_ids)
+        )
+        row["file_claimed_direct_false_exclusions"] += len(
+            set(expected.direct_file_node_ids) - set(observed.direct_file_node_ids)
+        )
+        row["file_context_false_inclusions"] += len(
+            set(observed.context_file_node_ids) - set(expected.context_file_node_ids)
+        )
+        row["file_context_false_exclusions"] += len(
+            set(expected.context_file_node_ids) - set(observed.context_file_node_ids)
+        )
+        row["file_suggestion_count"] += len(observed.suggested_file_node_ids)
+        if observed.suggested_node_ids or observed.suggested_file_node_ids:
+            row["focuses_with_suggestions"] += 1
     return row
 
 

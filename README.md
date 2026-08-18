@@ -39,6 +39,12 @@ evidence in the same investigation surface. RepoDelta then separates runtime
 change, verification, and unresolved context before revealing source-linked
 symbols and exact relationships.
 
+Focused structure also states why each member is present: **asserted** for an
+authored selector, **matched** for a deterministic identity match,
+**suggested** for a heuristic candidate, and **context** for the structural
+path needed to inspect it. Unresolved provenance stays explicit. These labels
+describe retrieval, not proof that a requirement or claim was implemented.
+
 ![Focused R1 structure with runtime, verification, and unresolved context](https://raw.githubusercontent.com/repodelta/repodelta/main/docs/assets/repodelta-structural-graph.webp)
 
 For `T` and `CC`, a concrete file or symbol named in a Markdown code span can
@@ -173,8 +179,9 @@ becoming an ungrounded review authority:
 | Area | Status | Role |
 | --- | --- | --- |
 | Full review generation | Supported, deterministic | Produces the complete interactive report and every formal conclusion without a model. |
-| Candidate evidence interpretation | Experimental ✓ | In an opt-in shadow run, the LLM classifies bounded deterministic candidates as selected, rejected, or insufficient and labels their evidence relationship and semantic role. |
-| LLM-assisted semantic intake and R/G-to-subgraph mapping | To explore | Test whether a model can understand less structured Issue language and improve requirement-to-code retrieval. |
+| T/CC candidate evidence interpretation | Experimental ✓ | In an opt-in shadow run, the LLM classifies bounded deterministic evidence candidates as selected, rejected, or insufficient. It does not change the formal report. |
+| Semantic focus filtering | To explore | Test whether a model can filter typed heuristic suggestions after deterministic candidate collection without changing structural facts, coverage, or assessment authority. |
+| Less-structured Issue intake | To explore | Test whether a model can interpret less structured intent while preserving authored sources and uncertainty. |
 | Architectural overlays and grounded explanations | To explore | Test model-assisted higher-level views and explanations while preserving source links, uncertainty, and deterministic authority. |
 
 The shadow result never changes the formal report, assessment, or merge

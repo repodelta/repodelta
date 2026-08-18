@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import subprocess
 from dataclasses import asdict, dataclass, replace
 from html import escape
 from pathlib import Path
-from typing import Any, Literal, Mapping
+from typing import Any, Literal, Mapping, Sequence
 
 from repodelta.model.contracts import (
     ReviewBrief,
@@ -16,7 +17,9 @@ from repodelta.model.contracts import (
 
 PACKET_SCHEMA = "structural_correctness_packet.v3"
 LEGACY_PACKET_SCHEMA = "structural_correctness_packet.v2"
-OBSERVATION_SCHEMA = "structural_correctness_observation.v2"
+LEGACY_OBSERVATION_SCHEMA = "structural_correctness_observation.v2"
+OBSERVATION_SCHEMA = "structural_correctness_observation.v3"
+SELECTION_INVARIANCE_SCHEMA = "structural_focus_selection_invariance.v1"
 LABELS_SCHEMA = "structural_correctness_labels.v3"
 LEGACY_LABELS_SCHEMA = "structural_correctness_labels.v2"
 
@@ -191,6 +194,28 @@ class ObservedFocus:
     direct_node_ids: tuple[str, ...] = ()
     context_node_ids: tuple[str, ...] = ()
     exact_relation_ids: tuple[str, ...] = ()
+    suggested_file_node_ids: tuple[str, ...] = ()
+    unresolved_file_node_ids: tuple[str, ...] = ()
+    suggested_node_ids: tuple[str, ...] = ()
+    unresolved_node_ids: tuple[str, ...] = ()
+
+    @property
+    def selected_file_node_ids(self) -> tuple[str, ...]:
+        return tuple(sorted({
+            *self.direct_file_node_ids,
+            *self.suggested_file_node_ids,
+            *self.context_file_node_ids,
+            *self.unresolved_file_node_ids,
+        }))
+
+    @property
+    def selected_node_ids(self) -> tuple[str, ...]:
+        return tuple(sorted({
+            *self.direct_node_ids,
+            *self.suggested_node_ids,
+            *self.context_node_ids,
+            *self.unresolved_node_ids,
+        }))
 
 
 @dataclass(frozen=True)
@@ -199,6 +224,102 @@ class StructuralCorrectnessObservation:
     files: tuple[ObservedFile, ...]
     focuses: tuple[ObservedFocus, ...]
     schema_version: str = OBSERVATION_SCHEMA
+
+
+def build_selection_invariance_baseline(
+    *,
+    repo_root: str | Path,
+    baseline_commit: str,
+    campaign_root: str | Path,
+    pull_requests: Sequence[int],
+    source_snapshot_root: str | Path | None = None,
+    source_commit: str | None = None,
+) -> dict[str, Any]:
+    """Rebuild the pre-provenance selected-universe baseline from Git.
+
+    The baseline is deliberately extracted from the pinned commit rather than
+    copied from the current observation artifacts.  The returned source blob
+    identities make the proof chain auditable when the committed JSON is
+    checked in alongside the current observations.
+    """
+
+    root = Path(repo_root).resolve()
+    campaign = Path(campaign_root)
+    if campaign.is_absolute():
+        campaign = campaign.resolve().relative_to(root)
+    snapshot_root = (
+        Path(source_snapshot_root).resolve()
+        if source_snapshot_root is not None
+        else None
+    )
+    if snapshot_root is None:
+        resolved_source_commit = _git_output(
+            root, "rev-parse", f"{baseline_commit}^{{commit}}"
+        )
+    else:
+        resolved_source_commit = source_commit
+        if not resolved_source_commit:
+            raise ValueError(
+                "source_snapshot_root requires the pinned source commit"
+            )
+    source_observations = []
+    per_pull_request = []
+    for pull_request in pull_requests:
+        relative_path = (
+            campaign
+            / "observations"
+            / f"pr-{pull_request}.observation.json"
+        ).as_posix()
+        if snapshot_root is None:
+            source_bytes = _git_output_bytes(
+                root, "show", f"{baseline_commit}:{relative_path}"
+            )
+            blob = _git_output(
+                root, "rev-parse", f"{baseline_commit}:{relative_path}"
+            )
+        else:
+            source_path = snapshot_root / Path(relative_path).name
+            source_bytes = source_path.read_bytes()
+            blob = _git_blob_id(source_bytes)
+        raw = json.loads(source_bytes)
+        observation = _observation_from_mapping(raw)
+        source_observations.append(
+            {
+                "pull_request": pull_request,
+                "path": relative_path,
+                "blob": blob,
+                "schema_version": observation.schema_version,
+            }
+        )
+        per_pull_request.append(
+            {
+                "pull_request": pull_request,
+                "source_blob": blob,
+                "focuses": [
+                    {
+                        "subject_id": focus.subject_id,
+                        "selected_file_node_ids": list(
+                            focus.selected_file_node_ids
+                        ),
+                        "selected_node_ids": list(focus.selected_node_ids),
+                        "exact_relation_ids": list(focus.exact_relation_ids),
+                        "disposition_state": focus.disposition_state,
+                    }
+                    for focus in observation.focuses
+                ],
+            }
+        )
+    return {
+        "schema_version": SELECTION_INVARIANCE_SCHEMA,
+        "baseline_commit": baseline_commit,
+        "source_commit": resolved_source_commit,
+        "source_observations": source_observations,
+        "description": (
+            "Pre-provenance selected membership baseline; compares selected "
+            "universes and exact relations, not provenance buckets."
+        ),
+        "per_pull_request": per_pull_request,
+    }
 
 
 LabelDisposition = Literal["included", "excluded", "unresolved"]
@@ -536,22 +657,30 @@ def _observe_focus(
 ) -> ObservedFocus:
     overlay = inspection.structural_overlay if inspection is not None else None
     direct_node_ids = ()
+    suggested_node_ids = ()
     context_node_ids = ()
+    unresolved_node_ids = ()
     exact_relation_ids = ()
     if overlay is not None:
         direct_node_ids = tuple(
             sorted(
                 item.node_id
                 for item in overlay.nodes
-                if item.role != "intermediate"
+                if item.is_direct_mapping
             )
+        )
+        suggested_node_ids = tuple(
+            sorted(item.node_id for item in overlay.nodes if item.is_suggested)
         )
         context_node_ids = tuple(
             sorted(
                 item.node_id
                 for item in overlay.nodes
-                if item.role == "intermediate"
+                if item.is_context
             )
+        )
+        unresolved_node_ids = tuple(
+            sorted(item.node_id for item in overlay.nodes if item.is_unresolved)
         )
         exact_relation_ids = tuple(
             sorted(
@@ -566,14 +695,18 @@ def _observe_focus(
             )
         )
     return ObservedFocus(
-        overview_focus.subject_id,
-        overview_focus.direct_file_node_ids,
-        overview_focus.context_file_node_ids,
-        overview_focus.relation_ids,
-        overview_focus.structural_disposition.state,
-        direct_node_ids,
-        context_node_ids,
-        exact_relation_ids,
+        subject_id=overview_focus.subject_id,
+        direct_file_node_ids=overview_focus.direct_file_node_ids,
+        context_file_node_ids=overview_focus.context_file_node_ids,
+        relation_ids=overview_focus.relation_ids,
+        disposition_state=overview_focus.structural_disposition.state,
+        direct_node_ids=direct_node_ids,
+        context_node_ids=context_node_ids,
+        exact_relation_ids=exact_relation_ids,
+        suggested_file_node_ids=overview_focus.suggested_file_node_ids,
+        unresolved_file_node_ids=overview_focus.unresolved_file_node_ids,
+        suggested_node_ids=suggested_node_ids,
+        unresolved_node_ids=unresolved_node_ids,
     )
 
 
@@ -652,7 +785,20 @@ def load_packet(path: str | Path) -> StructuralCorrectnessPacket:
 
 
 def load_observation(path: str | Path) -> StructuralCorrectnessObservation:
-    raw = _mapping(path, OBSERVATION_SCHEMA)
+    raw = _mapping_one_of(path, {OBSERVATION_SCHEMA, LEGACY_OBSERVATION_SCHEMA})
+    return _observation_from_mapping(raw)
+
+
+def _observation_from_mapping(
+    raw: Mapping[str, Any],
+) -> StructuralCorrectnessObservation:
+    schema_version = raw.get("schema_version")
+    if schema_version not in {OBSERVATION_SCHEMA, LEGACY_OBSERVATION_SCHEMA}:
+        raise ValueError(
+            "observation must use one of schema versions "
+            f"{OBSERVATION_SCHEMA}, {LEGACY_OBSERVATION_SCHEMA}"
+        )
+    schema_version = _string(raw, "schema_version")
     return StructuralCorrectnessObservation(
         packet_digest=_string(raw, "packet_digest"),
         files=tuple(
@@ -669,11 +815,33 @@ def load_observation(path: str | Path) -> StructuralCorrectnessObservation:
                 _strings(item.get("direct_node_ids", [])),
                 _strings(item.get("context_node_ids", [])),
                 _strings(item.get("exact_relation_ids", [])),
+                _strings(item.get("suggested_file_node_ids", [])),
+                _strings(item.get("unresolved_file_node_ids", [])),
+                _strings(item.get("suggested_node_ids", [])),
+                _strings(item.get("unresolved_node_ids", [])),
             )
             for item in _objects(raw, "focuses")
         ),
-        schema_version=_string(raw, "schema_version"),
+        schema_version=schema_version,
     )
+
+
+def _git_output(repo_root: Path, *arguments: str) -> str:
+    return _git_output_bytes(repo_root, *arguments).decode().strip()
+
+
+def _git_output_bytes(repo_root: Path, *arguments: str) -> bytes:
+    result = subprocess.run(
+        ["git", "-C", str(repo_root), *arguments],
+        check=True,
+        capture_output=True,
+    )
+    return result.stdout
+
+
+def _git_blob_id(value: bytes) -> str:
+    header = f"blob {len(value)}\0".encode("ascii")
+    return hashlib.sha1(header + value).hexdigest()
 
 
 def load_labels(
@@ -828,18 +996,32 @@ def _validate_observation(
         if item.role not in {"changed", "retained_bridge", "retained_context"}:
             raise ValueError("structural observation contains an invalid file role")
     for item in observation.focuses:
-        if not set((*item.direct_file_node_ids, *item.context_file_node_ids)) <= candidate_ids:
+        file_memberships = {
+            *item.direct_file_node_ids,
+            *item.suggested_file_node_ids,
+            *item.context_file_node_ids,
+            *item.unresolved_file_node_ids,
+        }
+        if not file_memberships <= candidate_ids:
             raise ValueError("structural observation focus contains unknown files")
-        if set(item.direct_file_node_ids) & set(item.context_file_node_ids):
-            raise ValueError("observed direct and context memberships must be distinct")
         if not set(item.relation_ids) <= set(packet.relation_ids):
             raise ValueError("structural observation focus contains unknown relations")
-        if not set((*item.direct_node_ids, *item.context_node_ids)) <= node_ids:
+        node_memberships = {
+            *item.direct_node_ids,
+            *item.suggested_node_ids,
+            *item.context_node_ids,
+            *item.unresolved_node_ids,
+        }
+        if not node_memberships <= node_ids:
             raise ValueError("structural observation focus contains unknown nodes")
-        if set(item.direct_node_ids) & set(item.context_node_ids):
-            raise ValueError(
-                "observed direct and context node memberships must be distinct"
-            )
+        node_categories = (
+            item.direct_node_ids,
+            item.suggested_node_ids,
+            item.context_node_ids,
+            item.unresolved_node_ids,
+        )
+        if sum(len(set(category)) for category in node_categories) != len(node_memberships):
+            raise ValueError("observed node membership categories must be distinct")
         if not set(item.exact_relation_ids) <= exact_relation_ids:
             raise ValueError(
                 "structural observation focus contains unknown exact relations"
@@ -864,13 +1046,43 @@ def _render(packet, observation, labels) -> str:
     observed_focus = {item.subject_id: item for item in observation.focuses}
     for label in labels.focuses:
         observed = observed_focus.get(label.subject_id)
-        file_result = _role_comparison(
+        observed_file_selected = set(observed.selected_file_node_ids if observed else ())
+        expected_file_selected = set(label.direct_file_node_ids) | set(
+            label.context_file_node_ids
+        )
+        observed_node_selected = set(observed.selected_node_ids if observed else ())
+        expected_node_selected = set(label.direct_node_ids) | set(
+            label.context_node_ids
+        )
+        file_selected_result = _set_comparison(
+            observed_file_selected, expected_file_selected
+        )
+        node_selected_result = _set_comparison(
+            observed_node_selected, expected_node_selected
+        )
+        file_direct_result = _set_comparison(
+            set(observed.direct_file_node_ids if observed else ()),
+            set(label.direct_file_node_ids),
+        )
+        node_direct_result = _set_comparison(
+            set(observed.direct_node_ids if observed else ()),
+            set(label.direct_node_ids),
+        )
+        file_context_result = _set_comparison(
+            set(observed.context_file_node_ids if observed else ()),
+            set(label.context_file_node_ids),
+        )
+        node_context_result = _set_comparison(
+            set(observed.context_node_ids if observed else ()),
+            set(label.context_node_ids),
+        )
+        file_role_result = _role_comparison(
             observed.direct_file_node_ids if observed else (),
             observed.context_file_node_ids if observed else (),
             label.direct_file_node_ids,
             label.context_file_node_ids,
         )
-        node_result = _role_comparison(
+        node_role_result = _role_comparison(
             observed.direct_node_ids if observed else (),
             observed.context_node_ids if observed else (),
             label.direct_node_ids,
@@ -883,11 +1095,27 @@ def _render(packet, observation, labels) -> str:
             expected_relations,
         )
         focus_coverage = _focus_coverage(packet, label)
+        file_dimensions = _dimension_html(
+            file_selected_result,
+            file_direct_result,
+            file_context_result,
+            observed.suggested_file_node_ids if observed else (),
+            observed.unresolved_file_node_ids if observed else (),
+            file_role_result,
+        )
+        node_dimensions = _dimension_html(
+            node_selected_result,
+            node_direct_result,
+            node_context_result,
+            observed.suggested_node_ids if observed else (),
+            observed.unresolved_node_ids if observed else (),
+            node_role_result,
+        )
         focus_rows.append(
             "<tr>"
             f"<td>{escape(label.subject_id)}</td>"
-            f"<td>{_comparison_html(file_result)}</td>"
-            f"<td>{_comparison_html(node_result)}</td>"
+            f"<td>{file_dimensions}</td>"
+            f"<td>{node_dimensions}</td>"
             f"<td>{_comparison_html(relation_result)}</td>"
             f"<td>{'yes' if label.unresolved else 'no'}</td>"
             f"<td>{escape(focus_coverage)}</td>"
@@ -911,7 +1139,7 @@ def _render(packet, observation, labels) -> str:
             else " · not independently verified"
         )
     )
-    return f"""<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>{escape(title)}</title><style>{_CSS}</style></head><body><main><header><p>Non-authoritative evaluation</p><h1>{escape(title)}</h1><p>{escape(authority_summary)}. File, node-role, exact-relation, and coverage truth remain distinct. This report does not change assessment or mergeability.</p><code>{escape(packet.digest)}</code></header><section><h2>File overview</h2><div class='cards'>{cards}</div><table><thead><tr><th>Candidate</th><th>RepoDelta</th><th>Reference</th><th>Result</th></tr></thead><tbody>{''.join(rows)}</tbody></table></section><section><h2>Focus membership</h2><table><thead><tr><th>Subject</th><th>Files</th><th>Nodes and roles</th><th>Exact relations</th><th>Reference unresolved</th><th>Reference coverage</th></tr></thead><tbody>{''.join(focus_rows)}</tbody></table></section><footer>Coverage: {escape(coverage_summary)}</footer></main></body></html>"""
+    return f"""<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>{escape(title)}</title><style>{_CSS}</style></head><body><main><header><p>Non-authoritative evaluation</p><h1>{escape(title)}</h1><p>{escape(authority_summary)}. Selected membership, claimed-direct, suggestion, unresolved-membership, structural-context, exact-relation, and coverage dimensions remain distinct. This report does not change assessment or mergeability.</p><code>{escape(packet.digest)}</code></header><section><h2>File overview</h2><div class='cards'>{cards}</div><table><thead><tr><th>Candidate</th><th>RepoDelta</th><th>Reference</th><th>Result</th></tr></thead><tbody>{''.join(rows)}</tbody></table></section><section><h2>Focus membership</h2><table><thead><tr><th>Subject</th><th>Files · dimensions</th><th>Nodes and roles · dimensions</th><th>Exact relations</th><th>Reference unresolved</th><th>Reference coverage</th></tr></thead><tbody>{''.join(focus_rows)}</tbody></table></section><footer>Coverage: {escape(coverage_summary)}</footer></main></body></html>"""
 
 
 def _focus_coverage(
@@ -993,6 +1221,34 @@ def _comparison_html(result):
         if values:
             parts.append(f"{key}: {' · '.join(values)}")
     return "<br>".join(escape(item) for item in parts)
+
+
+def _dimension_html(
+    selected,
+    claimed_direct,
+    structural_context,
+    suggested,
+    unresolved,
+    role,
+):
+    suggestion_ids = tuple(sorted(suggested))
+    suggestion_text = f"observed {len(suggestion_ids)}"
+    if suggestion_ids:
+        suggestion_text += ": " + " · ".join(suggestion_ids)
+    unresolved_ids = tuple(sorted(unresolved))
+    unresolved_text = f"observed {len(unresolved_ids)}"
+    if unresolved_ids:
+        unresolved_text += ": " + " · ".join(unresolved_ids)
+    return (
+        "<div class='dimension'>"
+        f"<b>Selected membership</b><br>{_comparison_html(selected)}<br>"
+        f"<b>Claimed direct</b><br>{_comparison_html(claimed_direct)}<br>"
+        f"<b>Suggestions</b><br>{escape(suggestion_text)}<br>"
+        f"<b>Unresolved</b><br>{escape(unresolved_text)}<br>"
+        f"<b>Structural context</b><br>{_comparison_html(structural_context)}<br>"
+        f"<b>Legacy role comparison</b><br>{_comparison_html(role)}"
+        "</div>"
+    )
 
 
 def _mapping(path: str | Path, schema: str) -> Mapping[str, Any]:
@@ -1158,4 +1414,5 @@ def _unique(values, name: str) -> None:
 
 _CSS = """
 :root{color-scheme:dark;--bg:#091015;--panel:#111b21;--line:#2b3b43;--text:#e9eff1;--muted:#91a0a7;--good:#70d49b;--bad:#ef8f91;--warn:#e6bd6a}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,sans-serif}main{width:min(1200px,calc(100% - 32px));margin:32px auto}header,section{padding:24px;margin-bottom:18px;background:var(--panel);border:1px solid var(--line);border-radius:14px}code{overflow-wrap:anywhere;color:var(--muted)}.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px}.cards div{padding:12px;border:1px solid var(--line);border-radius:9px}.cards span{display:block;color:var(--muted);font-size:11px}.cards strong{font-size:20px}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line)}th{color:var(--muted)}tr.match td:last-child{color:var(--good)}tr.false-inclusion td:last-child,tr.false-exclusion td:last-child{color:var(--bad)}tr.role-disagreement td:last-child,tr.unresolved td:last-child{color:var(--warn)}footer{color:var(--muted)}@media(max-width:700px){.cards{grid-template-columns:1fr 1fr}header,section{padding:14px}table{display:block;overflow:auto}}
+.dimension{font-size:11px;line-height:1.45}.dimension b{color:var(--muted);font-size:10px}
 """

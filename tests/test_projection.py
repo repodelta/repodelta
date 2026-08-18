@@ -31,9 +31,10 @@ from repodelta.model.contracts import (
     SourceRecord,
     StructuralChangeIdentity,
     StructuralCoverage,
-    StructuralFocusNode,
+    StructuralFocusMembership,
     StructuralFocusDisposition,
     StructuralFocusOverlay,
+    StructuralFocusProvenance,
     StructuralGraphEdge,
     StructuralGraphNode,
     StructuralGraphPlacement,
@@ -48,6 +49,7 @@ from repodelta.model.contracts import (
     TransformationContract,
     TransformationStructuralClosure,
     TransformationStructuralTopologyGroup,
+    TransformationSubjectSelection,
     VerificationIdentity,
     VerificationEvidenceInspection,
     VerificationWorkspace,
@@ -99,6 +101,22 @@ from repodelta.providers.structural import (
     StructuralGraphIndexStatus,
     StructuralGraphResult,
 )
+
+
+def _focus_member(kind, identity, membership_class="context", role="relation_endpoint"):
+    return StructuralFocusMembership(
+        member_kind=kind,
+        member_id=identity,
+        membership_class=membership_class,
+        structural_role=role,
+        provenance=(
+            StructuralFocusProvenance(
+                producer="test_fixture",
+                admission_class=membership_class,
+                source_ids=(identity,),
+            ),
+        ),
+    )
 
 
 def _with_verification_overlays(
@@ -278,21 +296,29 @@ def test_file_overview_aggregates_canonical_members_and_edges() -> None:
     topology = ArchitecturalChangeTopology(components=tuple(components.values()))
     workspace = VerificationWorkspace(inspections=(
         VerificationEvidenceInspection(
-            id="VEI:R1",
-            subject_id="R1",
-            structural_overlay=StructuralFocusOverlay(
-                edge_ids=(edge.id,),
-                relation_group_ids=(relation_group.id,),
-            ),
+                id="VEI:R1",
+                subject_id="R1",
+                structural_overlay=StructuralFocusOverlay(memberships=(
+                    _focus_member(
+                        "node", "N:fn:a", "matched", "changed_anchor"
+                    ),
+                    _focus_member("node", "N:fn:b", "context", "relation_endpoint"),
+                    _focus_member("edge", edge.id),
+                    _focus_member("relation_group", relation_group.id),
+                )),
             structural_disposition=StructuralFocusDisposition(state="projected"),
         ),
         VerificationEvidenceInspection(
-            id="VEI:G1",
-            subject_id="G1",
-            structural_overlay=StructuralFocusOverlay(
-                edge_ids=(file_edge.id,),
-                relation_group_ids=(import_group.id,),
-            ),
+                id="VEI:G1",
+                subject_id="G1",
+                structural_overlay=StructuralFocusOverlay(memberships=(
+                    _focus_member(
+                        "node", "N:file:a", "matched", "changed_anchor"
+                    ),
+                    _focus_member("node", "N:fn:b", "context", "relation_endpoint"),
+                    _focus_member("edge", file_edge.id),
+                    _focus_member("relation_group", import_group.id),
+                )),
             structural_disposition=StructuralFocusDisposition(state="projected"),
         ),
     ))
@@ -317,7 +343,8 @@ def test_file_overview_aggregates_canonical_members_and_edges() -> None:
     assert 'fill="#7be3ac"' in html
     assert 'data-member-node-ids="N:file:a N:fn:a"' in html
     assert 'data-member-group-ids="RG:calls RG:imports"' in html
-    assert html.count('data-focuses="R1 G1"') == 3
+    assert html.count('data-focuses="R1 G1"') == 2
+    assert 'data-context-focuses="R1 G1"' in html
     assert '<text class="file-node-layer" x="237" y="19">application</text>' in html
     assert 'data-file-node="N:file:a"' in html
     assert 'data-file-node="N:file:b"' in html
@@ -347,7 +374,7 @@ def test_file_overview_aggregates_canonical_members_and_edges() -> None:
     assert '<span class="relation-kind">imports</span>' in member_html
     assert "1 exact target" in member_html
     assert member_html.count('data-edge-id="') == 2
-    assert member_html.count('data-focuses="R1 G1"') == 2
+    assert member_html.count('data-context-focuses="R1 G1"') == 2
     assert 'data-edge-id="E:calls" data-source-node="N:fn:a"' in member_html
     assert 'data-edge-id="E:imports" data-source-node="N:file:a"' in member_html
     assert member_html.count('class="architectural-chip-html ') == 2
@@ -733,17 +760,18 @@ def test_evidence_paths_separate_runtime_and_verification_exact_traces() -> None
             inspections=(
                 SimpleNamespace(
                     subject_id="R1",
-                    structural_overlay=StructuralFocusOverlay(
-                        nodes=tuple(
-                            StructuralFocusNode(
-                                node_id=node_id,
-                                role="changed_anchor",
+                    structural_overlay=StructuralFocusOverlay(memberships=(
+                        *(
+                            _focus_member(
+                                "node", node_id, "matched", "changed_anchor"
                             )
                             for node_id in ("N:main", "N:submit", "N:test")
                         ),
-                        edge_ids=("D:runtime", "D:test"),
-                        relation_group_ids=("RG:runtime", "RG:test"),
-                    ),
+                        _focus_member("edge", "D:runtime"),
+                        _focus_member("edge", "D:test"),
+                        _focus_member("relation_group", "RG:runtime"),
+                        _focus_member("relation_group", "RG:test"),
+                    )),
                 ),
             )
         ),
@@ -755,6 +783,9 @@ def test_evidence_paths_separate_runtime_and_verification_exact_traces() -> None
     assert 'data-path-kind="verification"' in html
     assert '<span class="evidence-path-kind">Runtime change</span>' in html
     assert '<span class="evidence-path-kind">Verification</span>' in html
+    assert 'class="focus-membership-chip membership-matched"' in html
+    assert 'class="focus-membership-chip membership-context"' in html
+    assert 'data-membership-classes="matched context"' in html
     assert html.count("calls · added") == 4
     assert html.count('class="path-tree-forest"') == 4
     assert 'data-file-node-ids="N:file:cli N:file:submit"' in html
@@ -1113,6 +1144,7 @@ def _build_projection(
         ),
         focus_statements=(),
         transformation_contract=TransformationContract(),
+        transformation_subject_selection=TransformationSubjectSelection(),
         observed_transformation=ObservedTransformation(),
         transformation_structural_closure=TransformationStructuralClosure(),
         transformation_alignment=TransformationAlignment(),
@@ -1226,7 +1258,21 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
     assert set(selected_paths) <= set(anchor.structural_path_ids)
     overlay = brief.projection.slices[0].change_map.structural_overlay
     graph = brief.projection.review_graph
-    assert [item.role for item in overlay.nodes] == ["changed_anchor"]
+    assert [item.structural_role for item in overlay.nodes] == [
+        "changed_anchor"
+    ]
+    assert overlay.nodes[0].membership_class == "suggested"
+    assert {
+        item.producer for item in overlay.nodes[0].provenance
+    } == {"requirement_association"}
+    serialized_overlay = brief.to_dict()["projection"]["slices"][0][
+        "change_map"
+    ]["structural_overlay"]
+    assert serialized_overlay["memberships"][0]["membership_class"] == (
+        "suggested"
+    )
+    assert "nodes" not in serialized_overlay
+    assert "edge_ids" not in serialized_overlay
     assert overlay.path_relation_ids == ()
     assert graph.edges == ()
     assert len(graph.nodes) == 3
@@ -1249,6 +1295,9 @@ def test_codegraph_context_only_expands_selected_exact_anchor() -> None:
     assert "Full structural audit ·" in html
     assert 'class="evidence-paths" hidden' in html
     assert 'data-path-kind="unresolved"' in html
+    assert "Heuristic suggestion · 1" in html
+    assert 'data-focus-memberships="R1:suggested"' in html
+    assert 'data-focuses="" data-suggested-focuses="R1" data-context-focuses="" data-unresolved-focuses="" data-focus-memberships="R1:suggested"' in html
     assert "Change topology" not in html
     assert 'class="architectural-chip-html ' in html
     assert 'data-component-target="' in html
@@ -2090,20 +2139,28 @@ def test_review_graph_renders_complete_focus_union() -> None:
                 structural_disposition=StructuralFocusDisposition(
                     state="projected"
                 ),
-                structural_overlay=StructuralFocusOverlay(
-                    nodes=tuple(
-                        StructuralFocusNode(
-                            node_id=f"N:{node_id}",
-                            role="changed_anchor",
+                structural_overlay=StructuralFocusOverlay(memberships=(
+                    *(
+                        _focus_member(
+                            "node",
+                            f"N:{node_id}",
+                            "matched",
+                            "changed_anchor",
                         )
                         for node_id in focus_node_ids
                     ),
-                    edge_ids=edge_ids,
-                    relation_group_ids=tuple(
-                        group_projection.group_id_by_edge_id[edge_id]
+                    *(
+                        _focus_member("edge", edge_id)
                         for edge_id in edge_ids
-                    )
-                ),
+                    ),
+                    *(
+                        _focus_member(
+                            "relation_group",
+                            group_projection.group_id_by_edge_id[edge_id],
+                        )
+                        for edge_id in edge_ids
+                    ),
+                )),
             ),
         )
 
@@ -2206,7 +2263,7 @@ def test_review_graph_renders_complete_focus_union() -> None:
     assert html.count('class="delta-node kind-') == 4
     assert html.count('class="isolated-anchor operation-') == 1
     assert html.count('class="delta-edge operation-') == 3
-    assert 'data-focuses="R1 R2 G1"' in html
+    assert 'data-focuses="G1 R1 R2"' in html
     assert html.count('data-focus-target="overview"') == 1
     assert html.count('data-focus-target="R1"') == 1
     assert html.count('data-focus-target="R2"') == 1

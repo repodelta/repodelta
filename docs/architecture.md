@@ -396,6 +396,14 @@ are the only omitted-path provenance. Projection consumes the support set
 without reconstructing terminal relevance or selecting paths, then builds
 canonical symbol nodes and typed edges. `ReviewProjection` owns these identities
 once in one review-level graph; each slice references them through a focus overlay.
+Every overlay member carries one producer-owned admission class and its canonical
+source identities. R/G association owns `asserted`, `matched`, or `suggested`
+anchors from its typed relations; T/CC selection independently owns asserted
+anchors from explicit subject matches. Both emit the same downstream membership
+contract. Structural paths, relation endpoints, runtime/test terminals,
+placements, and ownership ancestors may add only `context`; incomplete
+provenance is `unresolved`. The strongest recorded producer class is canonical,
+and context cannot promote a node into a semantic mapping.
 Shared paths and cross-focus overlap collapse by deterministic edge identity,
 while global and per-focus path provenance remain explicit. Every selected
 changed symbol uses its canonical structural node identity, even without a
@@ -410,7 +418,9 @@ focus-specific ownership edge IDs. It does not query Codegraph, re-run
 head/base convergence, or infer hierarchy from names and paths.
 The single structural SVG lays out executable and ownership edges together.
 Its focus and Structure controls only change emphasis or visibility of those
-canonical IDs; they do not create a second graph truth.
+canonical IDs; they do not create a second graph truth. HTML renders the
+membership class and producer summary from the overlay and does not infer a
+mapping from reachability, display text, or graph position.
 Context facts join an overlay only when selected structural support connects
 them.
 Profiles remain canonical in `ProjectionCandidateSet`; convergence and routing

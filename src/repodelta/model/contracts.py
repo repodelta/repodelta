@@ -2708,11 +2708,31 @@ class CandidateConvergence:
                     )
 
 
-StructuralFocusNodeRole = Literal[
+StructuralFocusMemberKind = Literal[
+    "node",
+    "edge",
+    "relation_group",
+    "ownership_edge",
+    "placement",
+]
+
+StructuralFocusMembershipClass = Literal[
+    "asserted",
+    "matched",
+    "suggested",
+    "context",
+    "unresolved",
+]
+
+StructuralFocusRole = Literal[
     "changed_anchor",
     "runtime_context",
     "test_context",
-    "intermediate",
+    "connector",
+    "relation_endpoint",
+    "placement_ancestor",
+    "ownership_ancestor",
+    "unresolved",
 ]
 
 StructuralFocusDispositionState = Literal[
@@ -3062,11 +3082,22 @@ class StructuralOverviewFocus:
 
     subject_id: str
     direct_file_node_ids: tuple[str, ...] = ()
+    suggested_file_node_ids: tuple[str, ...] = ()
     context_file_node_ids: tuple[str, ...] = ()
+    unresolved_file_node_ids: tuple[str, ...] = ()
     relation_ids: tuple[str, ...] = ()
     structural_disposition: StructuralFocusDisposition = (
         StructuralFocusDisposition()
     )
+
+    @property
+    def selected_file_node_ids(self) -> tuple[str, ...]:
+        return tuple(sorted({
+            *self.direct_file_node_ids,
+            *self.suggested_file_node_ids,
+            *self.context_file_node_ids,
+            *self.unresolved_file_node_ids,
+        }))
 
 
 @dataclass(frozen=True)
@@ -3076,7 +3107,7 @@ class StructuralOverviewProjection:
     files: tuple[StructuralOverviewFile, ...] = ()
     relations: tuple[StructuralOverviewRelation, ...] = ()
     focuses: tuple[StructuralOverviewFocus, ...] = ()
-    schema_version: str = "structural_overview.v1"
+    schema_version: str = "structural_overview.v2"
 
     def files_by_id(self) -> dict[str, StructuralOverviewFile]:
         return {item.file_node_id: item for item in self.files}
@@ -3086,21 +3117,164 @@ class StructuralOverviewProjection:
 
 
 @dataclass(frozen=True)
-class StructuralFocusNode:
-    node_id: str
-    role: StructuralFocusNodeRole
-    relation_ids: tuple[str, ...] = ()
-    path_relation_ids: tuple[str, ...] = ()
+class StructuralFocusProvenance:
+    producer: str
+    admission_class: StructuralFocusMembershipClass
+    source_ids: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        if (
+            not self.producer.strip()
+            or not self.source_ids
+            or any(not source_id.strip() for source_id in self.source_ids)
+            or len(self.source_ids) != len(set(self.source_ids))
+        ):
+            raise ValueError("structural focus provenance requires producer sources")
 
 
 @dataclass(frozen=True)
-class StructuralFocusOverlay:
-    nodes: tuple[StructuralFocusNode, ...] = ()
-    edge_ids: tuple[str, ...] = ()
-    relation_group_ids: tuple[str, ...] = ()
-    ownership_edge_ids: tuple[str, ...] = ()
-    placement_ids: tuple[str, ...] = ()
+class StructuralFocusMembership:
+    member_kind: StructuralFocusMemberKind
+    member_id: str
+    membership_class: StructuralFocusMembershipClass
+    structural_role: StructuralFocusRole
+    provenance: tuple[StructuralFocusProvenance, ...]
+    relation_ids: tuple[str, ...] = ()
     path_relation_ids: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        if not self.member_id or not self.provenance:
+            raise ValueError("structural focus membership requires provenance")
+        strongest = min(
+            (item.admission_class for item in self.provenance),
+            key={
+                "asserted": 0,
+                "matched": 1,
+                "suggested": 2,
+                "context": 3,
+                "unresolved": 4,
+            }.__getitem__,
+        )
+        if self.membership_class != strongest:
+            raise ValueError(
+                "structural focus membership class must preserve its strongest provenance"
+            )
+        semantic_classes = {"asserted", "matched", "suggested"}
+        if self.membership_class in semantic_classes and (
+            self.member_kind != "node"
+            or self.structural_role != "changed_anchor"
+        ):
+            raise ValueError(
+                "semantic focus membership requires a changed node anchor"
+            )
+        if self.structural_role == "changed_anchor" and (
+            self.membership_class not in semantic_classes
+        ):
+            raise ValueError(
+                "structural context cannot become a changed anchor"
+            )
+        if (self.membership_class == "unresolved") != (
+            self.structural_role == "unresolved"
+        ):
+            raise ValueError("unresolved membership requires an unresolved role")
+        expected_non_node_roles = {
+            "edge": "relation_endpoint",
+            "relation_group": "relation_endpoint",
+            "ownership_edge": "ownership_ancestor",
+            "placement": "placement_ancestor",
+        }
+        expected_role = expected_non_node_roles.get(self.member_kind)
+        if expected_role is not None and (
+            self.membership_class != "context"
+            or self.structural_role != expected_role
+        ):
+            raise ValueError(
+                f"{self.member_kind} focus membership must remain {expected_role} context"
+            )
+        if self.member_kind != "node" and (
+            self.relation_ids or self.path_relation_ids
+        ):
+            raise ValueError(
+                "only node focus memberships may carry routed relation provenance"
+            )
+
+    @property
+    def node_id(self) -> str:
+        if self.member_kind != "node":
+            raise ValueError("only node memberships expose node_id")
+        return self.member_id
+
+    @property
+    def is_direct_mapping(self) -> bool:
+        """Return the producer-owned direct-mapping boundary.
+
+        Asserted selectors and deterministic matches are direct mappings.
+        Suggestions remain review candidates, structural members remain
+        context, and unresolved members remain unresolved; consumers must not
+        promote any of these categories to direct mapping.
+        """
+
+        return self.membership_class in {"asserted", "matched"}
+
+    @property
+    def is_suggested(self) -> bool:
+        return self.membership_class == "suggested"
+
+    @property
+    def is_context(self) -> bool:
+        return self.membership_class == "context"
+
+    @property
+    def is_unresolved(self) -> bool:
+        return self.membership_class == "unresolved"
+
+@dataclass(frozen=True)
+class StructuralFocusOverlay:
+    memberships: tuple[StructuralFocusMembership, ...] = ()
+    path_relation_ids: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        identities = tuple(
+            (item.member_kind, item.member_id) for item in self.memberships
+        )
+        if len(identities) != len(set(identities)):
+            raise ValueError("structural focus overlay contains duplicate memberships")
+
+    @property
+    def nodes(self) -> tuple[StructuralFocusMembership, ...]:
+        return tuple(
+            item for item in self.memberships if item.member_kind == "node"
+        )
+
+    @property
+    def edge_ids(self) -> tuple[str, ...]:
+        return tuple(
+            item.member_id for item in self.memberships if item.member_kind == "edge"
+        )
+
+    @property
+    def relation_group_ids(self) -> tuple[str, ...]:
+        return tuple(
+            item.member_id
+            for item in self.memberships
+            if item.member_kind == "relation_group"
+        )
+
+    @property
+    def ownership_edge_ids(self) -> tuple[str, ...]:
+        return tuple(
+            item.member_id
+            for item in self.memberships
+            if item.member_kind == "ownership_edge"
+        )
+
+    @property
+    def placement_ids(self) -> tuple[str, ...]:
+        return tuple(
+            item.member_id
+            for item in self.memberships
+            if item.member_kind == "placement"
+        )
 
 
 @dataclass(frozen=True)
@@ -3117,7 +3291,7 @@ class TransformationStructuralTopology:
     """Projection-owned mapping from closure claims to shared graph members."""
 
     groups: tuple[TransformationStructuralTopologyGroup, ...] = ()
-    schema_version: str = "transformation_structural_topology.v1"
+    schema_version: str = "transformation_structural_topology.v2"
 
     def by_claim_id(self) -> dict[str, TransformationStructuralTopologyGroup]:
         return {item.claim_id: item for item in self.groups}
@@ -3220,7 +3394,7 @@ class VerificationWorkspace:
     )
     matrix: tuple[VerificationMatrixEntry, ...] = ()
     inspections: tuple[VerificationEvidenceInspection, ...] = ()
-    schema_version: str = "verification_workspace.v7"
+    schema_version: str = "verification_workspace.v8"
 
     def by_subject_id(self) -> dict[str, VerificationMatrixEntry]:
         return {item.subject_id: item for item in self.matrix}
@@ -3242,7 +3416,7 @@ class ReviewProjection:
     structural_overview: StructuralOverviewProjection = (
         StructuralOverviewProjection()
     )
-    schema_version: str = "review_projection.v32"
+    schema_version: str = "review_projection.v34"
 
     def validate_consistency(
         self,
@@ -3980,7 +4154,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "repodelta-open-core"
-    schema_version: str = "review_brief.v55"
+    schema_version: str = "review_brief.v57"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

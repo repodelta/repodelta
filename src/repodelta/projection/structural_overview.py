@@ -256,6 +256,7 @@ def _derive_structural_overview(
         for relation in relation_items
         for group_id in relation.relation_group_ids
     }
+    relation_by_id = {relation.id: relation for relation in relation_items}
     group_id_by_edge_id = {
         edge_id: group.id
         for group in groups.values()
@@ -265,15 +266,21 @@ def _derive_structural_overview(
     focus_items = []
     for inspection in workspace.inspections:
         direct_files = set()
+        suggested_files = set()
         context_files = set()
+        unresolved_files = set()
         for focus_node in inspection.structural_overlay.nodes:
             file_id = file_by_node.get(focus_node.node_id)
             if file_id not in overview_files:
                 continue
-            if focus_node.role == "intermediate":
-                context_files.add(file_id)
-            else:
+            if focus_node.is_direct_mapping:
                 direct_files.add(file_id)
+            elif focus_node.is_suggested:
+                suggested_files.add(file_id)
+            elif focus_node.is_context:
+                context_files.add(file_id)
+            elif focus_node.is_unresolved:
+                unresolved_files.add(file_id)
         overlay_group_ids = set(inspection.structural_overlay.relation_group_ids)
         overlay_group_ids.update(
             group_id
@@ -285,17 +292,24 @@ def _derive_structural_overview(
             for group_id in overlay_group_ids
             if group_id in relation_id_by_group_id
         }
-        for relation in relation_items:
-            if relation.id not in relation_ids:
-                continue
-            direct_files.update(relation.source_file_node_ids)
-            direct_files.add(relation.target_file_node_id)
-        context_files -= direct_files
+        # A focused exact relation can carry a file-level endpoint even when
+        # the endpoint symbol is outside the displayed backbone. Preserve
+        # that endpoint as structural context so changing provenance buckets
+        # cannot silently change the selected file universe.
+        for relation_id in relation_ids:
+            relation = relation_by_id[relation_id]
+            context_files.update(relation.source_file_node_ids)
+            context_files.add(relation.target_file_node_id)
+        context_files.difference_update(
+            direct_files | suggested_files | unresolved_files
+        )
         focus_items.append(
             StructuralOverviewFocus(
                 subject_id=inspection.subject_id,
                 direct_file_node_ids=tuple(sorted(direct_files)),
+                suggested_file_node_ids=tuple(sorted(suggested_files)),
                 context_file_node_ids=tuple(sorted(context_files)),
+                unresolved_file_node_ids=tuple(sorted(unresolved_files)),
                 relation_ids=tuple(sorted(relation_ids)),
                 structural_disposition=inspection.structural_disposition,
             )
@@ -357,7 +371,7 @@ def validate_structural_overview(
 ) -> None:
     """Reject overview members that escape their canonical authorities."""
 
-    if overview.schema_version != "structural_overview.v1":
+    if overview.schema_version != "structural_overview.v2":
         raise ValueError("unsupported structural overview schema")
     files = overview.files_by_id()
     if len(files) != len(overview.files):
@@ -436,7 +450,7 @@ def validate_structural_overview(
         inspection = workspace.inspections_by_subject_id()[item.subject_id]
         if item.structural_disposition != inspection.structural_disposition:
             raise ValueError("structural overview changed focus disposition")
-        if not set((*item.direct_file_node_ids, *item.context_file_node_ids)) <= set(files):
+        if not set(item.selected_file_node_ids) <= set(files):
             raise ValueError("structural overview focus references unknown files")
         if not set(item.relation_ids) <= set(relations):
             raise ValueError("structural overview focus references unknown relations")

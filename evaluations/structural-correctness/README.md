@@ -46,7 +46,7 @@ endpoints, changed-file counts, and at most 32 diff hunk headers per file. It
 does not expose source lines, RepoDelta's selected files, projected roles, or
 focus memberships.
 
-## Campaign v1 sample
+## Campaign v1 (superseded proposal)
 
 The first sample is selected by change shape rather than randomly. Its
 machine-readable identities, categories, purposes, and campaign constraints
@@ -57,7 +57,9 @@ real PRs do not expose a retained-bridge or false-inclusion counterexample, a
 small synthetic fixture complements the campaign without replacing the real
 sample.
 
-Campaign v1 records a proposed baseline. Its
+Campaign v1 records the original proposed baseline and is retained only as
+historical method evidence. It is superseded by campaign v1.1 and must not be
+used as the current correctness authority. Its
 [reconciliation](campaign-v1/reconciliation.md) explains the authority and
 coverage limits that must be resolved before treating its
 [findings](campaign-v1/results/findings.md) or
@@ -82,16 +84,19 @@ ordinary exploratory output remains under `build/` and is not committed.
 
 File comparison distinguishes exact agreement, false inclusion, false
 exclusion, role disagreement, and reference-unresolved cases. Focus comparison
-reports those outcomes independently for file membership, canonical node role,
-and exact relations for each subject. `complete` or `available` remains bounded
-to the coverage surface recorded in the packet; it is never interpreted as
-complete repository truth.
+keeps selected membership, claimed-direct, suggestion behavior, structural
+context, and exact relations as separate dimensions for each subject. A
+suggestion is not promoted to direct mapping and is not silently relabeled as
+context. `complete` or `available` remains bounded to the coverage surface
+recorded in the packet; it is never interpreted as complete repository truth.
 
-Campaign findings determine the next product change. Provenance labels are
-justified when the underlying memberships are correct but insufficiently
-explained. Projection fixes come first when membership is wrong. Coverage
-truthfulness comes first when conclusions exceed observed bounds. Large-change
-clustering comes later when correctness holds but scale prevents comprehension.
+Campaign findings determine retrieval changes. Typed production provenance may
+be added without changing selection when it prevents context from being
+misrepresented as a direct mapping; that is a truth-boundary correction, not an
+accuracy claim. Any candidate, path, or closure policy change must be compared
+again with the current verified baseline. Coverage truthfulness comes first
+when conclusions exceed observed bounds, and large-change clustering comes
+later when correctness holds but scale prevents comprehension.
 
 ## Campaign v1.1
 
@@ -99,6 +104,26 @@ clustering comes later when correctness holds but scale prevents comprehension.
 and regenerates the same eight-PR sample under the v3 packet and independently
 verified reference contract. Its
 [`verification record`](campaign-v1-1/verification.md) documents source-review
-isolation and a relation-endpoint defect corrected before reference freeze. The
+isolation and a relation-endpoint defect corrected before reference freeze. Its
+[`selection invariance baseline`](campaign-v1-1/results/selection-invariance-baseline.json)
+checks selected file/node universes, exact relation IDs, and dispositions
+directly against the pre-provenance observation. It is reproducible from the
+pinned pre-#289 commit and records each source observation's Git blob identity:
+
+```bash
+PYTHONPATH=src python \
+  evaluations/structural-correctness/campaign-v1-1/\
+  generate_selection_invariance_baseline.py \
+  --baseline-commit 090377e
+```
+
+The
 [`findings`](campaign-v1-1/results/findings.md) retain the focus over-selection
-direction while bounding recall claims by per-focus traversal coverage.
+direction while separating provenance behavior from semantic reference roles
+and bounding recall claims by per-focus traversal coverage.
+The repository also keeps a byte-for-byte extraction under
+`campaign-v1-1/results/baseline-sources/090377e/` so a shallow CI checkout can
+verify the same recorded Git blob identities when the historical commit is not
+available locally.
+Campaign v1.1 is the sole current structural-correctness baseline; there is no
+campaign v1.2.

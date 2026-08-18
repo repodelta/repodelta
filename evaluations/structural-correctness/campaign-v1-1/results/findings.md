@@ -1,53 +1,78 @@
-# Campaign v1.1 findings
+# Campaign v1.1 findings after the provenance-separated rerun
 
-## Decision
+## Decision boundary
 
-Correct canonical focus association before investing in richer provenance,
-large-change clustering, or workflow traceability. The independently verified
-reference still shows severe focus over-selection. This conclusion is bounded
-to the frozen candidate and coverage surface and does not change production
-assessment or mergeability.
+The frozen v1.1 references remain unchanged and remain the semantic reference
+authority. This rerun changes only the observation schema and its downstream
+consumers: `asserted`/`matched` stay direct, while `suggested`, `context`, and
+`unresolved` remain separately observable. It does not relabel references or
+change candidate generation, convergence, or structural selection.
 
-## Verified result
+## Selection invariance
 
-- 8 real pull requests, 110 resolved focuses, and 3 unresolved focuses.
-- File overview: 34 false inclusions, 0 false exclusions, and 0 role
+All eight regenerated packets are byte-for-byte identical to the frozen
+packets. The committed
+[`selection-invariance-baseline.json`](selection-invariance-baseline.json)
+also checks, for all 113 focuses, that selected file IDs, selected node IDs,
+exact relation IDs, and disposition state are unchanged from the pre-#289
+observation. This is a direct membership check, not an inference from packet
+identity.
+
+## Rerun result
+
+The following are comparison false-inclusion/false-exclusion counts over the
+frozen candidate/reference surface, not raw membership totals:
+
+- File overview: **34 / 0** false inclusions/exclusions; **0** file-role
   disagreements.
-- Focus nodes: 1,453 false inclusions, 176 false exclusions, and 14 direct/context
-  role disagreements.
-- Exact relations: 684 false inclusions and 49 false exclusions.
-- Focus coverage: 3 complete for admitted direct seeds, 78 limited by truncated
-  admitted seeds, 29 correctly empty, 0 unknown, and 3 reference-unresolved.
+- Selected focus-file membership: **458 / 77** false
+  inclusions/exclusions.
+- Selected focus-node membership: **1,453 / 176** false
+  inclusions/exclusions.
+- Exact relation IDs: **684 / 49** false inclusions/exclusions.
 
-## Difference from campaign v1
+The separated dimensions are:
 
-Campaign v1 used agent-prepared proposed labels and reported 1,458 node false
-inclusions, 170 node false exclusions, and 13 role disagreements. Independent
-review found that several selected exact relations omitted one endpoint from
-the proposed membership. Closing those invalid references changed the verified
-result to 1,453 false inclusions, 176 false exclusions, and 14 role
-disagreements. Exact-relation counts remain 684 false inclusions and 49 false
-exclusions.
+- Claimed-direct nodes: **352 / 289** false inclusions/exclusions; claimed
+  direct files: **217 / 169**.
+- Structural-context nodes: **761 / 12** false inclusions/exclusions;
+  structural-context files: **151 / 3**. File-level context is disjoint from
+  direct/suggested/unresolved file categories; member-level provenance remains
+  available in the HTML inspection.
+- Suggestions observed: **465 node suggestions** and **199 file suggestions**
+  across **43 resolved focus rows**. Suggestions are reported as an epistemic/provenance
+  behavior; they are not promoted to direct mappings and are not relabeled as
+  context.
+- Production unresolved memberships remain a separate observed dimension in
+  the comparison HTML. They are reported, not compared to frozen direct/context
+  labels or silently folded into structural context.
 
-The changed numbers are expected: v1.1 is not a new authority label placed over
-the old answer. It corrects the answer, binds the corrected proposal digest,
-and records the evidence and isolation used to verify it.
+The legacy binary role comparison is retained only as a diagnostic: 1,101 / 289
+node false inclusions/exclusions and 12 role disagreements. It is not the
+selected-membership result and is not an optimization target.
+
+Coverage remains 3 complete for admitted direct seeds, 78 limited by truncated
+admitted seeds, 29 correctly empty, 0 unknown, and 3 reference-unresolved.
+
+## Interpretation
+
+The invariant selected universe confirms that preserving provenance downstream
+did not change what the structural pipeline selected. The new evaluator now
+answers separate questions: did RepoDelta select the right member universe,
+which members did it claim as direct, what suggestions did it expose, and which
+members did it present as structural context? A heuristic suggestion may be
+semantically direct in the frozen reference while RepoDelta still correctly
+refuses to claim that as a deterministic direct mapping.
+
+Consequently, the rerun is evidence for a truthful provenance boundary, not an
+accuracy improvement claim. Any future association or closure change must be
+evaluated against the selected-membership invariant and the four dimensions
+separately. No new campaign or reference relabeling is introduced here.
 
 ## Coverage interpretation
 
-Most non-empty focuses have limited traversal coverage. Their false-exclusion
-counts therefore cannot establish repository-wide recall and must remain
-bounded to collected candidates. That limitation does not explain the false
-inclusions: those nodes and relations were actually projected by RepoDelta but
-were excluded by the independently verified reference. The direction of the
-over-selection finding is therefore robust even though exhaustive recall is
-not established.
-
-## Next product experiment
-
-Change direct-anchor association so exact authored selectors and direct changed
-evidence remain direct while closure/reachable support stays context or outside
-the focus. Re-run this frozen campaign after that change. Accept the change only
-if verified false inclusions fall substantially without increasing bounded
-false exclusions or converting limited coverage into an unsupported completeness
-claim.
+Most non-empty focuses have limited traversal coverage. False-exclusion counts
+remain bounded to the collected candidates and cannot establish repository-wide
+recall. The unchanged comparison counts still show the existing over-selection
+direction on the frozen surface; the separated direct/context/suggestion counts
+explain how that over-selection is represented without collapsing provenance.

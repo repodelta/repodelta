@@ -10,7 +10,6 @@ from repodelta.model.contracts import (
     ReviewSlice,
     ReviewStructuralGraph,
     StructuralFocusDisposition,
-    StructuralFocusNode,
     StructuralFocusOverlay,
     TransformationAlignment,
     TransformationAssessment,
@@ -426,7 +425,7 @@ def _validate_workspace(
     transformation_structural_topology: TransformationStructuralTopology,
     transformation_structural_closure: TransformationStructuralClosure,
 ) -> None:
-    if workspace.schema_version != "verification_workspace.v7":
+    if workspace.schema_version != "verification_workspace.v8":
         raise ValueError("unsupported verification workspace schema")
     if workspace.transformation_structural_topology != (
         transformation_structural_topology
@@ -466,7 +465,7 @@ def _validate_workspace(
         item.change_map.focus_statement_id: item for item in slices
     }
     if transformation_structural_topology.schema_version != (
-        "transformation_structural_topology.v1"
+        "transformation_structural_topology.v2"
     ):
         raise ValueError("unsupported transformation structural topology schema")
     if tuple(
