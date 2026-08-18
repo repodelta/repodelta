@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
 
 from repodelta.evaluation.structural_correctness import (
@@ -262,11 +263,8 @@ def _selection_invariance_summary() -> dict[str, int | str]:
         item["pull_request"]
         for item in json.loads(V1_1_MANIFEST.read_text(encoding="utf-8"))["samples"]
     )
-    assert baseline == build_selection_invariance_baseline(
-        repo_root=Path.cwd(),
-        baseline_commit=baseline["baseline_commit"],
-        campaign_root=V1_1_CAMPAIGN,
-        pull_requests=pull_requests,
+    assert baseline == _rebuild_selection_invariance_baseline(
+        baseline, pull_requests
     )
     current_by_pr = {}
     for sample in json.loads(V1_1_MANIFEST.read_text(encoding="utf-8"))["samples"]:
@@ -379,6 +377,30 @@ def _assert_v3_dimensions(summary, expected_rows) -> None:
         "false_exclusions": sum(row["node_false_exclusions"] for row in expected_rows),
         "role_disagreements": sum(row["node_role_disagreements"] for row in expected_rows),
     }
+
+
+def _rebuild_selection_invariance_baseline(baseline, pull_requests):
+    try:
+        return build_selection_invariance_baseline(
+            repo_root=Path.cwd(),
+            baseline_commit=baseline["baseline_commit"],
+            campaign_root=V1_1_CAMPAIGN,
+            pull_requests=pull_requests,
+        )
+    except subprocess.CalledProcessError:
+        # CI's shallow checkout may omit the pinned ancestor. Fetch only that
+        # immutable commit, then rerun the same source-bound generator.
+        subprocess.run(
+            ["git", "fetch", "--no-tags", "origin", baseline["baseline_commit"]],
+            check=True,
+            capture_output=True,
+        )
+        return build_selection_invariance_baseline(
+            repo_root=Path.cwd(),
+            baseline_commit=baseline["baseline_commit"],
+            campaign_root=V1_1_CAMPAIGN,
+            pull_requests=pull_requests,
+        )
 
 
 def _campaign_row(pull_request, labels, observation):
