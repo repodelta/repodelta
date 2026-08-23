@@ -454,16 +454,25 @@ def _predicate_bindings(
             closure_plan,
         )
     }
-    ambiguous_selector_keys = {
+    unresolved_selector_keys = {
         (item.predicate_id, item.selector_index)
         for item in (subject_selection.diagnostics if subject_selection else ())
         if item.predicate_id == predicate.id
-        and item.state == "ambiguous_structural_match"
+        and (
+            item.state == "ambiguous_structural_match"
+            or (
+                item.state == "no_structural_match"
+                and predicate.expectation == "reference"
+                and claim.kind in _SURFACE_PRESENCE_CLAIM_KINDS
+            )
+        )
     }
-    if ambiguous_selector_keys:
-        # A selector that could name several changed identities must not
-        # re-enter assessment through the broader alignment vocabulary. Keep
-        # uniquely resolved structural subjects and uniquely named checks only.
+    if unresolved_selector_keys:
+        # An ambiguous selector, or an unmatched reference surface selector,
+        # must not re-enter formal predicate proof through the broader
+        # alignment vocabulary. Keep uniquely resolved structural subjects and
+        # uniquely named checks only; lexical compatibility remains
+        # non-authoritative context.
         predicate_specific_ids = set(selected_ids)
         verification_items = tuple(
             evidence[item.evidence_id]

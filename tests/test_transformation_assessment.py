@@ -92,7 +92,7 @@ def test_pipeline_assesses_claims_conservatively_from_typed_authorities() -> Non
     claims = {item.kind: item for item in brief.transformation_contract.claims}
     assessed = brief.transformation_assessment.by_claim_id()
 
-    assert assessed[claims["change"].id].status == "demonstrated"
+    assert assessed[claims["change"].id].status == "unverified"
     assert assessed[claims["after_topology"].id].status == "partial"
     assert assessed[claims["selected_region"].id].status == "unverified"
     assert assessed[claims["removal"].id].status == "partial"
@@ -519,6 +519,84 @@ def test_ambiguous_symbol_selector_does_not_reenter_alignment_as_direct() -> Non
     assert selection.diagnostics[0].state == "ambiguous_structural_match"
     assert alignment.by_claim_id()["T1"]
     assert assessment.status == "unverified"
+
+
+def test_unmatched_reference_selector_does_not_reenter_alignment_as_exact() -> None:
+    contract = extract_review_semantics(
+        issue_body=None,
+        issue_source=None,
+        pr_body="## Change\n- `config` is changed.\n",
+        pr_source=SourceRef(label="PR #9"),
+        pr_title="Reject unmatched reference subject",
+    ).transformation_contract
+    candidate = EvidenceItem(
+        id="review-config",
+        summary="Modified pkg.review_config",
+        kind="structural_change",
+        classification="code",
+        profile="production",
+        authority="structural_provider",
+        revision_side="review",
+        operation="modified",
+        role="changed_anchor",
+        changed=True,
+        head_signature=AssociationSignature(
+            identifiers=("config", "reviewconfig"),
+            tokens=("config",),
+        ),
+        structural_change=StructuralChangeIdentity(
+            review_symbol_id="review-config",
+        ),
+        metadata={
+            "path": "src/config.py",
+            "base_path": "src/config.py",
+            "head_path": "src/config.py",
+            "base_qualified_name": "pkg.review_config",
+            "base_name": "review_config",
+            "head_qualified_name": "pkg.review_config",
+            "head_name": "review_config",
+        },
+    )
+    catalog = EvidenceCatalog(items=(candidate,))
+    observed = reconstruct_observed_transformation(catalog)
+    selection = select_transformation_subjects(contract, observed, catalog)
+    alignment = TransformationAlignment(
+        bindings=(
+            TransformationEvidenceBinding(
+                id="TAB:T1:review-config",
+                claim_id="T1",
+                evidence_id=candidate.id,
+                evidence_role="change",
+                association="exact_identifier",
+                reasons=(
+                    AssociationReason(
+                        kind="exact_identifier",
+                        detail="Fixture supplies a broad lexical binding.",
+                    ),
+                ),
+            ),
+        ),
+    )
+    assessment = assess_transformation(
+        contract,
+        alignment,
+        catalog,
+        ClosureScanPlanSet(),
+        head_sha="head123",
+        subject_selection=selection,
+        structural_closure=converge_transformation_closure(
+            contract,
+            selection,
+            catalog,
+        ),
+    ).by_claim_id()["T1"]
+
+    assert selection.matches == ()
+    assert selection.diagnostics[0].state == "no_structural_match"
+    assert alignment.by_claim_id()["T1"]
+    assert assessment.status == "unverified"
+    assert assessment.predicate_assessments[0].status == "unverified"
+    assert assessment.predicate_assessments[0].supporting_binding_ids == ()
 
 
 def test_typed_predicate_rejects_unrelated_single_claim_binding() -> None:
