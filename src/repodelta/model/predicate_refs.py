@@ -54,6 +54,25 @@ def matches_transformation_selector(
     changed identities.
     """
 
+    if predicate.expectation == "reference":
+        # Assessment still consumes this compatibility predicate for
+        # non-direct alignment evidence. Direct structural admission goes
+        # through resolve_transformation_selector and remains canonical-only.
+        if predicate.selector_kind == "repository_path":
+            return _single_transformation_selector_match_kind(
+                predicate,
+                selector_value,
+                item,
+            ) is not None
+        if item.role == "verification":
+            return _single_transformation_selector_match_kind(
+                predicate,
+                selector_value,
+                item,
+            ) is not None
+        selector_keys = _selector_keys(selector_value)
+        signature = _candidate_signature(predicate, item)
+        return bool(selector_keys & {*signature.identifiers, *signature.tokens})
     return _single_transformation_selector_match_kind(
         predicate,
         selector_value,
@@ -151,6 +170,31 @@ def _single_transformation_selector_match_kind(
         return None
     signature = _candidate_signature(predicate, item)
     metadata = item.metadata
+    selector_is_qualified = _is_qualified_symbol(selector_text)
+    if predicate.expectation == "reference":
+        qualified_names = {
+            _normalize_symbol_selector(value)
+            for value in (
+                metadata.get("base_qualified_name"),
+                metadata.get("head_qualified_name"),
+            )
+            if isinstance(value, str) and value.strip()
+        }
+        names = {
+            _normalize_symbol_selector(value)
+            for value in (
+                metadata.get("base_name"),
+                metadata.get("head_name"),
+            )
+            if isinstance(value, str) and value.strip()
+        }
+        if selector_is_qualified:
+            return (
+                "qualified_symbol"
+                if selector_text in qualified_names
+                else None
+            )
+        return "symbol_name" if selector_text in names else None
     if predicate.expectation in {"present_base", "absent_head"}:
         side_metadata_defined = "base_qualified_name" in metadata
         if (
@@ -183,7 +227,6 @@ def _single_transformation_selector_match_kind(
         if isinstance(name, str)
         else ""
     )
-    selector_is_qualified = _is_qualified_symbol(selector_text)
     if selector_is_qualified:
         if normalized_qualified_name == selector_text:
             return "qualified_symbol"

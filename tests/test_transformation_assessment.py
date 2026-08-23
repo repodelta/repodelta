@@ -1099,6 +1099,15 @@ def _authority_fixture(
             *((bypass.id,) if include_bypass else ()),
         ),
         structural_change=StructuralChangeIdentity(review_symbol_id="adapter"),
+        metadata={
+            "path": "src/adapter.py",
+            "base_path": "src/adapter.py",
+            "head_path": "src/adapter.py",
+            "base_qualified_name": "Adapter",
+            "base_name": "Adapter",
+            "head_qualified_name": "Adapter",
+            "head_name": "Adapter",
+        },
     )
     catalog = EvidenceCatalog(
         items=(

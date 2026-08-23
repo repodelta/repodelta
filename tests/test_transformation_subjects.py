@@ -14,9 +14,11 @@ from repodelta.model.contracts import (
     ReviewSourcePacket,
     SourceRef,
     StructuralChangeIdentity,
+    TransformationPredicate,
     TransformationSubjectSelection,
 )
 from repodelta.pipeline import DeterministicAnalyzer
+from repodelta.model.predicate_refs import resolve_transformation_selector
 from repodelta.routing.transformation_subjects import select_transformation_subjects
 from repodelta.semantics.criteria import extract_review_semantics
 
@@ -208,6 +210,43 @@ def test_symbol_selector_does_not_match_a_longer_identifier() -> None:
 
     assert selection.matches == ()
     assert selection.diagnostics[0].state == "no_structural_match"
+
+
+def test_reference_selector_requires_canonical_leaf_identity() -> None:
+    predicate = TransformationPredicate(
+        id="TP:T1:1",
+        claim_id="T1",
+        selector_kind="symbol",
+        values=("config",),
+        expectation="reference",
+        sources=(SourceRef(label="PR #9"),),
+    )
+    candidate = _change(
+        "E:config",
+        path="src/config.py",
+        head_name="pkg.review_config",
+    )
+
+    selected, resolution, match_kind = resolve_transformation_selector(
+        predicate,
+        "config",
+        (candidate,),
+    )
+
+    assert selected == ()
+    assert resolution == "no_match"
+    assert match_kind is None
+
+    exact_selected, exact_resolution, exact_match_kind = (
+        resolve_transformation_selector(
+            predicate,
+            "review_config",
+            (candidate,),
+        )
+    )
+    assert exact_selected == (candidate,)
+    assert exact_resolution == "matched"
+    assert exact_match_kind == "symbol_name"
 
 
 def test_state_selectors_cannot_cross_their_declared_revision() -> None:
