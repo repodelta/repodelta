@@ -15,6 +15,8 @@ from repodelta.evaluation.focus_provenance import (
     write_provenance_json,
 )
 from repodelta.evaluation.structural_correctness import (
+    OBSERVATION_SCHEMA,
+    PREVIOUS_OBSERVATION_SCHEMA,
     ObservedFocus,
     ReferenceFocusLabel,
     StructuralSubject,
@@ -506,7 +508,7 @@ def test_observation_copies_real_review_brief_overlay_for_all_subject_paths(
     assert by_subject["G1"].memberships[0].membership_class == "suggested"
     assert by_subject["T1"].memberships[0].membership_class == "asserted"
     assert by_subject["CC1"].memberships[0].membership_class == "unresolved"
-    assert observation.schema_version == "structural_correctness_observation.v4"
+    assert observation.schema_version == OBSERVATION_SCHEMA
     assert all(
         focus.canonical_membership_digest
         == by_subject[focus.subject_id].canonical_membership_digest
@@ -577,7 +579,7 @@ def test_replay_requires_provenance_bound_observation() -> None:
             packet,
             replace(
                 _aligned_observation(packet),
-                schema_version="structural_correctness_observation.v3",
+                schema_version=PREVIOUS_OBSERVATION_SCHEMA,
             ),
             _provenance(packet),
             _labels(packet),

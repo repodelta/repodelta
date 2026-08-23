@@ -8,6 +8,7 @@ from typing import cast
 
 from repodelta.evaluation.focus_membership import canonical_focus_membership_digest
 from repodelta.evaluation.structural_correctness import (
+    OBSERVATION_SCHEMA,
     StructuralCorrectnessLabels,
     StructuralCorrectnessObservation,
     StructuralCorrectnessPacket,
@@ -248,7 +249,7 @@ def replay_producer_counterfactual(
 
     if observation.packet_digest != packet.digest:
         raise ValueError("structural observation does not match packet")
-    if observation.schema_version != "structural_correctness_observation.v4":
+    if observation.schema_version != OBSERVATION_SCHEMA:
         raise ValueError(
             "provenance replay requires a provenance-bound structural observation"
         )
