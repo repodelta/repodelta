@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from dataclasses import asdict, dataclass
 from collections.abc import Iterable, Mapping
 from pathlib import Path
@@ -20,8 +21,15 @@ from repodelta.model.contracts import (
 )
 
 
-PROVENANCE_OBSERVATION_SCHEMA = "structural_focus_provenance_observation.v1"
-COUNTERFACTUAL_SCHEMA = "structural_focus_producer_counterfactual.v1"
+PROVENANCE_OBSERVATION_SCHEMA = "structural_focus_provenance_observation.v2"
+COUNTERFACTUAL_SCHEMA = "structural_focus_producer_counterfactual.v2"
+_MEMBERSHIP_CLASS_ORDER = {
+    "asserted": 0,
+    "matched": 1,
+    "suggested": 2,
+    "context": 3,
+    "unresolved": 4,
+}
 
 
 @dataclass(frozen=True)
@@ -30,6 +38,7 @@ class ProvenanceFocus:
 
     subject_id: str
     memberships: tuple[StructuralFocusMembership, ...] = ()
+    canonical_membership_digest: str = ""
 
     def __post_init__(self) -> None:
         identities = tuple(
@@ -37,6 +46,12 @@ class ProvenanceFocus:
         )
         if len(identities) != len(set(identities)):
             raise ValueError("provenance focus contains duplicate memberships")
+        digest = _membership_digest(self.memberships)
+        if self.canonical_membership_digest:
+            if self.canonical_membership_digest != digest:
+                raise ValueError("canonical membership digest mismatch")
+        else:
+            object.__setattr__(self, "canonical_membership_digest", digest)
 
 
 @dataclass(frozen=True)
@@ -64,15 +79,42 @@ class StructuralFocusProvenanceObservation:
 
 
 @dataclass(frozen=True)
+class ProducerDimensionDelta:
+    false_inclusions: int
+    false_exclusions: int
+
+
+@dataclass(frozen=True)
+class ProducerObservedDimensions:
+    selected_nodes: int
+    claimed_direct_nodes: int
+    suggested_nodes: int
+    structural_context_nodes: int
+    unresolved_nodes: int
+    exact_relations: int
+    coverage_state: str
+    coverage_mapping_state: str
+
+
+@dataclass(frozen=True)
+class ProducerComparisonDimensions:
+    selected_nodes: ProducerDimensionDelta | None
+    claimed_direct_nodes: ProducerDimensionDelta | None
+    suggested_nodes: ProducerDimensionDelta | None
+    structural_context_nodes: ProducerDimensionDelta | None
+    unresolved_nodes: ProducerDimensionDelta | None
+    exact_relations: ProducerDimensionDelta | None
+
+
+@dataclass(frozen=True)
 class ProducerOutcome:
     subject_kind: str
     disabled_producer: str
     focus_count: int
+    comparison_focus_count: int
     memberships_removed: int
-    node_false_inclusions: int
-    node_false_exclusions: int
-    relation_false_inclusions: int
-    relation_false_exclusions: int
+    observed: ProducerObservedDimensions
+    comparison: ProducerComparisonDimensions
 
 
 @dataclass(frozen=True)
@@ -147,14 +189,24 @@ def load_focus_provenance(
         raise ValueError("provenance observation focuses must be a list")
     if not all(isinstance(focus, Mapping) for focus in raw_focuses):
         raise ValueError("provenance observation focuses must be objects")
+    for focus in raw_focuses:
+        memberships = focus.get("memberships", [])
+        if not isinstance(memberships, list):
+            raise ValueError("provenance focus memberships must be a list")
+    packet_digest = raw.get("packet_digest")
+    if not isinstance(packet_digest, str) or not packet_digest:
+        raise ValueError("provenance observation requires packet identity")
     return StructuralFocusProvenanceObservation(
-        packet_digest=str(raw["packet_digest"]),
+        packet_digest=packet_digest,
         focuses=tuple(
             ProvenanceFocus(
                 subject_id=str(focus["subject_id"]),
                 memberships=tuple(
                     _membership_from_mapping(item)
                     for item in focus.get("memberships", [])
+                ),
+                canonical_membership_digest=str(
+                    focus.get("canonical_membership_digest", "")
                 ),
             )
             for focus in raw_focuses
@@ -192,6 +244,22 @@ def replay_producer_counterfactual(
 
     disabled = tuple(sorted({item for item in disabled_producers if item}))
     disabled_set = set(disabled)
+    known_producers = {
+        key
+        for focus in provenance.focuses
+        for membership in focus.memberships
+        for provenance_item in membership.provenance
+        for key in (
+            provenance_item.producer,
+            f"{provenance_item.producer}:{provenance_item.admission_class}",
+        )
+    }
+    unknown_producers = disabled_set - known_producers
+    if unknown_producers:
+        raise ValueError(
+            "unknown disabled producer(s): "
+            + ", ".join(sorted(unknown_producers))
+        )
     subject_kinds = {item.subject_id: item.subject_kind for item in packet.subjects}
     outcomes: list[ProducerOutcome] = []
     for subject_kind in sorted(set(subject_kinds.values())):
@@ -201,43 +269,61 @@ def replay_producer_counterfactual(
             if kind == subject_kind
         ]
         removed = 0
-        node_fi = node_fe = relation_fi = relation_fe = 0
+        selected_observed = direct_observed = suggested_observed = 0
+        context_observed = unresolved_observed = relation_observed = 0
+        selected_fi = selected_fe = direct_fi = direct_fe = 0
+        relation_fi = relation_fe = 0
+        comparison_focus_count = 0
         for subject_id in focus_ids:
-            current = observed[subject_id]
             ref = expected[subject_id]
             focus = attributed[subject_id]
-            by_identity = {
-                (item.member_kind, item.member_id): item
-                for item in focus.memberships
-            }
-            kept = {
-                identity
-                for identity, membership in by_identity.items()
-                if _membership_survives(membership, disabled_set)
-            }
-            removed += len(by_identity) - len(kept)
-            observed_nodes = {
-                item
-                for item in (
-                    *current.direct_node_ids,
-                    *current.suggested_node_ids,
-                    *current.context_node_ids,
-                    *current.unresolved_node_ids,
+            surviving: dict[tuple[str, str], StructuralFocusMembershipClass] = {}
+            for membership in focus.memberships:
+                remaining = _surviving_provenance(membership, disabled_set)
+                if not remaining:
+                    removed += 1
+                    continue
+                surviving[(membership.member_kind, membership.member_id)] = (
+                    _strongest_membership_class(remaining)
                 )
-                if ("node", item) in kept
+            observed_nodes_by_class = {
+                "asserted": set(),
+                "matched": set(),
+                "suggested": set(),
+                "context": set(),
+                "unresolved": set(),
             }
+            for (member_kind, member_id), membership_class in surviving.items():
+                if member_kind == "node":
+                    observed_nodes_by_class[membership_class].add(member_id)
+            observed_direct = (
+                observed_nodes_by_class["asserted"]
+                | observed_nodes_by_class["matched"]
+            )
+            observed_suggested = observed_nodes_by_class["suggested"]
+            observed_context = observed_nodes_by_class["context"]
+            observed_unresolved = observed_nodes_by_class["unresolved"]
+            observed_nodes = set().union(*observed_nodes_by_class.values())
+            observed_relations = {
+                member_id
+                for (member_kind, member_id) in surviving
+                if member_kind == "relation_group"
+            }
+            selected_observed += len(observed_nodes)
+            direct_observed += len(observed_direct)
+            suggested_observed += len(observed_suggested)
+            context_observed += len(observed_context)
+            unresolved_observed += len(observed_unresolved)
+            relation_observed += len(observed_relations)
             expected_nodes = set(ref.direct_node_ids) | set(ref.context_node_ids)
             if not ref.unresolved:
-                node_fi += len(observed_nodes - expected_nodes)
-                node_fe += len(expected_nodes - observed_nodes)
-            observed_relations = {
-                identity[1]
-                for identity in kept
-                if identity[0] == "relation_group"
-                and identity[1] in set(current.exact_relation_ids)
-            }
-            expected_relations = set(ref.relation_ids)
-            if not ref.unresolved:
+                comparison_focus_count += 1
+                selected_fi += len(observed_nodes - expected_nodes)
+                selected_fe += len(expected_nodes - observed_nodes)
+                expected_direct = set(ref.direct_node_ids)
+                direct_fi += len(observed_direct - expected_direct)
+                direct_fe += len(expected_direct - observed_direct)
+                expected_relations = set(ref.relation_ids)
                 relation_fi += len(observed_relations - expected_relations)
                 relation_fe += len(expected_relations - observed_relations)
         outcomes.append(
@@ -245,11 +331,39 @@ def replay_producer_counterfactual(
                 subject_kind=subject_kind,
                 disabled_producer=",".join(disabled),
                 focus_count=len(focus_ids),
+                comparison_focus_count=comparison_focus_count,
                 memberships_removed=removed,
-                node_false_inclusions=node_fi,
-                node_false_exclusions=node_fe,
-                relation_false_inclusions=relation_fi,
-                relation_false_exclusions=relation_fe,
+                observed=ProducerObservedDimensions(
+                    selected_nodes=selected_observed,
+                    claimed_direct_nodes=direct_observed,
+                    suggested_nodes=suggested_observed,
+                    structural_context_nodes=context_observed,
+                    unresolved_nodes=unresolved_observed,
+                    exact_relations=relation_observed,
+                    coverage_state=packet.coverage.state,
+                    coverage_mapping_state=packet.coverage.seed_mapping_state,
+                ),
+                comparison=(
+                    ProducerComparisonDimensions(
+                        selected_nodes=ProducerDimensionDelta(selected_fi, selected_fe),
+                        claimed_direct_nodes=ProducerDimensionDelta(direct_fi, direct_fe),
+                        suggested_nodes=None,
+                        structural_context_nodes=None,
+                        unresolved_nodes=None,
+                        exact_relations=ProducerDimensionDelta(
+                            relation_fi, relation_fe
+                        ),
+                    )
+                    if comparison_focus_count
+                    else ProducerComparisonDimensions(
+                        selected_nodes=None,
+                        claimed_direct_nodes=None,
+                        suggested_nodes=None,
+                        structural_context_nodes=None,
+                        unresolved_nodes=None,
+                        exact_relations=None,
+                    )
+                ),
             )
         )
     return ProducerCounterfactualReport(
@@ -259,11 +373,36 @@ def replay_producer_counterfactual(
     )
 
 
-def _membership_survives(
+def _surviving_provenance(
     membership: StructuralFocusMembership,
     disabled: set[str],
-) -> bool:
-    return any(item.producer not in disabled for item in membership.provenance)
+) -> tuple[StructuralFocusProvenance, ...]:
+    return tuple(
+        item
+        for item in membership.provenance
+        if item.producer not in disabled
+        and f"{item.producer}:{item.admission_class}" not in disabled
+    )
+
+
+def _strongest_membership_class(
+    provenance: tuple[StructuralFocusProvenance, ...],
+) -> StructuralFocusMembershipClass:
+    return min(
+        (item.admission_class for item in provenance),
+        key=_MEMBERSHIP_CLASS_ORDER.__getitem__,
+    )
+
+
+def _membership_digest(
+    memberships: tuple[StructuralFocusMembership, ...],
+) -> str:
+    payload = json.dumps(
+        [asdict(item) for item in memberships],
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
 
 
 def _validate_provenance_observation(

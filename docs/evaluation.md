@@ -110,7 +110,10 @@ structural role, producer, and source IDs for every node, edge, relation-group,
 ownership, and placement membership. Producer counterfactuals replay only
 those recorded contributions; they do not reconstruct structural paths or
 predict a redesigned selector or closure policy. Missing or divergent sidecar
-membership fails closed before scoring.
+membership fails closed before scoring. The counterfactual output reports
+selected, claimed-direct, suggested, context, unresolved, relation, and
+coverage dimensions independently; a `producer:admission_class` selector can
+remove one recorded admission and recompute the strongest surviving class.
 
 Live shadow observations remain non-authoritative measurements. Their raw token
 usage and latency are reported without defining pass/fail budgets; monetary

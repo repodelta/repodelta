@@ -352,7 +352,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--disable-producer",
         action="append",
         default=[],
-        help="Producer identifier to remove from the recorded contribution set",
+        help=(
+            "Producer identifier, or producer:admission_class, to remove "
+            "from the recorded contribution set"
+        ),
     )
     return parser
 

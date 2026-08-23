@@ -56,8 +56,18 @@ repodelta compare-structural-provenance \
 ```
 
 This counterfactual removes a membership only when every recorded producer for
-that membership is disabled. It measures observed contribution; it does not
-predict what a redesigned selector or closure policy would have selected.
+that membership is disabled. A `producer:admission_class` selector can disable
+one recorded admission while retaining another, so the surviving strongest
+class is recomputed. It measures observed contribution; it does not predict
+what a redesigned selector or closure policy would have selected.
+
+The JSON keeps `observed` dimensions separate from `comparison` deltas:
+selected nodes, claimed-direct nodes, suggestions, structural context,
+unresolved memberships, exact relations, and the packet's coverage state are
+reported independently. Reference false-inclusion/false-exclusion deltas are
+only reported for dimensions with a resolved reference (selected, claimed
+direct, and exact relations); epistemic buckets are not silently compared as if
+they were semantic reference roles.
 
 Packet identity, candidate completeness, subject completeness, file roles,
 direct-versus-context focus membership, exact relation identity, and claimed
