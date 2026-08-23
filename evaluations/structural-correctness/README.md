@@ -11,7 +11,8 @@ an assessment, verification status, or merge decision.
 ## Blind workflow
 
 Generate the ordinary report, a labeler-facing packet, a separately stored
-canonical observation, and a complete unresolved label template:
+canonical observation, a canonical provenance sidecar, and a complete
+unresolved label template:
 
 ```bash
 repodelta review \
@@ -35,6 +36,46 @@ repodelta compare-structural-correctness \
   --reference-labels build/pr-267.labels.json \
   --output build/pr-267-structural-comparison.html
 ```
+
+The generated `pr-267.packet.json.provenance.json` is an evaluation-only copy
+of the production verification overlay. It preserves each membership's
+`asserted`/`matched`/`suggested`/`context`/`unresolved` class together with the
+producer and source IDs recorded by the canonical projection. The evaluator
+does not reconstruct paths or infer selector reasons from the packet. To replay
+the observed contribution of one producer, use the separate non-authoritative
+sink:
+
+```bash
+repodelta compare-structural-provenance \
+  --labeling-packet build/pr-267.packet.json \
+  --observation build/pr-267.packet.json.observation.json \
+  --provenance build/pr-267.packet.json.provenance.json \
+  --reference-labels build/pr-267.labels.json \
+  --disable-producer structural_path \
+  --output build/pr-267-provenance-counterfactual.json
+```
+
+This counterfactual removes a membership only when every recorded producer for
+that membership is disabled. A `producer:admission_class` selector can disable
+one recorded admission while retaining another, so the surviving strongest
+class is recomputed. It measures observed contribution; it does not predict
+what a redesigned selector or closure policy would have selected.
+
+The generated structural observation is schema v4 and records an independent
+canonical membership digest for each focus. Replay requires this provenance
+binding; changing producer/source details and recomputing only the sidecar's
+own digest fails against the ordinary observation. Historical v2/v3
+observations remain valid for ordinary structural comparison, but fail closed
+when used for provenance replay.
+
+The JSON keeps `observed` dimensions separate from `comparison` deltas:
+selected nodes, claimed-direct nodes, suggestions, structural context,
+unresolved memberships, and exact relations are reported independently.
+Provider coverage and seed-mapping state are top-level report fields, while
+baseline focus dispositions remain recorded per subject kind. Reference false-
+inclusion/false-exclusion deltas are only reported for dimensions with a
+resolved reference (selected, claimed-direct, and exact relations); epistemic
+buckets are not silently compared as if they were semantic reference roles.
 
 Packet identity, candidate completeness, subject completeness, file roles,
 direct-versus-context focus membership, exact relation identity, and claimed
