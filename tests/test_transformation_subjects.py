@@ -69,6 +69,12 @@ def _change(
             "path": path,
             "base_path": path if base_name else None,
             "head_path": path if head_name else None,
+            "qualified_name": head_name or base_name,
+            "name": (head_name or base_name).split(".")[-1],
+            "base_qualified_name": base_name or None,
+            "base_name": base_name.split(".")[-1] if base_name else None,
+            "head_qualified_name": head_name or None,
+            "head_name": head_name.split(".")[-1] if head_name else None,
         },
     )
 
@@ -97,7 +103,7 @@ def test_explicit_predicates_select_revision_appropriate_structural_subjects() -
 
     selection = select_transformation_subjects(contract, observed, catalog)
 
-    assert selection.schema_version == "transformation_subject_selection.v1"
+    assert selection.schema_version == "transformation_subject_selection.v2"
     assert [
         (item.claim_id, item.selector_value, item.evidence_id)
         for item in selection.matches
@@ -120,6 +126,88 @@ def test_explicit_predicates_select_revision_appropriate_structural_subjects() -
         if predicate.role == "target"
         for index in range(1, len(predicate.values) + 1)
     }
+
+
+def test_unqualified_symbol_selector_fails_closed_on_ambiguous_leaf_name() -> None:
+    contract = extract_review_semantics(
+        issue_body=None,
+        issue_source=None,
+        pr_body="## After\n- `Adapter` is changed.\n",
+        pr_source=SourceRef(label="PR #9"),
+        pr_title="Reject ambiguous structural subject",
+    ).transformation_contract
+    candidates = (
+        _change("E:one", path="src/one.py", head_name="pkg.one.Adapter"),
+        _change("E:two", path="src/two.py", head_name="pkg.two.Adapter"),
+    )
+    catalog = EvidenceCatalog(items=candidates)
+    observed = ObservedTransformation(
+        structural_change_evidence_ids=tuple(item.id for item in candidates)
+    )
+
+    selection = select_transformation_subjects(contract, observed, catalog)
+
+    assert selection.matches == ()
+    assert [
+        (item.state, item.message)
+        for item in selection.diagnostics
+    ] == [
+        (
+            "ambiguous_structural_match",
+            "Explicit selector 'Adapter' matched multiple canonical changed "
+            "structural identities on its expected revision side; direct "
+            "structural admission is refused. Use a qualified symbol or "
+            "repository path.",
+        )
+    ]
+
+
+def test_qualified_symbol_selector_wins_over_other_same_leaf_names() -> None:
+    contract = extract_review_semantics(
+        issue_body=None,
+        issue_source=None,
+        pr_body="## After\n- `pkg.two.Adapter` is changed.\n",
+        pr_source=SourceRef(label="PR #9"),
+        pr_title="Resolve qualified structural subject",
+    ).transformation_contract
+    candidates = (
+        _change("E:one", path="src/one.py", head_name="pkg.one.Adapter"),
+        _change("E:two", path="src/two.py", head_name="pkg.two.Adapter"),
+    )
+    catalog = EvidenceCatalog(items=candidates)
+    observed = ObservedTransformation(
+        structural_change_evidence_ids=tuple(item.id for item in candidates)
+    )
+
+    selection = select_transformation_subjects(contract, observed, catalog)
+
+    assert [(item.evidence_id, item.selector_match_kind) for item in selection.matches] == [
+        ("E:two", "qualified_symbol")
+    ]
+
+
+def test_symbol_selector_does_not_match_a_longer_identifier() -> None:
+    contract = extract_review_semantics(
+        issue_body=None,
+        issue_source=None,
+        pr_body="## After\n- `Adapter` is changed.\n",
+        pr_source=SourceRef(label="PR #9"),
+        pr_title="Reject partial structural subject",
+    ).transformation_contract
+    candidate = _change(
+        "E:factory",
+        path="src/factory.py",
+        head_name="pkg.AdapterFactory",
+    )
+    catalog = EvidenceCatalog(items=(candidate,))
+    observed = ObservedTransformation(
+        structural_change_evidence_ids=(candidate.id,)
+    )
+
+    selection = select_transformation_subjects(contract, observed, catalog)
+
+    assert selection.matches == ()
+    assert selection.diagnostics[0].state == "no_structural_match"
 
 
 def test_state_selectors_cannot_cross_their_declared_revision() -> None:
