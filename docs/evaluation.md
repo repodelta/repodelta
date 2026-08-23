@@ -110,10 +110,17 @@ structural role, producer, and source IDs for every node, edge, relation-group,
 ownership, and placement membership. Producer counterfactuals replay only
 those recorded contributions; they do not reconstruct structural paths or
 predict a redesigned selector or closure policy. Missing or divergent sidecar
-membership fails closed before scoring. The counterfactual output reports
-selected, claimed-direct, suggested, context, unresolved, relation, and
-coverage dimensions independently; a `producer:admission_class` selector can
-remove one recorded admission and recompute the strongest surviving class.
+membership fails closed before scoring. Each v4 structural observation records
+an independently computed per-focus canonical membership digest; provenance
+replay requires that bound observation and rejects a sidecar whose producer or
+source details were changed, even if the sidecar digest was recomputed. v2/v3
+observations remain loadable for ordinary historical comparison, but cannot be
+used for provenance replay. The counterfactual output reports selected,
+claimed-direct, suggested, context, unresolved, and relation dimensions
+independently; provider coverage is reported once at report level and baseline
+focus dispositions are reported per subject kind. A
+`producer:admission_class` selector can remove one recorded admission and
+recompute the strongest surviving class.
 
 Live shadow observations remain non-authoritative measurements. Their raw token
 usage and latency are reported without defining pass/fail budgets; monetary

@@ -18,6 +18,7 @@ from repodelta.evaluation.structural_correctness import (
     ObservedFocus,
     ReferenceFocusLabel,
     StructuralSubject,
+    observe_structural_correctness,
     prepare_structural_correctness_packet,
 )
 from repodelta.model.contracts import (
@@ -123,6 +124,7 @@ def _provenance(packet):
 
 def _aligned_observation(packet):
     source = _observation(packet)
+    provenance = _provenance(packet)
     return replace(
         source,
         focuses=(
@@ -131,8 +133,17 @@ def _aligned_observation(packet):
                 direct_node_ids=("S:a",),
                 context_node_ids=("S:b",),
                 exact_relation_ids=("REL:1",),
+                canonical_membership_digest=(
+                    provenance.focuses[0].canonical_membership_digest
+                ),
             ),
-            replace(source.focuses[1], suggested_node_ids=("S:c",)),
+            replace(
+                source.focuses[1],
+                suggested_node_ids=("S:c",),
+                canonical_membership_digest=(
+                    provenance.focuses[1].canonical_membership_digest
+                ),
+            ),
         ),
     )
 
@@ -233,6 +244,21 @@ def _tcc_inputs(packet):
                     ),
                 ),
             ),
+        ),
+    )
+    provenance_by_subject = {
+        item.subject_id: item for item in provenance.focuses
+    }
+    observation = replace(
+        observation,
+        focuses=tuple(
+            replace(
+                focus,
+                canonical_membership_digest=provenance_by_subject[
+                    focus.subject_id
+                ].canonical_membership_digest,
+            )
+            for focus in observation.focuses
         ),
     )
     return packet, observation, labels, provenance
@@ -466,7 +492,8 @@ def test_observation_copies_real_review_brief_overlay_for_all_subject_paths(
     brief = _production_brief()
     packet = prepare_structural_correctness_packet(brief)
 
-    provenance = observe_focus_provenance(brief, packet)
+    observation = observe_structural_correctness(brief, packet)
+    provenance = observe_focus_provenance(brief, packet, observation)
     by_subject = {item.subject_id: item for item in provenance.focuses}
 
     r1_kinds = {
@@ -479,6 +506,12 @@ def test_observation_copies_real_review_brief_overlay_for_all_subject_paths(
     assert by_subject["G1"].memberships[0].membership_class == "suggested"
     assert by_subject["T1"].memberships[0].membership_class == "asserted"
     assert by_subject["CC1"].memberships[0].membership_class == "unresolved"
+    assert observation.schema_version == "structural_correctness_observation.v4"
+    assert all(
+        focus.canonical_membership_digest
+        == by_subject[focus.subject_id].canonical_membership_digest
+        for focus in observation.focuses
+    )
 
     path = write_provenance_json(provenance, tmp_path / "production.json")
     assert load_focus_provenance(path) == provenance
@@ -495,6 +528,61 @@ def test_loading_rejects_producer_source_drift(tmp_path) -> None:
 
     with pytest.raises(ValueError, match="canonical membership digest"):
         load_focus_provenance(path)
+
+
+def test_replay_rejects_recomputed_sidecar_drift() -> None:
+    packet = _packet()
+    observation = _aligned_observation(packet)
+    source = _provenance(packet)
+    tampered_membership = replace(
+        source.focuses[0].memberships[0],
+        provenance=(
+            StructuralFocusProvenance(
+                "tampered_producer", "matched", ("S:a",)
+            ),
+        ),
+    )
+    tampered = replace(
+        source,
+        focuses=(
+            replace(
+                source.focuses[0],
+                memberships=(
+                    tampered_membership,
+                    *source.focuses[0].memberships[1:],
+                ),
+                canonical_membership_digest="",
+            ),
+            source.focuses[1],
+        ),
+    )
+
+    with pytest.raises(ValueError, match="canonical provenance digest differs"):
+        replay_producer_counterfactual(
+            packet,
+            observation,
+            tampered,
+            _labels(packet),
+            disabled_producers=(),
+        )
+
+
+def test_replay_requires_provenance_bound_observation() -> None:
+    packet = _packet()
+
+    with pytest.raises(
+        ValueError, match="requires a provenance-bound structural observation"
+    ):
+        replay_producer_counterfactual(
+            packet,
+            replace(
+                _aligned_observation(packet),
+                schema_version="structural_correctness_observation.v3",
+            ),
+            _provenance(packet),
+            _labels(packet),
+            disabled_producers=(),
+        )
 
 
 def test_counterfactual_replays_recorded_producer_contribution_only() -> None:
@@ -532,6 +620,9 @@ def test_zero_intervention_reproduces_observed_dimensions() -> None:
         item for item in report.outcomes if item.subject_kind == "requirement"
     )
     assert requirement.memberships_removed == 0
+    assert report.provider_coverage_state == packet.coverage.state
+    assert report.provider_seed_mapping_state == packet.coverage.seed_mapping_state
+    assert requirement.baseline_focus_dispositions == {"mapped": 1}
     assert requirement.observed.selected_nodes == 2
     assert requirement.observed.claimed_direct_nodes == 1
     assert requirement.observed.suggested_nodes == 0
@@ -623,10 +714,11 @@ def test_loading_rejects_empty_source_identity(tmp_path) -> None:
     path.write_text(
         '{"schema_version":"structural_focus_provenance_observation.v2",'
         f'"packet_digest":"{packet.digest}","focuses":[{{"subject_id":"R1",'
+        '"canonical_membership_digest":"invalid",'
         '"memberships":[{"member_kind":"node","member_id":"S:a",'
         '"membership_class":"asserted","structural_role":"changed_anchor",'
         '"provenance":[{"producer":"x","admission_class":"asserted",'
-        '"source_ids":[]}]}]} ,{"subject_id":"G1","memberships":[]}]}',
+        '"source_ids":[]}]}]}]}',
         encoding="utf-8",
     )
 
@@ -706,9 +798,22 @@ def test_disabling_one_admission_recomputes_surviving_class() -> None:
             source.focuses[1],
         ),
     )
+    source_observation = _aligned_observation(packet)
+    bound_observation = replace(
+        source_observation,
+        focuses=(
+            replace(
+                source_observation.focuses[0],
+                canonical_membership_digest=(
+                    provenance.focuses[0].canonical_membership_digest
+                ),
+            ),
+            source_observation.focuses[1],
+        ),
+    )
     report = replay_producer_counterfactual(
         packet,
-        _aligned_observation(packet),
+        bound_observation,
         provenance,
         _labels(packet),
         disabled_producers=("requirement_association:matched",),

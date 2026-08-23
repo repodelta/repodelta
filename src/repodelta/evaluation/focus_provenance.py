@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import json
-import hashlib
 from dataclasses import asdict, dataclass
 from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import cast
 
+from repodelta.evaluation.focus_membership import canonical_focus_membership_digest
 from repodelta.evaluation.structural_correctness import (
     StructuralCorrectnessLabels,
     StructuralCorrectnessObservation,
@@ -22,7 +22,7 @@ from repodelta.model.contracts import (
 
 
 PROVENANCE_OBSERVATION_SCHEMA = "structural_focus_provenance_observation.v2"
-COUNTERFACTUAL_SCHEMA = "structural_focus_producer_counterfactual.v2"
+COUNTERFACTUAL_SCHEMA = "structural_focus_producer_counterfactual.v3"
 _MEMBERSHIP_CLASS_ORDER = {
     "asserted": 0,
     "matched": 1,
@@ -46,7 +46,7 @@ class ProvenanceFocus:
         )
         if len(identities) != len(set(identities)):
             raise ValueError("provenance focus contains duplicate memberships")
-        digest = _membership_digest(self.memberships)
+        digest = canonical_focus_membership_digest(self.memberships)
         if self.canonical_membership_digest:
             if self.canonical_membership_digest != digest:
                 raise ValueError("canonical membership digest mismatch")
@@ -92,8 +92,6 @@ class ProducerObservedDimensions:
     structural_context_nodes: int
     unresolved_nodes: int
     exact_relations: int
-    coverage_state: str
-    coverage_mapping_state: str
 
 
 @dataclass(frozen=True)
@@ -113,6 +111,7 @@ class ProducerOutcome:
     focus_count: int
     comparison_focus_count: int
     memberships_removed: int
+    baseline_focus_dispositions: dict[str, int]
     observed: ProducerObservedDimensions
     comparison: ProducerComparisonDimensions
 
@@ -121,6 +120,8 @@ class ProducerOutcome:
 class ProducerCounterfactualReport:
     packet_digest: str
     disabled_producers: tuple[str, ...]
+    provider_coverage_state: str
+    provider_seed_mapping_state: str
     outcomes: tuple[ProducerOutcome, ...]
     schema_version: str = COUNTERFACTUAL_SCHEMA
 
@@ -128,6 +129,7 @@ class ProducerCounterfactualReport:
 def observe_focus_provenance(
     brief: ReviewBrief,
     packet: StructuralCorrectnessPacket,
+    observation: StructuralCorrectnessObservation | None = None,
 ) -> StructuralFocusProvenanceObservation:
     """Copy canonical overlay memberships into an evaluation artifact."""
 
@@ -143,11 +145,17 @@ def observe_focus_provenance(
         for item in brief.projection.verification_workspace.inspections
     }
     known_subjects = {item.subject_id for item in packet.subjects}
-    if set(inspections) < known_subjects:
+    if set(inspections) != known_subjects:
         missing = sorted(known_subjects - set(inspections))
+        unexpected = sorted(set(inspections) - known_subjects)
+        detail = []
+        if missing:
+            detail.append("missing: " + ", ".join(missing))
+        if unexpected:
+            detail.append("unexpected: " + ", ".join(unexpected))
         raise ValueError(
             "canonical verification inspections do not cover subjects: "
-            + ", ".join(missing)
+            + "; ".join(detail)
         )
     result = StructuralFocusProvenanceObservation(
         packet_digest=packet.digest,
@@ -160,8 +168,11 @@ def observe_focus_provenance(
         ),
     )
     _validate_provenance_observation(result, packet)
+    current_observation = observation or observe_structural_correctness(brief, packet)
+    if current_observation.packet_digest != packet.digest:
+        raise ValueError("structural observation does not match packet")
     _validate_observation_alignment(
-        observe_structural_correctness(brief, packet), result
+        current_observation, result
     )
     return result
 
@@ -193,6 +204,11 @@ def load_focus_provenance(
         memberships = focus.get("memberships", [])
         if not isinstance(memberships, list):
             raise ValueError("provenance focus memberships must be a list")
+        digest = focus.get("canonical_membership_digest")
+        if not isinstance(digest, str) or not digest:
+            raise ValueError(
+                "provenance focus requires canonical membership digest"
+            )
     packet_digest = raw.get("packet_digest")
     if not isinstance(packet_digest, str) or not packet_digest:
         raise ValueError("provenance observation requires packet identity")
@@ -232,6 +248,16 @@ def replay_producer_counterfactual(
 
     if observation.packet_digest != packet.digest:
         raise ValueError("structural observation does not match packet")
+    if observation.schema_version != "structural_correctness_observation.v4":
+        raise ValueError(
+            "provenance replay requires a provenance-bound structural observation"
+        )
+    if any(
+        not focus.canonical_membership_digest for focus in observation.focuses
+    ):
+        raise ValueError(
+            "provenance replay requires canonical membership digests"
+        )
     if labels.packet_digest != packet.digest:
         raise ValueError("reference labels do not match packet")
     _validate_provenance_observation(provenance, packet)
@@ -271,12 +297,17 @@ def replay_producer_counterfactual(
         removed = 0
         selected_observed = direct_observed = suggested_observed = 0
         context_observed = unresolved_observed = relation_observed = 0
+        baseline_focus_dispositions: dict[str, int] = {}
         selected_fi = selected_fe = direct_fi = direct_fe = 0
         relation_fi = relation_fe = 0
         comparison_focus_count = 0
         for subject_id in focus_ids:
             ref = expected[subject_id]
             focus = attributed[subject_id]
+            disposition = observed[subject_id].disposition_state
+            baseline_focus_dispositions[disposition] = (
+                baseline_focus_dispositions.get(disposition, 0) + 1
+            )
             surviving: dict[tuple[str, str], StructuralFocusMembershipClass] = {}
             for membership in focus.memberships:
                 remaining = _surviving_provenance(membership, disabled_set)
@@ -333,6 +364,9 @@ def replay_producer_counterfactual(
                 focus_count=len(focus_ids),
                 comparison_focus_count=comparison_focus_count,
                 memberships_removed=removed,
+                baseline_focus_dispositions=dict(
+                    sorted(baseline_focus_dispositions.items())
+                ),
                 observed=ProducerObservedDimensions(
                     selected_nodes=selected_observed,
                     claimed_direct_nodes=direct_observed,
@@ -340,8 +374,6 @@ def replay_producer_counterfactual(
                     structural_context_nodes=context_observed,
                     unresolved_nodes=unresolved_observed,
                     exact_relations=relation_observed,
-                    coverage_state=packet.coverage.state,
-                    coverage_mapping_state=packet.coverage.seed_mapping_state,
                 ),
                 comparison=(
                     ProducerComparisonDimensions(
@@ -369,6 +401,8 @@ def replay_producer_counterfactual(
     return ProducerCounterfactualReport(
         packet_digest=packet.digest,
         disabled_producers=disabled,
+        provider_coverage_state=packet.coverage.state,
+        provider_seed_mapping_state=packet.coverage.seed_mapping_state,
         outcomes=tuple(outcomes),
     )
 
@@ -392,17 +426,6 @@ def _strongest_membership_class(
         (item.admission_class for item in provenance),
         key=_MEMBERSHIP_CLASS_ORDER.__getitem__,
     )
-
-
-def _membership_digest(
-    memberships: tuple[StructuralFocusMembership, ...],
-) -> str:
-    payload = json.dumps(
-        [asdict(item) for item in memberships],
-        sort_keys=True,
-        separators=(",", ":"),
-    ).encode("utf-8")
-    return hashlib.sha256(payload).hexdigest()
 
 
 def _validate_provenance_observation(
@@ -446,6 +469,17 @@ def _validate_observation_alignment(
         raise ValueError("provenance and observation subjects differ")
     for subject_id, current in observed.items():
         memberships = attributed[subject_id].memberships
+        if not current.canonical_membership_digest:
+            raise ValueError(
+                f"structural observation lacks canonical provenance binding for {subject_id}"
+            )
+        if (
+            current.canonical_membership_digest
+            != attributed[subject_id].canonical_membership_digest
+        ):
+            raise ValueError(
+                f"canonical provenance digest differs for {subject_id}"
+            )
         by_class: dict[str, set[str]] = {
             "direct": set(),
             "suggested": set(),

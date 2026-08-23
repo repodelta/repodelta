@@ -544,7 +544,9 @@ def main() -> int:
                     f"{args.structural_correctness_packet_output}.observation.json",
                 )
                 provenance_output = write_provenance_json(
-                    observe_focus_provenance(brief, correctness_packet),
+                    observe_focus_provenance(
+                        brief, correctness_packet, observation
+                    ),
                     f"{args.structural_correctness_packet_output}.provenance.json",
                 )
                 label_template_output = write_structural_correctness_artifact(

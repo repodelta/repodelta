@@ -61,13 +61,21 @@ one recorded admission while retaining another, so the surviving strongest
 class is recomputed. It measures observed contribution; it does not predict
 what a redesigned selector or closure policy would have selected.
 
+The generated structural observation is schema v4 and records an independent
+canonical membership digest for each focus. Replay requires this provenance
+binding; changing producer/source details and recomputing only the sidecar's
+own digest fails against the ordinary observation. Historical v2/v3
+observations remain valid for ordinary structural comparison, but fail closed
+when used for provenance replay.
+
 The JSON keeps `observed` dimensions separate from `comparison` deltas:
 selected nodes, claimed-direct nodes, suggestions, structural context,
-unresolved memberships, exact relations, and the packet's coverage state are
-reported independently. Reference false-inclusion/false-exclusion deltas are
-only reported for dimensions with a resolved reference (selected, claimed
-direct, and exact relations); epistemic buckets are not silently compared as if
-they were semantic reference roles.
+unresolved memberships, and exact relations are reported independently.
+Provider coverage and seed-mapping state are top-level report fields, while
+baseline focus dispositions remain recorded per subject kind. Reference false-
+inclusion/false-exclusion deltas are only reported for dimensions with a
+resolved reference (selected, claimed-direct, and exact relations); epistemic
+buckets are not silently compared as if they were semantic reference roles.
 
 Packet identity, candidate completeness, subject completeness, file roles,
 direct-versus-context focus membership, exact relation identity, and claimed

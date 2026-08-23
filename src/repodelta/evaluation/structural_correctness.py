@@ -13,12 +13,14 @@ from repodelta.model.contracts import (
     StructuralOverviewFocus,
     VerificationEvidenceInspection,
 )
+from repodelta.evaluation.focus_membership import canonical_focus_membership_digest
 
 
 PACKET_SCHEMA = "structural_correctness_packet.v3"
 LEGACY_PACKET_SCHEMA = "structural_correctness_packet.v2"
 LEGACY_OBSERVATION_SCHEMA = "structural_correctness_observation.v2"
-OBSERVATION_SCHEMA = "structural_correctness_observation.v3"
+PREVIOUS_OBSERVATION_SCHEMA = "structural_correctness_observation.v3"
+OBSERVATION_SCHEMA = "structural_correctness_observation.v4"
 SELECTION_INVARIANCE_SCHEMA = "structural_focus_selection_invariance.v1"
 LABELS_SCHEMA = "structural_correctness_labels.v3"
 LEGACY_LABELS_SCHEMA = "structural_correctness_labels.v2"
@@ -198,6 +200,7 @@ class ObservedFocus:
     unresolved_file_node_ids: tuple[str, ...] = ()
     suggested_node_ids: tuple[str, ...] = ()
     unresolved_node_ids: tuple[str, ...] = ()
+    canonical_membership_digest: str = ""
 
     @property
     def selected_file_node_ids(self) -> tuple[str, ...]:
@@ -647,6 +650,7 @@ def observe_structural_correctness(
             )
             for item in overview.focuses
         ),
+        schema_version=OBSERVATION_SCHEMA,
     )
 
 
@@ -661,7 +665,11 @@ def _observe_focus(
     context_node_ids = ()
     unresolved_node_ids = ()
     exact_relation_ids = ()
+    canonical_membership_digest = canonical_focus_membership_digest(())
     if overlay is not None:
+        canonical_membership_digest = canonical_focus_membership_digest(
+            overlay.memberships
+        )
         direct_node_ids = tuple(
             sorted(
                 item.node_id
@@ -707,6 +715,7 @@ def _observe_focus(
         unresolved_file_node_ids=overview_focus.unresolved_file_node_ids,
         suggested_node_ids=suggested_node_ids,
         unresolved_node_ids=unresolved_node_ids,
+        canonical_membership_digest=canonical_membership_digest,
     )
 
 
@@ -785,7 +794,14 @@ def load_packet(path: str | Path) -> StructuralCorrectnessPacket:
 
 
 def load_observation(path: str | Path) -> StructuralCorrectnessObservation:
-    raw = _mapping_one_of(path, {OBSERVATION_SCHEMA, LEGACY_OBSERVATION_SCHEMA})
+    raw = _mapping_one_of(
+        path,
+        {
+            OBSERVATION_SCHEMA,
+            PREVIOUS_OBSERVATION_SCHEMA,
+            LEGACY_OBSERVATION_SCHEMA,
+        },
+    )
     return _observation_from_mapping(raw)
 
 
@@ -793,10 +809,15 @@ def _observation_from_mapping(
     raw: Mapping[str, Any],
 ) -> StructuralCorrectnessObservation:
     schema_version = raw.get("schema_version")
-    if schema_version not in {OBSERVATION_SCHEMA, LEGACY_OBSERVATION_SCHEMA}:
+    if schema_version not in {
+        OBSERVATION_SCHEMA,
+        PREVIOUS_OBSERVATION_SCHEMA,
+        LEGACY_OBSERVATION_SCHEMA,
+    }:
         raise ValueError(
             "observation must use one of schema versions "
-            f"{OBSERVATION_SCHEMA}, {LEGACY_OBSERVATION_SCHEMA}"
+            f"{OBSERVATION_SCHEMA}, {PREVIOUS_OBSERVATION_SCHEMA}, "
+            f"{LEGACY_OBSERVATION_SCHEMA}"
         )
     schema_version = _string(raw, "schema_version")
     return StructuralCorrectnessObservation(
@@ -819,6 +840,7 @@ def _observation_from_mapping(
                 _strings(item.get("unresolved_file_node_ids", [])),
                 _strings(item.get("suggested_node_ids", [])),
                 _strings(item.get("unresolved_node_ids", [])),
+                _optional_digest(item.get("canonical_membership_digest")),
             )
             for item in _objects(raw, "focuses")
         ),
@@ -1384,6 +1406,14 @@ def _strings(value: Any) -> tuple[str, ...]:
 def _optional_string(value: Any) -> str | None:
     if value is None: return None
     if not isinstance(value, str) or not value: raise ValueError("expected string or null")
+    return value
+
+
+def _optional_digest(value: Any) -> str:
+    if value is None or value == "":
+        return ""
+    if not isinstance(value, str):
+        raise ValueError("expected canonical membership digest string or null")
     return value
 
 
