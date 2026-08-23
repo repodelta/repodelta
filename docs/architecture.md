@@ -159,6 +159,11 @@ becoming alternate intake, classification, routing, or presentation paths.
 8. `TransformationAssessment` is the only authority for deterministic T/CC
    status. Missing association is unverified, local change is not global
    absence proof, and no status implies acceptance or mergeability.
+9. SQL schema providers return statement-level repository facts, typed
+   per-file coverage, and diagnostics only, never a folded schema or a
+   contract verdict. An unsupported or malformed statement becomes an
+   explicit coverage gap; it is never silently included or excluded from
+   what a downstream consumer can conclude.
 
 ## Semantic authority
 
