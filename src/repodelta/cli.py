@@ -21,11 +21,20 @@ from repodelta.evaluation.core import (
 )
 from repodelta.evaluation.comparison import write_shadow_comparison_html
 from repodelta.evaluation.structural_correctness import (
+    load_labels as load_structural_correctness_labels,
+    load_observation as load_structural_correctness_observation,
+    load_packet as load_structural_correctness_packet,
     observe_structural_correctness,
     prepare_structural_correctness_label_template,
     prepare_structural_correctness_packet,
     write_comparison_html as write_structural_correctness_comparison_html,
     write_json_artifact as write_structural_correctness_artifact,
+)
+from repodelta.evaluation.focus_provenance import (
+    load_focus_provenance,
+    observe_focus_provenance,
+    replay_producer_counterfactual,
+    write_provenance_json,
 )
 from repodelta.evaluation.shadow import load_human_shadow_labels_from_packet
 from repodelta.intake.fixture import load_fixture
@@ -330,6 +339,21 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     compare_structural.add_argument("--output", required=True)
+    compare_provenance = subparsers.add_parser(
+        "compare-structural-provenance",
+        help="Replay recorded structural producer contributions offline",
+    )
+    compare_provenance.add_argument("--labeling-packet", required=True)
+    compare_provenance.add_argument("--observation", required=True)
+    compare_provenance.add_argument("--provenance", required=True)
+    compare_provenance.add_argument("--reference-labels", required=True)
+    compare_provenance.add_argument("--output", required=True)
+    compare_provenance.add_argument(
+        "--disable-producer",
+        action="append",
+        default=[],
+        help="Producer identifier to remove from the recorded contribution set",
+    )
     return parser
 
 
@@ -369,6 +393,29 @@ def main() -> int:
                 args.labeling_packet,
                 args.observation,
                 args.reference_labels,
+                args.output,
+            )
+        except (OSError, ValueError) as exc:
+            print(f"repodelta: error: {exc}", file=sys.stderr)
+            return 2
+        print(output)
+        return 0
+    if args.command == "compare-structural-provenance":
+        try:
+            packet = load_structural_correctness_packet(args.labeling_packet)
+            observation = load_structural_correctness_observation(args.observation)
+            labels = load_structural_correctness_labels(
+                args.reference_labels, packet
+            )
+            provenance = load_focus_provenance(args.provenance)
+            output = write_provenance_json(
+                replay_producer_counterfactual(
+                    packet,
+                    observation,
+                    provenance,
+                    labels,
+                    disabled_producers=args.disable_producer,
+                ),
                 args.output,
             )
         except (OSError, ValueError) as exc:
@@ -479,7 +526,7 @@ def main() -> int:
                     ),
                 )
             ).analyze(analysis_input)
-            structural_correctness_outputs: tuple[Path, Path, Path] | None = None
+            structural_correctness_outputs: tuple[Path, Path, Path, Path] | None = None
             if args.structural_correctness_packet_output:
                 correctness_packet = prepare_structural_correctness_packet(brief)
                 packet_output = write_structural_correctness_artifact(
@@ -493,6 +540,10 @@ def main() -> int:
                     observation,
                     f"{args.structural_correctness_packet_output}.observation.json",
                 )
+                provenance_output = write_provenance_json(
+                    observe_focus_provenance(brief, correctness_packet),
+                    f"{args.structural_correctness_packet_output}.provenance.json",
+                )
                 label_template_output = write_structural_correctness_artifact(
                     prepare_structural_correctness_label_template(
                         correctness_packet
@@ -503,6 +554,7 @@ def main() -> int:
                     packet_output,
                     observation_output,
                     label_template_output,
+                    provenance_output,
                 )
             if args.llm_shadow_replay and not args.llm_shadow:
                 parser.error("--llm-shadow-replay requires --llm-shadow")

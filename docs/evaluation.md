@@ -104,6 +104,14 @@ than reporting vacuous success. Scanner-unavailable observations that do not
 produce subject evidence remain `no_structural_evidence`; evaluation does not
 upgrade that final state from provider input alone.
 
+Structural-correctness runs also write an evaluation-only provenance sidecar
+copied from the canonical verification overlay. It preserves membership class,
+structural role, producer, and source IDs for every node, edge, relation-group,
+ownership, and placement membership. Producer counterfactuals replay only
+those recorded contributions; they do not reconstruct structural paths or
+predict a redesigned selector or closure policy. Missing or divergent sidecar
+membership fails closed before scoring.
+
 Live shadow observations remain non-authoritative measurements. Their raw token
 usage and latency are reported without defining pass/fail budgets; monetary
 cost requires an explicit provider/model pricing policy and representative live
