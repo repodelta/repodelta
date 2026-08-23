@@ -12,6 +12,7 @@ from urllib.parse import urlparse
 from repodelta.pipeline import DeterministicAnalyzer
 from repodelta.providers.codegraph import CodegraphProvider
 from repodelta.closure.scanning import RepositoryClosureScanner
+from repodelta.providers.sql_schema import RepositorySqlSchemaProvider
 from repodelta.model.contracts import AnalysisInput
 from repodelta.evaluation.core import (
     evaluate_suite,
@@ -527,7 +528,17 @@ def main() -> int:
                     expected_base_revision=(
                         analysis_input.packet.base_sha if not args.fixture else None
                     ),
-                )
+                ),
+                sql_schema_provider=RepositorySqlSchemaProvider(
+                    roots.head,
+                    expected_head_revision=(
+                        analysis_input.packet.head_sha if not args.fixture else None
+                    ),
+                    base_root=roots.base,
+                    expected_base_revision=(
+                        analysis_input.packet.base_sha if not args.fixture else None
+                    ),
+                ),
             ).analyze(analysis_input)
             structural_correctness_outputs: tuple[Path, Path, Path, Path] | None = None
             if args.structural_correctness_packet_output:
