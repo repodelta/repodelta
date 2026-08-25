@@ -22,7 +22,10 @@ from repodelta.model.contracts import (
     TransformationStructuralClosureGroup,
     TransformationSubjectSelection,
 )
-from repodelta.model.predicate_refs import matches_transformation_selector
+from repodelta.model.predicate_refs import (
+    matches_transformation_selector,
+    resolve_transformation_selector,
+)
 from repodelta.model.structural_refs import (
     is_executable_head_path,
     is_outgoing_executable_head_path,
@@ -451,19 +454,54 @@ def _predicate_bindings(
             closure_plan,
         )
     }
-    predicate_specific_ids = {
-        item.evidence_id
-        for item in bindings
-        if item.evidence_role != "closure"
-        and any(
-            matches_transformation_selector(
-                predicate,
-                selector_value,
-                evidence[item.evidence_id],
+    unresolved_selector_keys = {
+        (item.predicate_id, item.selector_index)
+        for item in (subject_selection.diagnostics if subject_selection else ())
+        if item.predicate_id == predicate.id
+        and (
+            item.state == "ambiguous_structural_match"
+            or (
+                item.state == "no_structural_match"
+                and predicate.expectation == "reference"
+                and claim.kind in _SURFACE_PRESENCE_CLAIM_KINDS
             )
-            for selector_value in predicate.values
         )
     }
+    if unresolved_selector_keys:
+        # An ambiguous selector, or an unmatched reference surface selector,
+        # must not re-enter formal predicate proof through the broader
+        # alignment vocabulary. Keep uniquely resolved structural subjects and
+        # uniquely named checks only; lexical compatibility remains
+        # non-authoritative context.
+        predicate_specific_ids = set(selected_ids)
+        verification_items = tuple(
+            evidence[item.evidence_id]
+            for item in bindings
+            if item.evidence_role == "verification"
+            and item.evidence_id in evidence
+        )
+        for selector_value in predicate.values:
+            resolved, resolution, _ = resolve_transformation_selector(
+                predicate,
+                selector_value,
+                verification_items,
+            )
+            if resolution == "matched":
+                predicate_specific_ids.update(item.id for item in resolved)
+    else:
+        predicate_specific_ids = {
+            item.evidence_id
+            for item in bindings
+            if item.evidence_role != "closure"
+            and any(
+                matches_transformation_selector(
+                    predicate,
+                    selector_value,
+                    evidence[item.evidence_id],
+                )
+                for selector_value in predicate.values
+            )
+        }
     structural_bridge_ids = {
         item.evidence_id
         for item in bindings

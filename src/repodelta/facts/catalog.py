@@ -543,6 +543,19 @@ def _put_structural_changes(
                 metadata={
                     "review_symbol_id": review_symbol_id,
                     "qualified_name": exemplar.metadata["qualified_name"],
+                    "name": exemplar.metadata["name"],
+                    "base_qualified_name": (
+                        base.metadata["qualified_name"] if base is not None else None
+                    ),
+                    "base_name": (
+                        base.metadata["name"] if base is not None else None
+                    ),
+                    "head_qualified_name": (
+                        head.metadata["qualified_name"] if head is not None else None
+                    ),
+                    "head_name": (
+                        head.metadata["name"] if head is not None else None
+                    ),
                     "path": exemplar.metadata["path"],
                     "base_path": (
                         base.metadata["path"] if base is not None else None
