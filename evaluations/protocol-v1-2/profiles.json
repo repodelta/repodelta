@@ -1,0 +1,99 @@
+{
+  "schema_version": "repodelta_protocol_v1_2_profiles.v1",
+  "profiles": {
+    "pre_v1_2": {
+      "label": "pre-v1.2 protocol",
+      "commit": "479d48c1e92443d4705cbdf55466cc83094217b1",
+      "capabilities": {
+        "semantic_classification": false,
+        "authority_scope_owner": false,
+        "authorized_dependencies": false,
+        "counterfactual": true,
+        "conditional_replan": false,
+        "conditional_obligations": false,
+        "consumer_local_projection": false,
+        "nonsemantic_no_replan": false,
+        "fail_closed": true
+      },
+      "recognized_scopes": ["domain", "none"],
+      "replan_triggers": ["external_contract"],
+      "replan_exemptions": ["unrelated"],
+      "evidence": [
+        {
+          "path": "docs/agent-change-protocol.md",
+          "contains": "If implementation invalidates"
+        },
+        {
+          "path": "docs/agent-change-protocol.md",
+          "contains": "counterfactual and sink-level evidence"
+        },
+        {
+          "path": "AGENTS.md",
+          "contains": "Each changed boundary has one canonical semantic contract"
+        }
+      ]
+    },
+    "v1_2": {
+      "label": "candidate v1.2 protocol",
+      "commit": "ceefd9c26f8964668df8b7926b0b799da7080ee6",
+      "capabilities": {
+        "semantic_classification": true,
+        "authority_scope_owner": true,
+        "authorized_dependencies": true,
+        "counterfactual": true,
+        "conditional_replan": true,
+        "conditional_obligations": true,
+        "consumer_local_projection": true,
+        "nonsemantic_no_replan": true,
+        "fail_closed": true
+      },
+      "recognized_scopes": [
+        "domain",
+        "evaluation-local",
+        "presentation-local",
+        "none"
+      ],
+      "replan_triggers": [
+        "external_contract",
+        "target",
+        "authority",
+        "contract",
+        "region",
+        "semantic_owner",
+        "merge_evidence"
+      ],
+      "replan_exemptions": [
+        "helper_layout",
+        "consumer_local_projection",
+        "presentation_only",
+        "unrelated"
+      ],
+      "evidence": [
+        {
+          "path": "docs/agent-change-protocol.md",
+          "contains": "OBSERVE → CLASSIFY SEMANTICS → PLAN → MUTATE CANDIDATE"
+        },
+        {
+          "path": "AGENTS.md",
+          "contains": "Before changing or adding a derived result, record provenance"
+        },
+        {
+          "path": "AGENTS.md",
+          "contains": "If evidence materially changes target,"
+        },
+        {
+          "path": "docs/agent-change-protocol.md",
+          "contains": "hold authorized dependencies constant"
+        },
+        {
+          "path": "docs/pull-request-guidelines.md",
+          "contains": "each changed derived result's provenance, scope, owner, and dependencies"
+        },
+        {
+          "path": "docs/pull-request-guidelines.md",
+          "contains": "Title the PR around its responsibility or contract transition. Record applicable"
+        }
+      ]
+    }
+  }
+}

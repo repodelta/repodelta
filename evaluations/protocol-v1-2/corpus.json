@@ -1,0 +1,154 @@
+{
+  "schema_version": "repodelta_protocol_v1_2_corpus.v1",
+  "description": "Decision-replay cases for comparing the pre-v1.2 and candidate v1.2 governance protocols.",
+  "cases": [
+    {
+      "id": "historical-160",
+      "title": "T/CC anchors were omitted from the canonical backbone",
+      "provenance": "observed",
+      "source": [
+        "https://github.com/repodelta/repodelta/issues/160",
+        "https://github.com/repodelta/repodelta/pull/160"
+      ],
+      "scenario": "A production projection had separate R/G and T/CC seed writers. T/CC changed anchors were treated as support, so the rendered structural graph could be empty even though the PR changed code.",
+      "trigger": "authority",
+      "expected_replan": true,
+      "expected_scope": "domain",
+      "expected_unsafe_rejection": true,
+      "required_dimensions": [
+        "semantic_classification",
+        "authority_scope_owner",
+        "authorized_dependencies",
+        "counterfactual",
+        "conditional_replan",
+        "fail_closed"
+      ],
+      "notes": "The historical PR itself records one canonical seed authority and a counterexample for the empty graph. The protocol comparison tests whether the governance model would surface the authority transition before mutation."
+    },
+    {
+      "id": "historical-194",
+      "title": "Evaluation of LLM shadow mappings needed a separate authority",
+      "provenance": "observed",
+      "source": [
+        "https://github.com/repodelta/repodelta/issues/194",
+        "https://github.com/repodelta/repodelta/pull/194"
+      ],
+      "scenario": "A typed, deterministic evaluation result was added for recorded LLM shadow observations. The evaluator had to remain consumer-local and must not become formal review authority or invoke a provider.",
+      "trigger": "semantic_owner",
+      "expected_replan": true,
+      "expected_scope": "evaluation-local",
+      "expected_unsafe_rejection": true,
+      "required_dimensions": [
+        "semantic_classification",
+        "authority_scope_owner",
+        "authorized_dependencies",
+        "conditional_replan",
+        "fail_closed"
+      ],
+      "notes": "The historical record explicitly separates the evaluation sink from the CLI execution authority and formal assessment."
+    },
+    {
+      "id": "historical-264",
+      "title": "Collapsed structural overview changed only a presentation projection",
+      "provenance": "observed",
+      "source": [
+        "https://github.com/repodelta/repodelta/issues/264",
+        "https://github.com/repodelta/repodelta/pull/264"
+      ],
+      "scenario": "The HTML overview was narrowed to changed files and true retained bridges while the canonical graph, focus association, assessment, and full audit remained authoritative.",
+      "trigger": "presentation_only",
+      "expected_replan": false,
+      "expected_scope": "presentation-local",
+      "expected_unsafe_rejection": true,
+      "required_dimensions": [
+        "semantic_classification",
+        "authority_scope_owner",
+        "consumer_local_projection",
+        "nonsemantic_no_replan",
+        "fail_closed"
+      ],
+      "notes": "This is both a historical failure analogue and a boundary test: a correct local projection must not be promoted to domain-wide structural truth."
+    },
+    {
+      "id": "positive-99",
+      "title": "Canonical backbone projection with bounded membership",
+      "provenance": "observed",
+      "source": [
+        "https://github.com/repodelta/repodelta/issues/99",
+        "https://github.com/repodelta/repodelta/pull/99"
+      ],
+      "scenario": "A stable projection invariant was supported by counterexamples, sink evidence, bounded incident relations, ownership ancestors, and tests that preserved the complete graph while laying out a canonical backbone.",
+      "trigger": "stable_invariant",
+      "expected_replan": false,
+      "expected_scope": "domain",
+      "expected_unsafe_rejection": true,
+      "required_dimensions": [
+        "counterfactual",
+        "fail_closed"
+      ],
+      "notes": "This positive control checks that v1.2 does not reject an already well-bounded invariant or demand unnecessary planning bureaucracy."
+    },
+    {
+      "id": "heldout-near-miss",
+      "title": "Helper and layout cleanup with no semantic plan change",
+      "provenance": "declared",
+      "held_out": true,
+      "source": [
+        "https://github.com/repodelta/repodelta/issues/270"
+      ],
+      "scenario": "A refactor moves local helpers and adjusts report layout while preserving the same output authority, contracts, selected region, and sinks.",
+      "semantic_change": false,
+      "trigger": "helper_layout",
+      "expected_replan": false,
+      "expected_scope": "none",
+      "expected_unsafe_rejection": false,
+      "required_dimensions": [
+        "nonsemantic_no_replan"
+      ],
+      "notes": "This case is held out from the historical examples and tests the explicit v1.2 exemption for changes that leave the semantic plan intact."
+    },
+    {
+      "id": "negative-local-presentation",
+      "title": "Consumer-local presentation summary remains local",
+      "provenance": "declared",
+      "held_out": true,
+      "source": [
+        "https://github.com/repodelta/repodelta/issues/270"
+      ],
+      "scenario": "A report-only summary groups canonical evidence for readability, records its presentation-local owner, and does not write back to graph membership, assessment, coverage, or acceptance.",
+      "trigger": "consumer_local_projection",
+      "expected_replan": false,
+      "expected_scope": "presentation-local",
+      "expected_unsafe_rejection": true,
+      "required_dimensions": [
+        "semantic_classification",
+        "authority_scope_owner",
+        "consumer_local_projection",
+        "nonsemantic_no_replan",
+        "fail_closed"
+      ],
+      "notes": "This negative control is intentionally safe: the correct decision is to keep the projection local, not to add a new cross-consumer authority."
+    },
+    {
+      "id": "execution-replan-injection",
+      "title": "Execution evidence changes the semantic owner after planning",
+      "provenance": "declared",
+      "source": [
+        "https://github.com/repodelta/repodelta/issues/270"
+      ],
+      "scenario": "After a plan assigns one module as the canonical producer, an injected repository fact shows that the intended sink is owned by a different module. The agent must stop production-boundary mutation, revise the plan, and re-check affected contracts and merge evidence.",
+      "trigger": "semantic_owner",
+      "expected_replan": true,
+      "expected_scope": "domain",
+      "expected_unsafe_rejection": true,
+      "required_dimensions": [
+        "semantic_classification",
+        "authority_scope_owner",
+        "authorized_dependencies",
+        "conditional_replan",
+        "fail_closed"
+      ],
+      "notes": "This is the execution-time injection required by #270. It is a deterministic decision replay, not a claim that a live coding agent has been statistically tested."
+    }
+  ]
+}
