@@ -39,11 +39,26 @@ def _digest(value: Any) -> str:
 
 
 def _git_file(commit: str, path: str) -> str:
-    return subprocess.check_output(
-        ["git", "show", f"{commit}:{path}"],
-        cwd=ROOT,
-        text=True,
-    )
+    command = ["git", "show", f"{commit}:{path}"]
+    try:
+        return subprocess.check_output(command, cwd=ROOT, text=True)
+    except subprocess.CalledProcessError as first_error:
+        # CI uses a shallow checkout. Fetch only the pinned commit before
+        # failing closed; this preserves exact Git-source verification without
+        # requiring a full repository history in every workflow run.
+        try:
+            subprocess.run(
+                ["git", "fetch", "--no-tags", "--depth=1", "origin", commit],
+                cwd=ROOT,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            return subprocess.check_output(command, cwd=ROOT, text=True)
+        except (OSError, subprocess.CalledProcessError) as fetch_error:
+            raise AssertionError(
+                f"pinned source is unavailable: {commit}:{path}"
+            ) from fetch_error
 
 
 def _validate_profile_sources(profile: dict[str, Any]) -> list[dict[str, str]]:

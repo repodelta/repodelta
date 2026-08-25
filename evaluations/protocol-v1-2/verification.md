@@ -9,7 +9,9 @@
 - Seven cases are present: four source-backed historical/positive controls and
   three declared synthetic controls; two synthetic controls are held out.
 - The evaluator checks all profile source markers with `git show` before
-  scoring.
+  scoring. On a shallow CI checkout it fetches only the pinned commit, then
+  performs the same exact source check; if that fetch fails, evaluation fails
+  closed.
 
 ## Commands
 
