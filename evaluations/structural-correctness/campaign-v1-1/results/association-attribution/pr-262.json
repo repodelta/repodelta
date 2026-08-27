@@ -1,7 +1,8 @@
 {
-  "attribution_mode": "root_linked_observed_lineage",
+  "attribution_mode": "dimension_specific_observed_join",
   "causal_replay": false,
   "limits": {
+    "claimed_direct_nodes": "false inclusions use the observed direct member's admission relation; false exclusions use candidate-node joins",
     "reason_involvement": "comparison_involved is non-exclusive: a member reachable from multiple recorded roots is counted for each associated reason; comparison remains the exclusive ambiguity-aware view",
     "suggested_nodes": "observed_only; v1.1 has no suggestion reference",
     "unattributed": "membership has no recorded R/G changed-anchor lineage; no association reason is inferred",
@@ -42,10 +43,9 @@
           },
           "false_inclusions": 2,
           "false_inclusions_by_reason": {
-            "multiple": 2
+            "exact_identifier": 2
           },
           "false_inclusions_by_reason_involved": {
-            "claim_bridge": 2,
             "exact_identifier": 2
           }
         },
@@ -662,7 +662,7 @@
       "comparison_involved": {
         "claimed_direct_nodes": {
           "false_exclusions": 8,
-          "false_inclusions": 2
+          "false_inclusions": 0
         },
         "exact_relations": {
           "false_exclusions": 0,
@@ -688,7 +688,24 @@
     {
       "association": "exact_identifier",
       "candidate_count": 3,
-      "comparison": {},
+      "comparison": {
+        "claimed_direct_nodes": {
+          "false_exclusions": 0,
+          "false_inclusions": 2
+        },
+        "exact_relations": {
+          "false_exclusions": 0,
+          "false_inclusions": 0
+        },
+        "selected_nodes": {
+          "false_exclusions": 0,
+          "false_inclusions": 0
+        },
+        "structural_context_nodes": {
+          "false_exclusions": 0,
+          "false_inclusions": 0
+        }
+      },
       "comparison_involved": {
         "claimed_direct_nodes": {
           "false_exclusions": 0,
@@ -721,7 +738,7 @@
       "comparison": {
         "claimed_direct_nodes": {
           "false_exclusions": 0,
-          "false_inclusions": 2
+          "false_inclusions": 0
         },
         "exact_relations": {
           "false_exclusions": 0,

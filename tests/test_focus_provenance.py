@@ -668,7 +668,7 @@ def test_association_attribution_compares_recorded_lineage_without_replay() -> N
         attribution, observation, labels
     )
 
-    assert comparison["attribution_mode"] == "root_linked_observed_lineage"
+    assert comparison["attribution_mode"] == "dimension_specific_observed_join"
     assert comparison["causal_replay"] is False
     assert comparison["overall"]["claimed_direct_nodes"] == {
         "false_inclusions": 1,
@@ -691,6 +691,73 @@ def test_association_attribution_compares_recorded_lineage_without_replay() -> N
         "observed": 1,
         "comparison": "reference_unresolved",
     }
+
+
+def test_direct_false_inclusion_uses_its_observed_admission_relation() -> None:
+    brief = _association_brief()
+    packet = prepare_structural_correctness_packet(brief)
+    observation = observe_structural_correctness(brief, packet)
+    base_attribution = observe_association_attribution(brief, packet)
+    exact = next(
+        item for item in base_attribution.rows if item.relation_id == "R1:anchor:a"
+    )
+    bridge = next(
+        item for item in base_attribution.rows if item.relation_id == "G1:anchor:b"
+    )
+    attribution = replace(
+        base_attribution,
+        rows=(
+            exact,
+            replace(
+                bridge,
+                subject_id="R1",
+                subject_kind="requirement",
+                relation_id="R1:anchor:bridge",
+                association="claim_bridge",
+                reasons=(
+                    AssociationReason(
+                        "claim_bridge",
+                        "connected context root",
+                        ("bridge",),
+                    ),
+                ),
+                matched_terms=("bridge",),
+                source_channel="bridge",
+                structural_member_id="N:b",
+                structural_membership_class="context",
+                lineage_node_ids=("N:a", "N:b"),
+                lineage_relation_group_ids=("REL:1",),
+            ),
+        ),
+    )
+    labels = replace(
+        _labels(packet),
+        focuses=(
+            ReferenceFocusLabel(
+                "R1",
+                direct_node_ids=(),
+                context_node_ids=("N:b",),
+                relation_ids=("REL:1",),
+            ),
+            ReferenceFocusLabel("G1", unresolved=True),
+        ),
+    )
+
+    comparison = compare_association_attribution(
+        attribution, observation, labels
+    )
+
+    requirement = next(
+        item
+        for item in comparison["per_focus"]
+        if item["subject_id"] == "R1"
+    )
+    assert requirement["dimensions"]["claimed_direct_nodes"][
+        "false_inclusions_by_reason"
+    ] == {"exact_identifier": 1}
+    assert requirement["dimensions"]["selected_nodes"][
+        "false_inclusions_by_reason"
+    ] == {"multiple": 1}
 
 
 @pytest.mark.parametrize(

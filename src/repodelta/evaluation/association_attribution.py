@@ -360,8 +360,11 @@ def compare_association_attribution(
     """Compare association-linked observed membership with frozen references.
 
     This is deliberately a diagnostic comparison, not a causal replay. A node
-    or relation is assigned to a reason only when a recorded candidate row's
-    observed lineage names it; otherwise it is reported as ``unattributed``.
+    or relation is assigned to a reason only when the dimension's canonical
+    observed join names it; otherwise it is reported as ``unattributed``.
+    Node and relation dimensions use recorded observed lineage, while direct
+    false inclusions use the observed direct member's admission relation so a
+    connected but different root cannot manufacture direct ambiguity.
     Suggestions and unresolved memberships remain observed-only because the
     v1.1 reference contract labels semantic direct/context membership, not
     epistemic buckets.
@@ -410,6 +413,7 @@ def compare_association_attribution(
         rows = rows_by_focus[subject_id]
         subject_kind = subject_kind_by_id.get(subject_id, "unknown")
         by_node_lineage = _rows_by_lineage(rows, "node")
+        by_observed_member = _rows_by_observed_member(rows)
         by_relation_lineage = _rows_by_lineage(rows, "relation_group")
         by_candidate_node = _rows_by_candidate_node(rows)
         focus_result: dict[str, Any] = {
@@ -448,14 +452,19 @@ def compare_association_attribution(
             actual = actual_by_dimension[dimension]
             false_inclusions = actual - expected
             false_exclusions = expected - actual
+            inclusion_rows = (
+                by_observed_member
+                if dimension == "claimed_direct_nodes"
+                else by_node_lineage
+                if dimension != "exact_relations"
+                else by_relation_lineage
+            )
             result = {
                 "false_inclusions": len(false_inclusions),
                 "false_exclusions": len(false_exclusions),
                 "false_inclusions_by_reason": _bucket_members(
                     false_inclusions,
-                    by_node_lineage
-                    if dimension != "exact_relations"
-                    else by_relation_lineage,
+                    inclusion_rows,
                 ),
                 "false_exclusions_by_reason": _bucket_members(
                     false_exclusions,
@@ -465,9 +474,7 @@ def compare_association_attribution(
                 ),
                 "false_inclusions_by_reason_involved": _bucket_members_involved(
                     false_inclusions,
-                    by_node_lineage
-                    if dimension != "exact_relations"
-                    else by_relation_lineage,
+                    inclusion_rows,
                 ),
                 "false_exclusions_by_reason_involved": _bucket_members_involved(
                     false_exclusions,
@@ -507,7 +514,7 @@ def compare_association_attribution(
         "schema_version": ASSOCIATION_COMPARISON_SCHEMA,
         "packet_digest": attribution.packet_digest,
         "reference_status": labels.authority.status,
-        "attribution_mode": "root_linked_observed_lineage",
+        "attribution_mode": "dimension_specific_observed_join",
         "causal_replay": False,
         "overall": totals,
         "reason_breakdown": _reason_breakdown(
@@ -517,6 +524,10 @@ def compare_association_attribution(
         "limits": {
             "suggested_nodes": "observed_only; v1.1 has no suggestion reference",
             "unresolved_nodes": "observed_only; v1.1 unresolved is focus-level",
+            "claimed_direct_nodes": (
+                "false inclusions use the observed direct member's admission "
+                "relation; false exclusions use candidate-node joins"
+            ),
             "unattributed": (
                 "membership has no recorded R/G changed-anchor lineage; "
                 "no association reason is inferred"
@@ -668,6 +679,24 @@ def _rows_by_lineage(
         )
         for identity in identities:
             result[identity].append(row)
+    return {key: tuple(value) for key, value in result.items()}
+
+
+def _rows_by_observed_member(
+    rows: tuple[AssociationAttributionRow, ...],
+) -> dict[str, tuple[AssociationAttributionRow, ...]]:
+    """Join rows to the member admitted by their own observed relation.
+
+    This is intentionally narrower than lineage.  A direct membership must be
+    attributed to the candidate relation that actually names that observed
+    member; a different root in the same connected component is only context
+    for this dimension.
+    """
+
+    result: dict[str, list[AssociationAttributionRow]] = defaultdict(list)
+    for row in rows:
+        if row.structural_member_id is not None:
+            result[row.structural_member_id].append(row)
     return {key: tuple(value) for key, value in result.items()}
 
 

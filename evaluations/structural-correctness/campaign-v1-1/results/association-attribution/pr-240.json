@@ -1,7 +1,8 @@
 {
-  "attribution_mode": "root_linked_observed_lineage",
+  "attribution_mode": "dimension_specific_observed_join",
   "causal_replay": false,
   "limits": {
+    "claimed_direct_nodes": "false inclusions use the observed direct member's admission relation; false exclusions use candidate-node joins",
     "reason_involvement": "comparison_involved is non-exclusive: a member reachable from multiple recorded roots is counted for each associated reason; comparison remains the exclusive ambiguity-aware view",
     "suggested_nodes": "observed_only; v1.1 has no suggestion reference",
     "unattributed": "membership has no recorded R/G changed-anchor lineage; no association reason is inferred",
@@ -374,11 +375,9 @@
           },
           "false_inclusions": 10,
           "false_inclusions_by_reason": {
-            "exact_identifier": 7,
-            "multiple": 3
+            "exact_identifier": 10
           },
           "false_inclusions_by_reason_involved": {
-            "claim_bridge": 3,
             "exact_identifier": 10
           }
         },
@@ -458,12 +457,9 @@
           },
           "false_inclusions": 5,
           "false_inclusions_by_reason": {
-            "exact_identifier": 3,
-            "multiple": 2
+            "exact_identifier": 5
           },
           "false_inclusions_by_reason_involved": {
-            "claim_bridge": 2,
-            "distinctive_phrase": 2,
             "exact_identifier": 5
           }
         },
@@ -698,7 +694,7 @@
       "comparison_involved": {
         "claimed_direct_nodes": {
           "false_exclusions": 1,
-          "false_inclusions": 5
+          "false_inclusions": 0
         },
         "exact_relations": {
           "false_exclusions": 0,
@@ -745,7 +741,7 @@
       "comparison_involved": {
         "claimed_direct_nodes": {
           "false_exclusions": 5,
-          "false_inclusions": 2
+          "false_inclusions": 0
         },
         "exact_relations": {
           "false_exclusions": 0,
@@ -774,7 +770,7 @@
       "comparison": {
         "claimed_direct_nodes": {
           "false_exclusions": 0,
-          "false_inclusions": 10
+          "false_inclusions": 15
         },
         "exact_relations": {
           "false_exclusions": 0,
@@ -821,7 +817,7 @@
       "comparison": {
         "claimed_direct_nodes": {
           "false_exclusions": 0,
-          "false_inclusions": 5
+          "false_inclusions": 0
         },
         "exact_relations": {
           "false_exclusions": 0,
