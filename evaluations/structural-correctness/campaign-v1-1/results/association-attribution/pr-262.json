@@ -1,0 +1,815 @@
+{
+  "attribution_mode": "root_linked_observed_lineage",
+  "causal_replay": false,
+  "limits": {
+    "reason_involvement": "comparison_involved is non-exclusive: a member reachable from multiple recorded roots is counted for each associated reason; comparison remains the exclusive ambiguity-aware view",
+    "suggested_nodes": "observed_only; v1.1 has no suggestion reference",
+    "unattributed": "membership has no recorded R/G changed-anchor lineage; no association reason is inferred",
+    "unresolved_nodes": "observed_only; v1.1 unresolved is focus-level"
+  },
+  "overall": {
+    "claimed_direct_nodes": {
+      "false_exclusions": 37,
+      "false_inclusions": 2
+    },
+    "exact_relations": {
+      "false_exclusions": 2,
+      "false_inclusions": 126
+    },
+    "selected_nodes": {
+      "false_exclusions": 8,
+      "false_inclusions": 200
+    },
+    "structural_context_nodes": {
+      "false_exclusions": 0,
+      "false_inclusions": 149
+    }
+  },
+  "packet_digest": "56a6084269535c7d3d7cd9a69669363625f2194a2fdac2a159985562b15a763b",
+  "per_focus": [
+    {
+      "candidate_rows": 9,
+      "dimensions": {
+        "claimed_direct_nodes": {
+          "false_exclusions": 4,
+          "false_exclusions_by_reason": {
+            "claim_bridge": 2,
+            "unattributed": 2
+          },
+          "false_exclusions_by_reason_involved": {
+            "claim_bridge": 2,
+            "unattributed": 2
+          },
+          "false_inclusions": 2,
+          "false_inclusions_by_reason": {
+            "multiple": 2
+          },
+          "false_inclusions_by_reason_involved": {
+            "claim_bridge": 2,
+            "exact_identifier": 2
+          }
+        },
+        "exact_relations": {
+          "false_exclusions": 0,
+          "false_exclusions_by_reason": {},
+          "false_exclusions_by_reason_involved": {},
+          "false_inclusions": 18,
+          "false_inclusions_by_reason": {
+            "multiple": 18
+          },
+          "false_inclusions_by_reason_involved": {
+            "claim_bridge": 18,
+            "exact_identifier": 18
+          }
+        },
+        "selected_nodes": {
+          "false_exclusions": 2,
+          "false_exclusions_by_reason": {
+            "unattributed": 2
+          },
+          "false_exclusions_by_reason_involved": {
+            "unattributed": 2
+          },
+          "false_inclusions": 28,
+          "false_inclusions_by_reason": {
+            "multiple": 28
+          },
+          "false_inclusions_by_reason_involved": {
+            "claim_bridge": 28,
+            "exact_identifier": 28
+          }
+        },
+        "structural_context_nodes": {
+          "false_exclusions": 0,
+          "false_exclusions_by_reason": {},
+          "false_exclusions_by_reason_involved": {},
+          "false_inclusions": 22,
+          "false_inclusions_by_reason": {
+            "multiple": 22
+          },
+          "false_inclusions_by_reason_involved": {
+            "claim_bridge": 22,
+            "exact_identifier": 22
+          }
+        },
+        "suggested_nodes": {
+          "comparison": "observed_only",
+          "observed": 6
+        },
+        "unresolved_nodes": {
+          "comparison": "observed_only",
+          "observed": 0
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "G1",
+      "subject_kind": "guardrail"
+    },
+    {
+      "candidate_rows": 11,
+      "dimensions": {
+        "claimed_direct_nodes": {
+          "false_exclusions": 4,
+          "false_exclusions_by_reason": {
+            "claim_bridge": 3,
+            "unattributed": 1
+          },
+          "false_exclusions_by_reason_involved": {
+            "claim_bridge": 3,
+            "unattributed": 1
+          },
+          "false_inclusions": 0,
+          "false_inclusions_by_reason": {},
+          "false_inclusions_by_reason_involved": {}
+        },
+        "exact_relations": {
+          "false_exclusions": 0,
+          "false_exclusions_by_reason": {},
+          "false_exclusions_by_reason_involved": {},
+          "false_inclusions": 15,
+          "false_inclusions_by_reason": {
+            "claim_bridge": 15
+          },
+          "false_inclusions_by_reason_involved": {
+            "claim_bridge": 15
+          }
+        },
+        "selected_nodes": {
+          "false_exclusions": 1,
+          "false_exclusions_by_reason": {
+            "unattributed": 1
+          },
+          "false_exclusions_by_reason_involved": {
+            "unattributed": 1
+          },
+          "false_inclusions": 25,
+          "false_inclusions_by_reason": {
+            "claim_bridge": 25
+          },
+          "false_inclusions_by_reason_involved": {
+            "claim_bridge": 25
+          }
+        },
+        "structural_context_nodes": {
+          "false_exclusions": 0,
+          "false_exclusions_by_reason": {},
+          "false_exclusions_by_reason_involved": {},
+          "false_inclusions": 18,
+          "false_inclusions_by_reason": {
+            "claim_bridge": 18
+          },
+          "false_inclusions_by_reason_involved": {
+            "claim_bridge": 18
+          }
+        },
+        "suggested_nodes": {
+          "comparison": "observed_only",
+          "observed": 10
+        },
+        "unresolved_nodes": {
+          "comparison": "observed_only",
+          "observed": 0
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "G2",
+      "subject_kind": "guardrail"
+    },
+    {
+      "candidate_rows": 11,
+      "dimensions": {
+        "claimed_direct_nodes": {
+          "false_exclusions": 3,
+          "false_exclusions_by_reason": {
+            "claim_bridge": 3
+          },
+          "false_exclusions_by_reason_involved": {
+            "claim_bridge": 3
+          },
+          "false_inclusions": 0,
+          "false_inclusions_by_reason": {},
+          "false_inclusions_by_reason_involved": {}
+        },
+        "exact_relations": {
+          "false_exclusions": 0,
+          "false_exclusions_by_reason": {},
+          "false_exclusions_by_reason_involved": {},
+          "false_inclusions": 16,
+          "false_inclusions_by_reason": {
+            "claim_bridge": 16
+          },
+          "false_inclusions_by_reason_involved": {
+            "claim_bridge": 16
+          }
+        },
+        "selected_nodes": {
+          "false_exclusions": 0,
+          "false_exclusions_by_reason": {},
+          "false_exclusions_by_reason_involved": {},
+          "false_inclusions": 25,
+          "false_inclusions_by_reason": {
+            "claim_bridge": 25
+          },
+          "false_inclusions_by_reason_involved": {
+            "claim_bridge": 25
+          }
+        },
+        "structural_context_nodes": {
+          "false_exclusions": 0,
+          "false_exclusions_by_reason": {},
+          "false_exclusions_by_reason_involved": {},
+          "false_inclusions": 18,
+          "false_inclusions_by_reason": {
+            "claim_bridge": 18
+          },
+          "false_inclusions_by_reason_involved": {
+            "claim_bridge": 18
+          }
+        },
+        "suggested_nodes": {
+          "comparison": "observed_only",
+          "observed": 10
+        },
+        "unresolved_nodes": {
+          "comparison": "observed_only",
+          "observed": 0
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "G3",
+      "subject_kind": "guardrail"
+    },
+    {
+      "candidate_rows": 0,
+      "dimensions": {
+        "claimed_direct_nodes": {
+          "false_exclusions": 0,
+          "false_exclusions_by_reason": {},
+          "false_exclusions_by_reason_involved": {},
+          "false_inclusions": 0,
+          "false_inclusions_by_reason": {},
+          "false_inclusions_by_reason_involved": {}
+        },
+        "exact_relations": {
+          "false_exclusions": 0,
+          "false_exclusions_by_reason": {},
+          "false_exclusions_by_reason_involved": {},
+          "false_inclusions": 0,
+          "false_inclusions_by_reason": {},
+          "false_inclusions_by_reason_involved": {}
+        },
+        "selected_nodes": {
+          "false_exclusions": 0,
+          "false_exclusions_by_reason": {},
+          "false_exclusions_by_reason_involved": {},
+          "false_inclusions": 0,
+          "false_inclusions_by_reason": {},
+          "false_inclusions_by_reason_involved": {}
+        },
+        "structural_context_nodes": {
+          "false_exclusions": 0,
+          "false_exclusions_by_reason": {},
+          "false_exclusions_by_reason_involved": {},
+          "false_inclusions": 0,
+          "false_inclusions_by_reason": {},
+          "false_inclusions_by_reason_involved": {}
+        },
+        "suggested_nodes": {
+          "comparison": "observed_only",
+          "observed": 0
+        },
+        "unresolved_nodes": {
+          "comparison": "observed_only",
+          "observed": 0
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "G4",
+      "subject_kind": "guardrail"
+    },
+    {
+      "candidate_rows": 9,
+      "dimensions": {
+        "claimed_direct_nodes": {
+          "false_exclusions": 0,
+          "false_exclusions_by_reason": {},
+          "false_exclusions_by_reason_involved": {},
+          "false_inclusions": 0,
+          "false_inclusions_by_reason": {},
+          "false_inclusions_by_reason_involved": {}
+        },
+        "exact_relations": {
+          "false_exclusions": 0,
+          "false_exclusions_by_reason": {},
+          "false_exclusions_by_reason_involved": {},
+          "false_inclusions": 20,
+          "false_inclusions_by_reason": {
+            "claim_bridge": 20
+          },
+          "false_inclusions_by_reason_involved": {
+            "claim_bridge": 20
+          }
+        },
+        "selected_nodes": {
+          "false_exclusions": 0,
+          "false_exclusions_by_reason": {},
+          "false_exclusions_by_reason_involved": {},
+          "false_inclusions": 31,
+          "false_inclusions_by_reason": {
+            "claim_bridge": 31
+          },
+          "false_inclusions_by_reason_involved": {
+            "claim_bridge": 31
+          }
+        },
+        "structural_context_nodes": {
+          "false_exclusions": 0,
+          "false_exclusions_by_reason": {},
+          "false_exclusions_by_reason_involved": {},
+          "false_inclusions": 22,
+          "false_inclusions_by_reason": {
+            "claim_bridge": 22
+          },
+          "false_inclusions_by_reason_involved": {
+            "claim_bridge": 22
+          }
+        },
+        "suggested_nodes": {
+          "comparison": "observed_only",
+          "observed": 9
+        },
+        "unresolved_nodes": {
+          "comparison": "observed_only",
+          "observed": 0
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "G5",
+      "subject_kind": "guardrail"
+    },
+    {
+      "candidate_rows": 14,
+      "dimensions": {
+        "claimed_direct_nodes": {
+          "false_exclusions": 7,
+          "false_exclusions_by_reason": {
+            "claim_bridge": 2,
+            "distinctive_phrase": 5
+          },
+          "false_exclusions_by_reason_involved": {
+            "claim_bridge": 2,
+            "distinctive_phrase": 5
+          },
+          "false_inclusions": 0,
+          "false_inclusions_by_reason": {},
+          "false_inclusions_by_reason_involved": {}
+        },
+        "exact_relations": {
+          "false_exclusions": 0,
+          "false_exclusions_by_reason": {},
+          "false_exclusions_by_reason_involved": {},
+          "false_inclusions": 8,
+          "false_inclusions_by_reason": {
+            "multiple": 8
+          },
+          "false_inclusions_by_reason_involved": {
+            "claim_bridge": 8,
+            "distinctive_phrase": 8
+          }
+        },
+        "selected_nodes": {
+          "false_exclusions": 0,
+          "false_exclusions_by_reason": {},
+          "false_exclusions_by_reason_involved": {},
+          "false_inclusions": 20,
+          "false_inclusions_by_reason": {
+            "multiple": 20
+          },
+          "false_inclusions_by_reason_involved": {
+            "claim_bridge": 20,
+            "distinctive_phrase": 20
+          }
+        },
+        "structural_context_nodes": {
+          "false_exclusions": 0,
+          "false_exclusions_by_reason": {},
+          "false_exclusions_by_reason_involved": {},
+          "false_inclusions": 13,
+          "false_inclusions_by_reason": {
+            "multiple": 13
+          },
+          "false_inclusions_by_reason_involved": {
+            "claim_bridge": 13,
+            "distinctive_phrase": 13
+          }
+        },
+        "suggested_nodes": {
+          "comparison": "observed_only",
+          "observed": 14
+        },
+        "unresolved_nodes": {
+          "comparison": "observed_only",
+          "observed": 0
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "R1",
+      "subject_kind": "requirement"
+    },
+    {
+      "candidate_rows": 8,
+      "dimensions": {
+        "claimed_direct_nodes": {
+          "false_exclusions": 6,
+          "false_exclusions_by_reason": {
+            "distinctive_phrase": 3,
+            "unattributed": 3
+          },
+          "false_exclusions_by_reason_involved": {
+            "distinctive_phrase": 3,
+            "unattributed": 3
+          },
+          "false_inclusions": 0,
+          "false_inclusions_by_reason": {},
+          "false_inclusions_by_reason_involved": {}
+        },
+        "exact_relations": {
+          "false_exclusions": 1,
+          "false_exclusions_by_reason": {
+            "unattributed": 1
+          },
+          "false_exclusions_by_reason_involved": {
+            "unattributed": 1
+          },
+          "false_inclusions": 17,
+          "false_inclusions_by_reason": {
+            "distinctive_phrase": 17
+          },
+          "false_inclusions_by_reason_involved": {
+            "distinctive_phrase": 17
+          }
+        },
+        "selected_nodes": {
+          "false_exclusions": 3,
+          "false_exclusions_by_reason": {
+            "unattributed": 3
+          },
+          "false_exclusions_by_reason_involved": {
+            "unattributed": 3
+          },
+          "false_inclusions": 25,
+          "false_inclusions_by_reason": {
+            "distinctive_phrase": 25
+          },
+          "false_inclusions_by_reason_involved": {
+            "distinctive_phrase": 25
+          }
+        },
+        "structural_context_nodes": {
+          "false_exclusions": 0,
+          "false_exclusions_by_reason": {},
+          "false_exclusions_by_reason_involved": {},
+          "false_inclusions": 20,
+          "false_inclusions_by_reason": {
+            "distinctive_phrase": 20
+          },
+          "false_inclusions_by_reason_involved": {
+            "distinctive_phrase": 20
+          }
+        },
+        "suggested_nodes": {
+          "comparison": "observed_only",
+          "observed": 8
+        },
+        "unresolved_nodes": {
+          "comparison": "observed_only",
+          "observed": 0
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "R2",
+      "subject_kind": "requirement"
+    },
+    {
+      "candidate_rows": 12,
+      "dimensions": {
+        "claimed_direct_nodes": {
+          "false_exclusions": 7,
+          "false_exclusions_by_reason": {
+            "distinctive_phrase": 7
+          },
+          "false_exclusions_by_reason_involved": {
+            "distinctive_phrase": 7
+          },
+          "false_inclusions": 0,
+          "false_inclusions_by_reason": {},
+          "false_inclusions_by_reason_involved": {}
+        },
+        "exact_relations": {
+          "false_exclusions": 0,
+          "false_exclusions_by_reason": {},
+          "false_exclusions_by_reason_involved": {},
+          "false_inclusions": 15,
+          "false_inclusions_by_reason": {
+            "multiple": 15
+          },
+          "false_inclusions_by_reason_involved": {
+            "claim_bridge": 15,
+            "distinctive_phrase": 15
+          }
+        },
+        "selected_nodes": {
+          "false_exclusions": 0,
+          "false_exclusions_by_reason": {},
+          "false_exclusions_by_reason_involved": {},
+          "false_inclusions": 22,
+          "false_inclusions_by_reason": {
+            "multiple": 22
+          },
+          "false_inclusions_by_reason_involved": {
+            "claim_bridge": 22,
+            "distinctive_phrase": 22
+          }
+        },
+        "structural_context_nodes": {
+          "false_exclusions": 0,
+          "false_exclusions_by_reason": {},
+          "false_exclusions_by_reason_involved": {},
+          "false_inclusions": 17,
+          "false_inclusions_by_reason": {
+            "multiple": 17
+          },
+          "false_inclusions_by_reason_involved": {
+            "claim_bridge": 17,
+            "distinctive_phrase": 17
+          }
+        },
+        "suggested_nodes": {
+          "comparison": "observed_only",
+          "observed": 12
+        },
+        "unresolved_nodes": {
+          "comparison": "observed_only",
+          "observed": 0
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "R3",
+      "subject_kind": "requirement"
+    },
+    {
+      "candidate_rows": 9,
+      "dimensions": {
+        "claimed_direct_nodes": {
+          "false_exclusions": 6,
+          "false_exclusions_by_reason": {
+            "claim_bridge": 2,
+            "distinctive_phrase": 2,
+            "unattributed": 2
+          },
+          "false_exclusions_by_reason_involved": {
+            "claim_bridge": 2,
+            "distinctive_phrase": 2,
+            "unattributed": 2
+          },
+          "false_inclusions": 0,
+          "false_inclusions_by_reason": {},
+          "false_inclusions_by_reason_involved": {}
+        },
+        "exact_relations": {
+          "false_exclusions": 1,
+          "false_exclusions_by_reason": {
+            "unattributed": 1
+          },
+          "false_exclusions_by_reason_involved": {
+            "unattributed": 1
+          },
+          "false_inclusions": 17,
+          "false_inclusions_by_reason": {
+            "multiple": 17
+          },
+          "false_inclusions_by_reason_involved": {
+            "claim_bridge": 17,
+            "distinctive_phrase": 17
+          }
+        },
+        "selected_nodes": {
+          "false_exclusions": 2,
+          "false_exclusions_by_reason": {
+            "unattributed": 2
+          },
+          "false_exclusions_by_reason_involved": {
+            "unattributed": 2
+          },
+          "false_inclusions": 24,
+          "false_inclusions_by_reason": {
+            "multiple": 24
+          },
+          "false_inclusions_by_reason_involved": {
+            "claim_bridge": 24,
+            "distinctive_phrase": 24
+          }
+        },
+        "structural_context_nodes": {
+          "false_exclusions": 0,
+          "false_exclusions_by_reason": {},
+          "false_exclusions_by_reason_involved": {},
+          "false_inclusions": 19,
+          "false_inclusions_by_reason": {
+            "multiple": 19
+          },
+          "false_inclusions_by_reason_involved": {
+            "claim_bridge": 19,
+            "distinctive_phrase": 19
+          }
+        },
+        "suggested_nodes": {
+          "comparison": "observed_only",
+          "observed": 9
+        },
+        "unresolved_nodes": {
+          "comparison": "observed_only",
+          "observed": 0
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "R4",
+      "subject_kind": "requirement"
+    }
+  ],
+  "reason_breakdown": [
+    {
+      "association": "claim_bridge",
+      "candidate_count": 37,
+      "comparison": {
+        "claimed_direct_nodes": {
+          "false_exclusions": 8,
+          "false_inclusions": 0
+        },
+        "exact_relations": {
+          "false_exclusions": 0,
+          "false_inclusions": 51
+        },
+        "selected_nodes": {
+          "false_exclusions": 0,
+          "false_inclusions": 81
+        },
+        "structural_context_nodes": {
+          "false_exclusions": 0,
+          "false_inclusions": 58
+        }
+      },
+      "comparison_involved": {
+        "claimed_direct_nodes": {
+          "false_exclusions": 8,
+          "false_inclusions": 2
+        },
+        "exact_relations": {
+          "false_exclusions": 0,
+          "false_inclusions": 69
+        },
+        "selected_nodes": {
+          "false_exclusions": 0,
+          "false_inclusions": 109
+        },
+        "structural_context_nodes": {
+          "false_exclusions": 0,
+          "false_inclusions": 80
+        }
+      },
+      "deferred_count": 2,
+      "observed_anchor_memberships": 10,
+      "observed_membership_classes": {
+        "suggested": 35
+      },
+      "selected_count": 35,
+      "subject_kind": "guardrail"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_count": 3,
+      "comparison": {},
+      "comparison_involved": {
+        "claimed_direct_nodes": {
+          "false_exclusions": 0,
+          "false_inclusions": 2
+        },
+        "exact_relations": {
+          "false_exclusions": 0,
+          "false_inclusions": 18
+        },
+        "selected_nodes": {
+          "false_exclusions": 0,
+          "false_inclusions": 28
+        },
+        "structural_context_nodes": {
+          "false_exclusions": 0,
+          "false_inclusions": 22
+        }
+      },
+      "deferred_count": 0,
+      "observed_anchor_memberships": 3,
+      "observed_membership_classes": {
+        "matched": 3
+      },
+      "selected_count": 3,
+      "subject_kind": "guardrail"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_count": 7,
+      "comparison": {
+        "claimed_direct_nodes": {
+          "false_exclusions": 4,
+          "false_inclusions": 0
+        },
+        "exact_relations": {
+          "false_exclusions": 0,
+          "false_inclusions": 0
+        },
+        "selected_nodes": {
+          "false_exclusions": 0,
+          "false_inclusions": 0
+        },
+        "structural_context_nodes": {
+          "false_exclusions": 0,
+          "false_inclusions": 0
+        }
+      },
+      "comparison_involved": {
+        "claimed_direct_nodes": {
+          "false_exclusions": 4,
+          "false_inclusions": 0
+        },
+        "exact_relations": {
+          "false_exclusions": 0,
+          "false_inclusions": 40
+        },
+        "selected_nodes": {
+          "false_exclusions": 0,
+          "false_inclusions": 66
+        },
+        "structural_context_nodes": {
+          "false_exclusions": 0,
+          "false_inclusions": 49
+        }
+      },
+      "deferred_count": 0,
+      "observed_anchor_memberships": 6,
+      "observed_membership_classes": {
+        "suggested": 7
+      },
+      "selected_count": 7,
+      "subject_kind": "requirement"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_count": 36,
+      "comparison": {
+        "claimed_direct_nodes": {
+          "false_exclusions": 17,
+          "false_inclusions": 0
+        },
+        "exact_relations": {
+          "false_exclusions": 0,
+          "false_inclusions": 17
+        },
+        "selected_nodes": {
+          "false_exclusions": 0,
+          "false_inclusions": 25
+        },
+        "structural_context_nodes": {
+          "false_exclusions": 0,
+          "false_inclusions": 20
+        }
+      },
+      "comparison_involved": {
+        "claimed_direct_nodes": {
+          "false_exclusions": 17,
+          "false_inclusions": 0
+        },
+        "exact_relations": {
+          "false_exclusions": 0,
+          "false_inclusions": 57
+        },
+        "selected_nodes": {
+          "false_exclusions": 0,
+          "false_inclusions": 91
+        },
+        "structural_context_nodes": {
+          "false_exclusions": 0,
+          "false_inclusions": 69
+        }
+      },
+      "deferred_count": 0,
+      "observed_anchor_memberships": 14,
+      "observed_membership_classes": {
+        "suggested": 36
+      },
+      "selected_count": 36,
+      "subject_kind": "requirement"
+    }
+  ],
+  "reference_status": "verified",
+  "schema_version": "structural_association_comparison.v1"
+}

@@ -44,10 +44,12 @@ producer and source IDs recorded by the canonical projection. The generated
 `pr-267.packet.json.association.json` is a separate evaluation-only copy of
 every R/G changed-anchor candidate. It records the canonical association,
 reason details, matched terms, bridge IDs, convergence state, and any observed
-structural membership. Neither sidecar changes the production selection or
-assessment; the association sidecar exists to attribute reason-level behavior
-without reconstructing selector decisions from summary counts. The evaluator
-does not reconstruct paths or infer selector reasons from the packet. To replay
+structural membership. Its `source_channel` is a derived diagnostic
+classification of the recorded association kind; it is not a new production
+fact. Neither sidecar changes the production selection or assessment; the
+association sidecar exists to attribute reason-level behavior without
+reconstructing selector decisions from summary counts. The evaluator does not
+reconstruct paths or infer selector reasons from the packet. To replay
 the observed contribution of one producer, use the separate non-authoritative
 sink:
 
@@ -179,3 +181,25 @@ verify the same recorded Git blob identities when the historical commit is not
 available locally.
 Campaign v1.1 is the sole current structural-correctness baseline; there is no
 campaign v1.2.
+
+### Association attribution comparison
+
+The association sidecar can be compared with the frozen v1.1 references without
+rerunning production selection:
+
+```bash
+repodelta compare-structural-association \
+  --labeling-packet build/pr-267.packet.json \
+  --observation build/pr-267.packet.json.observation.json \
+  --association-attribution build/pr-267.packet.json.association.json \
+  --reference-labels build/pr-267.reference.json \
+  --output build/pr-267-association-comparison.json
+```
+
+The result reports selected-membership, claimed-direct, structural-context, and
+exact-relation false inclusions/exclusions by subject kind and recorded
+association reason. It also reports suggestions and unresolved memberships as
+observed-only dimensions. Downstream nodes and relation groups are attributed
+only through root-linked lineage already present in the canonical overlay;
+`causal_replay` is false, and members without a recorded lineage are
+`unattributed` rather than assigned a guessed reason.

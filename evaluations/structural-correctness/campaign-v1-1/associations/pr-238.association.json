@@ -4,8 +4,40 @@
     {
       "association": "distinctive_phrase",
       "bridge_ids": [],
+      "candidate_node_id": "SN:1ae20772b37149154b15",
       "candidate_state": "selected",
       "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:039ae519b3d5a07b5800",
+        "SN:1191c260686900356c91",
+        "SN:1ae20772b37149154b15",
+        "SN:2639513d25c07edfc597",
+        "SN:2ac9b806e153683f16b3",
+        "SN:31776beb122c49817441",
+        "SN:4f6abfce36264d7d285f",
+        "SN:5593553a4a0c1fb25619",
+        "SN:5a35d6f9079aa19c2381",
+        "SN:5fd0ac949f1566f5a461",
+        "SN:7b5832fd54d75011ec49",
+        "SN:88c2ccbf8b3ba521a111",
+        "SN:a065ad3210587aafcb4d",
+        "SN:ae7121776b87c1b88668",
+        "SN:dae6a55975facda4c9a1",
+        "SN:dba2408fadf305936d5b",
+        "SN:ddbafd59c33144cb3170",
+        "SN:ed13be5528f17423fb7a",
+        "SN:f493ed0c2caf1e591c9d",
+        "SN:f63087ace0914f7968f6"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:4ca75a4dddad26ed0b05",
+        "SRG:a32908f34325fbb4511c",
+        "SRG:c5020698332a9227ea86",
+        "SRG:d24773b7418bad9413b0",
+        "SRG:d887a12105f24eced927",
+        "SRG:da6be0c3994aaf0ec061",
+        "SRG:faef8d97ee6fe93ac727"
+      ],
       "matched_terms": [
         "canonical"
       ],
@@ -33,8 +65,54 @@
       "bridge_ids": [
         "VC4"
       ],
+      "candidate_node_id": "SN:1191c260686900356c91",
       "candidate_state": "selected",
       "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:039ae519b3d5a07b5800",
+        "SN:043ea7a4204d854226f7",
+        "SN:0f84fdd3d21d6d6a9f66",
+        "SN:1191c260686900356c91",
+        "SN:1ae20772b37149154b15",
+        "SN:2639513d25c07edfc597",
+        "SN:2ac9b806e153683f16b3",
+        "SN:30563f68e3ce403975fc",
+        "SN:31776beb122c49817441",
+        "SN:4f6abfce36264d7d285f",
+        "SN:5593553a4a0c1fb25619",
+        "SN:5a35d6f9079aa19c2381",
+        "SN:5fd0ac949f1566f5a461",
+        "SN:664d2e7f1912df5b6802",
+        "SN:7b5832fd54d75011ec49",
+        "SN:88c2ccbf8b3ba521a111",
+        "SN:899e331a0aa4b8722603",
+        "SN:9435b88dc81d757c519d",
+        "SN:a065ad3210587aafcb4d",
+        "SN:a354a519eccc3acaf4c2",
+        "SN:ae7121776b87c1b88668",
+        "SN:dae6a55975facda4c9a1",
+        "SN:dba2408fadf305936d5b",
+        "SN:ddbafd59c33144cb3170",
+        "SN:e9720893ed51042b845f",
+        "SN:ed13be5528f17423fb7a",
+        "SN:f493ed0c2caf1e591c9d",
+        "SN:f63087ace0914f7968f6",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:0c6ecc2e520ca6d74464",
+        "SRG:2570d468056918bc4b3e",
+        "SRG:4ca75a4dddad26ed0b05",
+        "SRG:803b8cc26463e983973d",
+        "SRG:a32908f34325fbb4511c",
+        "SRG:c5020698332a9227ea86",
+        "SRG:d24773b7418bad9413b0",
+        "SRG:d646fca35fbf26db7852",
+        "SRG:d887a12105f24eced927",
+        "SRG:da6be0c3994aaf0ec061",
+        "SRG:ddacc95c6e4fa4a48379",
+        "SRG:faef8d97ee6fe93ac727"
+      ],
       "matched_terms": [
         "canonical",
         "changed",
@@ -77,8 +155,51 @@
       "bridge_ids": [
         "VC3"
       ],
+      "candidate_node_id": "SN:1ae20772b37149154b15",
       "candidate_state": "selected",
       "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:039ae519b3d5a07b5800",
+        "SN:043ea7a4204d854226f7",
+        "SN:0f84fdd3d21d6d6a9f66",
+        "SN:1191c260686900356c91",
+        "SN:1ae20772b37149154b15",
+        "SN:2639513d25c07edfc597",
+        "SN:2ac9b806e153683f16b3",
+        "SN:30563f68e3ce403975fc",
+        "SN:31776beb122c49817441",
+        "SN:4f6abfce36264d7d285f",
+        "SN:5593553a4a0c1fb25619",
+        "SN:5a35d6f9079aa19c2381",
+        "SN:5fd0ac949f1566f5a461",
+        "SN:664d2e7f1912df5b6802",
+        "SN:899e331a0aa4b8722603",
+        "SN:9435b88dc81d757c519d",
+        "SN:a065ad3210587aafcb4d",
+        "SN:a354a519eccc3acaf4c2",
+        "SN:ae7121776b87c1b88668",
+        "SN:dae6a55975facda4c9a1",
+        "SN:dba2408fadf305936d5b",
+        "SN:ddbafd59c33144cb3170",
+        "SN:e9720893ed51042b845f",
+        "SN:ed13be5528f17423fb7a",
+        "SN:f493ed0c2caf1e591c9d",
+        "SN:f63087ace0914f7968f6",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:0c6ecc2e520ca6d74464",
+        "SRG:2570d468056918bc4b3e",
+        "SRG:4ca75a4dddad26ed0b05",
+        "SRG:803b8cc26463e983973d",
+        "SRG:a32908f34325fbb4511c",
+        "SRG:c5020698332a9227ea86",
+        "SRG:d24773b7418bad9413b0",
+        "SRG:d646fca35fbf26db7852",
+        "SRG:d887a12105f24eced927",
+        "SRG:da6be0c3994aaf0ec061",
+        "SRG:ddacc95c6e4fa4a48379"
+      ],
       "matched_terms": [
         "tests"
       ],
@@ -106,8 +227,11 @@
       "bridge_ids": [
         "VC4"
       ],
+      "candidate_node_id": null,
       "candidate_state": "selected",
       "evidence_role": "document_support",
+      "lineage_node_ids": [],
+      "lineage_relation_group_ids": [],
       "matched_terms": [
         "code",
         "identity",
@@ -150,8 +274,11 @@
       "bridge_ids": [
         "VC4"
       ],
+      "candidate_node_id": null,
       "candidate_state": "selected",
       "evidence_role": "document_support",
+      "lineage_node_ids": [],
+      "lineage_relation_group_ids": [],
       "matched_terms": [
         "code",
         "markdown",
@@ -196,8 +323,40 @@
       "bridge_ids": [
         "VC4"
       ],
+      "candidate_node_id": "SN:1ae20772b37149154b15",
       "candidate_state": "selected",
       "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:039ae519b3d5a07b5800",
+        "SN:1191c260686900356c91",
+        "SN:1ae20772b37149154b15",
+        "SN:2639513d25c07edfc597",
+        "SN:2ac9b806e153683f16b3",
+        "SN:31776beb122c49817441",
+        "SN:4f6abfce36264d7d285f",
+        "SN:5593553a4a0c1fb25619",
+        "SN:5a35d6f9079aa19c2381",
+        "SN:5fd0ac949f1566f5a461",
+        "SN:7b5832fd54d75011ec49",
+        "SN:88c2ccbf8b3ba521a111",
+        "SN:a065ad3210587aafcb4d",
+        "SN:ae7121776b87c1b88668",
+        "SN:dae6a55975facda4c9a1",
+        "SN:dba2408fadf305936d5b",
+        "SN:ddbafd59c33144cb3170",
+        "SN:ed13be5528f17423fb7a",
+        "SN:f493ed0c2caf1e591c9d",
+        "SN:f63087ace0914f7968f6"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:4ca75a4dddad26ed0b05",
+        "SRG:a32908f34325fbb4511c",
+        "SRG:c5020698332a9227ea86",
+        "SRG:d24773b7418bad9413b0",
+        "SRG:d887a12105f24eced927",
+        "SRG:da6be0c3994aaf0ec061",
+        "SRG:faef8d97ee6fe93ac727"
+      ],
       "matched_terms": [
         "selectors"
       ],
@@ -225,8 +384,14 @@
       "bridge_ids": [
         "VC4"
       ],
+      "candidate_node_id": "SN:950784709a7dcd98c452",
       "candidate_state": "selected",
       "evidence_role": "primary",
+      "lineage_node_ids": [
+        "SN:225343e0e40bf0830a66",
+        "SN:950784709a7dcd98c452"
+      ],
+      "lineage_relation_group_ids": [],
       "matched_terms": [
         "claim",
         "explicit",
@@ -268,8 +433,11 @@
       "bridge_ids": [
         "VC4"
       ],
+      "candidate_node_id": null,
       "candidate_state": "selected",
       "evidence_role": "document_support",
+      "lineage_node_ids": [],
+      "lineage_relation_group_ids": [],
       "matched_terms": [
         "claim",
         "code",
@@ -312,8 +480,14 @@
       "bridge_ids": [
         "VC3"
       ],
+      "candidate_node_id": "SN:950784709a7dcd98c452",
       "candidate_state": "selected",
       "evidence_role": "primary",
+      "lineage_node_ids": [
+        "SN:225343e0e40bf0830a66",
+        "SN:950784709a7dcd98c452"
+      ],
+      "lineage_relation_group_ids": [],
       "matched_terms": [
         "assessment"
       ],
@@ -341,8 +515,11 @@
       "bridge_ids": [
         "VC4"
       ],
+      "candidate_node_id": null,
       "candidate_state": "selected",
       "evidence_role": "document_support",
+      "lineage_node_ids": [],
+      "lineage_relation_group_ids": [],
       "matched_terms": [
         "code",
         "proof"
@@ -372,8 +549,51 @@
       "bridge_ids": [
         "VC3"
       ],
+      "candidate_node_id": "SN:ae7121776b87c1b88668",
       "candidate_state": "selected",
       "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:039ae519b3d5a07b5800",
+        "SN:043ea7a4204d854226f7",
+        "SN:0f84fdd3d21d6d6a9f66",
+        "SN:1191c260686900356c91",
+        "SN:1ae20772b37149154b15",
+        "SN:2639513d25c07edfc597",
+        "SN:2ac9b806e153683f16b3",
+        "SN:30563f68e3ce403975fc",
+        "SN:31776beb122c49817441",
+        "SN:4f6abfce36264d7d285f",
+        "SN:5593553a4a0c1fb25619",
+        "SN:5a35d6f9079aa19c2381",
+        "SN:5fd0ac949f1566f5a461",
+        "SN:664d2e7f1912df5b6802",
+        "SN:899e331a0aa4b8722603",
+        "SN:9435b88dc81d757c519d",
+        "SN:a065ad3210587aafcb4d",
+        "SN:a354a519eccc3acaf4c2",
+        "SN:ae7121776b87c1b88668",
+        "SN:dae6a55975facda4c9a1",
+        "SN:dba2408fadf305936d5b",
+        "SN:ddbafd59c33144cb3170",
+        "SN:e9720893ed51042b845f",
+        "SN:ed13be5528f17423fb7a",
+        "SN:f493ed0c2caf1e591c9d",
+        "SN:f63087ace0914f7968f6",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:0c6ecc2e520ca6d74464",
+        "SRG:2570d468056918bc4b3e",
+        "SRG:4ca75a4dddad26ed0b05",
+        "SRG:803b8cc26463e983973d",
+        "SRG:a32908f34325fbb4511c",
+        "SRG:c5020698332a9227ea86",
+        "SRG:d24773b7418bad9413b0",
+        "SRG:d646fca35fbf26db7852",
+        "SRG:d887a12105f24eced927",
+        "SRG:da6be0c3994aaf0ec061",
+        "SRG:ddacc95c6e4fa4a48379"
+      ],
       "matched_terms": [
         "tests"
       ],
@@ -401,8 +621,11 @@
       "bridge_ids": [
         "VC4"
       ],
+      "candidate_node_id": null,
       "candidate_state": "selected",
       "evidence_role": "document_support",
+      "lineage_node_ids": [],
+      "lineage_relation_group_ids": [],
       "matched_terms": [
         "code",
         "proof"
@@ -432,8 +655,54 @@
       "bridge_ids": [
         "VC4"
       ],
+      "candidate_node_id": "SN:1ae20772b37149154b15",
       "candidate_state": "selected",
       "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:039ae519b3d5a07b5800",
+        "SN:043ea7a4204d854226f7",
+        "SN:0f84fdd3d21d6d6a9f66",
+        "SN:1191c260686900356c91",
+        "SN:1ae20772b37149154b15",
+        "SN:2639513d25c07edfc597",
+        "SN:2ac9b806e153683f16b3",
+        "SN:30563f68e3ce403975fc",
+        "SN:31776beb122c49817441",
+        "SN:4f6abfce36264d7d285f",
+        "SN:5593553a4a0c1fb25619",
+        "SN:5a35d6f9079aa19c2381",
+        "SN:5fd0ac949f1566f5a461",
+        "SN:664d2e7f1912df5b6802",
+        "SN:7b5832fd54d75011ec49",
+        "SN:88c2ccbf8b3ba521a111",
+        "SN:899e331a0aa4b8722603",
+        "SN:9435b88dc81d757c519d",
+        "SN:a065ad3210587aafcb4d",
+        "SN:a354a519eccc3acaf4c2",
+        "SN:ae7121776b87c1b88668",
+        "SN:dae6a55975facda4c9a1",
+        "SN:dba2408fadf305936d5b",
+        "SN:ddbafd59c33144cb3170",
+        "SN:e9720893ed51042b845f",
+        "SN:ed13be5528f17423fb7a",
+        "SN:f493ed0c2caf1e591c9d",
+        "SN:f63087ace0914f7968f6",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:0c6ecc2e520ca6d74464",
+        "SRG:2570d468056918bc4b3e",
+        "SRG:4ca75a4dddad26ed0b05",
+        "SRG:803b8cc26463e983973d",
+        "SRG:a32908f34325fbb4511c",
+        "SRG:c5020698332a9227ea86",
+        "SRG:d24773b7418bad9413b0",
+        "SRG:d646fca35fbf26db7852",
+        "SRG:d887a12105f24eced927",
+        "SRG:da6be0c3994aaf0ec061",
+        "SRG:ddacc95c6e4fa4a48379",
+        "SRG:faef8d97ee6fe93ac727"
+      ],
       "matched_terms": [
         "canonical",
         "claim",
@@ -471,8 +740,11 @@
       "bridge_ids": [
         "VC4"
       ],
+      "candidate_node_id": null,
       "candidate_state": "selected",
       "evidence_role": "document_support",
+      "lineage_node_ids": [],
+      "lineage_relation_group_ids": [],
       "matched_terms": [
         "claim",
         "code",
@@ -515,8 +787,11 @@
       "bridge_ids": [
         "VC4"
       ],
+      "candidate_node_id": null,
       "candidate_state": "selected",
       "evidence_role": "document_support",
+      "lineage_node_ids": [],
+      "lineage_relation_group_ids": [],
       "matched_terms": [
         "authored",
         "code",
@@ -550,8 +825,40 @@
       "bridge_ids": [
         "VC4"
       ],
+      "candidate_node_id": "SN:1191c260686900356c91",
       "candidate_state": "selected",
       "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:039ae519b3d5a07b5800",
+        "SN:1191c260686900356c91",
+        "SN:1ae20772b37149154b15",
+        "SN:2639513d25c07edfc597",
+        "SN:2ac9b806e153683f16b3",
+        "SN:31776beb122c49817441",
+        "SN:4f6abfce36264d7d285f",
+        "SN:5593553a4a0c1fb25619",
+        "SN:5a35d6f9079aa19c2381",
+        "SN:5fd0ac949f1566f5a461",
+        "SN:7b5832fd54d75011ec49",
+        "SN:88c2ccbf8b3ba521a111",
+        "SN:a065ad3210587aafcb4d",
+        "SN:ae7121776b87c1b88668",
+        "SN:dae6a55975facda4c9a1",
+        "SN:dba2408fadf305936d5b",
+        "SN:ddbafd59c33144cb3170",
+        "SN:ed13be5528f17423fb7a",
+        "SN:f493ed0c2caf1e591c9d",
+        "SN:f63087ace0914f7968f6"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:4ca75a4dddad26ed0b05",
+        "SRG:a32908f34325fbb4511c",
+        "SRG:c5020698332a9227ea86",
+        "SRG:d24773b7418bad9413b0",
+        "SRG:d887a12105f24eced927",
+        "SRG:da6be0c3994aaf0ec061",
+        "SRG:faef8d97ee6fe93ac727"
+      ],
       "matched_terms": [
         "changed",
         "selectors"
@@ -581,8 +888,14 @@
       "bridge_ids": [
         "VC4"
       ],
+      "candidate_node_id": "SN:950784709a7dcd98c452",
       "candidate_state": "selected",
       "evidence_role": "primary",
+      "lineage_node_ids": [
+        "SN:225343e0e40bf0830a66",
+        "SN:950784709a7dcd98c452"
+      ],
+      "lineage_relation_group_ids": [],
       "matched_terms": [
         "claim",
         "explicit",
@@ -624,8 +937,54 @@
       "bridge_ids": [
         "VC4"
       ],
+      "candidate_node_id": "SN:1ae20772b37149154b15",
       "candidate_state": "selected",
       "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:039ae519b3d5a07b5800",
+        "SN:043ea7a4204d854226f7",
+        "SN:0f84fdd3d21d6d6a9f66",
+        "SN:1191c260686900356c91",
+        "SN:1ae20772b37149154b15",
+        "SN:2639513d25c07edfc597",
+        "SN:2ac9b806e153683f16b3",
+        "SN:30563f68e3ce403975fc",
+        "SN:31776beb122c49817441",
+        "SN:4f6abfce36264d7d285f",
+        "SN:5593553a4a0c1fb25619",
+        "SN:5a35d6f9079aa19c2381",
+        "SN:5fd0ac949f1566f5a461",
+        "SN:664d2e7f1912df5b6802",
+        "SN:7b5832fd54d75011ec49",
+        "SN:88c2ccbf8b3ba521a111",
+        "SN:899e331a0aa4b8722603",
+        "SN:9435b88dc81d757c519d",
+        "SN:a065ad3210587aafcb4d",
+        "SN:a354a519eccc3acaf4c2",
+        "SN:ae7121776b87c1b88668",
+        "SN:dae6a55975facda4c9a1",
+        "SN:dba2408fadf305936d5b",
+        "SN:ddbafd59c33144cb3170",
+        "SN:e9720893ed51042b845f",
+        "SN:ed13be5528f17423fb7a",
+        "SN:f493ed0c2caf1e591c9d",
+        "SN:f63087ace0914f7968f6",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:0c6ecc2e520ca6d74464",
+        "SRG:2570d468056918bc4b3e",
+        "SRG:4ca75a4dddad26ed0b05",
+        "SRG:803b8cc26463e983973d",
+        "SRG:a32908f34325fbb4511c",
+        "SRG:c5020698332a9227ea86",
+        "SRG:d24773b7418bad9413b0",
+        "SRG:d646fca35fbf26db7852",
+        "SRG:d887a12105f24eced927",
+        "SRG:da6be0c3994aaf0ec061",
+        "SRG:ddacc95c6e4fa4a48379",
+        "SRG:faef8d97ee6fe93ac727"
+      ],
       "matched_terms": [
         "canonical",
         "claim",
@@ -663,8 +1022,51 @@
       "bridge_ids": [
         "VC3"
       ],
+      "candidate_node_id": "SN:664d2e7f1912df5b6802",
       "candidate_state": "selected",
       "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:039ae519b3d5a07b5800",
+        "SN:043ea7a4204d854226f7",
+        "SN:0f84fdd3d21d6d6a9f66",
+        "SN:1191c260686900356c91",
+        "SN:1ae20772b37149154b15",
+        "SN:2639513d25c07edfc597",
+        "SN:2ac9b806e153683f16b3",
+        "SN:30563f68e3ce403975fc",
+        "SN:31776beb122c49817441",
+        "SN:4f6abfce36264d7d285f",
+        "SN:5593553a4a0c1fb25619",
+        "SN:5a35d6f9079aa19c2381",
+        "SN:5fd0ac949f1566f5a461",
+        "SN:664d2e7f1912df5b6802",
+        "SN:899e331a0aa4b8722603",
+        "SN:9435b88dc81d757c519d",
+        "SN:a065ad3210587aafcb4d",
+        "SN:a354a519eccc3acaf4c2",
+        "SN:ae7121776b87c1b88668",
+        "SN:dae6a55975facda4c9a1",
+        "SN:dba2408fadf305936d5b",
+        "SN:ddbafd59c33144cb3170",
+        "SN:e9720893ed51042b845f",
+        "SN:ed13be5528f17423fb7a",
+        "SN:f493ed0c2caf1e591c9d",
+        "SN:f63087ace0914f7968f6",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:0c6ecc2e520ca6d74464",
+        "SRG:2570d468056918bc4b3e",
+        "SRG:4ca75a4dddad26ed0b05",
+        "SRG:803b8cc26463e983973d",
+        "SRG:a32908f34325fbb4511c",
+        "SRG:c5020698332a9227ea86",
+        "SRG:d24773b7418bad9413b0",
+        "SRG:d646fca35fbf26db7852",
+        "SRG:d887a12105f24eced927",
+        "SRG:da6be0c3994aaf0ec061",
+        "SRG:ddacc95c6e4fa4a48379"
+      ],
       "matched_terms": [
         "semantic",
         "tests"
@@ -694,8 +1096,14 @@
       "bridge_ids": [
         "VC4"
       ],
+      "candidate_node_id": "SN:950784709a7dcd98c452",
       "candidate_state": "selected",
       "evidence_role": "primary",
+      "lineage_node_ids": [
+        "SN:225343e0e40bf0830a66",
+        "SN:950784709a7dcd98c452"
+      ],
+      "lineage_relation_group_ids": [],
       "matched_terms": [
         "rather",
         "remains",
@@ -735,8 +1143,54 @@
     {
       "association": "distinctive_phrase",
       "bridge_ids": [],
+      "candidate_node_id": "SN:664d2e7f1912df5b6802",
       "candidate_state": "selected",
       "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:039ae519b3d5a07b5800",
+        "SN:043ea7a4204d854226f7",
+        "SN:0f84fdd3d21d6d6a9f66",
+        "SN:1191c260686900356c91",
+        "SN:1ae20772b37149154b15",
+        "SN:2639513d25c07edfc597",
+        "SN:2ac9b806e153683f16b3",
+        "SN:30563f68e3ce403975fc",
+        "SN:31776beb122c49817441",
+        "SN:4f6abfce36264d7d285f",
+        "SN:5593553a4a0c1fb25619",
+        "SN:5a35d6f9079aa19c2381",
+        "SN:5fd0ac949f1566f5a461",
+        "SN:664d2e7f1912df5b6802",
+        "SN:7b5832fd54d75011ec49",
+        "SN:88c2ccbf8b3ba521a111",
+        "SN:899e331a0aa4b8722603",
+        "SN:9435b88dc81d757c519d",
+        "SN:a065ad3210587aafcb4d",
+        "SN:a354a519eccc3acaf4c2",
+        "SN:ae7121776b87c1b88668",
+        "SN:dae6a55975facda4c9a1",
+        "SN:dba2408fadf305936d5b",
+        "SN:ddbafd59c33144cb3170",
+        "SN:e9720893ed51042b845f",
+        "SN:ed13be5528f17423fb7a",
+        "SN:f493ed0c2caf1e591c9d",
+        "SN:f63087ace0914f7968f6",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:0c6ecc2e520ca6d74464",
+        "SRG:2570d468056918bc4b3e",
+        "SRG:4ca75a4dddad26ed0b05",
+        "SRG:803b8cc26463e983973d",
+        "SRG:a32908f34325fbb4511c",
+        "SRG:c5020698332a9227ea86",
+        "SRG:d24773b7418bad9413b0",
+        "SRG:d646fca35fbf26db7852",
+        "SRG:d887a12105f24eced927",
+        "SRG:da6be0c3994aaf0ec061",
+        "SRG:ddacc95c6e4fa4a48379",
+        "SRG:faef8d97ee6fe93ac727"
+      ],
       "matched_terms": [
         "claim"
       ],
@@ -762,8 +1216,27 @@
     {
       "association": "distinctive_phrase",
       "bridge_ids": [],
+      "candidate_node_id": "SN:1191c260686900356c91",
       "candidate_state": "selected",
       "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:039ae519b3d5a07b5800",
+        "SN:1191c260686900356c91",
+        "SN:2639513d25c07edfc597",
+        "SN:2ac9b806e153683f16b3",
+        "SN:31776beb122c49817441",
+        "SN:4f6abfce36264d7d285f",
+        "SN:5a35d6f9079aa19c2381",
+        "SN:ae7121776b87c1b88668",
+        "SN:dae6a55975facda4c9a1",
+        "SN:ed13be5528f17423fb7a",
+        "SN:f63087ace0914f7968f6"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:4ca75a4dddad26ed0b05",
+        "SRG:d24773b7418bad9413b0",
+        "SRG:da6be0c3994aaf0ec061"
+      ],
       "matched_terms": [
         "explicit"
       ],
@@ -791,8 +1264,11 @@
       "bridge_ids": [
         "VC4"
       ],
+      "candidate_node_id": null,
       "candidate_state": "selected",
       "evidence_role": "document_support",
+      "lineage_node_ids": [],
+      "lineage_relation_group_ids": [],
       "matched_terms": [
         "code",
         "selectors"
@@ -822,8 +1298,11 @@
       "bridge_ids": [
         "VC4"
       ],
+      "candidate_node_id": null,
       "candidate_state": "selected",
       "evidence_role": "document_support",
+      "lineage_node_ids": [],
+      "lineage_relation_group_ids": [],
       "matched_terms": [
         "code",
         "identity",
@@ -864,8 +1343,11 @@
     {
       "association": "distinctive_phrase",
       "bridge_ids": [],
+      "candidate_node_id": null,
       "candidate_state": "selected",
       "evidence_role": "document_support",
+      "lineage_node_ids": [],
+      "lineage_relation_group_ids": [],
       "matched_terms": [
         "focus"
       ],
@@ -893,8 +1375,14 @@
       "bridge_ids": [
         "VC4"
       ],
+      "candidate_node_id": "SN:950784709a7dcd98c452",
       "candidate_state": "selected",
       "evidence_role": "primary",
+      "lineage_node_ids": [
+        "SN:225343e0e40bf0830a66",
+        "SN:950784709a7dcd98c452"
+      ],
+      "lineage_relation_group_ids": [],
       "matched_terms": [
         "authored",
         "rather",
@@ -926,8 +1414,40 @@
       "bridge_ids": [
         "VC4"
       ],
+      "candidate_node_id": "SN:1ae20772b37149154b15",
       "candidate_state": "selected",
       "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:039ae519b3d5a07b5800",
+        "SN:1191c260686900356c91",
+        "SN:1ae20772b37149154b15",
+        "SN:2639513d25c07edfc597",
+        "SN:2ac9b806e153683f16b3",
+        "SN:31776beb122c49817441",
+        "SN:4f6abfce36264d7d285f",
+        "SN:5593553a4a0c1fb25619",
+        "SN:5a35d6f9079aa19c2381",
+        "SN:5fd0ac949f1566f5a461",
+        "SN:7b5832fd54d75011ec49",
+        "SN:88c2ccbf8b3ba521a111",
+        "SN:a065ad3210587aafcb4d",
+        "SN:ae7121776b87c1b88668",
+        "SN:dae6a55975facda4c9a1",
+        "SN:dba2408fadf305936d5b",
+        "SN:ddbafd59c33144cb3170",
+        "SN:ed13be5528f17423fb7a",
+        "SN:f493ed0c2caf1e591c9d",
+        "SN:f63087ace0914f7968f6"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:4ca75a4dddad26ed0b05",
+        "SRG:a32908f34325fbb4511c",
+        "SRG:c5020698332a9227ea86",
+        "SRG:d24773b7418bad9413b0",
+        "SRG:d887a12105f24eced927",
+        "SRG:da6be0c3994aaf0ec061",
+        "SRG:faef8d97ee6fe93ac727"
+      ],
       "matched_terms": [
         "selectors"
       ],
@@ -953,8 +1473,14 @@
     {
       "association": "distinctive_phrase",
       "bridge_ids": [],
+      "candidate_node_id": "SN:950784709a7dcd98c452",
       "candidate_state": "selected",
       "evidence_role": "primary",
+      "lineage_node_ids": [
+        "SN:225343e0e40bf0830a66",
+        "SN:950784709a7dcd98c452"
+      ],
+      "lineage_relation_group_ids": [],
       "matched_terms": [
         "focus"
       ],
@@ -980,8 +1506,14 @@
     {
       "association": "distinctive_phrase",
       "bridge_ids": [],
+      "candidate_node_id": "SN:950784709a7dcd98c452",
       "candidate_state": "selected",
       "evidence_role": "primary",
+      "lineage_node_ids": [
+        "SN:225343e0e40bf0830a66",
+        "SN:950784709a7dcd98c452"
+      ],
+      "lineage_relation_group_ids": [],
       "matched_terms": [
         "explicit",
         "remains"
@@ -1009,8 +1541,40 @@
     {
       "association": "distinctive_phrase",
       "bridge_ids": [],
+      "candidate_node_id": "SN:1191c260686900356c91",
       "candidate_state": "selected",
       "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:039ae519b3d5a07b5800",
+        "SN:1191c260686900356c91",
+        "SN:1ae20772b37149154b15",
+        "SN:2639513d25c07edfc597",
+        "SN:2ac9b806e153683f16b3",
+        "SN:31776beb122c49817441",
+        "SN:4f6abfce36264d7d285f",
+        "SN:5593553a4a0c1fb25619",
+        "SN:5a35d6f9079aa19c2381",
+        "SN:5fd0ac949f1566f5a461",
+        "SN:7b5832fd54d75011ec49",
+        "SN:88c2ccbf8b3ba521a111",
+        "SN:a065ad3210587aafcb4d",
+        "SN:ae7121776b87c1b88668",
+        "SN:dae6a55975facda4c9a1",
+        "SN:dba2408fadf305936d5b",
+        "SN:ddbafd59c33144cb3170",
+        "SN:ed13be5528f17423fb7a",
+        "SN:f493ed0c2caf1e591c9d",
+        "SN:f63087ace0914f7968f6"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:4ca75a4dddad26ed0b05",
+        "SRG:a32908f34325fbb4511c",
+        "SRG:c5020698332a9227ea86",
+        "SRG:d24773b7418bad9413b0",
+        "SRG:d887a12105f24eced927",
+        "SRG:da6be0c3994aaf0ec061",
+        "SRG:faef8d97ee6fe93ac727"
+      ],
       "matched_terms": [
         "canonical",
         "focus"
@@ -1040,8 +1604,11 @@
       "bridge_ids": [
         "VC3"
       ],
+      "candidate_node_id": null,
       "candidate_state": "selected",
       "evidence_role": "document_support",
+      "lineage_node_ids": [],
+      "lineage_relation_group_ids": [],
       "matched_terms": [
         "assessment",
         "routing"
@@ -1069,8 +1636,11 @@
     {
       "association": "distinctive_phrase",
       "bridge_ids": [],
+      "candidate_node_id": null,
       "candidate_state": "selected",
       "evidence_role": "document_support",
+      "lineage_node_ids": [],
+      "lineage_relation_group_ids": [],
       "matched_terms": [
         "prose"
       ],
@@ -1098,8 +1668,51 @@
       "bridge_ids": [
         "VC3"
       ],
+      "candidate_node_id": "SN:1191c260686900356c91",
       "candidate_state": "selected",
       "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:039ae519b3d5a07b5800",
+        "SN:043ea7a4204d854226f7",
+        "SN:0f84fdd3d21d6d6a9f66",
+        "SN:1191c260686900356c91",
+        "SN:1ae20772b37149154b15",
+        "SN:2639513d25c07edfc597",
+        "SN:2ac9b806e153683f16b3",
+        "SN:30563f68e3ce403975fc",
+        "SN:31776beb122c49817441",
+        "SN:4f6abfce36264d7d285f",
+        "SN:5593553a4a0c1fb25619",
+        "SN:5a35d6f9079aa19c2381",
+        "SN:5fd0ac949f1566f5a461",
+        "SN:664d2e7f1912df5b6802",
+        "SN:899e331a0aa4b8722603",
+        "SN:9435b88dc81d757c519d",
+        "SN:a065ad3210587aafcb4d",
+        "SN:a354a519eccc3acaf4c2",
+        "SN:ae7121776b87c1b88668",
+        "SN:dae6a55975facda4c9a1",
+        "SN:dba2408fadf305936d5b",
+        "SN:ddbafd59c33144cb3170",
+        "SN:e9720893ed51042b845f",
+        "SN:ed13be5528f17423fb7a",
+        "SN:f493ed0c2caf1e591c9d",
+        "SN:f63087ace0914f7968f6",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:0c6ecc2e520ca6d74464",
+        "SRG:2570d468056918bc4b3e",
+        "SRG:4ca75a4dddad26ed0b05",
+        "SRG:803b8cc26463e983973d",
+        "SRG:a32908f34325fbb4511c",
+        "SRG:c5020698332a9227ea86",
+        "SRG:d24773b7418bad9413b0",
+        "SRG:d646fca35fbf26db7852",
+        "SRG:d887a12105f24eced927",
+        "SRG:da6be0c3994aaf0ec061",
+        "SRG:ddacc95c6e4fa4a48379"
+      ],
       "matched_terms": [
         "projection",
         "tests"
@@ -1129,8 +1742,40 @@
       "bridge_ids": [
         "VC4"
       ],
+      "candidate_node_id": "SN:1191c260686900356c91",
       "candidate_state": "selected",
       "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:039ae519b3d5a07b5800",
+        "SN:1191c260686900356c91",
+        "SN:1ae20772b37149154b15",
+        "SN:2639513d25c07edfc597",
+        "SN:2ac9b806e153683f16b3",
+        "SN:31776beb122c49817441",
+        "SN:4f6abfce36264d7d285f",
+        "SN:5593553a4a0c1fb25619",
+        "SN:5a35d6f9079aa19c2381",
+        "SN:5fd0ac949f1566f5a461",
+        "SN:7b5832fd54d75011ec49",
+        "SN:88c2ccbf8b3ba521a111",
+        "SN:a065ad3210587aafcb4d",
+        "SN:ae7121776b87c1b88668",
+        "SN:dae6a55975facda4c9a1",
+        "SN:dba2408fadf305936d5b",
+        "SN:ddbafd59c33144cb3170",
+        "SN:ed13be5528f17423fb7a",
+        "SN:f493ed0c2caf1e591c9d",
+        "SN:f63087ace0914f7968f6"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:4ca75a4dddad26ed0b05",
+        "SRG:a32908f34325fbb4511c",
+        "SRG:c5020698332a9227ea86",
+        "SRG:d24773b7418bad9413b0",
+        "SRG:d887a12105f24eced927",
+        "SRG:da6be0c3994aaf0ec061",
+        "SRG:faef8d97ee6fe93ac727"
+      ],
       "matched_terms": [
         "changed",
         "selectors"
@@ -1160,8 +1805,11 @@
       "bridge_ids": [
         "VC4"
       ],
+      "candidate_node_id": null,
       "candidate_state": "selected",
       "evidence_role": "document_support",
+      "lineage_node_ids": [],
+      "lineage_relation_group_ids": [],
       "matched_terms": [
         "authored",
         "code",
@@ -1195,8 +1843,11 @@
       "bridge_ids": [
         "VC4"
       ],
+      "candidate_node_id": null,
       "candidate_state": "selected",
       "evidence_role": "document_support",
+      "lineage_node_ids": [],
+      "lineage_relation_group_ids": [],
       "matched_terms": [
         "code",
         "markdown",
@@ -1241,8 +1892,11 @@
       "bridge_ids": [
         "VC4"
       ],
+      "candidate_node_id": null,
       "candidate_state": "selected",
       "evidence_role": "document_support",
+      "lineage_node_ids": [],
+      "lineage_relation_group_ids": [],
       "matched_terms": [
         "code",
         "selectors"
@@ -1272,8 +1926,54 @@
       "bridge_ids": [
         "VC4"
       ],
+      "candidate_node_id": "SN:1191c260686900356c91",
       "candidate_state": "selected",
       "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:039ae519b3d5a07b5800",
+        "SN:043ea7a4204d854226f7",
+        "SN:0f84fdd3d21d6d6a9f66",
+        "SN:1191c260686900356c91",
+        "SN:1ae20772b37149154b15",
+        "SN:2639513d25c07edfc597",
+        "SN:2ac9b806e153683f16b3",
+        "SN:30563f68e3ce403975fc",
+        "SN:31776beb122c49817441",
+        "SN:4f6abfce36264d7d285f",
+        "SN:5593553a4a0c1fb25619",
+        "SN:5a35d6f9079aa19c2381",
+        "SN:5fd0ac949f1566f5a461",
+        "SN:664d2e7f1912df5b6802",
+        "SN:7b5832fd54d75011ec49",
+        "SN:88c2ccbf8b3ba521a111",
+        "SN:899e331a0aa4b8722603",
+        "SN:9435b88dc81d757c519d",
+        "SN:a065ad3210587aafcb4d",
+        "SN:a354a519eccc3acaf4c2",
+        "SN:ae7121776b87c1b88668",
+        "SN:dae6a55975facda4c9a1",
+        "SN:dba2408fadf305936d5b",
+        "SN:ddbafd59c33144cb3170",
+        "SN:e9720893ed51042b845f",
+        "SN:ed13be5528f17423fb7a",
+        "SN:f493ed0c2caf1e591c9d",
+        "SN:f63087ace0914f7968f6",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:0c6ecc2e520ca6d74464",
+        "SRG:2570d468056918bc4b3e",
+        "SRG:4ca75a4dddad26ed0b05",
+        "SRG:803b8cc26463e983973d",
+        "SRG:a32908f34325fbb4511c",
+        "SRG:c5020698332a9227ea86",
+        "SRG:d24773b7418bad9413b0",
+        "SRG:d646fca35fbf26db7852",
+        "SRG:d887a12105f24eced927",
+        "SRG:da6be0c3994aaf0ec061",
+        "SRG:ddacc95c6e4fa4a48379",
+        "SRG:faef8d97ee6fe93ac727"
+      ],
       "matched_terms": [
         "canonical",
         "changed",
@@ -1314,8 +2014,54 @@
     {
       "association": "distinctive_phrase",
       "bridge_ids": [],
+      "candidate_node_id": "SN:664d2e7f1912df5b6802",
       "candidate_state": "selected",
       "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:039ae519b3d5a07b5800",
+        "SN:043ea7a4204d854226f7",
+        "SN:0f84fdd3d21d6d6a9f66",
+        "SN:1191c260686900356c91",
+        "SN:1ae20772b37149154b15",
+        "SN:2639513d25c07edfc597",
+        "SN:2ac9b806e153683f16b3",
+        "SN:30563f68e3ce403975fc",
+        "SN:31776beb122c49817441",
+        "SN:4f6abfce36264d7d285f",
+        "SN:5593553a4a0c1fb25619",
+        "SN:5a35d6f9079aa19c2381",
+        "SN:5fd0ac949f1566f5a461",
+        "SN:664d2e7f1912df5b6802",
+        "SN:7b5832fd54d75011ec49",
+        "SN:88c2ccbf8b3ba521a111",
+        "SN:899e331a0aa4b8722603",
+        "SN:9435b88dc81d757c519d",
+        "SN:a065ad3210587aafcb4d",
+        "SN:a354a519eccc3acaf4c2",
+        "SN:ae7121776b87c1b88668",
+        "SN:dae6a55975facda4c9a1",
+        "SN:dba2408fadf305936d5b",
+        "SN:ddbafd59c33144cb3170",
+        "SN:e9720893ed51042b845f",
+        "SN:ed13be5528f17423fb7a",
+        "SN:f493ed0c2caf1e591c9d",
+        "SN:f63087ace0914f7968f6",
+        "SN:fb59d4c4600b15c3c61b"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:0c6ecc2e520ca6d74464",
+        "SRG:2570d468056918bc4b3e",
+        "SRG:4ca75a4dddad26ed0b05",
+        "SRG:803b8cc26463e983973d",
+        "SRG:a32908f34325fbb4511c",
+        "SRG:c5020698332a9227ea86",
+        "SRG:d24773b7418bad9413b0",
+        "SRG:d646fca35fbf26db7852",
+        "SRG:d887a12105f24eced927",
+        "SRG:da6be0c3994aaf0ec061",
+        "SRG:ddacc95c6e4fa4a48379",
+        "SRG:faef8d97ee6fe93ac727"
+      ],
       "matched_terms": [
         "claim"
       ],
@@ -1339,5 +2085,43 @@
       "target_type": "evidence"
     }
   ],
-  "schema_version": "structural_association_attribution.v1"
+  "schema_version": "structural_association_attribution.v2",
+  "subject_kinds": [
+    [
+      "G1",
+      "guardrail"
+    ],
+    [
+      "G2",
+      "guardrail"
+    ],
+    [
+      "G3",
+      "guardrail"
+    ],
+    [
+      "G4",
+      "guardrail"
+    ],
+    [
+      "R1",
+      "requirement"
+    ],
+    [
+      "R2",
+      "requirement"
+    ],
+    [
+      "R3",
+      "requirement"
+    ],
+    [
+      "R4",
+      "requirement"
+    ],
+    [
+      "R5",
+      "requirement"
+    ]
+  ]
 }

@@ -11,6 +11,7 @@ from repodelta.evaluation.structural_correctness import (
     load_packet,
 )
 from repodelta.evaluation.association_attribution import (
+    aggregate_association_comparisons,
     load_association_attribution,
 )
 
@@ -200,6 +201,13 @@ def test_campaign_v1_1_association_sidecars_bind_to_frozen_packets() -> None:
         )
 
         assert sidecar.packet_digest == packet.digest
+        assert sidecar.subject_kinds == tuple(
+            sorted(
+                (item.subject_id, item.subject_kind)
+                for item in packet.subjects
+                if item.subject_kind in {"requirement", "guardrail"}
+            )
+        )
         assert all(
             item.subject_kind in {"requirement", "guardrail"}
             and item.slot == "changed_anchor"
@@ -209,6 +217,39 @@ def test_campaign_v1_1_association_sidecars_bind_to_frozen_packets() -> None:
         assert tuple(item.relation_id for item in sidecar.rows) == tuple(
             sorted(item.relation_id for item in sidecar.rows)
         )
+
+
+def test_campaign_v1_1_association_comparison_summary_is_derived() -> None:
+    result_dir = V1_1_CAMPAIGN / "results" / "association-attribution"
+    comparisons = {
+        path.stem: json.loads(path.read_text(encoding="utf-8"))
+        for path in sorted(result_dir.glob("pr-*.json"))
+    }
+    summary = json.loads(
+        (result_dir / "summary.json").read_text(encoding="utf-8")
+    )
+
+    assert summary == aggregate_association_comparisons(comparisons)
+    assert summary["overall"]["claimed_direct_nodes"] == {
+        "false_inclusions": 38,
+        "false_exclusions": 212,
+    }
+    exact_identifier = {
+        (item["subject_kind"], item["association"]): item
+        for item in summary["by_reason"]
+    }
+    assert exact_identifier[("requirement", "exact_identifier")][
+        "comparison_involved"
+    ]["claimed_direct_nodes"] == {
+        "false_inclusions": 31,
+        "false_exclusions": 0,
+    }
+    assert exact_identifier[("guardrail", "exact_identifier")][
+        "comparison_involved"
+    ]["claimed_direct_nodes"] == {
+        "false_inclusions": 7,
+        "false_exclusions": 0,
+    }
 
 
 def test_campaign_v1_1_summary_is_derived_from_verified_references() -> None:

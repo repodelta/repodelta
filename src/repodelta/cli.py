@@ -37,8 +37,11 @@ from repodelta.evaluation.focus_provenance import (
     write_provenance_json,
 )
 from repodelta.evaluation.association_attribution import (
+    compare_association_attribution,
+    load_association_attribution,
     observe_association_attribution,
     write_association_attribution,
+    write_association_comparison,
 )
 from repodelta.evaluation.shadow import load_human_shadow_labels_from_packet
 from repodelta.intake.fixture import load_fixture
@@ -361,6 +364,27 @@ def build_parser() -> argparse.ArgumentParser:
             "from the recorded contribution set"
         ),
     )
+    compare_association = subparsers.add_parser(
+        "compare-structural-association",
+        help="Compare recorded R/G association attribution with frozen labels",
+    )
+    compare_association.add_argument("--labeling-packet", required=True)
+    compare_association.add_argument("--observation", required=True)
+    compare_association.add_argument(
+        "--association-attribution",
+        "--association",
+        dest="association_attribution",
+        required=True,
+        help="Evaluation-only R/G association attribution sidecar",
+    )
+    compare_association.add_argument(
+        "--reference-labels",
+        "--human-labels",
+        dest="reference_labels",
+        required=True,
+        help="Frozen proposed or independently verified reference labels",
+    )
+    compare_association.add_argument("--output", required=True)
     return parser
 
 
@@ -423,6 +447,25 @@ def main() -> int:
                     labels,
                     disabled_producers=args.disable_producer,
                 ),
+                args.output,
+            )
+        except (OSError, ValueError) as exc:
+            print(f"repodelta: error: {exc}", file=sys.stderr)
+            return 2
+        print(output)
+        return 0
+    if args.command == "compare-structural-association":
+        try:
+            packet = load_structural_correctness_packet(args.labeling_packet)
+            observation = load_structural_correctness_observation(args.observation)
+            labels = load_structural_correctness_labels(
+                args.reference_labels, packet
+            )
+            attribution = load_association_attribution(
+                args.association_attribution
+            )
+            output = write_association_comparison(
+                compare_association_attribution(attribution, observation, labels),
                 args.output,
             )
         except (OSError, ValueError) as exc:
