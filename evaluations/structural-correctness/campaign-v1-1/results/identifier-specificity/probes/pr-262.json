@@ -36,66 +36,6 @@
             "suffix_alias"
           ],
           "term": "workspace"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 1,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "associated"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 2,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "available"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 6,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "evidence"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 6,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "graph"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 1,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "projected"
         }
       ]
     },
@@ -133,42 +73,6 @@
             "suffix_alias"
           ],
           "term": "workspace"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 2,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "controls"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 6,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "evidence"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 6,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "graph"
         }
       ]
     },
@@ -206,42 +110,6 @@
             "suffix_alias"
           ],
           "term": "workspace"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 2,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "available"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 6,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "evidence"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 6,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "graph"
         }
       ]
     }

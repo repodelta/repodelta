@@ -226,12 +226,16 @@ repodelta observe-structural-identifier \
   --output build/pr-267.identifier-specificity.json
 ```
 
-Each matched term records its authored form (complete identifier or suffix
-alias), observed origin (`qualified_name`, `path`, `diff_text`,
+Each matched term records its normalized authored-key form (a complete
+identifier or suffix alias inferred by the same deterministic tokenizer),
+observed origin (`qualified_name`, `path`, `diff_text`,
 `signature_unattributed`, or `unobserved`), canonical changed-symbol
 resolution, and per-focus fanout. Historical v1.1 packets are necessarily
 `partial`: they never contained raw diff text, so the adapter marks that
-origin as `unobserved` rather than reconstructing it.
+origin as `unobserved` rather than reconstructing it. In a live brief, diff
+origin is recorded only when the target's canonical change-relation identity
+resolves to an evidence item carrying the raw preview; otherwise the term is
+`signature_unattributed`/`unobserved` and completeness remains `partial`.
 
 The sidecar can then compare bounded direct-admission policies without changing
 production selection or replaying closure:

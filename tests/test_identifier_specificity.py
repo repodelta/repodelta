@@ -7,6 +7,7 @@ from repodelta.evaluation.association_attribution import (
     AssociationAttributionRow,
 )
 from repodelta.evaluation.identifier_specificity import (
+    _term_observation,
     compare_identifier_policies,
     observe_identifier_specificity_from_artifacts,
 )
@@ -15,6 +16,7 @@ from repodelta.evaluation.structural_correctness import (
     StructuralSubject,
 )
 from repodelta.model.contracts import AssociationReason
+from repodelta.model.contracts import AssociationSignature, EvidenceItem
 from repodelta.cli import build_parser
 
 from test_structural_correctness import _labels, _observation, _packet
@@ -60,8 +62,11 @@ def _inputs(term: str = "verificationworkspace"):
                     AssociationReason(
                         "exact_identifier", "identifier overlap", (matched_term,)
                     ),
+                    AssociationReason(
+                        "claim_bridge", "supporting bridge", ("review",)
+                    ),
                 ),
-                matched_terms=(matched_term,),
+                matched_terms=(matched_term, "review"),
                 source_channel="evidence",
                 evidence_role="primary",
                 bridge_ids=(),
@@ -82,8 +87,11 @@ def _inputs(term: str = "verificationworkspace"):
                     AssociationReason(
                         "exact_identifier", "identifier overlap", (matched_term,)
                     ),
+                    AssociationReason(
+                        "claim_bridge", "supporting bridge", ("review",)
+                    ),
                 ),
-                matched_terms=(matched_term,),
+                matched_terms=(matched_term, "review"),
                 source_channel="evidence",
                 evidence_role="primary",
                 bridge_ids=(),
@@ -175,3 +183,32 @@ def test_identifier_shadow_commands_have_explicit_inputs() -> None:
         ]
     )
     assert compare.identifier_specificity == "specificity.json"
+
+
+def test_structural_change_diff_origin_uses_canonical_relation_identity() -> None:
+    target = EvidenceItem(
+        id="E:structural-change",
+        summary="Modified function: adapter",
+        kind="structural_change",
+        classification="code",
+        head_signature=AssociationSignature(identifiers=("github",)),
+        change_relation_ids=("CR:1",),
+    )
+    diff = EvidenceItem(
+        id="E:change-relation",
+        summary="Added change",
+        kind="change_relation",
+        classification="code",
+        metadata={"head_preview": "uses GitHub app credentials"},
+        change_relation_ids=("CR:1",),
+    )
+    observed = _term_observation(
+        "github",
+        {"github": ("full_identifier",)},
+        target,
+        None,
+        (),
+        [],
+        (diff,),
+    )
+    assert observed.origins == ("diff_text",)

@@ -66,7 +66,7 @@
         {
           "canonical_full_match_count": 0,
           "canonical_resolution": "none",
-          "fanout": 12,
+          "fanout": 3,
           "origins": [
             "unobserved"
           ],
@@ -91,7 +91,7 @@
         {
           "canonical_full_match_count": 0,
           "canonical_resolution": "none",
-          "fanout": 16,
+          "fanout": 6,
           "origins": [
             "unobserved"
           ],
@@ -99,42 +99,6 @@
             "full_identifier"
           ],
           "term": "github"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 7,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "exact"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 6,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "local"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 14,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "structural"
         }
       ]
     },
@@ -185,102 +149,6 @@
             "full_identifier"
           ],
           "term": "prismcode"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 16,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "base"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 5,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "both"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 7,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "exact"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 20,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "head"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 14,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "live"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 6,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "local"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 6,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "only"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 17,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "path"
         }
       ]
     },
@@ -323,7 +191,7 @@
         {
           "canonical_full_match_count": 0,
           "canonical_resolution": "none",
-          "fanout": 16,
+          "fanout": 6,
           "origins": [
             "unobserved"
           ],
@@ -331,102 +199,6 @@
             "full_identifier"
           ],
           "term": "github"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 17,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "base"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 5,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "both"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 7,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "exact"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 21,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "head"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 15,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "live"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 6,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "local"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 7,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "only"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 20,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "path"
         }
       ]
     },
@@ -477,90 +249,6 @@
             "full_identifier"
           ],
           "term": "prismcode"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 17,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "codegraph"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 7,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "exact"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 20,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "head"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 3,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "index"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 6,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "only"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 5,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "structural"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 3,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "worktrees"
         }
       ]
     },
@@ -578,7 +266,7 @@
         {
           "canonical_full_match_count": 0,
           "canonical_resolution": "none",
-          "fanout": 16,
+          "fanout": 6,
           "origins": [
             "unobserved"
           ],
@@ -586,78 +274,6 @@
             "full_identifier"
           ],
           "term": "github"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 16,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "codegraph"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 7,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "exact"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 21,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "head"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 7,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "only"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 14,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "structural"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 3,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "worktrees"
         }
       ]
     },
@@ -675,7 +291,7 @@
         {
           "canonical_full_match_count": 0,
           "canonical_resolution": "none",
-          "fanout": 16,
+          "fanout": 6,
           "origins": [
             "unobserved"
           ],
@@ -683,66 +299,6 @@
             "full_identifier"
           ],
           "term": "github"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 17,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "base"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 5,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "default"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 7,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "exact"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 21,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "head"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 15,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "live"
         }
       ]
     },
@@ -768,66 +324,6 @@
             "full_identifier"
           ],
           "term": "prismcode"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 16,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "base"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 4,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "default"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 7,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "exact"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 20,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "head"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 14,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "live"
         }
       ]
     },
@@ -845,7 +341,7 @@
         {
           "canonical_full_match_count": 0,
           "canonical_resolution": "none",
-          "fanout": 12,
+          "fanout": 3,
           "origins": [
             "unobserved"
           ],
@@ -878,42 +374,6 @@
             "full_identifier"
           ],
           "term": "prismcode"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 20,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "head"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 14,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "live"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 17,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "path"
         }
       ]
     },
@@ -956,7 +416,7 @@
         {
           "canonical_full_match_count": 0,
           "canonical_resolution": "none",
-          "fanout": 16,
+          "fanout": 6,
           "origins": [
             "unobserved"
           ],
@@ -964,18 +424,6 @@
             "full_identifier"
           ],
           "term": "github"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 8,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "providers"
         }
       ]
     },
@@ -993,7 +441,7 @@
         {
           "canonical_full_match_count": 0,
           "canonical_resolution": "none",
-          "fanout": 16,
+          "fanout": 6,
           "origins": [
             "unobserved"
           ],
@@ -1001,126 +449,6 @@
             "full_identifier"
           ],
           "term": "github"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 17,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "base"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 16,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "codegraph"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 21,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "head"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 5,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "isolatedreviewroots"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 15,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "live"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 20,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "path"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 16,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "remote"
-        },
-        {
-          "canonical_full_match_count": 1,
-          "canonical_resolution": "unique",
-          "fanout": 12,
-          "origins": [
-            "qualified_name"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "remotereviewroots"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 12,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "reviewroots"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 13,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "roots"
         }
       ]
     },
@@ -1271,66 +599,6 @@
             "full_identifier"
           ],
           "term": "prismcode"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 17,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "codegraph"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 6,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "only"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 17,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "path"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 15,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "remote"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 15,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "review"
         }
       ]
     },
@@ -1373,7 +641,7 @@
         {
           "canonical_full_match_count": 0,
           "canonical_resolution": "none",
-          "fanout": 12,
+          "fanout": 3,
           "origins": [
             "unobserved"
           ],

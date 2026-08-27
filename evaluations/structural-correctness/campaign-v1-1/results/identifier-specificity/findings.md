@@ -7,6 +7,12 @@ The historical packets do not include raw diff text, so all probe artifacts are
 marked `origin_completeness: partial`; missing origin is recorded as
 `unobserved`, never guessed as canonical.
 
+The live probe now follows `structural_change.change_relation_ids` to the
+canonical `change_relation` evidence item before assigning `diff_text`. If
+that identity or preview is absent it records `signature_unattributed` or
+`unobserved` and remains partial; it never assigns an origin by matching a
+summary or path heuristically.
+
 | Direct-node policy | False inclusions | False exclusions |
 | --- | ---: | ---: |
 | Current observed policy | 38 | 212 |

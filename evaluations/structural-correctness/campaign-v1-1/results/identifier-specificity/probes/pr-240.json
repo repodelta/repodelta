@@ -24,18 +24,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -61,18 +49,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 47,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "review"
         }
       ]
     },
@@ -123,18 +99,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 47,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "review"
         }
       ]
     },
@@ -185,18 +149,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -247,30 +199,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 40,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "review"
         }
       ]
     },
@@ -296,18 +224,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 47,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "review"
         }
       ]
     },
@@ -333,30 +249,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 18,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "html"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -382,18 +274,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -436,7 +316,7 @@
         {
           "canonical_full_match_count": 0,
           "canonical_resolution": "none",
-          "fanout": 29,
+          "fanout": 5,
           "origins": [
             "unobserved"
           ],
@@ -486,7 +366,7 @@
         {
           "canonical_full_match_count": 0,
           "canonical_resolution": "none",
-          "fanout": 26,
+          "fanout": 5,
           "origins": [
             "unobserved"
           ],
@@ -494,18 +374,6 @@
             "full_identifier"
           ],
           "term": "github"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -531,18 +399,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 47,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "review"
         }
       ]
     },
@@ -568,18 +424,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -630,18 +474,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -717,18 +549,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -804,30 +624,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 2,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "private"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 47,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "review"
         }
       ]
     },
@@ -853,18 +649,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -915,18 +699,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 47,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "review"
         }
       ]
     },
@@ -952,18 +724,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 18,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "html"
         }
       ]
     },
@@ -1006,7 +766,7 @@
         {
           "canonical_full_match_count": 0,
           "canonical_resolution": "none",
-          "fanout": 26,
+          "fanout": 5,
           "origins": [
             "unobserved"
           ],
@@ -1076,18 +836,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 18,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "html"
         }
       ]
     },
@@ -1113,18 +861,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -1142,7 +878,7 @@
         {
           "canonical_full_match_count": 0,
           "canonical_resolution": "none",
-          "fanout": 29,
+          "fanout": 5,
           "origins": [
             "unobserved"
           ],
@@ -1200,18 +936,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 40,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "review"
         }
       ]
     },
@@ -1237,18 +961,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -1274,18 +986,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 20,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "html"
         }
       ]
     },
@@ -1311,18 +1011,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -1398,18 +1086,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -1460,18 +1136,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 47,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "review"
         }
       ]
     },
@@ -1497,18 +1161,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 9,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "output"
         }
       ]
     },
@@ -1584,18 +1236,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -1613,7 +1253,7 @@
         {
           "canonical_full_match_count": 0,
           "canonical_resolution": "none",
-          "fanout": 29,
+          "fanout": 5,
           "origins": [
             "unobserved"
           ],
@@ -1671,18 +1311,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -1708,18 +1336,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -1795,18 +1411,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -1857,30 +1461,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 47,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "review"
         }
       ]
     },
@@ -1906,18 +1486,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -1943,30 +1511,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 2,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "private"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 40,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "review"
         }
       ]
     },
@@ -2009,7 +1553,7 @@
         {
           "canonical_full_match_count": 0,
           "canonical_resolution": "none",
-          "fanout": 26,
+          "fanout": 5,
           "origins": [
             "unobserved"
           ],
@@ -2017,18 +1561,6 @@
             "full_identifier"
           ],
           "term": "github"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -2054,18 +1586,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 11,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "output"
         }
       ]
     },
@@ -2116,18 +1636,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -2203,18 +1711,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 40,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "review"
         }
       ]
     },
@@ -2340,18 +1836,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -2477,30 +1961,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 8,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "fixture"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 40,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "review"
         }
       ]
     },
@@ -2526,18 +1986,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -2563,18 +2011,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -2600,18 +2036,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -2654,7 +2078,7 @@
         {
           "canonical_full_match_count": 0,
           "canonical_resolution": "none",
-          "fanout": 26,
+          "fanout": 5,
           "origins": [
             "unobserved"
           ],
@@ -2674,18 +2098,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -2711,30 +2123,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 9,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "fixture"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 47,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "review"
         }
       ]
     },
@@ -2785,18 +2173,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -2839,7 +2215,7 @@
         {
           "canonical_full_match_count": 0,
           "canonical_resolution": "none",
-          "fanout": 29,
+          "fanout": 5,
           "origins": [
             "unobserved"
           ],
@@ -2897,18 +2273,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -2976,7 +2340,7 @@
         {
           "canonical_full_match_count": 0,
           "canonical_resolution": "none",
-          "fanout": 26,
+          "fanout": 5,
           "origins": [
             "unobserved"
           ],
@@ -2996,30 +2360,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 2,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "environment"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 4,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "isolated"
         }
       ]
     },
@@ -3195,18 +2535,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -3232,30 +2560,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 20,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "html"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -3281,18 +2585,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -3318,18 +2610,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -3355,18 +2635,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -3417,18 +2685,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 40,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "review"
         }
       ]
     },
@@ -3504,18 +2760,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 5,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "json"
         }
       ]
     },
@@ -3541,18 +2785,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -3578,18 +2810,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -3615,18 +2835,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -3652,18 +2860,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 40,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "review"
         }
       ]
     },
@@ -3689,18 +2885,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 20,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "html"
         }
       ]
     },
@@ -3751,18 +2935,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -3813,18 +2985,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -3900,18 +3060,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 47,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "review"
         }
       ]
     },
@@ -3954,7 +3102,7 @@
         {
           "canonical_full_match_count": 0,
           "canonical_resolution": "none",
-          "fanout": 29,
+          "fanout": 5,
           "origins": [
             "unobserved"
           ],
@@ -4012,18 +3160,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 36,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "readme"
         }
       ]
     },
@@ -4049,18 +3185,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 4,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "json"
         }
       ]
     },
@@ -4086,18 +3210,6 @@
             "full_identifier"
           ],
           "term": "repodelta"
-        },
-        {
-          "canonical_full_match_count": 0,
-          "canonical_resolution": "none",
-          "fanout": 40,
-          "origins": [
-            "unobserved"
-          ],
-          "source_forms": [
-            "unknown"
-          ],
-          "term": "review"
         }
       ]
     }

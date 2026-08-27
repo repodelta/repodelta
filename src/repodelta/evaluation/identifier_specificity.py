@@ -177,10 +177,16 @@ def observe_identifier_specificity(
     for row in attribution.rows:
         if row.association != "exact_identifier" or not row.matched_terms:
             continue
+        exact_terms = _primary_exact_terms(row)
+        if not exact_terms:
+            raise ValueError(
+                f"exact identifier row {row.relation_id} has no primary terms"
+            )
         target = evidence.get(row.target_id)
         candidate = symbol_by_id.get(row.candidate_node_id or "")
         if target is None:
             complete = False
+        diff_evidence = _change_relation_evidence(target, evidence)
         term_rows = tuple(
             _term_observation(
                 term,
@@ -189,10 +195,14 @@ def observe_identifier_specificity(
                 candidate,
                 changed_symbols,
                 rows_by_focus[row.subject_id],
+                diff_evidence,
             )
-            for term in row.matched_terms
+            for term in exact_terms
         )
-        if any("unobserved" in item.origins for item in term_rows):
+        if any(
+            set(item.origins) & {"unobserved", "signature_unattributed"}
+            for item in term_rows
+        ):
             complete = False
         result_rows.append(
             IdentifierSpecificityRow(
@@ -251,6 +261,11 @@ def observe_identifier_specificity_from_artifacts(
     for row in attribution.rows:
         if row.association != "exact_identifier" or not row.matched_terms:
             continue
+        exact_terms = _primary_exact_terms(row)
+        if not exact_terms:
+            raise ValueError(
+                f"exact identifier row {row.relation_id} has no primary terms"
+            )
         candidate = symbols.get(row.candidate_node_id or "")
         terms = tuple(
             _term_observation(
@@ -260,9 +275,10 @@ def observe_identifier_specificity_from_artifacts(
                 candidate,
                 changed_symbols,
                 rows_by_focus[row.subject_id],
+                (),
                 artifact_only=True,
             )
-            for term in row.matched_terms
+            for term in exact_terms
         )
         result_rows.append(
             IdentifierSpecificityRow(
@@ -550,6 +566,7 @@ def _term_observation(
     candidate: Any,
     changed_symbols: tuple[Any, ...],
     focus_rows: list[AssociationAttributionRow],
+    diff_evidence: tuple[Any, ...],
     *,
     artifact_only: bool = False,
 ) -> IdentifierTermObservation:
@@ -575,7 +592,16 @@ def _term_observation(
             *target.head_signature.identifiers,
             *target.base_signature.identifiers,
         }
-        if term in signature_terms and not origins:
+        for relation_evidence in diff_evidence:
+            previews = "\n".join(
+                str(relation_evidence.metadata.get(key, ""))
+                for key in ("head_preview", "base_preview")
+            )
+            if term in identifier_keys(previews):
+                origins.add("diff_text")
+        if term in signature_terms and not (
+            origins & {"qualified_name", "path", "diff_text"}
+        ):
             origins.add("signature_unattributed")
     elif artifact_only:
         if not origins:
@@ -600,7 +626,8 @@ def _term_observation(
         {
             item.candidate_node_id or item.target_id
             for item in focus_rows
-            if term in item.matched_terms
+            if item.association == "exact_identifier"
+            and term in _primary_exact_terms(item)
         }
     )
     return IdentifierTermObservation(
@@ -632,6 +659,49 @@ def term_ok(policy: str, term: IdentifierTermObservation) -> bool:
             and term.canonical_resolution == "unique"
         )
     raise ValueError(f"unknown identifier policy: {policy}")
+
+
+def _primary_exact_terms(row: AssociationAttributionRow) -> tuple[str, ...]:
+    """Return only the terms owned by the primary exact reason.
+
+    Attribution rows flatten all reason terms for compatibility.  The probe's
+    specificity contract must not treat bridge/support terms as identifier
+    evidence, even when the row also has an exact primary reason.
+    """
+
+    return tuple(
+        dict.fromkeys(
+            term
+            for reason in row.reasons
+            if reason.kind == "exact_identifier"
+            for term in reason.matched_terms
+        )
+    )
+
+
+def _change_relation_evidence(
+    target: Any,
+    evidence: Mapping[str, Any],
+) -> tuple[Any, ...]:
+    """Resolve raw diff previews through structural change relation IDs only."""
+
+    if target is None:
+        return ()
+    relation_ids = set(getattr(target, "change_relation_ids", ()))
+    identity = getattr(target, "structural_change", None)
+    if identity is not None:
+        relation_ids.update(getattr(target, "change_relation_ids", ()))
+    if target.kind == "change_relation":
+        return (target,)
+    if not relation_ids:
+        return ()
+    matches = tuple(
+        item
+        for item in evidence.values()
+        if item.kind == "change_relation"
+        and relation_ids.intersection(item.change_relation_ids)
+    )
+    return tuple(sorted(matches, key=lambda item: item.id))
 
 
 def _source_forms(statement: str) -> dict[str, tuple[SourceForm, ...]]:
