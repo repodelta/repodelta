@@ -14,6 +14,10 @@ from repodelta.evaluation.association_attribution import (
     aggregate_association_comparisons,
     load_association_attribution,
 )
+from repodelta.evaluation.identifier_specificity import (
+    aggregate_identifier_policy_shadows,
+    load_identifier_specificity,
+)
 
 
 MANIFEST = Path(
@@ -698,3 +702,30 @@ def _focus_coverage_counts(packet, labels):
         else:
             counts["complete"] += 1
     return counts
+
+
+def test_campaign_v1_1_identifier_policy_summary_is_derived() -> None:
+    result_dir = V1_1_CAMPAIGN / "results" / "identifier-specificity"
+    probes = sorted((result_dir / "probes").glob("pr-*.json"))
+    policy_paths = sorted((result_dir / "policies").glob("pr-*.json"))
+    shadows = {
+        path.stem: json.loads(path.read_text(encoding="utf-8"))
+        for path in policy_paths
+    }
+    summary = json.loads(
+        (result_dir / "summary.json").read_text(encoding="utf-8")
+    )
+    assert len(probes) == len(policy_paths) == 8
+    assert all(
+        load_identifier_specificity(path).origin_completeness == "partial"
+        for path in probes
+    )
+    assert summary == aggregate_identifier_policy_shadows(shadows)
+    assert summary["overall"]["current"] == {
+        "false_inclusions": 38,
+        "false_exclusions": 212,
+    }
+    assert summary["overall"]["canonical_unique"] == {
+        "false_inclusions": 0,
+        "false_exclusions": 227,
+    }

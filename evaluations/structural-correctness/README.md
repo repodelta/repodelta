@@ -210,3 +210,48 @@ a guessed reason; these fallback rows make the reason totals reconcile with
 the overall deltas.
 The separate `comparison_involved` view remains non-exclusive and may count a
 member for every recorded reason that reaches it.
+
+### Identifier specificity probe and policy shadow
+
+`exact_identifier` is a production association reason, not proof that a
+lexical overlap names one canonical symbol. The evaluation-only identifier
+probe keeps that distinction visible. A live review writes an additional
+`*.identifier-specificity.json` sidecar; for a frozen packet and association
+sidecar it can be regenerated with:
+
+```bash
+repodelta observe-structural-identifier \
+  --labeling-packet build/pr-267.packet.json \
+  --association-attribution build/pr-267.packet.json.association.json \
+  --output build/pr-267.identifier-specificity.json
+```
+
+Each matched term records its authored form (complete identifier or suffix
+alias), observed origin (`qualified_name`, `path`, `diff_text`,
+`signature_unattributed`, or `unobserved`), canonical changed-symbol
+resolution, and per-focus fanout. Historical v1.1 packets are necessarily
+`partial`: they never contained raw diff text, so the adapter marks that
+origin as `unobserved` rather than reconstructing it.
+
+The sidecar can then compare bounded direct-admission policies without changing
+production selection or replaying closure:
+
+```bash
+repodelta compare-structural-identifier \
+  --labeling-packet build/pr-267.packet.json \
+  --observation build/pr-267.packet.json.observation.json \
+  --association-attribution build/pr-267.packet.json.association.json \
+  --identifier-specificity build/pr-267.identifier-specificity.json \
+  --reference-labels build/pr-267.reference.json \
+  --output build/pr-267-identifier-policy-shadow.json
+```
+
+The comparison includes the observed `current` policy plus `no_suffix`,
+`low_fanout`, and `canonical_unique` shadows. It reports only direct-node
+false inclusions/exclusions against the frozen semantic reference. It does
+not claim to predict selected files, structural context, exact relations, or
+semantic resolution; an LLM/embedding policy remains unexplored. No policy in
+this experiment changes the formal report or assessment authority.
+
+The frozen v1.1 run and its interpretation are recorded in the
+[`identifier-specificity findings`](campaign-v1-1/results/identifier-specificity/findings.md).

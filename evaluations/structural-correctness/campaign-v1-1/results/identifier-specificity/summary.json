@@ -1,0 +1,82 @@
+{
+  "by_subject_kind": {
+    "guardrail": {
+      "canonical_unique": {
+        "false_exclusions": 52,
+        "false_inclusions": 0
+      },
+      "current": {
+        "false_exclusions": 50,
+        "false_inclusions": 7
+      },
+      "low_fanout": {
+        "false_exclusions": 52,
+        "false_inclusions": 0
+      },
+      "no_suffix": {
+        "false_exclusions": 50,
+        "false_inclusions": 7
+      }
+    },
+    "requirement": {
+      "canonical_unique": {
+        "false_exclusions": 175,
+        "false_inclusions": 0
+      },
+      "current": {
+        "false_exclusions": 162,
+        "false_inclusions": 31
+      },
+      "low_fanout": {
+        "false_exclusions": 175,
+        "false_inclusions": 0
+      },
+      "no_suffix": {
+        "false_exclusions": 162,
+        "false_inclusions": 31
+      }
+    }
+  },
+  "limits": {
+    "authority": "evaluation-only; no production selection or assessment changes",
+    "causal_replay": false,
+    "downstream_replay": false
+  },
+  "overall": {
+    "canonical_unique": {
+      "false_exclusions": 227,
+      "false_inclusions": 0
+    },
+    "current": {
+      "false_exclusions": 212,
+      "false_inclusions": 38
+    },
+    "low_fanout": {
+      "false_exclusions": 227,
+      "false_inclusions": 0
+    },
+    "no_suffix": {
+      "false_exclusions": 212,
+      "false_inclusions": 38
+    }
+  },
+  "policies": {
+    "canonical_unique": "accept only a full qualified-name identifier resolving to one changed symbol",
+    "current": "reproduce observed direct membership; no policy change",
+    "low_fanout": "accept only a full identifier with canonical origin and focus fanout one",
+    "no_suffix": "accept exact identifiers only when the authored term is not suffix-only"
+  },
+  "sample_count": 8,
+  "samples": [
+    "pr-208",
+    "pr-235",
+    "pr-238",
+    "pr-240",
+    "pr-245",
+    "pr-250",
+    "pr-262",
+    "pr-267"
+  ],
+  "schema_version": "structural_identifier_policy_shadow_summary.v1",
+  "specificity_origin_completeness": "partial"
+}

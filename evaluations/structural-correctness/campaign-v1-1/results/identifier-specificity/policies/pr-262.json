@@ -1,0 +1,594 @@
+{
+  "by_subject_kind": {
+    "guardrail": {
+      "canonical_unique": {
+        "false_exclusions": 12,
+        "false_inclusions": 0
+      },
+      "current": {
+        "false_exclusions": 11,
+        "false_inclusions": 2
+      },
+      "low_fanout": {
+        "false_exclusions": 12,
+        "false_inclusions": 0
+      },
+      "no_suffix": {
+        "false_exclusions": 11,
+        "false_inclusions": 2
+      }
+    },
+    "requirement": {
+      "canonical_unique": {
+        "false_exclusions": 26,
+        "false_inclusions": 0
+      },
+      "current": {
+        "false_exclusions": 26,
+        "false_inclusions": 0
+      },
+      "low_fanout": {
+        "false_exclusions": 26,
+        "false_inclusions": 0
+      },
+      "no_suffix": {
+        "false_exclusions": 26,
+        "false_inclusions": 0
+      }
+    }
+  },
+  "causal_replay": false,
+  "downstream_replay": false,
+  "limits": {
+    "authority": "evaluation-only; no production association or projection is changed",
+    "direct_dimension": "only observed direct member admission is projected",
+    "downstream": "selected/context/relation effects are not replayed",
+    "historical_origin": "v1.1 artifacts without raw evidence are marked partial/unobserved",
+    "semantic_resolution": "no LLM or semantic model is used; grounded semantic policy remains unexplored"
+  },
+  "overall": {
+    "canonical_unique": {
+      "false_exclusions": 38,
+      "false_inclusions": 0
+    },
+    "current": {
+      "false_exclusions": 37,
+      "false_inclusions": 2
+    },
+    "low_fanout": {
+      "false_exclusions": 38,
+      "false_inclusions": 0
+    },
+    "no_suffix": {
+      "false_exclusions": 37,
+      "false_inclusions": 2
+    }
+  },
+  "packet_digest": "56a6084269535c7d3d7cd9a69669363625f2194a2fdac2a159985562b15a763b",
+  "per_focus": [
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_unique": {
+          "false_exclusion_nodes": [
+            "SN:3b3fd6e980400fe1d379",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:bdcdc50c53174c6c89f0",
+            "SN:d2e389bfa55c339d1f0c",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 5,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:3b3fd6e980400fe1d379",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:bdcdc50c53174c6c89f0",
+            "SN:d2e389bfa55c339d1f0c"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [
+            "SN:04a6b663dcf6c3ab94ba",
+            "SN:491e9b2d0ef54d5ef533"
+          ],
+          "false_inclusions": 2,
+          "observed_direct_nodes": [
+            "SN:04a6b663dcf6c3ab94ba",
+            "SN:491e9b2d0ef54d5ef533",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ]
+        },
+        "low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:3b3fd6e980400fe1d379",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:bdcdc50c53174c6c89f0",
+            "SN:d2e389bfa55c339d1f0c",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 5,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:3b3fd6e980400fe1d379",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:bdcdc50c53174c6c89f0",
+            "SN:d2e389bfa55c339d1f0c"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [
+            "SN:04a6b663dcf6c3ab94ba",
+            "SN:491e9b2d0ef54d5ef533"
+          ],
+          "false_inclusions": 2,
+          "observed_direct_nodes": [
+            "SN:04a6b663dcf6c3ab94ba",
+            "SN:491e9b2d0ef54d5ef533",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ]
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "G1",
+      "subject_kind": "guardrail"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_unique": {
+          "false_exclusion_nodes": [
+            "SN:9caebf5ac975d54164ab",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:b9147320f7cc4299f067",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:9caebf5ac975d54164ab",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:b9147320f7cc4299f067",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:9caebf5ac975d54164ab",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:b9147320f7cc4299f067",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:9caebf5ac975d54164ab",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:b9147320f7cc4299f067",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "G2",
+      "subject_kind": "guardrail"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_unique": {
+          "false_exclusion_nodes": [
+            "SN:69fe86be4087ee523fea",
+            "SN:abf417d0fba6b4e83048",
+            "SN:b8d4254dc3828c940fbb"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:69fe86be4087ee523fea",
+            "SN:abf417d0fba6b4e83048",
+            "SN:b8d4254dc3828c940fbb"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:69fe86be4087ee523fea",
+            "SN:abf417d0fba6b4e83048",
+            "SN:b8d4254dc3828c940fbb"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:69fe86be4087ee523fea",
+            "SN:abf417d0fba6b4e83048",
+            "SN:b8d4254dc3828c940fbb"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "G3",
+      "subject_kind": "guardrail"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_unique": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "low_fanout": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "G4",
+      "subject_kind": "guardrail"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_unique": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "low_fanout": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "G5",
+      "subject_kind": "guardrail"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_unique": {
+          "false_exclusion_nodes": [
+            "SN:3b3fd6e980400fe1d379",
+            "SN:6555144fcb0994ee3cd4",
+            "SN:9c926f5950f88e50331a",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:b9147320f7cc4299f067",
+            "SN:d2e389bfa55c339d1f0c",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 7,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:3b3fd6e980400fe1d379",
+            "SN:6555144fcb0994ee3cd4",
+            "SN:9c926f5950f88e50331a",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:b9147320f7cc4299f067",
+            "SN:d2e389bfa55c339d1f0c",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 7,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:3b3fd6e980400fe1d379",
+            "SN:6555144fcb0994ee3cd4",
+            "SN:9c926f5950f88e50331a",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:b9147320f7cc4299f067",
+            "SN:d2e389bfa55c339d1f0c",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 7,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:3b3fd6e980400fe1d379",
+            "SN:6555144fcb0994ee3cd4",
+            "SN:9c926f5950f88e50331a",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:b9147320f7cc4299f067",
+            "SN:d2e389bfa55c339d1f0c",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 7,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "R1",
+      "subject_kind": "requirement"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_unique": {
+          "false_exclusion_nodes": [
+            "SN:3b3fd6e980400fe1d379",
+            "SN:6555144fcb0994ee3cd4",
+            "SN:9c926f5950f88e50331a",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:d2e389bfa55c339d1f0c",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 6,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:3b3fd6e980400fe1d379",
+            "SN:6555144fcb0994ee3cd4",
+            "SN:9c926f5950f88e50331a",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:d2e389bfa55c339d1f0c",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 6,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:3b3fd6e980400fe1d379",
+            "SN:6555144fcb0994ee3cd4",
+            "SN:9c926f5950f88e50331a",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:d2e389bfa55c339d1f0c",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 6,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:3b3fd6e980400fe1d379",
+            "SN:6555144fcb0994ee3cd4",
+            "SN:9c926f5950f88e50331a",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:d2e389bfa55c339d1f0c",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 6,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "R2",
+      "subject_kind": "requirement"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_unique": {
+          "false_exclusion_nodes": [
+            "SN:3b3fd6e980400fe1d379",
+            "SN:69fe86be4087ee523fea",
+            "SN:abf417d0fba6b4e83048",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:bdcdc50c53174c6c89f0",
+            "SN:d2e389bfa55c339d1f0c",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 7,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:3b3fd6e980400fe1d379",
+            "SN:69fe86be4087ee523fea",
+            "SN:abf417d0fba6b4e83048",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:bdcdc50c53174c6c89f0",
+            "SN:d2e389bfa55c339d1f0c",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 7,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:3b3fd6e980400fe1d379",
+            "SN:69fe86be4087ee523fea",
+            "SN:abf417d0fba6b4e83048",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:bdcdc50c53174c6c89f0",
+            "SN:d2e389bfa55c339d1f0c",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 7,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:3b3fd6e980400fe1d379",
+            "SN:69fe86be4087ee523fea",
+            "SN:abf417d0fba6b4e83048",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:bdcdc50c53174c6c89f0",
+            "SN:d2e389bfa55c339d1f0c",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 7,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "R3",
+      "subject_kind": "requirement"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_unique": {
+          "false_exclusion_nodes": [
+            "SN:0bdcc4ff455ba951fac0",
+            "SN:3b3fd6e980400fe1d379",
+            "SN:6555144fcb0994ee3cd4",
+            "SN:9c926f5950f88e50331a",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 6,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:0bdcc4ff455ba951fac0",
+            "SN:3b3fd6e980400fe1d379",
+            "SN:6555144fcb0994ee3cd4",
+            "SN:9c926f5950f88e50331a",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 6,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:0bdcc4ff455ba951fac0",
+            "SN:3b3fd6e980400fe1d379",
+            "SN:6555144fcb0994ee3cd4",
+            "SN:9c926f5950f88e50331a",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 6,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:0bdcc4ff455ba951fac0",
+            "SN:3b3fd6e980400fe1d379",
+            "SN:6555144fcb0994ee3cd4",
+            "SN:9c926f5950f88e50331a",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 6,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "R4",
+      "subject_kind": "requirement"
+    }
+  ],
+  "policies": {
+    "canonical_unique": "accept only a full qualified-name identifier resolving to one changed symbol",
+    "current": "reproduce observed direct membership; no policy change",
+    "low_fanout": "accept only a full identifier with canonical origin and focus fanout one",
+    "no_suffix": "accept exact identifiers only when the authored term is not suffix-only"
+  },
+  "schema_version": "structural_identifier_policy_shadow.v1",
+  "specificity_origin_completeness": "partial"
+}

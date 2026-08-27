@@ -1,0 +1,726 @@
+{
+  "by_subject_kind": {
+    "guardrail": {
+      "canonical_unique": {
+        "false_exclusions": 11,
+        "false_inclusions": 0
+      },
+      "current": {
+        "false_exclusions": 10,
+        "false_inclusions": 5
+      },
+      "low_fanout": {
+        "false_exclusions": 11,
+        "false_inclusions": 0
+      },
+      "no_suffix": {
+        "false_exclusions": 10,
+        "false_inclusions": 5
+      }
+    },
+    "requirement": {
+      "canonical_unique": {
+        "false_exclusions": 20,
+        "false_inclusions": 0
+      },
+      "current": {
+        "false_exclusions": 17,
+        "false_inclusions": 4
+      },
+      "low_fanout": {
+        "false_exclusions": 20,
+        "false_inclusions": 0
+      },
+      "no_suffix": {
+        "false_exclusions": 17,
+        "false_inclusions": 4
+      }
+    }
+  },
+  "causal_replay": false,
+  "downstream_replay": false,
+  "limits": {
+    "authority": "evaluation-only; no production association or projection is changed",
+    "direct_dimension": "only observed direct member admission is projected",
+    "downstream": "selected/context/relation effects are not replayed",
+    "historical_origin": "v1.1 artifacts without raw evidence are marked partial/unobserved",
+    "semantic_resolution": "no LLM or semantic model is used; grounded semantic policy remains unexplored"
+  },
+  "overall": {
+    "canonical_unique": {
+      "false_exclusions": 31,
+      "false_inclusions": 0
+    },
+    "current": {
+      "false_exclusions": 27,
+      "false_inclusions": 9
+    },
+    "low_fanout": {
+      "false_exclusions": 31,
+      "false_inclusions": 0
+    },
+    "no_suffix": {
+      "false_exclusions": 27,
+      "false_inclusions": 9
+    }
+  },
+  "packet_digest": "209df0d0b0fd43874530b491e0912f32d13232d5b97b507035b1a1471807b534",
+  "per_focus": [
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_unique": {
+          "false_exclusion_nodes": [
+            "SN:2f1d216f93e61ff00415",
+            "SN:4b3329617dfe529df905",
+            "SN:5176dacfa5eb098779f1",
+            "SN:b42a6abb614a25065834",
+            "SN:f12a3435be353934fe37",
+            "SN:fd734ecf164b6af521ca"
+          ],
+          "false_exclusions": 6,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:2f1d216f93e61ff00415",
+            "SN:4b3329617dfe529df905",
+            "SN:5176dacfa5eb098779f1",
+            "SN:b42a6abb614a25065834",
+            "SN:f12a3435be353934fe37",
+            "SN:fd734ecf164b6af521ca"
+          ],
+          "false_exclusions": 6,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:2f1d216f93e61ff00415",
+            "SN:4b3329617dfe529df905",
+            "SN:5176dacfa5eb098779f1",
+            "SN:b42a6abb614a25065834",
+            "SN:f12a3435be353934fe37",
+            "SN:fd734ecf164b6af521ca"
+          ],
+          "false_exclusions": 6,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:2f1d216f93e61ff00415",
+            "SN:4b3329617dfe529df905",
+            "SN:5176dacfa5eb098779f1",
+            "SN:b42a6abb614a25065834",
+            "SN:f12a3435be353934fe37",
+            "SN:fd734ecf164b6af521ca"
+          ],
+          "false_exclusions": 6,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "G1",
+      "subject_kind": "guardrail"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_unique": {
+          "false_exclusion_nodes": [
+            "SN:4b3329617dfe529df905",
+            "SN:e07680b66a5b2177f906"
+          ],
+          "false_exclusions": 2,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:4b3329617dfe529df905",
+            "SN:e07680b66a5b2177f906"
+          ],
+          "false_exclusions": 2,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:4b3329617dfe529df905",
+            "SN:e07680b66a5b2177f906"
+          ],
+          "false_exclusions": 2,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:4b3329617dfe529df905",
+            "SN:e07680b66a5b2177f906"
+          ],
+          "false_exclusions": 2,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "G2",
+      "subject_kind": "guardrail"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_unique": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "low_fanout": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "G3",
+      "subject_kind": "guardrail"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_unique": {
+          "false_exclusion_nodes": [
+            "SN:4b3329617dfe529df905",
+            "SN:5176dacfa5eb098779f1",
+            "SN:e07680b66a5b2177f906"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:5176dacfa5eb098779f1",
+            "SN:e07680b66a5b2177f906"
+          ],
+          "false_exclusions": 2,
+          "false_inclusion_nodes": [
+            "SN:ac4ddbe869abcda97db5",
+            "SN:e17326fb5baeb2c79e39"
+          ],
+          "false_inclusions": 2,
+          "observed_direct_nodes": [
+            "SN:4b3329617dfe529df905",
+            "SN:ac4ddbe869abcda97db5",
+            "SN:e17326fb5baeb2c79e39"
+          ]
+        },
+        "low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:4b3329617dfe529df905",
+            "SN:5176dacfa5eb098779f1",
+            "SN:e07680b66a5b2177f906"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:5176dacfa5eb098779f1",
+            "SN:e07680b66a5b2177f906"
+          ],
+          "false_exclusions": 2,
+          "false_inclusion_nodes": [
+            "SN:ac4ddbe869abcda97db5",
+            "SN:e17326fb5baeb2c79e39"
+          ],
+          "false_inclusions": 2,
+          "observed_direct_nodes": [
+            "SN:4b3329617dfe529df905",
+            "SN:ac4ddbe869abcda97db5",
+            "SN:e17326fb5baeb2c79e39"
+          ]
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "G4",
+      "subject_kind": "guardrail"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_unique": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "low_fanout": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "G5",
+      "subject_kind": "guardrail"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_unique": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [
+            "SN:4b3329617dfe529df905",
+            "SN:ac4ddbe869abcda97db5",
+            "SN:e17326fb5baeb2c79e39"
+          ],
+          "false_inclusions": 3,
+          "observed_direct_nodes": [
+            "SN:4b3329617dfe529df905",
+            "SN:ac4ddbe869abcda97db5",
+            "SN:e17326fb5baeb2c79e39"
+          ]
+        },
+        "low_fanout": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [
+            "SN:4b3329617dfe529df905",
+            "SN:ac4ddbe869abcda97db5",
+            "SN:e17326fb5baeb2c79e39"
+          ],
+          "false_inclusions": 3,
+          "observed_direct_nodes": [
+            "SN:4b3329617dfe529df905",
+            "SN:ac4ddbe869abcda97db5",
+            "SN:e17326fb5baeb2c79e39"
+          ]
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "G6",
+      "subject_kind": "guardrail"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_unique": {
+          "false_exclusion_nodes": [
+            "SN:4b3329617dfe529df905",
+            "SN:c508618d7302e73db040",
+            "SN:c7b56e0cdafd7207a1d5",
+            "SN:e17326fb5baeb2c79e39"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:4b3329617dfe529df905",
+            "SN:c508618d7302e73db040",
+            "SN:c7b56e0cdafd7207a1d5",
+            "SN:e17326fb5baeb2c79e39"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:4b3329617dfe529df905",
+            "SN:c508618d7302e73db040",
+            "SN:c7b56e0cdafd7207a1d5",
+            "SN:e17326fb5baeb2c79e39"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:4b3329617dfe529df905",
+            "SN:c508618d7302e73db040",
+            "SN:c7b56e0cdafd7207a1d5",
+            "SN:e17326fb5baeb2c79e39"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "R1",
+      "subject_kind": "requirement"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_unique": {
+          "false_exclusion_nodes": [
+            "SN:4b3329617dfe529df905",
+            "SN:b42a6abb614a25065834",
+            "SN:c508618d7302e73db040",
+            "SN:e07680b66a5b2177f906"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:b42a6abb614a25065834",
+            "SN:c508618d7302e73db040",
+            "SN:e07680b66a5b2177f906"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [
+            "SN:ac4ddbe869abcda97db5",
+            "SN:e17326fb5baeb2c79e39"
+          ],
+          "false_inclusions": 2,
+          "observed_direct_nodes": [
+            "SN:4b3329617dfe529df905",
+            "SN:ac4ddbe869abcda97db5",
+            "SN:e17326fb5baeb2c79e39"
+          ]
+        },
+        "low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:4b3329617dfe529df905",
+            "SN:b42a6abb614a25065834",
+            "SN:c508618d7302e73db040",
+            "SN:e07680b66a5b2177f906"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:b42a6abb614a25065834",
+            "SN:c508618d7302e73db040",
+            "SN:e07680b66a5b2177f906"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [
+            "SN:ac4ddbe869abcda97db5",
+            "SN:e17326fb5baeb2c79e39"
+          ],
+          "false_inclusions": 2,
+          "observed_direct_nodes": [
+            "SN:4b3329617dfe529df905",
+            "SN:ac4ddbe869abcda97db5",
+            "SN:e17326fb5baeb2c79e39"
+          ]
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "R2",
+      "subject_kind": "requirement"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_unique": {
+          "false_exclusion_nodes": [
+            "SN:15fee4a667a914118edb",
+            "SN:4b3329617dfe529df905",
+            "SN:5176dacfa5eb098779f1"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:15fee4a667a914118edb",
+            "SN:4b3329617dfe529df905",
+            "SN:5176dacfa5eb098779f1"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [
+            "SN:65f2bddea43702f029e9"
+          ],
+          "false_inclusions": 1,
+          "observed_direct_nodes": [
+            "SN:65f2bddea43702f029e9"
+          ]
+        },
+        "low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:15fee4a667a914118edb",
+            "SN:4b3329617dfe529df905",
+            "SN:5176dacfa5eb098779f1"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:15fee4a667a914118edb",
+            "SN:4b3329617dfe529df905",
+            "SN:5176dacfa5eb098779f1"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [
+            "SN:65f2bddea43702f029e9"
+          ],
+          "false_inclusions": 1,
+          "observed_direct_nodes": [
+            "SN:65f2bddea43702f029e9"
+          ]
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "R3",
+      "subject_kind": "requirement"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_unique": {
+          "false_exclusion_nodes": [
+            "SN:48e5be66da52dd920ef0",
+            "SN:4b3329617dfe529df905"
+          ],
+          "false_exclusions": 2,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:48e5be66da52dd920ef0",
+            "SN:4b3329617dfe529df905"
+          ],
+          "false_exclusions": 2,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:48e5be66da52dd920ef0",
+            "SN:4b3329617dfe529df905"
+          ],
+          "false_exclusions": 2,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:48e5be66da52dd920ef0",
+            "SN:4b3329617dfe529df905"
+          ],
+          "false_exclusions": 2,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "R4",
+      "subject_kind": "requirement"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_unique": {
+          "false_exclusion_nodes": [
+            "SN:af14ac23d3c198f604a8",
+            "SN:c508618d7302e73db040",
+            "SN:e17326fb5baeb2c79e39"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:af14ac23d3c198f604a8",
+            "SN:c508618d7302e73db040",
+            "SN:e17326fb5baeb2c79e39"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:af14ac23d3c198f604a8",
+            "SN:c508618d7302e73db040",
+            "SN:e17326fb5baeb2c79e39"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:af14ac23d3c198f604a8",
+            "SN:c508618d7302e73db040",
+            "SN:e17326fb5baeb2c79e39"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "R5",
+      "subject_kind": "requirement"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_unique": {
+          "false_exclusion_nodes": [
+            "SN:4b3329617dfe529df905",
+            "SN:ac4ddbe869abcda97db5",
+            "SN:b42a6abb614a25065834",
+            "SN:f12a3435be353934fe37"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:b42a6abb614a25065834",
+            "SN:f12a3435be353934fe37"
+          ],
+          "false_exclusions": 2,
+          "false_inclusion_nodes": [
+            "SN:e17326fb5baeb2c79e39"
+          ],
+          "false_inclusions": 1,
+          "observed_direct_nodes": [
+            "SN:4b3329617dfe529df905",
+            "SN:ac4ddbe869abcda97db5",
+            "SN:e17326fb5baeb2c79e39"
+          ]
+        },
+        "low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:4b3329617dfe529df905",
+            "SN:ac4ddbe869abcda97db5",
+            "SN:b42a6abb614a25065834",
+            "SN:f12a3435be353934fe37"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:b42a6abb614a25065834",
+            "SN:f12a3435be353934fe37"
+          ],
+          "false_exclusions": 2,
+          "false_inclusion_nodes": [
+            "SN:e17326fb5baeb2c79e39"
+          ],
+          "false_inclusions": 1,
+          "observed_direct_nodes": [
+            "SN:4b3329617dfe529df905",
+            "SN:ac4ddbe869abcda97db5",
+            "SN:e17326fb5baeb2c79e39"
+          ]
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "R6",
+      "subject_kind": "requirement"
+    }
+  ],
+  "policies": {
+    "canonical_unique": "accept only a full qualified-name identifier resolving to one changed symbol",
+    "current": "reproduce observed direct membership; no policy change",
+    "low_fanout": "accept only a full identifier with canonical origin and focus fanout one",
+    "no_suffix": "accept exact identifiers only when the authored term is not suffix-only"
+  },
+  "schema_version": "structural_identifier_policy_shadow.v1",
+  "specificity_origin_completeness": "partial"
+}
