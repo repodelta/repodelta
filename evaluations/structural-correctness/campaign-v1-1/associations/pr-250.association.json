@@ -1,0 +1,2068 @@
+{
+  "packet_digest": "7fbfeab34c4b6cb778a83aac682a39d391db3d6ea5cc9c614b6bd107edd2cdf6",
+  "rows": [
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "short",
+        "token"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "short",
+            "token"
+          ]
+        }
+      ],
+      "relation_id": "PR:0b5f2cddd72a4ebe739a",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:3a51de0d542afc9f9f77",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:2aefc5376a3ea4370d69",
+      "target_type": "evidence"
+    },
+    {
+      "association": "exact_identifier",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "github"
+      ],
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:12605e6c7ab0f11dae39",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:685d462624914d88ccee",
+      "structural_membership_class": "matched",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:21b72ac449c0b5808153",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "installation",
+        "private"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "private"
+          ]
+        }
+      ],
+      "relation_id": "PR:15bc72ac103c17ed3853",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:ba347423dc92c9ac0dc6",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:6e2523b4c3486769140a",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "command",
+        "github",
+        "push"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "command",
+            "github",
+            "push"
+          ]
+        }
+      ],
+      "relation_id": "PR:191a907e99d87828ca92",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:a00e9b6fa7b6de79835e",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:1ba9f09385635f56b04c",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "failed",
+        "stage"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "failed",
+            "stage"
+          ]
+        }
+      ],
+      "relation_id": "PR:1d7e319f56b4554fe951",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:98c5976f8bf9d630a3bf",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:7ac27de07a57d0f420d7",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "create",
+        "pull",
+        "push",
+        "request"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "create",
+            "pull",
+            "push",
+            "request"
+          ]
+        }
+      ],
+      "relation_id": "PR:1eb7f6260cca8ae7f6ae",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:1937c9efe9c494398507",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:6574676f03a777406a84",
+      "target_type": "evidence"
+    },
+    {
+      "association": "exact_identifier",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "document_support",
+      "matched_terms": [
+        "github"
+      ],
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:1fe2b23719ebb353fb00",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:ff21727879899576ada6",
+      "target_type": "evidence"
+    },
+    {
+      "association": "exact_identifier",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "github"
+      ],
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:23e03af54c6284752ee9",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:3a88d5c9bb545acc56a7",
+      "structural_membership_class": "matched",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:9ab4a168003716950ddb",
+      "target_type": "evidence"
+    },
+    {
+      "association": "exact_identifier",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "github"
+      ],
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:280b8ddc1cad9466f3f8",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:22b4b08216bbe93b7f22",
+      "structural_membership_class": "matched",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:ddb54c2e57b357812e9d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "command",
+        "lived",
+        "short",
+        "token"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "command",
+            "lived",
+            "short",
+            "token"
+          ]
+        }
+      ],
+      "relation_id": "PR:289993ae5da7b38664a4",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:032ab6b952e529651125",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:57d14320372a057c469f",
+      "target_type": "evidence"
+    },
+    {
+      "association": "exact_identifier",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "github"
+      ],
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:29bebcbab2c124b5dafd",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:f84131015a58b3fa3570",
+      "structural_membership_class": "matched",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:16405487a4e1e5245129",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "base",
+        "body",
+        "installation",
+        "title"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "base",
+            "body",
+            "installation",
+            "title"
+          ]
+        }
+      ],
+      "relation_id": "PR:2ce5bbf79b6d1dd51ece",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:ba347423dc92c9ac0dc6",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:6e2523b4c3486769140a",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "installation",
+        "private"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "private"
+          ]
+        }
+      ],
+      "relation_id": "PR:2cf956999f4c299b84d2",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:ba347423dc92c9ac0dc6",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:6e2523b4c3486769140a",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "command",
+        "create"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "command",
+            "create"
+          ]
+        }
+      ],
+      "relation_id": "PR:3051fe6cbf8d42752b4d",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:032ab6b952e529651125",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:57d14320372a057c469f",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "installation",
+        "token",
+        "when"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "token",
+            "when"
+          ]
+        }
+      ],
+      "relation_id": "PR:30fdd1b1f108132bd6b0",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:8fc9551b6fc3152ad7f9",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:dd2d32d1c1c92a1a172a",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "base",
+        "body",
+        "installation",
+        "title"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "base",
+            "body",
+            "installation",
+            "title"
+          ]
+        }
+      ],
+      "relation_id": "PR:359c95f1afcd5b023898",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:b31cbc9a6dd7c751d622",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:e9628d1c685777cdbc1f",
+      "target_type": "evidence"
+    },
+    {
+      "association": "exact_identifier",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "document_support",
+      "matched_terms": [
+        "github"
+      ],
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:3b62c400012ec5767596",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:ff21727879899576ada6",
+      "target_type": "evidence"
+    },
+    {
+      "association": "exact_identifier",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "github"
+      ],
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:3bd7476003c2396c1380",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:98c5976f8bf9d630a3bf",
+      "structural_membership_class": "matched",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:7ac27de07a57d0f420d7",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "command",
+        "short",
+        "token"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "command",
+            "short",
+            "token"
+          ]
+        }
+      ],
+      "relation_id": "PR:3d46a05d1164b1d8b2a6",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:a00e9b6fa7b6de79835e",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:1ba9f09385635f56b04c",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "command",
+        "installation",
+        "local",
+        "private"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "command",
+            "installation",
+            "local",
+            "private"
+          ]
+        }
+      ],
+      "relation_id": "PR:4172abd0fe5c5dcaf416",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:3a88d5c9bb545acc56a7",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:9ab4a168003716950ddb",
+      "target_type": "evidence"
+    },
+    {
+      "association": "exact_identifier",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "github"
+      ],
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:4cfd0ac33a9a342f12fb",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:5b6398205e515fdd43b6",
+      "structural_membership_class": "matched",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:0d018a0b496c2b2eab51",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "github",
+        "human",
+        "request",
+        "reviewers"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "github",
+            "human",
+            "request",
+            "reviewers"
+          ]
+        }
+      ],
+      "relation_id": "PR:4df92fb8a2597fe6d02a",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:8acb6942a315534f2a82",
+      "structural_membership_class": "suggested",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:a486332c5d83c847016e",
+      "target_type": "evidence"
+    },
+    {
+      "association": "exact_identifier",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "github"
+      ],
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:5167e381a7921774a7f3",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:5dfd8aa1b6c788319e19",
+      "structural_membership_class": "matched",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:42e6a4ab851acd42660d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "exact_identifier",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "github"
+      ],
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:56e17e9a26b8affe85ee",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:685d462624914d88ccee",
+      "structural_membership_class": "matched",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:21b72ac449c0b5808153",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "installation",
+        "private"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "private"
+          ]
+        }
+      ],
+      "relation_id": "PR:5719b8ee7ac56fdc1ca0",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:79105a3ff714c5098f6f",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:678e2981a23fff67030e",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "failed",
+        "stage"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "failed",
+            "stage"
+          ]
+        }
+      ],
+      "relation_id": "PR:5c32422b40465b157aa7",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:5b6398205e515fdd43b6",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:0d018a0b496c2b2eab51",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "installation",
+        "token"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "token"
+          ]
+        }
+      ],
+      "relation_id": "PR:60b3a15fe6b7c1c5f229",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:5dfd8aa1b6c788319e19",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:42e6a4ab851acd42660d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "installation",
+        "private"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "private"
+          ]
+        }
+      ],
+      "relation_id": "PR:6743b0e6fb1123df4b0e",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:b31cbc9a6dd7c751d622",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:e9628d1c685777cdbc1f",
+      "target_type": "evidence"
+    },
+    {
+      "association": "exact_identifier",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "github"
+      ],
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:67e61b0ce0c4f965de72",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:22b4b08216bbe93b7f22",
+      "structural_membership_class": "matched",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:ddb54c2e57b357812e9d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "installation",
+        "private"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "private"
+          ]
+        }
+      ],
+      "relation_id": "PR:6a7f9dd6f83cfd555c94",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:b31cbc9a6dd7c751d622",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:e9628d1c685777cdbc1f",
+      "target_type": "evidence"
+    },
+    {
+      "association": "exact_identifier",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "github"
+      ],
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:6c114830a9c0b845506a",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:6775041f0d09829f2c84",
+      "structural_membership_class": "matched",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:c5864fc769ad442f93a5",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "pull",
+        "request"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "pull",
+            "request"
+          ]
+        }
+      ],
+      "relation_id": "PR:72f7b3ad4a6956118451",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:7446ec41985d80f072b8",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:f2108e6a7fcab562c01e",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "installation",
+        "private",
+        "token"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "private",
+            "token"
+          ]
+        }
+      ],
+      "relation_id": "PR:74c5c0eb2e125c321d2b",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:79105a3ff714c5098f6f",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:678e2981a23fff67030e",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "create",
+        "pull",
+        "push",
+        "request"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "create",
+            "pull",
+            "push",
+            "request"
+          ]
+        }
+      ],
+      "relation_id": "PR:7bc9962b520e8de88572",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:79105a3ff714c5098f6f",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:678e2981a23fff67030e",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "installation",
+        "stage",
+        "tokens"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "stage",
+            "tokens"
+          ]
+        }
+      ],
+      "relation_id": "PR:8342efcf79a027e8db1f",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:5dfd8aa1b6c788319e19",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:42e6a4ab851acd42660d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "exact_identifier",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "github"
+      ],
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:8c9cd9ad6ab1a57b86a5",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:fc5a6e76da5400a44a62",
+      "structural_membership_class": "matched",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:6d6b1decd05086024fc9",
+      "target_type": "evidence"
+    },
+    {
+      "association": "exact_identifier",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "github"
+      ],
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:8f5fdf68ab86974334fb",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:5b6398205e515fdd43b6",
+      "structural_membership_class": "matched",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:0d018a0b496c2b2eab51",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "installation",
+        "token"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "token"
+          ]
+        }
+      ],
+      "relation_id": "PR:9590e7e818899e42dd61",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:6212f4bd30bf768b8022",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:e4c351302b13daf629e2",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "document_support",
+      "matched_terms": [
+        "body",
+        "branch",
+        "repository",
+        "reviewer",
+        "title"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "body",
+            "branch",
+            "repository",
+            "reviewer",
+            "title"
+          ]
+        }
+      ],
+      "relation_id": "PR:965029c554884dddbb2c",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:ff21727879899576ada6",
+      "target_type": "evidence"
+    },
+    {
+      "association": "exact_identifier",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "github"
+      ],
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:98f5d36d798882b51c8b",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:6212f4bd30bf768b8022",
+      "structural_membership_class": "matched",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:e4c351302b13daf629e2",
+      "target_type": "evidence"
+    },
+    {
+      "association": "exact_identifier",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "github"
+      ],
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:9c8c19f41583341055de",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:98c5976f8bf9d630a3bf",
+      "structural_membership_class": "matched",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:7ac27de07a57d0f420d7",
+      "target_type": "evidence"
+    },
+    {
+      "association": "exact_identifier",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "github"
+      ],
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:9f8e716c43e0948c81a5",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:f84131015a58b3fa3570",
+      "structural_membership_class": "matched",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:16405487a4e1e5245129",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "installation",
+        "private"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "private"
+          ]
+        }
+      ],
+      "relation_id": "PR:a224e917ea865d592400",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:c08e6c43c888af3e9dd4",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:c385c3bcc522b69bd13c",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "base",
+        "body",
+        "title"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "base",
+            "body",
+            "title"
+          ]
+        }
+      ],
+      "relation_id": "PR:a276cc2417becfe182a5",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:5b6398205e515fdd43b6",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:0d018a0b496c2b2eab51",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "installation",
+        "private"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "private"
+          ]
+        }
+      ],
+      "relation_id": "PR:a2cf8ae228719d5e3e5b",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:1937c9efe9c494398507",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:6574676f03a777406a84",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "installation",
+        "private",
+        "token"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "private",
+            "token"
+          ]
+        }
+      ],
+      "relation_id": "PR:a30bc0fb1e1dffdde5da",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:1937c9efe9c494398507",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:6574676f03a777406a84",
+      "target_type": "evidence"
+    },
+    {
+      "association": "exact_identifier",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "github"
+      ],
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:abfb7216bb8e8422e4df",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:525c7ab799416c858f39",
+      "structural_membership_class": "matched",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:8b9d46f1cce8649ec3c0",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "credential",
+        "installation"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "credential",
+            "installation"
+          ]
+        }
+      ],
+      "relation_id": "PR:acd70a69876f8d78cf60",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:6212f4bd30bf768b8022",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:e4c351302b13daf629e2",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "branch",
+        "reviewers"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "branch",
+            "reviewers"
+          ]
+        }
+      ],
+      "relation_id": "PR:c237bfa3a93f5860a86c",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:c08e6c43c888af3e9dd4",
+      "structural_membership_class": "suggested",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:c385c3bcc522b69bd13c",
+      "target_type": "evidence"
+    },
+    {
+      "association": "exact_identifier",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "github"
+      ],
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:c53789a1e8f91d374217",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:fc5a6e76da5400a44a62",
+      "structural_membership_class": "matched",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:6d6b1decd05086024fc9",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "short",
+        "token"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "short",
+            "token"
+          ]
+        }
+      ],
+      "relation_id": "PR:c7e1b5bf5be98ac93dba",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:8acb6942a315534f2a82",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:a486332c5d83c847016e",
+      "target_type": "evidence"
+    },
+    {
+      "association": "exact_identifier",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "github"
+      ],
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:cc75751389fd4e3c9bc7",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:3a88d5c9bb545acc56a7",
+      "structural_membership_class": "matched",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:9ab4a168003716950ddb",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "create",
+        "github",
+        "maintainer",
+        "pull",
+        "request"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "create",
+            "github",
+            "maintainer",
+            "pull",
+            "request"
+          ]
+        }
+      ],
+      "relation_id": "PR:cddf800b13418e918290",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:8acb6942a315534f2a82",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:a486332c5d83c847016e",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "short",
+        "token"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "short",
+            "token"
+          ]
+        }
+      ],
+      "relation_id": "PR:ce553bd488b9c2d1dd47",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:d1889fbf0a3a9bb17be7",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:d9ee97f4ae3c34cdd895",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "credential",
+        "failed"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "credential",
+            "failed"
+          ]
+        }
+      ],
+      "relation_id": "PR:cefe99ed872f6b4a37df",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:525c7ab799416c858f39",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:8b9d46f1cce8649ec3c0",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "command",
+        "push"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "command",
+            "push"
+          ]
+        }
+      ],
+      "relation_id": "PR:cf41bdb989befb583a9c",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:41b644f4fe321ec33b0c",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:c2b9bc7a96e9b7643edd",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "installation",
+        "token",
+        "when"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "token",
+            "when"
+          ]
+        }
+      ],
+      "relation_id": "PR:d0156a345e590cee1b07",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:d4aac995c733cf495218",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:fac8fb96a9dd747557cb",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "base",
+        "body",
+        "branch",
+        "defaults",
+        "installation",
+        "repository",
+        "reviewer",
+        "title"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "base",
+            "body",
+            "branch",
+            "defaults",
+            "installation",
+            "repository",
+            "reviewer",
+            "title"
+          ]
+        }
+      ],
+      "relation_id": "PR:da0f5d2ea0f84bde3fa1",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:3a88d5c9bb545acc56a7",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:9ab4a168003716950ddb",
+      "target_type": "evidence"
+    },
+    {
+      "association": "exact_identifier",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "github"
+      ],
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:da8ac39a306ff879fa62",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:6212f4bd30bf768b8022",
+      "structural_membership_class": "matched",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:e4c351302b13daf629e2",
+      "target_type": "evidence"
+    },
+    {
+      "association": "exact_identifier",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "github"
+      ],
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:dc33002d797fe5caea9f",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:6775041f0d09829f2c84",
+      "structural_membership_class": "matched",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:c5864fc769ad442f93a5",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "installation",
+        "secret"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "secret"
+          ]
+        }
+      ],
+      "relation_id": "PR:e60523884578aa2f925a",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:6212f4bd30bf768b8022",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:e4c351302b13daf629e2",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "command",
+        "lived",
+        "short"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "command",
+            "lived",
+            "short"
+          ]
+        }
+      ],
+      "relation_id": "PR:ef7a7a1af4a64bf6b4ab",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:dbb832751a75c0141e72",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:23191a851a219fcea313",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "installation",
+        "private"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "private"
+          ]
+        }
+      ],
+      "relation_id": "PR:f0ed4d601d15c8455564",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:3a88d5c9bb545acc56a7",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:9ab4a168003716950ddb",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "base",
+        "body",
+        "branch",
+        "installation",
+        "reviewer",
+        "title"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "base",
+            "body",
+            "branch",
+            "installation",
+            "reviewer",
+            "title"
+          ]
+        }
+      ],
+      "relation_id": "PR:f1500b1d82c213670482",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:c08e6c43c888af3e9dd4",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:c385c3bcc522b69bd13c",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "command",
+        "token"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "command",
+            "token"
+          ]
+        }
+      ],
+      "relation_id": "PR:f1e01fb40e9035ab2217",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:41b644f4fe321ec33b0c",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:c2b9bc7a96e9b7643edd",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "command",
+        "github"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "command",
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:f29ce022707d998a94b5",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:a00e9b6fa7b6de79835e",
+      "structural_membership_class": "suggested",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:1ba9f09385635f56b04c",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "installation",
+        "private"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "private"
+          ]
+        }
+      ],
+      "relation_id": "PR:f40a50d17a1603e16a70",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:c08e6c43c888af3e9dd4",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:c385c3bcc522b69bd13c",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "human",
+        "request",
+        "reviewers"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "human",
+            "request",
+            "reviewers"
+          ]
+        }
+      ],
+      "relation_id": "PR:f5dab1503fcd1dde4f29",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:7446ec41985d80f072b8",
+      "structural_membership_class": "suggested",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:f2108e6a7fcab562c01e",
+      "target_type": "evidence"
+    },
+    {
+      "association": "exact_identifier",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "github"
+      ],
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:f7ee96fb6c79627f643c",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:5dfd8aa1b6c788319e19",
+      "structural_membership_class": "matched",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:42e6a4ab851acd42660d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "exact_identifier",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "github"
+      ],
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:ff8ad4815158fdba7409",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:525c7ab799416c858f39",
+      "structural_membership_class": "matched",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:8b9d46f1cce8649ec3c0",
+      "target_type": "evidence"
+    }
+  ],
+  "schema_version": "structural_association_attribution.v1"
+}

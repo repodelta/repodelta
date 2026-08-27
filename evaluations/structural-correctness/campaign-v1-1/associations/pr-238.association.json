@@ -1,0 +1,1343 @@
+{
+  "packet_digest": "d24193cd8fa4982a526d167a4bb9a17de93438f910dffe7a1ceabdcbbd4bedc3",
+  "rows": [
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "canonical"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical"
+          ]
+        }
+      ],
+      "relation_id": "PR:010fab55c038eb23f2f2",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:1ae20772b37149154b15",
+      "structural_membership_class": "suggested",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:a2ca1cde1795a49efa9c",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [
+        "VC4"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "canonical",
+        "changed",
+        "claim",
+        "explicit",
+        "selectors"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "changed",
+            "claim",
+            "explicit"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "changed",
+            "selectors"
+          ]
+        }
+      ],
+      "relation_id": "PR:04dcc00c88d2cb942ed0",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:1191c260686900356c91",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:cb60529841d02b22d60d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "claim_bridge",
+      "bridge_ids": [
+        "VC3"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "tests"
+      ],
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "tests"
+          ]
+        }
+      ],
+      "relation_id": "PR:07e45402d0843b7e3cac",
+      "slot": "changed_anchor",
+      "source_channel": "bridge",
+      "structural_member_id": "SN:1ae20772b37149154b15",
+      "structural_membership_class": "suggested",
+      "subject_id": "G4",
+      "subject_kind": "guardrail",
+      "target_id": "E:structural_change:a2ca1cde1795a49efa9c",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [
+        "VC4"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "document_support",
+      "matched_terms": [
+        "code",
+        "identity",
+        "markdown",
+        "side",
+        "proof"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "code",
+            "identity",
+            "markdown",
+            "side"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "code",
+            "proof"
+          ]
+        }
+      ],
+      "relation_id": "PR:1bb4cd2ccda8f408bb7e",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:175d26128f0e3d843b7d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [
+        "VC4"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "document_support",
+      "matched_terms": [
+        "code",
+        "markdown",
+        "only",
+        "authored",
+        "selectors",
+        "spans"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "code",
+            "markdown",
+            "only"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "authored",
+            "code",
+            "selectors",
+            "spans"
+          ]
+        }
+      ],
+      "relation_id": "PR:1e3c6a97797c64364a97",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:16e2e5b51a9b833a61fd",
+      "target_type": "evidence"
+    },
+    {
+      "association": "claim_bridge",
+      "bridge_ids": [
+        "VC4"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "selectors"
+      ],
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "selectors"
+          ]
+        }
+      ],
+      "relation_id": "PR:270557fb759c3a0f6651",
+      "slot": "changed_anchor",
+      "source_channel": "bridge",
+      "structural_member_id": "SN:1ae20772b37149154b15",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:a2ca1cde1795a49efa9c",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [
+        "VC4"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "claim",
+        "explicit",
+        "authored",
+        "rather",
+        "than"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "claim",
+            "explicit"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "authored",
+            "rather",
+            "than"
+          ]
+        }
+      ],
+      "relation_id": "PR:302bca4d2e2adbc6e81d",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:950784709a7dcd98c452",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:98a2517d7da45fa47672",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [
+        "VC4"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "document_support",
+      "matched_terms": [
+        "claim",
+        "code",
+        "explicit",
+        "markdown",
+        "selectors"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "claim",
+            "code",
+            "explicit",
+            "markdown"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "code",
+            "selectors"
+          ]
+        }
+      ],
+      "relation_id": "PR:3d35a7f0f52d8df9aa14",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:14581a37db2112a62616",
+      "target_type": "evidence"
+    },
+    {
+      "association": "claim_bridge",
+      "bridge_ids": [
+        "VC3"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "assessment"
+      ],
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "assessment"
+          ]
+        }
+      ],
+      "relation_id": "PR:439ef3da0e32e2d0f4d1",
+      "slot": "changed_anchor",
+      "source_channel": "bridge",
+      "structural_member_id": "SN:950784709a7dcd98c452",
+      "structural_membership_class": "suggested",
+      "subject_id": "G4",
+      "subject_kind": "guardrail",
+      "target_id": "E:structural_change:98a2517d7da45fa47672",
+      "target_type": "evidence"
+    },
+    {
+      "association": "claim_bridge",
+      "bridge_ids": [
+        "VC4"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "document_support",
+      "matched_terms": [
+        "code",
+        "proof"
+      ],
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "code",
+            "proof"
+          ]
+        }
+      ],
+      "relation_id": "PR:4e80a6e884c9c48b3972",
+      "slot": "changed_anchor",
+      "source_channel": "bridge",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "G3",
+      "subject_kind": "guardrail",
+      "target_id": "E:change_relation:175d26128f0e3d843b7d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "claim_bridge",
+      "bridge_ids": [
+        "VC3"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "tests"
+      ],
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "tests"
+          ]
+        }
+      ],
+      "relation_id": "PR:54dabd5476e1d45212cb",
+      "slot": "changed_anchor",
+      "source_channel": "bridge",
+      "structural_member_id": "SN:ae7121776b87c1b88668",
+      "structural_membership_class": "suggested",
+      "subject_id": "G4",
+      "subject_kind": "guardrail",
+      "target_id": "E:structural_change:62bd488fe518cd433bd0",
+      "target_type": "evidence"
+    },
+    {
+      "association": "claim_bridge",
+      "bridge_ids": [
+        "VC4"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "document_support",
+      "matched_terms": [
+        "code",
+        "proof"
+      ],
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "code",
+            "proof"
+          ]
+        }
+      ],
+      "relation_id": "PR:55dfe91068deb2da28a7",
+      "slot": "changed_anchor",
+      "source_channel": "bridge",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:175d26128f0e3d843b7d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [
+        "VC4"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "canonical",
+        "claim",
+        "selectors"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "claim"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "selectors"
+          ]
+        }
+      ],
+      "relation_id": "PR:5a32b74332ef2dc5e10d",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:1ae20772b37149154b15",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:a2ca1cde1795a49efa9c",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [
+        "VC4"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "document_support",
+      "matched_terms": [
+        "claim",
+        "code",
+        "explicit",
+        "markdown",
+        "selectors"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "claim",
+            "code",
+            "explicit",
+            "markdown"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "code",
+            "selectors"
+          ]
+        }
+      ],
+      "relation_id": "PR:5b01d182616f1c24d742",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:14581a37db2112a62616",
+      "target_type": "evidence"
+    },
+    {
+      "association": "claim_bridge",
+      "bridge_ids": [
+        "VC4"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "document_support",
+      "matched_terms": [
+        "authored",
+        "code",
+        "selectors",
+        "spans"
+      ],
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "authored",
+            "code",
+            "selectors",
+            "spans"
+          ]
+        }
+      ],
+      "relation_id": "PR:6dcb0ab70a47f612c9b1",
+      "slot": "changed_anchor",
+      "source_channel": "bridge",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "G3",
+      "subject_kind": "guardrail",
+      "target_id": "E:change_relation:16e2e5b51a9b833a61fd",
+      "target_type": "evidence"
+    },
+    {
+      "association": "claim_bridge",
+      "bridge_ids": [
+        "VC4"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "changed",
+        "selectors"
+      ],
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "changed",
+            "selectors"
+          ]
+        }
+      ],
+      "relation_id": "PR:75d9497c997c26536c0c",
+      "slot": "changed_anchor",
+      "source_channel": "bridge",
+      "structural_member_id": "SN:1191c260686900356c91",
+      "structural_membership_class": "suggested",
+      "subject_id": "G3",
+      "subject_kind": "guardrail",
+      "target_id": "E:structural_change:cb60529841d02b22d60d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [
+        "VC4"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "claim",
+        "explicit",
+        "authored",
+        "rather",
+        "than"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "claim",
+            "explicit"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "authored",
+            "rather",
+            "than"
+          ]
+        }
+      ],
+      "relation_id": "PR:78d118f1efe0e360c1a7",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:950784709a7dcd98c452",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:98a2517d7da45fa47672",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [
+        "VC4"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "canonical",
+        "claim",
+        "selectors"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "claim"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "selectors"
+          ]
+        }
+      ],
+      "relation_id": "PR:845188de1287c0039ba8",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:1ae20772b37149154b15",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:a2ca1cde1795a49efa9c",
+      "target_type": "evidence"
+    },
+    {
+      "association": "claim_bridge",
+      "bridge_ids": [
+        "VC3"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "semantic",
+        "tests"
+      ],
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "semantic",
+            "tests"
+          ]
+        }
+      ],
+      "relation_id": "PR:8977c6487c5bc2cb3fbe",
+      "slot": "changed_anchor",
+      "source_channel": "bridge",
+      "structural_member_id": "SN:664d2e7f1912df5b6802",
+      "structural_membership_class": "suggested",
+      "subject_id": "G4",
+      "subject_kind": "guardrail",
+      "target_id": "E:structural_change:fafadb651a20f04995de",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [
+        "VC4"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "rather",
+        "remains",
+        "than",
+        "authored"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "rather",
+            "remains",
+            "than"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "authored",
+            "rather",
+            "than"
+          ]
+        }
+      ],
+      "relation_id": "PR:8993e38cf8c22c49c4ce",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:950784709a7dcd98c452",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:98a2517d7da45fa47672",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "claim"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "claim"
+          ]
+        }
+      ],
+      "relation_id": "PR:999585be9f815dedaad6",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:664d2e7f1912df5b6802",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:fafadb651a20f04995de",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "explicit"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "explicit"
+          ]
+        }
+      ],
+      "relation_id": "PR:99f4af30f18416be8454",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:1191c260686900356c91",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:cb60529841d02b22d60d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "claim_bridge",
+      "bridge_ids": [
+        "VC4"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "document_support",
+      "matched_terms": [
+        "code",
+        "selectors"
+      ],
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "code",
+            "selectors"
+          ]
+        }
+      ],
+      "relation_id": "PR:a136828c26d51de6b4d0",
+      "slot": "changed_anchor",
+      "source_channel": "bridge",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "G3",
+      "subject_kind": "guardrail",
+      "target_id": "E:change_relation:14581a37db2112a62616",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [
+        "VC4"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "document_support",
+      "matched_terms": [
+        "code",
+        "identity",
+        "markdown",
+        "side",
+        "proof"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "code",
+            "identity",
+            "markdown",
+            "side"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "code",
+            "proof"
+          ]
+        }
+      ],
+      "relation_id": "PR:a1bc9cb4452998fe9f37",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:175d26128f0e3d843b7d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "document_support",
+      "matched_terms": [
+        "focus"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "focus"
+          ]
+        }
+      ],
+      "relation_id": "PR:aee09a5524b2dda9a02b",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:14581a37db2112a62616",
+      "target_type": "evidence"
+    },
+    {
+      "association": "claim_bridge",
+      "bridge_ids": [
+        "VC4"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "authored",
+        "rather",
+        "than"
+      ],
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "authored",
+            "rather",
+            "than"
+          ]
+        }
+      ],
+      "relation_id": "PR:b5ed236ec36e2c062075",
+      "slot": "changed_anchor",
+      "source_channel": "bridge",
+      "structural_member_id": "SN:950784709a7dcd98c452",
+      "structural_membership_class": "suggested",
+      "subject_id": "G3",
+      "subject_kind": "guardrail",
+      "target_id": "E:structural_change:98a2517d7da45fa47672",
+      "target_type": "evidence"
+    },
+    {
+      "association": "claim_bridge",
+      "bridge_ids": [
+        "VC4"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "selectors"
+      ],
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "selectors"
+          ]
+        }
+      ],
+      "relation_id": "PR:b8ff75053d2212d37b28",
+      "slot": "changed_anchor",
+      "source_channel": "bridge",
+      "structural_member_id": "SN:1ae20772b37149154b15",
+      "structural_membership_class": "suggested",
+      "subject_id": "G3",
+      "subject_kind": "guardrail",
+      "target_id": "E:structural_change:a2ca1cde1795a49efa9c",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "focus"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "focus"
+          ]
+        }
+      ],
+      "relation_id": "PR:bc85bf83cea4504ac198",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:950784709a7dcd98c452",
+      "structural_membership_class": "suggested",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:98a2517d7da45fa47672",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "explicit",
+        "remains"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "explicit",
+            "remains"
+          ]
+        }
+      ],
+      "relation_id": "PR:c02bd90c2ff5eb623324",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:950784709a7dcd98c452",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:98a2517d7da45fa47672",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "canonical",
+        "focus"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "focus"
+          ]
+        }
+      ],
+      "relation_id": "PR:c8817387d08d9078b407",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:1191c260686900356c91",
+      "structural_membership_class": "suggested",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:cb60529841d02b22d60d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "claim_bridge",
+      "bridge_ids": [
+        "VC3"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "document_support",
+      "matched_terms": [
+        "assessment",
+        "routing"
+      ],
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "assessment",
+            "routing"
+          ]
+        }
+      ],
+      "relation_id": "PR:cc19c3e9772c21607c4c",
+      "slot": "changed_anchor",
+      "source_channel": "bridge",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "G4",
+      "subject_kind": "guardrail",
+      "target_id": "E:change_relation:16e2e5b51a9b833a61fd",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "document_support",
+      "matched_terms": [
+        "prose"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "prose"
+          ]
+        }
+      ],
+      "relation_id": "PR:d6ce146df84a1d753ee1",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:175d26128f0e3d843b7d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "claim_bridge",
+      "bridge_ids": [
+        "VC3"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "projection",
+        "tests"
+      ],
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "projection",
+            "tests"
+          ]
+        }
+      ],
+      "relation_id": "PR:e1b54bcceca025539340",
+      "slot": "changed_anchor",
+      "source_channel": "bridge",
+      "structural_member_id": "SN:1191c260686900356c91",
+      "structural_membership_class": "suggested",
+      "subject_id": "G4",
+      "subject_kind": "guardrail",
+      "target_id": "E:structural_change:cb60529841d02b22d60d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "claim_bridge",
+      "bridge_ids": [
+        "VC4"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "changed",
+        "selectors"
+      ],
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "changed",
+            "selectors"
+          ]
+        }
+      ],
+      "relation_id": "PR:e83aec13e00168b690ea",
+      "slot": "changed_anchor",
+      "source_channel": "bridge",
+      "structural_member_id": "SN:1191c260686900356c91",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:cb60529841d02b22d60d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "claim_bridge",
+      "bridge_ids": [
+        "VC4"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "document_support",
+      "matched_terms": [
+        "authored",
+        "code",
+        "selectors",
+        "spans"
+      ],
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "authored",
+            "code",
+            "selectors",
+            "spans"
+          ]
+        }
+      ],
+      "relation_id": "PR:ef31b6fe1733638ea325",
+      "slot": "changed_anchor",
+      "source_channel": "bridge",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:16e2e5b51a9b833a61fd",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [
+        "VC4"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "document_support",
+      "matched_terms": [
+        "code",
+        "markdown",
+        "only",
+        "authored",
+        "selectors",
+        "spans"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "code",
+            "markdown",
+            "only"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "authored",
+            "code",
+            "selectors",
+            "spans"
+          ]
+        }
+      ],
+      "relation_id": "PR:f0013c40ce49687b2165",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:16e2e5b51a9b833a61fd",
+      "target_type": "evidence"
+    },
+    {
+      "association": "claim_bridge",
+      "bridge_ids": [
+        "VC4"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "document_support",
+      "matched_terms": [
+        "code",
+        "selectors"
+      ],
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "code",
+            "selectors"
+          ]
+        }
+      ],
+      "relation_id": "PR:f671076c5dd52d789684",
+      "slot": "changed_anchor",
+      "source_channel": "bridge",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:14581a37db2112a62616",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [
+        "VC4"
+      ],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "canonical",
+        "changed",
+        "claim",
+        "explicit",
+        "selectors"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "changed",
+            "claim",
+            "explicit"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "changed",
+            "selectors"
+          ]
+        }
+      ],
+      "relation_id": "PR:fb93f8c9c7f7769f0c1f",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:1191c260686900356c91",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:cb60529841d02b22d60d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "claim"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "claim"
+          ]
+        }
+      ],
+      "relation_id": "PR:fed0742075377036a97e",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:664d2e7f1912df5b6802",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:fafadb651a20f04995de",
+      "target_type": "evidence"
+    }
+  ],
+  "schema_version": "structural_association_attribution.v1"
+}

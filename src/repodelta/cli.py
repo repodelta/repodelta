@@ -36,6 +36,10 @@ from repodelta.evaluation.focus_provenance import (
     replay_producer_counterfactual,
     write_provenance_json,
 )
+from repodelta.evaluation.association_attribution import (
+    observe_association_attribution,
+    write_association_attribution,
+)
 from repodelta.evaluation.shadow import load_human_shadow_labels_from_packet
 from repodelta.intake.fixture import load_fixture
 from repodelta.intake.github import GitHubApiError, GitHubClient, GitHubPullRequestAdapter
@@ -529,7 +533,9 @@ def main() -> int:
                     ),
                 )
             ).analyze(analysis_input)
-            structural_correctness_outputs: tuple[Path, Path, Path, Path] | None = None
+            structural_correctness_outputs: tuple[
+                Path, Path, Path, Path, Path
+            ] | None = None
             if args.structural_correctness_packet_output:
                 correctness_packet = prepare_structural_correctness_packet(brief)
                 packet_output = write_structural_correctness_artifact(
@@ -549,6 +555,10 @@ def main() -> int:
                     ),
                     f"{args.structural_correctness_packet_output}.provenance.json",
                 )
+                association_output = write_association_attribution(
+                    observe_association_attribution(brief, correctness_packet),
+                    f"{args.structural_correctness_packet_output}.association.json",
+                )
                 label_template_output = write_structural_correctness_artifact(
                     prepare_structural_correctness_label_template(
                         correctness_packet
@@ -560,6 +570,7 @@ def main() -> int:
                     observation_output,
                     label_template_output,
                     provenance_output,
+                    association_output,
                 )
             if args.llm_shadow_replay and not args.llm_shadow:
                 parser.error("--llm-shadow-replay requires --llm-shadow")

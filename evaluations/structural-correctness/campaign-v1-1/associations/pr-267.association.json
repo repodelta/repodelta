@@ -1,0 +1,2687 @@
+{
+  "packet_digest": "d71944788aa7fbe75fd43b3b7b1820bb9b170b7beb3421fc48aedfc6a0c6587f",
+  "rows": [
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "member"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "member"
+          ]
+        }
+      ],
+      "relation_id": "PR:01e0fb4eea68fe693776",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:cc0c8a0045a6fe1e8112",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:dac2a3a7b5861dcf6d94",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "changed",
+        "files"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "changed",
+            "files"
+          ]
+        }
+      ],
+      "relation_id": "PR:0f38e171ce3269c44c08",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:6ca8c7c3f63e6030f55a",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:b1ee2a150dd8610abee0",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "changed"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "changed"
+          ]
+        }
+      ],
+      "relation_id": "PR:131b7f21016aa8654caf",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:da715a5d1d6fd4915e50",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:6cefe68e4c9af18a87d4",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "canonical",
+        "evidence",
+        "verification"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "evidence",
+            "verification"
+          ]
+        }
+      ],
+      "relation_id": "PR:157094db278f7d1e4844",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:19cd2582561d6e9791c8",
+      "structural_membership_class": "suggested",
+      "subject_id": "R6",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:842e419d5817f0244e2d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "files"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "files"
+          ]
+        }
+      ],
+      "relation_id": "PR:162e2161433ad9540b34",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:3f027f11e0341d0de0a1",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:f60e67a6527bd5cf0910",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "changed"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "changed"
+          ]
+        }
+      ],
+      "relation_id": "PR:17ed8e08f4d336d87b86",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:cb7ee03d07a731b92b5e",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:9f6805100dda21ac7cdb",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "canonical",
+        "member"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "member"
+          ]
+        }
+      ],
+      "relation_id": "PR:1b0838257ae8dab02bde",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:7ccf02543c1154f94fd5",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:1d9c808f0be2cb266b6f",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "canonical"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical"
+          ]
+        }
+      ],
+      "relation_id": "PR:1e18d3089b9b1aacac28",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:62694386d20493a8b93a",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:f8fbea12d82b0e44c81d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "focus"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "focus"
+          ]
+        }
+      ],
+      "relation_id": "PR:1e5dceb10f0216b0b251",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:9caebf5ac975d54164ab",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:48b4be1bebef4808995e",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "changed",
+        "context"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "changed",
+            "context"
+          ]
+        }
+      ],
+      "relation_id": "PR:1ff833742a21fe7b3829",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:cb7ee03d07a731b92b5e",
+      "structural_membership_class": "suggested",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:9f6805100dda21ac7cdb",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "deferred",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "verification"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "verification"
+          ]
+        }
+      ],
+      "relation_id": "PR:22296eccb9663631aeed",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R6",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:ad1031bb297bf76002a5",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "evidence"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "evidence"
+          ]
+        }
+      ],
+      "relation_id": "PR:243f358ac795849f5eb9",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:93ec5f652b50cda4913b",
+      "structural_membership_class": "suggested",
+      "subject_id": "R6",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:9447f8b2939b4d22b529",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "canonical",
+        "evidence"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "evidence"
+          ]
+        }
+      ],
+      "relation_id": "PR:28916d9228d8061aefb5",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:6ca8c7c3f63e6030f55a",
+      "structural_membership_class": "suggested",
+      "subject_id": "R6",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:b1ee2a150dd8610abee0",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "canonical",
+        "relations"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "relations"
+          ]
+        }
+      ],
+      "relation_id": "PR:2bb4ad97b1ff0029bee8",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:3f027f11e0341d0de0a1",
+      "structural_membership_class": "suggested",
+      "subject_id": "R6",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:f60e67a6527bd5cf0910",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "changed",
+        "context",
+        "path"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "changed",
+            "context",
+            "path"
+          ]
+        }
+      ],
+      "relation_id": "PR:360b7f182d85134e6e21",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:e73c3e724e4afb3c2224",
+      "structural_membership_class": "suggested",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:30d53b2c6a34bcb73805",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "bridges",
+        "changed",
+        "context"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "bridges",
+            "changed",
+            "context"
+          ]
+        }
+      ],
+      "relation_id": "PR:386c729301e47ebe38fd",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:ae049f36b6e35fe43a22",
+      "structural_membership_class": "suggested",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:6ea7857296a794e334b2",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "changed",
+        "files",
+        "visible"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "changed",
+            "files",
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:3af766e4aa3b3a27a7be",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:ae049f36b6e35fe43a22",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:6ea7857296a794e334b2",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "member"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "member"
+          ]
+        }
+      ],
+      "relation_id": "PR:3b16fdd5f3c651b2910b",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:89fff3edee9994df99f2",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:77e03ead5809cff4d272",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "focus",
+        "presentation"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "focus",
+            "presentation"
+          ]
+        }
+      ],
+      "relation_id": "PR:3d1a14e0f0c8e012f46c",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:b8d4254dc3828c940fbb",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:120c37f322a0f27d6777",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "canonical",
+        "focus",
+        "presentation"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "focus",
+            "presentation"
+          ]
+        }
+      ],
+      "relation_id": "PR:3d66ccdc0591654190cd",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:3a738b073bed5edc6b52",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:3e3aceafa2d0163297c3",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "canonical",
+        "focus"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "focus"
+          ]
+        }
+      ],
+      "relation_id": "PR:3dcfddfcfd23f339cae5",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:ae049f36b6e35fe43a22",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:6ea7857296a794e334b2",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "visible"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:3e9bfda6737e4c4f5fd0",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:9caebf5ac975d54164ab",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:48b4be1bebef4808995e",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "canonical",
+        "every",
+        "member",
+        "preserve"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "every",
+            "member",
+            "preserve"
+          ]
+        }
+      ],
+      "relation_id": "PR:40025326a32a65287e83",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:da5397a88d8f4040b729",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:5f6288daba4e6c4d8d44",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "changed",
+        "context",
+        "path"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "changed",
+            "context",
+            "path"
+          ]
+        }
+      ],
+      "relation_id": "PR:44ed635d7b7a1289217a",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:543ff43b3e5eeab71613",
+      "structural_membership_class": "suggested",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:6a86c6e0b7da0d183cbf",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "presentation"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "presentation"
+          ]
+        }
+      ],
+      "relation_id": "PR:45beeda55adecbea3cea",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:bcf3a6f0186446f5f61f",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:c74862e8c9be7a3c0ac3",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "canonical"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical"
+          ]
+        }
+      ],
+      "relation_id": "PR:467208e07bae16efa63b",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:cfde61f968af432ceae5",
+      "structural_membership_class": "suggested",
+      "subject_id": "R6",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:8ace4ea1a8a809ecf6e0",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "files",
+        "independent",
+        "renderer"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "files",
+            "independent",
+            "renderer"
+          ]
+        }
+      ],
+      "relation_id": "PR:4978c6e297c1e1a2643a",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:3f027f11e0341d0de0a1",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:f60e67a6527bd5cf0910",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "changed",
+        "context"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "changed",
+            "context"
+          ]
+        }
+      ],
+      "relation_id": "PR:4ce761d87bd68160eea7",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:d72a3845dd3e700ef2bd",
+      "structural_membership_class": "suggested",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:10db8d68c12b625d5297",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "changed",
+        "files",
+        "visible"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "changed",
+            "files",
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:5232044272a22b3f431b",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:da5397a88d8f4040b729",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:5f6288daba4e6c4d8d44",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "visible"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:5346b121c02a85dfc134",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:b8d4254dc3828c940fbb",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:120c37f322a0f27d6777",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "focus"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "focus"
+          ]
+        }
+      ],
+      "relation_id": "PR:539effabbd18eb99985c",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:9c926f5950f88e50331a",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:9965e36e706df5f2cf47",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "focus"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "focus"
+          ]
+        }
+      ],
+      "relation_id": "PR:5a365f3d6ca7135b813f",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:89fff3edee9994df99f2",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:77e03ead5809cff4d272",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "canonical"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical"
+          ]
+        }
+      ],
+      "relation_id": "PR:5b99ff71d469e28f1054",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:19cd2582561d6e9791c8",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:842e419d5817f0244e2d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "changed",
+        "files"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "changed",
+            "files"
+          ]
+        }
+      ],
+      "relation_id": "PR:5e3cfb9a48e94424e4ff",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:89fff3edee9994df99f2",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:77e03ead5809cff4d272",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "changed",
+        "context"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "changed",
+            "context"
+          ]
+        }
+      ],
+      "relation_id": "PR:5ef6539180cfe43f1833",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:da5397a88d8f4040b729",
+      "structural_membership_class": "suggested",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:5f6288daba4e6c4d8d44",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "audit",
+        "available",
+        "canonical",
+        "exact",
+        "full",
+        "keep",
+        "relations",
+        "verification"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "audit",
+            "available",
+            "canonical",
+            "exact",
+            "full",
+            "keep",
+            "relations",
+            "verification"
+          ]
+        }
+      ],
+      "relation_id": "PR:5f5ad35dd1fd78d37654",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:3a738b073bed5edc6b52",
+      "structural_membership_class": "suggested",
+      "subject_id": "R6",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:3e3aceafa2d0163297c3",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "canonical"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical"
+          ]
+        }
+      ],
+      "relation_id": "PR:5f71b3add3c403ac07f3",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:cfde61f968af432ceae5",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:8ace4ea1a8a809ecf6e0",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "evidence",
+        "verification"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "evidence",
+            "verification"
+          ]
+        }
+      ],
+      "relation_id": "PR:63117c23a286ca1728e9",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:51c24c73bde89d40669a",
+      "structural_membership_class": "suggested",
+      "subject_id": "R6",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:b9763a6bb0287322c575",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "member"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "member"
+          ]
+        }
+      ],
+      "relation_id": "PR:69c878258a13ee444055",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:543ff43b3e5eeab71613",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:6a86c6e0b7da0d183cbf",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "changed"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "changed"
+          ]
+        }
+      ],
+      "relation_id": "PR:6b7fb58fea9d5a310091",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:543ff43b3e5eeab71613",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:6a86c6e0b7da0d183cbf",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "canonical",
+        "focus"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "focus"
+          ]
+        }
+      ],
+      "relation_id": "PR:6b80c3355a0352b8b313",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:da5397a88d8f4040b729",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:5f6288daba4e6c4d8d44",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "bridges",
+        "changed"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "bridges",
+            "changed"
+          ]
+        }
+      ],
+      "relation_id": "PR:6c853e5ba03b6b451fab",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:da715a5d1d6fd4915e50",
+      "structural_membership_class": "suggested",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:6cefe68e4c9af18a87d4",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "evidence",
+        "exact",
+        "relations"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "evidence",
+            "exact",
+            "relations"
+          ]
+        }
+      ],
+      "relation_id": "PR:6d7ac435e8c21705579a",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:cc0c8a0045a6fe1e8112",
+      "structural_membership_class": "suggested",
+      "subject_id": "R6",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:dac2a3a7b5861dcf6d94",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "context",
+        "path"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "context",
+            "path"
+          ]
+        }
+      ],
+      "relation_id": "PR:71cffbcb31529188f970",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:3b3fd6e980400fe1d379",
+      "structural_membership_class": "suggested",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:70f75ab39c0f62841d02",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "evidence"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "evidence"
+          ]
+        }
+      ],
+      "relation_id": "PR:73bfa0edf2a1af440a8e",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:78da35998e62891f6fa9",
+      "structural_membership_class": "suggested",
+      "subject_id": "R6",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:fc66180bd788fe28dbb8",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "evidence",
+        "verification"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "evidence",
+            "verification"
+          ]
+        }
+      ],
+      "relation_id": "PR:74c050558f2c014609de",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:543ff43b3e5eeab71613",
+      "structural_membership_class": "suggested",
+      "subject_id": "R6",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:6a86c6e0b7da0d183cbf",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "renderer"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "renderer"
+          ]
+        }
+      ],
+      "relation_id": "PR:7a5703e9dc0b3f787632",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:93ec5f652b50cda4913b",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:9447f8b2939b4d22b529",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "canonical",
+        "relations"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "relations"
+          ]
+        }
+      ],
+      "relation_id": "PR:7c9f5674628cff992123",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:7ccf02543c1154f94fd5",
+      "structural_membership_class": "suggested",
+      "subject_id": "R6",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:1d9c808f0be2cb266b6f",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "changed",
+        "direct",
+        "edges",
+        "files",
+        "preserve"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "changed",
+            "direct",
+            "edges",
+            "files",
+            "preserve"
+          ]
+        }
+      ],
+      "relation_id": "PR:83164a5ba953686ed326",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:da5397a88d8f4040b729",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:5f6288daba4e6c4d8d44",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "renderer"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "renderer"
+          ]
+        }
+      ],
+      "relation_id": "PR:83aef8e5e9b70ce8e123",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:2380d52ce46c588ff706",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:ad1031bb297bf76002a5",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "direct"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "direct"
+          ]
+        }
+      ],
+      "relation_id": "PR:84b29b33fb7583c2e925",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:62694386d20493a8b93a",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:f8fbea12d82b0e44c81d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "changed",
+        "direct",
+        "files",
+        "required"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "changed",
+            "direct",
+            "files",
+            "required"
+          ]
+        }
+      ],
+      "relation_id": "PR:84c29b544e600024625b",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:3a738b073bed5edc6b52",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:3e3aceafa2d0163297c3",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "changed",
+        "direct",
+        "edges",
+        "files"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "changed",
+            "direct",
+            "edges",
+            "files"
+          ]
+        }
+      ],
+      "relation_id": "PR:89a75187c6b79733613c",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:ae049f36b6e35fe43a22",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:6ea7857296a794e334b2",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "changed"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "changed"
+          ]
+        }
+      ],
+      "relation_id": "PR:8d7fbbc83bf13d022283",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:6904460cc4e09f715dce",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:fd709a174d14ab73b381",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "focus"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "focus"
+          ]
+        }
+      ],
+      "relation_id": "PR:9a5bec7c61808c3c940c",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:51c24c73bde89d40669a",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:b9763a6bb0287322c575",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "changed"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "changed"
+          ]
+        }
+      ],
+      "relation_id": "PR:9b07fe014e67b7219bf9",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:da715a5d1d6fd4915e50",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:6cefe68e4c9af18a87d4",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "every"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "every"
+          ]
+        }
+      ],
+      "relation_id": "PR:9b10c37a1ac6f6f54da5",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:bcf3a6f0186446f5f61f",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:c74862e8c9be7a3c0ac3",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "canonical"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical"
+          ]
+        }
+      ],
+      "relation_id": "PR:9ddfe0360fc4287069cd",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:3f027f11e0341d0de0a1",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:f60e67a6527bd5cf0910",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "changed"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "changed"
+          ]
+        }
+      ],
+      "relation_id": "PR:a0f3dbfb09f28c3cc662",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:cc0c8a0045a6fe1e8112",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:dac2a3a7b5861dcf6d94",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "adjacent",
+        "changed",
+        "context"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "adjacent",
+            "changed",
+            "context"
+          ]
+        }
+      ],
+      "relation_id": "PR:a5bb0c5a54e5e7fc39b4",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:89fff3edee9994df99f2",
+      "structural_membership_class": "suggested",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:77e03ead5809cff4d272",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "presentation"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "presentation"
+          ]
+        }
+      ],
+      "relation_id": "PR:aa4c828894966287a916",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:e5c53c5a5891a300fe10",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:defcf28f30c2302c4c60",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "changed",
+        "edges"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "changed",
+            "edges"
+          ]
+        }
+      ],
+      "relation_id": "PR:ab82c80c89508a27545c",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:6904460cc4e09f715dce",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:fd709a174d14ab73b381",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "canonical",
+        "evidence",
+        "exact",
+        "relations"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "evidence",
+            "exact",
+            "relations"
+          ]
+        }
+      ],
+      "relation_id": "PR:acc00d08b406983dcc36",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:da5397a88d8f4040b729",
+      "structural_membership_class": "suggested",
+      "subject_id": "R6",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:5f6288daba4e6c4d8d44",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "focus",
+        "presentation"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "focus",
+            "presentation"
+          ]
+        }
+      ],
+      "relation_id": "PR:ad38e3f821e702598d09",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:e5b7fa1fcafb4c77ce3f",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:ce53432532a7b2dca4d3",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "canonical"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical"
+          ]
+        }
+      ],
+      "relation_id": "PR:ad94bb698d56b62eb44a",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:6ca8c7c3f63e6030f55a",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:b1ee2a150dd8610abee0",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "adjacent",
+        "changed",
+        "context",
+        "path"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "adjacent",
+            "changed",
+            "context",
+            "path"
+          ]
+        }
+      ],
+      "relation_id": "PR:ada3498536bb134e18fc",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:6904460cc4e09f715dce",
+      "structural_membership_class": "suggested",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:fd709a174d14ab73b381",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "changed"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "changed"
+          ]
+        }
+      ],
+      "relation_id": "PR:af0d253ce2d637e3dc3c",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:e73c3e724e4afb3c2224",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:30d53b2c6a34bcb73805",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "direct"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "direct"
+          ]
+        }
+      ],
+      "relation_id": "PR:bd5bce44fea924cd497f",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:e5b7fa1fcafb4c77ce3f",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:ce53432532a7b2dca4d3",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "canonical"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical"
+          ]
+        }
+      ],
+      "relation_id": "PR:bf5127005ae14acf7be1",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:62694386d20493a8b93a",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:f8fbea12d82b0e44c81d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "evidence"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "evidence"
+          ]
+        }
+      ],
+      "relation_id": "PR:c0e15eccdbf11adfc694",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:6904460cc4e09f715dce",
+      "structural_membership_class": "suggested",
+      "subject_id": "R6",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:fd709a174d14ab73b381",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "focus",
+        "presentation"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "focus",
+            "presentation"
+          ]
+        }
+      ],
+      "relation_id": "PR:c5b148c928ae70ad1f86",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:3b3fd6e980400fe1d379",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:70f75ab39c0f62841d02",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "evidence"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "evidence"
+          ]
+        }
+      ],
+      "relation_id": "PR:c800ec41f5e352a3b2ec",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:bcf3a6f0186446f5f61f",
+      "structural_membership_class": "suggested",
+      "subject_id": "R6",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:c74862e8c9be7a3c0ac3",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "edges"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "edges"
+          ]
+        }
+      ],
+      "relation_id": "PR:c933ab710e62821422df",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:19cd2582561d6e9791c8",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:842e419d5817f0244e2d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "changed",
+        "direct",
+        "files"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "changed",
+            "direct",
+            "files"
+          ]
+        }
+      ],
+      "relation_id": "PR:d3454cce56ae74dc8aac",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:89fff3edee9994df99f2",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:77e03ead5809cff4d272",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "changed",
+        "edges"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "changed",
+            "edges"
+          ]
+        }
+      ],
+      "relation_id": "PR:d4eb1148e7085f8f6631",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:543ff43b3e5eeab71613",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:6a86c6e0b7da0d183cbf",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "visible"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:d769810acfbbbb53ab58",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:e5b7fa1fcafb4c77ce3f",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:ce53432532a7b2dca4d3",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "canonical",
+        "member"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "member"
+          ]
+        }
+      ],
+      "relation_id": "PR:dc9c1d5296eb8ab283d0",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:ae049f36b6e35fe43a22",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:6ea7857296a794e334b2",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "changed"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "changed"
+          ]
+        }
+      ],
+      "relation_id": "PR:dd934e97400179c3853f",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:cc0c8a0045a6fe1e8112",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:dac2a3a7b5861dcf6d94",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "canonical",
+        "evidence"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "evidence"
+          ]
+        }
+      ],
+      "relation_id": "PR:ddc3578b1594e132ec24",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:a6cbe5a013f33936a911",
+      "structural_membership_class": "suggested",
+      "subject_id": "R6",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:aa4b7b42ff951a9097a0",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "canonical"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical"
+          ]
+        }
+      ],
+      "relation_id": "PR:e14cb4d05b841fc9cf70",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:62694386d20493a8b93a",
+      "structural_membership_class": "suggested",
+      "subject_id": "R6",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:f8fbea12d82b0e44c81d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "evidence",
+        "verification"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "evidence",
+            "verification"
+          ]
+        }
+      ],
+      "relation_id": "PR:e41ce6d6192c9cb012c8",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:f828a99b97e49c237175",
+      "structural_membership_class": "suggested",
+      "subject_id": "R6",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:d1a9b8954da09b63f3d5",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "adjacent",
+        "changed",
+        "context",
+        "path"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "adjacent",
+            "changed",
+            "context",
+            "path"
+          ]
+        }
+      ],
+      "relation_id": "PR:e6402fc1752b3767dab2",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:3a738b073bed5edc6b52",
+      "structural_membership_class": "suggested",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:3e3aceafa2d0163297c3",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "verification"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "verification"
+          ]
+        }
+      ],
+      "relation_id": "PR:e7f3d56f7061583117fb",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:e5c53c5a5891a300fe10",
+      "structural_membership_class": "suggested",
+      "subject_id": "R6",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:defcf28f30c2302c4c60",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "canonical",
+        "member"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "member"
+          ]
+        }
+      ],
+      "relation_id": "PR:e81a42a933a976ff90ab",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:3a738b073bed5edc6b52",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:3e3aceafa2d0163297c3",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "canonical"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical"
+          ]
+        }
+      ],
+      "relation_id": "PR:e9af784c61f00030fad3",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:6ca8c7c3f63e6030f55a",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:b1ee2a150dd8610abee0",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "evidence",
+        "relations"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "evidence",
+            "relations"
+          ]
+        }
+      ],
+      "relation_id": "PR:ec18d4147a45fda9504d",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:89fff3edee9994df99f2",
+      "structural_membership_class": "suggested",
+      "subject_id": "R6",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:77e03ead5809cff4d272",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "changed",
+        "files",
+        "visible"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "changed",
+            "files",
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:f0c7ee8ddb0308dcd95b",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:3a738b073bed5edc6b52",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:3e3aceafa2d0163297c3",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "member"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "member"
+          ]
+        }
+      ],
+      "relation_id": "PR:f13d744bf9e76828ed62",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:6904460cc4e09f715dce",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:fd709a174d14ab73b381",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "canonical"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical"
+          ]
+        }
+      ],
+      "relation_id": "PR:f2a154e861bf6338be7e",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:19cd2582561d6e9791c8",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:842e419d5817f0244e2d",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "canonical"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical"
+          ]
+        }
+      ],
+      "relation_id": "PR:f636b5abdca6b0dde285",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:3f027f11e0341d0de0a1",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:f60e67a6527bd5cf0910",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "canonical",
+        "member"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "member"
+          ]
+        }
+      ],
+      "relation_id": "PR:f9923d1d3b8eb8a29c18",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:cfde61f968af432ceae5",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:8ace4ea1a8a809ecf6e0",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "matched_terms": [
+        "canonical",
+        "evidence",
+        "exact",
+        "relations",
+        "verification"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "evidence",
+            "exact",
+            "relations",
+            "verification"
+          ]
+        }
+      ],
+      "relation_id": "PR:fd1438940dd2b518c213",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:ae049f36b6e35fe43a22",
+      "structural_membership_class": "suggested",
+      "subject_id": "R6",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:6ea7857296a794e334b2",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "matched_terms": [
+        "changed",
+        "files",
+        "renderer"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "changed",
+            "files",
+            "renderer"
+          ]
+        }
+      ],
+      "relation_id": "PR:fd4e15fedb93829b7394",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:6ca8c7c3f63e6030f55a",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:b1ee2a150dd8610abee0",
+      "target_type": "evidence"
+    }
+  ],
+  "schema_version": "structural_association_attribution.v1"
+}

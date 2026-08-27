@@ -40,7 +40,13 @@ repodelta compare-structural-correctness \
 The generated `pr-267.packet.json.provenance.json` is an evaluation-only copy
 of the production verification overlay. It preserves each membership's
 `asserted`/`matched`/`suggested`/`context`/`unresolved` class together with the
-producer and source IDs recorded by the canonical projection. The evaluator
+producer and source IDs recorded by the canonical projection. The generated
+`pr-267.packet.json.association.json` is a separate evaluation-only copy of
+every R/G changed-anchor candidate. It records the canonical association,
+reason details, matched terms, bridge IDs, convergence state, and any observed
+structural membership. Neither sidecar changes the production selection or
+assessment; the association sidecar exists to attribute reason-level behavior
+without reconstructing selector decisions from summary counts. The evaluator
 does not reconstruct paths or infer selector reasons from the packet. To replay
 the observed contribution of one producer, use the separate non-authoritative
 sink:
@@ -162,6 +168,11 @@ The
 [`findings`](campaign-v1-1/results/findings.md) retain the focus over-selection
 direction while separating provenance behavior from semantic reference roles
 and bounding recall claims by per-focus traversal coverage.
+The committed [`associations`](campaign-v1-1/associations/) artifacts are the
+same evaluation-only R/G changed-anchor sidecars emitted by the command above;
+they preserve candidate reasons and convergence data for reason-level
+attribution. They do not become a new reference authority or alter the frozen
+observations.
 The repository also keeps a byte-for-byte extraction under
 `campaign-v1-1/results/baseline-sources/090377e/` so a shallow CI checkout can
 verify the same recorded Git blob identities when the historical commit is not

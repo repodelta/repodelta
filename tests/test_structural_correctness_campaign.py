@@ -10,6 +10,9 @@ from repodelta.evaluation.structural_correctness import (
     load_observation,
     load_packet,
 )
+from repodelta.evaluation.association_attribution import (
+    load_association_attribution,
+)
 
 
 MANIFEST = Path(
@@ -180,6 +183,32 @@ def test_campaign_v1_1_binds_verified_references_before_comparison() -> None:
             / "results"
             / f"pr-{pull_request}.comparison.html"
         ).is_file()
+
+
+def test_campaign_v1_1_association_sidecars_bind_to_frozen_packets() -> None:
+    manifest = json.loads(V1_1_MANIFEST.read_text(encoding="utf-8"))
+
+    for sample in manifest["samples"]:
+        pull_request = sample["pull_request"]
+        packet = load_packet(
+            V1_1_CAMPAIGN / "packets" / f"pr-{pull_request}.packet.json"
+        )
+        sidecar = load_association_attribution(
+            V1_1_CAMPAIGN
+            / "associations"
+            / f"pr-{pull_request}.association.json"
+        )
+
+        assert sidecar.packet_digest == packet.digest
+        assert all(
+            item.subject_kind in {"requirement", "guardrail"}
+            and item.slot == "changed_anchor"
+            and item.target_type == "evidence"
+            for item in sidecar.rows
+        )
+        assert tuple(item.relation_id for item in sidecar.rows) == tuple(
+            sorted(item.relation_id for item in sidecar.rows)
+        )
 
 
 def test_campaign_v1_1_summary_is_derived_from_verified_references() -> None:
