@@ -14,6 +14,13 @@ from repodelta.evaluation.focus_provenance import (
     replay_producer_counterfactual,
     write_provenance_json,
 )
+from repodelta.evaluation.association_attribution import (
+    AssociationAttributionRow,
+    compare_association_attribution,
+    load_association_attribution,
+    observe_association_attribution,
+    write_association_attribution,
+)
 from repodelta.evaluation.structural_correctness import (
     OBSERVATION_SCHEMA,
     PREVIOUS_OBSERVATION_SCHEMA,
@@ -24,7 +31,10 @@ from repodelta.evaluation.structural_correctness import (
     prepare_structural_correctness_packet,
 )
 from repodelta.model.contracts import (
+    AssociationReason,
+    CandidateConvergence,
     ChangedFile,
+    ConvergenceGroup,
     EvidenceCatalog,
     EvidenceItem,
     ReviewBrief,
@@ -46,6 +56,10 @@ from repodelta.model.contracts import (
     StructuralOverviewFocus,
     StructuralOverviewProjection,
     StructuralRelationGroup,
+    ProjectionCandidateGroup,
+    ProjectionCandidateSet,
+    ProjectionRelation,
+    Requirement,
     VerificationEvidenceInspection,
     VerificationMatrixEntry,
     VerificationWorkspace,
@@ -476,6 +490,114 @@ def _production_brief() -> ReviewBrief:
     )
 
 
+def _association_brief() -> ReviewBrief:
+    """Add canonical R/G candidate and convergence data to the fixture brief."""
+
+    source = _production_brief()
+    relations = (
+        ProjectionRelation(
+            id="G1:anchor:b",
+            focus_statement_id="G1",
+            slot="changed_anchor",
+            target_type="evidence",
+            target_id="EV:N:b",
+            association="distinctive_phrase",
+            reasons=(
+                AssociationReason(
+                    "distinctive_phrase",
+                    "guardrail phrase overlaps changed symbol",
+                    ("bridge", "boundary"),
+                ),
+            ),
+            evidence_role="primary",
+        ),
+        ProjectionRelation(
+            id="R1:anchor:a",
+            focus_statement_id="R1",
+            slot="changed_anchor",
+            target_type="evidence",
+            target_id="EV:N:a",
+            association="exact_identifier",
+            reasons=(
+                AssociationReason(
+                    "exact_identifier",
+                    "canonical symbol identifier matched",
+                    ("N:a",),
+                ),
+            ),
+            evidence_role="primary",
+        ),
+    )
+    candidates = ProjectionCandidateSet(
+        relations=relations,
+        groups=(
+            ProjectionCandidateGroup("G1", "guardrail", ("G1:anchor:b",)),
+            ProjectionCandidateGroup("R1", "behavior", ("R1:anchor:a",)),
+        ),
+    )
+    convergence = CandidateConvergence(
+        groups=(
+            ConvergenceGroup(
+                "G1",
+                deferred_relation_ids=("G1:anchor:b",),
+            ),
+            ConvergenceGroup(
+                "R1",
+                selected_relation_ids=("R1:anchor:a",),
+            ),
+        )
+    )
+    workspace = source.projection.verification_workspace
+    updated_inspections = []
+    for inspection in workspace.inspections:
+        if inspection.subject_id not in {"G1", "R1"}:
+            updated_inspections.append(inspection)
+            continue
+        memberships = tuple(
+            replace(
+                membership,
+                relation_ids=(
+                    ("R1:anchor:a",)
+                    if inspection.subject_id == "R1"
+                    and membership.member_id == "N:a"
+                    else membership.relation_ids
+                ),
+            )
+            for membership in inspection.structural_overlay.memberships
+        )
+        updated_inspections.append(
+            replace(
+                inspection,
+                structural_overlay=replace(
+                    inspection.structural_overlay,
+                    memberships=memberships,
+                ),
+            )
+        )
+    updated_projection = replace(
+        source.projection,
+        verification_workspace=replace(
+            workspace,
+            inspections=tuple(updated_inspections),
+        ),
+    )
+    return replace(
+        source,
+        requirements=(Requirement("R1", "Keep the changed anchor."),),
+        guardrails=(
+            Requirement(
+                "G1",
+                "Keep the bridge boundary stable.",
+                purpose="guardrail",
+                kind="guardrail",
+            ),
+        ),
+        projection_candidates=candidates,
+        candidate_convergence=convergence,
+        projection=updated_projection,
+    )
+
+
 def test_provenance_round_trip_preserves_membership_classes(tmp_path) -> None:
     packet = _packet()
     value = _provenance(packet)
@@ -486,6 +608,289 @@ def test_provenance_round_trip_preserves_membership_classes(tmp_path) -> None:
     assert loaded == value
     assert loaded.focuses[0].memberships[0].membership_class == "matched"
     assert loaded.focuses[0].memberships[1].membership_class == "context"
+
+
+def test_association_attribution_copies_candidates_and_observed_membership(
+    tmp_path,
+) -> None:
+    brief = _association_brief()
+    packet = prepare_structural_correctness_packet(brief)
+
+    attribution = observe_association_attribution(brief, packet)
+
+    assert [item.relation_id for item in attribution.rows] == [
+        "G1:anchor:b",
+        "R1:anchor:a",
+    ]
+    assert attribution.subject_kinds == (
+        ("G1", "guardrail"),
+        ("R1", "requirement"),
+    )
+    guardrail, requirement = attribution.rows
+    assert guardrail.association == "distinctive_phrase"
+    assert guardrail.source_channel == "evidence"
+    assert guardrail.matched_terms == ("bridge", "boundary")
+    assert guardrail.candidate_state == "deferred"
+    assert guardrail.candidate_node_id == "N:b"
+    assert guardrail.structural_member_id is None
+    assert guardrail.structural_membership_class is None
+    assert requirement.association == "exact_identifier"
+    assert requirement.candidate_state == "selected"
+    assert requirement.candidate_node_id == "N:a"
+    assert requirement.structural_member_id == "N:a"
+    assert requirement.structural_membership_class == "matched"
+    assert requirement.lineage_node_ids == ("N:a", "N:b")
+    assert requirement.lineage_relation_group_ids == ("REL:1",)
+
+    path = write_association_attribution(attribution, tmp_path / "association.json")
+    assert load_association_attribution(path) == attribution
+
+
+def test_association_attribution_compares_recorded_lineage_without_replay() -> None:
+    brief = _association_brief()
+    packet = prepare_structural_correctness_packet(brief)
+    attribution = observe_association_attribution(brief, packet)
+    observation = observe_structural_correctness(brief, packet)
+    labels = replace(
+        _labels(packet),
+        focuses=(
+            ReferenceFocusLabel(
+                "R1",
+                direct_node_ids=(),
+                context_node_ids=("N:b",),
+                relation_ids=("REL:1",),
+            ),
+            ReferenceFocusLabel("G1", unresolved=True),
+        ),
+    )
+
+    comparison = compare_association_attribution(
+        attribution, observation, labels
+    )
+
+    assert comparison["attribution_mode"] == "dimension_specific_observed_join"
+    assert comparison["causal_replay"] is False
+    assert comparison["overall"]["claimed_direct_nodes"] == {
+        "false_inclusions": 1,
+        "false_exclusions": 0,
+    }
+    exact_identifier = next(
+        item
+        for item in comparison["reason_breakdown"]
+        if item["subject_kind"] == "requirement"
+        and item["association"] == "exact_identifier"
+    )
+    assert exact_identifier["comparison"]["claimed_direct_nodes"] == {
+        "false_inclusions": 1,
+        "false_exclusions": 0,
+    }
+    guardrail_focus = next(
+        item for item in comparison["per_focus"] if item["subject_id"] == "G1"
+    )
+    assert guardrail_focus["dimensions"]["suggested_nodes"] == {
+        "observed": 1,
+        "comparison": "reference_unresolved",
+    }
+
+
+def test_direct_false_inclusion_uses_its_observed_admission_relation() -> None:
+    brief = _association_brief()
+    packet = prepare_structural_correctness_packet(brief)
+    observation = observe_structural_correctness(brief, packet)
+    base_attribution = observe_association_attribution(brief, packet)
+    exact = next(
+        item for item in base_attribution.rows if item.relation_id == "R1:anchor:a"
+    )
+    bridge = next(
+        item for item in base_attribution.rows if item.relation_id == "G1:anchor:b"
+    )
+    attribution = replace(
+        base_attribution,
+        rows=(
+            exact,
+            replace(
+                bridge,
+                subject_id="R1",
+                subject_kind="requirement",
+                relation_id="R1:anchor:bridge",
+                association="claim_bridge",
+                reasons=(
+                    AssociationReason(
+                        "claim_bridge",
+                        "connected context root",
+                        ("bridge",),
+                    ),
+                ),
+                matched_terms=("bridge",),
+                source_channel="bridge",
+                structural_member_id="N:b",
+                structural_membership_class="context",
+                lineage_node_ids=("N:a", "N:b"),
+                lineage_relation_group_ids=("REL:1",),
+            ),
+        ),
+    )
+    labels = replace(
+        _labels(packet),
+        focuses=(
+            ReferenceFocusLabel(
+                "R1",
+                direct_node_ids=(),
+                context_node_ids=("N:b",),
+                relation_ids=("REL:1",),
+            ),
+            ReferenceFocusLabel("G1", unresolved=True),
+        ),
+    )
+
+    comparison = compare_association_attribution(
+        attribution, observation, labels
+    )
+
+    requirement = next(
+        item
+        for item in comparison["per_focus"]
+        if item["subject_id"] == "R1"
+    )
+    assert requirement["dimensions"]["claimed_direct_nodes"][
+        "false_inclusions_by_reason"
+    ] == {"exact_identifier": 1}
+    assert requirement["dimensions"]["selected_nodes"][
+        "false_inclusions_by_reason"
+    ] == {"multiple": 1}
+
+
+@pytest.mark.parametrize(
+    ("association", "source_channel"),
+    (
+        ("provided_association", "evidence"),
+        ("explicit_reference", "statement"),
+        ("exact_identifier", "evidence"),
+        ("distinctive_phrase", "evidence"),
+        ("claim_bridge", "bridge"),
+        ("structural_bridge", "structural"),
+        ("current_head", "verification"),
+    ),
+)
+def test_association_source_channel_is_derived_diagnostically(
+    association, source_channel
+) -> None:
+    row = AssociationAttributionRow(
+        subject_id="R1",
+        subject_kind="requirement",
+        relation_id=f"R1:{association}",
+        slot="changed_anchor",
+        target_type="evidence",
+        target_id="EV:N:a",
+        association=association,
+        reasons=(AssociationReason(association, "diagnostic", ("term",)),),
+        matched_terms=("term",),
+        source_channel=source_channel,
+        evidence_role="primary",
+        bridge_ids=(),
+        candidate_state="deferred",
+    )
+
+    assert row.source_channel == source_channel
+
+
+def test_association_attribution_requires_reason_precedence_and_terms() -> None:
+    with pytest.raises(ValueError, match="reasons led by its association"):
+        AssociationAttributionRow(
+            subject_id="R1",
+            subject_kind="requirement",
+            relation_id="R1:bad-precedence",
+            slot="changed_anchor",
+            target_type="evidence",
+            target_id="EV:N:a",
+            association="exact_identifier",
+            reasons=(
+                AssociationReason("distinctive_phrase", "wrong first reason"),
+            ),
+            matched_terms=(),
+            source_channel="evidence",
+            evidence_role="primary",
+            bridge_ids=(),
+            candidate_state="selected",
+        )
+    with pytest.raises(ValueError, match="requires reasons led"):
+        AssociationAttributionRow(
+            subject_id="R1",
+            subject_kind="requirement",
+            relation_id="R1:missing-reason",
+            slot="changed_anchor",
+            target_type="evidence",
+            target_id="EV:N:a",
+            association="exact_identifier",
+            reasons=(),
+            matched_terms=(),
+            source_channel="evidence",
+            evidence_role="primary",
+            bridge_ids=(),
+            candidate_state="selected",
+        )
+
+
+def test_association_attribution_rejects_ambiguous_observed_membership() -> None:
+    brief = _association_brief()
+    workspace = brief.projection.verification_workspace
+    inspections = []
+    for inspection in workspace.inspections:
+        if inspection.subject_id != "R1":
+            inspections.append(inspection)
+            continue
+        memberships = tuple(
+            replace(
+                membership,
+                relation_ids=(
+                    (*membership.relation_ids, "R1:anchor:a")
+                    if membership.member_id == "N:b"
+                    else membership.relation_ids
+                ),
+            )
+            for membership in inspection.structural_overlay.memberships
+        )
+        inspections.append(
+            replace(
+                inspection,
+                structural_overlay=replace(
+                    inspection.structural_overlay,
+                    memberships=memberships,
+                ),
+            )
+        )
+    ambiguous = replace(
+        brief,
+        projection=replace(
+            brief.projection,
+            verification_workspace=replace(
+                workspace, inspections=tuple(inspections)
+            ),
+        ),
+    )
+    packet = prepare_structural_correctness_packet(ambiguous)
+
+    with pytest.raises(ValueError, match="multiple structural nodes"):
+        observe_association_attribution(ambiguous, packet)
+
+
+def test_association_attribution_rejects_packet_or_reason_drift() -> None:
+    brief = _association_brief()
+    packet = prepare_structural_correctness_packet(brief)
+
+    with pytest.raises(ValueError, match="does not match current review"):
+        observe_association_attribution(
+            brief,
+            replace(packet, head_sha="different"),
+        )
+
+    with pytest.raises(ValueError, match="matched terms are not canonical"):
+        replace(
+            # Keep this a focused contract test without invoking the producer.
+            # The reason's terms are the canonical source for the flattened field.
+            observe_association_attribution(brief, packet).rows[0],
+            matched_terms=("not-canonical",),
+        )
 
 
 def test_observation_copies_real_review_brief_overlay_for_all_subject_paths(

@@ -10,6 +10,10 @@ from repodelta.evaluation.structural_correctness import (
     load_observation,
     load_packet,
 )
+from repodelta.evaluation.association_attribution import (
+    aggregate_association_comparisons,
+    load_association_attribution,
+)
 
 
 MANIFEST = Path(
@@ -180,6 +184,118 @@ def test_campaign_v1_1_binds_verified_references_before_comparison() -> None:
             / "results"
             / f"pr-{pull_request}.comparison.html"
         ).is_file()
+
+
+def test_campaign_v1_1_association_sidecars_bind_to_frozen_packets() -> None:
+    manifest = json.loads(V1_1_MANIFEST.read_text(encoding="utf-8"))
+
+    for sample in manifest["samples"]:
+        pull_request = sample["pull_request"]
+        packet = load_packet(
+            V1_1_CAMPAIGN / "packets" / f"pr-{pull_request}.packet.json"
+        )
+        sidecar = load_association_attribution(
+            V1_1_CAMPAIGN
+            / "associations"
+            / f"pr-{pull_request}.association.json"
+        )
+
+        assert sidecar.packet_digest == packet.digest
+        assert sidecar.subject_kinds == tuple(
+            sorted(
+                (item.subject_id, item.subject_kind)
+                for item in packet.subjects
+                if item.subject_kind in {"requirement", "guardrail"}
+            )
+        )
+        assert all(
+            item.subject_kind in {"requirement", "guardrail"}
+            and item.slot == "changed_anchor"
+            and item.target_type == "evidence"
+            for item in sidecar.rows
+        )
+        assert tuple(item.relation_id for item in sidecar.rows) == tuple(
+            sorted(item.relation_id for item in sidecar.rows)
+        )
+
+
+def test_campaign_v1_1_association_comparison_summary_is_derived() -> None:
+    result_dir = V1_1_CAMPAIGN / "results" / "association-attribution"
+    comparisons = {
+        path.stem: json.loads(path.read_text(encoding="utf-8"))
+        for path in sorted(result_dir.glob("pr-*.json"))
+    }
+    summary = json.loads(
+        (result_dir / "summary.json").read_text(encoding="utf-8")
+    )
+
+    assert summary == aggregate_association_comparisons(comparisons)
+    assert summary["overall"]["claimed_direct_nodes"] == {
+        "false_inclusions": 38,
+        "false_exclusions": 212,
+    }
+    exact_identifier = {
+        (item["subject_kind"], item["association"]): item
+        for item in summary["by_reason"]
+    }
+    assert exact_identifier[("requirement", "exact_identifier")][
+        "comparison_involved"
+    ]["claimed_direct_nodes"] == {
+        "false_inclusions": 31,
+        "false_exclusions": 0,
+    }
+    assert exact_identifier[("guardrail", "exact_identifier")][
+        "comparison_involved"
+    ]["claimed_direct_nodes"] == {
+        "false_inclusions": 7,
+        "false_exclusions": 0,
+    }
+
+
+def test_campaign_v1_1_exclusive_reason_breakdown_accounts_for_overall() -> None:
+    result_dir = V1_1_CAMPAIGN / "results" / "association-attribution"
+    comparisons = {
+        path.stem: json.loads(path.read_text(encoding="utf-8"))
+        for path in sorted(result_dir.glob("pr-*.json"))
+    }
+    summary = json.loads(
+        (result_dir / "summary.json").read_text(encoding="utf-8")
+    )
+    concrete_and_fallback_reasons = {
+        (item["subject_kind"], item["association"])
+        for item in summary["by_reason"]
+    }
+    observed_exclusive_buckets = set()
+    for comparison in comparisons.values():
+        for focus in comparison["per_focus"]:
+            for result in focus["dimensions"].values():
+                if not isinstance(result, dict):
+                    continue
+                for field in (
+                    "false_inclusions_by_reason",
+                    "false_exclusions_by_reason",
+                ):
+                    for bucket, count in result.get(field, {}).items():
+                        if bucket in {"multiple", "unattributed"} and count:
+                            observed_exclusive_buckets.add(
+                                (focus["subject_kind"], bucket)
+                            )
+
+    assert observed_exclusive_buckets <= concrete_and_fallback_reasons
+
+    dimensions = (
+        "selected_nodes",
+        "claimed_direct_nodes",
+        "structural_context_nodes",
+        "exact_relations",
+    )
+    for dimension in dimensions:
+        for field in ("false_inclusions", "false_exclusions"):
+            accounted = sum(
+                item["comparison"].get(dimension, {}).get(field, 0)
+                for item in summary["by_reason"]
+            )
+            assert accounted == summary["overall"][dimension][field]
 
 
 def test_campaign_v1_1_summary_is_derived_from_verified_references() -> None:

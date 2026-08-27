@@ -1,0 +1,978 @@
+{
+  "packet_digest": "d0f86cce67cc01b6a483d5343949947bc03e5479f252d4b8b5f3bd8a401196bf",
+  "rows": [
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_node_id": "SN:a3d4b9349331e480ccc9",
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:09332362e45a8f116f64",
+        "SN:0d25a940127b8a09a2b9",
+        "SN:145b9edaae9cc86f5d86",
+        "SN:1a5471da8621916f448b",
+        "SN:32ebced8120db69f929e",
+        "SN:37a3f84572c25e3cbbd4",
+        "SN:3fa93a82bd95f9e201a7",
+        "SN:473f603d478751e24b92",
+        "SN:7fde768326d5b10302de",
+        "SN:95e9ae79b3966ac4ccfe",
+        "SN:9c926f5950f88e50331a",
+        "SN:9fedf27572541c37e5ea",
+        "SN:a3d4b9349331e480ccc9",
+        "SN:c033e6e31be5b3be7dec",
+        "SN:d8551c12f6997fd3e0c2",
+        "SN:e0ab5042bc9453753bcc",
+        "SN:e0f566150e37781fa3a0",
+        "SN:ecad981cc93122e38885",
+        "SN:f63087ace0914f7968f6"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:0d668a197b71bcac6e9d",
+        "SRG:1619d4e12124c51e2943",
+        "SRG:1ff920091de717ed1eab",
+        "SRG:3abfbadd81d024b9f452",
+        "SRG:4257483d00b180dd305e",
+        "SRG:49a8213a8573d09e9917",
+        "SRG:622089e388c43cff609a",
+        "SRG:6d660aafd447af4b7efe",
+        "SRG:76e7799e9720fdf7b684",
+        "SRG:798efd3c76bdddcd4a5c",
+        "SRG:d8bc8af3074c8c9a14a4",
+        "SRG:dc9807504d9ee685a9e0"
+      ],
+      "matched_terms": [
+        "backbone",
+        "direct",
+        "primary"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "backbone",
+            "direct",
+            "primary"
+          ]
+        }
+      ],
+      "relation_id": "PR:0d1da592a9c5ff9d324b",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:a3d4b9349331e480ccc9",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:4fbcf96b02d19017c2c9",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_node_id": "SN:e0ab5042bc9453753bcc",
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "lineage_node_ids": [
+        "SN:09332362e45a8f116f64",
+        "SN:0d25a940127b8a09a2b9",
+        "SN:1a5471da8621916f448b",
+        "SN:32ebced8120db69f929e",
+        "SN:37a3f84572c25e3cbbd4",
+        "SN:7fde768326d5b10302de",
+        "SN:95e9ae79b3966ac4ccfe",
+        "SN:9c926f5950f88e50331a",
+        "SN:9fedf27572541c37e5ea",
+        "SN:a3d4b9349331e480ccc9",
+        "SN:d8551c12f6997fd3e0c2",
+        "SN:e0ab5042bc9453753bcc",
+        "SN:e0f566150e37781fa3a0",
+        "SN:ecad981cc93122e38885",
+        "SN:f63087ace0914f7968f6"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:0d668a197b71bcac6e9d",
+        "SRG:1619d4e12124c51e2943",
+        "SRG:1ff920091de717ed1eab",
+        "SRG:3abfbadd81d024b9f452",
+        "SRG:4257483d00b180dd305e",
+        "SRG:622089e388c43cff609a",
+        "SRG:6d660aafd447af4b7efe",
+        "SRG:76e7799e9720fdf7b684",
+        "SRG:798efd3c76bdddcd4a5c",
+        "SRG:d8bc8af3074c8c9a14a4",
+        "SRG:dc9807504d9ee685a9e0"
+      ],
+      "matched_terms": [
+        "direct",
+        "selected"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "direct",
+            "selected"
+          ]
+        }
+      ],
+      "relation_id": "PR:14f96604e8ad458d1d3d",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:e0ab5042bc9453753bcc",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:d0cf036a1010c1207bc5",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_node_id": "SN:e0ab5042bc9453753bcc",
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "lineage_node_ids": [
+        "SN:09332362e45a8f116f64",
+        "SN:0d25a940127b8a09a2b9",
+        "SN:145b9edaae9cc86f5d86",
+        "SN:1a5471da8621916f448b",
+        "SN:32ebced8120db69f929e",
+        "SN:37a3f84572c25e3cbbd4",
+        "SN:3fa93a82bd95f9e201a7",
+        "SN:473f603d478751e24b92",
+        "SN:7fde768326d5b10302de",
+        "SN:95e9ae79b3966ac4ccfe",
+        "SN:9c926f5950f88e50331a",
+        "SN:9fedf27572541c37e5ea",
+        "SN:a3d4b9349331e480ccc9",
+        "SN:c033e6e31be5b3be7dec",
+        "SN:d8551c12f6997fd3e0c2",
+        "SN:e0ab5042bc9453753bcc",
+        "SN:e0f566150e37781fa3a0",
+        "SN:ecad981cc93122e38885",
+        "SN:f63087ace0914f7968f6"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:0d668a197b71bcac6e9d",
+        "SRG:1619d4e12124c51e2943",
+        "SRG:1ff920091de717ed1eab",
+        "SRG:3abfbadd81d024b9f452",
+        "SRG:4257483d00b180dd305e",
+        "SRG:49a8213a8573d09e9917",
+        "SRG:622089e388c43cff609a",
+        "SRG:6d660aafd447af4b7efe",
+        "SRG:76e7799e9720fdf7b684",
+        "SRG:798efd3c76bdddcd4a5c",
+        "SRG:d8bc8af3074c8c9a14a4",
+        "SRG:dc9807504d9ee685a9e0"
+      ],
+      "matched_terms": [
+        "backbone",
+        "direct",
+        "selected",
+        "structural"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "backbone",
+            "direct",
+            "selected",
+            "structural"
+          ]
+        }
+      ],
+      "relation_id": "PR:1aacf84ecfd6649bf87b",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:e0ab5042bc9453753bcc",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:d0cf036a1010c1207bc5",
+      "target_type": "evidence"
+    },
+    {
+      "association": "claim_bridge",
+      "bridge_ids": [
+        "VC3"
+      ],
+      "candidate_node_id": "SN:e0ab5042bc9453753bcc",
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "lineage_node_ids": [
+        "SN:09332362e45a8f116f64",
+        "SN:0d25a940127b8a09a2b9",
+        "SN:1a5471da8621916f448b",
+        "SN:7fde768326d5b10302de",
+        "SN:95e9ae79b3966ac4ccfe",
+        "SN:9fedf27572541c37e5ea",
+        "SN:e0ab5042bc9453753bcc",
+        "SN:f63087ace0914f7968f6"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:1ff920091de717ed1eab",
+        "SRG:6d660aafd447af4b7efe",
+        "SRG:798efd3c76bdddcd4a5c",
+        "SRG:d8bc8af3074c8c9a14a4",
+        "SRG:dc9807504d9ee685a9e0"
+      ],
+      "matched_terms": [
+        "backbone",
+        "seed"
+      ],
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "backbone",
+            "seed"
+          ]
+        }
+      ],
+      "relation_id": "PR:29400860b268293064ee",
+      "slot": "changed_anchor",
+      "source_channel": "bridge",
+      "structural_member_id": "SN:e0ab5042bc9453753bcc",
+      "structural_membership_class": "suggested",
+      "subject_id": "G3",
+      "subject_kind": "guardrail",
+      "target_id": "E:structural_change:d0cf036a1010c1207bc5",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_node_id": "SN:a3d4b9349331e480ccc9",
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:09332362e45a8f116f64",
+        "SN:0d25a940127b8a09a2b9",
+        "SN:1a5471da8621916f448b",
+        "SN:32ebced8120db69f929e",
+        "SN:37a3f84572c25e3cbbd4",
+        "SN:7fde768326d5b10302de",
+        "SN:95e9ae79b3966ac4ccfe",
+        "SN:9c926f5950f88e50331a",
+        "SN:9fedf27572541c37e5ea",
+        "SN:a3d4b9349331e480ccc9",
+        "SN:d8551c12f6997fd3e0c2",
+        "SN:e0ab5042bc9453753bcc",
+        "SN:e0f566150e37781fa3a0",
+        "SN:ecad981cc93122e38885",
+        "SN:f63087ace0914f7968f6"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:0d668a197b71bcac6e9d",
+        "SRG:1619d4e12124c51e2943",
+        "SRG:1ff920091de717ed1eab",
+        "SRG:3abfbadd81d024b9f452",
+        "SRG:4257483d00b180dd305e",
+        "SRG:622089e388c43cff609a",
+        "SRG:6d660aafd447af4b7efe",
+        "SRG:76e7799e9720fdf7b684",
+        "SRG:798efd3c76bdddcd4a5c",
+        "SRG:d8bc8af3074c8c9a14a4",
+        "SRG:dc9807504d9ee685a9e0"
+      ],
+      "matched_terms": [
+        "backbone",
+        "focus"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "backbone",
+            "focus"
+          ]
+        }
+      ],
+      "relation_id": "PR:2e34e8ec774dec9fe4b2",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:a3d4b9349331e480ccc9",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:4fbcf96b02d19017c2c9",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_node_id": "SN:37a3f84572c25e3cbbd4",
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:09332362e45a8f116f64",
+        "SN:0d25a940127b8a09a2b9",
+        "SN:1a5471da8621916f448b",
+        "SN:32ebced8120db69f929e",
+        "SN:37a3f84572c25e3cbbd4",
+        "SN:7fde768326d5b10302de",
+        "SN:95e9ae79b3966ac4ccfe",
+        "SN:9c926f5950f88e50331a",
+        "SN:9fedf27572541c37e5ea",
+        "SN:a3d4b9349331e480ccc9",
+        "SN:d8551c12f6997fd3e0c2",
+        "SN:e0ab5042bc9453753bcc",
+        "SN:e0f566150e37781fa3a0",
+        "SN:ecad981cc93122e38885",
+        "SN:f63087ace0914f7968f6"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:0d668a197b71bcac6e9d",
+        "SRG:1619d4e12124c51e2943",
+        "SRG:1ff920091de717ed1eab",
+        "SRG:3abfbadd81d024b9f452",
+        "SRG:4257483d00b180dd305e",
+        "SRG:622089e388c43cff609a",
+        "SRG:6d660aafd447af4b7efe",
+        "SRG:76e7799e9720fdf7b684",
+        "SRG:798efd3c76bdddcd4a5c",
+        "SRG:d8bc8af3074c8c9a14a4",
+        "SRG:dc9807504d9ee685a9e0"
+      ],
+      "matched_terms": [
+        "direct"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "direct"
+          ]
+        }
+      ],
+      "relation_id": "PR:31115b9f5c0674655585",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:37a3f84572c25e3cbbd4",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_node_id": "SN:473f603d478751e24b92",
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:09332362e45a8f116f64",
+        "SN:0d25a940127b8a09a2b9",
+        "SN:145b9edaae9cc86f5d86",
+        "SN:1a5471da8621916f448b",
+        "SN:32ebced8120db69f929e",
+        "SN:37a3f84572c25e3cbbd4",
+        "SN:3fa93a82bd95f9e201a7",
+        "SN:473f603d478751e24b92",
+        "SN:7fde768326d5b10302de",
+        "SN:95e9ae79b3966ac4ccfe",
+        "SN:9c926f5950f88e50331a",
+        "SN:9fedf27572541c37e5ea",
+        "SN:a3d4b9349331e480ccc9",
+        "SN:c033e6e31be5b3be7dec",
+        "SN:d8551c12f6997fd3e0c2",
+        "SN:e0ab5042bc9453753bcc",
+        "SN:e0f566150e37781fa3a0",
+        "SN:ecad981cc93122e38885",
+        "SN:f63087ace0914f7968f6"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:0d668a197b71bcac6e9d",
+        "SRG:1619d4e12124c51e2943",
+        "SRG:1ff920091de717ed1eab",
+        "SRG:3abfbadd81d024b9f452",
+        "SRG:4257483d00b180dd305e",
+        "SRG:49a8213a8573d09e9917",
+        "SRG:622089e388c43cff609a",
+        "SRG:6d660aafd447af4b7efe",
+        "SRG:76e7799e9720fdf7b684",
+        "SRG:798efd3c76bdddcd4a5c",
+        "SRG:d8bc8af3074c8c9a14a4",
+        "SRG:dc9807504d9ee685a9e0"
+      ],
+      "matched_terms": [
+        "evidence",
+        "primary",
+        "structural"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "evidence",
+            "primary",
+            "structural"
+          ]
+        }
+      ],
+      "relation_id": "PR:37c4b872d580245c1478",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:473f603d478751e24b92",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:44a2370ce77a6e66f8e7",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_node_id": "SN:37a3f84572c25e3cbbd4",
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:09332362e45a8f116f64",
+        "SN:0d25a940127b8a09a2b9",
+        "SN:145b9edaae9cc86f5d86",
+        "SN:1a5471da8621916f448b",
+        "SN:32ebced8120db69f929e",
+        "SN:37a3f84572c25e3cbbd4",
+        "SN:3fa93a82bd95f9e201a7",
+        "SN:473f603d478751e24b92",
+        "SN:7fde768326d5b10302de",
+        "SN:95e9ae79b3966ac4ccfe",
+        "SN:9c926f5950f88e50331a",
+        "SN:9fedf27572541c37e5ea",
+        "SN:a3d4b9349331e480ccc9",
+        "SN:c033e6e31be5b3be7dec",
+        "SN:d8551c12f6997fd3e0c2",
+        "SN:e0ab5042bc9453753bcc",
+        "SN:e0f566150e37781fa3a0",
+        "SN:ecad981cc93122e38885",
+        "SN:f63087ace0914f7968f6"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:0d668a197b71bcac6e9d",
+        "SRG:1619d4e12124c51e2943",
+        "SRG:1ff920091de717ed1eab",
+        "SRG:3abfbadd81d024b9f452",
+        "SRG:4257483d00b180dd305e",
+        "SRG:49a8213a8573d09e9917",
+        "SRG:622089e388c43cff609a",
+        "SRG:6d660aafd447af4b7efe",
+        "SRG:76e7799e9720fdf7b684",
+        "SRG:798efd3c76bdddcd4a5c",
+        "SRG:d8bc8af3074c8c9a14a4",
+        "SRG:dc9807504d9ee685a9e0"
+      ],
+      "matched_terms": [
+        "backbone",
+        "direct",
+        "primary"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "backbone",
+            "direct",
+            "primary"
+          ]
+        }
+      ],
+      "relation_id": "PR:57c956df4b714a7b26a8",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:37a3f84572c25e3cbbd4",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_node_id": "SN:a3d4b9349331e480ccc9",
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:09332362e45a8f116f64",
+        "SN:0d25a940127b8a09a2b9",
+        "SN:1a5471da8621916f448b",
+        "SN:32ebced8120db69f929e",
+        "SN:37a3f84572c25e3cbbd4",
+        "SN:7fde768326d5b10302de",
+        "SN:95e9ae79b3966ac4ccfe",
+        "SN:9c926f5950f88e50331a",
+        "SN:9fedf27572541c37e5ea",
+        "SN:a3d4b9349331e480ccc9",
+        "SN:d8551c12f6997fd3e0c2",
+        "SN:e0ab5042bc9453753bcc",
+        "SN:e0f566150e37781fa3a0",
+        "SN:ecad981cc93122e38885",
+        "SN:f63087ace0914f7968f6"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:0d668a197b71bcac6e9d",
+        "SRG:1619d4e12124c51e2943",
+        "SRG:1ff920091de717ed1eab",
+        "SRG:3abfbadd81d024b9f452",
+        "SRG:4257483d00b180dd305e",
+        "SRG:622089e388c43cff609a",
+        "SRG:6d660aafd447af4b7efe",
+        "SRG:76e7799e9720fdf7b684",
+        "SRG:798efd3c76bdddcd4a5c",
+        "SRG:d8bc8af3074c8c9a14a4",
+        "SRG:dc9807504d9ee685a9e0"
+      ],
+      "matched_terms": [
+        "backbone",
+        "canonical",
+        "context",
+        "include",
+        "intermediate"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "backbone",
+            "canonical",
+            "context",
+            "include",
+            "intermediate"
+          ]
+        }
+      ],
+      "relation_id": "PR:8b15af7d5eafa90adf43",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:a3d4b9349331e480ccc9",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:4fbcf96b02d19017c2c9",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_node_id": "SN:e0ab5042bc9453753bcc",
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "lineage_node_ids": [
+        "SN:09332362e45a8f116f64",
+        "SN:0d25a940127b8a09a2b9",
+        "SN:1a5471da8621916f448b",
+        "SN:32ebced8120db69f929e",
+        "SN:37a3f84572c25e3cbbd4",
+        "SN:7fde768326d5b10302de",
+        "SN:95e9ae79b3966ac4ccfe",
+        "SN:9c926f5950f88e50331a",
+        "SN:9fedf27572541c37e5ea",
+        "SN:a3d4b9349331e480ccc9",
+        "SN:d8551c12f6997fd3e0c2",
+        "SN:e0ab5042bc9453753bcc",
+        "SN:e0f566150e37781fa3a0",
+        "SN:ecad981cc93122e38885",
+        "SN:f63087ace0914f7968f6"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:0d668a197b71bcac6e9d",
+        "SRG:1619d4e12124c51e2943",
+        "SRG:1ff920091de717ed1eab",
+        "SRG:3abfbadd81d024b9f452",
+        "SRG:4257483d00b180dd305e",
+        "SRG:622089e388c43cff609a",
+        "SRG:6d660aafd447af4b7efe",
+        "SRG:76e7799e9720fdf7b684",
+        "SRG:798efd3c76bdddcd4a5c",
+        "SRG:d8bc8af3074c8c9a14a4",
+        "SRG:dc9807504d9ee685a9e0"
+      ],
+      "matched_terms": [
+        "backbone"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "backbone"
+          ]
+        }
+      ],
+      "relation_id": "PR:95ecaa2ed8719b2f5f3c",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:e0ab5042bc9453753bcc",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:d0cf036a1010c1207bc5",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_node_id": "SN:e0ab5042bc9453753bcc",
+      "candidate_state": "selected",
+      "evidence_role": "primary",
+      "lineage_node_ids": [
+        "SN:09332362e45a8f116f64",
+        "SN:0d25a940127b8a09a2b9",
+        "SN:1a5471da8621916f448b",
+        "SN:32ebced8120db69f929e",
+        "SN:37a3f84572c25e3cbbd4",
+        "SN:7fde768326d5b10302de",
+        "SN:95e9ae79b3966ac4ccfe",
+        "SN:9c926f5950f88e50331a",
+        "SN:9fedf27572541c37e5ea",
+        "SN:a3d4b9349331e480ccc9",
+        "SN:d8551c12f6997fd3e0c2",
+        "SN:e0ab5042bc9453753bcc",
+        "SN:e0f566150e37781fa3a0",
+        "SN:ecad981cc93122e38885",
+        "SN:f63087ace0914f7968f6"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:0d668a197b71bcac6e9d",
+        "SRG:1619d4e12124c51e2943",
+        "SRG:1ff920091de717ed1eab",
+        "SRG:3abfbadd81d024b9f452",
+        "SRG:4257483d00b180dd305e",
+        "SRG:622089e388c43cff609a",
+        "SRG:6d660aafd447af4b7efe",
+        "SRG:76e7799e9720fdf7b684",
+        "SRG:798efd3c76bdddcd4a5c",
+        "SRG:d8bc8af3074c8c9a14a4",
+        "SRG:dc9807504d9ee685a9e0"
+      ],
+      "matched_terms": [
+        "backbone",
+        "canonical",
+        "nodes"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "backbone",
+            "canonical",
+            "nodes"
+          ]
+        }
+      ],
+      "relation_id": "PR:96e323515b714e39a56d",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:e0ab5042bc9453753bcc",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:d0cf036a1010c1207bc5",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_node_id": "SN:a3d4b9349331e480ccc9",
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:09332362e45a8f116f64",
+        "SN:0d25a940127b8a09a2b9",
+        "SN:1a5471da8621916f448b",
+        "SN:32ebced8120db69f929e",
+        "SN:37a3f84572c25e3cbbd4",
+        "SN:7fde768326d5b10302de",
+        "SN:95e9ae79b3966ac4ccfe",
+        "SN:9c926f5950f88e50331a",
+        "SN:9fedf27572541c37e5ea",
+        "SN:a3d4b9349331e480ccc9",
+        "SN:d8551c12f6997fd3e0c2",
+        "SN:e0ab5042bc9453753bcc",
+        "SN:e0f566150e37781fa3a0",
+        "SN:ecad981cc93122e38885",
+        "SN:f63087ace0914f7968f6"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:0d668a197b71bcac6e9d",
+        "SRG:1619d4e12124c51e2943",
+        "SRG:1ff920091de717ed1eab",
+        "SRG:3abfbadd81d024b9f452",
+        "SRG:4257483d00b180dd305e",
+        "SRG:622089e388c43cff609a",
+        "SRG:6d660aafd447af4b7efe",
+        "SRG:76e7799e9720fdf7b684",
+        "SRG:798efd3c76bdddcd4a5c",
+        "SRG:d8bc8af3074c8c9a14a4",
+        "SRG:dc9807504d9ee685a9e0"
+      ],
+      "matched_terms": [
+        "direct"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "direct"
+          ]
+        }
+      ],
+      "relation_id": "PR:a7ae7e4555da1f5e8770",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:a3d4b9349331e480ccc9",
+      "structural_membership_class": "suggested",
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:4fbcf96b02d19017c2c9",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_node_id": "SN:3fa93a82bd95f9e201a7",
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:09332362e45a8f116f64",
+        "SN:0d25a940127b8a09a2b9",
+        "SN:145b9edaae9cc86f5d86",
+        "SN:1a5471da8621916f448b",
+        "SN:32ebced8120db69f929e",
+        "SN:37a3f84572c25e3cbbd4",
+        "SN:3fa93a82bd95f9e201a7",
+        "SN:473f603d478751e24b92",
+        "SN:7fde768326d5b10302de",
+        "SN:95e9ae79b3966ac4ccfe",
+        "SN:9c926f5950f88e50331a",
+        "SN:9fedf27572541c37e5ea",
+        "SN:a3d4b9349331e480ccc9",
+        "SN:c033e6e31be5b3be7dec",
+        "SN:d8551c12f6997fd3e0c2",
+        "SN:e0ab5042bc9453753bcc",
+        "SN:e0f566150e37781fa3a0",
+        "SN:ecad981cc93122e38885",
+        "SN:f63087ace0914f7968f6"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:0d668a197b71bcac6e9d",
+        "SRG:1619d4e12124c51e2943",
+        "SRG:1ff920091de717ed1eab",
+        "SRG:3abfbadd81d024b9f452",
+        "SRG:4257483d00b180dd305e",
+        "SRG:49a8213a8573d09e9917",
+        "SRG:622089e388c43cff609a",
+        "SRG:6d660aafd447af4b7efe",
+        "SRG:76e7799e9720fdf7b684",
+        "SRG:798efd3c76bdddcd4a5c",
+        "SRG:d8bc8af3074c8c9a14a4",
+        "SRG:dc9807504d9ee685a9e0"
+      ],
+      "matched_terms": [
+        "evidence",
+        "structural",
+        "support"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "evidence",
+            "structural",
+            "support"
+          ]
+        }
+      ],
+      "relation_id": "PR:abb079d1efad751b24e2",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:3fa93a82bd95f9e201a7",
+      "structural_membership_class": "suggested",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:7c4162e02e623fea377f",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_node_id": "SN:37a3f84572c25e3cbbd4",
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:09332362e45a8f116f64",
+        "SN:0d25a940127b8a09a2b9",
+        "SN:1a5471da8621916f448b",
+        "SN:32ebced8120db69f929e",
+        "SN:37a3f84572c25e3cbbd4",
+        "SN:7fde768326d5b10302de",
+        "SN:95e9ae79b3966ac4ccfe",
+        "SN:9c926f5950f88e50331a",
+        "SN:9fedf27572541c37e5ea",
+        "SN:a3d4b9349331e480ccc9",
+        "SN:d8551c12f6997fd3e0c2",
+        "SN:e0ab5042bc9453753bcc",
+        "SN:e0f566150e37781fa3a0",
+        "SN:ecad981cc93122e38885",
+        "SN:f63087ace0914f7968f6"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:0d668a197b71bcac6e9d",
+        "SRG:1619d4e12124c51e2943",
+        "SRG:1ff920091de717ed1eab",
+        "SRG:3abfbadd81d024b9f452",
+        "SRG:4257483d00b180dd305e",
+        "SRG:622089e388c43cff609a",
+        "SRG:6d660aafd447af4b7efe",
+        "SRG:76e7799e9720fdf7b684",
+        "SRG:798efd3c76bdddcd4a5c",
+        "SRG:d8bc8af3074c8c9a14a4",
+        "SRG:dc9807504d9ee685a9e0"
+      ],
+      "matched_terms": [
+        "backbone",
+        "canonical",
+        "context",
+        "include",
+        "intermediate"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "backbone",
+            "canonical",
+            "context",
+            "include",
+            "intermediate"
+          ]
+        }
+      ],
+      "relation_id": "PR:b8ad1961e49fed5173bf",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:37a3f84572c25e3cbbd4",
+      "structural_membership_class": "suggested",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+      "target_type": "evidence"
+    },
+    {
+      "association": "distinctive_phrase",
+      "bridge_ids": [],
+      "candidate_node_id": "SN:37a3f84572c25e3cbbd4",
+      "candidate_state": "selected",
+      "evidence_role": "test_support",
+      "lineage_node_ids": [
+        "SN:09332362e45a8f116f64",
+        "SN:0d25a940127b8a09a2b9",
+        "SN:1a5471da8621916f448b",
+        "SN:32ebced8120db69f929e",
+        "SN:37a3f84572c25e3cbbd4",
+        "SN:7fde768326d5b10302de",
+        "SN:95e9ae79b3966ac4ccfe",
+        "SN:9c926f5950f88e50331a",
+        "SN:9fedf27572541c37e5ea",
+        "SN:a3d4b9349331e480ccc9",
+        "SN:d8551c12f6997fd3e0c2",
+        "SN:e0ab5042bc9453753bcc",
+        "SN:e0f566150e37781fa3a0",
+        "SN:ecad981cc93122e38885",
+        "SN:f63087ace0914f7968f6"
+      ],
+      "lineage_relation_group_ids": [
+        "SRG:0d668a197b71bcac6e9d",
+        "SRG:1619d4e12124c51e2943",
+        "SRG:1ff920091de717ed1eab",
+        "SRG:3abfbadd81d024b9f452",
+        "SRG:4257483d00b180dd305e",
+        "SRG:622089e388c43cff609a",
+        "SRG:6d660aafd447af4b7efe",
+        "SRG:76e7799e9720fdf7b684",
+        "SRG:798efd3c76bdddcd4a5c",
+        "SRG:d8bc8af3074c8c9a14a4",
+        "SRG:dc9807504d9ee685a9e0"
+      ],
+      "matched_terms": [
+        "backbone",
+        "focus"
+      ],
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "backbone",
+            "focus"
+          ]
+        }
+      ],
+      "relation_id": "PR:ebd9497d2ef2778480a3",
+      "slot": "changed_anchor",
+      "source_channel": "evidence",
+      "structural_member_id": "SN:37a3f84572c25e3cbbd4",
+      "structural_membership_class": "suggested",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+      "target_type": "evidence"
+    }
+  ],
+  "schema_version": "structural_association_attribution.v2",
+  "subject_kinds": [
+    [
+      "G1",
+      "guardrail"
+    ],
+    [
+      "G2",
+      "guardrail"
+    ],
+    [
+      "G3",
+      "guardrail"
+    ],
+    [
+      "G4",
+      "guardrail"
+    ],
+    [
+      "R1",
+      "requirement"
+    ],
+    [
+      "R2",
+      "requirement"
+    ],
+    [
+      "R3",
+      "requirement"
+    ],
+    [
+      "R4",
+      "requirement"
+    ],
+    [
+      "R5",
+      "requirement"
+    ]
+  ]
+}

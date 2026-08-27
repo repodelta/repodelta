@@ -203,6 +203,23 @@ def test_structural_comparison_names_reference_authority_without_breaking_alias(
     assert current.reference_labels == "labels.json"
     assert legacy.reference_labels == "labels.json"
 
+    association = parser.parse_args(
+        [
+            "compare-structural-association",
+            "--labeling-packet",
+            "packet.json",
+            "--observation",
+            "observation.json",
+            "--association-attribution",
+            "association.json",
+            "--reference-labels",
+            "labels.json",
+            "--output",
+            "association-comparison.json",
+        ]
+    )
+    assert association.association_attribution == "association.json"
+
 
 def test_packet_exposes_bounded_structural_facts_without_projected_answers() -> None:
     file_fact = EvidenceItem(

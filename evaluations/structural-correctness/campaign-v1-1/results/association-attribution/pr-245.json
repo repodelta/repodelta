@@ -1,0 +1,34 @@
+{
+  "attribution_mode": "dimension_specific_observed_join",
+  "causal_replay": false,
+  "limits": {
+    "claimed_direct_nodes": "false inclusions use the observed direct member's admission relation; false exclusions use candidate-node joins",
+    "reason_involvement": "comparison_involved is non-exclusive: a member reachable from multiple recorded roots is counted for each associated reason; comparison remains the exclusive ambiguity-aware view",
+    "suggested_nodes": "observed_only; v1.1 has no suggestion reference",
+    "unattributed": "membership has no recorded R/G changed-anchor lineage; no association reason is inferred",
+    "unresolved_nodes": "observed_only; v1.1 unresolved is focus-level"
+  },
+  "overall": {
+    "claimed_direct_nodes": {
+      "false_exclusions": 0,
+      "false_inclusions": 0
+    },
+    "exact_relations": {
+      "false_exclusions": 0,
+      "false_inclusions": 0
+    },
+    "selected_nodes": {
+      "false_exclusions": 0,
+      "false_inclusions": 0
+    },
+    "structural_context_nodes": {
+      "false_exclusions": 0,
+      "false_inclusions": 0
+    }
+  },
+  "packet_digest": "c439f75d8e6d8d03cc82efad6975fb4ce112ada699871ef187bf2a2a574504c4",
+  "per_focus": [],
+  "reason_breakdown": [],
+  "reference_status": "verified",
+  "schema_version": "structural_association_comparison.v1"
+}

@@ -40,8 +40,16 @@ repodelta compare-structural-correctness \
 The generated `pr-267.packet.json.provenance.json` is an evaluation-only copy
 of the production verification overlay. It preserves each membership's
 `asserted`/`matched`/`suggested`/`context`/`unresolved` class together with the
-producer and source IDs recorded by the canonical projection. The evaluator
-does not reconstruct paths or infer selector reasons from the packet. To replay
+producer and source IDs recorded by the canonical projection. The generated
+`pr-267.packet.json.association.json` is a separate evaluation-only copy of
+every R/G changed-anchor candidate. It records the canonical association,
+reason details, matched terms, bridge IDs, convergence state, and any observed
+structural membership. Its `source_channel` is a derived diagnostic
+classification of the recorded association kind; it is not a new production
+fact. Neither sidecar changes the production selection or assessment; the
+association sidecar exists to attribute reason-level behavior without
+reconstructing selector decisions from summary counts. The evaluator does not
+reconstruct paths or infer selector reasons from the packet. To replay
 the observed contribution of one producer, use the separate non-authoritative
 sink:
 
@@ -162,9 +170,43 @@ The
 [`findings`](campaign-v1-1/results/findings.md) retain the focus over-selection
 direction while separating provenance behavior from semantic reference roles
 and bounding recall claims by per-focus traversal coverage.
+The committed [`associations`](campaign-v1-1/associations/) artifacts are the
+same evaluation-only R/G changed-anchor sidecars emitted by the command above;
+they preserve candidate reasons and convergence data for reason-level
+attribution. They do not become a new reference authority or alter the frozen
+observations.
 The repository also keeps a byte-for-byte extraction under
 `campaign-v1-1/results/baseline-sources/090377e/` so a shallow CI checkout can
 verify the same recorded Git blob identities when the historical commit is not
 available locally.
 Campaign v1.1 is the sole current structural-correctness baseline; there is no
 campaign v1.2.
+
+### Association attribution comparison
+
+The association sidecar can be compared with the frozen v1.1 references without
+rerunning production selection:
+
+```bash
+repodelta compare-structural-association \
+  --labeling-packet build/pr-267.packet.json \
+  --observation build/pr-267.packet.json.observation.json \
+  --association-attribution build/pr-267.packet.json.association.json \
+  --reference-labels build/pr-267.reference.json \
+  --output build/pr-267-association-comparison.json
+```
+
+The result reports selected-membership, claimed-direct, structural-context, and
+exact-relation false inclusions/exclusions by subject kind and recorded
+association reason. It also reports suggestions and unresolved memberships as
+observed-only dimensions. Selected nodes, structural context, and relation
+groups are attributed through root-linked lineage already present in the
+canonical overlay; claimed-direct false inclusions use the observed member's
+own admission relation, while claimed-direct false exclusions use candidate
+node identity. `causal_replay` is false. The exclusive reason breakdown keeps
+`multiple` for members reachable from more than one recorded root and
+`unattributed` for members without a recorded lineage, rather than assigning
+a guessed reason; these fallback rows make the reason totals reconcile with
+the overall deltas.
+The separate `comparison_involved` view remains non-exclusive and may count a
+member for every recorded reason that reaches it.
