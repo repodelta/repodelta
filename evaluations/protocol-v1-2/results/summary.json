@@ -1,0 +1,585 @@
+{
+  "schema_version": "repodelta_protocol_v1_2_replay.v1",
+  "corpus_digest": "e06119e5b3e291d914d168b462fd3d2e03c94e336d03171dc518c66b1c59704c",
+  "profiles_digest": "510cd831d5e0fa1c6b9b715a73aa811cce91ecb0f86e895b6f488c88a11534d1",
+  "case_count": 7,
+  "observed_case_count": 4,
+  "held_out_case_count": 2,
+  "profiles": {
+    "pre_v1_2": {
+      "label": "pre-v1.2 protocol",
+      "commit": "479d48c1e92443d4705cbdf55466cc83094217b1",
+      "source_checks": [
+        {
+          "path": "docs/agent-change-protocol.md",
+          "contains": "If implementation invalidates",
+          "status": "pass"
+        },
+        {
+          "path": "docs/agent-change-protocol.md",
+          "contains": "counterfactual and sink-level evidence",
+          "status": "pass"
+        },
+        {
+          "path": "AGENTS.md",
+          "contains": "Each changed boundary has one canonical semantic contract",
+          "status": "pass"
+        }
+      ],
+      "cases": [
+        {
+          "case_id": "historical-160",
+          "provenance": "observed",
+          "held_out": false,
+          "required_dimensions": [
+            "authority_scope_owner",
+            "authorized_dependencies",
+            "conditional_replan",
+            "counterfactual",
+            "fail_closed",
+            "semantic_classification"
+          ],
+          "recognized_dimensions": [
+            "counterfactual",
+            "fail_closed"
+          ],
+          "missing_dimensions": [
+            "authority_scope_owner",
+            "authorized_dependencies",
+            "conditional_replan",
+            "semantic_classification"
+          ],
+          "scope_expected": "domain",
+          "scope_recognized": true,
+          "replan_expected": true,
+          "replan_predicted": false,
+          "replan_correct": false,
+          "unsafe_rejection_expected": true,
+          "unsafe_rejection_preserved": true,
+          "noise_units": 0
+        },
+        {
+          "case_id": "historical-194",
+          "provenance": "observed",
+          "held_out": false,
+          "required_dimensions": [
+            "authority_scope_owner",
+            "authorized_dependencies",
+            "conditional_replan",
+            "fail_closed",
+            "semantic_classification"
+          ],
+          "recognized_dimensions": [
+            "fail_closed"
+          ],
+          "missing_dimensions": [
+            "authority_scope_owner",
+            "authorized_dependencies",
+            "conditional_replan",
+            "semantic_classification"
+          ],
+          "scope_expected": "evaluation-local",
+          "scope_recognized": false,
+          "replan_expected": true,
+          "replan_predicted": false,
+          "replan_correct": false,
+          "unsafe_rejection_expected": true,
+          "unsafe_rejection_preserved": true,
+          "noise_units": 0
+        },
+        {
+          "case_id": "historical-264",
+          "provenance": "observed",
+          "held_out": false,
+          "required_dimensions": [
+            "authority_scope_owner",
+            "consumer_local_projection",
+            "fail_closed",
+            "nonsemantic_no_replan",
+            "semantic_classification"
+          ],
+          "recognized_dimensions": [
+            "fail_closed"
+          ],
+          "missing_dimensions": [
+            "authority_scope_owner",
+            "consumer_local_projection",
+            "nonsemantic_no_replan",
+            "semantic_classification"
+          ],
+          "scope_expected": "presentation-local",
+          "scope_recognized": false,
+          "replan_expected": false,
+          "replan_predicted": false,
+          "replan_correct": true,
+          "unsafe_rejection_expected": true,
+          "unsafe_rejection_preserved": true,
+          "noise_units": 0
+        },
+        {
+          "case_id": "positive-99",
+          "provenance": "observed",
+          "held_out": false,
+          "required_dimensions": [
+            "counterfactual",
+            "fail_closed"
+          ],
+          "recognized_dimensions": [
+            "counterfactual",
+            "fail_closed"
+          ],
+          "missing_dimensions": [],
+          "scope_expected": "domain",
+          "scope_recognized": true,
+          "replan_expected": false,
+          "replan_predicted": false,
+          "replan_correct": true,
+          "unsafe_rejection_expected": true,
+          "unsafe_rejection_preserved": true,
+          "noise_units": 0
+        },
+        {
+          "case_id": "heldout-near-miss",
+          "provenance": "declared",
+          "held_out": true,
+          "required_dimensions": [
+            "nonsemantic_no_replan"
+          ],
+          "recognized_dimensions": [],
+          "missing_dimensions": [
+            "nonsemantic_no_replan"
+          ],
+          "scope_expected": "none",
+          "scope_recognized": true,
+          "replan_expected": false,
+          "replan_predicted": false,
+          "replan_correct": true,
+          "unsafe_rejection_expected": false,
+          "unsafe_rejection_preserved": true,
+          "noise_units": 1
+        },
+        {
+          "case_id": "negative-local-presentation",
+          "provenance": "declared",
+          "held_out": true,
+          "required_dimensions": [
+            "authority_scope_owner",
+            "consumer_local_projection",
+            "fail_closed",
+            "nonsemantic_no_replan",
+            "semantic_classification"
+          ],
+          "recognized_dimensions": [
+            "fail_closed"
+          ],
+          "missing_dimensions": [
+            "authority_scope_owner",
+            "consumer_local_projection",
+            "nonsemantic_no_replan",
+            "semantic_classification"
+          ],
+          "scope_expected": "presentation-local",
+          "scope_recognized": false,
+          "replan_expected": false,
+          "replan_predicted": false,
+          "replan_correct": true,
+          "unsafe_rejection_expected": true,
+          "unsafe_rejection_preserved": true,
+          "noise_units": 0
+        },
+        {
+          "case_id": "execution-replan-injection",
+          "provenance": "declared",
+          "held_out": false,
+          "required_dimensions": [
+            "authority_scope_owner",
+            "authorized_dependencies",
+            "conditional_replan",
+            "fail_closed",
+            "semantic_classification"
+          ],
+          "recognized_dimensions": [
+            "fail_closed"
+          ],
+          "missing_dimensions": [
+            "authority_scope_owner",
+            "authorized_dependencies",
+            "conditional_replan",
+            "semantic_classification"
+          ],
+          "scope_expected": "domain",
+          "scope_recognized": true,
+          "replan_expected": true,
+          "replan_predicted": false,
+          "replan_correct": false,
+          "unsafe_rejection_expected": true,
+          "unsafe_rejection_preserved": true,
+          "noise_units": 0
+        }
+      ],
+      "metrics": {
+        "recognition": {
+          "required_obligations": 29,
+          "recognized_obligations": 8,
+          "missing_obligations": 21,
+          "accuracy": 0.275862
+        },
+        "scope_precision": {
+          "cases": 6,
+          "correct": 3,
+          "accuracy": 0.5
+        },
+        "replan": {
+          "true_positive": 0,
+          "false_positive": 0,
+          "positive_cases": 3,
+          "negative_cases": 4,
+          "recall": 0.0,
+          "precision": null,
+          "accuracy": 0.571429
+        },
+        "unsafe_rejection": {
+          "cases": 6,
+          "preserved": 6,
+          "hard_gate": true
+        },
+        "planning_noise": {
+          "units": 1,
+          "held_out_units": 1
+        }
+      }
+    },
+    "v1_2": {
+      "label": "candidate v1.2 protocol",
+      "commit": "ceefd9c26f8964668df8b7926b0b799da7080ee6",
+      "source_checks": [
+        {
+          "path": "docs/agent-change-protocol.md",
+          "contains": "OBSERVE → CLASSIFY SEMANTICS → PLAN → MUTATE CANDIDATE",
+          "status": "pass"
+        },
+        {
+          "path": "AGENTS.md",
+          "contains": "Before changing or adding a derived result, record provenance",
+          "status": "pass"
+        },
+        {
+          "path": "AGENTS.md",
+          "contains": "If evidence materially changes target,",
+          "status": "pass"
+        },
+        {
+          "path": "docs/agent-change-protocol.md",
+          "contains": "hold authorized dependencies constant",
+          "status": "pass"
+        },
+        {
+          "path": "docs/pull-request-guidelines.md",
+          "contains": "each changed derived result's provenance, scope, owner, and dependencies",
+          "status": "pass"
+        },
+        {
+          "path": "docs/pull-request-guidelines.md",
+          "contains": "Title the PR around its responsibility or contract transition. Record applicable",
+          "status": "pass"
+        }
+      ],
+      "cases": [
+        {
+          "case_id": "historical-160",
+          "provenance": "observed",
+          "held_out": false,
+          "required_dimensions": [
+            "authority_scope_owner",
+            "authorized_dependencies",
+            "conditional_replan",
+            "counterfactual",
+            "fail_closed",
+            "semantic_classification"
+          ],
+          "recognized_dimensions": [
+            "authority_scope_owner",
+            "authorized_dependencies",
+            "conditional_replan",
+            "counterfactual",
+            "fail_closed",
+            "semantic_classification"
+          ],
+          "missing_dimensions": [],
+          "scope_expected": "domain",
+          "scope_recognized": true,
+          "replan_expected": true,
+          "replan_predicted": true,
+          "replan_correct": true,
+          "unsafe_rejection_expected": true,
+          "unsafe_rejection_preserved": true,
+          "noise_units": 0
+        },
+        {
+          "case_id": "historical-194",
+          "provenance": "observed",
+          "held_out": false,
+          "required_dimensions": [
+            "authority_scope_owner",
+            "authorized_dependencies",
+            "conditional_replan",
+            "fail_closed",
+            "semantic_classification"
+          ],
+          "recognized_dimensions": [
+            "authority_scope_owner",
+            "authorized_dependencies",
+            "conditional_replan",
+            "fail_closed",
+            "semantic_classification"
+          ],
+          "missing_dimensions": [],
+          "scope_expected": "evaluation-local",
+          "scope_recognized": true,
+          "replan_expected": true,
+          "replan_predicted": true,
+          "replan_correct": true,
+          "unsafe_rejection_expected": true,
+          "unsafe_rejection_preserved": true,
+          "noise_units": 0
+        },
+        {
+          "case_id": "historical-264",
+          "provenance": "observed",
+          "held_out": false,
+          "required_dimensions": [
+            "authority_scope_owner",
+            "consumer_local_projection",
+            "fail_closed",
+            "nonsemantic_no_replan",
+            "semantic_classification"
+          ],
+          "recognized_dimensions": [
+            "authority_scope_owner",
+            "consumer_local_projection",
+            "fail_closed",
+            "nonsemantic_no_replan",
+            "semantic_classification"
+          ],
+          "missing_dimensions": [],
+          "scope_expected": "presentation-local",
+          "scope_recognized": true,
+          "replan_expected": false,
+          "replan_predicted": false,
+          "replan_correct": true,
+          "unsafe_rejection_expected": true,
+          "unsafe_rejection_preserved": true,
+          "noise_units": 0
+        },
+        {
+          "case_id": "positive-99",
+          "provenance": "observed",
+          "held_out": false,
+          "required_dimensions": [
+            "counterfactual",
+            "fail_closed"
+          ],
+          "recognized_dimensions": [
+            "counterfactual",
+            "fail_closed"
+          ],
+          "missing_dimensions": [],
+          "scope_expected": "domain",
+          "scope_recognized": true,
+          "replan_expected": false,
+          "replan_predicted": false,
+          "replan_correct": true,
+          "unsafe_rejection_expected": true,
+          "unsafe_rejection_preserved": true,
+          "noise_units": 0
+        },
+        {
+          "case_id": "heldout-near-miss",
+          "provenance": "declared",
+          "held_out": true,
+          "required_dimensions": [
+            "nonsemantic_no_replan"
+          ],
+          "recognized_dimensions": [
+            "nonsemantic_no_replan"
+          ],
+          "missing_dimensions": [],
+          "scope_expected": "none",
+          "scope_recognized": true,
+          "replan_expected": false,
+          "replan_predicted": false,
+          "replan_correct": true,
+          "unsafe_rejection_expected": false,
+          "unsafe_rejection_preserved": true,
+          "noise_units": 0
+        },
+        {
+          "case_id": "negative-local-presentation",
+          "provenance": "declared",
+          "held_out": true,
+          "required_dimensions": [
+            "authority_scope_owner",
+            "consumer_local_projection",
+            "fail_closed",
+            "nonsemantic_no_replan",
+            "semantic_classification"
+          ],
+          "recognized_dimensions": [
+            "authority_scope_owner",
+            "consumer_local_projection",
+            "fail_closed",
+            "nonsemantic_no_replan",
+            "semantic_classification"
+          ],
+          "missing_dimensions": [],
+          "scope_expected": "presentation-local",
+          "scope_recognized": true,
+          "replan_expected": false,
+          "replan_predicted": false,
+          "replan_correct": true,
+          "unsafe_rejection_expected": true,
+          "unsafe_rejection_preserved": true,
+          "noise_units": 0
+        },
+        {
+          "case_id": "execution-replan-injection",
+          "provenance": "declared",
+          "held_out": false,
+          "required_dimensions": [
+            "authority_scope_owner",
+            "authorized_dependencies",
+            "conditional_replan",
+            "fail_closed",
+            "semantic_classification"
+          ],
+          "recognized_dimensions": [
+            "authority_scope_owner",
+            "authorized_dependencies",
+            "conditional_replan",
+            "fail_closed",
+            "semantic_classification"
+          ],
+          "missing_dimensions": [],
+          "scope_expected": "domain",
+          "scope_recognized": true,
+          "replan_expected": true,
+          "replan_predicted": true,
+          "replan_correct": true,
+          "unsafe_rejection_expected": true,
+          "unsafe_rejection_preserved": true,
+          "noise_units": 0
+        }
+      ],
+      "metrics": {
+        "recognition": {
+          "required_obligations": 29,
+          "recognized_obligations": 29,
+          "missing_obligations": 0,
+          "accuracy": 1.0
+        },
+        "scope_precision": {
+          "cases": 6,
+          "correct": 6,
+          "accuracy": 1.0
+        },
+        "replan": {
+          "true_positive": 3,
+          "false_positive": 0,
+          "positive_cases": 3,
+          "negative_cases": 4,
+          "recall": 1.0,
+          "precision": 1.0,
+          "accuracy": 1.0
+        },
+        "unsafe_rejection": {
+          "cases": 6,
+          "preserved": 6,
+          "hard_gate": true
+        },
+        "planning_noise": {
+          "units": 0,
+          "held_out_units": 0
+        }
+      }
+    }
+  },
+  "comparison": {
+    "pre_v1_2": {
+      "recognition": {
+        "required_obligations": 29,
+        "recognized_obligations": 8,
+        "missing_obligations": 21,
+        "accuracy": 0.275862
+      },
+      "scope_precision": {
+        "cases": 6,
+        "correct": 3,
+        "accuracy": 0.5
+      },
+      "replan": {
+        "true_positive": 0,
+        "false_positive": 0,
+        "positive_cases": 3,
+        "negative_cases": 4,
+        "recall": 0.0,
+        "precision": null,
+        "accuracy": 0.571429
+      },
+      "unsafe_rejection": {
+        "cases": 6,
+        "preserved": 6,
+        "hard_gate": true
+      },
+      "planning_noise": {
+        "units": 1,
+        "held_out_units": 1
+      }
+    },
+    "v1_2": {
+      "recognition": {
+        "required_obligations": 29,
+        "recognized_obligations": 29,
+        "missing_obligations": 0,
+        "accuracy": 1.0
+      },
+      "scope_precision": {
+        "cases": 6,
+        "correct": 6,
+        "accuracy": 1.0
+      },
+      "replan": {
+        "true_positive": 3,
+        "false_positive": 0,
+        "positive_cases": 3,
+        "negative_cases": 4,
+        "recall": 1.0,
+        "precision": 1.0,
+        "accuracy": 1.0
+      },
+      "unsafe_rejection": {
+        "cases": 6,
+        "preserved": 6,
+        "hard_gate": true
+      },
+      "planning_noise": {
+        "units": 0,
+        "held_out_units": 0
+      }
+    },
+    "acceptance": {
+      "recognition_improves": true,
+      "scope_precision_improves": true,
+      "replan_recall_improves": true,
+      "replan_precision_not_lower": true,
+      "unsafe_rejection_not_lower": true,
+      "noise_not_higher": true,
+      "replay_accepts_v1_2": true
+    }
+  },
+  "limitations": [
+    "This is a deterministic protocol-decision replay, not a live coding-agent trial.",
+    "Historical cases are source-backed; synthetic controls are declared and held out from the historical examples.",
+    "The profile capabilities are a checked interpretation of pinned protocol text, not runtime telemetry.",
+    "A later live-agent study is required to estimate actual recognition or execution behavior."
+  ]
+}
