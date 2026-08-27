@@ -1,6 +1,10 @@
 {
   "by_subject_kind": {
     "guardrail": {
+      "canonical_low_fanout": {
+        "false_exclusions": 2,
+        "false_inclusions": 0
+      },
       "canonical_token_unique": {
         "false_exclusions": 2,
         "false_inclusions": 0
@@ -9,16 +13,24 @@
         "false_exclusions": 2,
         "false_inclusions": 0
       },
-      "low_fanout": {
+      "full_token_low_fanout": {
         "false_exclusions": 2,
         "false_inclusions": 0
       },
       "no_suffix": {
+        "false_exclusions": 2,
+        "false_inclusions": 0
+      },
+      "qualified_token_present": {
         "false_exclusions": 2,
         "false_inclusions": 0
       }
     },
     "requirement": {
+      "canonical_low_fanout": {
+        "false_exclusions": 13,
+        "false_inclusions": 0
+      },
       "canonical_token_unique": {
         "false_exclusions": 13,
         "false_inclusions": 0
@@ -27,11 +39,15 @@
         "false_exclusions": 13,
         "false_inclusions": 0
       },
-      "low_fanout": {
+      "full_token_low_fanout": {
         "false_exclusions": 13,
         "false_inclusions": 0
       },
       "no_suffix": {
+        "false_exclusions": 13,
+        "false_inclusions": 0
+      },
+      "qualified_token_present": {
         "false_exclusions": 13,
         "false_inclusions": 0
       }
@@ -47,6 +63,10 @@
     "semantic_resolution": "no LLM or semantic model is used; grounded semantic policy remains unexplored"
   },
   "overall": {
+    "canonical_low_fanout": {
+      "false_exclusions": 15,
+      "false_inclusions": 0
+    },
     "canonical_token_unique": {
       "false_exclusions": 15,
       "false_inclusions": 0
@@ -55,11 +75,15 @@
       "false_exclusions": 15,
       "false_inclusions": 0
     },
-    "low_fanout": {
+    "full_token_low_fanout": {
       "false_exclusions": 15,
       "false_inclusions": 0
     },
     "no_suffix": {
+      "false_exclusions": 15,
+      "false_inclusions": 0
+    },
+    "qualified_token_present": {
       "false_exclusions": 15,
       "false_inclusions": 0
     }
@@ -69,6 +93,13 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
         "canonical_token_unique": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
@@ -83,7 +114,7 @@
           "false_inclusions": 0,
           "observed_direct_nodes": []
         },
-        "low_fanout": {
+        "full_token_low_fanout": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
           "false_inclusion_nodes": [],
@@ -91,6 +122,13 @@
           "observed_direct_nodes": []
         },
         "no_suffix": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
           "false_inclusion_nodes": [],
@@ -105,6 +143,16 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:37a3f84572c25e3cbbd4",
+            "SN:e0ab5042bc9453753bcc"
+          ],
+          "false_exclusions": 2,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
         "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:37a3f84572c25e3cbbd4",
@@ -125,7 +173,7 @@
           "false_inclusions": 0,
           "observed_direct_nodes": []
         },
-        "low_fanout": {
+        "full_token_low_fanout": {
           "false_exclusion_nodes": [
             "SN:37a3f84572c25e3cbbd4",
             "SN:e0ab5042bc9453753bcc"
@@ -136,6 +184,16 @@
           "observed_direct_nodes": []
         },
         "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:37a3f84572c25e3cbbd4",
+            "SN:e0ab5042bc9453753bcc"
+          ],
+          "false_exclusions": 2,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
           "false_exclusion_nodes": [
             "SN:37a3f84572c25e3cbbd4",
             "SN:e0ab5042bc9453753bcc"
@@ -153,6 +211,13 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
         "canonical_token_unique": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
@@ -167,7 +232,7 @@
           "false_inclusions": 0,
           "observed_direct_nodes": []
         },
-        "low_fanout": {
+        "full_token_low_fanout": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
           "false_inclusion_nodes": [],
@@ -175,6 +240,13 @@
           "observed_direct_nodes": []
         },
         "no_suffix": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
           "false_inclusion_nodes": [],
@@ -189,6 +261,13 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
         "canonical_token_unique": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
@@ -203,7 +282,7 @@
           "false_inclusions": 0,
           "observed_direct_nodes": []
         },
-        "low_fanout": {
+        "full_token_low_fanout": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
           "false_inclusion_nodes": [],
@@ -211,6 +290,13 @@
           "observed_direct_nodes": []
         },
         "no_suffix": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
           "false_inclusion_nodes": [],
@@ -225,6 +311,16 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:37a3f84572c25e3cbbd4",
+            "SN:e0ab5042bc9453753bcc"
+          ],
+          "false_exclusions": 2,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
         "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:37a3f84572c25e3cbbd4",
@@ -245,7 +341,7 @@
           "false_inclusions": 0,
           "observed_direct_nodes": []
         },
-        "low_fanout": {
+        "full_token_low_fanout": {
           "false_exclusion_nodes": [
             "SN:37a3f84572c25e3cbbd4",
             "SN:e0ab5042bc9453753bcc"
@@ -256,6 +352,16 @@
           "observed_direct_nodes": []
         },
         "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:37a3f84572c25e3cbbd4",
+            "SN:e0ab5042bc9453753bcc"
+          ],
+          "false_exclusions": 2,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
           "false_exclusion_nodes": [
             "SN:37a3f84572c25e3cbbd4",
             "SN:e0ab5042bc9453753bcc"
@@ -273,6 +379,16 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:37a3f84572c25e3cbbd4",
+            "SN:e0ab5042bc9453753bcc"
+          ],
+          "false_exclusions": 2,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
         "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:37a3f84572c25e3cbbd4",
@@ -293,7 +409,7 @@
           "false_inclusions": 0,
           "observed_direct_nodes": []
         },
-        "low_fanout": {
+        "full_token_low_fanout": {
           "false_exclusion_nodes": [
             "SN:37a3f84572c25e3cbbd4",
             "SN:e0ab5042bc9453753bcc"
@@ -304,6 +420,16 @@
           "observed_direct_nodes": []
         },
         "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:37a3f84572c25e3cbbd4",
+            "SN:e0ab5042bc9453753bcc"
+          ],
+          "false_exclusions": 2,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
           "false_exclusion_nodes": [
             "SN:37a3f84572c25e3cbbd4",
             "SN:e0ab5042bc9453753bcc"
@@ -321,6 +447,16 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:37a3f84572c25e3cbbd4",
+            "SN:e0ab5042bc9453753bcc"
+          ],
+          "false_exclusions": 2,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
         "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:37a3f84572c25e3cbbd4",
@@ -341,7 +477,7 @@
           "false_inclusions": 0,
           "observed_direct_nodes": []
         },
-        "low_fanout": {
+        "full_token_low_fanout": {
           "false_exclusion_nodes": [
             "SN:37a3f84572c25e3cbbd4",
             "SN:e0ab5042bc9453753bcc"
@@ -352,6 +488,16 @@
           "observed_direct_nodes": []
         },
         "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:37a3f84572c25e3cbbd4",
+            "SN:e0ab5042bc9453753bcc"
+          ],
+          "false_exclusions": 2,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
           "false_exclusion_nodes": [
             "SN:37a3f84572c25e3cbbd4",
             "SN:e0ab5042bc9453753bcc"
@@ -369,6 +515,17 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:09332362e45a8f116f64",
+            "SN:3fa93a82bd95f9e201a7",
+            "SN:e0ab5042bc9453753bcc"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
         "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:09332362e45a8f116f64",
@@ -391,7 +548,7 @@
           "false_inclusions": 0,
           "observed_direct_nodes": []
         },
-        "low_fanout": {
+        "full_token_low_fanout": {
           "false_exclusion_nodes": [
             "SN:09332362e45a8f116f64",
             "SN:3fa93a82bd95f9e201a7",
@@ -403,6 +560,17 @@
           "observed_direct_nodes": []
         },
         "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:09332362e45a8f116f64",
+            "SN:3fa93a82bd95f9e201a7",
+            "SN:e0ab5042bc9453753bcc"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
           "false_exclusion_nodes": [
             "SN:09332362e45a8f116f64",
             "SN:3fa93a82bd95f9e201a7",
@@ -421,6 +589,18 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:37a3f84572c25e3cbbd4",
+            "SN:3fa93a82bd95f9e201a7",
+            "SN:473f603d478751e24b92",
+            "SN:e0ab5042bc9453753bcc"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
         "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:37a3f84572c25e3cbbd4",
@@ -445,7 +625,7 @@
           "false_inclusions": 0,
           "observed_direct_nodes": []
         },
-        "low_fanout": {
+        "full_token_low_fanout": {
           "false_exclusion_nodes": [
             "SN:37a3f84572c25e3cbbd4",
             "SN:3fa93a82bd95f9e201a7",
@@ -468,6 +648,18 @@
           "false_inclusion_nodes": [],
           "false_inclusions": 0,
           "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
+          "false_exclusion_nodes": [
+            "SN:37a3f84572c25e3cbbd4",
+            "SN:3fa93a82bd95f9e201a7",
+            "SN:473f603d478751e24b92",
+            "SN:e0ab5042bc9453753bcc"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
         }
       },
       "reference_unresolved": false,
@@ -476,11 +668,13 @@
     }
   ],
   "policies": {
+    "canonical_low_fanout": "accept a full authored identifier token with qualified-name origin and exact-association fanout one",
     "canonical_token_unique": "accept a full authored identifier token only when it occurs in the candidate qualified name and uniquely resolves among changed symbols",
     "current": "reproduce observed direct membership; no policy change",
-    "low_fanout": "accept only a full identifier with canonical origin and focus fanout one",
-    "no_suffix": "accept exact identifiers only when the authored term is not suffix-only"
+    "full_token_low_fanout": "accept a full authored identifier token with exact-association fanout one, without a qualified-name-origin requirement",
+    "no_suffix": "accept exact identifiers only when the authored term is not suffix-only",
+    "qualified_token_present": "accept a full authored identifier token observed in the candidate qualified name, without uniqueness or fanout constraints"
   },
-  "schema_version": "structural_identifier_policy_shadow.v1",
+  "schema_version": "structural_identifier_policy_shadow.v2",
   "specificity_origin_completeness": "partial"
 }

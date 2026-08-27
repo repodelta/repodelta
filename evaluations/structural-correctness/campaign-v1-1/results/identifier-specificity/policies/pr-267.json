@@ -1,6 +1,10 @@
 {
   "by_subject_kind": {
     "guardrail": {
+      "canonical_low_fanout": {
+        "false_exclusions": 15,
+        "false_inclusions": 0
+      },
       "canonical_token_unique": {
         "false_exclusions": 15,
         "false_inclusions": 0
@@ -9,16 +13,24 @@
         "false_exclusions": 15,
         "false_inclusions": 0
       },
-      "low_fanout": {
+      "full_token_low_fanout": {
         "false_exclusions": 15,
         "false_inclusions": 0
       },
       "no_suffix": {
+        "false_exclusions": 15,
+        "false_inclusions": 0
+      },
+      "qualified_token_present": {
         "false_exclusions": 15,
         "false_inclusions": 0
       }
     },
     "requirement": {
+      "canonical_low_fanout": {
+        "false_exclusions": 41,
+        "false_inclusions": 0
+      },
       "canonical_token_unique": {
         "false_exclusions": 41,
         "false_inclusions": 0
@@ -27,11 +39,15 @@
         "false_exclusions": 41,
         "false_inclusions": 0
       },
-      "low_fanout": {
+      "full_token_low_fanout": {
         "false_exclusions": 41,
         "false_inclusions": 0
       },
       "no_suffix": {
+        "false_exclusions": 41,
+        "false_inclusions": 0
+      },
+      "qualified_token_present": {
         "false_exclusions": 41,
         "false_inclusions": 0
       }
@@ -47,6 +63,10 @@
     "semantic_resolution": "no LLM or semantic model is used; grounded semantic policy remains unexplored"
   },
   "overall": {
+    "canonical_low_fanout": {
+      "false_exclusions": 56,
+      "false_inclusions": 0
+    },
     "canonical_token_unique": {
       "false_exclusions": 56,
       "false_inclusions": 0
@@ -55,11 +75,15 @@
       "false_exclusions": 56,
       "false_inclusions": 0
     },
-    "low_fanout": {
+    "full_token_low_fanout": {
       "false_exclusions": 56,
       "false_inclusions": 0
     },
     "no_suffix": {
+      "false_exclusions": 56,
+      "false_inclusions": 0
+    },
+    "qualified_token_present": {
       "false_exclusions": 56,
       "false_inclusions": 0
     }
@@ -69,6 +93,18 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:3a738b073bed5edc6b52",
+            "SN:3b3fd6e980400fe1d379",
+            "SN:93ec5f652b50cda4913b",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
         "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:3a738b073bed5edc6b52",
@@ -93,7 +129,7 @@
           "false_inclusions": 0,
           "observed_direct_nodes": []
         },
-        "low_fanout": {
+        "full_token_low_fanout": {
           "false_exclusion_nodes": [
             "SN:3a738b073bed5edc6b52",
             "SN:3b3fd6e980400fe1d379",
@@ -106,6 +142,18 @@
           "observed_direct_nodes": []
         },
         "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:3a738b073bed5edc6b52",
+            "SN:3b3fd6e980400fe1d379",
+            "SN:93ec5f652b50cda4913b",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
           "false_exclusion_nodes": [
             "SN:3a738b073bed5edc6b52",
             "SN:3b3fd6e980400fe1d379",
@@ -125,6 +173,18 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:ae049f36b6e35fe43a22",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:da5397a88d8f4040b729",
+            "SN:f828a99b97e49c237175"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
         "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:ae049f36b6e35fe43a22",
@@ -149,7 +209,7 @@
           "false_inclusions": 0,
           "observed_direct_nodes": []
         },
-        "low_fanout": {
+        "full_token_low_fanout": {
           "false_exclusion_nodes": [
             "SN:ae049f36b6e35fe43a22",
             "SN:bcf3a6f0186446f5f61f",
@@ -162,6 +222,18 @@
           "observed_direct_nodes": []
         },
         "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:ae049f36b6e35fe43a22",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:da5397a88d8f4040b729",
+            "SN:f828a99b97e49c237175"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
           "false_exclusion_nodes": [
             "SN:ae049f36b6e35fe43a22",
             "SN:bcf3a6f0186446f5f61f",
@@ -181,6 +253,17 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:543ff43b3e5eeab71613",
+            "SN:9c926f5950f88e50331a",
+            "SN:ae049f36b6e35fe43a22"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
         "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:543ff43b3e5eeab71613",
@@ -203,7 +286,7 @@
           "false_inclusions": 0,
           "observed_direct_nodes": []
         },
-        "low_fanout": {
+        "full_token_low_fanout": {
           "false_exclusion_nodes": [
             "SN:543ff43b3e5eeab71613",
             "SN:9c926f5950f88e50331a",
@@ -215,6 +298,17 @@
           "observed_direct_nodes": []
         },
         "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:543ff43b3e5eeab71613",
+            "SN:9c926f5950f88e50331a",
+            "SN:ae049f36b6e35fe43a22"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
           "false_exclusion_nodes": [
             "SN:543ff43b3e5eeab71613",
             "SN:9c926f5950f88e50331a",
@@ -233,6 +327,18 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:6ca8c7c3f63e6030f55a",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:cc0c8a0045a6fe1e8112",
+            "SN:da5397a88d8f4040b729"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
         "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:6ca8c7c3f63e6030f55a",
@@ -257,7 +363,7 @@
           "false_inclusions": 0,
           "observed_direct_nodes": []
         },
-        "low_fanout": {
+        "full_token_low_fanout": {
           "false_exclusion_nodes": [
             "SN:6ca8c7c3f63e6030f55a",
             "SN:bcf3a6f0186446f5f61f",
@@ -270,6 +376,18 @@
           "observed_direct_nodes": []
         },
         "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:6ca8c7c3f63e6030f55a",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:cc0c8a0045a6fe1e8112",
+            "SN:da5397a88d8f4040b729"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
           "false_exclusion_nodes": [
             "SN:6ca8c7c3f63e6030f55a",
             "SN:bcf3a6f0186446f5f61f",
@@ -289,6 +407,13 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
         "canonical_token_unique": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
@@ -303,7 +428,7 @@
           "false_inclusions": 0,
           "observed_direct_nodes": []
         },
-        "low_fanout": {
+        "full_token_low_fanout": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
           "false_inclusion_nodes": [],
@@ -311,6 +436,13 @@
           "observed_direct_nodes": []
         },
         "no_suffix": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
           "false_inclusion_nodes": [],
@@ -325,6 +457,13 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
         "canonical_token_unique": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
@@ -339,7 +478,7 @@
           "false_inclusions": 0,
           "observed_direct_nodes": []
         },
-        "low_fanout": {
+        "full_token_low_fanout": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
           "false_inclusion_nodes": [],
@@ -347,6 +486,13 @@
           "observed_direct_nodes": []
         },
         "no_suffix": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
           "false_inclusion_nodes": [],
@@ -361,6 +507,13 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
         "canonical_token_unique": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
@@ -375,7 +528,7 @@
           "false_inclusions": 0,
           "observed_direct_nodes": []
         },
-        "low_fanout": {
+        "full_token_low_fanout": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
           "false_inclusion_nodes": [],
@@ -383,6 +536,13 @@
           "observed_direct_nodes": []
         },
         "no_suffix": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
           "false_inclusion_nodes": [],
@@ -397,6 +557,13 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
         "canonical_token_unique": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
@@ -411,7 +578,7 @@
           "false_inclusions": 0,
           "observed_direct_nodes": []
         },
-        "low_fanout": {
+        "full_token_low_fanout": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
           "false_inclusion_nodes": [],
@@ -419,6 +586,13 @@
           "observed_direct_nodes": []
         },
         "no_suffix": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
           "false_inclusion_nodes": [],
@@ -433,6 +607,26 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:19cd2582561d6e9791c8",
+            "SN:3f027f11e0341d0de0a1",
+            "SN:543ff43b3e5eeab71613",
+            "SN:62694386d20493a8b93a",
+            "SN:6ca8c7c3f63e6030f55a",
+            "SN:7ccf02543c1154f94fd5",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:cfde61f968af432ceae5",
+            "SN:da5397a88d8f4040b729",
+            "SN:f637ad1c36b0e06a1f13",
+            "SN:f828a99b97e49c237175"
+          ],
+          "false_exclusions": 12,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
         "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:19cd2582561d6e9791c8",
@@ -473,7 +667,7 @@
           "false_inclusions": 0,
           "observed_direct_nodes": []
         },
-        "low_fanout": {
+        "full_token_low_fanout": {
           "false_exclusion_nodes": [
             "SN:19cd2582561d6e9791c8",
             "SN:3f027f11e0341d0de0a1",
@@ -494,6 +688,26 @@
           "observed_direct_nodes": []
         },
         "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:19cd2582561d6e9791c8",
+            "SN:3f027f11e0341d0de0a1",
+            "SN:543ff43b3e5eeab71613",
+            "SN:62694386d20493a8b93a",
+            "SN:6ca8c7c3f63e6030f55a",
+            "SN:7ccf02543c1154f94fd5",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:cfde61f968af432ceae5",
+            "SN:da5397a88d8f4040b729",
+            "SN:f637ad1c36b0e06a1f13",
+            "SN:f828a99b97e49c237175"
+          ],
+          "false_exclusions": 12,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
           "false_exclusion_nodes": [
             "SN:19cd2582561d6e9791c8",
             "SN:3f027f11e0341d0de0a1",
@@ -521,6 +735,18 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:7ccf02543c1154f94fd5",
+            "SN:89fff3edee9994df99f2",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:da715a5d1d6fd4915e50"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
         "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:7ccf02543c1154f94fd5",
@@ -545,7 +771,7 @@
           "false_inclusions": 0,
           "observed_direct_nodes": []
         },
-        "low_fanout": {
+        "full_token_low_fanout": {
           "false_exclusion_nodes": [
             "SN:7ccf02543c1154f94fd5",
             "SN:89fff3edee9994df99f2",
@@ -558,6 +784,18 @@
           "observed_direct_nodes": []
         },
         "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:7ccf02543c1154f94fd5",
+            "SN:89fff3edee9994df99f2",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:da715a5d1d6fd4915e50"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
           "false_exclusion_nodes": [
             "SN:7ccf02543c1154f94fd5",
             "SN:89fff3edee9994df99f2",
@@ -577,6 +815,19 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:543ff43b3e5eeab71613",
+            "SN:89fff3edee9994df99f2",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:cfde61f968af432ceae5",
+            "SN:da715a5d1d6fd4915e50"
+          ],
+          "false_exclusions": 5,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
         "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:543ff43b3e5eeab71613",
@@ -603,7 +854,7 @@
           "false_inclusions": 0,
           "observed_direct_nodes": []
         },
-        "low_fanout": {
+        "full_token_low_fanout": {
           "false_exclusion_nodes": [
             "SN:543ff43b3e5eeab71613",
             "SN:89fff3edee9994df99f2",
@@ -617,6 +868,19 @@
           "observed_direct_nodes": []
         },
         "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:543ff43b3e5eeab71613",
+            "SN:89fff3edee9994df99f2",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:cfde61f968af432ceae5",
+            "SN:da715a5d1d6fd4915e50"
+          ],
+          "false_exclusions": 5,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
           "false_exclusion_nodes": [
             "SN:543ff43b3e5eeab71613",
             "SN:89fff3edee9994df99f2",
@@ -637,6 +901,21 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:13363eed6464c772fb73",
+            "SN:19cd2582561d6e9791c8",
+            "SN:7ccf02543c1154f94fd5",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:cc0c8a0045a6fe1e8112",
+            "SN:da5397a88d8f4040b729"
+          ],
+          "false_exclusions": 7,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
         "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:13363eed6464c772fb73",
@@ -667,7 +946,7 @@
           "false_inclusions": 0,
           "observed_direct_nodes": []
         },
-        "low_fanout": {
+        "full_token_low_fanout": {
           "false_exclusion_nodes": [
             "SN:13363eed6464c772fb73",
             "SN:19cd2582561d6e9791c8",
@@ -683,6 +962,21 @@
           "observed_direct_nodes": []
         },
         "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:13363eed6464c772fb73",
+            "SN:19cd2582561d6e9791c8",
+            "SN:7ccf02543c1154f94fd5",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:cc0c8a0045a6fe1e8112",
+            "SN:da5397a88d8f4040b729"
+          ],
+          "false_exclusions": 7,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
           "false_exclusion_nodes": [
             "SN:13363eed6464c772fb73",
             "SN:19cd2582561d6e9791c8",
@@ -705,6 +999,20 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:62694386d20493a8b93a",
+            "SN:9c926f5950f88e50331a",
+            "SN:9caebf5ac975d54164ab",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:bcf3a6f0186446f5f61f"
+          ],
+          "false_exclusions": 6,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
         "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:62694386d20493a8b93a",
@@ -733,7 +1041,7 @@
           "false_inclusions": 0,
           "observed_direct_nodes": []
         },
-        "low_fanout": {
+        "full_token_low_fanout": {
           "false_exclusion_nodes": [
             "SN:62694386d20493a8b93a",
             "SN:9c926f5950f88e50331a",
@@ -748,6 +1056,20 @@
           "observed_direct_nodes": []
         },
         "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:62694386d20493a8b93a",
+            "SN:9c926f5950f88e50331a",
+            "SN:9caebf5ac975d54164ab",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:bcf3a6f0186446f5f61f"
+          ],
+          "false_exclusions": 6,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
           "false_exclusion_nodes": [
             "SN:62694386d20493a8b93a",
             "SN:9c926f5950f88e50331a",
@@ -769,6 +1091,21 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:2380d52ce46c588ff706",
+            "SN:3b3fd6e980400fe1d379",
+            "SN:3f027f11e0341d0de0a1",
+            "SN:a6cbe5a013f33936a911",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:da5397a88d8f4040b729",
+            "SN:f637ad1c36b0e06a1f13"
+          ],
+          "false_exclusions": 7,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
         "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:2380d52ce46c588ff706",
@@ -799,7 +1136,7 @@
           "false_inclusions": 0,
           "observed_direct_nodes": []
         },
-        "low_fanout": {
+        "full_token_low_fanout": {
           "false_exclusion_nodes": [
             "SN:2380d52ce46c588ff706",
             "SN:3b3fd6e980400fe1d379",
@@ -828,6 +1165,21 @@
           "false_inclusion_nodes": [],
           "false_inclusions": 0,
           "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
+          "false_exclusion_nodes": [
+            "SN:2380d52ce46c588ff706",
+            "SN:3b3fd6e980400fe1d379",
+            "SN:3f027f11e0341d0de0a1",
+            "SN:a6cbe5a013f33936a911",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:da5397a88d8f4040b729",
+            "SN:f637ad1c36b0e06a1f13"
+          ],
+          "false_exclusions": 7,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
         }
       },
       "reference_unresolved": false,
@@ -836,11 +1188,13 @@
     }
   ],
   "policies": {
+    "canonical_low_fanout": "accept a full authored identifier token with qualified-name origin and exact-association fanout one",
     "canonical_token_unique": "accept a full authored identifier token only when it occurs in the candidate qualified name and uniquely resolves among changed symbols",
     "current": "reproduce observed direct membership; no policy change",
-    "low_fanout": "accept only a full identifier with canonical origin and focus fanout one",
-    "no_suffix": "accept exact identifiers only when the authored term is not suffix-only"
+    "full_token_low_fanout": "accept a full authored identifier token with exact-association fanout one, without a qualified-name-origin requirement",
+    "no_suffix": "accept exact identifiers only when the authored term is not suffix-only",
+    "qualified_token_present": "accept a full authored identifier token observed in the candidate qualified name, without uniqueness or fanout constraints"
   },
-  "schema_version": "structural_identifier_policy_shadow.v1",
+  "schema_version": "structural_identifier_policy_shadow.v2",
   "specificity_origin_completeness": "partial"
 }

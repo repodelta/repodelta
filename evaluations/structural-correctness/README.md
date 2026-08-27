@@ -230,7 +230,10 @@ Each matched term records its normalized authored-key form (a complete
 identifier or suffix alias inferred by the same deterministic tokenizer),
 observed origin (`qualified_name`, `path`, `diff_text`,
 `signature_unattributed`, or `unobserved`), canonical changed-symbol
-resolution, and per-focus fanout. Historical v1.1 packets are necessarily
+resolution, and per-focus exact-association fanout. Resolution is measured
+against all changed symbols in the packet, not a focus-eligible candidate
+universe; it is therefore a repository-wide changed-symbol token check rather
+than a complete canonical identity resolver. Historical v1.1 packets are necessarily
 `partial`: they never contained raw diff text, so the adapter marks that
 origin as `unobserved` rather than reconstructing it. In a live brief, diff
 origin is recorded only when the target's canonical change-relation identity
@@ -252,10 +255,10 @@ repodelta compare-structural-identifier \
 ```
 
 The comparison includes the observed `current` policy plus `no_suffix`,
-`low_fanout`, and `canonical_token_unique` shadows. The last policy accepts a
-full authored identifier token only when it occurs in the candidate qualified
-name and uniquely resolves among changed symbols; it is not a full qualified
-name equality check. The comparison reports only direct-node
+`canonical_low_fanout`, `qualified_token_present`, `full_token_low_fanout`, and
+`canonical_token_unique` shadows. These isolate qualified-name token support,
+exact-association fanout, and uniqueness: none is a full qualified-name
+equality check. The comparison reports only direct-node
 false inclusions/exclusions against the frozen semantic reference. It does
 not claim to predict selected files, structural context, exact relations, or
 semantic resolution; an LLM/embedding policy remains unexplored. No policy in

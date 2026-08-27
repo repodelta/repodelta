@@ -17,7 +17,9 @@ summary or path heuristically.
 | --- | ---: | ---: |
 | Current observed policy | 38 | 212 |
 | No suffix-only terms | 38 | 212 |
-| Low fanout + canonical origin | 0 | 227 |
+| Canonical origin + low fanout | 0 | 227 |
+| Qualified-name token present | 0 | 227 |
+| Full token + low fanout | 0 | 227 |
 | Canonical token unique match | 0 | 227 |
 
 The 38 current direct false inclusions are split into 31 requirements and 7
@@ -32,6 +34,22 @@ sample. That means suffix aliases alone do not explain the observed direct
 false inclusions. The evidence supports the narrower hypothesis that broad
 lexical identifier overlap is being treated as direct authority, but the
 historical packet cannot separate qualified-name, path, and changed-line origins
-for every row. A production fix should therefore wait for a live probe with raw
-evidence origins and a semantic-recall design, rather than deleting the shared
-high-recall identifier primitive.
+for every row.
+
+The three orthogonal shadows are also identical on this sample: requiring only
+qualified-name token origin, requiring only full-token exact-association fanout
+one, and requiring both canonical origin and fanout one each remove all 38
+false inclusions while adding 15 false exclusions. This means the historical
+replay points more strongly at qualified-name origin as the first discriminator;
+fanout and uniqueness add no observed separation here. The result remains a
+direct-only projection over partial historical origin data, not a production
+policy recommendation. A production fix should therefore wait for a live probe
+with raw evidence origins and a semantic-recall design, rather than deleting the
+shared high-recall identifier primitive.
+
+The `canonical_resolution` count is repository-wide: it counts changed-symbol
+qualified-name token occurrences across the packet, not only symbols eligible
+for the current focus. Likewise, `fanout` is the number of candidate nodes in
+the focus's recorded `exact_identifier` rows sharing the term. These are bounded
+shadow measurements, not a production canonical-identity resolver or a replay
+of the full candidate universe.

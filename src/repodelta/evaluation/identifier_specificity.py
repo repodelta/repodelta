@@ -35,8 +35,8 @@ from repodelta.model.predicate_refs import identifier_keys
 
 
 IDENTIFIER_SPECIFICITY_SCHEMA = "structural_identifier_specificity.v1"
-IDENTIFIER_POLICY_SHADOW_SCHEMA = "structural_identifier_policy_shadow.v1"
-IDENTIFIER_POLICY_SUMMARY_SCHEMA = "structural_identifier_policy_shadow_summary.v1"
+IDENTIFIER_POLICY_SHADOW_SCHEMA = "structural_identifier_policy_shadow.v2"
+IDENTIFIER_POLICY_SUMMARY_SCHEMA = "structural_identifier_policy_shadow_summary.v2"
 _WORD_RE = re.compile(r"[A-Za-z][A-Za-z0-9_]{2,}")
 _SUBJECT_KINDS = frozenset({"requirement", "guardrail"})
 _DIRECT_CLASSES = frozenset({"asserted", "matched"})
@@ -384,7 +384,18 @@ def compare_identifier_policies(
     policies = {
         "current": "reproduce observed direct membership; no policy change",
         "no_suffix": "accept exact identifiers only when the authored term is not suffix-only",
-        "low_fanout": "accept only a full identifier with canonical origin and focus fanout one",
+        "canonical_low_fanout": (
+            "accept a full authored identifier token with qualified-name origin "
+            "and exact-association fanout one"
+        ),
+        "qualified_token_present": (
+            "accept a full authored identifier token observed in the candidate "
+            "qualified name, without uniqueness or fanout constraints"
+        ),
+        "full_token_low_fanout": (
+            "accept a full authored identifier token with exact-association "
+            "fanout one, without a qualified-name-origin requirement"
+        ),
         "canonical_token_unique": (
             "accept a full authored identifier token only when it occurs in the "
             "candidate qualified name and uniquely resolves among changed symbols"
@@ -653,8 +664,12 @@ def term_ok(policy: str, term: IdentifierTermObservation) -> bool:
     canonical = "qualified_name" in term.origins
     if policy == "no_suffix":
         return full and not suffix_only
-    if policy == "low_fanout":
+    if policy == "canonical_low_fanout":
         return full and canonical and term.fanout == 1
+    if policy == "qualified_token_present":
+        return full and canonical
+    if policy == "full_token_low_fanout":
+        return full and term.fanout == 1
     if policy == "canonical_token_unique":
         return (
             full

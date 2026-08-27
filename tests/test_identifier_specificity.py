@@ -11,8 +11,10 @@ from repodelta.evaluation.association_attribution import (
 from repodelta.evaluation.identifier_specificity import (
     _term_observation,
     compare_identifier_policies,
+    IdentifierTermObservation,
     load_identifier_specificity,
     observe_identifier_specificity_from_artifacts,
+    term_ok,
     write_identifier_specificity,
 )
 from repodelta.evaluation.structural_correctness import (
@@ -122,6 +124,30 @@ def test_canonical_full_identifier_is_distinguished_from_suffix_alias() -> None:
     suffix_term = suffix.rows[0].terms[0]
     assert suffix_term.source_forms == ("suffix_alias",)
     assert suffix_term.canonical_resolution == "none"
+
+
+def test_orthogonal_policy_shadows_keep_origin_and_fanout_separate() -> None:
+    canonical_fanout_two = IdentifierTermObservation(
+        term="verificationworkspace",
+        source_forms=("full_identifier",),
+        origins=("qualified_name",),
+        canonical_full_match_count=1,
+        canonical_resolution="unique",
+        fanout=2,
+    )
+    unobserved_fanout_one = IdentifierTermObservation(
+        term="verificationworkspace",
+        source_forms=("full_identifier",),
+        origins=("unobserved",),
+        canonical_full_match_count=1,
+        canonical_resolution="unique",
+        fanout=1,
+    )
+
+    assert term_ok("qualified_token_present", canonical_fanout_two)
+    assert not term_ok("full_token_low_fanout", canonical_fanout_two)
+    assert not term_ok("qualified_token_present", unobserved_fanout_one)
+    assert term_ok("full_token_low_fanout", unobserved_fanout_one)
 
 
 def test_identifier_token_collision_fails_closed() -> None:

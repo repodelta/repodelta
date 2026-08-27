@@ -10,6 +10,10 @@
     "semantic_resolution": "no LLM or semantic model is used; grounded semantic policy remains unexplored"
   },
   "overall": {
+    "canonical_low_fanout": {
+      "false_exclusions": 0,
+      "false_inclusions": 0
+    },
     "canonical_token_unique": {
       "false_exclusions": 0,
       "false_inclusions": 0
@@ -18,11 +22,15 @@
       "false_exclusions": 0,
       "false_inclusions": 0
     },
-    "low_fanout": {
+    "full_token_low_fanout": {
       "false_exclusions": 0,
       "false_inclusions": 0
     },
     "no_suffix": {
+      "false_exclusions": 0,
+      "false_inclusions": 0
+    },
+    "qualified_token_present": {
       "false_exclusions": 0,
       "false_inclusions": 0
     }
@@ -30,11 +38,13 @@
   "packet_digest": "c439f75d8e6d8d03cc82efad6975fb4ce112ada699871ef187bf2a2a574504c4",
   "per_focus": [],
   "policies": {
+    "canonical_low_fanout": "accept a full authored identifier token with qualified-name origin and exact-association fanout one",
     "canonical_token_unique": "accept a full authored identifier token only when it occurs in the candidate qualified name and uniquely resolves among changed symbols",
     "current": "reproduce observed direct membership; no policy change",
-    "low_fanout": "accept only a full identifier with canonical origin and focus fanout one",
-    "no_suffix": "accept exact identifiers only when the authored term is not suffix-only"
+    "full_token_low_fanout": "accept a full authored identifier token with exact-association fanout one, without a qualified-name-origin requirement",
+    "no_suffix": "accept exact identifiers only when the authored term is not suffix-only",
+    "qualified_token_present": "accept a full authored identifier token observed in the candidate qualified name, without uniqueness or fanout constraints"
   },
-  "schema_version": "structural_identifier_policy_shadow.v1",
+  "schema_version": "structural_identifier_policy_shadow.v2",
   "specificity_origin_completeness": "partial"
 }

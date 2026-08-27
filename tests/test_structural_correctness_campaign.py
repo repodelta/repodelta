@@ -724,6 +724,17 @@ def test_campaign_v1_1_identifier_policy_summary_is_derived() -> None:
         for path in probes
     )
     assert summary == aggregate_identifier_policy_shadows(shadows)
+    assert summary["schema_version"] == (
+        "structural_identifier_policy_shadow_summary.v2"
+    )
+    assert set(summary["policies"]) == {
+        "current",
+        "no_suffix",
+        "canonical_low_fanout",
+        "qualified_token_present",
+        "full_token_low_fanout",
+        "canonical_token_unique",
+    }
     assert summary["overall"]["current"] == {
         "false_inclusions": 38,
         "false_exclusions": 212,
@@ -732,6 +743,15 @@ def test_campaign_v1_1_identifier_policy_summary_is_derived() -> None:
         "false_inclusions": 0,
         "false_exclusions": 227,
     }
+    for policy in (
+        "canonical_low_fanout",
+        "qualified_token_present",
+        "full_token_low_fanout",
+    ):
+        assert summary["overall"][policy] == {
+            "false_inclusions": 0,
+            "false_exclusions": 227,
+        }
 
 
 def test_campaign_v1_1_identifier_artifacts_recompute_from_frozen_inputs() -> None:
