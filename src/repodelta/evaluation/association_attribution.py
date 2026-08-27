@@ -799,6 +799,35 @@ def _reason_breakdown(
             )
         }
         result.append(entry)
+    # ``multiple`` and ``unattributed`` are exclusive comparison buckets, not
+    # candidate association kinds.  They therefore do not appear in
+    # ``candidates`` above, but they must remain first-class reason rows so an
+    # exclusive breakdown can be reconciled with the overall deltas.
+    for key in sorted(
+        (set(reason_totals) | set(reason_involvement_totals)) - set(candidates)
+    ):
+        subject_kind, association = key
+        entry = {
+            "subject_kind": subject_kind,
+            "association": association,
+            "candidate_count": 0,
+            "selected_count": 0,
+            "deferred_count": 0,
+            "observed_anchor_memberships": 0,
+            "observed_membership_classes": {},
+            "comparison": {
+                dimension: dict(counts)
+                for dimension, counts in sorted(reason_totals.get(key, {}).items())
+            },
+            "comparison_involved": {
+                dimension: dict(counts)
+                for dimension, counts in sorted(
+                    reason_involvement_totals.get(key, {}).items()
+                )
+            },
+        }
+        result.append(entry)
+    result.sort(key=lambda item: (item["subject_kind"], item["association"]))
     return result
 
 

@@ -814,6 +814,79 @@
       },
       "selected_count": 27,
       "subject_kind": "requirement"
+    },
+    {
+      "association": "multiple",
+      "candidate_count": 0,
+      "comparison": {
+        "claimed_direct_nodes": {
+          "false_exclusions": 0,
+          "false_inclusions": 5
+        },
+        "exact_relations": {
+          "false_exclusions": 0,
+          "false_inclusions": 19
+        },
+        "selected_nodes": {
+          "false_exclusions": 0,
+          "false_inclusions": 29
+        },
+        "structural_context_nodes": {
+          "false_exclusions": 0,
+          "false_inclusions": 0
+        }
+      },
+      "comparison_involved": {},
+      "deferred_count": 0,
+      "observed_anchor_memberships": 0,
+      "observed_membership_classes": {},
+      "selected_count": 0,
+      "subject_kind": "requirement"
+    },
+    {
+      "association": "unattributed",
+      "candidate_count": 0,
+      "comparison": {
+        "claimed_direct_nodes": {
+          "false_exclusions": 10,
+          "false_inclusions": 0
+        },
+        "exact_relations": {
+          "false_exclusions": 0,
+          "false_inclusions": 0
+        },
+        "selected_nodes": {
+          "false_exclusions": 8,
+          "false_inclusions": 0
+        },
+        "structural_context_nodes": {
+          "false_exclusions": 0,
+          "false_inclusions": 0
+        }
+      },
+      "comparison_involved": {
+        "claimed_direct_nodes": {
+          "false_exclusions": 10,
+          "false_inclusions": 0
+        },
+        "exact_relations": {
+          "false_exclusions": 0,
+          "false_inclusions": 0
+        },
+        "selected_nodes": {
+          "false_exclusions": 8,
+          "false_inclusions": 0
+        },
+        "structural_context_nodes": {
+          "false_exclusions": 0,
+          "false_inclusions": 0
+        }
+      },
+      "deferred_count": 0,
+      "observed_anchor_memberships": 0,
+      "observed_membership_classes": {},
+      "selected_count": 0,
+      "subject_kind": "requirement"
     }
   ],
   "reference_status": "verified",

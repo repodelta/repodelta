@@ -201,5 +201,9 @@ exact-relation false inclusions/exclusions by subject kind and recorded
 association reason. It also reports suggestions and unresolved memberships as
 observed-only dimensions. Downstream nodes and relation groups are attributed
 only through root-linked lineage already present in the canonical overlay;
-`causal_replay` is false, and members without a recorded lineage are
-`unattributed` rather than assigned a guessed reason.
+`causal_replay` is false. The exclusive reason breakdown keeps `multiple` for
+members reachable from more than one recorded root and `unattributed` for
+members without a recorded lineage, rather than assigning a guessed reason;
+these fallback rows make the reason totals reconcile with the overall deltas.
+The separate `comparison_involved` view remains non-exclusive and may count a
+member for every recorded reason that reaches it.

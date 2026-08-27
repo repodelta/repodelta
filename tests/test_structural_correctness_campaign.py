@@ -252,6 +252,52 @@ def test_campaign_v1_1_association_comparison_summary_is_derived() -> None:
     }
 
 
+def test_campaign_v1_1_exclusive_reason_breakdown_accounts_for_overall() -> None:
+    result_dir = V1_1_CAMPAIGN / "results" / "association-attribution"
+    comparisons = {
+        path.stem: json.loads(path.read_text(encoding="utf-8"))
+        for path in sorted(result_dir.glob("pr-*.json"))
+    }
+    summary = json.loads(
+        (result_dir / "summary.json").read_text(encoding="utf-8")
+    )
+    concrete_and_fallback_reasons = {
+        (item["subject_kind"], item["association"])
+        for item in summary["by_reason"]
+    }
+    observed_exclusive_buckets = set()
+    for comparison in comparisons.values():
+        for focus in comparison["per_focus"]:
+            for result in focus["dimensions"].values():
+                if not isinstance(result, dict):
+                    continue
+                for field in (
+                    "false_inclusions_by_reason",
+                    "false_exclusions_by_reason",
+                ):
+                    for bucket, count in result.get(field, {}).items():
+                        if bucket in {"multiple", "unattributed"} and count:
+                            observed_exclusive_buckets.add(
+                                (focus["subject_kind"], bucket)
+                            )
+
+    assert observed_exclusive_buckets <= concrete_and_fallback_reasons
+
+    dimensions = (
+        "selected_nodes",
+        "claimed_direct_nodes",
+        "structural_context_nodes",
+        "exact_relations",
+    )
+    for dimension in dimensions:
+        for field in ("false_inclusions", "false_exclusions"):
+            accounted = sum(
+                item["comparison"].get(dimension, {}).get(field, 0)
+                for item in summary["by_reason"]
+            )
+            assert accounted == summary["overall"][dimension][field]
+
+
 def test_campaign_v1_1_summary_is_derived_from_verified_references() -> None:
     manifest = json.loads(V1_1_MANIFEST.read_text(encoding="utf-8"))
     summary = json.loads(
