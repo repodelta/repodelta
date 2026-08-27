@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from dataclasses import replace
 
+import pytest
+
 from repodelta.evaluation.association_attribution import (
     AssociationAttributionObservation,
     AssociationAttributionRow,
@@ -9,7 +11,9 @@ from repodelta.evaluation.association_attribution import (
 from repodelta.evaluation.identifier_specificity import (
     _term_observation,
     compare_identifier_policies,
+    load_identifier_specificity,
     observe_identifier_specificity_from_artifacts,
+    write_identifier_specificity,
 )
 from repodelta.evaluation.structural_correctness import (
     StructuralRelationCandidate,
@@ -184,6 +188,7 @@ def test_signature_without_canonical_origin_is_classified_explicitly() -> None:
         kind="structural_change",
         classification="code",
         head_signature=AssociationSignature(identifiers=("github",)),
+        metadata={"summary": "GitHub appears in a non-diff summary"},
     )
     observed = _term_observation(
         "github",
@@ -197,6 +202,39 @@ def test_signature_without_canonical_origin_is_classified_explicitly() -> None:
 
     assert observed.origins == ("signature_unattributed",)
     assert observed.canonical_resolution == "unobserved"
+
+
+def test_packet_digest_mismatch_fails_closed() -> None:
+    packet, observation, labels, attribution = _inputs()
+    mismatched_attribution = replace(attribution, packet_digest="wrong")
+
+    with pytest.raises(ValueError, match="association attribution does not match"):
+        observe_identifier_specificity_from_artifacts(packet, mismatched_attribution)
+
+    specificity = observe_identifier_specificity_from_artifacts(packet, attribution)
+    mismatched_observation = replace(observation, packet_digest="wrong")
+    with pytest.raises(ValueError, match="observation does not match"):
+        compare_identifier_policies(
+            packet,
+            mismatched_observation,
+            labels,
+            attribution,
+            specificity,
+        )
+
+
+def test_identifier_specificity_round_trip_is_deterministic(tmp_path) -> None:
+    packet, _, _, attribution = _inputs()
+    value = observe_identifier_specificity_from_artifacts(packet, attribution)
+
+    first_path = write_identifier_specificity(value, tmp_path / "first.json")
+    loaded = load_identifier_specificity(first_path)
+    second_path = write_identifier_specificity(loaded, tmp_path / "second.json")
+
+    assert loaded == value
+    assert first_path.read_text(encoding="utf-8") == second_path.read_text(
+        encoding="utf-8"
+    )
 
 
 def test_policy_shadow_is_direct_only_and_rejects_suffix_without_mutating_observation() -> None:

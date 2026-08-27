@@ -587,7 +587,7 @@ def _term_observation(
             origins.add("path")
         previews = "\n".join(
             str(metadata.get(key, ""))
-            for key in ("head_preview", "base_preview", "summary")
+            for key in ("head_preview", "base_preview")
         )
         if term in identifier_keys(previews):
             origins.add("diff_text")
@@ -691,9 +691,6 @@ def _change_relation_evidence(
     if target is None:
         return ()
     relation_ids = set(getattr(target, "change_relation_ids", ()))
-    identity = getattr(target, "structural_change", None)
-    if identity is not None:
-        relation_ids.update(getattr(target, "change_relation_ids", ()))
     if target.kind == "change_relation":
         return (target,)
     if not relation_ids:

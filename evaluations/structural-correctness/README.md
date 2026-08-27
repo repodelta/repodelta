@@ -236,6 +236,7 @@ origin as `unobserved` rather than reconstructing it. In a live brief, diff
 origin is recorded only when the target's canonical change-relation identity
 resolves to an evidence item carrying the raw preview; otherwise the term is
 `signature_unattributed`/`unobserved` and completeness remains `partial`.
+Descriptive evidence summaries are not treated as raw diff text.
 
 The sidecar can then compare bounded direct-admission policies without changing
 production selection or replaying closure:
