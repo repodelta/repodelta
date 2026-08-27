@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from typing import Literal
 
 from repodelta.model.contracts import (
     AssociationSignature,
@@ -10,6 +11,14 @@ from repodelta.model.contracts import (
 )
 
 _WORD_RE = re.compile(r"[A-Za-z][A-Za-z0-9_]{2,}")
+
+TransformationSelectorMatchKind = Literal[
+    "qualified_symbol",
+    "symbol_name",
+    "repository_path",
+    "verification_name",
+]
+TransformationSelectorResolution = Literal["matched", "no_match", "ambiguous"]
 
 
 def identifier_keys(value: str) -> frozenset[str]:
@@ -37,27 +46,206 @@ def matches_transformation_selector(
     selector_value: str,
     item: EvidenceItem,
 ) -> bool:
-    """Match one typed selector against one fact on its declared revision."""
+    """Match one typed selector against one fact on its declared revision.
+
+    This remains the single-fact predicate used by assessment. Callers that
+    admit structural subjects must use ``resolve_transformation_selector`` so
+    that an unqualified symbol selector cannot silently select several
+    changed identities.
+    """
+
+    if predicate.expectation == "reference":
+        # Assessment still consumes this compatibility predicate for
+        # non-direct alignment evidence. Direct structural admission goes
+        # through resolve_transformation_selector and remains canonical-only.
+        if predicate.selector_kind == "repository_path":
+            return _single_transformation_selector_match_kind(
+                predicate,
+                selector_value,
+                item,
+            ) is not None
+        if item.role == "verification":
+            return _single_transformation_selector_match_kind(
+                predicate,
+                selector_value,
+                item,
+            ) is not None
+        selector_keys = _selector_keys(selector_value)
+        signature = _candidate_signature(predicate, item)
+        return bool(selector_keys & {*signature.identifiers, *signature.tokens})
+    return _single_transformation_selector_match_kind(
+        predicate,
+        selector_value,
+        item,
+    ) is not None
+
+
+def resolve_transformation_selector(
+    predicate: TransformationPredicate,
+    selector_value: str,
+    items: tuple[EvidenceItem, ...] | list[EvidenceItem],
+) -> tuple[
+    tuple[EvidenceItem, ...],
+    TransformationSelectorResolution,
+    TransformationSelectorMatchKind | None,
+]:
+    """Resolve one selector against a candidate universe conservatively.
+
+    Repository paths are explicit scopes and may intentionally select several
+    changed symbols. Symbol selectors, however, are direct-admission roots:
+    an unqualified name must resolve to exactly one canonical changed identity.
+    Qualified matches take precedence over leaf-name matches; a tie is
+    ambiguous and fails closed.
+    """
+
+    candidates = tuple(
+        (
+            item,
+            _single_transformation_selector_match_kind(
+                predicate,
+                selector_value,
+                item,
+            ),
+        )
+        for item in items
+    )
+    matches = tuple(
+        (item, match_kind)
+        for item, match_kind in candidates
+        if match_kind is not None
+    )
+    if not matches:
+        return (), "no_match", None
+    if predicate.selector_kind == "repository_path":
+        return (
+            tuple(item for item, _ in matches),
+            "matched",
+            "repository_path",
+        )
+    qualified = tuple(
+        item for item, match_kind in matches if match_kind == "qualified_symbol"
+    )
+    if qualified:
+        if len(qualified) == 1:
+            return qualified, "matched", "qualified_symbol"
+        return (), "ambiguous", None
+    verification = tuple(
+        item for item, match_kind in matches if match_kind == "verification_name"
+    )
+    if verification:
+        if len(verification) == 1:
+            return verification, "matched", "verification_name"
+        return (), "ambiguous", None
+    named = tuple(
+        item for item, match_kind in matches if match_kind == "symbol_name"
+    )
+    if len(named) == 1:
+        return named, "matched", "symbol_name"
+    return (), "ambiguous", None
+
+
+def _single_transformation_selector_match_kind(
+    predicate: TransformationPredicate,
+    selector_value: str,
+    item: EvidenceItem,
+) -> TransformationSelectorMatchKind | None:
+    """Classify one fact without deciding whether a selector is unique."""
 
     if predicate.selector_kind == "repository_path":
         selector_path = _normalize_path(selector_value).rstrip("/")
-        return any(
+        return "repository_path" if any(
             path == selector_path or path.startswith(f"{selector_path}/")
             for path in _candidate_paths(predicate, item)
-        )
+        ) else None
     if item.role == "verification":
         identity = item.verification_identity
         selector_name = canonical_verification_name(selector_value)
-        return bool(
+        return "verification_name" if (
             selector_name
             and identity is not None
             and selector_name == identity.name
-        )
-    selector_keys = _selector_keys(selector_value)
-    if not selector_keys:
-        return False
+        ) else None
+    selector_text = _normalize_symbol_selector(selector_value)
+    if not selector_text:
+        return None
     signature = _candidate_signature(predicate, item)
-    return bool(selector_keys & {*signature.identifiers, *signature.tokens})
+    metadata = item.metadata
+    selector_is_qualified = _is_qualified_symbol(selector_text)
+    if predicate.expectation == "reference":
+        qualified_names = {
+            _normalize_symbol_selector(value)
+            for value in (
+                metadata.get("base_qualified_name"),
+                metadata.get("head_qualified_name"),
+            )
+            if isinstance(value, str) and value.strip()
+        }
+        names = {
+            _normalize_symbol_selector(value)
+            for value in (
+                metadata.get("base_name"),
+                metadata.get("head_name"),
+            )
+            if isinstance(value, str) and value.strip()
+        }
+        if selector_is_qualified:
+            return (
+                "qualified_symbol"
+                if selector_text in qualified_names
+                else None
+            )
+        return "symbol_name" if selector_text in names else None
+    if predicate.expectation in {"present_base", "absent_head"}:
+        side_metadata_defined = "base_qualified_name" in metadata
+        if (
+            side_metadata_defined
+            and metadata.get("base_qualified_name") is None
+        ):
+            return None
+        qualified_name = metadata.get("base_qualified_name")
+        name = metadata.get("base_name")
+    elif predicate.expectation in {"present_head", "verified_head"}:
+        side_metadata_defined = "head_qualified_name" in metadata
+        if (
+            side_metadata_defined
+            and metadata.get("head_qualified_name") is None
+        ):
+            return None
+        qualified_name = metadata.get("head_qualified_name")
+        name = metadata.get("head_name")
+    else:
+        side_metadata_defined = False
+        qualified_name = metadata.get("qualified_name")
+        name = metadata.get("name")
+    normalized_qualified_name = (
+        _normalize_symbol_selector(qualified_name)
+        if isinstance(qualified_name, str)
+        else ""
+    )
+    normalized_name = (
+        _normalize_symbol_selector(name)
+        if isinstance(name, str)
+        else ""
+    )
+    if selector_is_qualified:
+        if normalized_qualified_name == selector_text:
+            return "qualified_symbol"
+        if side_metadata_defined:
+            return None
+        compact_selector = _compact_symbol(selector_text)
+        if compact_selector in signature.identifiers and compact_selector != (
+            _compact_symbol(selector_text.rsplit(".", 1)[-1])
+        ):
+            return "qualified_symbol"
+        return None
+    if normalized_name == selector_text:
+        return "symbol_name"
+    if side_metadata_defined:
+        return None
+    selector_keys = _selector_keys(selector_value)
+    if selector_keys & {*signature.identifiers, *signature.tokens}:
+        return "symbol_name"
+    return None
 
 
 def _candidate_signature(
@@ -117,3 +305,17 @@ def _selector_keys(value: str) -> frozenset[str]:
             *(item for item in (normalized,) if len(item) >= 3),
         }
     )
+
+
+def _normalize_symbol_selector(value: str) -> str:
+    explicit = value.strip().removesuffix("()").strip()
+    explicit = re.sub(r"\s+", "", explicit)
+    return explicit.replace("::", ".").casefold()
+
+
+def _compact_symbol(value: str) -> str:
+    return re.sub(r"[^a-z0-9]", "", value.casefold())
+
+
+def _is_qualified_symbol(value: str) -> bool:
+    return "." in value

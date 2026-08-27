@@ -24,6 +24,7 @@ from repodelta.model.contracts import (
     TransformationAssessmentReason,
     TransformationClaim,
     TransformationEvidenceBinding,
+    TransformationAlignment,
     TransformationPredicateAssessment,
     TransformationSubjectMatch,
     TransformationSubjectSelection,
@@ -91,7 +92,7 @@ def test_pipeline_assesses_claims_conservatively_from_typed_authorities() -> Non
     claims = {item.kind: item for item in brief.transformation_contract.claims}
     assessed = brief.transformation_assessment.by_claim_id()
 
-    assert assessed[claims["change"].id].status == "demonstrated"
+    assert assessed[claims["change"].id].status == "unverified"
     assert assessed[claims["after_topology"].id].status == "partial"
     assert assessed[claims["selected_region"].id].status == "unverified"
     assert assessed[claims["removal"].id].status == "partial"
@@ -437,6 +438,165 @@ def test_unmatched_repository_path_fails_closed() -> None:
     assert selection.diagnostics[0].state == "no_structural_match"
     assert alignment.by_claim_id().get(claim.id, ()) == ()
     assert assessment.by_claim_id()[claim.id].status == "unverified"
+
+
+def test_ambiguous_symbol_selector_does_not_reenter_alignment_as_direct() -> None:
+    contract = extract_review_semantics(
+        issue_body=None,
+        issue_source=None,
+        pr_body="## After topology\n- `Adapter` is the canonical entry.\n",
+        pr_source=SourceRef(label="PR #9"),
+        pr_title="Reject broad transformation subject",
+    ).transformation_contract
+
+    def changed(identity: str, qualified_name: str) -> EvidenceItem:
+        return EvidenceItem(
+            id=identity,
+            summary=f"Modified {qualified_name}",
+            kind="structural_change",
+            classification="code",
+            profile="production",
+            authority="structural_provider",
+            revision_side="review",
+            operation="modified",
+            role="changed_anchor",
+            changed=True,
+            head_signature=AssociationSignature(
+                identifiers=("adapter",),
+                tokens=("adapter",),
+            ),
+            structural_change=StructuralChangeIdentity(
+                review_symbol_id=identity,
+            ),
+            metadata={
+                "path": f"src/{identity}.py",
+                "head_path": f"src/{identity}.py",
+                "base_path": f"src/{identity}.py",
+                "head_qualified_name": qualified_name,
+                "head_name": "Adapter",
+                "base_qualified_name": qualified_name,
+                "base_name": "Adapter",
+            },
+        )
+
+    candidates = (
+        changed("one", "pkg.one.Adapter"),
+        changed("two", "pkg.two.Adapter"),
+    )
+    catalog = EvidenceCatalog(items=candidates)
+    observed = reconstruct_observed_transformation(catalog)
+    selection = select_transformation_subjects(contract, observed, catalog)
+    closure = converge_transformation_closure(contract, selection, catalog)
+    alignment = TransformationAlignment(
+        bindings=tuple(
+            TransformationEvidenceBinding(
+                id=f"TAB:T1:{item.id}",
+                claim_id="T1",
+                evidence_id=item.id,
+                evidence_role="change",
+                association="exact_identifier",
+                reasons=(
+                    AssociationReason(
+                        kind="exact_identifier",
+                        detail="Fixture supplies a broad lexical binding.",
+                    ),
+                ),
+            )
+            for item in candidates
+        ),
+    )
+    assessment = assess_transformation(
+        contract,
+        alignment,
+        catalog,
+        ClosureScanPlanSet(),
+        head_sha="head123",
+        subject_selection=selection,
+        structural_closure=closure,
+    ).by_claim_id()["T1"]
+
+    assert selection.matches == ()
+    assert selection.diagnostics[0].state == "ambiguous_structural_match"
+    assert alignment.by_claim_id()["T1"]
+    assert assessment.status == "unverified"
+
+
+def test_unmatched_reference_selector_does_not_reenter_alignment_as_exact() -> None:
+    contract = extract_review_semantics(
+        issue_body=None,
+        issue_source=None,
+        pr_body="## Change\n- `config` is changed.\n",
+        pr_source=SourceRef(label="PR #9"),
+        pr_title="Reject unmatched reference subject",
+    ).transformation_contract
+    candidate = EvidenceItem(
+        id="review-config",
+        summary="Modified pkg.review_config",
+        kind="structural_change",
+        classification="code",
+        profile="production",
+        authority="structural_provider",
+        revision_side="review",
+        operation="modified",
+        role="changed_anchor",
+        changed=True,
+        head_signature=AssociationSignature(
+            identifiers=("config", "reviewconfig"),
+            tokens=("config",),
+        ),
+        structural_change=StructuralChangeIdentity(
+            review_symbol_id="review-config",
+        ),
+        metadata={
+            "path": "src/config.py",
+            "base_path": "src/config.py",
+            "head_path": "src/config.py",
+            "base_qualified_name": "pkg.review_config",
+            "base_name": "review_config",
+            "head_qualified_name": "pkg.review_config",
+            "head_name": "review_config",
+        },
+    )
+    catalog = EvidenceCatalog(items=(candidate,))
+    observed = reconstruct_observed_transformation(catalog)
+    selection = select_transformation_subjects(contract, observed, catalog)
+    alignment = TransformationAlignment(
+        bindings=(
+            TransformationEvidenceBinding(
+                id="TAB:T1:review-config",
+                claim_id="T1",
+                evidence_id=candidate.id,
+                evidence_role="change",
+                association="exact_identifier",
+                reasons=(
+                    AssociationReason(
+                        kind="exact_identifier",
+                        detail="Fixture supplies a broad lexical binding.",
+                    ),
+                ),
+            ),
+        ),
+    )
+    assessment = assess_transformation(
+        contract,
+        alignment,
+        catalog,
+        ClosureScanPlanSet(),
+        head_sha="head123",
+        subject_selection=selection,
+        structural_closure=converge_transformation_closure(
+            contract,
+            selection,
+            catalog,
+        ),
+    ).by_claim_id()["T1"]
+
+    assert selection.matches == ()
+    assert selection.diagnostics[0].state == "no_structural_match"
+    assert alignment.by_claim_id()["T1"]
+    assert assessment.status == "unverified"
+    assert assessment.predicate_assessments[0].status == "unverified"
+    assert assessment.predicate_assessments[0].supporting_binding_ids == ()
 
 
 def test_typed_predicate_rejects_unrelated_single_claim_binding() -> None:
@@ -1017,6 +1177,15 @@ def _authority_fixture(
             *((bypass.id,) if include_bypass else ()),
         ),
         structural_change=StructuralChangeIdentity(review_symbol_id="adapter"),
+        metadata={
+            "path": "src/adapter.py",
+            "base_path": "src/adapter.py",
+            "head_path": "src/adapter.py",
+            "base_qualified_name": "Adapter",
+            "base_name": "Adapter",
+            "head_qualified_name": "Adapter",
+            "head_name": "Adapter",
+        },
     )
     catalog = EvidenceCatalog(
         items=(

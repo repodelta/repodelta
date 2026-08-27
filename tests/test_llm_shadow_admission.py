@@ -87,15 +87,15 @@ def test_admission_is_stable_and_excludes_unrelated_changed_anchors() -> None:
     assert admission.request is not None
     candidate_ids = tuple(item.evidence_id for item in admission.request.candidates)
     assert set(admission.deterministic_evidence_ids) <= set(candidate_ids)
-    assert candidate_ids == admission.deterministic_evidence_ids
+    assert admission.deterministic_evidence_ids == ()
     assert admission.request.request_id.startswith(f"shadow:{claim.id}:")
     changed = next(
         item
         for item in admission.request.candidates
         if item.kind == "change_relation"
     )
-    assert changed.admission_tier == "baseline"
-    assert changed.association == "deterministic_baseline"
+    assert changed.admission_tier == "identifier"
+    assert changed.association == "exact_identifier"
     assert changed.path == "src/service.py"
     assert changed.classification == "code"
     assert changed.profile == "production"
@@ -169,24 +169,22 @@ def test_admission_truncates_only_after_preserving_baseline() -> None:
     assert admission.request.coverage_limits
 
 
-def test_multiple_direct_anchors_survive_without_competing() -> None:
+def test_multiple_lexical_anchors_remain_shadow_candidates_without_direct_proof() -> None:
     brief = _brief("## Change\n- Update `old_call` and `old_extra`.\n")
     claim = brief.transformation_contract.by_kind("change")[0]
 
     admission = _admit(brief).by_claim_id()[claim.id]
 
     assert admission.request is not None
-    assert tuple(
-        item.evidence_id for item in admission.request.candidates
-    ) == admission.deterministic_evidence_ids
-    assert len(admission.deterministic_evidence_ids) == 2
+    assert len(admission.request.candidates) == 2
+    assert admission.deterministic_evidence_ids == ()
 
 
 def test_admission_canonicalizes_baseline_to_request_candidate_order() -> None:
     brief = _brief("## Change\n- Update `old_call` and `old_extra`.\n")
     claim = brief.transformation_contract.by_kind("change")[0]
     assessment = brief.transformation_assessment.by_claim_id()[claim.id]
-    assert len(assessment.supporting_binding_ids) == 2
+    assert assessment.supporting_binding_ids == ()
     reversed_assessment = replace(
         brief.transformation_assessment,
         claims=tuple(
@@ -209,9 +207,7 @@ def test_admission_canonicalizes_baseline_to_request_candidate_order() -> None:
     admission = _admit(brief).by_claim_id()[claim.id]
 
     assert admission.request is not None
-    assert admission.deterministic_evidence_ids == tuple(
-        item.evidence_id for item in admission.request.candidates
-    )
+    assert admission.deterministic_evidence_ids == ()
 
 
 def test_admission_blocks_when_baseline_itself_exceeds_budget() -> None:
@@ -221,7 +217,7 @@ def test_admission_blocks_when_baseline_itself_exceeds_budget() -> None:
         brief, policy=ShadowAdmissionPolicy(max_candidates=1)
     ).by_claim_id()[claim.id]
 
-    assert len(admission.deterministic_evidence_ids) > 1
-    assert admission.state == "blocked"
-    assert admission.request is None
-    assert admission.diagnostics[0].code == "shadow_admission_baseline_over_budget"
+    assert admission.deterministic_evidence_ids == ()
+    assert admission.state == "ready_truncated"
+    assert admission.request is not None
+    assert len(admission.request.candidates) == 1
