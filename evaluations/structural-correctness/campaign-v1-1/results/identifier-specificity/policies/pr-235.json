@@ -1,7 +1,7 @@
 {
   "by_subject_kind": {
     "guardrail": {
-      "canonical_unique": {
+      "canonical_token_unique": {
         "false_exclusions": 11,
         "false_inclusions": 0
       },
@@ -19,7 +19,7 @@
       }
     },
     "requirement": {
-      "canonical_unique": {
+      "canonical_token_unique": {
         "false_exclusions": 20,
         "false_inclusions": 0
       },
@@ -47,7 +47,7 @@
     "semantic_resolution": "no LLM or semantic model is used; grounded semantic policy remains unexplored"
   },
   "overall": {
-    "canonical_unique": {
+    "canonical_token_unique": {
       "false_exclusions": 31,
       "false_inclusions": 0
     },
@@ -69,7 +69,7 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
-        "canonical_unique": {
+        "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:2f1d216f93e61ff00415",
             "SN:4b3329617dfe529df905",
@@ -133,7 +133,7 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
-        "canonical_unique": {
+        "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:4b3329617dfe529df905",
             "SN:e07680b66a5b2177f906"
@@ -181,7 +181,7 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
-        "canonical_unique": {
+        "canonical_token_unique": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
           "false_inclusion_nodes": [],
@@ -217,7 +217,7 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
-        "canonical_unique": {
+        "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:4b3329617dfe529df905",
             "SN:5176dacfa5eb098779f1",
@@ -281,7 +281,7 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
-        "canonical_unique": {
+        "canonical_token_unique": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
           "false_inclusion_nodes": [],
@@ -317,7 +317,7 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
-        "canonical_unique": {
+        "canonical_token_unique": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
           "false_inclusion_nodes": [],
@@ -369,7 +369,7 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
-        "canonical_unique": {
+        "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:4b3329617dfe529df905",
             "SN:c508618d7302e73db040",
@@ -425,7 +425,7 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
-        "canonical_unique": {
+        "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:4b3329617dfe529df905",
             "SN:b42a6abb614a25065834",
@@ -493,7 +493,7 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
-        "canonical_unique": {
+        "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:15fee4a667a914118edb",
             "SN:4b3329617dfe529df905",
@@ -553,7 +553,7 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
-        "canonical_unique": {
+        "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:48e5be66da52dd920ef0",
             "SN:4b3329617dfe529df905"
@@ -601,7 +601,7 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
-        "canonical_unique": {
+        "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:af14ac23d3c198f604a8",
             "SN:c508618d7302e73db040",
@@ -653,7 +653,7 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
-        "canonical_unique": {
+        "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:4b3329617dfe529df905",
             "SN:ac4ddbe869abcda97db5",
@@ -716,7 +716,7 @@
     }
   ],
   "policies": {
-    "canonical_unique": "accept only a full qualified-name identifier resolving to one changed symbol",
+    "canonical_token_unique": "accept a full authored identifier token only when it occurs in the candidate qualified name and uniquely resolves among changed symbols",
     "current": "reproduce observed direct membership; no policy change",
     "low_fanout": "accept only a full identifier with canonical origin and focus fanout one",
     "no_suffix": "accept exact identifiers only when the authored term is not suffix-only"

@@ -120,6 +120,85 @@ def test_canonical_full_identifier_is_distinguished_from_suffix_alias() -> None:
     assert suffix_term.canonical_resolution == "none"
 
 
+def test_identifier_token_collision_fails_closed() -> None:
+    packet, observation, labels, attribution = _inputs()
+    symbols = list(packet.symbols)
+    symbols[0] = replace(
+        symbols[0], qualified_name="pkg.alpha.VerificationWorkspace"
+    )
+    symbols[2] = replace(
+        symbols[2], qualified_name="pkg.beta.VerificationWorkspace"
+    )
+    packet = replace(packet, symbols=tuple(symbols))
+    observation = replace(observation, packet_digest=packet.digest)
+    labels = replace(labels, packet_digest=packet.digest)
+    attribution = replace(attribution, packet_digest=packet.digest)
+
+    specificity = observe_identifier_specificity_from_artifacts(
+        packet, attribution
+    )
+    term = specificity.rows[0].terms[0]
+
+    assert term.canonical_full_match_count == 2
+    assert term.canonical_resolution == "multiple"
+    assert term.origins == ("qualified_name",)
+    result = compare_identifier_policies(
+        packet, observation, labels, attribution, specificity
+    )
+    assert result["overall"]["canonical_token_unique"] == {
+        "false_inclusions": 0,
+        "false_exclusions": 1,
+    }
+
+
+def test_missing_origin_metadata_is_not_guessed_as_canonical() -> None:
+    packet, _, _, attribution = _inputs()
+    first = attribution.rows[0]
+    attribution = replace(
+        attribution,
+        rows=(
+            replace(
+                first,
+                candidate_node_id=None,
+                structural_member_id=None,
+                structural_membership_class=None,
+            ),
+            *attribution.rows[1:],
+        ),
+    )
+
+    specificity = observe_identifier_specificity_from_artifacts(
+        packet, attribution
+    )
+    term = specificity.rows[0].terms[0]
+
+    assert term.origins == ("unobserved",)
+    assert "qualified_name" not in term.origins
+    assert specificity.origin_completeness == "partial"
+
+
+def test_signature_without_canonical_origin_is_classified_explicitly() -> None:
+    target = EvidenceItem(
+        id="E:signature-only",
+        summary="Signature-only evidence",
+        kind="structural_change",
+        classification="code",
+        head_signature=AssociationSignature(identifiers=("github",)),
+    )
+    observed = _term_observation(
+        "github",
+        {"github": ("full_identifier",)},
+        target,
+        None,
+        (),
+        (),
+        (),
+    )
+
+    assert observed.origins == ("signature_unattributed",)
+    assert observed.canonical_resolution == "unobserved"
+
+
 def test_policy_shadow_is_direct_only_and_rejects_suffix_without_mutating_observation() -> None:
     packet, observation, labels, attribution = _inputs("workspace")
     specificity = observe_identifier_specificity_from_artifacts(packet, attribution)
@@ -132,7 +211,7 @@ def test_policy_shadow_is_direct_only_and_rejects_suffix_without_mutating_observ
         "false_inclusions": 1,
         "false_exclusions": 0,
     }
-    assert result["overall"]["canonical_unique"] == {
+    assert result["overall"]["canonical_token_unique"] == {
         "false_inclusions": 0,
         "false_exclusions": 1,
     }

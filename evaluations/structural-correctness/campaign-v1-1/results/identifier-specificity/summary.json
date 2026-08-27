@@ -1,7 +1,7 @@
 {
   "by_subject_kind": {
     "guardrail": {
-      "canonical_unique": {
+      "canonical_token_unique": {
         "false_exclusions": 52,
         "false_inclusions": 0
       },
@@ -19,7 +19,7 @@
       }
     },
     "requirement": {
-      "canonical_unique": {
+      "canonical_token_unique": {
         "false_exclusions": 175,
         "false_inclusions": 0
       },
@@ -43,7 +43,7 @@
     "downstream_replay": false
   },
   "overall": {
-    "canonical_unique": {
+    "canonical_token_unique": {
       "false_exclusions": 227,
       "false_inclusions": 0
     },
@@ -61,7 +61,7 @@
     }
   },
   "policies": {
-    "canonical_unique": "accept only a full qualified-name identifier resolving to one changed symbol",
+    "canonical_token_unique": "accept a full authored identifier token only when it occurs in the candidate qualified name and uniquely resolves among changed symbols",
     "current": "reproduce observed direct membership; no policy change",
     "low_fanout": "accept only a full identifier with canonical origin and focus fanout one",
     "no_suffix": "accept exact identifiers only when the authored term is not suffix-only"

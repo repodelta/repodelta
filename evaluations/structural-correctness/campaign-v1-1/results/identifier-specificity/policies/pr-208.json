@@ -1,7 +1,7 @@
 {
   "by_subject_kind": {
     "guardrail": {
-      "canonical_unique": {
+      "canonical_token_unique": {
         "false_exclusions": 2,
         "false_inclusions": 0
       },
@@ -19,7 +19,7 @@
       }
     },
     "requirement": {
-      "canonical_unique": {
+      "canonical_token_unique": {
         "false_exclusions": 13,
         "false_inclusions": 0
       },
@@ -47,7 +47,7 @@
     "semantic_resolution": "no LLM or semantic model is used; grounded semantic policy remains unexplored"
   },
   "overall": {
-    "canonical_unique": {
+    "canonical_token_unique": {
       "false_exclusions": 15,
       "false_inclusions": 0
     },
@@ -69,7 +69,7 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
-        "canonical_unique": {
+        "canonical_token_unique": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
           "false_inclusion_nodes": [],
@@ -105,7 +105,7 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
-        "canonical_unique": {
+        "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:37a3f84572c25e3cbbd4",
             "SN:e0ab5042bc9453753bcc"
@@ -153,7 +153,7 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
-        "canonical_unique": {
+        "canonical_token_unique": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
           "false_inclusion_nodes": [],
@@ -189,7 +189,7 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
-        "canonical_unique": {
+        "canonical_token_unique": {
           "false_exclusion_nodes": [],
           "false_exclusions": 0,
           "false_inclusion_nodes": [],
@@ -225,7 +225,7 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
-        "canonical_unique": {
+        "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:37a3f84572c25e3cbbd4",
             "SN:e0ab5042bc9453753bcc"
@@ -273,7 +273,7 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
-        "canonical_unique": {
+        "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:37a3f84572c25e3cbbd4",
             "SN:e0ab5042bc9453753bcc"
@@ -321,7 +321,7 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
-        "canonical_unique": {
+        "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:37a3f84572c25e3cbbd4",
             "SN:e0ab5042bc9453753bcc"
@@ -369,7 +369,7 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
-        "canonical_unique": {
+        "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:09332362e45a8f116f64",
             "SN:3fa93a82bd95f9e201a7",
@@ -421,7 +421,7 @@
     {
       "direct_membership_complete": "complete",
       "policies": {
-        "canonical_unique": {
+        "canonical_token_unique": {
           "false_exclusion_nodes": [
             "SN:37a3f84572c25e3cbbd4",
             "SN:3fa93a82bd95f9e201a7",
@@ -476,7 +476,7 @@
     }
   ],
   "policies": {
-    "canonical_unique": "accept only a full qualified-name identifier resolving to one changed symbol",
+    "canonical_token_unique": "accept a full authored identifier token only when it occurs in the candidate qualified name and uniquely resolves among changed symbols",
     "current": "reproduce observed direct membership; no policy change",
     "low_fanout": "accept only a full identifier with canonical origin and focus fanout one",
     "no_suffix": "accept exact identifiers only when the authored term is not suffix-only"

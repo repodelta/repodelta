@@ -385,7 +385,10 @@ def compare_identifier_policies(
         "current": "reproduce observed direct membership; no policy change",
         "no_suffix": "accept exact identifiers only when the authored term is not suffix-only",
         "low_fanout": "accept only a full identifier with canonical origin and focus fanout one",
-        "canonical_unique": "accept only a full qualified-name identifier resolving to one changed symbol",
+        "canonical_token_unique": (
+            "accept a full authored identifier token only when it occurs in the "
+            "candidate qualified name and uniquely resolves among changed symbols"
+        ),
     }
     policy_sets: dict[str, dict[str, set[str]]] = {
         name: {} for name in policies
@@ -652,7 +655,7 @@ def term_ok(policy: str, term: IdentifierTermObservation) -> bool:
         return full and not suffix_only
     if policy == "low_fanout":
         return full and canonical and term.fanout == 1
-    if policy == "canonical_unique":
+    if policy == "canonical_token_unique":
         return (
             full
             and canonical

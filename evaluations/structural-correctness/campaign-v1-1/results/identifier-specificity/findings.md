@@ -18,7 +18,7 @@ summary or path heuristically.
 | Current observed policy | 38 | 212 |
 | No suffix-only terms | 38 | 212 |
 | Low fanout + canonical origin | 0 | 227 |
-| Canonical unique qualified-name match | 0 | 227 |
+| Canonical token unique match | 0 | 227 |
 
 The 38 current direct false inclusions are split into 31 requirements and 7
 guardrails. The strict shadow removes those false inclusions, but introduces 15

@@ -251,7 +251,10 @@ repodelta compare-structural-identifier \
 ```
 
 The comparison includes the observed `current` policy plus `no_suffix`,
-`low_fanout`, and `canonical_unique` shadows. It reports only direct-node
+`low_fanout`, and `canonical_token_unique` shadows. The last policy accepts a
+full authored identifier token only when it occurs in the candidate qualified
+name and uniquely resolves among changed symbols; it is not a full qualified
+name equality check. The comparison reports only direct-node
 false inclusions/exclusions against the frozen semantic reference. It does
 not claim to predict selected files, structural context, exact relations, or
 semantic resolution; an LLM/embedding policy remains unexplored. No policy in
