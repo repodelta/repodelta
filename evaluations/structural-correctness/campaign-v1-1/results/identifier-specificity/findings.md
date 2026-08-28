@@ -36,16 +36,16 @@ lexical identifier overlap is being treated as direct authority, but the
 historical packet cannot separate qualified-name, path, and changed-line origins
 for every row.
 
-The three orthogonal shadows are also identical on this sample: requiring only
-qualified-name token origin, requiring only full-token exact-association fanout
-one, and requiring both canonical origin and fanout one each remove all 38
-false inclusions while adding 15 false exclusions. This means the historical
-replay points more strongly at qualified-name origin as the first discriminator;
-fanout and uniqueness add no observed separation here. The result remains a
-direct-only projection over partial historical origin data, not a production
-policy recommendation. A production fix should therefore wait for a live probe
-with raw evidence origins and a semantic-recall design, rather than deleting the
-shared high-recall identifier primitive.
+The orthogonal qualified-name-origin and low-fanout shadows have the same
+per-focus direct membership and aggregate result on this sample: each removes
+all 38 false inclusions while adding 15 false exclusions. The frozen replay
+therefore does not distinguish qualified-name origin from exact-association
+fanout as the operative discriminator; the two features are observationally
+confounded here. Uniqueness adds no additional separation beyond those strict
+shadows. The result remains a direct-only projection over partial historical
+origin data, not a production policy recommendation. A production fix should
+therefore wait for a live probe with raw evidence origins and a semantic-recall
+design, rather than deleting the shared high-recall identifier primitive.
 
 The `canonical_resolution` count is repository-wide: it counts changed-symbol
 qualified-name token occurrences across the packet, not only symbols eligible
