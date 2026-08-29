@@ -371,3 +371,9 @@ only the reference reviewer's judgment that a future direct mapping might be
 provable from the cited evidence; it never creates a production `matched` or
 direct mapping. A production change would need its own machine-verifiable
 proof trace and authority contract.
+
+Before the first R/G semantic-labeling batch, freeze and follow the
+[`labeling and verification protocol`](campaign-v1-1/rg-semantic-labeling-protocol.md).
+It governs the independent proposer/verifier roles, allowed inputs, evidence
+review, reproducible model-assisted runs, high-risk adjudication, and the stop
+conditions that the lifecycle schema alone cannot prove.
