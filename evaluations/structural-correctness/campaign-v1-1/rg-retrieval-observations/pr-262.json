@@ -1,0 +1,1987 @@
+{
+  "candidate_universe_digest": "a1fbeb38a54d8fd266eee158b3ef7f0dddacb2ec86268f0e28d60282d396a37e",
+  "rows": [
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G1:E:structural_change:120c37f322a0f27d6777",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "controls",
+            "graph"
+          ]
+        }
+      ],
+      "relation_id": "PR:53389b44b60fe53b3cd8",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:40e9917973895cbd3e20",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:46bf23112e0065c929bb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G1:E:structural_change:48b4be1bebef4808995e",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "evidence"
+          ]
+        }
+      ],
+      "relation_id": "PR:ed729ef49806c2188365",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:4f5a4978caab51f73bdc",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:660e935f95a8b76e8bc7",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G1:E:structural_change:70f75ab39c0f62841d02",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "graph"
+          ]
+        }
+      ],
+      "relation_id": "PR:b976c37e68e1ce8bb756",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:G1:E:structural_change:70fd73a38602eda46bb5",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "verificationworkspace",
+            "workspace"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "associated",
+            "available",
+            "evidence",
+            "graph",
+            "projected"
+          ]
+        }
+      ],
+      "relation_id": "PR:8ab52fda8cfaeccb631f",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:89eede32735af7c67d52",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G1:E:structural_change:917f81bf4b6411ed5fcb",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "evidence"
+          ]
+        }
+      ],
+      "relation_id": "PR:629d6690ee8d307c9b8f",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G1:E:structural_change:9965e36e706df5f2cf47",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "authored",
+            "graph"
+          ]
+        }
+      ],
+      "relation_id": "PR:c9640d7272a7a6c4f854",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G1:E:structural_change:cba72181004ababfcfe1",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "evidence",
+            "fixture"
+          ]
+        }
+      ],
+      "relation_id": "PR:9e01a455206d4975abd7",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:G1:E:structural_change:ce53432532a7b2dca4d3",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "verificationworkspace",
+            "workspace"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "controls",
+            "evidence",
+            "graph"
+          ]
+        }
+      ],
+      "relation_id": "PR:e0c057f5fe55055932da",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:G1:E:structural_change:ddb3035c4b476469bdea",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "verificationworkspace",
+            "workspace"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "available",
+            "evidence",
+            "graph"
+          ]
+        }
+      ],
+      "relation_id": "PR:ea26d2ab33d0104594d6",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:f0d1174c2365f7ad8ea0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G2:E:structural_change:120c37f322a0f27d6777",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "controls",
+            "graph",
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:6dd8a0675cbad3ef280e",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G2:E:structural_change:40e9917973895cbd3e20",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "details",
+            "section"
+          ]
+        }
+      ],
+      "relation_id": "PR:977afb85f8ef3eb48a7b",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:46bf23112e0065c929bb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G2:E:structural_change:48b4be1bebef4808995e",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "evidence"
+          ]
+        }
+      ],
+      "relation_id": "PR:c371278f30bbe993a025",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G2:E:structural_change:4f5a4978caab51f73bdc",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "section"
+          ]
+        }
+      ],
+      "relation_id": "PR:1ac22b0bf7a300930f79",
+      "retrieval_state": "deferred"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:660e935f95a8b76e8bc7",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G2:E:structural_change:70f75ab39c0f62841d02",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "graph",
+            "section"
+          ]
+        }
+      ],
+      "relation_id": "PR:af22c829e78b8d06f13a",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G2:E:structural_change:70fd73a38602eda46bb5",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "associated",
+            "available",
+            "canonical",
+            "details",
+            "evidence",
+            "graph",
+            "projected",
+            "section",
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:363ac5b47f075b360d9d",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:89eede32735af7c67d52",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G2:E:structural_change:917f81bf4b6411ed5fcb",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "evidence",
+            "section"
+          ]
+        }
+      ],
+      "relation_id": "PR:a34bbc391141fd256f82",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G2:E:structural_change:9965e36e706df5f2cf47",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "authored",
+            "graph"
+          ]
+        }
+      ],
+      "relation_id": "PR:cb1775928b69e1656d66",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G2:E:structural_change:cba72181004ababfcfe1",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "evidence",
+            "fixture",
+            "section"
+          ]
+        }
+      ],
+      "relation_id": "PR:b6b25d5b2258bcd1d7e6",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G2:E:structural_change:ce53432532a7b2dca4d3",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "controls",
+            "evidence",
+            "graph",
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:82199758502e7e1537e5",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G2:E:structural_change:ddb3035c4b476469bdea",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "available",
+            "canonical",
+            "details",
+            "evidence",
+            "graph",
+            "section",
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:29ec38c7bd89757c4a2b",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:f0d1174c2365f7ad8ea0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G3:E:structural_change:120c37f322a0f27d6777",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "controls",
+            "graph",
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:0f89c8d02a47b302fcad",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G3:E:structural_change:40e9917973895cbd3e20",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "details",
+            "section"
+          ]
+        }
+      ],
+      "relation_id": "PR:bca99f0c39f422cfcba5",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:46bf23112e0065c929bb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G3:E:structural_change:48b4be1bebef4808995e",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "evidence"
+          ]
+        }
+      ],
+      "relation_id": "PR:f49596374b7c62f87fe1",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G3:E:structural_change:4f5a4978caab51f73bdc",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "section"
+          ]
+        }
+      ],
+      "relation_id": "PR:74d281c061e2b383c301",
+      "retrieval_state": "deferred"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:660e935f95a8b76e8bc7",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G3:E:structural_change:70f75ab39c0f62841d02",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "graph",
+            "section"
+          ]
+        }
+      ],
+      "relation_id": "PR:3edfe559d6a5ab7b6bd9",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G3:E:structural_change:70fd73a38602eda46bb5",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "associated",
+            "available",
+            "canonical",
+            "details",
+            "evidence",
+            "graph",
+            "projected",
+            "section",
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:0d1b8b6490d79c2a9c16",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:89eede32735af7c67d52",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G3:E:structural_change:917f81bf4b6411ed5fcb",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "evidence",
+            "section"
+          ]
+        }
+      ],
+      "relation_id": "PR:fbd8851d3472bf38c10b",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G3:E:structural_change:9965e36e706df5f2cf47",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "authored",
+            "graph"
+          ]
+        }
+      ],
+      "relation_id": "PR:945f90b7efc0a6878437",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G3:E:structural_change:cba72181004ababfcfe1",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "evidence",
+            "fixture",
+            "section"
+          ]
+        }
+      ],
+      "relation_id": "PR:c50bf13744e94f6e66e5",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G3:E:structural_change:ce53432532a7b2dca4d3",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "controls",
+            "evidence",
+            "graph",
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:cfefc1913ba4b55f4d01",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G3:E:structural_change:ddb3035c4b476469bdea",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "available",
+            "canonical",
+            "details",
+            "evidence",
+            "graph",
+            "section",
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:dda9ec4ce271c35ab4ef",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:f0d1174c2365f7ad8ea0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:120c37f322a0f27d6777",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:40e9917973895cbd3e20",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:46bf23112e0065c929bb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:48b4be1bebef4808995e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:4f5a4978caab51f73bdc",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:660e935f95a8b76e8bc7",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:70f75ab39c0f62841d02",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:70fd73a38602eda46bb5",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:89eede32735af7c67d52",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:917f81bf4b6411ed5fcb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:9965e36e706df5f2cf47",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:cba72181004ababfcfe1",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:ce53432532a7b2dca4d3",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:ddb3035c4b476469bdea",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:f0d1174c2365f7ad8ea0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G5:E:structural_change:120c37f322a0f27d6777",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "controls",
+            "graph"
+          ]
+        }
+      ],
+      "relation_id": "PR:50d2ca393b7d3b6ce17f",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:40e9917973895cbd3e20",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:46bf23112e0065c929bb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G5:E:structural_change:48b4be1bebef4808995e",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "evidence"
+          ]
+        }
+      ],
+      "relation_id": "PR:93655a9c00e6b322c0cd",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:4f5a4978caab51f73bdc",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:660e935f95a8b76e8bc7",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G5:E:structural_change:70f75ab39c0f62841d02",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "graph"
+          ]
+        }
+      ],
+      "relation_id": "PR:844f21e0cc9b106613ac",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G5:E:structural_change:70fd73a38602eda46bb5",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "associated",
+            "available",
+            "evidence",
+            "graph",
+            "projected"
+          ]
+        }
+      ],
+      "relation_id": "PR:7b8c9adce750e0dd589e",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:89eede32735af7c67d52",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G5:E:structural_change:917f81bf4b6411ed5fcb",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "evidence"
+          ]
+        }
+      ],
+      "relation_id": "PR:0167d0f5b4630ab96d9e",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G5:E:structural_change:9965e36e706df5f2cf47",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "authored",
+            "graph"
+          ]
+        }
+      ],
+      "relation_id": "PR:7963f2e4b23ce79e9b5d",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G5:E:structural_change:cba72181004ababfcfe1",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "evidence",
+            "fixture"
+          ]
+        }
+      ],
+      "relation_id": "PR:90cc97565b3daab08520",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G5:E:structural_change:ce53432532a7b2dca4d3",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "controls",
+            "evidence",
+            "graph"
+          ]
+        }
+      ],
+      "relation_id": "PR:0b3fda374d9d602e712b",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G5:E:structural_change:ddb3035c4b476469bdea",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "available",
+            "evidence",
+            "graph"
+          ]
+        }
+      ],
+      "relation_id": "PR:4495a092027b085526df",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:f0d1174c2365f7ad8ea0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R1:E:structural_change:120c37f322a0f27d6777",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "subject"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "controls",
+            "graph",
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:5346b121c02a85dfc134",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R1:E:structural_change:40e9917973895cbd3e20",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "subject"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "details",
+            "section"
+          ]
+        }
+      ],
+      "relation_id": "PR:a6646ba919c93560a680",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R1:E:structural_change:46bf23112e0065c929bb",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "observations"
+          ]
+        }
+      ],
+      "relation_id": "PR:578f7ef349d5a98afb8f",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:R1:E:structural_change:48b4be1bebef4808995e",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "evidence"
+          ]
+        }
+      ],
+      "relation_id": "PR:519c12b2a3da44610b56",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R1:E:structural_change:4f5a4978caab51f73bdc",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "inspector",
+            "subject"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "section"
+          ]
+        }
+      ],
+      "relation_id": "PR:2066d89aed2f2f3fad2d",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R1:E:structural_change:660e935f95a8b76e8bc7",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "source"
+          ]
+        }
+      ],
+      "relation_id": "PR:7a16025d21c0f1d4584c",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R1:E:structural_change:70f75ab39c0f62841d02",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "inspector",
+            "subject",
+            "surface"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "graph",
+            "section"
+          ]
+        }
+      ],
+      "relation_id": "PR:de4a6f4f32d12ea5b23a",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R1:E:structural_change:70fd73a38602eda46bb5",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "inspector",
+            "investigation",
+            "observations",
+            "source",
+            "subject"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "associated",
+            "available",
+            "canonical",
+            "details",
+            "evidence",
+            "graph",
+            "projected",
+            "section",
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:3b5b66916bad76a16b95",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R1:E:structural_change:89eede32735af7c67d52",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "observations"
+          ]
+        }
+      ],
+      "relation_id": "PR:67ce049805a3ed077aac",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:R1:E:structural_change:917f81bf4b6411ed5fcb",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "evidence",
+            "section"
+          ]
+        }
+      ],
+      "relation_id": "PR:a8c960c6bbd61fe88f40",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:R1:E:structural_change:9965e36e706df5f2cf47",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "authored",
+            "graph"
+          ]
+        }
+      ],
+      "relation_id": "PR:88d400cc546c42850287",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:R1:E:structural_change:cba72181004ababfcfe1",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "evidence",
+            "fixture",
+            "section"
+          ]
+        }
+      ],
+      "relation_id": "PR:1719cbbfe60a38678479",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R1:E:structural_change:ce53432532a7b2dca4d3",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "inspector",
+            "subject"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "controls",
+            "evidence",
+            "graph",
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:d769810acfbbbb53ab58",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R1:E:structural_change:ddb3035c4b476469bdea",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "inspector",
+            "investigation",
+            "observations",
+            "source",
+            "subject"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "available",
+            "canonical",
+            "details",
+            "evidence",
+            "graph",
+            "section",
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:37829cb6d0f03abf11c4",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:f0d1174c2365f7ad8ea0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:120c37f322a0f27d6777",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:40e9917973895cbd3e20",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "detail"
+          ]
+        }
+      ],
+      "relation_id": "PR:bc9f3c79d9c492f9dfc1",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:46bf23112e0065c929bb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:48b4be1bebef4808995e",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "evidence"
+          ]
+        }
+      ],
+      "relation_id": "PR:29f53c7d6d0300013e3d",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:4f5a4978caab51f73bdc",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:660e935f95a8b76e8bc7",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:70f75ab39c0f62841d02",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "detail"
+          ]
+        }
+      ],
+      "relation_id": "PR:b7f7ce8a1b00a7715539",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:70fd73a38602eda46bb5",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "contradiction",
+            "detail",
+            "evidence",
+            "exceptional",
+            "state",
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:cd6b4194d290ec57c71b",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:89eede32735af7c67d52",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:917f81bf4b6411ed5fcb",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "evidence"
+          ]
+        }
+      ],
+      "relation_id": "PR:7fcfee46872763f5e82b",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:9965e36e706df5f2cf47",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:cba72181004ababfcfe1",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "evidence"
+          ]
+        }
+      ],
+      "relation_id": "PR:b56785a2756814818634",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:ce53432532a7b2dca4d3",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "evidence",
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:bd5bce44fea924cd497f",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:ddb3035c4b476469bdea",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "contradiction",
+            "detail",
+            "evidence",
+            "state",
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:aacb9d7804215a27707c",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:f0d1174c2365f7ad8ea0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R3:E:structural_change:120c37f322a0f27d6777",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "graph",
+            "subject"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "controls",
+            "graph",
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:28c4aa9b1ebec28d3727",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R3:E:structural_change:40e9917973895cbd3e20",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "graph",
+            "subject"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "details",
+            "section"
+          ]
+        }
+      ],
+      "relation_id": "PR:db1b043a7e77af3945cd",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:46bf23112e0065c929bb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R3:E:structural_change:48b4be1bebef4808995e",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "evidence"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "evidence"
+          ]
+        }
+      ],
+      "relation_id": "PR:766b836b7fd4be46c1aa",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R3:E:structural_change:4f5a4978caab51f73bdc",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "subject"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "section"
+          ]
+        }
+      ],
+      "relation_id": "PR:01c3e196a6617bfa2910",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R3:E:structural_change:660e935f95a8b76e8bc7",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "review"
+          ]
+        }
+      ],
+      "relation_id": "PR:483bead442ac9c051988",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R3:E:structural_change:70f75ab39c0f62841d02",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "authored",
+            "graph",
+            "subject"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "graph",
+            "section"
+          ]
+        }
+      ],
+      "relation_id": "PR:71cffbcb31529188f970",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R3:E:structural_change:70fd73a38602eda46bb5",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "available",
+            "evidence",
+            "graph",
+            "review",
+            "subject"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "associated",
+            "available",
+            "canonical",
+            "details",
+            "evidence",
+            "graph",
+            "projected",
+            "section",
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:1799a53367316caf04ea",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:89eede32735af7c67d52",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R3:E:structural_change:917f81bf4b6411ed5fcb",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "evidence"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "evidence",
+            "section"
+          ]
+        }
+      ],
+      "relation_id": "PR:8034488a4c0d9c7d695d",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R3:E:structural_change:9965e36e706df5f2cf47",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "authored",
+            "graph",
+            "review"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "authored",
+            "graph"
+          ]
+        }
+      ],
+      "relation_id": "PR:0333bbb75589a7812be2",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:R3:E:structural_change:cba72181004ababfcfe1",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "evidence",
+            "fixture",
+            "section"
+          ]
+        }
+      ],
+      "relation_id": "PR:acb14b5f398c1f1b448d",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R3:E:structural_change:ce53432532a7b2dca4d3",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "evidence",
+            "graph",
+            "review",
+            "subject"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "controls",
+            "evidence",
+            "graph",
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:adebeff701715d6769ea",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R3:E:structural_change:ddb3035c4b476469bdea",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "available",
+            "evidence",
+            "graph",
+            "review",
+            "subject"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "available",
+            "canonical",
+            "details",
+            "evidence",
+            "graph",
+            "section",
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:c7870665cf68dff87caf",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:f0d1174c2365f7ad8ea0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:R4:E:structural_change:120c37f322a0f27d6777",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:71046afa90e694c09ee7",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R4:E:structural_change:40e9917973895cbd3e20",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "section"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "details",
+            "section"
+          ]
+        }
+      ],
+      "relation_id": "PR:a35e2b191fb6045b6671",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:46bf23112e0065c929bb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:48b4be1bebef4808995e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R4:E:structural_change:4f5a4978caab51f73bdc",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "section"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "section"
+          ]
+        }
+      ],
+      "relation_id": "PR:d54892c0bea7543247da",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:660e935f95a8b76e8bc7",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R4:E:structural_change:70f75ab39c0f62841d02",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "section"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "section"
+          ]
+        }
+      ],
+      "relation_id": "PR:01f9febc4345f27ac9eb",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R4:E:structural_change:70fd73a38602eda46bb5",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "entry",
+            "investigation",
+            "section"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "canonical",
+            "details",
+            "section",
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:36dec6f87faef4d5c4b0",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:89eede32735af7c67d52",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R4:E:structural_change:917f81bf4b6411ed5fcb",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "section"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "section"
+          ]
+        }
+      ],
+      "relation_id": "PR:91228974c8b38405a920",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:9965e36e706df5f2cf47",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R4:E:structural_change:cba72181004ababfcfe1",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "section"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "fixture",
+            "section"
+          ]
+        }
+      ],
+      "relation_id": "PR:f3bdd018439382fd05c3",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:R4:E:structural_change:ce53432532a7b2dca4d3",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:890a081e09c048cc6939",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R4:E:structural_change:ddb3035c4b476469bdea",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "canonical",
+            "entry",
+            "investigation",
+            "section"
+          ]
+        },
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "canonical",
+            "details",
+            "section",
+            "visible"
+          ]
+        }
+      ],
+      "relation_id": "PR:33522efc6f3f2d4e0dc6",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:f0d1174c2365f7ad8ea0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    }
+  ],
+  "schema_version": "rg_semantic_candidate_retrieval.v1",
+  "structural_packet_digest": "56a6084269535c7d3d7cd9a69669363625f2194a2fdac2a159985562b15a763b"
+}

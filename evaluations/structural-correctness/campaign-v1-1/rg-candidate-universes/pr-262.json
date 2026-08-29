@@ -1,0 +1,1724 @@
+{
+  "anchors": [
+    {
+      "canonical_node_id": "SN:b8d4254dc3828c940fbb",
+      "canonical_review_symbol_id": "E:review_symbol:7d2479f64bf8c8ee0e9f",
+      "change_relation_ids": [
+        "hunk:src/repodelta/presentation/html.py:1:change:0"
+      ],
+      "classification": "code",
+      "evidence_id": "E:structural_change:120c37f322a0f27d6777",
+      "evidence_kind": "structural_change",
+      "node_state": "node_resolved",
+      "operation": "added",
+      "path": "src/repodelta/presentation/html.py",
+      "profile": "production",
+      "revision_side": "review",
+      "sources": [
+        {
+          "label": "Codegraph symbol",
+          "line_end": 222,
+          "line_start": 185,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/src/repodelta/presentation/html.py#L185-L222"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 222,
+          "line_start": 185,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/src/repodelta/presentation/html.py#L185-L222"
+        }
+      ],
+      "summary": "Added function: _focus_controls"
+    },
+    {
+      "canonical_node_id": "SN:69fe86be4087ee523fea",
+      "canonical_review_symbol_id": "E:review_symbol:d62efcc534ee03eb856a",
+      "change_relation_ids": [
+        "hunk:tests/test_verification_projection.py:0:change:0"
+      ],
+      "classification": "test",
+      "evidence_id": "E:structural_change:40e9917973895cbd3e20",
+      "evidence_kind": "structural_change",
+      "node_state": "node_resolved",
+      "operation": "modified",
+      "path": "tests/test_verification_projection.py",
+      "profile": "test",
+      "revision_side": "review",
+      "sources": [
+        {
+          "label": "Codegraph symbol",
+          "line_end": 225,
+          "line_start": 196,
+          "path": "tests/test_verification_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/tests/test_verification_projection.py#L196-L225"
+        },
+        {
+          "label": "Codegraph symbol",
+          "line_end": 232,
+          "line_start": 196,
+          "path": "tests/test_verification_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/tests/test_verification_projection.py#L196-L232"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 232,
+          "line_start": 226,
+          "path": "tests/test_verification_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/tests/test_verification_projection.py#L226-L232"
+        }
+      ],
+      "summary": "Modified function: test_generic_transition_context_is_explicitly_not_graph_applicable"
+    },
+    {
+      "canonical_node_id": "SN:b9147320f7cc4299f067",
+      "canonical_review_symbol_id": "E:review_symbol:0663c7ba00d3b3863661",
+      "change_relation_ids": [
+        "hunk:tests/test_projection.py:3:change:0"
+      ],
+      "classification": "test",
+      "evidence_id": "E:structural_change:46bf23112e0065c929bb",
+      "evidence_kind": "structural_change",
+      "node_state": "node_resolved",
+      "operation": "modified",
+      "path": "tests/test_projection.py",
+      "profile": "test",
+      "revision_side": "review",
+      "sources": [
+        {
+          "label": "Codegraph symbol",
+          "line_end": 3073,
+          "line_start": 3003,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/tests/test_projection.py#L3003-L3073"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 3057,
+          "line_start": 3057,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/tests/test_projection.py#L3057"
+        },
+        {
+          "label": "Codegraph symbol",
+          "line_end": 3070,
+          "line_start": 3000,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/tests/test_projection.py#L3000-L3070"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 3054,
+          "line_start": 3054,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/tests/test_projection.py#L3054"
+        }
+      ],
+      "summary": "Modified function: test_focus_evidence_roles_are_routed_before_convergence_and_presentation"
+    },
+    {
+      "canonical_node_id": "SN:9caebf5ac975d54164ab",
+      "canonical_review_symbol_id": "E:review_symbol:810cf4332c932e5341c8",
+      "change_relation_ids": [
+        "hunk:tests/test_projection.py:0:change:0",
+        "hunk:tests/test_projection.py:0:change:1"
+      ],
+      "classification": "test",
+      "evidence_id": "E:structural_change:48b4be1bebef4808995e",
+      "evidence_kind": "structural_change",
+      "node_state": "node_resolved",
+      "operation": "modified",
+      "path": "tests/test_projection.py",
+      "profile": "test",
+      "revision_side": "review",
+      "sources": [
+        {
+          "label": "Codegraph symbol",
+          "line_end": 1150,
+          "line_start": 1069,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/tests/test_projection.py#L1069-L1150"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 1125,
+          "line_start": 1120,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/tests/test_projection.py#L1120-L1125"
+        },
+        {
+          "label": "Codegraph symbol",
+          "line_end": 1148,
+          "line_start": 1069,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/tests/test_projection.py#L1069-L1148"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 1123,
+          "line_start": 1120,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/tests/test_projection.py#L1120-L1123"
+        }
+      ],
+      "summary": "Modified function: test_codegraph_context_only_expands_selected_exact_anchor"
+    },
+    {
+      "canonical_node_id": "SN:d2e389bfa55c339d1f0c",
+      "canonical_review_symbol_id": "E:review_symbol:5a74dfb983b1f71ab2b4",
+      "change_relation_ids": [
+        "hunk:tests/test_verification_projection.py:1:change:0",
+        "hunk:tests/test_verification_projection.py:1:change:1",
+        "hunk:tests/test_verification_projection.py:1:change:2"
+      ],
+      "classification": "test",
+      "evidence_id": "E:structural_change:4f5a4978caab51f73bdc",
+      "evidence_kind": "structural_change",
+      "node_state": "node_resolved",
+      "operation": "modified",
+      "path": "tests/test_verification_projection.py",
+      "profile": "test",
+      "revision_side": "review",
+      "sources": [
+        {
+          "label": "Codegraph symbol",
+          "line_end": 274,
+          "line_start": 259,
+          "path": "tests/test_verification_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/tests/test_verification_projection.py#L259-L274"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 274,
+          "line_start": 265,
+          "path": "tests/test_verification_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/tests/test_verification_projection.py#L265-L274"
+        },
+        {
+          "label": "Codegraph symbol",
+          "line_end": 283,
+          "line_start": 266,
+          "path": "tests/test_verification_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/tests/test_verification_projection.py#L266-L283"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 283,
+          "line_start": 272,
+          "path": "tests/test_verification_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/tests/test_verification_projection.py#L272-L283"
+        }
+      ],
+      "summary": "Modified function: test_renderer_indexes_typed_summary_into_existing_inspectors"
+    },
+    {
+      "canonical_node_id": "SN:bdcdc50c53174c6c89f0",
+      "canonical_review_symbol_id": "E:review_symbol:b47bab44c24a3e1d76ee",
+      "change_relation_ids": [
+        "hunk:tests/test_semantic_authority.py:1:change:0"
+      ],
+      "classification": "test",
+      "evidence_id": "E:structural_change:660e935f95a8b76e8bc7",
+      "evidence_kind": "structural_change",
+      "node_state": "node_resolved",
+      "operation": "modified",
+      "path": "tests/test_semantic_authority.py",
+      "profile": "test",
+      "revision_side": "review",
+      "sources": [
+        {
+          "label": "Codegraph symbol",
+          "line_end": 715,
+          "line_start": 639,
+          "path": "tests/test_semantic_authority.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/tests/test_semantic_authority.py#L639-L715"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 712,
+          "line_start": 712,
+          "path": "tests/test_semantic_authority.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/tests/test_semantic_authority.py#L712"
+        },
+        {
+          "label": "Codegraph symbol",
+          "line_end": 718,
+          "line_start": 642,
+          "path": "tests/test_semantic_authority.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/tests/test_semantic_authority.py#L642-L718"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 715,
+          "line_start": 715,
+          "path": "tests/test_semantic_authority.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/tests/test_semantic_authority.py#L715"
+        }
+      ],
+      "summary": "Modified function: test_review_contract_aliases_preserve_source_and_verification_identity"
+    },
+    {
+      "canonical_node_id": "SN:3b3fd6e980400fe1d379",
+      "canonical_review_symbol_id": "E:review_symbol:5b2f512dcb204bc5245a",
+      "change_relation_ids": [
+        "hunk:src/repodelta/presentation/html.py:10:change:0",
+        "hunk:src/repodelta/presentation/html.py:11:change:0",
+        "hunk:src/repodelta/presentation/html.py:12:change:0",
+        "hunk:src/repodelta/presentation/html.py:12:change:1",
+        "hunk:src/repodelta/presentation/html.py:13:change:0",
+        "hunk:src/repodelta/presentation/html.py:14:change:0",
+        "hunk:src/repodelta/presentation/html.py:15:change:0",
+        "hunk:src/repodelta/presentation/html.py:15:change:1",
+        "hunk:src/repodelta/presentation/html.py:16:change:0",
+        "hunk:src/repodelta/presentation/html.py:16:change:1",
+        "hunk:src/repodelta/presentation/html.py:17:change:0",
+        "hunk:src/repodelta/presentation/html.py:17:change:1"
+      ],
+      "classification": "code",
+      "evidence_id": "E:structural_change:70f75ab39c0f62841d02",
+      "evidence_kind": "structural_change",
+      "node_state": "node_resolved",
+      "operation": "modified",
+      "path": "src/repodelta/presentation/html.py",
+      "profile": "production",
+      "revision_side": "review",
+      "sources": [
+        {
+          "label": "Codegraph symbol",
+          "line_end": 3006,
+          "line_start": 2488,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/src/repodelta/presentation/html.py#L2488-L3006"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 2523,
+          "line_start": 2523,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/src/repodelta/presentation/html.py#L2523"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 2538,
+          "line_start": 2537,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/src/repodelta/presentation/html.py#L2537-L2538"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 2649,
+          "line_start": 2640,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/src/repodelta/presentation/html.py#L2640-L2649"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 2661,
+          "line_start": 2661,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/src/repodelta/presentation/html.py#L2661"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 2717,
+          "line_start": 2717,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/src/repodelta/presentation/html.py#L2717"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 2853,
+          "line_start": 2828,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/src/repodelta/presentation/html.py#L2828-L2853"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 2906,
+          "line_start": 2895,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/src/repodelta/presentation/html.py#L2895-L2906"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 3003,
+          "line_start": 2978,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/src/repodelta/presentation/html.py#L2978-L3003"
+        },
+        {
+          "label": "Codegraph symbol",
+          "line_end": 3000,
+          "line_start": 2523,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/src/repodelta/presentation/html.py#L2523-L3000"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 2678,
+          "line_start": 2673,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/src/repodelta/presentation/html.py#L2673-L2678"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 2690,
+          "line_start": 2690,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/src/repodelta/presentation/html.py#L2690"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 2871,
+          "line_start": 2856,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/src/repodelta/presentation/html.py#L2856-L2871"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 2997,
+          "line_start": 2994,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/src/repodelta/presentation/html.py#L2994-L2997"
+        }
+      ],
+      "summary": "Modified function: render_html"
+    },
+    {
+      "canonical_node_id": "SN:04a6b663dcf6c3ab94ba",
+      "canonical_review_symbol_id": "E:review_symbol:bd35bd95d2b0c61552d6",
+      "change_relation_ids": [
+        "hunk:src/repodelta/presentation/html.py:7:change:0",
+        "hunk:src/repodelta/presentation/html.py:8:change:0",
+        "hunk:src/repodelta/presentation/html.py:8:change:1",
+        "hunk:src/repodelta/presentation/html.py:8:change:2",
+        "hunk:src/repodelta/presentation/html.py:8:change:3",
+        "hunk:src/repodelta/presentation/html.py:8:change:4",
+        "hunk:src/repodelta/presentation/html.py:8:change:5",
+        "hunk:src/repodelta/presentation/html.py:9:change:0",
+        "hunk:src/repodelta/presentation/html.py:9:change:2",
+        "hunk:src/repodelta/presentation/html.py:9:change:3",
+        "hunk:src/repodelta/presentation/html.py:9:change:4"
+      ],
+      "classification": "code",
+      "evidence_id": "E:structural_change:70fd73a38602eda46bb5",
+      "evidence_kind": "structural_change",
+      "node_state": "node_resolved",
+      "operation": "unresolved",
+      "path": "src/repodelta/presentation/html.py",
+      "profile": "production",
+      "revision_side": "review",
+      "sources": [
+        {
+          "label": "Codegraph symbol",
+          "line_end": 2413,
+          "line_start": 2281,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/src/repodelta/presentation/html.py#L2281-L2413"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 2291,
+          "line_start": 2281,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/src/repodelta/presentation/html.py#L2281-L2291"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 2390,
+          "line_start": 2349,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/src/repodelta/presentation/html.py#L2349-L2390"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 2412,
+          "line_start": 2401,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/src/repodelta/presentation/html.py#L2401-L2412"
+        }
+      ],
+      "summary": "Unresolved function: _focus_assessment_inspector"
+    },
+    {
+      "canonical_node_id": "SN:0bdcc4ff455ba951fac0",
+      "canonical_review_symbol_id": "E:review_symbol:ef2c12c111e119daf93a",
+      "change_relation_ids": [
+        "hunk:tests/test_projection.py:2:change:0"
+      ],
+      "classification": "test",
+      "evidence_id": "E:structural_change:89eede32735af7c67d52",
+      "evidence_kind": "structural_change",
+      "node_state": "node_resolved",
+      "operation": "modified",
+      "path": "tests/test_projection.py",
+      "profile": "test",
+      "revision_side": "review",
+      "sources": [
+        {
+          "label": "Codegraph symbol",
+          "line_end": 2808,
+          "line_start": 2797,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/tests/test_projection.py#L2797-L2808"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 2808,
+          "line_start": 2808,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/tests/test_projection.py#L2808"
+        },
+        {
+          "label": "Codegraph symbol",
+          "line_end": 2805,
+          "line_start": 2794,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/tests/test_projection.py#L2794-L2805"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 2805,
+          "line_start": 2805,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/tests/test_projection.py#L2805"
+        }
+      ],
+      "summary": "Modified function: test_selection_and_rendering_are_byte_stable"
+    },
+    {
+      "canonical_node_id": "SN:abf417d0fba6b4e83048",
+      "canonical_review_symbol_id": "E:review_symbol:5610f6f7fe8403bed6ee",
+      "change_relation_ids": [
+        "hunk:tests/test_semantic_authority.py:0:change:0",
+        "hunk:tests/test_semantic_authority.py:0:change:1"
+      ],
+      "classification": "test",
+      "evidence_id": "E:structural_change:917f81bf4b6411ed5fcb",
+      "evidence_kind": "structural_change",
+      "node_state": "node_resolved",
+      "operation": "modified",
+      "path": "tests/test_semantic_authority.py",
+      "profile": "test",
+      "revision_side": "review",
+      "sources": [
+        {
+          "label": "Codegraph symbol",
+          "line_end": 346,
+          "line_start": 309,
+          "path": "tests/test_semantic_authority.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/tests/test_semantic_authority.py#L309-L346"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 343,
+          "line_start": 340,
+          "path": "tests/test_semantic_authority.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/tests/test_semantic_authority.py#L340-L343"
+        },
+        {
+          "label": "Codegraph symbol",
+          "line_end": 349,
+          "line_start": 309,
+          "path": "tests/test_semantic_authority.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/tests/test_semantic_authority.py#L309-L349"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 346,
+          "line_start": 340,
+          "path": "tests/test_semantic_authority.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/tests/test_semantic_authority.py#L340-L346"
+        }
+      ],
+      "summary": "Modified function: test_pr_acceptance_criteria_are_provisional_without_linked_issue"
+    },
+    {
+      "canonical_node_id": "SN:9c926f5950f88e50331a",
+      "canonical_review_symbol_id": "E:review_symbol:278209ee26bdf39dba43",
+      "change_relation_ids": [
+        "hunk:tests/test_projection.py:1:change:0"
+      ],
+      "classification": "test",
+      "evidence_id": "E:structural_change:9965e36e706df5f2cf47",
+      "evidence_kind": "structural_change",
+      "node_state": "node_resolved",
+      "operation": "modified",
+      "path": "tests/test_projection.py",
+      "profile": "test",
+      "revision_side": "review",
+      "sources": [
+        {
+          "label": "Codegraph symbol",
+          "line_end": 2080,
+          "line_start": 1850,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/tests/test_projection.py#L1850-L2080"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 2078,
+          "line_start": 2077,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/tests/test_projection.py#L2077-L2078"
+        },
+        {
+          "label": "Codegraph symbol",
+          "line_end": 2077,
+          "line_start": 1848,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/tests/test_projection.py#L1848-L2077"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 2075,
+          "line_start": 2075,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/tests/test_projection.py#L2075"
+        }
+      ],
+      "summary": "Modified function: test_review_graph_renders_complete_focus_union"
+    },
+    {
+      "canonical_node_id": "SN:6555144fcb0994ee3cd4",
+      "canonical_review_symbol_id": "E:review_symbol:c1d361374852d7c8217b",
+      "change_relation_ids": [
+        "hunk:tests/test_open_core.py:0:change:0",
+        "hunk:tests/test_open_core.py:0:change:1",
+        "hunk:tests/test_open_core.py:1:change:0"
+      ],
+      "classification": "test",
+      "evidence_id": "E:structural_change:cba72181004ababfcfe1",
+      "evidence_kind": "structural_change",
+      "node_state": "node_resolved",
+      "operation": "modified",
+      "path": "tests/test_open_core.py",
+      "profile": "test",
+      "revision_side": "review",
+      "sources": [
+        {
+          "label": "Codegraph symbol",
+          "line_end": 73,
+          "line_start": 17,
+          "path": "tests/test_open_core.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/tests/test_open_core.py#L17-L73"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 25,
+          "line_start": 25,
+          "path": "tests/test_open_core.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/tests/test_open_core.py#L25"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 67,
+          "line_start": 67,
+          "path": "tests/test_open_core.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/tests/test_open_core.py#L67"
+        },
+        {
+          "label": "Codegraph symbol",
+          "line_end": 74,
+          "line_start": 17,
+          "path": "tests/test_open_core.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/tests/test_open_core.py#L17-L74"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 30,
+          "line_start": 25,
+          "path": "tests/test_open_core.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/tests/test_open_core.py#L25-L30"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 68,
+          "line_start": 68,
+          "path": "tests/test_open_core.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/tests/test_open_core.py#L68"
+        }
+      ],
+      "summary": "Modified function: test_fixture_to_requirement_first_html"
+    },
+    {
+      "canonical_node_id": "SN:e5b7fa1fcafb4c77ce3f",
+      "canonical_review_symbol_id": "E:review_symbol:4c87b075c7729e40582e",
+      "change_relation_ids": [
+        "hunk:src/repodelta/presentation/html.py:1:change:1",
+        "hunk:src/repodelta/presentation/html.py:1:change:2",
+        "hunk:src/repodelta/presentation/html.py:1:change:3",
+        "hunk:src/repodelta/presentation/html.py:2:change:0",
+        "hunk:src/repodelta/presentation/html.py:3:change:0",
+        "hunk:src/repodelta/presentation/html.py:4:change:0",
+        "hunk:src/repodelta/presentation/html.py:5:change:0",
+        "hunk:src/repodelta/presentation/html.py:6:change:0"
+      ],
+      "classification": "code",
+      "evidence_id": "E:structural_change:ce53432532a7b2dca4d3",
+      "evidence_kind": "structural_change",
+      "node_state": "node_resolved",
+      "operation": "modified",
+      "path": "src/repodelta/presentation/html.py",
+      "profile": "production",
+      "revision_side": "review",
+      "sources": [
+        {
+          "label": "Codegraph symbol",
+          "line_end": 772,
+          "line_start": 184,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/src/repodelta/presentation/html.py#L184-L772"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 230,
+          "line_start": 230,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/src/repodelta/presentation/html.py#L230"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 610,
+          "line_start": 605,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/src/repodelta/presentation/html.py#L605-L610"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 659,
+          "line_start": 620,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/src/repodelta/presentation/html.py#L620-L659"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 767,
+          "line_start": 767,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/src/repodelta/presentation/html.py#L767"
+        },
+        {
+          "label": "Codegraph symbol",
+          "line_end": 788,
+          "line_start": 225,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/src/repodelta/presentation/html.py#L225-L788"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 244,
+          "line_start": 230,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/src/repodelta/presentation/html.py#L230-L244"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 657,
+          "line_start": 657,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/src/repodelta/presentation/html.py#L657"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 669,
+          "line_start": 667,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/src/repodelta/presentation/html.py#L667-L669"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 767,
+          "line_start": 763,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/src/repodelta/presentation/html.py#L763-L767"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 783,
+          "line_start": 782,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/src/repodelta/presentation/html.py#L782-L783"
+        }
+      ],
+      "summary": "Modified function: _review_graph"
+    },
+    {
+      "canonical_node_id": "SN:491e9b2d0ef54d5ef533",
+      "canonical_review_symbol_id": "E:review_symbol:c5aa7a805191089fd525",
+      "change_relation_ids": [
+        "hunk:src/repodelta/presentation/html.py:7:change:0",
+        "hunk:src/repodelta/presentation/html.py:7:change:1",
+        "hunk:src/repodelta/presentation/html.py:7:change:2",
+        "hunk:src/repodelta/presentation/html.py:7:change:3",
+        "hunk:src/repodelta/presentation/html.py:8:change:1",
+        "hunk:src/repodelta/presentation/html.py:8:change:2",
+        "hunk:src/repodelta/presentation/html.py:8:change:3",
+        "hunk:src/repodelta/presentation/html.py:8:change:4",
+        "hunk:src/repodelta/presentation/html.py:8:change:5",
+        "hunk:src/repodelta/presentation/html.py:9:change:0",
+        "hunk:src/repodelta/presentation/html.py:9:change:1",
+        "hunk:src/repodelta/presentation/html.py:9:change:2",
+        "hunk:src/repodelta/presentation/html.py:9:change:3",
+        "hunk:src/repodelta/presentation/html.py:9:change:4"
+      ],
+      "classification": "code",
+      "evidence_id": "E:structural_change:ddb3035c4b476469bdea",
+      "evidence_kind": "structural_change",
+      "node_state": "node_resolved",
+      "operation": "unresolved",
+      "path": "src/repodelta/presentation/html.py",
+      "profile": "production",
+      "revision_side": "review",
+      "sources": [
+        {
+          "label": "Codegraph symbol",
+          "line_end": 2378,
+          "line_start": 2265,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/src/repodelta/presentation/html.py#L2265-L2378"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 2284,
+          "line_start": 2265,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/src/repodelta/presentation/html.py#L2265-L2284"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 2355,
+          "line_start": 2339,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/src/repodelta/presentation/html.py#L2339-L2355"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 2377,
+          "line_start": 2366,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/src/repodelta/presentation/html.py#L2366-L2377"
+        }
+      ],
+      "summary": "Unresolved function: _verification_accordion"
+    },
+    {
+      "canonical_node_id": "SN:2426a3989cb2a97d2842",
+      "canonical_review_symbol_id": "E:review_symbol:bcc45645af3d49317b5c",
+      "change_relation_ids": [
+        "hunk:src/repodelta/presentation/html.py:0:change:0",
+        "hunk:src/repodelta/presentation/html.py:1:change:0"
+      ],
+      "classification": "code",
+      "evidence_id": "E:structural_change:f0d1174c2365f7ad8ea0",
+      "evidence_kind": "structural_change",
+      "node_state": "node_resolved",
+      "operation": "modified",
+      "path": "src/repodelta/presentation/html.py",
+      "profile": "production",
+      "revision_side": "review",
+      "sources": [
+        {
+          "label": "Codegraph symbol",
+          "line_end": 3014,
+          "line_start": 1,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/42a28d7883304dbd0f272a5de0011d8b7410e1e7/src/repodelta/presentation/html.py#L1-L3014"
+        },
+        {
+          "label": "Codegraph symbol",
+          "line_end": 3008,
+          "line_start": 1,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/src/repodelta/presentation/html.py#L1-L3008"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 12,
+          "line_start": 12,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/src/repodelta/presentation/html.py#L12"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 224,
+          "line_start": 223,
+          "path": "src/repodelta/presentation/html.py",
+          "url": "https://github.com/repodelta/repodelta/blob/24cba6759ddf3cc787a5675754bd1d057c755411/src/repodelta/presentation/html.py#L223-L224"
+        }
+      ],
+      "summary": "Modified file: src/repodelta/presentation/html.py"
+    }
+  ],
+  "candidates": [
+    {
+      "candidate_id": "C:G1:E:structural_change:120c37f322a0f27d6777",
+      "evidence_id": "E:structural_change:120c37f322a0f27d6777",
+      "evidence_role": "primary",
+      "subject_id": "G1"
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:40e9917973895cbd3e20",
+      "evidence_id": "E:structural_change:40e9917973895cbd3e20",
+      "evidence_role": "test_support",
+      "subject_id": "G1"
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:46bf23112e0065c929bb",
+      "evidence_id": "E:structural_change:46bf23112e0065c929bb",
+      "evidence_role": "test_support",
+      "subject_id": "G1"
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:48b4be1bebef4808995e",
+      "evidence_id": "E:structural_change:48b4be1bebef4808995e",
+      "evidence_role": "test_support",
+      "subject_id": "G1"
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:4f5a4978caab51f73bdc",
+      "evidence_id": "E:structural_change:4f5a4978caab51f73bdc",
+      "evidence_role": "test_support",
+      "subject_id": "G1"
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:660e935f95a8b76e8bc7",
+      "evidence_id": "E:structural_change:660e935f95a8b76e8bc7",
+      "evidence_role": "test_support",
+      "subject_id": "G1"
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:70f75ab39c0f62841d02",
+      "evidence_id": "E:structural_change:70f75ab39c0f62841d02",
+      "evidence_role": "primary",
+      "subject_id": "G1"
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:70fd73a38602eda46bb5",
+      "evidence_id": "E:structural_change:70fd73a38602eda46bb5",
+      "evidence_role": "primary",
+      "subject_id": "G1"
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:89eede32735af7c67d52",
+      "evidence_id": "E:structural_change:89eede32735af7c67d52",
+      "evidence_role": "test_support",
+      "subject_id": "G1"
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:917f81bf4b6411ed5fcb",
+      "evidence_id": "E:structural_change:917f81bf4b6411ed5fcb",
+      "evidence_role": "test_support",
+      "subject_id": "G1"
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:9965e36e706df5f2cf47",
+      "evidence_id": "E:structural_change:9965e36e706df5f2cf47",
+      "evidence_role": "test_support",
+      "subject_id": "G1"
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:cba72181004ababfcfe1",
+      "evidence_id": "E:structural_change:cba72181004ababfcfe1",
+      "evidence_role": "test_support",
+      "subject_id": "G1"
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:ce53432532a7b2dca4d3",
+      "evidence_id": "E:structural_change:ce53432532a7b2dca4d3",
+      "evidence_role": "primary",
+      "subject_id": "G1"
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:ddb3035c4b476469bdea",
+      "evidence_id": "E:structural_change:ddb3035c4b476469bdea",
+      "evidence_role": "primary",
+      "subject_id": "G1"
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:f0d1174c2365f7ad8ea0",
+      "evidence_id": "E:structural_change:f0d1174c2365f7ad8ea0",
+      "evidence_role": "primary",
+      "subject_id": "G1"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:120c37f322a0f27d6777",
+      "evidence_id": "E:structural_change:120c37f322a0f27d6777",
+      "evidence_role": "primary",
+      "subject_id": "G2"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:40e9917973895cbd3e20",
+      "evidence_id": "E:structural_change:40e9917973895cbd3e20",
+      "evidence_role": "test_support",
+      "subject_id": "G2"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:46bf23112e0065c929bb",
+      "evidence_id": "E:structural_change:46bf23112e0065c929bb",
+      "evidence_role": "test_support",
+      "subject_id": "G2"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:48b4be1bebef4808995e",
+      "evidence_id": "E:structural_change:48b4be1bebef4808995e",
+      "evidence_role": "test_support",
+      "subject_id": "G2"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:4f5a4978caab51f73bdc",
+      "evidence_id": "E:structural_change:4f5a4978caab51f73bdc",
+      "evidence_role": "test_support",
+      "subject_id": "G2"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:660e935f95a8b76e8bc7",
+      "evidence_id": "E:structural_change:660e935f95a8b76e8bc7",
+      "evidence_role": "test_support",
+      "subject_id": "G2"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:70f75ab39c0f62841d02",
+      "evidence_id": "E:structural_change:70f75ab39c0f62841d02",
+      "evidence_role": "primary",
+      "subject_id": "G2"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:70fd73a38602eda46bb5",
+      "evidence_id": "E:structural_change:70fd73a38602eda46bb5",
+      "evidence_role": "primary",
+      "subject_id": "G2"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:89eede32735af7c67d52",
+      "evidence_id": "E:structural_change:89eede32735af7c67d52",
+      "evidence_role": "test_support",
+      "subject_id": "G2"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:917f81bf4b6411ed5fcb",
+      "evidence_id": "E:structural_change:917f81bf4b6411ed5fcb",
+      "evidence_role": "test_support",
+      "subject_id": "G2"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:9965e36e706df5f2cf47",
+      "evidence_id": "E:structural_change:9965e36e706df5f2cf47",
+      "evidence_role": "test_support",
+      "subject_id": "G2"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:cba72181004ababfcfe1",
+      "evidence_id": "E:structural_change:cba72181004ababfcfe1",
+      "evidence_role": "test_support",
+      "subject_id": "G2"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:ce53432532a7b2dca4d3",
+      "evidence_id": "E:structural_change:ce53432532a7b2dca4d3",
+      "evidence_role": "primary",
+      "subject_id": "G2"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:ddb3035c4b476469bdea",
+      "evidence_id": "E:structural_change:ddb3035c4b476469bdea",
+      "evidence_role": "primary",
+      "subject_id": "G2"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:f0d1174c2365f7ad8ea0",
+      "evidence_id": "E:structural_change:f0d1174c2365f7ad8ea0",
+      "evidence_role": "primary",
+      "subject_id": "G2"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:120c37f322a0f27d6777",
+      "evidence_id": "E:structural_change:120c37f322a0f27d6777",
+      "evidence_role": "primary",
+      "subject_id": "G3"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:40e9917973895cbd3e20",
+      "evidence_id": "E:structural_change:40e9917973895cbd3e20",
+      "evidence_role": "test_support",
+      "subject_id": "G3"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:46bf23112e0065c929bb",
+      "evidence_id": "E:structural_change:46bf23112e0065c929bb",
+      "evidence_role": "test_support",
+      "subject_id": "G3"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:48b4be1bebef4808995e",
+      "evidence_id": "E:structural_change:48b4be1bebef4808995e",
+      "evidence_role": "test_support",
+      "subject_id": "G3"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:4f5a4978caab51f73bdc",
+      "evidence_id": "E:structural_change:4f5a4978caab51f73bdc",
+      "evidence_role": "test_support",
+      "subject_id": "G3"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:660e935f95a8b76e8bc7",
+      "evidence_id": "E:structural_change:660e935f95a8b76e8bc7",
+      "evidence_role": "test_support",
+      "subject_id": "G3"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:70f75ab39c0f62841d02",
+      "evidence_id": "E:structural_change:70f75ab39c0f62841d02",
+      "evidence_role": "primary",
+      "subject_id": "G3"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:70fd73a38602eda46bb5",
+      "evidence_id": "E:structural_change:70fd73a38602eda46bb5",
+      "evidence_role": "primary",
+      "subject_id": "G3"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:89eede32735af7c67d52",
+      "evidence_id": "E:structural_change:89eede32735af7c67d52",
+      "evidence_role": "test_support",
+      "subject_id": "G3"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:917f81bf4b6411ed5fcb",
+      "evidence_id": "E:structural_change:917f81bf4b6411ed5fcb",
+      "evidence_role": "test_support",
+      "subject_id": "G3"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:9965e36e706df5f2cf47",
+      "evidence_id": "E:structural_change:9965e36e706df5f2cf47",
+      "evidence_role": "test_support",
+      "subject_id": "G3"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:cba72181004ababfcfe1",
+      "evidence_id": "E:structural_change:cba72181004ababfcfe1",
+      "evidence_role": "test_support",
+      "subject_id": "G3"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:ce53432532a7b2dca4d3",
+      "evidence_id": "E:structural_change:ce53432532a7b2dca4d3",
+      "evidence_role": "primary",
+      "subject_id": "G3"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:ddb3035c4b476469bdea",
+      "evidence_id": "E:structural_change:ddb3035c4b476469bdea",
+      "evidence_role": "primary",
+      "subject_id": "G3"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:f0d1174c2365f7ad8ea0",
+      "evidence_id": "E:structural_change:f0d1174c2365f7ad8ea0",
+      "evidence_role": "primary",
+      "subject_id": "G3"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:120c37f322a0f27d6777",
+      "evidence_id": "E:structural_change:120c37f322a0f27d6777",
+      "evidence_role": "primary",
+      "subject_id": "G4"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:40e9917973895cbd3e20",
+      "evidence_id": "E:structural_change:40e9917973895cbd3e20",
+      "evidence_role": "test_support",
+      "subject_id": "G4"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:46bf23112e0065c929bb",
+      "evidence_id": "E:structural_change:46bf23112e0065c929bb",
+      "evidence_role": "test_support",
+      "subject_id": "G4"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:48b4be1bebef4808995e",
+      "evidence_id": "E:structural_change:48b4be1bebef4808995e",
+      "evidence_role": "test_support",
+      "subject_id": "G4"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:4f5a4978caab51f73bdc",
+      "evidence_id": "E:structural_change:4f5a4978caab51f73bdc",
+      "evidence_role": "test_support",
+      "subject_id": "G4"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:660e935f95a8b76e8bc7",
+      "evidence_id": "E:structural_change:660e935f95a8b76e8bc7",
+      "evidence_role": "test_support",
+      "subject_id": "G4"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:70f75ab39c0f62841d02",
+      "evidence_id": "E:structural_change:70f75ab39c0f62841d02",
+      "evidence_role": "primary",
+      "subject_id": "G4"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:70fd73a38602eda46bb5",
+      "evidence_id": "E:structural_change:70fd73a38602eda46bb5",
+      "evidence_role": "primary",
+      "subject_id": "G4"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:89eede32735af7c67d52",
+      "evidence_id": "E:structural_change:89eede32735af7c67d52",
+      "evidence_role": "test_support",
+      "subject_id": "G4"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:917f81bf4b6411ed5fcb",
+      "evidence_id": "E:structural_change:917f81bf4b6411ed5fcb",
+      "evidence_role": "test_support",
+      "subject_id": "G4"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:9965e36e706df5f2cf47",
+      "evidence_id": "E:structural_change:9965e36e706df5f2cf47",
+      "evidence_role": "test_support",
+      "subject_id": "G4"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:cba72181004ababfcfe1",
+      "evidence_id": "E:structural_change:cba72181004ababfcfe1",
+      "evidence_role": "test_support",
+      "subject_id": "G4"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:ce53432532a7b2dca4d3",
+      "evidence_id": "E:structural_change:ce53432532a7b2dca4d3",
+      "evidence_role": "primary",
+      "subject_id": "G4"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:ddb3035c4b476469bdea",
+      "evidence_id": "E:structural_change:ddb3035c4b476469bdea",
+      "evidence_role": "primary",
+      "subject_id": "G4"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:f0d1174c2365f7ad8ea0",
+      "evidence_id": "E:structural_change:f0d1174c2365f7ad8ea0",
+      "evidence_role": "primary",
+      "subject_id": "G4"
+    },
+    {
+      "candidate_id": "C:G5:E:structural_change:120c37f322a0f27d6777",
+      "evidence_id": "E:structural_change:120c37f322a0f27d6777",
+      "evidence_role": "primary",
+      "subject_id": "G5"
+    },
+    {
+      "candidate_id": "C:G5:E:structural_change:40e9917973895cbd3e20",
+      "evidence_id": "E:structural_change:40e9917973895cbd3e20",
+      "evidence_role": "test_support",
+      "subject_id": "G5"
+    },
+    {
+      "candidate_id": "C:G5:E:structural_change:46bf23112e0065c929bb",
+      "evidence_id": "E:structural_change:46bf23112e0065c929bb",
+      "evidence_role": "test_support",
+      "subject_id": "G5"
+    },
+    {
+      "candidate_id": "C:G5:E:structural_change:48b4be1bebef4808995e",
+      "evidence_id": "E:structural_change:48b4be1bebef4808995e",
+      "evidence_role": "test_support",
+      "subject_id": "G5"
+    },
+    {
+      "candidate_id": "C:G5:E:structural_change:4f5a4978caab51f73bdc",
+      "evidence_id": "E:structural_change:4f5a4978caab51f73bdc",
+      "evidence_role": "test_support",
+      "subject_id": "G5"
+    },
+    {
+      "candidate_id": "C:G5:E:structural_change:660e935f95a8b76e8bc7",
+      "evidence_id": "E:structural_change:660e935f95a8b76e8bc7",
+      "evidence_role": "test_support",
+      "subject_id": "G5"
+    },
+    {
+      "candidate_id": "C:G5:E:structural_change:70f75ab39c0f62841d02",
+      "evidence_id": "E:structural_change:70f75ab39c0f62841d02",
+      "evidence_role": "primary",
+      "subject_id": "G5"
+    },
+    {
+      "candidate_id": "C:G5:E:structural_change:70fd73a38602eda46bb5",
+      "evidence_id": "E:structural_change:70fd73a38602eda46bb5",
+      "evidence_role": "primary",
+      "subject_id": "G5"
+    },
+    {
+      "candidate_id": "C:G5:E:structural_change:89eede32735af7c67d52",
+      "evidence_id": "E:structural_change:89eede32735af7c67d52",
+      "evidence_role": "test_support",
+      "subject_id": "G5"
+    },
+    {
+      "candidate_id": "C:G5:E:structural_change:917f81bf4b6411ed5fcb",
+      "evidence_id": "E:structural_change:917f81bf4b6411ed5fcb",
+      "evidence_role": "test_support",
+      "subject_id": "G5"
+    },
+    {
+      "candidate_id": "C:G5:E:structural_change:9965e36e706df5f2cf47",
+      "evidence_id": "E:structural_change:9965e36e706df5f2cf47",
+      "evidence_role": "test_support",
+      "subject_id": "G5"
+    },
+    {
+      "candidate_id": "C:G5:E:structural_change:cba72181004ababfcfe1",
+      "evidence_id": "E:structural_change:cba72181004ababfcfe1",
+      "evidence_role": "test_support",
+      "subject_id": "G5"
+    },
+    {
+      "candidate_id": "C:G5:E:structural_change:ce53432532a7b2dca4d3",
+      "evidence_id": "E:structural_change:ce53432532a7b2dca4d3",
+      "evidence_role": "primary",
+      "subject_id": "G5"
+    },
+    {
+      "candidate_id": "C:G5:E:structural_change:ddb3035c4b476469bdea",
+      "evidence_id": "E:structural_change:ddb3035c4b476469bdea",
+      "evidence_role": "primary",
+      "subject_id": "G5"
+    },
+    {
+      "candidate_id": "C:G5:E:structural_change:f0d1174c2365f7ad8ea0",
+      "evidence_id": "E:structural_change:f0d1174c2365f7ad8ea0",
+      "evidence_role": "primary",
+      "subject_id": "G5"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:120c37f322a0f27d6777",
+      "evidence_id": "E:structural_change:120c37f322a0f27d6777",
+      "evidence_role": "primary",
+      "subject_id": "R1"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:40e9917973895cbd3e20",
+      "evidence_id": "E:structural_change:40e9917973895cbd3e20",
+      "evidence_role": "test_support",
+      "subject_id": "R1"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:46bf23112e0065c929bb",
+      "evidence_id": "E:structural_change:46bf23112e0065c929bb",
+      "evidence_role": "test_support",
+      "subject_id": "R1"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:48b4be1bebef4808995e",
+      "evidence_id": "E:structural_change:48b4be1bebef4808995e",
+      "evidence_role": "test_support",
+      "subject_id": "R1"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:4f5a4978caab51f73bdc",
+      "evidence_id": "E:structural_change:4f5a4978caab51f73bdc",
+      "evidence_role": "test_support",
+      "subject_id": "R1"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:660e935f95a8b76e8bc7",
+      "evidence_id": "E:structural_change:660e935f95a8b76e8bc7",
+      "evidence_role": "test_support",
+      "subject_id": "R1"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:70f75ab39c0f62841d02",
+      "evidence_id": "E:structural_change:70f75ab39c0f62841d02",
+      "evidence_role": "primary",
+      "subject_id": "R1"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:70fd73a38602eda46bb5",
+      "evidence_id": "E:structural_change:70fd73a38602eda46bb5",
+      "evidence_role": "primary",
+      "subject_id": "R1"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:89eede32735af7c67d52",
+      "evidence_id": "E:structural_change:89eede32735af7c67d52",
+      "evidence_role": "test_support",
+      "subject_id": "R1"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:917f81bf4b6411ed5fcb",
+      "evidence_id": "E:structural_change:917f81bf4b6411ed5fcb",
+      "evidence_role": "test_support",
+      "subject_id": "R1"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:9965e36e706df5f2cf47",
+      "evidence_id": "E:structural_change:9965e36e706df5f2cf47",
+      "evidence_role": "test_support",
+      "subject_id": "R1"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:cba72181004ababfcfe1",
+      "evidence_id": "E:structural_change:cba72181004ababfcfe1",
+      "evidence_role": "test_support",
+      "subject_id": "R1"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:ce53432532a7b2dca4d3",
+      "evidence_id": "E:structural_change:ce53432532a7b2dca4d3",
+      "evidence_role": "primary",
+      "subject_id": "R1"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:ddb3035c4b476469bdea",
+      "evidence_id": "E:structural_change:ddb3035c4b476469bdea",
+      "evidence_role": "primary",
+      "subject_id": "R1"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:f0d1174c2365f7ad8ea0",
+      "evidence_id": "E:structural_change:f0d1174c2365f7ad8ea0",
+      "evidence_role": "primary",
+      "subject_id": "R1"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:120c37f322a0f27d6777",
+      "evidence_id": "E:structural_change:120c37f322a0f27d6777",
+      "evidence_role": "primary",
+      "subject_id": "R2"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:40e9917973895cbd3e20",
+      "evidence_id": "E:structural_change:40e9917973895cbd3e20",
+      "evidence_role": "test_support",
+      "subject_id": "R2"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:46bf23112e0065c929bb",
+      "evidence_id": "E:structural_change:46bf23112e0065c929bb",
+      "evidence_role": "test_support",
+      "subject_id": "R2"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:48b4be1bebef4808995e",
+      "evidence_id": "E:structural_change:48b4be1bebef4808995e",
+      "evidence_role": "test_support",
+      "subject_id": "R2"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:4f5a4978caab51f73bdc",
+      "evidence_id": "E:structural_change:4f5a4978caab51f73bdc",
+      "evidence_role": "test_support",
+      "subject_id": "R2"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:660e935f95a8b76e8bc7",
+      "evidence_id": "E:structural_change:660e935f95a8b76e8bc7",
+      "evidence_role": "test_support",
+      "subject_id": "R2"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:70f75ab39c0f62841d02",
+      "evidence_id": "E:structural_change:70f75ab39c0f62841d02",
+      "evidence_role": "primary",
+      "subject_id": "R2"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:70fd73a38602eda46bb5",
+      "evidence_id": "E:structural_change:70fd73a38602eda46bb5",
+      "evidence_role": "primary",
+      "subject_id": "R2"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:89eede32735af7c67d52",
+      "evidence_id": "E:structural_change:89eede32735af7c67d52",
+      "evidence_role": "test_support",
+      "subject_id": "R2"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:917f81bf4b6411ed5fcb",
+      "evidence_id": "E:structural_change:917f81bf4b6411ed5fcb",
+      "evidence_role": "test_support",
+      "subject_id": "R2"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:9965e36e706df5f2cf47",
+      "evidence_id": "E:structural_change:9965e36e706df5f2cf47",
+      "evidence_role": "test_support",
+      "subject_id": "R2"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:cba72181004ababfcfe1",
+      "evidence_id": "E:structural_change:cba72181004ababfcfe1",
+      "evidence_role": "test_support",
+      "subject_id": "R2"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:ce53432532a7b2dca4d3",
+      "evidence_id": "E:structural_change:ce53432532a7b2dca4d3",
+      "evidence_role": "primary",
+      "subject_id": "R2"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:ddb3035c4b476469bdea",
+      "evidence_id": "E:structural_change:ddb3035c4b476469bdea",
+      "evidence_role": "primary",
+      "subject_id": "R2"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:f0d1174c2365f7ad8ea0",
+      "evidence_id": "E:structural_change:f0d1174c2365f7ad8ea0",
+      "evidence_role": "primary",
+      "subject_id": "R2"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:120c37f322a0f27d6777",
+      "evidence_id": "E:structural_change:120c37f322a0f27d6777",
+      "evidence_role": "primary",
+      "subject_id": "R3"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:40e9917973895cbd3e20",
+      "evidence_id": "E:structural_change:40e9917973895cbd3e20",
+      "evidence_role": "test_support",
+      "subject_id": "R3"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:46bf23112e0065c929bb",
+      "evidence_id": "E:structural_change:46bf23112e0065c929bb",
+      "evidence_role": "test_support",
+      "subject_id": "R3"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:48b4be1bebef4808995e",
+      "evidence_id": "E:structural_change:48b4be1bebef4808995e",
+      "evidence_role": "test_support",
+      "subject_id": "R3"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:4f5a4978caab51f73bdc",
+      "evidence_id": "E:structural_change:4f5a4978caab51f73bdc",
+      "evidence_role": "test_support",
+      "subject_id": "R3"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:660e935f95a8b76e8bc7",
+      "evidence_id": "E:structural_change:660e935f95a8b76e8bc7",
+      "evidence_role": "test_support",
+      "subject_id": "R3"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:70f75ab39c0f62841d02",
+      "evidence_id": "E:structural_change:70f75ab39c0f62841d02",
+      "evidence_role": "primary",
+      "subject_id": "R3"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:70fd73a38602eda46bb5",
+      "evidence_id": "E:structural_change:70fd73a38602eda46bb5",
+      "evidence_role": "primary",
+      "subject_id": "R3"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:89eede32735af7c67d52",
+      "evidence_id": "E:structural_change:89eede32735af7c67d52",
+      "evidence_role": "test_support",
+      "subject_id": "R3"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:917f81bf4b6411ed5fcb",
+      "evidence_id": "E:structural_change:917f81bf4b6411ed5fcb",
+      "evidence_role": "test_support",
+      "subject_id": "R3"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:9965e36e706df5f2cf47",
+      "evidence_id": "E:structural_change:9965e36e706df5f2cf47",
+      "evidence_role": "test_support",
+      "subject_id": "R3"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:cba72181004ababfcfe1",
+      "evidence_id": "E:structural_change:cba72181004ababfcfe1",
+      "evidence_role": "test_support",
+      "subject_id": "R3"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:ce53432532a7b2dca4d3",
+      "evidence_id": "E:structural_change:ce53432532a7b2dca4d3",
+      "evidence_role": "primary",
+      "subject_id": "R3"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:ddb3035c4b476469bdea",
+      "evidence_id": "E:structural_change:ddb3035c4b476469bdea",
+      "evidence_role": "primary",
+      "subject_id": "R3"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:f0d1174c2365f7ad8ea0",
+      "evidence_id": "E:structural_change:f0d1174c2365f7ad8ea0",
+      "evidence_role": "primary",
+      "subject_id": "R3"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:120c37f322a0f27d6777",
+      "evidence_id": "E:structural_change:120c37f322a0f27d6777",
+      "evidence_role": "primary",
+      "subject_id": "R4"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:40e9917973895cbd3e20",
+      "evidence_id": "E:structural_change:40e9917973895cbd3e20",
+      "evidence_role": "test_support",
+      "subject_id": "R4"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:46bf23112e0065c929bb",
+      "evidence_id": "E:structural_change:46bf23112e0065c929bb",
+      "evidence_role": "test_support",
+      "subject_id": "R4"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:48b4be1bebef4808995e",
+      "evidence_id": "E:structural_change:48b4be1bebef4808995e",
+      "evidence_role": "test_support",
+      "subject_id": "R4"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:4f5a4978caab51f73bdc",
+      "evidence_id": "E:structural_change:4f5a4978caab51f73bdc",
+      "evidence_role": "test_support",
+      "subject_id": "R4"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:660e935f95a8b76e8bc7",
+      "evidence_id": "E:structural_change:660e935f95a8b76e8bc7",
+      "evidence_role": "test_support",
+      "subject_id": "R4"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:70f75ab39c0f62841d02",
+      "evidence_id": "E:structural_change:70f75ab39c0f62841d02",
+      "evidence_role": "primary",
+      "subject_id": "R4"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:70fd73a38602eda46bb5",
+      "evidence_id": "E:structural_change:70fd73a38602eda46bb5",
+      "evidence_role": "primary",
+      "subject_id": "R4"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:89eede32735af7c67d52",
+      "evidence_id": "E:structural_change:89eede32735af7c67d52",
+      "evidence_role": "test_support",
+      "subject_id": "R4"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:917f81bf4b6411ed5fcb",
+      "evidence_id": "E:structural_change:917f81bf4b6411ed5fcb",
+      "evidence_role": "test_support",
+      "subject_id": "R4"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:9965e36e706df5f2cf47",
+      "evidence_id": "E:structural_change:9965e36e706df5f2cf47",
+      "evidence_role": "test_support",
+      "subject_id": "R4"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:cba72181004ababfcfe1",
+      "evidence_id": "E:structural_change:cba72181004ababfcfe1",
+      "evidence_role": "test_support",
+      "subject_id": "R4"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:ce53432532a7b2dca4d3",
+      "evidence_id": "E:structural_change:ce53432532a7b2dca4d3",
+      "evidence_role": "primary",
+      "subject_id": "R4"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:ddb3035c4b476469bdea",
+      "evidence_id": "E:structural_change:ddb3035c4b476469bdea",
+      "evidence_role": "primary",
+      "subject_id": "R4"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:f0d1174c2365f7ad8ea0",
+      "evidence_id": "E:structural_change:f0d1174c2365f7ad8ea0",
+      "evidence_role": "primary",
+      "subject_id": "R4"
+    }
+  ],
+  "schema_version": "rg_semantic_candidate_universe.v1",
+  "structural_packet_digest": "56a6084269535c7d3d7cd9a69669363625f2194a2fdac2a159985562b15a763b",
+  "subjects": [
+    {
+      "authored_statement": "Preserve verification_workspace, assessment authority, verification-matrix data, source identity, and coverage semantics.",
+      "profile": "guardrail",
+      "subject_id": "G1",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "The structural graph may consume and focus canonical verification results but must not derive or re-decide assessment state.",
+      "profile": "guardrail",
+      "subject_id": "G2",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "Do not classify absent structural mapping as absent authored or verification evidence.",
+      "profile": "guardrail",
+      "subject_id": "G3",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "Assessment, observation, association, graph-membership, collection, or acceptance semantics.",
+      "profile": "guardrail",
+      "subject_id": "G4",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "New evidence collection or LLM behavior.",
+      "profile": "guardrail",
+      "subject_id": "G5",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "Selecting an R/G/T/CC subject in the structural investigation surface shows its authored statement, canonical assessment, observations, and source in the same inspector.",
+      "profile": "generic",
+      "subject_id": "R1",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "Assessment and evidence detail is progressively disclosed by default, while the assessment state and any contradiction, missing evidence, incomplete collection, or other exceptional condition remain visible without expansion.",
+      "profile": "generic",
+      "subject_id": "R2",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "A subject without structural mapping remains available and shows its authored statement and non-structural evidence; absence from the graph must not remove it from review.",
+      "profile": "generic",
+      "subject_id": "R3",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "The page has one canonical R/G/T/CC investigation entry rather than a second repeated Verification section.",
+      "profile": "generic",
+      "subject_id": "R4",
+      "subject_kind": "requirement"
+    }
+  ]
+}

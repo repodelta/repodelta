@@ -1,0 +1,5105 @@
+{
+  "candidate_universe_digest": "dd8148a3063067b75f7855b809dd90d1aacb4e38c8a8ea200b4f4e969c5ec3b4",
+  "rows": [
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:change_relation:ff21727879899576ada6",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:changed_file:0b1a2d641e4c68cd6bed",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:changed_file:a3220c6b1fc37c2d6a16",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:changed_file:af4d7934afb51f3cf0d0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:changed_file:e3d6f2e177fae6a17a98",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:changed_file:e7040b83e90b3dcce8ee",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:0d018a0b496c2b2eab51",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:14461db15a94594e9c5a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:16405487a4e1e5245129",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:1ba9f09385635f56b04c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:21b72ac449c0b5808153",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:23191a851a219fcea313",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:2aefc5376a3ea4370d69",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:2e70f154f64bcc8b7b21",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:3f5fe2cfaf7f2562e4f2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:42e6a4ab851acd42660d",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:4997d227702d5bc62195",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:57d14320372a057c469f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:61e3a8d053071ce95a5f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:6574676f03a777406a84",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:678e2981a23fff67030e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:6d6b1decd05086024fc9",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:6e2523b4c3486769140a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:6e2fee56fb1283224b68",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:7a0cb29d98f66011e909",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:7ac27de07a57d0f420d7",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:7eb24b67ca072c05219c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:8b9d46f1cce8649ec3c0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:91f25116bde17d3d09cc",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:9ab4a168003716950ddb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:9b783d6066f6a782f3aa",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:a486332c5d83c847016e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:b1a498c82be2f5a096c4",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:ba39b635ed9f50c05e71",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:c2b9bc7a96e9b7643edd",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:c385c3bcc522b69bd13c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:c4f041b23d15c7316399",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:c5864fc769ad442f93a5",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:c9f8cd7009419ca2c9d2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:d0eaa50d0546a2197f69",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:d68583e0bcce16b3dc5f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:d9ee97f4ae3c34cdd895",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:dd2d32d1c1c92a1a172a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:ddb54c2e57b357812e9d",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:e4c351302b13daf629e2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:e8aed1935f6ec48ad115",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:e9628d1c685777cdbc1f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:f2108e6a7fcab562c01e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:f59558e09ee5937e80c4",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:f6668f6708629f11c3d6",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:f81dfcab8813f5045c85",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:f822794be06182374264",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:fac8fb96a9dd747557cb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:change_relation:ff21727879899576ada6",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:changed_file:0b1a2d641e4c68cd6bed",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:changed_file:a3220c6b1fc37c2d6a16",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:changed_file:af4d7934afb51f3cf0d0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:changed_file:e3d6f2e177fae6a17a98",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:changed_file:e7040b83e90b3dcce8ee",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:0d018a0b496c2b2eab51",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:14461db15a94594e9c5a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:16405487a4e1e5245129",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:1ba9f09385635f56b04c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:21b72ac449c0b5808153",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:23191a851a219fcea313",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:2aefc5376a3ea4370d69",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:2e70f154f64bcc8b7b21",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:3f5fe2cfaf7f2562e4f2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:42e6a4ab851acd42660d",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:4997d227702d5bc62195",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:57d14320372a057c469f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:61e3a8d053071ce95a5f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:6574676f03a777406a84",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:678e2981a23fff67030e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:6d6b1decd05086024fc9",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:6e2523b4c3486769140a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:6e2fee56fb1283224b68",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:7a0cb29d98f66011e909",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:7ac27de07a57d0f420d7",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:7eb24b67ca072c05219c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:8b9d46f1cce8649ec3c0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:91f25116bde17d3d09cc",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:9ab4a168003716950ddb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:9b783d6066f6a782f3aa",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:a486332c5d83c847016e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:b1a498c82be2f5a096c4",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:ba39b635ed9f50c05e71",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:c2b9bc7a96e9b7643edd",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:c385c3bcc522b69bd13c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:c4f041b23d15c7316399",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:c5864fc769ad442f93a5",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:c9f8cd7009419ca2c9d2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:d0eaa50d0546a2197f69",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:d68583e0bcce16b3dc5f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:d9ee97f4ae3c34cdd895",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:dd2d32d1c1c92a1a172a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:ddb54c2e57b357812e9d",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:e4c351302b13daf629e2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:e8aed1935f6ec48ad115",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:e9628d1c685777cdbc1f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:f2108e6a7fcab562c01e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:f59558e09ee5937e80c4",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:f6668f6708629f11c3d6",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:f81dfcab8813f5045c85",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:f822794be06182374264",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:fac8fb96a9dd747557cb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:change_relation:ff21727879899576ada6",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:changed_file:0b1a2d641e4c68cd6bed",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:changed_file:a3220c6b1fc37c2d6a16",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:changed_file:af4d7934afb51f3cf0d0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:changed_file:e3d6f2e177fae6a17a98",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:changed_file:e7040b83e90b3dcce8ee",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:0d018a0b496c2b2eab51",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:14461db15a94594e9c5a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:16405487a4e1e5245129",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:1ba9f09385635f56b04c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:21b72ac449c0b5808153",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:23191a851a219fcea313",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:2aefc5376a3ea4370d69",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:2e70f154f64bcc8b7b21",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:3f5fe2cfaf7f2562e4f2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:42e6a4ab851acd42660d",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:4997d227702d5bc62195",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:57d14320372a057c469f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:61e3a8d053071ce95a5f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:6574676f03a777406a84",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:678e2981a23fff67030e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:6d6b1decd05086024fc9",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:6e2523b4c3486769140a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:6e2fee56fb1283224b68",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:7a0cb29d98f66011e909",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:7ac27de07a57d0f420d7",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:7eb24b67ca072c05219c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:8b9d46f1cce8649ec3c0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:91f25116bde17d3d09cc",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:9ab4a168003716950ddb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:9b783d6066f6a782f3aa",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:a486332c5d83c847016e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:b1a498c82be2f5a096c4",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:ba39b635ed9f50c05e71",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:c2b9bc7a96e9b7643edd",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:c385c3bcc522b69bd13c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:c4f041b23d15c7316399",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:c5864fc769ad442f93a5",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:c9f8cd7009419ca2c9d2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:d0eaa50d0546a2197f69",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:d68583e0bcce16b3dc5f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:d9ee97f4ae3c34cdd895",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:dd2d32d1c1c92a1a172a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:ddb54c2e57b357812e9d",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:e4c351302b13daf629e2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:e8aed1935f6ec48ad115",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:e9628d1c685777cdbc1f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:f2108e6a7fcab562c01e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:f59558e09ee5937e80c4",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:f6668f6708629f11c3d6",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:f81dfcab8813f5045c85",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:f822794be06182374264",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:fac8fb96a9dd747557cb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:change_relation:ff21727879899576ada6",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:changed_file:0b1a2d641e4c68cd6bed",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:changed_file:a3220c6b1fc37c2d6a16",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:changed_file:af4d7934afb51f3cf0d0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:changed_file:e3d6f2e177fae6a17a98",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:changed_file:e7040b83e90b3dcce8ee",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:0d018a0b496c2b2eab51",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:14461db15a94594e9c5a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:16405487a4e1e5245129",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:1ba9f09385635f56b04c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:21b72ac449c0b5808153",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:23191a851a219fcea313",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:2aefc5376a3ea4370d69",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:2e70f154f64bcc8b7b21",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:3f5fe2cfaf7f2562e4f2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:42e6a4ab851acd42660d",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:4997d227702d5bc62195",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:57d14320372a057c469f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:61e3a8d053071ce95a5f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:6574676f03a777406a84",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:678e2981a23fff67030e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:6d6b1decd05086024fc9",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:6e2523b4c3486769140a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:6e2fee56fb1283224b68",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:7a0cb29d98f66011e909",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:7ac27de07a57d0f420d7",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:7eb24b67ca072c05219c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:8b9d46f1cce8649ec3c0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:91f25116bde17d3d09cc",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:9ab4a168003716950ddb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:9b783d6066f6a782f3aa",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:a486332c5d83c847016e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:b1a498c82be2f5a096c4",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:ba39b635ed9f50c05e71",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:c2b9bc7a96e9b7643edd",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:c385c3bcc522b69bd13c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:c4f041b23d15c7316399",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:c5864fc769ad442f93a5",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:c9f8cd7009419ca2c9d2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:d0eaa50d0546a2197f69",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:d68583e0bcce16b3dc5f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:d9ee97f4ae3c34cdd895",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:dd2d32d1c1c92a1a172a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:ddb54c2e57b357812e9d",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:e4c351302b13daf629e2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:e8aed1935f6ec48ad115",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:e9628d1c685777cdbc1f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:f2108e6a7fcab562c01e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:f59558e09ee5937e80c4",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:f6668f6708629f11c3d6",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:f81dfcab8813f5045c85",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:f822794be06182374264",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:fac8fb96a9dd747557cb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:change_relation:ff21727879899576ada6",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:changed_file:0b1a2d641e4c68cd6bed",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:changed_file:a3220c6b1fc37c2d6a16",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:changed_file:af4d7934afb51f3cf0d0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:changed_file:e3d6f2e177fae6a17a98",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:changed_file:e7040b83e90b3dcce8ee",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:0d018a0b496c2b2eab51",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:14461db15a94594e9c5a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:16405487a4e1e5245129",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:1ba9f09385635f56b04c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:21b72ac449c0b5808153",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:23191a851a219fcea313",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:2aefc5376a3ea4370d69",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:2e70f154f64bcc8b7b21",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:3f5fe2cfaf7f2562e4f2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:42e6a4ab851acd42660d",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:4997d227702d5bc62195",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:57d14320372a057c469f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:61e3a8d053071ce95a5f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:6574676f03a777406a84",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:678e2981a23fff67030e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:6d6b1decd05086024fc9",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:6e2523b4c3486769140a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:6e2fee56fb1283224b68",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:7a0cb29d98f66011e909",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:7ac27de07a57d0f420d7",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:7eb24b67ca072c05219c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:8b9d46f1cce8649ec3c0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:91f25116bde17d3d09cc",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:9ab4a168003716950ddb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:9b783d6066f6a782f3aa",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:a486332c5d83c847016e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:b1a498c82be2f5a096c4",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:ba39b635ed9f50c05e71",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:c2b9bc7a96e9b7643edd",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:c385c3bcc522b69bd13c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:c4f041b23d15c7316399",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:c5864fc769ad442f93a5",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:c9f8cd7009419ca2c9d2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:d0eaa50d0546a2197f69",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:d68583e0bcce16b3dc5f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:d9ee97f4ae3c34cdd895",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:dd2d32d1c1c92a1a172a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:ddb54c2e57b357812e9d",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:e4c351302b13daf629e2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:e8aed1935f6ec48ad115",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:e9628d1c685777cdbc1f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:f2108e6a7fcab562c01e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:f59558e09ee5937e80c4",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:f6668f6708629f11c3d6",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:f81dfcab8813f5045c85",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:f822794be06182374264",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G5:E:structural_change:fac8fb96a9dd747557cb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:change_relation:ff21727879899576ada6",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:changed_file:0b1a2d641e4c68cd6bed",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:changed_file:a3220c6b1fc37c2d6a16",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:changed_file:af4d7934afb51f3cf0d0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:changed_file:e3d6f2e177fae6a17a98",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:changed_file:e7040b83e90b3dcce8ee",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:0d018a0b496c2b2eab51",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:14461db15a94594e9c5a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:16405487a4e1e5245129",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:1ba9f09385635f56b04c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:21b72ac449c0b5808153",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:23191a851a219fcea313",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:2aefc5376a3ea4370d69",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:2e70f154f64bcc8b7b21",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:3f5fe2cfaf7f2562e4f2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:42e6a4ab851acd42660d",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:4997d227702d5bc62195",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:57d14320372a057c469f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:61e3a8d053071ce95a5f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:6574676f03a777406a84",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:678e2981a23fff67030e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:6d6b1decd05086024fc9",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:6e2523b4c3486769140a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:6e2fee56fb1283224b68",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:7a0cb29d98f66011e909",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:7ac27de07a57d0f420d7",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:7eb24b67ca072c05219c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:8b9d46f1cce8649ec3c0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:91f25116bde17d3d09cc",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:9ab4a168003716950ddb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:9b783d6066f6a782f3aa",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:a486332c5d83c847016e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:b1a498c82be2f5a096c4",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:ba39b635ed9f50c05e71",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:c2b9bc7a96e9b7643edd",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:c385c3bcc522b69bd13c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:c4f041b23d15c7316399",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:c5864fc769ad442f93a5",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:c9f8cd7009419ca2c9d2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:d0eaa50d0546a2197f69",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:d68583e0bcce16b3dc5f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:d9ee97f4ae3c34cdd895",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:dd2d32d1c1c92a1a172a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:ddb54c2e57b357812e9d",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:e4c351302b13daf629e2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:e8aed1935f6ec48ad115",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:e9628d1c685777cdbc1f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:f2108e6a7fcab562c01e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:f59558e09ee5937e80c4",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:f6668f6708629f11c3d6",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:f81dfcab8813f5045c85",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:f822794be06182374264",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G6:E:structural_change:fac8fb96a9dd747557cb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:change_relation:ff21727879899576ada6",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:changed_file:0b1a2d641e4c68cd6bed",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:changed_file:a3220c6b1fc37c2d6a16",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:changed_file:af4d7934afb51f3cf0d0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:changed_file:e3d6f2e177fae6a17a98",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:changed_file:e7040b83e90b3dcce8ee",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:0d018a0b496c2b2eab51",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:14461db15a94594e9c5a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:16405487a4e1e5245129",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:1ba9f09385635f56b04c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:21b72ac449c0b5808153",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:23191a851a219fcea313",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:2aefc5376a3ea4370d69",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:2e70f154f64bcc8b7b21",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:3f5fe2cfaf7f2562e4f2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:42e6a4ab851acd42660d",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:4997d227702d5bc62195",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:57d14320372a057c469f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:61e3a8d053071ce95a5f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:6574676f03a777406a84",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:678e2981a23fff67030e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:6d6b1decd05086024fc9",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:6e2523b4c3486769140a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:6e2fee56fb1283224b68",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:7a0cb29d98f66011e909",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:7ac27de07a57d0f420d7",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:7eb24b67ca072c05219c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:8b9d46f1cce8649ec3c0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:91f25116bde17d3d09cc",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:9ab4a168003716950ddb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:9b783d6066f6a782f3aa",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:a486332c5d83c847016e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:b1a498c82be2f5a096c4",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:ba39b635ed9f50c05e71",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:c2b9bc7a96e9b7643edd",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:c385c3bcc522b69bd13c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:c4f041b23d15c7316399",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:c5864fc769ad442f93a5",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:c9f8cd7009419ca2c9d2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:d0eaa50d0546a2197f69",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:d68583e0bcce16b3dc5f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:d9ee97f4ae3c34cdd895",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:dd2d32d1c1c92a1a172a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:ddb54c2e57b357812e9d",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:e4c351302b13daf629e2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:e8aed1935f6ec48ad115",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:e9628d1c685777cdbc1f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:f2108e6a7fcab562c01e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:f59558e09ee5937e80c4",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:f6668f6708629f11c3d6",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:f81dfcab8813f5045c85",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:f822794be06182374264",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G7:E:structural_change:fac8fb96a9dd747557cb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:R1:E:change_relation:ff21727879899576ada6",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:1fe2b23719ebb353fb00",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:changed_file:0b1a2d641e4c68cd6bed",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:changed_file:a3220c6b1fc37c2d6a16",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:changed_file:af4d7934afb51f3cf0d0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:changed_file:e3d6f2e177fae6a17a98",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:changed_file:e7040b83e90b3dcce8ee",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:R1:E:structural_change:0d018a0b496c2b2eab51",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:4cfd0ac33a9a342f12fb",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:14461db15a94594e9c5a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:R1:E:structural_change:16405487a4e1e5245129",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:9f8e716c43e0948c81a5",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R1:E:structural_change:1ba9f09385635f56b04c",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "command",
+            "github",
+            "push"
+          ]
+        }
+      ],
+      "relation_id": "PR:191a907e99d87828ca92",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:R1:E:structural_change:21b72ac449c0b5808153",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:12605e6c7ab0f11dae39",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:23191a851a219fcea313",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:2aefc5376a3ea4370d69",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:2e70f154f64bcc8b7b21",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:3f5fe2cfaf7f2562e4f2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:R1:E:structural_change:42e6a4ab851acd42660d",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:5167e381a7921774a7f3",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:4997d227702d5bc62195",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R1:E:structural_change:57d14320372a057c469f",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "command",
+            "create"
+          ]
+        }
+      ],
+      "relation_id": "PR:3051fe6cbf8d42752b4d",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:61e3a8d053071ce95a5f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R1:E:structural_change:6574676f03a777406a84",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "create",
+            "pull",
+            "push",
+            "request"
+          ]
+        }
+      ],
+      "relation_id": "PR:1eb7f6260cca8ae7f6ae",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R1:E:structural_change:678e2981a23fff67030e",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "create",
+            "pull",
+            "push",
+            "request"
+          ]
+        }
+      ],
+      "relation_id": "PR:7bc9962b520e8de88572",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:R1:E:structural_change:6d6b1decd05086024fc9",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:c53789a1e8f91d374217",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:6e2523b4c3486769140a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:6e2fee56fb1283224b68",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:7a0cb29d98f66011e909",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:R1:E:structural_change:7ac27de07a57d0f420d7",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:3bd7476003c2396c1380",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:7eb24b67ca072c05219c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:R1:E:structural_change:8b9d46f1cce8649ec3c0",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:abfb7216bb8e8422e4df",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:91f25116bde17d3d09cc",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:R1:E:structural_change:9ab4a168003716950ddb",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:23e03af54c6284752ee9",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:9b783d6066f6a782f3aa",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R1:E:structural_change:a486332c5d83c847016e",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "create",
+            "github",
+            "maintainer",
+            "pull",
+            "request"
+          ]
+        }
+      ],
+      "relation_id": "PR:cddf800b13418e918290",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:b1a498c82be2f5a096c4",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:ba39b635ed9f50c05e71",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R1:E:structural_change:c2b9bc7a96e9b7643edd",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "command",
+            "push"
+          ]
+        }
+      ],
+      "relation_id": "PR:cf41bdb989befb583a9c",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:c385c3bcc522b69bd13c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:c4f041b23d15c7316399",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:R1:E:structural_change:c5864fc769ad442f93a5",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:dc33002d797fe5caea9f",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:c9f8cd7009419ca2c9d2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:d0eaa50d0546a2197f69",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:d68583e0bcce16b3dc5f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:d9ee97f4ae3c34cdd895",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:dd2d32d1c1c92a1a172a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:R1:E:structural_change:ddb54c2e57b357812e9d",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:280b8ddc1cad9466f3f8",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:R1:E:structural_change:e4c351302b13daf629e2",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:da8ac39a306ff879fa62",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:e8aed1935f6ec48ad115",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:e9628d1c685777cdbc1f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R1:E:structural_change:f2108e6a7fcab562c01e",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "pull",
+            "request"
+          ]
+        }
+      ],
+      "relation_id": "PR:72f7b3ad4a6956118451",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:f59558e09ee5937e80c4",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:f6668f6708629f11c3d6",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:f81dfcab8813f5045c85",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:f822794be06182374264",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:fac8fb96a9dd747557cb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:change_relation:ff21727879899576ada6",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:changed_file:0b1a2d641e4c68cd6bed",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:changed_file:a3220c6b1fc37c2d6a16",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:changed_file:af4d7934afb51f3cf0d0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:changed_file:e3d6f2e177fae6a17a98",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:changed_file:e7040b83e90b3dcce8ee",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:0d018a0b496c2b2eab51",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:14461db15a94594e9c5a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:16405487a4e1e5245129",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:1ba9f09385635f56b04c",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "command",
+            "short",
+            "token"
+          ]
+        }
+      ],
+      "relation_id": "PR:3d46a05d1164b1d8b2a6",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:21b72ac449c0b5808153",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:23191a851a219fcea313",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "command",
+            "lived",
+            "short"
+          ]
+        }
+      ],
+      "relation_id": "PR:ef7a7a1af4a64bf6b4ab",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:2aefc5376a3ea4370d69",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "short",
+            "token"
+          ]
+        }
+      ],
+      "relation_id": "PR:0b5f2cddd72a4ebe739a",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:2e70f154f64bcc8b7b21",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:3f5fe2cfaf7f2562e4f2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:42e6a4ab851acd42660d",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "token"
+          ]
+        }
+      ],
+      "relation_id": "PR:60b3a15fe6b7c1c5f229",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:4997d227702d5bc62195",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:57d14320372a057c469f",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "command",
+            "lived",
+            "short",
+            "token"
+          ]
+        }
+      ],
+      "relation_id": "PR:289993ae5da7b38664a4",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:61e3a8d053071ce95a5f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:6574676f03a777406a84",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "private",
+            "token"
+          ]
+        }
+      ],
+      "relation_id": "PR:a30bc0fb1e1dffdde5da",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:678e2981a23fff67030e",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "private",
+            "token"
+          ]
+        }
+      ],
+      "relation_id": "PR:74c5c0eb2e125c321d2b",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:6d6b1decd05086024fc9",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:6e2523b4c3486769140a",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "private"
+          ]
+        }
+      ],
+      "relation_id": "PR:15bc72ac103c17ed3853",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:6e2fee56fb1283224b68",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:7a0cb29d98f66011e909",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:7ac27de07a57d0f420d7",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:7eb24b67ca072c05219c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:8b9d46f1cce8649ec3c0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:91f25116bde17d3d09cc",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:9ab4a168003716950ddb",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "command",
+            "installation",
+            "local",
+            "private"
+          ]
+        }
+      ],
+      "relation_id": "PR:4172abd0fe5c5dcaf416",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:9b783d6066f6a782f3aa",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:a486332c5d83c847016e",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "short",
+            "token"
+          ]
+        }
+      ],
+      "relation_id": "PR:c7e1b5bf5be98ac93dba",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:b1a498c82be2f5a096c4",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:ba39b635ed9f50c05e71",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:c2b9bc7a96e9b7643edd",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "command",
+            "token"
+          ]
+        }
+      ],
+      "relation_id": "PR:f1e01fb40e9035ab2217",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:c385c3bcc522b69bd13c",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "private"
+          ]
+        }
+      ],
+      "relation_id": "PR:f40a50d17a1603e16a70",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:c4f041b23d15c7316399",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:c5864fc769ad442f93a5",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:c9f8cd7009419ca2c9d2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:d0eaa50d0546a2197f69",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:d68583e0bcce16b3dc5f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:d9ee97f4ae3c34cdd895",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "short",
+            "token"
+          ]
+        }
+      ],
+      "relation_id": "PR:ce553bd488b9c2d1dd47",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:dd2d32d1c1c92a1a172a",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "token",
+            "when"
+          ]
+        }
+      ],
+      "relation_id": "PR:30fdd1b1f108132bd6b0",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:ddb54c2e57b357812e9d",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:e4c351302b13daf629e2",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "token"
+          ]
+        }
+      ],
+      "relation_id": "PR:9590e7e818899e42dd61",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:e8aed1935f6ec48ad115",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:e9628d1c685777cdbc1f",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "private"
+          ]
+        }
+      ],
+      "relation_id": "PR:6743b0e6fb1123df4b0e",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:f2108e6a7fcab562c01e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:f59558e09ee5937e80c4",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:f6668f6708629f11c3d6",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:f81dfcab8813f5045c85",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:f822794be06182374264",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:fac8fb96a9dd747557cb",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "token",
+            "when"
+          ]
+        }
+      ],
+      "relation_id": "PR:d0156a345e590cee1b07",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:R3:E:change_relation:ff21727879899576ada6",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:3b62c400012ec5767596",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:changed_file:0b1a2d641e4c68cd6bed",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:changed_file:a3220c6b1fc37c2d6a16",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:changed_file:af4d7934afb51f3cf0d0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:changed_file:e3d6f2e177fae6a17a98",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:changed_file:e7040b83e90b3dcce8ee",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:R3:E:structural_change:0d018a0b496c2b2eab51",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:8f5fdf68ab86974334fb",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:14461db15a94594e9c5a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:R3:E:structural_change:16405487a4e1e5245129",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:29bebcbab2c124b5dafd",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R3:E:structural_change:1ba9f09385635f56b04c",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "command",
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:f29ce022707d998a94b5",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:R3:E:structural_change:21b72ac449c0b5808153",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:56e17e9a26b8affe85ee",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:23191a851a219fcea313",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:2aefc5376a3ea4370d69",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:2e70f154f64bcc8b7b21",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:3f5fe2cfaf7f2562e4f2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:R3:E:structural_change:42e6a4ab851acd42660d",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:f7ee96fb6c79627f643c",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:4997d227702d5bc62195",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:57d14320372a057c469f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:61e3a8d053071ce95a5f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:6574676f03a777406a84",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:678e2981a23fff67030e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:R3:E:structural_change:6d6b1decd05086024fc9",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:8c9cd9ad6ab1a57b86a5",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:6e2523b4c3486769140a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:6e2fee56fb1283224b68",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:7a0cb29d98f66011e909",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:R3:E:structural_change:7ac27de07a57d0f420d7",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:9c8c19f41583341055de",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:7eb24b67ca072c05219c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:R3:E:structural_change:8b9d46f1cce8649ec3c0",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:ff8ad4815158fdba7409",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:91f25116bde17d3d09cc",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:R3:E:structural_change:9ab4a168003716950ddb",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:cc75751389fd4e3c9bc7",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:9b783d6066f6a782f3aa",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R3:E:structural_change:a486332c5d83c847016e",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "github",
+            "human",
+            "request",
+            "reviewers"
+          ]
+        }
+      ],
+      "relation_id": "PR:4df92fb8a2597fe6d02a",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:b1a498c82be2f5a096c4",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:ba39b635ed9f50c05e71",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:c2b9bc7a96e9b7643edd",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R3:E:structural_change:c385c3bcc522b69bd13c",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "branch",
+            "reviewers"
+          ]
+        }
+      ],
+      "relation_id": "PR:c237bfa3a93f5860a86c",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:c4f041b23d15c7316399",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:R3:E:structural_change:c5864fc769ad442f93a5",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:6c114830a9c0b845506a",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:c9f8cd7009419ca2c9d2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:d0eaa50d0546a2197f69",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:d68583e0bcce16b3dc5f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:d9ee97f4ae3c34cdd895",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:dd2d32d1c1c92a1a172a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:R3:E:structural_change:ddb54c2e57b357812e9d",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:67e61b0ce0c4f965de72",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_id": "C:R3:E:structural_change:e4c351302b13daf629e2",
+      "reasons": [
+        {
+          "detail": "A distinctive identifier occurs in both texts.",
+          "kind": "exact_identifier",
+          "matched_terms": [
+            "github"
+          ]
+        }
+      ],
+      "relation_id": "PR:98f5d36d798882b51c8b",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:e8aed1935f6ec48ad115",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:e9628d1c685777cdbc1f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R3:E:structural_change:f2108e6a7fcab562c01e",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "human",
+            "request",
+            "reviewers"
+          ]
+        }
+      ],
+      "relation_id": "PR:f5dab1503fcd1dde4f29",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:f59558e09ee5937e80c4",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:f6668f6708629f11c3d6",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:f81dfcab8813f5045c85",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:f822794be06182374264",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:fac8fb96a9dd747557cb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R4:E:change_relation:ff21727879899576ada6",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "body",
+            "branch",
+            "repository",
+            "reviewer",
+            "title"
+          ]
+        }
+      ],
+      "relation_id": "PR:965029c554884dddbb2c",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:changed_file:0b1a2d641e4c68cd6bed",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:changed_file:a3220c6b1fc37c2d6a16",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:changed_file:af4d7934afb51f3cf0d0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:changed_file:e3d6f2e177fae6a17a98",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:changed_file:e7040b83e90b3dcce8ee",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R4:E:structural_change:0d018a0b496c2b2eab51",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "base",
+            "body",
+            "title"
+          ]
+        }
+      ],
+      "relation_id": "PR:a276cc2417becfe182a5",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:14461db15a94594e9c5a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:16405487a4e1e5245129",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:1ba9f09385635f56b04c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:21b72ac449c0b5808153",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:23191a851a219fcea313",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:2aefc5376a3ea4370d69",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:2e70f154f64bcc8b7b21",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:3f5fe2cfaf7f2562e4f2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:42e6a4ab851acd42660d",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:4997d227702d5bc62195",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:57d14320372a057c469f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:61e3a8d053071ce95a5f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:6574676f03a777406a84",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:678e2981a23fff67030e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:6d6b1decd05086024fc9",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R4:E:structural_change:6e2523b4c3486769140a",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "base",
+            "body",
+            "installation",
+            "title"
+          ]
+        }
+      ],
+      "relation_id": "PR:2ce5bbf79b6d1dd51ece",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:6e2fee56fb1283224b68",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:7a0cb29d98f66011e909",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:7ac27de07a57d0f420d7",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:7eb24b67ca072c05219c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:8b9d46f1cce8649ec3c0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:91f25116bde17d3d09cc",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R4:E:structural_change:9ab4a168003716950ddb",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "base",
+            "body",
+            "branch",
+            "defaults",
+            "installation",
+            "repository",
+            "reviewer",
+            "title"
+          ]
+        }
+      ],
+      "relation_id": "PR:da0f5d2ea0f84bde3fa1",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:9b783d6066f6a782f3aa",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:a486332c5d83c847016e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:b1a498c82be2f5a096c4",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:ba39b635ed9f50c05e71",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:c2b9bc7a96e9b7643edd",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R4:E:structural_change:c385c3bcc522b69bd13c",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "base",
+            "body",
+            "branch",
+            "installation",
+            "reviewer",
+            "title"
+          ]
+        }
+      ],
+      "relation_id": "PR:f1500b1d82c213670482",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:c4f041b23d15c7316399",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:c5864fc769ad442f93a5",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:c9f8cd7009419ca2c9d2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:d0eaa50d0546a2197f69",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:d68583e0bcce16b3dc5f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:d9ee97f4ae3c34cdd895",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:dd2d32d1c1c92a1a172a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:ddb54c2e57b357812e9d",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R4:E:structural_change:e4c351302b13daf629e2",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "secret"
+          ]
+        }
+      ],
+      "relation_id": "PR:e60523884578aa2f925a",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:e8aed1935f6ec48ad115",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R4:E:structural_change:e9628d1c685777cdbc1f",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "base",
+            "body",
+            "installation",
+            "title"
+          ]
+        }
+      ],
+      "relation_id": "PR:359c95f1afcd5b023898",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:f2108e6a7fcab562c01e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:f59558e09ee5937e80c4",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:f6668f6708629f11c3d6",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:f81dfcab8813f5045c85",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:f822794be06182374264",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:fac8fb96a9dd747557cb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:change_relation:ff21727879899576ada6",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:changed_file:0b1a2d641e4c68cd6bed",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:changed_file:a3220c6b1fc37c2d6a16",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:changed_file:af4d7934afb51f3cf0d0",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:changed_file:e3d6f2e177fae6a17a98",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:changed_file:e7040b83e90b3dcce8ee",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R5:E:structural_change:0d018a0b496c2b2eab51",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "failed",
+            "stage"
+          ]
+        }
+      ],
+      "relation_id": "PR:5c32422b40465b157aa7",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:14461db15a94594e9c5a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:16405487a4e1e5245129",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:1ba9f09385635f56b04c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:21b72ac449c0b5808153",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:23191a851a219fcea313",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:2aefc5376a3ea4370d69",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:2e70f154f64bcc8b7b21",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:3f5fe2cfaf7f2562e4f2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R5:E:structural_change:42e6a4ab851acd42660d",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "stage",
+            "tokens"
+          ]
+        }
+      ],
+      "relation_id": "PR:8342efcf79a027e8db1f",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:4997d227702d5bc62195",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:57d14320372a057c469f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:61e3a8d053071ce95a5f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R5:E:structural_change:6574676f03a777406a84",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "private"
+          ]
+        }
+      ],
+      "relation_id": "PR:a2cf8ae228719d5e3e5b",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R5:E:structural_change:678e2981a23fff67030e",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "private"
+          ]
+        }
+      ],
+      "relation_id": "PR:5719b8ee7ac56fdc1ca0",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:6d6b1decd05086024fc9",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R5:E:structural_change:6e2523b4c3486769140a",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "private"
+          ]
+        }
+      ],
+      "relation_id": "PR:2cf956999f4c299b84d2",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:6e2fee56fb1283224b68",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:7a0cb29d98f66011e909",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R5:E:structural_change:7ac27de07a57d0f420d7",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "failed",
+            "stage"
+          ]
+        }
+      ],
+      "relation_id": "PR:1d7e319f56b4554fe951",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:7eb24b67ca072c05219c",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R5:E:structural_change:8b9d46f1cce8649ec3c0",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "credential",
+            "failed"
+          ]
+        }
+      ],
+      "relation_id": "PR:cefe99ed872f6b4a37df",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:91f25116bde17d3d09cc",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R5:E:structural_change:9ab4a168003716950ddb",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "private"
+          ]
+        }
+      ],
+      "relation_id": "PR:f0ed4d601d15c8455564",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:9b783d6066f6a782f3aa",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:a486332c5d83c847016e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:b1a498c82be2f5a096c4",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:ba39b635ed9f50c05e71",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:c2b9bc7a96e9b7643edd",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R5:E:structural_change:c385c3bcc522b69bd13c",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "private"
+          ]
+        }
+      ],
+      "relation_id": "PR:a224e917ea865d592400",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:c4f041b23d15c7316399",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:c5864fc769ad442f93a5",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:c9f8cd7009419ca2c9d2",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:d0eaa50d0546a2197f69",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:d68583e0bcce16b3dc5f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:d9ee97f4ae3c34cdd895",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:dd2d32d1c1c92a1a172a",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:ddb54c2e57b357812e9d",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R5:E:structural_change:e4c351302b13daf629e2",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "credential",
+            "installation"
+          ]
+        }
+      ],
+      "relation_id": "PR:acd70a69876f8d78cf60",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:e8aed1935f6ec48ad115",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R5:E:structural_change:e9628d1c685777cdbc1f",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "installation",
+            "private"
+          ]
+        }
+      ],
+      "relation_id": "PR:6a7f9dd6f83cfd555c94",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:f2108e6a7fcab562c01e",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:f59558e09ee5937e80c4",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:f6668f6708629f11c3d6",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:f81dfcab8813f5045c85",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:f822794be06182374264",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:fac8fb96a9dd747557cb",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    }
+  ],
+  "schema_version": "rg_semantic_candidate_retrieval.v1",
+  "structural_packet_digest": "7fbfeab34c4b6cb778a83aac682a39d391db3d6ea5cc9c614b6bd107edd2cdf6"
+}

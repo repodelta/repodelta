@@ -1,0 +1,75 @@
+{
+  "aggregate": {
+    "association:claim_bridge": 284,
+    "association:distinctive_phrase": 726,
+    "association:exact_identifier": 180,
+    "association:not_retrieved": 3681,
+    "candidate_count": 4871,
+    "node_state:node_resolved": 3597,
+    "node_state:not_node_backed": 1274,
+    "retrieval_state:deferred": 554,
+    "retrieval_state:not_retrieved": 3681,
+    "retrieval_state:selected": 636,
+    "subject_count": 76
+  },
+  "campaign_id": "structural-correctness-v1.1",
+  "limits": {
+    "authority": "evaluation-only; no production association, projection, assessment, or report changed",
+    "coverage": "candidate universe is profile-eligible changed anchors, not repository-wide semantic completeness",
+    "packet_invariance": "each regenerated ordinary packet matched its frozen v1.1 packet by SHA-256",
+    "semantic_reference": "a blind template is generated from the frozen universe before independent labeling; no semantic reference is committed"
+  },
+  "reference_state": "not_frozen",
+  "sample_count": 8,
+  "samples": [
+    {
+      "candidate_count": 54,
+      "candidate_universe_digest": "6ee61bf0f516385acfce02172b1b2466a0ffb3a7cec58165e4fcc4b1c5a86502",
+      "pull_request": 208,
+      "subject_count": 9
+    },
+    {
+      "candidate_count": 99,
+      "candidate_universe_digest": "debd2376c95621e0c13a06d4c98dd65be8e6eafdb3152a1b1fdda1bda97209fe",
+      "pull_request": 238,
+      "subject_count": 9
+    },
+    {
+      "candidate_count": 0,
+      "candidate_universe_digest": "c1721fc90203aa7c524e7cd5909c1cf2af6edf1d1e5c14ecf9e78ac4975cb15a",
+      "pull_request": 245,
+      "subject_count": 0
+    },
+    {
+      "candidate_count": 636,
+      "candidate_universe_digest": "dd8148a3063067b75f7855b809dd90d1aacb4e38c8a8ea200b4f4e969c5ec3b4",
+      "pull_request": 250,
+      "subject_count": 12
+    },
+    {
+      "candidate_count": 521,
+      "candidate_universe_digest": "c2e9422bc6a3c7e0518de149d93326550f7612b0c9bb04a90bb338a37a55beeb",
+      "pull_request": 235,
+      "subject_count": 12
+    },
+    {
+      "candidate_count": 135,
+      "candidate_universe_digest": "a1fbeb38a54d8fd266eee158b3ef7f0dddacb2ec86268f0e28d60282d396a37e",
+      "pull_request": 262,
+      "subject_count": 9
+    },
+    {
+      "candidate_count": 632,
+      "candidate_universe_digest": "998867c53769c2997b023a97283cb32798d7b28c104b79912e56aa733b53d490",
+      "pull_request": 267,
+      "subject_count": 14
+    },
+    {
+      "candidate_count": 2794,
+      "candidate_universe_digest": "b6c35224914283d38d04b470720e9c585e5a1bb6589849f641d3f8f6c4cfb3b8",
+      "pull_request": 240,
+      "subject_count": 11
+    }
+  ],
+  "schema_version": "rg_semantic_candidate_campaign_summary.v1"
+}

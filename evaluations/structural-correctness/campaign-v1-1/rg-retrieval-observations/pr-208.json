@@ -1,0 +1,530 @@
+{
+  "candidate_universe_digest": "6ee61bf0f516385acfce02172b1b2466a0ffb3a7cec58165e4fcc4b1c5a86502",
+  "rows": [
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:44a2370ce77a6e66f8e7",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:4fbcf96b02d19017c2c9",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:5d2be31cc60dea3d2f3b",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:7c4162e02e623fea377f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:9ff44326982c1acafe85",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G1:E:structural_change:d0cf036a1010c1207bc5",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:44a2370ce77a6e66f8e7",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:4fbcf96b02d19017c2c9",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:5d2be31cc60dea3d2f3b",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:7c4162e02e623fea377f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:9ff44326982c1acafe85",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G2:E:structural_change:d0cf036a1010c1207bc5",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:44a2370ce77a6e66f8e7",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:4fbcf96b02d19017c2c9",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:5d2be31cc60dea3d2f3b",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:7c4162e02e623fea377f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G3:E:structural_change:9ff44326982c1acafe85",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "claim_bridge",
+      "candidate_id": "C:G3:E:structural_change:d0cf036a1010c1207bc5",
+      "reasons": [
+        {
+          "detail": "An associated PR claim has a deterministic identifier or discriminative phrase relation to this changed anchor.",
+          "kind": "claim_bridge",
+          "matched_terms": [
+            "backbone",
+            "seed"
+          ]
+        }
+      ],
+      "relation_id": "PR:29400860b268293064ee",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:44a2370ce77a6e66f8e7",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:4fbcf96b02d19017c2c9",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:5d2be31cc60dea3d2f3b",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:7c4162e02e623fea377f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:9ff44326982c1acafe85",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:G4:E:structural_change:d0cf036a1010c1207bc5",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R1:E:structural_change:44a2370ce77a6e66f8e7",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "evidence",
+            "primary",
+            "structural"
+          ]
+        }
+      ],
+      "relation_id": "PR:37c4b872d580245c1478",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R1:E:structural_change:4fbcf96b02d19017c2c9",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "backbone",
+            "direct",
+            "primary"
+          ]
+        }
+      ],
+      "relation_id": "PR:0d1da592a9c5ff9d324b",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R1:E:structural_change:5d2be31cc60dea3d2f3b",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "backbone",
+            "direct",
+            "primary"
+          ]
+        }
+      ],
+      "relation_id": "PR:57c956df4b714a7b26a8",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R1:E:structural_change:7c4162e02e623fea377f",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "evidence",
+            "structural",
+            "support"
+          ]
+        }
+      ],
+      "relation_id": "PR:abb079d1efad751b24e2",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R1:E:structural_change:9ff44326982c1acafe85",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R1:E:structural_change:d0cf036a1010c1207bc5",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "backbone",
+            "direct",
+            "selected",
+            "structural"
+          ]
+        }
+      ],
+      "relation_id": "PR:1aacf84ecfd6649bf87b",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:44a2370ce77a6e66f8e7",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:4fbcf96b02d19017c2c9",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "backbone",
+            "focus"
+          ]
+        }
+      ],
+      "relation_id": "PR:2e34e8ec774dec9fe4b2",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:5d2be31cc60dea3d2f3b",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "backbone",
+            "focus"
+          ]
+        }
+      ],
+      "relation_id": "PR:ebd9497d2ef2778480a3",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:7c4162e02e623fea377f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R2:E:structural_change:9ff44326982c1acafe85",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R2:E:structural_change:d0cf036a1010c1207bc5",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "backbone"
+          ]
+        }
+      ],
+      "relation_id": "PR:95ecaa2ed8719b2f5f3c",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:44a2370ce77a6e66f8e7",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:4fbcf96b02d19017c2c9",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:5d2be31cc60dea3d2f3b",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:7c4162e02e623fea377f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:9ff44326982c1acafe85",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R3:E:structural_change:d0cf036a1010c1207bc5",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:44a2370ce77a6e66f8e7",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R4:E:structural_change:4fbcf96b02d19017c2c9",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "backbone",
+            "canonical",
+            "context",
+            "include",
+            "intermediate"
+          ]
+        }
+      ],
+      "relation_id": "PR:8b15af7d5eafa90adf43",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R4:E:structural_change:5d2be31cc60dea3d2f3b",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "backbone",
+            "canonical",
+            "context",
+            "include",
+            "intermediate"
+          ]
+        }
+      ],
+      "relation_id": "PR:b8ad1961e49fed5173bf",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:7c4162e02e623fea377f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R4:E:structural_change:9ff44326982c1acafe85",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R4:E:structural_change:d0cf036a1010c1207bc5",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "backbone",
+            "canonical",
+            "nodes"
+          ]
+        }
+      ],
+      "relation_id": "PR:96e323515b714e39a56d",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:44a2370ce77a6e66f8e7",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R5:E:structural_change:4fbcf96b02d19017c2c9",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "direct"
+          ]
+        }
+      ],
+      "relation_id": "PR:a7ae7e4555da1f5e8770",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R5:E:structural_change:5d2be31cc60dea3d2f3b",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "direct"
+          ]
+        }
+      ],
+      "relation_id": "PR:31115b9f5c0674655585",
+      "retrieval_state": "selected"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:7c4162e02e623fea377f",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": null,
+      "candidate_id": "C:R5:E:structural_change:9ff44326982c1acafe85",
+      "reasons": [],
+      "relation_id": null,
+      "retrieval_state": "not_retrieved"
+    },
+    {
+      "association": "distinctive_phrase",
+      "candidate_id": "C:R5:E:structural_change:d0cf036a1010c1207bc5",
+      "reasons": [
+        {
+          "detail": "A review-discriminative term and at least one supporting term occur in both texts.",
+          "kind": "distinctive_phrase",
+          "matched_terms": [
+            "direct",
+            "selected"
+          ]
+        }
+      ],
+      "relation_id": "PR:14f96604e8ad458d1d3d",
+      "retrieval_state": "selected"
+    }
+  ],
+  "schema_version": "rg_semantic_candidate_retrieval.v1",
+  "structural_packet_digest": "d0f86cce67cc01b6a483d5343949947bc03e5479f252d4b8b5f3bd8a401196bf"
+}

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+from collections import Counter
 from dataclasses import asdict
 from pathlib import Path
 
@@ -20,6 +21,10 @@ from repodelta.evaluation.identifier_specificity import (
     compare_identifier_policies,
     load_identifier_specificity,
     observe_identifier_specificity_from_artifacts,
+)
+from repodelta.evaluation.rg_candidate_universe import (
+    load_rg_candidate_universe,
+    load_rg_retrieval_observation,
 )
 
 
@@ -224,6 +229,65 @@ def test_campaign_v1_1_association_sidecars_bind_to_frozen_packets() -> None:
         assert tuple(item.relation_id for item in sidecar.rows) == tuple(
             sorted(item.relation_id for item in sidecar.rows)
         )
+
+
+def test_campaign_v1_1_rg_candidate_artifacts_bind_and_summary_is_derived() -> None:
+    """Keep the committed pre-association extraction independently auditable."""
+
+    manifest = json.loads(V1_1_MANIFEST.read_text(encoding="utf-8"))
+    result_dir = V1_1_CAMPAIGN / "results" / "rg-candidate-universe"
+    summary = json.loads((result_dir / "summary.json").read_text(encoding="utf-8"))
+
+    aggregate: Counter[str] = Counter()
+    expected_samples: list[dict[str, object]] = []
+    for sample in manifest["samples"]:
+        pull_request = int(sample["pull_request"])
+        packet = load_packet(
+            V1_1_CAMPAIGN / "packets" / f"pr-{pull_request}.packet.json"
+        )
+        universe = load_rg_candidate_universe(
+            V1_1_CAMPAIGN / "rg-candidate-universes" / f"pr-{pull_request}.json"
+        )
+        retrieval = load_rg_retrieval_observation(
+            V1_1_CAMPAIGN / "rg-retrieval-observations" / f"pr-{pull_request}.json"
+        )
+
+        assert universe.structural_packet_digest == packet.digest
+        assert retrieval.structural_packet_digest == packet.digest
+        assert retrieval.candidate_universe_digest == universe.digest
+        assert {row.candidate_id for row in retrieval.rows} == {
+            candidate.candidate_id for candidate in universe.candidates
+        }
+
+        anchors_by_id = {item.evidence_id: item for item in universe.anchors}
+        aggregate["candidate_count"] += len(universe.candidates)
+        aggregate["subject_count"] += len(universe.subjects)
+        aggregate.update(
+            f"node_state:{anchors_by_id[candidate.evidence_id].node_state}"
+            for candidate in universe.candidates
+        )
+        aggregate.update(
+            f"retrieval_state:{row.retrieval_state}" for row in retrieval.rows
+        )
+        aggregate.update(
+            f"association:{row.association or 'not_retrieved'}"
+            for row in retrieval.rows
+        )
+        expected_samples.append(
+            {
+                "pull_request": pull_request,
+                "candidate_universe_digest": universe.digest,
+                "candidate_count": len(universe.candidates),
+                "subject_count": len(universe.subjects),
+            }
+        )
+
+    assert summary["schema_version"] == "rg_semantic_candidate_campaign_summary.v1"
+    assert summary["campaign_id"] == manifest["campaign_id"]
+    assert summary["reference_state"] == "not_frozen"
+    assert summary["sample_count"] == len(expected_samples)
+    assert summary["samples"] == expected_samples
+    assert summary["aggregate"] == dict(sorted(aggregate.items()))
 
 
 def test_campaign_v1_1_association_comparison_summary_is_derived() -> None:
