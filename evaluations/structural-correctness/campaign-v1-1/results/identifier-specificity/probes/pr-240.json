@@ -1,0 +1,3264 @@
+{
+  "origin_completeness": "partial",
+  "packet_digest": "09b07291b2a6a2c4f74cc57ed9b8b99c347eecc48bb3a93eeb08dab9fd73606f",
+  "rows": [
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:0028d547c7e181e04baf",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:01ff2c810c0f28bdfc3e",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:01ba1e7ea80ab2b7e7bb",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:ebfc03eace07f7c633c8",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:c9993135c4809468ebaf",
+      "candidate_state": "selected",
+      "relation_id": "PR:07ead9ab8cae9792adc0",
+      "structural_member_id": "SN:c9993135c4809468ebaf",
+      "structural_membership_class": "matched",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:891a9fb991d6169665ed",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:0a6e20c99a4856173e17",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:e23c3d7a9095def5ff8e",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:c9993135c4809468ebaf",
+      "candidate_state": "selected",
+      "relation_id": "PR:0c214bec4371ab371c2d",
+      "structural_member_id": "SN:c9993135c4809468ebaf",
+      "structural_membership_class": "matched",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:891a9fb991d6169665ed",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:11df2550a0f337b5de71",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:cd8ffd1d4b77538566ff",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:e222d6da9178cbd37c92",
+      "candidate_state": "deferred",
+      "relation_id": "PR:11e0b5bb422b089a1554",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:11ea18bad0a68a1a724d",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:12dafde0cadbe4912202",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:25ab6815e870e01b3628",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:17024aa47c17ca6d48f4",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:6226368a8d1d1514f3ea",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:18e72fe0b889ee29d0d8",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:d7269a1dea65ff711c2d",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:1cd208ff0c36c6b20a21",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:3892bfddaf60c29c48e0",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:1cdede5574adbfd3e72f",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "G5",
+      "subject_kind": "guardrail",
+      "target_id": "E:change_relation:01ff2c810c0f28bdfc3e",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:1deb37c9ed9d16aac38b",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:d6877e022f54d5734099",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:1fd7f7e41e535674f8dc",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:0bcafee477cef3115627",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 13,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:229c3a9a0f5b9ffb79ba",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:75de5e9e5bdbcdc05ded",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:6a2f25fd76287696671e",
+      "candidate_state": "deferred",
+      "relation_id": "PR:22fadc44fe6ba971f260",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:a9af4a2b30a0abff03a7",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:23044e07af02d4aed26b",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:85a7e477d7c716de66ff",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:245da0728f003b2c2ee9",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:0bcafee477cef3115627",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:2b8758b3f298a46feb16",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:85a7e477d7c716de66ff",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:ac110e568958ef160af3",
+      "candidate_state": "selected",
+      "relation_id": "PR:2cf998ec2cbb1dfaa486",
+      "structural_member_id": "SN:ac110e568958ef160af3",
+      "structural_membership_class": "matched",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:53edbd49fc05cb5ff526",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:2d048139aef955aebf1f",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "G5",
+      "subject_kind": "guardrail",
+      "target_id": "E:change_relation:75de5e9e5bdbcdc05ded",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:2dfbc9a924c57ab0d1fc",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:a1cd2c268fccec9423dc",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:312e59c35c607729f48b",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "G5",
+      "subject_kind": "guardrail",
+      "target_id": "E:change_relation:d6877e022f54d5734099",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:7e87c364f43827990953",
+      "candidate_state": "selected",
+      "relation_id": "PR:31527dd809be8a573247",
+      "structural_member_id": "SN:7e87c364f43827990953",
+      "structural_membership_class": "matched",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:01b81142508f2a6cae92",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 13,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:35f36eeebd2ea3d9bd35",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:2d863840c64e7f696fd5",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:3d608688af6b45bc5bf5",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:cb53c377784acd22f068",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:65f2bddea43702f029e9",
+      "candidate_state": "deferred",
+      "relation_id": "PR:409edc4069d26486988d",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:71bf43da73a5461e8afe",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:43ef23269f411e3e8f28",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:f57edd3f58c1a214aad6",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:e5c5f37fd85a7c49185e",
+      "candidate_state": "deferred",
+      "relation_id": "PR:45c679037dd9327e3090",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:379ff55d208492faacfc",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:47a55fd22c99cd57871f",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "G3",
+      "subject_kind": "guardrail",
+      "target_id": "E:change_relation:1bf1167ef81aee4b4f69",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:49ab80e81734cc653134",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:5ea19f254c7152ac8e25",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        },
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:49d6802debdaad93db7c",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "G3",
+      "subject_kind": "guardrail",
+      "target_id": "E:change_relation:75de5e9e5bdbcdc05ded",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:af9530a3c482c37e3f1d",
+      "candidate_state": "selected",
+      "relation_id": "PR:4a0f45d9946530afa350",
+      "structural_member_id": "SN:af9530a3c482c37e3f1d",
+      "structural_membership_class": "matched",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:31317cd27e97ed8893dc",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:4e0b0a8209fa8cb9e35b",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:3892d0071aa12cb35481",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:50a5d3814ee76cced978",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:01ff2c810c0f28bdfc3e",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:55222a1730ca3725c2ca",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:b9103a9292db02e49493",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:5582290fc0e16d383cf9",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:ebfc03eace07f7c633c8",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:570fef4b8a8186a44994",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:041edaa6aefe4fe91890",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:af9530a3c482c37e3f1d",
+      "candidate_state": "selected",
+      "relation_id": "PR:5731bb569a38fedcdc0d",
+      "structural_member_id": "SN:af9530a3c482c37e3f1d",
+      "structural_membership_class": "matched",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:31317cd27e97ed8893dc",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:58cfc2cb8d046936ac01",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:1498072e67aecde2815f",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:435927c58d226e9c9bd7",
+      "candidate_state": "selected",
+      "relation_id": "PR:59e02a713eb062fbf0b4",
+      "structural_member_id": "SN:435927c58d226e9c9bd7",
+      "structural_membership_class": "matched",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:32e4942a574c22d47988",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 13,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:5a1b2123590f8ca65358",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "G3",
+      "subject_kind": "guardrail",
+      "target_id": "E:change_relation:01ff2c810c0f28bdfc3e",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:5b774714a40a96685331",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:3dd0b16d7ec9ba0b03e9",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:5cb10638efc9394578fe",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:894a132a9b04567aae3c",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:60cb0bb5ca4565470b5d",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:a59ffc8579f6deb526a8",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:e13ddd13ac0415756885",
+      "candidate_state": "selected",
+      "relation_id": "PR:60ce227214b56a60d8ad",
+      "structural_member_id": "SN:e13ddd13ac0415756885",
+      "structural_membership_class": "matched",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:5645370da54fe1fc0277",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:e13ddd13ac0415756885",
+      "candidate_state": "selected",
+      "relation_id": "PR:62536d1006972d38f3a6",
+      "structural_member_id": "SN:e13ddd13ac0415756885",
+      "structural_membership_class": "matched",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:5645370da54fe1fc0277",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 13,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:64f7044e230309ed8ecc",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "G3",
+      "subject_kind": "guardrail",
+      "target_id": "E:change_relation:5ea19f254c7152ac8e25",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:699e8637b71ca4d97ee5",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:041edaa6aefe4fe91890",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:6d878df57e6e1504a618",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:5ea19f254c7152ac8e25",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:6ea262e99efe08c47c4a",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "G4",
+      "subject_kind": "guardrail",
+      "target_id": "E:change_relation:5ea19f254c7152ac8e25",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:6fc342d169563b185f47",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:fd9eecf1cfea8ca04df4",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:703af6493abd8e348d05",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:de87cfeee065f1bbe1ac",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:7452992bfe2e222378dc",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:86aef10a842da6f2f8e8",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:77c2304f00bec8f620d4",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:1bf1167ef81aee4b4f69",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:792c9ed391eb7f36cfb9",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:eef7b60cc903977ba4c8",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:e222d6da9178cbd37c92",
+      "candidate_state": "deferred",
+      "relation_id": "PR:799dde94d63cb7919e4a",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:11ea18bad0a68a1a724d",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:79d663d668046a17615a",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:25ab6815e870e01b3628",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:7a8908410c6462eb6c3e",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:3892bfddaf60c29c48e0",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:7dfc37b18b5ce5044c61",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:2d863840c64e7f696fd5",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:ac110e568958ef160af3",
+      "candidate_state": "selected",
+      "relation_id": "PR:7ff5ef899da87e029bdb",
+      "structural_member_id": "SN:ac110e568958ef160af3",
+      "structural_membership_class": "matched",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:53edbd49fc05cb5ff526",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:81421b50de0c804ad7f7",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:d6877e022f54d5734099",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:e13ddd13ac0415756885",
+      "candidate_state": "selected",
+      "relation_id": "PR:84b76e09eb3fbd4ff3e5",
+      "structural_member_id": "SN:e13ddd13ac0415756885",
+      "structural_membership_class": "matched",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:5645370da54fe1fc0277",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:65f2bddea43702f029e9",
+      "candidate_state": "selected",
+      "relation_id": "PR:8595768b95218e4152f8",
+      "structural_member_id": "SN:65f2bddea43702f029e9",
+      "structural_membership_class": "matched",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:71bf43da73a5461e8afe",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 13,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:85bfb82a10e059920405",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:a1cd2c268fccec9423dc",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:8abded63c36ec0a75d61",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:199637a03adc84c9cbe5",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 13,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:8d090df19880cf0eb452",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "G4",
+      "subject_kind": "guardrail",
+      "target_id": "E:change_relation:75de5e9e5bdbcdc05ded",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:8d86f5fb526c39688fb2",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:f57edd3f58c1a214aad6",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:e5c5f37fd85a7c49185e",
+      "candidate_state": "selected",
+      "relation_id": "PR:8ecf51a7900970f26fb8",
+      "structural_member_id": "SN:e5c5f37fd85a7c49185e",
+      "structural_membership_class": "matched",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:379ff55d208492faacfc",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 13,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:65f2bddea43702f029e9",
+      "candidate_state": "deferred",
+      "relation_id": "PR:9101d8d70dad4e247ddc",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:71bf43da73a5461e8afe",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:928ded6cb13787d593cc",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "G3",
+      "subject_kind": "guardrail",
+      "target_id": "E:change_relation:d6877e022f54d5734099",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:96c9688fa2bad4ad42c1",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:5ea19f254c7152ac8e25",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:96f2b2136bf1b418f086",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:fb179fd953b87718e0a0",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:97241afe864007e4a7bc",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:b9103a9292db02e49493",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:975bb576367b72796e4e",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:1d2ccdf2a8d86488c37a",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:99ffabb2e96cce61d0f3",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "G4",
+      "subject_kind": "guardrail",
+      "target_id": "E:change_relation:d6877e022f54d5734099",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:9baa9a2d9be5fa5871cc",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:1d2ccdf2a8d86488c37a",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:7e87c364f43827990953",
+      "candidate_state": "selected",
+      "relation_id": "PR:9d1fff86fd653aa4791b",
+      "structural_member_id": "SN:7e87c364f43827990953",
+      "structural_membership_class": "matched",
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:01b81142508f2a6cae92",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:9ebf1e48cf3b6029dab0",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:fb179fd953b87718e0a0",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:a01571ba16b2a461f377",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:c9f1fdfbd646dbc19060",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:a04318f102507617f2c4",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:b11bfee3cf65be75eeaa",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:435927c58d226e9c9bd7",
+      "candidate_state": "deferred",
+      "relation_id": "PR:a151308c660ff421b277",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:32e4942a574c22d47988",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:a61cc6acd3b13592379a",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:01ff2c810c0f28bdfc3e",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        },
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:7e87c364f43827990953",
+      "candidate_state": "selected",
+      "relation_id": "PR:a64ab7447cb28ee38f1b",
+      "structural_member_id": "SN:7e87c364f43827990953",
+      "structural_membership_class": "matched",
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:01b81142508f2a6cae92",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:a7d1d0c12c8448041004",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:894a132a9b04567aae3c",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:a968f0005217973a8753",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:eef7b60cc903977ba4c8",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:ab08aea77fdc3d3d3079",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:628cc89c7756010d6237",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:adf61c54c235ad4d76e5",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:1bf1167ef81aee4b4f69",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:af9530a3c482c37e3f1d",
+      "candidate_state": "selected",
+      "relation_id": "PR:ae04ce4e0ae7ba2f9200",
+      "structural_member_id": "SN:af9530a3c482c37e3f1d",
+      "structural_membership_class": "matched",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:31317cd27e97ed8893dc",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 13,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:afe2437bfad89cdaec9d",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:b11bfee3cf65be75eeaa",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:435927c58d226e9c9bd7",
+      "candidate_state": "deferred",
+      "relation_id": "PR:b20d3bc7d88ca5bcdb11",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:32e4942a574c22d47988",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:b21f3039139bf3c68826",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "G5",
+      "subject_kind": "guardrail",
+      "target_id": "E:change_relation:1bf1167ef81aee4b4f69",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:b6071cbc455ef58bfe74",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:1bf1167ef81aee4b4f69",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        },
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:b66d84b28abddf9f9672",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "G4",
+      "subject_kind": "guardrail",
+      "target_id": "E:change_relation:01ff2c810c0f28bdfc3e",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:bb66e31a37d27f54f8a3",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:628cc89c7756010d6237",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:bc6f0ba0311fecf78974",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:ad925880e9716570dfbb",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:be76b069bca4a4435827",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:0bcafee477cef3115627",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:c9993135c4809468ebaf",
+      "candidate_state": "selected",
+      "relation_id": "PR:bf6db29b9fdcd55b8388",
+      "structural_member_id": "SN:c9993135c4809468ebaf",
+      "structural_membership_class": "matched",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:891a9fb991d6169665ed",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 13,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:6a2f25fd76287696671e",
+      "candidate_state": "selected",
+      "relation_id": "PR:c27093b3c5c2772ca5f1",
+      "structural_member_id": "SN:6a2f25fd76287696671e",
+      "structural_membership_class": "matched",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:a9af4a2b30a0abff03a7",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 13,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:c2fef991438bdce74692",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:3f9f0b1abd2ec86f6109",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:c3275ddc36a40d0f4ef3",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:d7269a1dea65ff711c2d",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:c7e5d79d2c4383d4eba8",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:cb53c377784acd22f068",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:cbed66bafb08229da6c4",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:de87cfeee065f1bbe1ac",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:d0c8675a1d28c07cb1f9",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:1498072e67aecde2815f",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:d1d4a4a32c9b39cae163",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:ad925880e9716570dfbb",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:d34747300f82687c86ba",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:a59ffc8579f6deb526a8",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:d7f29e3ce22f127321f1",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:86aef10a842da6f2f8e8",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:ac110e568958ef160af3",
+      "candidate_state": "selected",
+      "relation_id": "PR:dd6e860cf9ddfe5929f1",
+      "structural_member_id": "SN:ac110e568958ef160af3",
+      "structural_membership_class": "matched",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:53edbd49fc05cb5ff526",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 13,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:e031944d27167ae5ced0",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:b8dbd54e391367cb9a29",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:e06a629201ad0f624edc",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:fd9eecf1cfea8ca04df4",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:e06b91a636a404f65dc1",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:cd8ffd1d4b77538566ff",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:e298ff45622687ae01c7",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:3f9f0b1abd2ec86f6109",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:6a2f25fd76287696671e",
+      "candidate_state": "deferred",
+      "relation_id": "PR:e6028a15c910e6393578",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:a9af4a2b30a0abff03a7",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:e5c5f37fd85a7c49185e",
+      "candidate_state": "deferred",
+      "relation_id": "PR:e807a0e5beed4f55a961",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:379ff55d208492faacfc",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:e222d6da9178cbd37c92",
+      "candidate_state": "selected",
+      "relation_id": "PR:e957c201161b9ce5b322",
+      "structural_member_id": "SN:e222d6da9178cbd37c92",
+      "structural_membership_class": "matched",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:11ea18bad0a68a1a724d",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 13,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:ee4121c18a460ead86bb",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:c9f1fdfbd646dbc19060",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:f07803e42510185a24dc",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:e23c3d7a9095def5ff8e",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 13,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:f0c3777e130b2c1e7eeb",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:3dd0b16d7ec9ba0b03e9",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:f1cde8f84571bf5162c2",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "G5",
+      "subject_kind": "guardrail",
+      "target_id": "E:change_relation:5ea19f254c7152ac8e25",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:f3cfd7bc4664ee1e6cf5",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:c25d899f05683c7b445a",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:f3e9f410fecf10628ecf",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:199637a03adc84c9cbe5",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:f7a5df1e5e643a1b985a",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R1",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:c25d899f05683c7b445a",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 47,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:fa0a9b0c26a9117ce456",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R5",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:75de5e9e5bdbcdc05ded",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:fb1754645186c831bdd4",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "G4",
+      "subject_kind": "guardrail",
+      "target_id": "E:change_relation:1bf1167ef81aee4b4f69",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:fb9edd4410d215b60763",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:3892d0071aa12cb35481",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:feb9c5e4e7afb632fd99",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:b8dbd54e391367cb9a29",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:ffc539df60f5adabbd09",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R4",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:6226368a8d1d1514f3ea",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 45,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "repodelta"
+        }
+      ]
+    }
+  ],
+  "schema_version": "structural_identifier_specificity.v1",
+  "subject_kinds": [
+    [
+      "G1",
+      "guardrail"
+    ],
+    [
+      "G2",
+      "guardrail"
+    ],
+    [
+      "G3",
+      "guardrail"
+    ],
+    [
+      "G4",
+      "guardrail"
+    ],
+    [
+      "G5",
+      "guardrail"
+    ],
+    [
+      "R1",
+      "requirement"
+    ],
+    [
+      "R2",
+      "requirement"
+    ],
+    [
+      "R3",
+      "requirement"
+    ],
+    [
+      "R4",
+      "requirement"
+    ],
+    [
+      "R5",
+      "requirement"
+    ],
+    [
+      "R6",
+      "requirement"
+    ]
+  ]
+}

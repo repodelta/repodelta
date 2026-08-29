@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+from dataclasses import asdict
 from pathlib import Path
 
 from repodelta.evaluation.structural_correctness import (
@@ -13,6 +14,12 @@ from repodelta.evaluation.structural_correctness import (
 from repodelta.evaluation.association_attribution import (
     aggregate_association_comparisons,
     load_association_attribution,
+)
+from repodelta.evaluation.identifier_specificity import (
+    aggregate_identifier_policy_shadows,
+    compare_identifier_policies,
+    load_identifier_specificity,
+    observe_identifier_specificity_from_artifacts,
 )
 
 
@@ -698,3 +705,108 @@ def _focus_coverage_counts(packet, labels):
         else:
             counts["complete"] += 1
     return counts
+
+
+def test_campaign_v1_1_identifier_policy_summary_is_derived() -> None:
+    result_dir = V1_1_CAMPAIGN / "results" / "identifier-specificity"
+    probes = sorted((result_dir / "probes").glob("pr-*.json"))
+    policy_paths = sorted((result_dir / "policies").glob("pr-*.json"))
+    shadows = {
+        path.stem: json.loads(path.read_text(encoding="utf-8"))
+        for path in policy_paths
+    }
+    summary = json.loads(
+        (result_dir / "summary.json").read_text(encoding="utf-8")
+    )
+    assert len(probes) == len(policy_paths) == 8
+    assert all(
+        load_identifier_specificity(path).origin_completeness == "partial"
+        for path in probes
+    )
+    assert summary == aggregate_identifier_policy_shadows(shadows)
+    assert summary["schema_version"] == (
+        "structural_identifier_policy_shadow_summary.v2"
+    )
+    assert set(summary["policies"]) == {
+        "current",
+        "no_suffix",
+        "canonical_low_fanout",
+        "qualified_token_present",
+        "full_token_low_fanout",
+        "canonical_token_unique",
+    }
+    assert summary["overall"]["current"] == {
+        "false_inclusions": 38,
+        "false_exclusions": 212,
+    }
+    assert summary["overall"]["canonical_token_unique"] == {
+        "false_inclusions": 0,
+        "false_exclusions": 227,
+    }
+    for policy in (
+        "canonical_low_fanout",
+        "qualified_token_present",
+        "full_token_low_fanout",
+    ):
+        assert summary["overall"][policy] == {
+            "false_inclusions": 0,
+            "false_exclusions": 227,
+        }
+
+
+def test_campaign_v1_1_identifier_artifacts_recompute_from_frozen_inputs() -> None:
+    result_dir = V1_1_CAMPAIGN / "results" / "identifier-specificity"
+    manifest = json.loads(V1_1_MANIFEST.read_text(encoding="utf-8"))
+
+    for sample in manifest["samples"]:
+        pull_request = int(sample["pull_request"])
+        packet = load_packet(
+            V1_1_CAMPAIGN / "packets" / f"pr-{pull_request}.packet.json"
+        )
+        observation = load_observation(
+            V1_1_CAMPAIGN
+            / "observations"
+            / f"pr-{pull_request}.observation.json"
+        )
+        labels = load_labels(
+            V1_1_CAMPAIGN / "references" / f"pr-{pull_request}.reference.json",
+            packet,
+        )
+        attribution = load_association_attribution(
+            V1_1_CAMPAIGN
+            / "associations"
+            / f"pr-{pull_request}.association.json"
+        )
+        specificity = observe_identifier_specificity_from_artifacts(
+            packet, attribution
+        )
+        expected_probe = json.loads(
+            json.dumps(
+                asdict(specificity),
+                sort_keys=True,
+            )
+        )
+        committed_probe = json.loads(
+            (
+                result_dir
+                / "probes"
+                / f"pr-{pull_request}.json"
+            ).read_text(encoding="utf-8")
+        )
+        assert committed_probe == expected_probe
+
+        expected_policy = compare_identifier_policies(
+            packet,
+            observation,
+            labels,
+            attribution,
+            specificity,
+        )
+        committed_policy = json.loads(
+            (
+                result_dir
+                / "policies"
+                / f"pr-{pull_request}.json"
+            ).read_text(encoding="utf-8")
+        )
+        assert committed_policy == expected_policy

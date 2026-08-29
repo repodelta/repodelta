@@ -1,0 +1,108 @@
+{
+  "by_subject_kind": {
+    "guardrail": {
+      "canonical_low_fanout": {
+        "false_exclusions": 52,
+        "false_inclusions": 0
+      },
+      "canonical_token_unique": {
+        "false_exclusions": 52,
+        "false_inclusions": 0
+      },
+      "current": {
+        "false_exclusions": 50,
+        "false_inclusions": 7
+      },
+      "full_token_low_fanout": {
+        "false_exclusions": 52,
+        "false_inclusions": 0
+      },
+      "no_suffix": {
+        "false_exclusions": 50,
+        "false_inclusions": 7
+      },
+      "qualified_token_present": {
+        "false_exclusions": 52,
+        "false_inclusions": 0
+      }
+    },
+    "requirement": {
+      "canonical_low_fanout": {
+        "false_exclusions": 175,
+        "false_inclusions": 0
+      },
+      "canonical_token_unique": {
+        "false_exclusions": 175,
+        "false_inclusions": 0
+      },
+      "current": {
+        "false_exclusions": 162,
+        "false_inclusions": 31
+      },
+      "full_token_low_fanout": {
+        "false_exclusions": 175,
+        "false_inclusions": 0
+      },
+      "no_suffix": {
+        "false_exclusions": 162,
+        "false_inclusions": 31
+      },
+      "qualified_token_present": {
+        "false_exclusions": 175,
+        "false_inclusions": 0
+      }
+    }
+  },
+  "limits": {
+    "authority": "evaluation-only; no production selection or assessment changes",
+    "causal_replay": false,
+    "downstream_replay": false
+  },
+  "overall": {
+    "canonical_low_fanout": {
+      "false_exclusions": 227,
+      "false_inclusions": 0
+    },
+    "canonical_token_unique": {
+      "false_exclusions": 227,
+      "false_inclusions": 0
+    },
+    "current": {
+      "false_exclusions": 212,
+      "false_inclusions": 38
+    },
+    "full_token_low_fanout": {
+      "false_exclusions": 227,
+      "false_inclusions": 0
+    },
+    "no_suffix": {
+      "false_exclusions": 212,
+      "false_inclusions": 38
+    },
+    "qualified_token_present": {
+      "false_exclusions": 227,
+      "false_inclusions": 0
+    }
+  },
+  "policies": {
+    "canonical_low_fanout": "accept a full authored identifier token with qualified-name origin and exact-association fanout one",
+    "canonical_token_unique": "accept a full authored identifier token only when it occurs in the candidate qualified name and uniquely resolves among changed symbols",
+    "current": "reproduce observed direct membership; no policy change",
+    "full_token_low_fanout": "accept a full authored identifier token with exact-association fanout one, without a qualified-name-origin requirement",
+    "no_suffix": "accept exact identifiers only when the authored term is not suffix-only",
+    "qualified_token_present": "accept a full authored identifier token observed in the candidate qualified name, without uniqueness or fanout constraints"
+  },
+  "sample_count": 8,
+  "samples": [
+    "pr-208",
+    "pr-235",
+    "pr-238",
+    "pr-240",
+    "pr-245",
+    "pr-250",
+    "pr-262",
+    "pr-267"
+  ],
+  "schema_version": "structural_identifier_policy_shadow_summary.v2",
+  "specificity_origin_completeness": "partial"
+}

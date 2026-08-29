@@ -210,3 +210,59 @@ a guessed reason; these fallback rows make the reason totals reconcile with
 the overall deltas.
 The separate `comparison_involved` view remains non-exclusive and may count a
 member for every recorded reason that reaches it.
+
+### Identifier specificity probe and policy shadow
+
+`exact_identifier` is a production association reason, not proof that a
+lexical overlap names one canonical symbol. The evaluation-only identifier
+probe keeps that distinction visible. A live review writes an additional
+`*.identifier-specificity.json` sidecar; for a frozen packet and association
+sidecar it can be regenerated with:
+
+```bash
+repodelta observe-structural-identifier \
+  --labeling-packet build/pr-267.packet.json \
+  --association-attribution build/pr-267.packet.json.association.json \
+  --output build/pr-267.identifier-specificity.json
+```
+
+Each matched term records its normalized authored-key form (a complete
+identifier or suffix alias inferred by the same deterministic tokenizer),
+observed origin (`qualified_name`, `path`, `diff_text`,
+`signature_unattributed`, or `unobserved`), canonical changed-symbol
+resolution, and per-focus exact-association fanout. Resolution is measured
+against all changed symbols in the packet, not a focus-eligible candidate
+universe; it is therefore a repository-wide changed-symbol token check rather
+than a complete canonical identity resolver. Historical v1.1 packets are necessarily
+`partial`: they never contained raw diff text, so the adapter marks that
+origin as `unobserved` rather than reconstructing it. In a live brief, diff
+origin is recorded only when the target's canonical change-relation identity
+resolves to an evidence item carrying the raw preview; otherwise the term is
+`signature_unattributed`/`unobserved` and completeness remains `partial`.
+Descriptive evidence summaries are not treated as raw diff text.
+
+The sidecar can then compare bounded direct-admission policies without changing
+production selection or replaying closure:
+
+```bash
+repodelta compare-structural-identifier \
+  --labeling-packet build/pr-267.packet.json \
+  --observation build/pr-267.packet.json.observation.json \
+  --association-attribution build/pr-267.packet.json.association.json \
+  --identifier-specificity build/pr-267.identifier-specificity.json \
+  --reference-labels build/pr-267.reference.json \
+  --output build/pr-267-identifier-policy-shadow.json
+```
+
+The comparison includes the observed `current` policy plus `no_suffix`,
+`canonical_low_fanout`, `qualified_token_present`, `full_token_low_fanout`, and
+`canonical_token_unique` shadows. These isolate qualified-name token support,
+exact-association fanout, and uniqueness: none is a full qualified-name
+equality check. The comparison reports only direct-node
+false inclusions/exclusions against the frozen semantic reference. It does
+not claim to predict selected files, structural context, exact relations, or
+semantic resolution; an LLM/embedding policy remains unexplored. No policy in
+this experiment changes the formal report or assessment authority.
+
+The frozen v1.1 run and its interpretation are recorded in the
+[`identifier-specificity findings`](campaign-v1-1/results/identifier-specificity/findings.md).

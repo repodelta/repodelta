@@ -43,6 +43,14 @@ from repodelta.evaluation.association_attribution import (
     write_association_attribution,
     write_association_comparison,
 )
+from repodelta.evaluation.identifier_specificity import (
+    compare_identifier_policies,
+    load_identifier_specificity,
+    observe_identifier_specificity,
+    observe_identifier_specificity_from_artifacts,
+    write_identifier_policy_shadow,
+    write_identifier_specificity,
+)
 from repodelta.evaluation.shadow import load_human_shadow_labels_from_packet
 from repodelta.intake.fixture import load_fixture
 from repodelta.intake.github import GitHubApiError, GitHubClient, GitHubPullRequestAdapter
@@ -385,6 +393,33 @@ def build_parser() -> argparse.ArgumentParser:
         help="Frozen proposed or independently verified reference labels",
     )
     compare_association.add_argument("--output", required=True)
+    observe_identifier = subparsers.add_parser(
+        "observe-structural-identifier",
+        help="Record evaluation-only R/G identifier origins from frozen artifacts",
+    )
+    observe_identifier.add_argument("--labeling-packet", required=True)
+    observe_identifier.add_argument(
+        "--association-attribution",
+        "--association",
+        dest="association_attribution",
+        required=True,
+    )
+    observe_identifier.add_argument("--output", required=True)
+    compare_identifier = subparsers.add_parser(
+        "compare-structural-identifier",
+        help="Compare bounded R/G identifier-admission policies without replay",
+    )
+    compare_identifier.add_argument("--labeling-packet", required=True)
+    compare_identifier.add_argument("--observation", required=True)
+    compare_identifier.add_argument("--association-attribution", required=True)
+    compare_identifier.add_argument("--identifier-specificity", required=True)
+    compare_identifier.add_argument(
+        "--reference-labels",
+        "--human-labels",
+        dest="reference_labels",
+        required=True,
+    )
+    compare_identifier.add_argument("--output", required=True)
     return parser
 
 
@@ -466,6 +501,43 @@ def main() -> int:
             )
             output = write_association_comparison(
                 compare_association_attribution(attribution, observation, labels),
+                args.output,
+            )
+        except (OSError, ValueError) as exc:
+            print(f"repodelta: error: {exc}", file=sys.stderr)
+            return 2
+        print(output)
+        return 0
+    if args.command == "observe-structural-identifier":
+        try:
+            packet = load_structural_correctness_packet(args.labeling_packet)
+            attribution = load_association_attribution(
+                args.association_attribution
+            )
+            output = write_identifier_specificity(
+                observe_identifier_specificity_from_artifacts(packet, attribution),
+                args.output,
+            )
+        except (OSError, ValueError) as exc:
+            print(f"repodelta: error: {exc}", file=sys.stderr)
+            return 2
+        print(output)
+        return 0
+    if args.command == "compare-structural-identifier":
+        try:
+            packet = load_structural_correctness_packet(args.labeling_packet)
+            observation = load_structural_correctness_observation(args.observation)
+            labels = load_structural_correctness_labels(
+                args.reference_labels, packet
+            )
+            attribution = load_association_attribution(
+                args.association_attribution
+            )
+            specificity = load_identifier_specificity(args.identifier_specificity)
+            output = write_identifier_policy_shadow(
+                compare_identifier_policies(
+                    packet, observation, labels, attribution, specificity
+                ),
                 args.output,
             )
         except (OSError, ValueError) as exc:
@@ -577,7 +649,7 @@ def main() -> int:
                 )
             ).analyze(analysis_input)
             structural_correctness_outputs: tuple[
-                Path, Path, Path, Path, Path
+                Path, Path, Path, Path, Path, Path
             ] | None = None
             if args.structural_correctness_packet_output:
                 correctness_packet = prepare_structural_correctness_packet(brief)
@@ -602,6 +674,14 @@ def main() -> int:
                     observe_association_attribution(brief, correctness_packet),
                     f"{args.structural_correctness_packet_output}.association.json",
                 )
+                identifier_specificity_output = write_identifier_specificity(
+                    observe_identifier_specificity(
+                        brief,
+                        correctness_packet,
+                        load_association_attribution(association_output),
+                    ),
+                    f"{args.structural_correctness_packet_output}.identifier-specificity.json",
+                )
                 label_template_output = write_structural_correctness_artifact(
                     prepare_structural_correctness_label_template(
                         correctness_packet
@@ -614,6 +694,7 @@ def main() -> int:
                     label_template_output,
                     provenance_output,
                     association_output,
+                    identifier_specificity_output,
                 )
             if args.llm_shadow_replay and not args.llm_shadow:
                 parser.error("--llm-shadow-replay requires --llm-shadow")

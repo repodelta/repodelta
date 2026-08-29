@@ -1,0 +1,1200 @@
+{
+  "by_subject_kind": {
+    "guardrail": {
+      "canonical_low_fanout": {
+        "false_exclusions": 15,
+        "false_inclusions": 0
+      },
+      "canonical_token_unique": {
+        "false_exclusions": 15,
+        "false_inclusions": 0
+      },
+      "current": {
+        "false_exclusions": 15,
+        "false_inclusions": 0
+      },
+      "full_token_low_fanout": {
+        "false_exclusions": 15,
+        "false_inclusions": 0
+      },
+      "no_suffix": {
+        "false_exclusions": 15,
+        "false_inclusions": 0
+      },
+      "qualified_token_present": {
+        "false_exclusions": 15,
+        "false_inclusions": 0
+      }
+    },
+    "requirement": {
+      "canonical_low_fanout": {
+        "false_exclusions": 41,
+        "false_inclusions": 0
+      },
+      "canonical_token_unique": {
+        "false_exclusions": 41,
+        "false_inclusions": 0
+      },
+      "current": {
+        "false_exclusions": 41,
+        "false_inclusions": 0
+      },
+      "full_token_low_fanout": {
+        "false_exclusions": 41,
+        "false_inclusions": 0
+      },
+      "no_suffix": {
+        "false_exclusions": 41,
+        "false_inclusions": 0
+      },
+      "qualified_token_present": {
+        "false_exclusions": 41,
+        "false_inclusions": 0
+      }
+    }
+  },
+  "causal_replay": false,
+  "downstream_replay": false,
+  "limits": {
+    "authority": "evaluation-only; no production association or projection is changed",
+    "direct_dimension": "only observed direct member admission is projected",
+    "downstream": "selected/context/relation effects are not replayed",
+    "historical_origin": "v1.1 artifacts without raw evidence are marked partial/unobserved",
+    "semantic_resolution": "no LLM or semantic model is used; grounded semantic policy remains unexplored"
+  },
+  "overall": {
+    "canonical_low_fanout": {
+      "false_exclusions": 56,
+      "false_inclusions": 0
+    },
+    "canonical_token_unique": {
+      "false_exclusions": 56,
+      "false_inclusions": 0
+    },
+    "current": {
+      "false_exclusions": 56,
+      "false_inclusions": 0
+    },
+    "full_token_low_fanout": {
+      "false_exclusions": 56,
+      "false_inclusions": 0
+    },
+    "no_suffix": {
+      "false_exclusions": 56,
+      "false_inclusions": 0
+    },
+    "qualified_token_present": {
+      "false_exclusions": 56,
+      "false_inclusions": 0
+    }
+  },
+  "packet_digest": "d71944788aa7fbe75fd43b3b7b1820bb9b170b7beb3421fc48aedfc6a0c6587f",
+  "per_focus": [
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:3a738b073bed5edc6b52",
+            "SN:3b3fd6e980400fe1d379",
+            "SN:93ec5f652b50cda4913b",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "canonical_token_unique": {
+          "false_exclusion_nodes": [
+            "SN:3a738b073bed5edc6b52",
+            "SN:3b3fd6e980400fe1d379",
+            "SN:93ec5f652b50cda4913b",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:3a738b073bed5edc6b52",
+            "SN:3b3fd6e980400fe1d379",
+            "SN:93ec5f652b50cda4913b",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "full_token_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:3a738b073bed5edc6b52",
+            "SN:3b3fd6e980400fe1d379",
+            "SN:93ec5f652b50cda4913b",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:3a738b073bed5edc6b52",
+            "SN:3b3fd6e980400fe1d379",
+            "SN:93ec5f652b50cda4913b",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
+          "false_exclusion_nodes": [
+            "SN:3a738b073bed5edc6b52",
+            "SN:3b3fd6e980400fe1d379",
+            "SN:93ec5f652b50cda4913b",
+            "SN:e5b7fa1fcafb4c77ce3f"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "G1",
+      "subject_kind": "guardrail"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:ae049f36b6e35fe43a22",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:da5397a88d8f4040b729",
+            "SN:f828a99b97e49c237175"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "canonical_token_unique": {
+          "false_exclusion_nodes": [
+            "SN:ae049f36b6e35fe43a22",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:da5397a88d8f4040b729",
+            "SN:f828a99b97e49c237175"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:ae049f36b6e35fe43a22",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:da5397a88d8f4040b729",
+            "SN:f828a99b97e49c237175"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "full_token_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:ae049f36b6e35fe43a22",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:da5397a88d8f4040b729",
+            "SN:f828a99b97e49c237175"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:ae049f36b6e35fe43a22",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:da5397a88d8f4040b729",
+            "SN:f828a99b97e49c237175"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
+          "false_exclusion_nodes": [
+            "SN:ae049f36b6e35fe43a22",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:da5397a88d8f4040b729",
+            "SN:f828a99b97e49c237175"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "G2",
+      "subject_kind": "guardrail"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:543ff43b3e5eeab71613",
+            "SN:9c926f5950f88e50331a",
+            "SN:ae049f36b6e35fe43a22"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "canonical_token_unique": {
+          "false_exclusion_nodes": [
+            "SN:543ff43b3e5eeab71613",
+            "SN:9c926f5950f88e50331a",
+            "SN:ae049f36b6e35fe43a22"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:543ff43b3e5eeab71613",
+            "SN:9c926f5950f88e50331a",
+            "SN:ae049f36b6e35fe43a22"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "full_token_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:543ff43b3e5eeab71613",
+            "SN:9c926f5950f88e50331a",
+            "SN:ae049f36b6e35fe43a22"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:543ff43b3e5eeab71613",
+            "SN:9c926f5950f88e50331a",
+            "SN:ae049f36b6e35fe43a22"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
+          "false_exclusion_nodes": [
+            "SN:543ff43b3e5eeab71613",
+            "SN:9c926f5950f88e50331a",
+            "SN:ae049f36b6e35fe43a22"
+          ],
+          "false_exclusions": 3,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "G3",
+      "subject_kind": "guardrail"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:6ca8c7c3f63e6030f55a",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:cc0c8a0045a6fe1e8112",
+            "SN:da5397a88d8f4040b729"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "canonical_token_unique": {
+          "false_exclusion_nodes": [
+            "SN:6ca8c7c3f63e6030f55a",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:cc0c8a0045a6fe1e8112",
+            "SN:da5397a88d8f4040b729"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:6ca8c7c3f63e6030f55a",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:cc0c8a0045a6fe1e8112",
+            "SN:da5397a88d8f4040b729"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "full_token_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:6ca8c7c3f63e6030f55a",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:cc0c8a0045a6fe1e8112",
+            "SN:da5397a88d8f4040b729"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:6ca8c7c3f63e6030f55a",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:cc0c8a0045a6fe1e8112",
+            "SN:da5397a88d8f4040b729"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
+          "false_exclusion_nodes": [
+            "SN:6ca8c7c3f63e6030f55a",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:cc0c8a0045a6fe1e8112",
+            "SN:da5397a88d8f4040b729"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "G4",
+      "subject_kind": "guardrail"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "canonical_token_unique": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "full_token_low_fanout": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "G5",
+      "subject_kind": "guardrail"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "canonical_token_unique": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "full_token_low_fanout": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "G6",
+      "subject_kind": "guardrail"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "canonical_token_unique": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "full_token_low_fanout": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "G7",
+      "subject_kind": "guardrail"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "canonical_token_unique": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "full_token_low_fanout": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
+          "false_exclusion_nodes": [],
+          "false_exclusions": 0,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "G8",
+      "subject_kind": "guardrail"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:19cd2582561d6e9791c8",
+            "SN:3f027f11e0341d0de0a1",
+            "SN:543ff43b3e5eeab71613",
+            "SN:62694386d20493a8b93a",
+            "SN:6ca8c7c3f63e6030f55a",
+            "SN:7ccf02543c1154f94fd5",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:cfde61f968af432ceae5",
+            "SN:da5397a88d8f4040b729",
+            "SN:f637ad1c36b0e06a1f13",
+            "SN:f828a99b97e49c237175"
+          ],
+          "false_exclusions": 12,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "canonical_token_unique": {
+          "false_exclusion_nodes": [
+            "SN:19cd2582561d6e9791c8",
+            "SN:3f027f11e0341d0de0a1",
+            "SN:543ff43b3e5eeab71613",
+            "SN:62694386d20493a8b93a",
+            "SN:6ca8c7c3f63e6030f55a",
+            "SN:7ccf02543c1154f94fd5",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:cfde61f968af432ceae5",
+            "SN:da5397a88d8f4040b729",
+            "SN:f637ad1c36b0e06a1f13",
+            "SN:f828a99b97e49c237175"
+          ],
+          "false_exclusions": 12,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:19cd2582561d6e9791c8",
+            "SN:3f027f11e0341d0de0a1",
+            "SN:543ff43b3e5eeab71613",
+            "SN:62694386d20493a8b93a",
+            "SN:6ca8c7c3f63e6030f55a",
+            "SN:7ccf02543c1154f94fd5",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:cfde61f968af432ceae5",
+            "SN:da5397a88d8f4040b729",
+            "SN:f637ad1c36b0e06a1f13",
+            "SN:f828a99b97e49c237175"
+          ],
+          "false_exclusions": 12,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "full_token_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:19cd2582561d6e9791c8",
+            "SN:3f027f11e0341d0de0a1",
+            "SN:543ff43b3e5eeab71613",
+            "SN:62694386d20493a8b93a",
+            "SN:6ca8c7c3f63e6030f55a",
+            "SN:7ccf02543c1154f94fd5",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:cfde61f968af432ceae5",
+            "SN:da5397a88d8f4040b729",
+            "SN:f637ad1c36b0e06a1f13",
+            "SN:f828a99b97e49c237175"
+          ],
+          "false_exclusions": 12,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:19cd2582561d6e9791c8",
+            "SN:3f027f11e0341d0de0a1",
+            "SN:543ff43b3e5eeab71613",
+            "SN:62694386d20493a8b93a",
+            "SN:6ca8c7c3f63e6030f55a",
+            "SN:7ccf02543c1154f94fd5",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:cfde61f968af432ceae5",
+            "SN:da5397a88d8f4040b729",
+            "SN:f637ad1c36b0e06a1f13",
+            "SN:f828a99b97e49c237175"
+          ],
+          "false_exclusions": 12,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
+          "false_exclusion_nodes": [
+            "SN:19cd2582561d6e9791c8",
+            "SN:3f027f11e0341d0de0a1",
+            "SN:543ff43b3e5eeab71613",
+            "SN:62694386d20493a8b93a",
+            "SN:6ca8c7c3f63e6030f55a",
+            "SN:7ccf02543c1154f94fd5",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:cfde61f968af432ceae5",
+            "SN:da5397a88d8f4040b729",
+            "SN:f637ad1c36b0e06a1f13",
+            "SN:f828a99b97e49c237175"
+          ],
+          "false_exclusions": 12,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "R1",
+      "subject_kind": "requirement"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:7ccf02543c1154f94fd5",
+            "SN:89fff3edee9994df99f2",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:da715a5d1d6fd4915e50"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "canonical_token_unique": {
+          "false_exclusion_nodes": [
+            "SN:7ccf02543c1154f94fd5",
+            "SN:89fff3edee9994df99f2",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:da715a5d1d6fd4915e50"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:7ccf02543c1154f94fd5",
+            "SN:89fff3edee9994df99f2",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:da715a5d1d6fd4915e50"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "full_token_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:7ccf02543c1154f94fd5",
+            "SN:89fff3edee9994df99f2",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:da715a5d1d6fd4915e50"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:7ccf02543c1154f94fd5",
+            "SN:89fff3edee9994df99f2",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:da715a5d1d6fd4915e50"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
+          "false_exclusion_nodes": [
+            "SN:7ccf02543c1154f94fd5",
+            "SN:89fff3edee9994df99f2",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:da715a5d1d6fd4915e50"
+          ],
+          "false_exclusions": 4,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "R2",
+      "subject_kind": "requirement"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:543ff43b3e5eeab71613",
+            "SN:89fff3edee9994df99f2",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:cfde61f968af432ceae5",
+            "SN:da715a5d1d6fd4915e50"
+          ],
+          "false_exclusions": 5,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "canonical_token_unique": {
+          "false_exclusion_nodes": [
+            "SN:543ff43b3e5eeab71613",
+            "SN:89fff3edee9994df99f2",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:cfde61f968af432ceae5",
+            "SN:da715a5d1d6fd4915e50"
+          ],
+          "false_exclusions": 5,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:543ff43b3e5eeab71613",
+            "SN:89fff3edee9994df99f2",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:cfde61f968af432ceae5",
+            "SN:da715a5d1d6fd4915e50"
+          ],
+          "false_exclusions": 5,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "full_token_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:543ff43b3e5eeab71613",
+            "SN:89fff3edee9994df99f2",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:cfde61f968af432ceae5",
+            "SN:da715a5d1d6fd4915e50"
+          ],
+          "false_exclusions": 5,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:543ff43b3e5eeab71613",
+            "SN:89fff3edee9994df99f2",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:cfde61f968af432ceae5",
+            "SN:da715a5d1d6fd4915e50"
+          ],
+          "false_exclusions": 5,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
+          "false_exclusion_nodes": [
+            "SN:543ff43b3e5eeab71613",
+            "SN:89fff3edee9994df99f2",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:cfde61f968af432ceae5",
+            "SN:da715a5d1d6fd4915e50"
+          ],
+          "false_exclusions": 5,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "R3",
+      "subject_kind": "requirement"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:13363eed6464c772fb73",
+            "SN:19cd2582561d6e9791c8",
+            "SN:7ccf02543c1154f94fd5",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:cc0c8a0045a6fe1e8112",
+            "SN:da5397a88d8f4040b729"
+          ],
+          "false_exclusions": 7,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "canonical_token_unique": {
+          "false_exclusion_nodes": [
+            "SN:13363eed6464c772fb73",
+            "SN:19cd2582561d6e9791c8",
+            "SN:7ccf02543c1154f94fd5",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:cc0c8a0045a6fe1e8112",
+            "SN:da5397a88d8f4040b729"
+          ],
+          "false_exclusions": 7,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:13363eed6464c772fb73",
+            "SN:19cd2582561d6e9791c8",
+            "SN:7ccf02543c1154f94fd5",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:cc0c8a0045a6fe1e8112",
+            "SN:da5397a88d8f4040b729"
+          ],
+          "false_exclusions": 7,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "full_token_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:13363eed6464c772fb73",
+            "SN:19cd2582561d6e9791c8",
+            "SN:7ccf02543c1154f94fd5",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:cc0c8a0045a6fe1e8112",
+            "SN:da5397a88d8f4040b729"
+          ],
+          "false_exclusions": 7,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:13363eed6464c772fb73",
+            "SN:19cd2582561d6e9791c8",
+            "SN:7ccf02543c1154f94fd5",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:cc0c8a0045a6fe1e8112",
+            "SN:da5397a88d8f4040b729"
+          ],
+          "false_exclusions": 7,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
+          "false_exclusion_nodes": [
+            "SN:13363eed6464c772fb73",
+            "SN:19cd2582561d6e9791c8",
+            "SN:7ccf02543c1154f94fd5",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:cc0c8a0045a6fe1e8112",
+            "SN:da5397a88d8f4040b729"
+          ],
+          "false_exclusions": 7,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "R4",
+      "subject_kind": "requirement"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:62694386d20493a8b93a",
+            "SN:9c926f5950f88e50331a",
+            "SN:9caebf5ac975d54164ab",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:bcf3a6f0186446f5f61f"
+          ],
+          "false_exclusions": 6,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "canonical_token_unique": {
+          "false_exclusion_nodes": [
+            "SN:62694386d20493a8b93a",
+            "SN:9c926f5950f88e50331a",
+            "SN:9caebf5ac975d54164ab",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:bcf3a6f0186446f5f61f"
+          ],
+          "false_exclusions": 6,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:62694386d20493a8b93a",
+            "SN:9c926f5950f88e50331a",
+            "SN:9caebf5ac975d54164ab",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:bcf3a6f0186446f5f61f"
+          ],
+          "false_exclusions": 6,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "full_token_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:62694386d20493a8b93a",
+            "SN:9c926f5950f88e50331a",
+            "SN:9caebf5ac975d54164ab",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:bcf3a6f0186446f5f61f"
+          ],
+          "false_exclusions": 6,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:62694386d20493a8b93a",
+            "SN:9c926f5950f88e50331a",
+            "SN:9caebf5ac975d54164ab",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:bcf3a6f0186446f5f61f"
+          ],
+          "false_exclusions": 6,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
+          "false_exclusion_nodes": [
+            "SN:62694386d20493a8b93a",
+            "SN:9c926f5950f88e50331a",
+            "SN:9caebf5ac975d54164ab",
+            "SN:ae049f36b6e35fe43a22",
+            "SN:b8d4254dc3828c940fbb",
+            "SN:bcf3a6f0186446f5f61f"
+          ],
+          "false_exclusions": 6,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "R5",
+      "subject_kind": "requirement"
+    },
+    {
+      "direct_membership_complete": "complete",
+      "policies": {
+        "canonical_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:2380d52ce46c588ff706",
+            "SN:3b3fd6e980400fe1d379",
+            "SN:3f027f11e0341d0de0a1",
+            "SN:a6cbe5a013f33936a911",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:da5397a88d8f4040b729",
+            "SN:f637ad1c36b0e06a1f13"
+          ],
+          "false_exclusions": 7,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "canonical_token_unique": {
+          "false_exclusion_nodes": [
+            "SN:2380d52ce46c588ff706",
+            "SN:3b3fd6e980400fe1d379",
+            "SN:3f027f11e0341d0de0a1",
+            "SN:a6cbe5a013f33936a911",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:da5397a88d8f4040b729",
+            "SN:f637ad1c36b0e06a1f13"
+          ],
+          "false_exclusions": 7,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "current": {
+          "false_exclusion_nodes": [
+            "SN:2380d52ce46c588ff706",
+            "SN:3b3fd6e980400fe1d379",
+            "SN:3f027f11e0341d0de0a1",
+            "SN:a6cbe5a013f33936a911",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:da5397a88d8f4040b729",
+            "SN:f637ad1c36b0e06a1f13"
+          ],
+          "false_exclusions": 7,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "full_token_low_fanout": {
+          "false_exclusion_nodes": [
+            "SN:2380d52ce46c588ff706",
+            "SN:3b3fd6e980400fe1d379",
+            "SN:3f027f11e0341d0de0a1",
+            "SN:a6cbe5a013f33936a911",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:da5397a88d8f4040b729",
+            "SN:f637ad1c36b0e06a1f13"
+          ],
+          "false_exclusions": 7,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "no_suffix": {
+          "false_exclusion_nodes": [
+            "SN:2380d52ce46c588ff706",
+            "SN:3b3fd6e980400fe1d379",
+            "SN:3f027f11e0341d0de0a1",
+            "SN:a6cbe5a013f33936a911",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:da5397a88d8f4040b729",
+            "SN:f637ad1c36b0e06a1f13"
+          ],
+          "false_exclusions": 7,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        },
+        "qualified_token_present": {
+          "false_exclusion_nodes": [
+            "SN:2380d52ce46c588ff706",
+            "SN:3b3fd6e980400fe1d379",
+            "SN:3f027f11e0341d0de0a1",
+            "SN:a6cbe5a013f33936a911",
+            "SN:bcf3a6f0186446f5f61f",
+            "SN:da5397a88d8f4040b729",
+            "SN:f637ad1c36b0e06a1f13"
+          ],
+          "false_exclusions": 7,
+          "false_inclusion_nodes": [],
+          "false_inclusions": 0,
+          "observed_direct_nodes": []
+        }
+      },
+      "reference_unresolved": false,
+      "subject_id": "R6",
+      "subject_kind": "requirement"
+    }
+  ],
+  "policies": {
+    "canonical_low_fanout": "accept a full authored identifier token with qualified-name origin and exact-association fanout one",
+    "canonical_token_unique": "accept a full authored identifier token only when it occurs in the candidate qualified name and uniquely resolves among changed symbols",
+    "current": "reproduce observed direct membership; no policy change",
+    "full_token_low_fanout": "accept a full authored identifier token with exact-association fanout one, without a qualified-name-origin requirement",
+    "no_suffix": "accept exact identifiers only when the authored term is not suffix-only",
+    "qualified_token_present": "accept a full authored identifier token observed in the candidate qualified name, without uniqueness or fanout constraints"
+  },
+  "schema_version": "structural_identifier_policy_shadow.v2",
+  "specificity_origin_completeness": "partial"
+}

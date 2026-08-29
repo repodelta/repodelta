@@ -1,0 +1,44 @@
+{
+  "origin_completeness": "partial",
+  "packet_digest": "d24193cd8fa4982a526d167a4bb9a17de93438f910dffe7a1ceabdcbbd4bedc3",
+  "rows": [],
+  "schema_version": "structural_identifier_specificity.v1",
+  "subject_kinds": [
+    [
+      "G1",
+      "guardrail"
+    ],
+    [
+      "G2",
+      "guardrail"
+    ],
+    [
+      "G3",
+      "guardrail"
+    ],
+    [
+      "G4",
+      "guardrail"
+    ],
+    [
+      "R1",
+      "requirement"
+    ],
+    [
+      "R2",
+      "requirement"
+    ],
+    [
+      "R3",
+      "requirement"
+    ],
+    [
+      "R4",
+      "requirement"
+    ],
+    [
+      "R5",
+      "requirement"
+    ]
+  ]
+}

@@ -1,0 +1,707 @@
+{
+  "origin_completeness": "partial",
+  "packet_digest": "209df0d0b0fd43874530b491e0912f32d13232d5b97b507035b1a1471807b534",
+  "rows": [
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:06d0f7c853dd4b33da88",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "G4",
+      "subject_kind": "guardrail",
+      "target_id": "E:change_relation:6f9ec1cf612197c9aef1",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 6,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:e17326fb5baeb2c79e39",
+      "candidate_state": "selected",
+      "relation_id": "PR:166159e594fbe1a47cb9",
+      "structural_member_id": "SN:e17326fb5baeb2c79e39",
+      "structural_membership_class": "matched",
+      "subject_id": "G6",
+      "subject_kind": "guardrail",
+      "target_id": "E:structural_change:5ac566203ba38e7a8452",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 6,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:4b3329617dfe529df905",
+      "candidate_state": "selected",
+      "relation_id": "PR:2185a7184eb44ebabd02",
+      "structural_member_id": "SN:4b3329617dfe529df905",
+      "structural_membership_class": "matched",
+      "subject_id": "R6",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:aea825405c02cc6cd5b2",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 3,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:e17326fb5baeb2c79e39",
+      "candidate_state": "selected",
+      "relation_id": "PR:43966332de408e72a18d",
+      "structural_member_id": "SN:e17326fb5baeb2c79e39",
+      "structural_membership_class": "matched",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:5ac566203ba38e7a8452",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 6,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:504a8a496560ef3c2e2d",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "G4",
+      "subject_kind": "guardrail",
+      "target_id": "E:change_relation:fcb69bc6563fde922016",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 6,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:535884d768a3ce9b55f0",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:6f9ec1cf612197c9aef1",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "prismcode"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:4b3329617dfe529df905",
+      "candidate_state": "selected",
+      "relation_id": "PR:58c1690c47bdc131bd4c",
+      "structural_member_id": "SN:4b3329617dfe529df905",
+      "structural_membership_class": "matched",
+      "subject_id": "G6",
+      "subject_kind": "guardrail",
+      "target_id": "E:structural_change:aea825405c02cc6cd5b2",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 6,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:599d720c89a5bd331ae3",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:6f9ec1cf612197c9aef1",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 6,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:ac4ddbe869abcda97db5",
+      "candidate_state": "selected",
+      "relation_id": "PR:5ff9ab0a477fbd092d63",
+      "structural_member_id": "SN:ac4ddbe869abcda97db5",
+      "structural_membership_class": "matched",
+      "subject_id": "G6",
+      "subject_kind": "guardrail",
+      "target_id": "E:structural_change:6dda115fbcec31c05579",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 6,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:68fb3686907e52d56d1d",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:fcb69bc6563fde922016",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "prismcode"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:7004a7aaef305dbfcaf5",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:fcb69bc6563fde922016",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 6,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:70550a9fb3222fa24dad",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:01416105dc98bfa585dd",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 6,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:807bc1edce5f2a08087e",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:01416105dc98bfa585dd",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "prismcode"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:e17326fb5baeb2c79e39",
+      "candidate_state": "selected",
+      "relation_id": "PR:83aae3022ed570d9f0c1",
+      "structural_member_id": "SN:e17326fb5baeb2c79e39",
+      "structural_membership_class": "matched",
+      "subject_id": "R6",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:5ac566203ba38e7a8452",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 3,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:65f2bddea43702f029e9",
+      "candidate_state": "selected",
+      "relation_id": "PR:8595768b95218e4152f8",
+      "structural_member_id": "SN:65f2bddea43702f029e9",
+      "structural_membership_class": "matched",
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:71bf43da73a5461e8afe",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "prismcode"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:e17326fb5baeb2c79e39",
+      "candidate_state": "selected",
+      "relation_id": "PR:994cbe9502fd9d745e52",
+      "structural_member_id": "SN:e17326fb5baeb2c79e39",
+      "structural_membership_class": "matched",
+      "subject_id": "G4",
+      "subject_kind": "guardrail",
+      "target_id": "E:structural_change:5ac566203ba38e7a8452",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 6,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:ac4ddbe869abcda97db5",
+      "candidate_state": "selected",
+      "relation_id": "PR:9a59fa33254dd70fc149",
+      "structural_member_id": "SN:ac4ddbe869abcda97db5",
+      "structural_membership_class": "matched",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:6dda115fbcec31c05579",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 6,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:4b3329617dfe529df905",
+      "candidate_state": "selected",
+      "relation_id": "PR:be36ef8ee6d7ec592c12",
+      "structural_member_id": "SN:4b3329617dfe529df905",
+      "structural_membership_class": "matched",
+      "subject_id": "R2",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:aea825405c02cc6cd5b2",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 6,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:beb3159b6d16234ba1d8",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "G6",
+      "subject_kind": "guardrail",
+      "target_id": "E:change_relation:6f9ec1cf612197c9aef1",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 6,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:4b3329617dfe529df905",
+      "candidate_state": "selected",
+      "relation_id": "PR:c0bdc98bb38f75d5c312",
+      "structural_member_id": "SN:4b3329617dfe529df905",
+      "structural_membership_class": "matched",
+      "subject_id": "G4",
+      "subject_kind": "guardrail",
+      "target_id": "E:structural_change:aea825405c02cc6cd5b2",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 6,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:c0db2b884a9425151080",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "G4",
+      "subject_kind": "guardrail",
+      "target_id": "E:change_relation:01416105dc98bfa585dd",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 6,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:c6f26872e1fe213b8ede",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "G6",
+      "subject_kind": "guardrail",
+      "target_id": "E:change_relation:fcb69bc6563fde922016",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 6,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "selected",
+      "relation_id": "PR:d77fe9814626095c57af",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "G6",
+      "subject_kind": "guardrail",
+      "target_id": "E:change_relation:01416105dc98bfa585dd",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 6,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": null,
+      "candidate_state": "deferred",
+      "relation_id": "PR:de9e49fcd1a9edc747f2",
+      "structural_member_id": null,
+      "structural_membership_class": null,
+      "subject_id": "R3",
+      "subject_kind": "requirement",
+      "target_id": "E:change_relation:dd284294024a01378a80",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 5,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "prismcode"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:ac4ddbe869abcda97db5",
+      "candidate_state": "selected",
+      "relation_id": "PR:f2eabb1a071009615bb6",
+      "structural_member_id": "SN:ac4ddbe869abcda97db5",
+      "structural_membership_class": "matched",
+      "subject_id": "G4",
+      "subject_kind": "guardrail",
+      "target_id": "E:structural_change:6dda115fbcec31c05579",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 6,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:ac4ddbe869abcda97db5",
+      "candidate_state": "selected",
+      "relation_id": "PR:ff3ec5aa951990c252cd",
+      "structural_member_id": "SN:ac4ddbe869abcda97db5",
+      "structural_membership_class": "matched",
+      "subject_id": "R6",
+      "subject_kind": "requirement",
+      "target_id": "E:structural_change:6dda115fbcec31c05579",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 3,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "github"
+        }
+      ]
+    }
+  ],
+  "schema_version": "structural_identifier_specificity.v1",
+  "subject_kinds": [
+    [
+      "G1",
+      "guardrail"
+    ],
+    [
+      "G2",
+      "guardrail"
+    ],
+    [
+      "G3",
+      "guardrail"
+    ],
+    [
+      "G4",
+      "guardrail"
+    ],
+    [
+      "G5",
+      "guardrail"
+    ],
+    [
+      "G6",
+      "guardrail"
+    ],
+    [
+      "R1",
+      "requirement"
+    ],
+    [
+      "R2",
+      "requirement"
+    ],
+    [
+      "R3",
+      "requirement"
+    ],
+    [
+      "R4",
+      "requirement"
+    ],
+    [
+      "R5",
+      "requirement"
+    ],
+    [
+      "R6",
+      "requirement"
+    ]
+  ]
+}

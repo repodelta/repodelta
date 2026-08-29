@@ -1,0 +1,156 @@
+{
+  "origin_completeness": "partial",
+  "packet_digest": "56a6084269535c7d3d7cd9a69669363625f2194a2fdac2a159985562b15a763b",
+  "rows": [
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:04a6b663dcf6c3ab94ba",
+      "candidate_state": "selected",
+      "relation_id": "PR:8ab52fda8cfaeccb631f",
+      "structural_member_id": "SN:04a6b663dcf6c3ab94ba",
+      "structural_membership_class": "matched",
+      "subject_id": "G1",
+      "subject_kind": "guardrail",
+      "target_id": "E:structural_change:70fd73a38602eda46bb5",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 3,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "verificationworkspace"
+        },
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 3,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "suffix_alias"
+          ],
+          "term": "workspace"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:e5b7fa1fcafb4c77ce3f",
+      "candidate_state": "selected",
+      "relation_id": "PR:e0c057f5fe55055932da",
+      "structural_member_id": "SN:e5b7fa1fcafb4c77ce3f",
+      "structural_membership_class": "matched",
+      "subject_id": "G1",
+      "subject_kind": "guardrail",
+      "target_id": "E:structural_change:ce53432532a7b2dca4d3",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 3,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "verificationworkspace"
+        },
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 3,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "suffix_alias"
+          ],
+          "term": "workspace"
+        }
+      ]
+    },
+    {
+      "association": "exact_identifier",
+      "candidate_node_id": "SN:491e9b2d0ef54d5ef533",
+      "candidate_state": "selected",
+      "relation_id": "PR:ea26d2ab33d0104594d6",
+      "structural_member_id": "SN:491e9b2d0ef54d5ef533",
+      "structural_membership_class": "matched",
+      "subject_id": "G1",
+      "subject_kind": "guardrail",
+      "target_id": "E:structural_change:ddb3035c4b476469bdea",
+      "terms": [
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 3,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "full_identifier"
+          ],
+          "term": "verificationworkspace"
+        },
+        {
+          "canonical_full_match_count": 0,
+          "canonical_resolution": "none",
+          "fanout": 3,
+          "origins": [
+            "unobserved"
+          ],
+          "source_forms": [
+            "suffix_alias"
+          ],
+          "term": "workspace"
+        }
+      ]
+    }
+  ],
+  "schema_version": "structural_identifier_specificity.v1",
+  "subject_kinds": [
+    [
+      "G1",
+      "guardrail"
+    ],
+    [
+      "G2",
+      "guardrail"
+    ],
+    [
+      "G3",
+      "guardrail"
+    ],
+    [
+      "G4",
+      "guardrail"
+    ],
+    [
+      "G5",
+      "guardrail"
+    ],
+    [
+      "R1",
+      "requirement"
+    ],
+    [
+      "R2",
+      "requirement"
+    ],
+    [
+      "R3",
+      "requirement"
+    ],
+    [
+      "R4",
+      "requirement"
+    ]
+  ]
+}
