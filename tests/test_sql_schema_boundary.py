@@ -55,7 +55,7 @@ def test_observation_answers_one_question_and_gaps_the_other(
         {
             "migrations/001.sql": (
                 "CREATE TABLE users (\n"
-                "  id bigint PRIMARY KEY,\n"
+                "  id bigint,\n"
                 "  email text\n"
                 ");\n"
             ),
@@ -107,3 +107,8 @@ def test_observation_answers_one_question_and_gaps_the_other(
 
     fully_accounted_for = all(item.state == "observed" for item in result.coverage)
     assert fully_accounted_for is False
+
+    # Capability travels with the result: a consumer can tell
+    # alter_column_set_not_null was something this provider could recognize
+    # at all, without reading the provider's source.
+    assert "alter_column_set_not_null" in result.capabilities

@@ -5,8 +5,13 @@ from pathlib import Path
 
 import pytest
 
-from repodelta.model.contracts import SqlSchemaFileCoverage, SqlSchemaGap, SqlSchemaStatement
-from repodelta.providers.sql_schema import RepositorySqlSchemaProvider
+from repodelta.model.contracts import (
+    SqlSchemaFileCoverage,
+    SqlSchemaGap,
+    SqlSchemaResult,
+    SqlSchemaStatement,
+)
+from repodelta.providers.sql_schema import _CAPABILITIES, RepositorySqlSchemaProvider
 
 
 def _repository(tmp_path: Path, files: dict[str, str]) -> tuple[Path, str]:
@@ -42,7 +47,7 @@ def test_fully_supported_file_is_observed_without_gaps(tmp_path: Path) -> None:
         {
             "migrations/001.sql": (
                 "CREATE TABLE users (\n"
-                "  id bigint PRIMARY KEY,\n"
+                "  id bigint,\n"
                 "  email text\n"
                 ");\n"
                 "ALTER TABLE users ADD COLUMN name text;\n"
@@ -109,6 +114,138 @@ def test_malformed_supported_construct_is_a_parse_failure_not_a_guess(
     coverage = result.coverage[0]
     assert coverage.state == "partial"
     assert [gap.reason for gap in coverage.gaps] == ["parse_failure"]
+
+
+def test_add_column_with_unaccounted_modifier_is_a_gap_not_silent(
+    tmp_path: Path,
+) -> None:
+    root, revision = _repository(
+        tmp_path,
+        {
+            "migrations/001.sql": (
+                "ALTER TABLE users ADD COLUMN email text NOT NULL "
+                "DEFAULT some_vendor_function();\n"
+            ),
+        },
+    )
+    provider = RepositorySqlSchemaProvider(root, expected_head_revision=revision)
+
+    result = provider.observe(head_paths=("migrations/001.sql",))
+
+    # The safe fact -- a column was added -- is still recorded.
+    assert len(result.statements) == 1
+    statement = result.statements[0]
+    assert statement.kind == "alter_table_add_column"
+    assert statement.column == "email"
+    assert statement.nullable is None
+
+    # But NOT NULL / DEFAULT in the same statement are not silently folded
+    # into "fully observed" -- they become an explicit gap on the same line.
+    coverage = result.coverage[0]
+    assert coverage.state == "partial"
+    assert coverage.statement_count == 1
+    assert [gap.reason for gap in coverage.gaps] == ["unaccounted_column_semantics"]
+    assert coverage.gaps[0].line == 1
+
+
+def test_add_column_without_modifiers_stays_fully_observed(
+    tmp_path: Path,
+) -> None:
+    root, revision = _repository(
+        tmp_path,
+        {"migrations/001.sql": "ALTER TABLE users ADD COLUMN external_id text;\n"},
+    )
+    provider = RepositorySqlSchemaProvider(root, expected_head_revision=revision)
+
+    result = provider.observe(head_paths=("migrations/001.sql",))
+
+    assert len(result.statements) == 1
+    assert result.coverage[0].state == "observed"
+    assert result.coverage[0].gaps == ()
+
+
+def test_create_table_with_column_modifiers_is_a_gap_not_silent(
+    tmp_path: Path,
+) -> None:
+    root, revision = _repository(
+        tmp_path,
+        {
+            "migrations/001.sql": (
+                "CREATE TABLE users (\n"
+                "  id bigint PRIMARY KEY,\n"
+                "  email text NOT NULL\n"
+                ");\n"
+            ),
+        },
+    )
+    provider = RepositorySqlSchemaProvider(root, expected_head_revision=revision)
+
+    result = provider.observe(head_paths=("migrations/001.sql",))
+
+    # The safe fact -- the table exists -- is still recorded.
+    assert len(result.statements) == 1
+    assert result.statements[0].kind == "create_table"
+    assert result.statements[0].table == "users"
+
+    # But the column-level semantics inside the body (PRIMARY KEY, NOT NULL)
+    # are unaccounted for and must not disappear into "fully observed".
+    coverage = result.coverage[0]
+    assert coverage.state == "partial"
+    assert [gap.reason for gap in coverage.gaps] == ["unaccounted_column_semantics"]
+
+
+def test_create_table_without_column_modifiers_stays_fully_observed(
+    tmp_path: Path,
+) -> None:
+    root, revision = _repository(
+        tmp_path,
+        {"migrations/001.sql": "CREATE TABLE users (\n  id bigint,\n  email text\n);\n"},
+    )
+    provider = RepositorySqlSchemaProvider(root, expected_head_revision=revision)
+
+    result = provider.observe(head_paths=("migrations/001.sql",))
+
+    assert len(result.statements) == 1
+    assert result.coverage[0].state == "observed"
+    assert result.coverage[0].gaps == ()
+
+
+def test_capabilities_are_declared_on_every_observed_result(
+    tmp_path: Path,
+) -> None:
+    root, revision = _repository(
+        tmp_path, {"migrations/001.sql": "CREATE TABLE users (id bigint);\n"}
+    )
+    provider = RepositorySqlSchemaProvider(root, expected_head_revision=revision)
+
+    result = provider.observe(head_paths=("migrations/001.sql",))
+
+    assert result.capabilities == _CAPABILITIES
+    assert set(statement.kind for statement in result.statements) <= set(
+        result.capabilities
+    )
+
+
+def test_statement_outside_declared_capabilities_is_rejected() -> None:
+    statement = SqlSchemaStatement(
+        revision_side="head",
+        path="x.sql",
+        line_start=1,
+        line_end=1,
+        kind="create_table",
+        table="users",
+    )
+    result = SqlSchemaResult(
+        capabilities=("alter_table_add_column",),
+        statements=(statement,),
+        coverage=(
+            SqlSchemaFileCoverage(
+                revision_side="head", path="x.sql", state="observed", statement_count=1
+            ),
+        ),
+    )
+    with pytest.raises(ValueError, match="outside its declared capabilities"):
+        result.validate_consistency()
 
 
 def test_stale_head_checkout_is_unavailable_not_guessed(tmp_path: Path) -> None:

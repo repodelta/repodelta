@@ -1855,7 +1855,9 @@ SqlSchemaStatementKind = Literal[
     "alter_column_drop_not_null",
 ]
 SqlSchemaCoverageState = Literal["observed", "partial", "unavailable"]
-SqlSchemaGapReason = Literal["unsupported_statement", "parse_failure"]
+SqlSchemaGapReason = Literal[
+    "unsupported_statement", "parse_failure", "unaccounted_column_semantics"
+]
 
 
 @dataclass(frozen=True)
@@ -1920,12 +1922,23 @@ class SqlSchemaFileCoverage:
 
 @dataclass(frozen=True)
 class SqlSchemaResult:
+    capabilities: tuple[SqlSchemaStatementKind, ...] = ()
     statements: tuple[SqlSchemaStatement, ...] = ()
     coverage: tuple[SqlSchemaFileCoverage, ...] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
-    schema_version: str = "sql_schema_result.v1"
+    schema_version: str = "sql_schema_result.v2"
 
     def validate_consistency(self) -> None:
+        unclaimed_kinds = {
+            statement.kind
+            for statement in self.statements
+            if statement.kind not in self.capabilities
+        }
+        if unclaimed_kinds:
+            raise ValueError(
+                "sql schema result emitted statement kinds outside its "
+                f"declared capabilities: {sorted(unclaimed_kinds)}"
+            )
         coverage_keys = tuple(
             (item.revision_side, item.path) for item in self.coverage
         )
@@ -2277,7 +2290,8 @@ class EvidenceCatalog:
     diagnostics: tuple[Diagnostic, ...] = ()
     closure_scan_diagnostics: tuple[ClosureScanDiagnostic, ...] = ()
     sql_schema_coverage: tuple[SqlSchemaFileCoverage, ...] = ()
-    schema_version: str = "evidence_catalog.v19"
+    sql_schema_capabilities: tuple[SqlSchemaStatementKind, ...] = ()
+    schema_version: str = "evidence_catalog.v20"
 
     def by_id(self) -> dict[str, EvidenceItem]:
         return {item.id: item for item in self.items}
@@ -4276,7 +4290,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "repodelta-open-core"
-    schema_version: str = "review_brief.v58"
+    schema_version: str = "review_brief.v59"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

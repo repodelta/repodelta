@@ -201,6 +201,7 @@ def build_evidence_catalog(
             for diagnostic in revision.diagnostics
         ),
         sql_schema_coverage=sql_schema_result.coverage,
+        sql_schema_capabilities=sql_schema_result.capabilities,
     )
     catalog.validate_consistency()
     return catalog

@@ -11,9 +11,22 @@ from repodelta.model.contracts import (
     SqlSchemaGap,
     SqlSchemaResult,
     SqlSchemaStatement,
+    SqlSchemaStatementKind,
 )
 
 _MAX_BYTES_PER_FILE = 2_000_000
+
+# The exact statement kinds this provider can recognize, independent of
+# whether any of them appear in a given run. Declared on every SqlSchemaResult
+# so a downstream consumer never has to import this module to learn the
+# provider's epistemic limits.
+_CAPABILITIES: tuple[SqlSchemaStatementKind, ...] = (
+    "create_table",
+    "alter_table_add_column",
+    "alter_table_drop_column",
+    "alter_column_set_not_null",
+    "alter_column_drop_not_null",
+)
 
 _TOKEN = re.compile(
     r"""
@@ -61,6 +74,15 @@ _DROP_NOT_NULL = re.compile(
 )
 _SET_NOT_NULL_VERB = re.compile(r"\bSET\s+NOT\s+NULL\b", re.IGNORECASE)
 _DROP_NOT_NULL_VERB = re.compile(r"\bDROP\s+NOT\s+NULL\b", re.IGNORECASE)
+
+# Column-definition modifiers this provider recognizes by sight but does not
+# extract as facts. A CREATE TABLE or ADD COLUMN statement that matches our
+# capability but also carries one of these is a recognized statement with
+# unaccounted-for semantics -- an explicit gap, never a silent inclusion.
+_UNACCOUNTED_MODIFIER = re.compile(
+    r"\b(NOT\s+NULL|DEFAULT|UNIQUE|PRIMARY\s+KEY|REFERENCES|CHECK)\b",
+    re.IGNORECASE,
+)
 
 
 def _identifier(raw: str) -> str:
@@ -127,18 +149,25 @@ def _classify(
 ) -> tuple[SqlSchemaStatement | None, SqlSchemaGap | None]:
     normalized = " ".join(text.split())
     if match := _CREATE_TABLE.match(text.strip()):
-        return (
-            SqlSchemaStatement(
-                revision_side=revision_side,
-                path=path,
-                line_start=line_start,
-                line_end=line_end,
-                kind="create_table",
-                table=_identifier(match.group("table")),
-                normalized_text=normalized,
-            ),
-            None,
+        statement = SqlSchemaStatement(
+            revision_side=revision_side,
+            path=path,
+            line_start=line_start,
+            line_end=line_end,
+            kind="create_table",
+            table=_identifier(match.group("table")),
+            normalized_text=normalized,
         )
+        gap = (
+            SqlSchemaGap(
+                line=line_start,
+                reason="unaccounted_column_semantics",
+                excerpt=normalized[:240],
+            )
+            if _UNACCOUNTED_MODIFIER.search(text)
+            else None
+        )
+        return statement, gap
     if _CREATE_TABLE_VERB.match(text.strip()):
         return None, SqlSchemaGap(
             line=line_start, reason="parse_failure", excerpt=normalized[:240]
@@ -181,19 +210,26 @@ def _classify(
                 line=line_start, reason="parse_failure", excerpt=normalized[:240]
             )
         if match := _ADD_COLUMN.match(text.strip()):
-            return (
-                SqlSchemaStatement(
-                    revision_side=revision_side,
-                    path=path,
-                    line_start=line_start,
-                    line_end=line_end,
-                    kind="alter_table_add_column",
-                    table=_identifier(match.group("table")),
-                    column=_identifier(match.group("column")),
-                    normalized_text=normalized,
-                ),
-                None,
+            statement = SqlSchemaStatement(
+                revision_side=revision_side,
+                path=path,
+                line_start=line_start,
+                line_end=line_end,
+                kind="alter_table_add_column",
+                table=_identifier(match.group("table")),
+                column=_identifier(match.group("column")),
+                normalized_text=normalized,
             )
+            gap = (
+                SqlSchemaGap(
+                    line=line_start,
+                    reason="unaccounted_column_semantics",
+                    excerpt=normalized[:240],
+                )
+                if _UNACCOUNTED_MODIFIER.search(text)
+                else None
+            )
+            return statement, gap
         if _ADD_COLUMN_VERB.search(text):
             return None, SqlSchemaGap(
                 line=line_start, reason="parse_failure", excerpt=normalized[:240]
@@ -315,6 +351,7 @@ class RepositorySqlSchemaProvider:
             coverage.extend(side_coverage)
             diagnostics.extend(side_diagnostics)
         result = SqlSchemaResult(
+            capabilities=_CAPABILITIES,
             statements=tuple(statements),
             coverage=tuple(coverage),
             diagnostics=tuple(diagnostics),

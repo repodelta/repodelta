@@ -38,6 +38,7 @@ def test_sql_schema_statement_becomes_a_typed_evidence_item() -> None:
         normalized_text="CREATE TABLE users ( id bigint )",
     )
     sql_schema_result = SqlSchemaResult(
+        capabilities=("create_table",),
         statements=(statement,),
         coverage=(
             SqlSchemaFileCoverage(
@@ -48,6 +49,7 @@ def test_sql_schema_statement_becomes_a_typed_evidence_item() -> None:
             ),
         ),
     )
+    sql_schema_result.validate_consistency()
 
     catalog = build_evidence_catalog(
         packet,
@@ -65,6 +67,7 @@ def test_sql_schema_statement_becomes_a_typed_evidence_item() -> None:
     assert item.revision_side == "head"
     assert item.changed is False
     assert item.sql_schema_statement == statement
+    assert catalog.sql_schema_capabilities == ("create_table",)
     assert item.sources[0].path == "migrations/001.sql"
     assert item.sources[0].line_start == 1
     assert catalog.sql_schema_coverage == sql_schema_result.coverage
@@ -87,6 +90,7 @@ def test_sql_schema_gap_diagnostics_flow_into_catalog_diagnostics() -> None:
             Diagnostic(code="sql_schema_dirty_checkout", message="dirty checkout"),
         ),
     )
+    sql_schema_result.validate_consistency()
 
     catalog = build_evidence_catalog(
         packet,
