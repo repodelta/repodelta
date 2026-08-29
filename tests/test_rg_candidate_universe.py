@@ -125,6 +125,7 @@ def _reference(universe):
                     proofability="direct_capable",
                     proof_basis="typed_predicate",
                     evidence_witnesses=("src/a.py#L10",),
+                    review_status="reviewed",
                 )
             )
         elif label.candidate_id == "C:G1:EV:anchor:a":
@@ -134,6 +135,7 @@ def _reference(universe):
                     semantic_relation="contextual_support",
                     proofability="not_applicable",
                     proof_basis="none",
+                    review_status="reviewed",
                 )
             )
         else:
@@ -265,6 +267,14 @@ def test_reference_and_retrieval_fail_closed_when_candidate_disposition_is_missi
     template = prepare_rg_semantic_reference_template(universe)
 
     assert all(label.review_status == "pending" for label in template.labels)
+    with pytest.raises(ValueError, match="pending R/G semantic label"):
+        RGSemanticReferenceLabel(
+            candidate_id="C:R1:EV:anchor:a",
+            semantic_relation="implements",
+            proofability="direct_capable",
+            proof_basis="typed_predicate",
+            evidence_witnesses=("src/a.py#L10",),
+        )
     with pytest.raises(ValueError, match="pending candidate labels"):
         verify_rg_semantic_reference(
             template,

@@ -276,7 +276,7 @@ class RGSemanticReferenceLabel:
     proof_basis: ProofBasis
     evidence_witnesses: tuple[str, ...] = ()
     note: str = ""
-    review_status: ReferenceLabelStatus = "reviewed"
+    review_status: ReferenceLabelStatus = "pending"
 
     def __post_init__(self) -> None:
         if not self.candidate_id:
