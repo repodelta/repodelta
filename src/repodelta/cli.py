@@ -51,6 +51,16 @@ from repodelta.evaluation.identifier_specificity import (
     write_identifier_policy_shadow,
     write_identifier_specificity,
 )
+from repodelta.evaluation.rg_candidate_universe import (
+    compare_rg_retrieval,
+    load_rg_candidate_universe,
+    load_rg_retrieval_observation,
+    load_rg_semantic_reference,
+    observe_rg_retrieval,
+    prepare_rg_candidate_universe,
+    prepare_rg_semantic_reference_template,
+    write_rg_candidate_artifact,
+)
 from repodelta.evaluation.shadow import load_human_shadow_labels_from_packet
 from repodelta.intake.fixture import load_fixture
 from repodelta.intake.github import GitHubApiError, GitHubClient, GitHubPullRequestAdapter
@@ -420,6 +430,31 @@ def build_parser() -> argparse.ArgumentParser:
         required=True,
     )
     compare_identifier.add_argument("--output", required=True)
+    compare_rg_candidates = subparsers.add_parser(
+        "compare-rg-semantic-candidates",
+        help=(
+            "Compare an evaluation-only R/G candidate universe, retrieval "
+            "observation, and frozen semantic reference"
+        ),
+    )
+    compare_rg_candidates.add_argument("--candidate-universe", required=True)
+    compare_rg_candidates.add_argument("--retrieval-observation", required=True)
+    compare_rg_candidates.add_argument(
+        "--reference-labels",
+        "--semantic-reference",
+        dest="reference_labels",
+        required=True,
+    )
+    compare_rg_candidates.add_argument("--output", required=True)
+    prepare_rg_reference = subparsers.add_parser(
+        "prepare-rg-semantic-reference",
+        help="Write a blind R/G semantic/proofability label template",
+    )
+    prepare_rg_reference.add_argument("--candidate-universe", required=True)
+    prepare_rg_reference.add_argument(
+        "--proposed-by", default="unassigned", help="Reference proposal author"
+    )
+    prepare_rg_reference.add_argument("--output", required=True)
     return parser
 
 
@@ -545,6 +580,36 @@ def main() -> int:
             return 2
         print(output)
         return 0
+    if args.command == "compare-rg-semantic-candidates":
+        try:
+            universe = load_rg_candidate_universe(args.candidate_universe)
+            retrieval = load_rg_retrieval_observation(
+                args.retrieval_observation
+            )
+            reference = load_rg_semantic_reference(args.reference_labels)
+            output = write_rg_candidate_artifact(
+                compare_rg_retrieval(universe, retrieval, reference),
+                args.output,
+            )
+        except (OSError, ValueError) as exc:
+            print(f"repodelta: error: {exc}", file=sys.stderr)
+            return 2
+        print(output)
+        return 0
+    if args.command == "prepare-rg-semantic-reference":
+        try:
+            universe = load_rg_candidate_universe(args.candidate_universe)
+            output = write_rg_candidate_artifact(
+                prepare_rg_semantic_reference_template(
+                    universe, proposed_by=args.proposed_by
+                ),
+                args.output,
+            )
+        except (OSError, ValueError) as exc:
+            print(f"repodelta: error: {exc}", file=sys.stderr)
+            return 2
+        print(output)
+        return 0
     if args.command != "review":
         return 2
     try:
@@ -648,9 +713,7 @@ def main() -> int:
                     ),
                 )
             ).analyze(analysis_input)
-            structural_correctness_outputs: tuple[
-                Path, Path, Path, Path, Path, Path
-            ] | None = None
+            structural_correctness_outputs: tuple[Path, ...] | None = None
             if args.structural_correctness_packet_output:
                 correctness_packet = prepare_structural_correctness_packet(brief)
                 packet_output = write_structural_correctness_artifact(
@@ -682,6 +745,25 @@ def main() -> int:
                     ),
                     f"{args.structural_correctness_packet_output}.identifier-specificity.json",
                 )
+                rg_candidate_universe = prepare_rg_candidate_universe(
+                    brief, correctness_packet
+                )
+                rg_candidate_output = write_rg_candidate_artifact(
+                    rg_candidate_universe,
+                    f"{args.structural_correctness_packet_output}.rg-candidates.json",
+                )
+                rg_retrieval_output = write_rg_candidate_artifact(
+                    observe_rg_retrieval(
+                        brief,
+                        correctness_packet,
+                        rg_candidate_universe,
+                    ),
+                    f"{args.structural_correctness_packet_output}.rg-retrieval.json",
+                )
+                rg_label_template_output = write_rg_candidate_artifact(
+                    prepare_rg_semantic_reference_template(rg_candidate_universe),
+                    f"{args.structural_correctness_packet_output}.rg-candidates.labels.template.json",
+                )
                 label_template_output = write_structural_correctness_artifact(
                     prepare_structural_correctness_label_template(
                         correctness_packet
@@ -695,6 +777,9 @@ def main() -> int:
                     provenance_output,
                     association_output,
                     identifier_specificity_output,
+                    rg_candidate_output,
+                    rg_retrieval_output,
+                    rg_label_template_output,
                 )
             if args.llm_shadow_replay and not args.llm_shadow:
                 parser.error("--llm-shadow-replay requires --llm-shadow")

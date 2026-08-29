@@ -266,3 +266,83 @@ this experiment changes the formal report or assessment authority.
 
 The frozen v1.1 run and its interpretation are recorded in the
 [`identifier-specificity findings`](campaign-v1-1/results/identifier-specificity/findings.md).
+
+### R/G semantic candidate universe
+
+The identifier probe showed that tightening lexical admission alone trades
+false inclusions for false exclusions. Before changing that production boundary,
+an evaluation run can freeze a broader but still bounded R/G candidate universe:
+every profile-eligible changed-anchor fact, before current association filters
+it. A live structural-correctness output additionally writes:
+
+```text
+<packet>.rg-candidates.json
+<packet>.rg-retrieval.json
+<packet>.rg-candidates.labels.template.json
+```
+
+The candidate universe preserves the source fact identity, profile, revision
+and change provenance, source links, and any canonical review-symbol or graph
+node mapping. A `node_unresolved` or `not_node_backed` candidate remains in the
+packet; it is not silently discarded because it cannot be drawn as a graph
+node. The universe contains no association result, structural membership, or
+model answer.
+
+The retrieval sidecar separately records the current production association
+for every frozen candidate (`not_retrieved`, `selected`, or `deferred`) and its
+recorded reasons. It is an observation of the existing selector, not a second
+selector. The label template separately asks an isolated verifier to classify
+each candidate as `implements`, `constrains`, `removes`,
+`directly_verifies`, `contextual_support`, `unrelated`, or `insufficient`, and
+to state whether the semantic-direct relation has direct-capable proof,
+suggestion-only evidence, or insufficient evidence.
+
+After the reference is independently completed and verified, compare it with
+the observed retrieval without changing the formal report:
+
+```bash
+repodelta compare-rg-semantic-candidates \
+  --candidate-universe build/pr-267.packet.json.rg-candidates.json \
+  --retrieval-observation build/pr-267.packet.json.rg-retrieval.json \
+  --reference-labels build/pr-267.rg-semantic-reference.json \
+  --output build/pr-267.rg-semantic-comparison.json
+```
+
+The comparison keeps two questions distinct: whether current retrieval surfaced
+a semantic-direct candidate at all, and whether current `provided_association`/
+`exact_identifier` attempts agree with the smaller direct-capable set. It
+reports any independently reviewed direct expectation outside the bounded
+candidate universe, and direct candidates that lack a canonical graph node.
+Those are coverage limits, not automatic false exclusions.
+
+Structural paths, relation endpoints, ownership/placement ancestry, and
+retained topology remain structural context rather than direct semantic
+candidates. Guardrail closure scans and current-head verification observations
+also remain a separate proof surface. Future LLM work, including Issue #225,
+may consume this frozen candidate substrate for ranking or suggestion, but may
+not define it or promote a candidate to formal direct admission.
+
+The v1.1 extraction is reproducible only by re-running its source PRs because
+the older packet intentionally omitted anchors that were never associated:
+
+```bash
+GITHUB_TOKEN="$(gh auth token)" PYTHONPATH=src python \
+  evaluations/structural-correctness/campaign-v1-1/\
+  run_rg_candidate_universe.py
+```
+
+It refuses to write the new artifacts if an ordinary frozen v1.1 packet
+changes. Generate a label template from a frozen candidate universe without
+opening its retrieval sidecar:
+
+```bash
+repodelta prepare-rg-semantic-reference \
+  --candidate-universe evaluations/structural-correctness/campaign-v1-1/\
+rg-candidate-universes/pr-267.json \
+  --proposed-by independent-labeler \
+  --output build/pr-267.rg-semantic-reference.json
+```
+
+The generated template remains unresolved until a verifier labels it without
+reading the retrieval sidecar; an unresolved template is not presented as a
+semantic-correctness result.

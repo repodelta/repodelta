@@ -1,0 +1,698 @@
+{
+  "anchors": [
+    {
+      "canonical_node_id": "SN:473f603d478751e24b92",
+      "canonical_review_symbol_id": "E:review_symbol:033af31f8636f0da232a",
+      "change_relation_ids": [
+        "hunk:tests/test_projection.py:0:change:0",
+        "hunk:tests/test_projection.py:1:change:0"
+      ],
+      "classification": "test",
+      "evidence_id": "E:structural_change:44a2370ce77a6e66f8e7",
+      "evidence_kind": "structural_change",
+      "node_state": "node_resolved",
+      "operation": "modified",
+      "path": "tests/test_projection.py",
+      "profile": "test",
+      "revision_side": "review",
+      "sources": [
+        {
+          "label": "Codegraph symbol",
+          "line_end": 847,
+          "line_start": 825,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/tests/test_projection.py#L825-L847"
+        },
+        {
+          "label": "Codegraph symbol",
+          "line_end": 849,
+          "line_start": 825,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L825-L849"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 832,
+          "line_start": 832,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L832"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 848,
+          "line_start": 848,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L848"
+        }
+      ],
+      "summary": "Modified function: test_projection_uses_review_relevant_structural_closure::relation"
+    },
+    {
+      "canonical_node_id": "SN:a3d4b9349331e480ccc9",
+      "canonical_review_symbol_id": "E:review_symbol:3e95ca68e49900f4c965",
+      "change_relation_ids": [
+        "hunk:tests/test_projection.py:10:change:0",
+        "hunk:tests/test_projection.py:8:change:0",
+        "hunk:tests/test_projection.py:9:change:0",
+        "hunk:tests/test_projection.py:9:change:1"
+      ],
+      "classification": "test",
+      "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+      "evidence_kind": "structural_change",
+      "node_state": "node_resolved",
+      "operation": "unresolved",
+      "path": "tests/test_projection.py",
+      "profile": "test",
+      "revision_side": "review",
+      "sources": [
+        {
+          "label": "Codegraph symbol",
+          "line_end": 1499,
+          "line_start": 1437,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/tests/test_projection.py#L1437-L1499"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 1459,
+          "line_start": 1437,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/tests/test_projection.py#L1437-L1459"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 1473,
+          "line_start": 1468,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/tests/test_projection.py#L1468-L1473"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 1499,
+          "line_start": 1498,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/tests/test_projection.py#L1498-L1499"
+        }
+      ],
+      "summary": "Unresolved function: test_canonical_backbone_seeds_include_rg_and_transformation_anchors"
+    },
+    {
+      "canonical_node_id": "SN:37a3f84572c25e3cbbd4",
+      "canonical_review_symbol_id": "E:review_symbol:5412d94c25e5bc4dd2d0",
+      "change_relation_ids": [
+        "hunk:tests/test_projection.py:10:change:0",
+        "hunk:tests/test_projection.py:8:change:0",
+        "hunk:tests/test_projection.py:9:change:1"
+      ],
+      "classification": "test",
+      "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+      "evidence_kind": "structural_change",
+      "node_state": "node_resolved",
+      "operation": "added",
+      "path": "tests/test_projection.py",
+      "profile": "test",
+      "revision_side": "review",
+      "sources": [
+        {
+          "label": "Codegraph symbol",
+          "line_end": 1514,
+          "line_start": 1473,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1473-L1514"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 1473,
+          "line_start": 1473,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1473"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 1489,
+          "line_start": 1486,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1486-L1489"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 1514,
+          "line_start": 1514,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1514"
+        }
+      ],
+      "summary": "Added function: test_canonical_backbone_seeds_include_all_direct_changed_anchors"
+    },
+    {
+      "canonical_node_id": "SN:3fa93a82bd95f9e201a7",
+      "canonical_review_symbol_id": "E:review_symbol:e1102eb252e1cad7ab34",
+      "change_relation_ids": [
+        "hunk:tests/test_projection.py:2:change:0",
+        "hunk:tests/test_projection.py:3:change:0",
+        "hunk:tests/test_projection.py:4:change:0",
+        "hunk:tests/test_projection.py:5:change:0",
+        "hunk:tests/test_projection.py:6:change:0",
+        "hunk:tests/test_projection.py:7:change:0"
+      ],
+      "classification": "test",
+      "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+      "evidence_kind": "structural_change",
+      "node_state": "node_resolved",
+      "operation": "modified",
+      "path": "tests/test_projection.py",
+      "profile": "test",
+      "revision_side": "review",
+      "sources": [
+        {
+          "label": "Codegraph symbol",
+          "line_end": 1135,
+          "line_start": 766,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/tests/test_projection.py#L766-L1135"
+        },
+        {
+          "label": "Codegraph symbol",
+          "line_end": 1171,
+          "line_start": 766,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L766-L1171"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 869,
+          "line_start": 858,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L858-L869"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 1025,
+          "line_start": 1012,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1012-L1025"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 1102,
+          "line_start": 1101,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1101-L1102"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 1137,
+          "line_start": 1136,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1136-L1137"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 1155,
+          "line_start": 1154,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1154-L1155"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 1169,
+          "line_start": 1168,
+          "path": "tests/test_projection.py",
+          "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1168-L1169"
+        }
+      ],
+      "summary": "Modified function: test_projection_uses_review_relevant_structural_closure"
+    },
+    {
+      "canonical_node_id": "SN:09332362e45a8f116f64",
+      "canonical_review_symbol_id": "E:review_symbol:289d9c801e420530dfcd",
+      "change_relation_ids": [
+        "hunk:src/prismcode/projection/build.py:0:change:0"
+      ],
+      "classification": "code",
+      "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+      "evidence_kind": "structural_change",
+      "node_state": "node_resolved",
+      "operation": "modified",
+      "path": "src/prismcode/projection/build.py",
+      "profile": "production",
+      "revision_side": "review",
+      "sources": [
+        {
+          "label": "Codegraph symbol",
+          "line_end": 433,
+          "line_start": 57,
+          "path": "src/prismcode/projection/build.py",
+          "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L57-L433"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 329,
+          "line_start": 329,
+          "path": "src/prismcode/projection/build.py",
+          "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L329"
+        },
+        {
+          "label": "Codegraph symbol",
+          "line_end": 432,
+          "line_start": 57,
+          "path": "src/prismcode/projection/build.py",
+          "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+        }
+      ],
+      "summary": "Modified function: build_review_projection"
+    },
+    {
+      "canonical_node_id": "SN:e0ab5042bc9453753bcc",
+      "canonical_review_symbol_id": "E:review_symbol:fba3b1f5a90fe869ca2d",
+      "change_relation_ids": [
+        "hunk:src/prismcode/projection/build.py:1:change:0",
+        "hunk:src/prismcode/projection/build.py:1:change:1",
+        "hunk:src/prismcode/projection/build.py:1:change:2"
+      ],
+      "classification": "code",
+      "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+      "evidence_kind": "structural_change",
+      "node_state": "node_resolved",
+      "operation": "modified",
+      "path": "src/prismcode/projection/build.py",
+      "profile": "production",
+      "revision_side": "review",
+      "sources": [
+        {
+          "label": "Codegraph symbol",
+          "line_end": 461,
+          "line_start": 436,
+          "path": "src/prismcode/projection/build.py",
+          "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L436-L461"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 454,
+          "line_start": 442,
+          "path": "src/prismcode/projection/build.py",
+          "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L442-L454"
+        },
+        {
+          "label": "Codegraph symbol",
+          "line_end": 457,
+          "line_start": 435,
+          "path": "src/prismcode/projection/build.py",
+          "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L435-L457"
+        },
+        {
+          "label": "diff hunk",
+          "line_end": 450,
+          "line_start": 442,
+          "path": "src/prismcode/projection/build.py",
+          "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L442-L450"
+        }
+      ],
+      "summary": "Modified function: _canonical_backbone_seed_node_ids"
+    }
+  ],
+  "candidates": [
+    {
+      "candidate_id": "C:G1:E:structural_change:44a2370ce77a6e66f8e7",
+      "evidence_id": "E:structural_change:44a2370ce77a6e66f8e7",
+      "evidence_role": "test_support",
+      "subject_id": "G1"
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:4fbcf96b02d19017c2c9",
+      "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+      "evidence_role": "test_support",
+      "subject_id": "G1"
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:5d2be31cc60dea3d2f3b",
+      "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+      "evidence_role": "test_support",
+      "subject_id": "G1"
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:7c4162e02e623fea377f",
+      "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+      "evidence_role": "test_support",
+      "subject_id": "G1"
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:9ff44326982c1acafe85",
+      "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+      "evidence_role": "primary",
+      "subject_id": "G1"
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:d0cf036a1010c1207bc5",
+      "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+      "evidence_role": "primary",
+      "subject_id": "G1"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:44a2370ce77a6e66f8e7",
+      "evidence_id": "E:structural_change:44a2370ce77a6e66f8e7",
+      "evidence_role": "test_support",
+      "subject_id": "G2"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:4fbcf96b02d19017c2c9",
+      "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+      "evidence_role": "test_support",
+      "subject_id": "G2"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:5d2be31cc60dea3d2f3b",
+      "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+      "evidence_role": "test_support",
+      "subject_id": "G2"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:7c4162e02e623fea377f",
+      "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+      "evidence_role": "test_support",
+      "subject_id": "G2"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:9ff44326982c1acafe85",
+      "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+      "evidence_role": "primary",
+      "subject_id": "G2"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:d0cf036a1010c1207bc5",
+      "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+      "evidence_role": "primary",
+      "subject_id": "G2"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:44a2370ce77a6e66f8e7",
+      "evidence_id": "E:structural_change:44a2370ce77a6e66f8e7",
+      "evidence_role": "test_support",
+      "subject_id": "G3"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:4fbcf96b02d19017c2c9",
+      "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+      "evidence_role": "test_support",
+      "subject_id": "G3"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:5d2be31cc60dea3d2f3b",
+      "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+      "evidence_role": "test_support",
+      "subject_id": "G3"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:7c4162e02e623fea377f",
+      "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+      "evidence_role": "test_support",
+      "subject_id": "G3"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:9ff44326982c1acafe85",
+      "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+      "evidence_role": "primary",
+      "subject_id": "G3"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:d0cf036a1010c1207bc5",
+      "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+      "evidence_role": "primary",
+      "subject_id": "G3"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:44a2370ce77a6e66f8e7",
+      "evidence_id": "E:structural_change:44a2370ce77a6e66f8e7",
+      "evidence_role": "test_support",
+      "subject_id": "G4"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:4fbcf96b02d19017c2c9",
+      "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+      "evidence_role": "test_support",
+      "subject_id": "G4"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:5d2be31cc60dea3d2f3b",
+      "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+      "evidence_role": "test_support",
+      "subject_id": "G4"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:7c4162e02e623fea377f",
+      "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+      "evidence_role": "test_support",
+      "subject_id": "G4"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:9ff44326982c1acafe85",
+      "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+      "evidence_role": "primary",
+      "subject_id": "G4"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:d0cf036a1010c1207bc5",
+      "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+      "evidence_role": "primary",
+      "subject_id": "G4"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:44a2370ce77a6e66f8e7",
+      "evidence_id": "E:structural_change:44a2370ce77a6e66f8e7",
+      "evidence_role": "test_support",
+      "subject_id": "R1"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:4fbcf96b02d19017c2c9",
+      "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+      "evidence_role": "test_support",
+      "subject_id": "R1"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:5d2be31cc60dea3d2f3b",
+      "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+      "evidence_role": "test_support",
+      "subject_id": "R1"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:7c4162e02e623fea377f",
+      "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+      "evidence_role": "test_support",
+      "subject_id": "R1"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:9ff44326982c1acafe85",
+      "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+      "evidence_role": "primary",
+      "subject_id": "R1"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:d0cf036a1010c1207bc5",
+      "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+      "evidence_role": "primary",
+      "subject_id": "R1"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:44a2370ce77a6e66f8e7",
+      "evidence_id": "E:structural_change:44a2370ce77a6e66f8e7",
+      "evidence_role": "test_support",
+      "subject_id": "R2"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:4fbcf96b02d19017c2c9",
+      "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+      "evidence_role": "test_support",
+      "subject_id": "R2"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:5d2be31cc60dea3d2f3b",
+      "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+      "evidence_role": "test_support",
+      "subject_id": "R2"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:7c4162e02e623fea377f",
+      "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+      "evidence_role": "test_support",
+      "subject_id": "R2"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:9ff44326982c1acafe85",
+      "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+      "evidence_role": "primary",
+      "subject_id": "R2"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:d0cf036a1010c1207bc5",
+      "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+      "evidence_role": "primary",
+      "subject_id": "R2"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:44a2370ce77a6e66f8e7",
+      "evidence_id": "E:structural_change:44a2370ce77a6e66f8e7",
+      "evidence_role": "test_support",
+      "subject_id": "R3"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:4fbcf96b02d19017c2c9",
+      "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+      "evidence_role": "test_support",
+      "subject_id": "R3"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:5d2be31cc60dea3d2f3b",
+      "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+      "evidence_role": "test_support",
+      "subject_id": "R3"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:7c4162e02e623fea377f",
+      "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+      "evidence_role": "test_support",
+      "subject_id": "R3"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:9ff44326982c1acafe85",
+      "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+      "evidence_role": "primary",
+      "subject_id": "R3"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:d0cf036a1010c1207bc5",
+      "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+      "evidence_role": "primary",
+      "subject_id": "R3"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:44a2370ce77a6e66f8e7",
+      "evidence_id": "E:structural_change:44a2370ce77a6e66f8e7",
+      "evidence_role": "test_support",
+      "subject_id": "R4"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:4fbcf96b02d19017c2c9",
+      "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+      "evidence_role": "test_support",
+      "subject_id": "R4"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:5d2be31cc60dea3d2f3b",
+      "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+      "evidence_role": "test_support",
+      "subject_id": "R4"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:7c4162e02e623fea377f",
+      "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+      "evidence_role": "test_support",
+      "subject_id": "R4"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:9ff44326982c1acafe85",
+      "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+      "evidence_role": "primary",
+      "subject_id": "R4"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:d0cf036a1010c1207bc5",
+      "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+      "evidence_role": "primary",
+      "subject_id": "R4"
+    },
+    {
+      "candidate_id": "C:R5:E:structural_change:44a2370ce77a6e66f8e7",
+      "evidence_id": "E:structural_change:44a2370ce77a6e66f8e7",
+      "evidence_role": "test_support",
+      "subject_id": "R5"
+    },
+    {
+      "candidate_id": "C:R5:E:structural_change:4fbcf96b02d19017c2c9",
+      "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+      "evidence_role": "test_support",
+      "subject_id": "R5"
+    },
+    {
+      "candidate_id": "C:R5:E:structural_change:5d2be31cc60dea3d2f3b",
+      "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+      "evidence_role": "test_support",
+      "subject_id": "R5"
+    },
+    {
+      "candidate_id": "C:R5:E:structural_change:7c4162e02e623fea377f",
+      "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+      "evidence_role": "test_support",
+      "subject_id": "R5"
+    },
+    {
+      "candidate_id": "C:R5:E:structural_change:9ff44326982c1acafe85",
+      "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+      "evidence_role": "primary",
+      "subject_id": "R5"
+    },
+    {
+      "candidate_id": "C:R5:E:structural_change:d0cf036a1010c1207bc5",
+      "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+      "evidence_role": "primary",
+      "subject_id": "R5"
+    }
+  ],
+  "schema_version": "rg_semantic_candidate_universe.v1",
+  "structural_packet_digest": "d0f86cce67cc01b6a483d5343949947bc03e5479f252d4b8b5f3bd8a401196bf",
+  "subjects": [
+    {
+      "authored_statement": "Do not change Codegraph collection, traversal budgets, changed-anchor association, assessment, LLM behavior, or graph layout.",
+      "profile": "guardrail",
+      "subject_id": "G1",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "Do not promote all reachable structural support nodes.",
+      "profile": "guardrail",
+      "subject_id": "G2",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "Do not introduce a second backbone producer or renderer-side membership decision.",
+      "profile": "guardrail",
+      "subject_id": "G3",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "Traversal convergence, support-path relevance, LLM inference, assessment semantics, and visual-layout redesign.",
+      "profile": "guardrail",
+      "subject_id": "G4",
+      "subject_kind": "guardrail"
+    },
+    {
+      "authored_statement": "A selected direct changed structural anchor is eligible for default backbone membership regardless of whether its focus-relative evidence annotation is primary, test support, or documentation support.",
+      "profile": "generic",
+      "subject_id": "R1",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "Focus-relative evidence annotation remains available for reviewer explanation and presentation, but cannot add, remove, or suppress structural backbone membership.",
+      "profile": "generic",
+      "subject_id": "R2",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "The same membership contract applies to Issue R/G and PR Transformation/Completion subjects.",
+      "profile": "api_contract",
+      "subject_id": "R3",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "Intermediate, retained-context, and merely reachable support nodes remain outside the default backbone unless canonical backbone rules independently include them.",
+      "profile": "generic",
+      "subject_id": "R4",
+      "subject_kind": "requirement"
+    },
+    {
+      "authored_statement": "The graph retains direct production and direct test changes together when both are selected.",
+      "profile": "generic",
+      "subject_id": "R5",
+      "subject_kind": "requirement"
+    }
+  ]
+}
