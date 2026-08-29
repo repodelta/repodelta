@@ -45,7 +45,7 @@ from repodelta.routing.semantics import (
 
 RG_CANDIDATE_UNIVERSE_SCHEMA = "rg_semantic_candidate_universe.v1"
 RG_RETRIEVAL_OBSERVATION_SCHEMA = "rg_semantic_candidate_retrieval.v1"
-RG_SEMANTIC_REFERENCE_SCHEMA = "rg_semantic_candidate_reference.v1"
+RG_SEMANTIC_REFERENCE_SCHEMA = "rg_semantic_candidate_reference.v2"
 RG_SEMANTIC_COMPARISON_SCHEMA = "rg_semantic_candidate_comparison.v1"
 
 _SUBJECT_KINDS = frozenset({"requirement", "guardrail"})
@@ -73,6 +73,7 @@ SemanticRelation = Literal[
 Proofability = Literal[
     "direct_capable", "suggested_only", "not_applicable", "insufficient"
 ]
+ReferenceLabelStatus = Literal["pending", "reviewed"]
 ProofBasis = Literal[
     "explicit_authoring",
     "typed_predicate",
@@ -275,6 +276,7 @@ class RGSemanticReferenceLabel:
     proof_basis: ProofBasis
     evidence_witnesses: tuple[str, ...] = ()
     note: str = ""
+    review_status: ReferenceLabelStatus = "reviewed"
 
     def __post_init__(self) -> None:
         if not self.candidate_id:
@@ -306,6 +308,20 @@ class RGSemanticReferenceLabel:
             "none",
         }:
             raise ValueError("R/G semantic label has invalid proof basis")
+        if self.review_status not in {"pending", "reviewed"}:
+            raise ValueError("R/G semantic label has invalid review status")
+        if self.review_status == "pending":
+            if (
+                self.semantic_relation != "insufficient"
+                or self.proofability != "insufficient"
+                or self.proof_basis != "none"
+                or self.evidence_witnesses
+                or self.note
+            ):
+                raise ValueError(
+                    "pending R/G semantic label cannot make a semantic judgment"
+                )
+            return
         direct = self.semantic_relation in _DIRECT_RELATIONS
         if direct and self.proofability not in {
             "direct_capable",
@@ -401,6 +417,8 @@ class RGSemanticReference:
         authority = self.authority
         if not authority.proposed_by:
             raise ValueError("R/G semantic reference requires a proposer")
+        if authority.status not in {"proposed", "verified"}:
+            raise ValueError("R/G semantic reference has invalid authority status")
         if authority.status == "proposed" and (
             authority.verified_by
             or authority.verification_method
@@ -415,8 +433,11 @@ class RGSemanticReference:
             or not authority.verification_evidence
             or not authority.system_under_test_isolated
             or authority.proposal_digest != self.proposal_digest
+            or any(item.review_status != "reviewed" for item in self.labels)
         ):
-            raise ValueError("verified R/G reference must bind its exact proposal")
+            raise ValueError(
+                "verified R/G reference must bind a fully reviewed exact proposal"
+            )
 
 
 def prepare_rg_candidate_universe(
@@ -558,7 +579,7 @@ def prepare_rg_semantic_reference_template(
     *,
     proposed_by: str = "unassigned",
 ) -> RGSemanticReference:
-    """Create a complete but conclusion-free semantic label template."""
+    """Create a complete but unreviewed semantic label template."""
 
     return RGSemanticReference(
         candidate_universe_digest=universe.digest,
@@ -568,6 +589,7 @@ def prepare_rg_semantic_reference_template(
                 semantic_relation="insufficient",
                 proofability="insufficient",
                 proof_basis="none",
+                review_status="pending",
             )
             for item in universe.candidates
         ),
@@ -589,6 +611,10 @@ def verify_rg_semantic_reference(
     _validate_reference(reference, universe)
     if reference.authority.status != "proposed":
         raise ValueError("only a proposed R/G semantic reference can be verified")
+    if any(label.review_status != "reviewed" for label in reference.labels):
+        raise ValueError(
+            "cannot verify R/G semantic reference with pending candidate labels"
+        )
     verified = replace(
         reference,
         authority=RGSemanticReferenceAuthority(
@@ -623,6 +649,10 @@ def compare_rg_retrieval(
 
     _validate_retrieval(retrieval, universe)
     _validate_reference(reference, universe)
+    if reference.authority.status != "verified":
+        raise ValueError(
+            "only a verified R/G semantic reference can produce semantic metrics"
+        )
     subjects = {item.subject_id: item for item in universe.subjects}
     anchors_by_id = {item.evidence_id: item for item in universe.anchors}
     candidates_by_subject: dict[str, list[RGSemanticCandidate]] = defaultdict(list)
@@ -760,11 +790,13 @@ def compare_rg_retrieval(
             ),
             "authority": (
                 "lexical retrieval, canonical resolution, and model suggestions "
-                "do not alter formal direct admission"
+                "do not alter formal direct admission; reference proofability is "
+                "evaluation evidence only and does not create a production direct "
+                "mapping"
             ),
             "unresolved_reference": (
-                "insufficient reference labels are excluded from FI/FE rather "
-                "than treated as semantic negatives"
+                "reviewed insufficient reference labels are excluded from FI/FE "
+                "rather than treated as semantic negatives"
             ),
         },
     }
@@ -839,7 +871,10 @@ def load_rg_semantic_reference(path: str | Path) -> RGSemanticReference:
         verified_by=_optional_string(authority_raw.get("verified_by")) or "",
         verification_method=_optional_string(authority_raw.get("verification_method")) or "",
         verification_evidence=_strings(authority_raw.get("verification_evidence", [])),
-        system_under_test_isolated=bool(authority_raw.get("system_under_test_isolated", False)),
+        system_under_test_isolated=_boolean(
+            authority_raw.get("system_under_test_isolated", False),
+            "system_under_test_isolated",
+        ),
         proposal_digest=_optional_string(authority_raw.get("proposal_digest")) or "",
     )
     labels = tuple(
@@ -850,6 +885,7 @@ def load_rg_semantic_reference(path: str | Path) -> RGSemanticReference:
             proof_basis=_string(item, "proof_basis"),  # type: ignore[arg-type]
             evidence_witnesses=_strings(item.get("evidence_witnesses", [])),
             note=_optional_string(item.get("note")) or "",
+            review_status=_string(item, "review_status"),  # type: ignore[arg-type]
         )
         for item in _objects(raw, "labels")
     )
@@ -1053,6 +1089,12 @@ def _optional_string(value: object) -> str | None:
     if not isinstance(value, str):
         raise ValueError("optional value must be a string or null")
     return value or None
+
+
+def _boolean(value: object, key: str) -> bool:
+    if not isinstance(value, bool):
+        raise ValueError(f"{key} must be a boolean")
+    return value
 
 
 def _strings(value: object) -> tuple[str, ...]:

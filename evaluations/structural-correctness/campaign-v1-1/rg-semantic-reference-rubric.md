@@ -26,7 +26,7 @@ candidates in this reference.
 
 ## Semantic relation
 
-Choose exactly one for every candidate:
+After reviewing a candidate, choose exactly one for every candidate:
 
 - `implements`: the changed fact directly realizes the requirement.
 - `constrains`: the changed fact directly enforces or preserves the guardrail.
@@ -37,6 +37,11 @@ Choose exactly one for every candidate:
 - `unrelated`: no supported semantic relation to the subject.
 - `insufficient`: bounded evidence cannot support a responsible decision.
 
+The generated template starts every candidate as `pending`; pending is not a
+semantic relation and cannot be used for comparison or verification. A
+reviewed `insufficient` row is different: it records that the evidence was
+examined and a responsible decision remains unavailable.
+
 Lexical overlap, path similarity, canonical-node uniqueness, graph reachability,
 and a model's confidence are candidate evidence only. None is, by itself, a
 semantic-direct label.
@@ -46,7 +51,8 @@ semantic-direct label.
 For a semantic-direct label, separately record whether RepoDelta could
 eventually treat the relation as direct authority:
 
-- `direct_capable`: a source-linked, deterministic basis exists. Use one of
+- `direct_capable`: the reference reviewer judges that a source-linked,
+  deterministic basis could support a future direct mapping. Use one of
   `explicit_authoring`, `typed_predicate`, `bounded_evidence`, or
   `deterministic_mapping`, and cite concrete witnesses.
 - `suggested_only`: the semantic relation is plausible, but only heuristic or
@@ -59,6 +65,10 @@ Witnesses must identify the source evidence used for the label (candidate
 source link, exact diff/source region, or another stable reviewed identity).
 They must not cite a RepoDelta association/membership as proof.
 
+This is an evaluation judgment, not a production proof trace. In particular,
+`direct_capable` must not be consumed as a production `matched`/direct mapping
+without a separately defined machine-verifiable proof contract.
+
 ## Coverage gaps
 
 If independent review identifies a semantically direct changed fact that does
@@ -69,9 +79,12 @@ coverage, not as a candidate-retrieval false exclusion.
 
 ## Freeze and verification
 
-The template begins with every candidate `insufficient`. A proposed reference
-is complete only when it disposes every candidate. It becomes verified only
-after a separate verifier records method, evidence, and isolation from the
-retrieval observation, then binds the exact proposal digest. A human, AI, or
-controlled combination may verify it; reproducible evidence and isolation are
-the authority conditions.
+The template begins with every candidate `pending`. A proposed reference is
+complete only when every candidate is explicitly marked `reviewed`; an
+untouched template cannot be verified. A complete proposal remains
+non-authoritative and cannot be compared. It becomes verified only after a
+separate verifier records method, evidence, and isolation from the retrieval
+observation, then binds the exact proposal digest. A human, AI, or controlled
+combination may verify it; reproducible evidence and isolation are the
+authority conditions. Only a fully reviewed, verified reference may emit
+semantic FI/FE metrics.

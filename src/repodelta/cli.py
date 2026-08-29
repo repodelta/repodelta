@@ -59,6 +59,7 @@ from repodelta.evaluation.rg_candidate_universe import (
     observe_rg_retrieval,
     prepare_rg_candidate_universe,
     prepare_rg_semantic_reference_template,
+    verify_rg_semantic_reference,
     write_rg_candidate_artifact,
 )
 from repodelta.evaluation.shadow import load_human_shadow_labels_from_packet
@@ -455,6 +456,34 @@ def build_parser() -> argparse.ArgumentParser:
         "--proposed-by", default="unassigned", help="Reference proposal author"
     )
     prepare_rg_reference.add_argument("--output", required=True)
+    verify_rg_reference = subparsers.add_parser(
+        "verify-rg-semantic-reference",
+        help=(
+            "Verify a fully reviewed R/G semantic reference before semantic "
+            "metrics may be compared"
+        ),
+    )
+    verify_rg_reference.add_argument("--candidate-universe", required=True)
+    verify_rg_reference.add_argument(
+        "--reference-labels",
+        "--proposed-reference",
+        dest="reference_labels",
+        required=True,
+    )
+    verify_rg_reference.add_argument("--verified-by", required=True)
+    verify_rg_reference.add_argument("--verification-method", required=True)
+    verify_rg_reference.add_argument(
+        "--verification-evidence",
+        action="append",
+        default=[],
+        help="Stable evidence identity used by the independent verifier; repeatable",
+    )
+    verify_rg_reference.add_argument(
+        "--system-under-test-isolated",
+        action="store_true",
+        help="Confirm that retrieval observations remained unseen during labeling",
+    )
+    verify_rg_reference.add_argument("--output", required=True)
     return parser
 
 
@@ -602,6 +631,26 @@ def main() -> int:
             output = write_rg_candidate_artifact(
                 prepare_rg_semantic_reference_template(
                     universe, proposed_by=args.proposed_by
+                ),
+                args.output,
+            )
+        except (OSError, ValueError) as exc:
+            print(f"repodelta: error: {exc}", file=sys.stderr)
+            return 2
+        print(output)
+        return 0
+    if args.command == "verify-rg-semantic-reference":
+        try:
+            universe = load_rg_candidate_universe(args.candidate_universe)
+            reference = load_rg_semantic_reference(args.reference_labels)
+            output = write_rg_candidate_artifact(
+                verify_rg_semantic_reference(
+                    reference,
+                    universe,
+                    verified_by=args.verified_by,
+                    verification_method=args.verification_method,
+                    verification_evidence=tuple(args.verification_evidence),
+                    system_under_test_isolated=args.system_under_test_isolated,
                 ),
                 args.output,
             )

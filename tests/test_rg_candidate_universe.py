@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import json
+import sys
 from dataclasses import replace
 
 import pytest
 
-from repodelta.cli import build_parser
+from repodelta.cli import build_parser, main
 from repodelta.evaluation.rg_candidate_universe import (
     RGSemanticReferenceGap,
     RGSemanticReferenceLabel,
@@ -135,8 +137,19 @@ def _reference(universe):
                 )
             )
         else:
-            labels.append(label)
+            labels.append(replace(label, review_status="reviewed"))
     return replace(template, labels=tuple(sorted(labels, key=lambda item: item.candidate_id)))
+
+
+def _verified_reference(universe):
+    return verify_rg_semantic_reference(
+        _reference(universe),
+        universe,
+        verified_by="independent-reviewer",
+        verification_method="reviewed source anchors without retrieval observation",
+        verification_evidence=("https://example.test/pull/1/files",),
+        system_under_test_isolated=True,
+    )
 
 
 def test_candidate_universe_precedes_association_and_retains_unresolved_nodes() -> None:
@@ -185,7 +198,7 @@ def test_retrieval_is_observed_separately_from_semantic_reference(tmp_path) -> N
         if item.candidate_id not in {"C:R1:EV:anchor:a", "C:G1:EV:anchor:file"}
     )
 
-    reference = _reference(universe)
+    reference = _verified_reference(universe)
     comparison = compare_rg_retrieval(universe, retrieval, reference)
     assert comparison["production_changed"] is False
     assert comparison["overall"]["retrieval_against_semantic_direct"] == {
@@ -204,6 +217,15 @@ def test_retrieval_is_observed_separately_from_semantic_reference(tmp_path) -> N
     assert load_rg_candidate_universe(universe_path) == universe
     assert load_rg_retrieval_observation(retrieval_path) == retrieval
     assert load_rg_semantic_reference(reference_path) == reference
+
+    raw_reference = json.loads(reference_path.read_text(encoding="utf-8"))
+    raw_reference["authority"]["system_under_test_isolated"] = "false"
+    invalid_reference_path = tmp_path / "invalid-reference.json"
+    invalid_reference_path.write_text(
+        json.dumps(raw_reference), encoding="utf-8"
+    )
+    with pytest.raises(ValueError, match="system_under_test_isolated must be a boolean"):
+        load_rg_semantic_reference(invalid_reference_path)
 
 
 def test_reference_coverage_and_verification_are_explicit() -> None:
@@ -241,6 +263,29 @@ def test_reference_and_retrieval_fail_closed_when_candidate_disposition_is_missi
     packet = prepare_structural_correctness_packet(brief)
     universe = prepare_rg_candidate_universe(brief, packet)
     template = prepare_rg_semantic_reference_template(universe)
+
+    assert all(label.review_status == "pending" for label in template.labels)
+    with pytest.raises(ValueError, match="pending candidate labels"):
+        verify_rg_semantic_reference(
+            template,
+            universe,
+            verified_by="reviewer",
+            verification_method="independent",
+            verification_evidence=("evidence",),
+            system_under_test_isolated=True,
+        )
+    with pytest.raises(ValueError, match="verified R/G semantic reference"):
+        compare_rg_retrieval(
+            universe,
+            observe_rg_retrieval(brief, packet, universe),
+            template,
+        )
+    with pytest.raises(ValueError, match="verified R/G semantic reference"):
+        compare_rg_retrieval(
+            universe,
+            observe_rg_retrieval(brief, packet, universe),
+            _reference(universe),
+        )
 
     with pytest.raises(ValueError, match="dispose every candidate"):
         compare_rg_retrieval(
@@ -313,3 +358,64 @@ def test_cli_exposes_explicit_candidate_comparison_inputs() -> None:
     )
     assert template.candidate_universe == "candidates.json"
     assert template.proposed_by == "independent-labeler"
+
+    verification = build_parser().parse_args(
+        [
+            "verify-rg-semantic-reference",
+            "--candidate-universe",
+            "candidates.json",
+            "--reference-labels",
+            "proposal.json",
+            "--verified-by",
+            "independent-reviewer",
+            "--verification-method",
+            "blind source review",
+            "--verification-evidence",
+            "issue#304",
+            "--verification-evidence",
+            "pr#305",
+            "--system-under-test-isolated",
+            "--output",
+            "reference.json",
+        ]
+    )
+    assert verification.reference_labels == "proposal.json"
+    assert verification.verification_evidence == ["issue#304", "pr#305"]
+    assert verification.system_under_test_isolated is True
+
+
+def test_cli_only_verifies_a_fully_reviewed_semantic_reference(
+    tmp_path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    brief = _brief()
+    packet = prepare_structural_correctness_packet(brief)
+    universe = prepare_rg_candidate_universe(brief, packet)
+    universe_path = write_rg_candidate_artifact(universe, tmp_path / "universe.json")
+    proposal_path = write_rg_candidate_artifact(
+        _reference(universe), tmp_path / "proposal.json"
+    )
+    verified_path = tmp_path / "verified.json"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "repodelta",
+            "verify-rg-semantic-reference",
+            "--candidate-universe",
+            str(universe_path),
+            "--reference-labels",
+            str(proposal_path),
+            "--verified-by",
+            "independent-reviewer",
+            "--verification-method",
+            "blind source review",
+            "--verification-evidence",
+            "issue#304",
+            "--system-under-test-isolated",
+            "--output",
+            str(verified_path),
+        ],
+    )
+
+    assert main() == 0
+    assert load_rg_semantic_reference(verified_path).authority.status == "verified"

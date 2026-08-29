@@ -295,16 +295,37 @@ selector. The label template separately asks an isolated verifier to classify
 each candidate as `implements`, `constrains`, `removes`,
 `directly_verifies`, `contextual_support`, `unrelated`, or `insufficient`, and
 to state whether the semantic-direct relation has direct-capable proof,
-suggestion-only evidence, or insufficient evidence.
+suggestion-only evidence, or insufficient evidence. `insufficient` is a
+reviewed conclusion: it means the bounded source evidence was examined but
+does not support a responsible decision. It is not the template's “not yet
+reviewed” state.
 
-After the reference is independently completed and verified, compare it with
-the observed retrieval without changing the formal report:
+The generated template marks every row `pending`; it is deliberately not
+comparable. A labeler must explicitly mark every row `reviewed`, then an
+independent verifier records the isolation and evidence that bind the exact
+proposal digest:
+
+```bash
+repodelta verify-rg-semantic-reference \
+  --candidate-universe evaluations/structural-correctness/campaign-v1-1/\
+rg-candidate-universes/pr-267.json \
+  --reference-labels build/pr-267.rg-semantic-reference.proposed.json \
+  --verified-by independent-verifier \
+  --verification-method "blind source review" \
+  --verification-evidence issue#304 \
+  --system-under-test-isolated \
+  --output build/pr-267.rg-semantic-reference.verified.json
+```
+
+Only that independently completed and verified reference may be compared with
+the observed retrieval; proposed references fail closed and cannot emit
+semantic FI/FE metrics:
 
 ```bash
 repodelta compare-rg-semantic-candidates \
   --candidate-universe build/pr-267.packet.json.rg-candidates.json \
   --retrieval-observation build/pr-267.packet.json.rg-retrieval.json \
-  --reference-labels build/pr-267.rg-semantic-reference.json \
+  --reference-labels build/pr-267.rg-semantic-reference.verified.json \
   --output build/pr-267.rg-semantic-comparison.json
 ```
 
@@ -343,6 +364,10 @@ rg-candidate-universes/pr-267.json \
   --output build/pr-267.rg-semantic-reference.json
 ```
 
-The generated template remains unresolved until a verifier labels it without
-reading the retrieval sidecar; an unresolved template is not presented as a
-semantic-correctness result.
+The generated template remains pending until a labeler reviews it without
+reading the retrieval sidecar. It is not presented as a semantic-correctness
+result, and neither is a complete-but-proposed reference. `direct_capable` is
+only the reference reviewer's judgment that a future direct mapping might be
+provable from the cited evidence; it never creates a production `matched` or
+direct mapping. A production change would need its own machine-verifiable
+proof trace and authority contract.
