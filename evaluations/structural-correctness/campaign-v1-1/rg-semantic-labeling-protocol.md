@@ -41,9 +41,19 @@ version, configuration digest, and execution record.
   rubric. The verifier may accept, challenge, or send a row to adjudication.
 - An adjudicator is distinct from the proposer and verifier whenever a
   high-risk or unresolved disagreement needs another judgment.
-- A human, AI system, or controlled combination may perform any role. Identity
-  separation and inspectable evidence, not a label such as “human”, establish
-  independence.
+- A human, AI system, or controlled combination may perform any role. Separate
+  identities, isolated inputs, and inspectable evidence establish **procedural
+  independence**: one role did not simply accept the other role's output. They
+  do not by themselves establish independent error modes.
+
+Every run record must disclose whether the proposer, verifier, and adjudicator
+share a person, model family, provider, prompt family, or other material
+reasoning dependency. A changed decoding setting or execution identifier within
+one model family is not, by itself, a diverse high-risk review. Each required
+high-risk review must use either a different person or a materially different
+model family/provider and prompt implementation. This diversity reduces a
+known correlation risk; it must not be described as proof of epistemic
+independence.
 
 The named human Issue owner accepts the campaign method and its published
 limitations. That acceptance does not convert any individual semantic label
@@ -71,6 +81,11 @@ The run record lists the allowed input paths and their SHA-256 values. If the
 proposer accesses a forbidden surface, the batch is invalid. Do not silently
 repair labels after seeing that surface: discard the batch or record a new,
 isolated batch with a different identity.
+
+The verifier and adjudicator are subject to the same retrieval isolation. They
+may inspect the proposal, challenge, and adjudication records required for their
+role, but must not open a retrieval observation, association/provenance output,
+comparison result, or generated report before the verified reference is frozen.
 
 ## Labeling procedure
 
@@ -113,7 +128,7 @@ their cited source witnesses, and reproducibility metadata; do not store
 secrets or raw provider error text. A model's confidence or rationale is not a
 proof basis by itself.
 
-## Semantic verification and risk review
+## Semantic verification, audit, and risk review
 
 The verifier validates more than JSON shape:
 
@@ -126,9 +141,31 @@ The verifier validates more than JSON shape:
 - `out_of_universe`, `node_unresolved`, `not_node_backed`, and reviewed
   `insufficient` cases remain visible as coverage or uncertainty.
 
-Every semantic-direct row is high risk. Before a reference is verified, the
-campaign also predeclares a stratified audit sample covering at least the
-following risk surfaces present in that batch:
+The verified-reference transition has deliberately bounded review coverage:
+
+- Every proposal row receives lifecycle, manifest, isolation, and required
+  field/witness-validity checks.
+- Every semantic-direct row is high risk and receives a second, independent
+  source-evidence review by the verifier. A challenger or unresolved high-risk
+  disagreement goes to an adjudicator.
+- A predeclared, independently reviewed sample covers non-direct judgments as
+  well as any direct rows selected by the sampling plan. Its purpose is to make
+  potentially missed semantic-direct candidates observable; it does not imply
+  that every non-direct row has independent semantic consensus.
+
+Before the proposer sees a label, the batch manifest freezes both parts of the
+audit plan:
+
+- a pre-label deterministic selector, seed, source-derived risk tags, and
+  minimum coverage; this selector uses only candidate-universe and
+  source-contract facts and records its candidate IDs before labeling; and
+- a post-proposal supplemental selector, seed, output-label strata, and
+  minimum coverage. It may use the completed proposal only to apply these
+  predeclared strata; it runs mechanically before semantic verification and
+  cannot be replaced by manually cherry-picked candidate IDs.
+
+The combined audit plan must cover the following surfaces when they occur in
+the batch:
 
 - direct versus contextual/unrelated boundary;
 - Requirements and Guardrails;
@@ -136,10 +173,13 @@ following risk surfaces present in that batch:
 - changed anchors with no graph node;
 - direct-capable versus suggested-only proofability.
 
-Each high-risk row receives a second independent review. That review may be by
-a person or a distinct model configuration, but it must have a separate run
-record and source-evidence inspection. The sample design, candidate IDs, and
-acceptance rule are frozen before its labels are compared.
+The acceptance rule must state the maximum permitted unresolved or material
+semantic-review disagreement in each stratum and the response to a failure.
+At minimum, an unresolved mandatory direct review leaves the batch unverified;
+a failed non-direct audit expands review or requires a new isolated proposal as
+the predeclared rule specifies. `verified` therefore means
+**protocol-verified reference**, not that every row received two independent
+semantic judgments.
 
 ## Disagreement and adjudication
 
