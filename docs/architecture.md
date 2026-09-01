@@ -170,7 +170,12 @@ becoming alternate intake, classification, routing, or presentation paths.
    not extract (a column modifier it did not parse, for example) still
    records the safe fact and still gets an explicit gap for what it did
    not — coverage of a statement never implies coverage of every
-   semantic dimension inside it.
+   semantic dimension inside it. Matching a recognized prefix is not the
+   same as recognizing the whole statement: a structural check confirms
+   the shape the provider claims to observe is actually intact (its
+   parenthesized body closes) before any fact is emitted from it. A
+   statement that never completes the shape is a parse failure, not a
+   partially-trusted fact.
 
 ## Semantic authority
 

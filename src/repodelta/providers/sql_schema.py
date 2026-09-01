@@ -89,6 +89,53 @@ def _identifier(raw: str) -> str:
     return raw.strip().strip('"')
 
 
+def _table_body_is_closed(text: str, body_start: int) -> bool:
+    """Check the parenthesized CREATE TABLE body actually closes.
+
+    Narrow structural check, not a general SQL parser: only tracks paren
+    depth and quote state well enough to find the matching close paren for
+    the one already consumed by the CREATE TABLE regex. A statement whose
+    body never closes (truncated, malformed) is not a table declaration --
+    it's a parse failure, and must not be recognized as one.
+    """
+
+    depth = 1
+    in_single = False
+    in_double = False
+    i = body_start
+    n = len(text)
+    while i < n:
+        ch = text[i]
+        if in_single:
+            if text[i:i + 2] == "''":
+                i += 2
+                continue
+            if ch == "'":
+                in_single = False
+            i += 1
+            continue
+        if in_double:
+            if text[i:i + 2] == '""':
+                i += 2
+                continue
+            if ch == '"':
+                in_double = False
+            i += 1
+            continue
+        if ch == "'":
+            in_single = True
+        elif ch == '"':
+            in_double = True
+        elif ch == "(":
+            depth += 1
+        elif ch == ")":
+            depth -= 1
+            if depth == 0:
+                return True
+        i += 1
+    return False
+
+
 def _split_statements(text: str) -> tuple[tuple[str, int, int], ...]:
     """Split on top-level ';' only, honoring quotes, comments, and $tag$ bodies.
 
@@ -149,6 +196,10 @@ def _classify(
 ) -> tuple[SqlSchemaStatement | None, SqlSchemaGap | None]:
     normalized = " ".join(text.split())
     if match := _CREATE_TABLE.match(text.strip()):
+        if not _table_body_is_closed(text.strip(), match.end()):
+            return None, SqlSchemaGap(
+                line=line_start, reason="parse_failure", excerpt=normalized[:240]
+            )
         statement = SqlSchemaStatement(
             revision_side=revision_side,
             path=path,

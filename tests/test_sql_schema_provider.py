@@ -210,6 +210,49 @@ def test_create_table_without_column_modifiers_stays_fully_observed(
     assert result.coverage[0].gaps == ()
 
 
+def test_create_table_with_an_unclosed_body_is_a_parse_failure_not_a_fact(
+    tmp_path: Path,
+) -> None:
+    root, revision = _repository(
+        tmp_path,
+        # No closing paren -- truncated/malformed, not a real table shape.
+        {"migrations/001.sql": "CREATE TABLE users (\n  id bigint\n;\n"},
+    )
+    provider = RepositorySqlSchemaProvider(root, expected_head_revision=revision)
+
+    result = provider.observe(head_paths=("migrations/001.sql",))
+
+    # No "table declared" fact for syntax that never actually closed.
+    assert result.statements == ()
+    coverage = result.coverage[0]
+    assert coverage.state == "partial"
+    assert coverage.statement_count == 0
+    assert [gap.reason for gap in coverage.gaps] == ["parse_failure"]
+
+
+def test_create_table_body_close_survives_a_paren_inside_a_string_literal(
+    tmp_path: Path,
+) -> None:
+    root, revision = _repository(
+        tmp_path,
+        {
+            "migrations/001.sql": (
+                "CREATE TABLE users (\n"
+                "  note text DEFAULT '(n/a)'\n"
+                ");\n"
+            ),
+        },
+    )
+    provider = RepositorySqlSchemaProvider(root, expected_head_revision=revision)
+
+    result = provider.observe(head_paths=("migrations/001.sql",))
+
+    # A paren inside a quoted default value must not be mistaken for the
+    # body's structural close (or its absence).
+    assert len(result.statements) == 1
+    assert result.statements[0].kind == "create_table"
+
+
 def test_capabilities_are_declared_on_every_observed_result(
     tmp_path: Path,
 ) -> None:
