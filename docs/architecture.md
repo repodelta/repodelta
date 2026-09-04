@@ -159,6 +159,29 @@ becoming alternate intake, classification, routing, or presentation paths.
 8. `TransformationAssessment` is the only authority for deterministic T/CC
    status. Missing association is unverified, local change is not global
    absence proof, and no status implies acceptance or mergeability.
+9. SQL schema providers declare a flat capability list, and return
+   statement-level repository facts, typed per-file coverage, and
+   diagnostics only, never a folded schema or a contract verdict. An
+   unsupported or malformed statement becomes an explicit coverage gap;
+   it is never silently included or excluded from what a downstream
+   consumer can conclude. Recognizing a statement's shape is not the
+   same as accounting for every fact inside it: a statement that matches
+   a declared capability but also carries semantics the provider does
+   not extract (a column modifier it did not parse, for example) still
+   records the safe fact and still gets an explicit gap for what it did
+   not — coverage of a statement never implies coverage of every
+   semantic dimension inside it. Matching a recognized prefix is not the
+   same as recognizing the whole statement: a structural check confirms
+   the shape the provider claims to observe is actually intact (its
+   parenthesized body closes) before any fact is emitted from it. A
+   statement that never completes the shape is a parse failure, not a
+   partially-trusted fact. A tracked path that resolves outside the
+   checkout root is never read; a fact is only evidence for the
+   reviewed revision when its content actually came from that revision,
+   not from wherever a symlink happens to point. The capability/fact
+   invariant belongs to the `SqlSchemaProvider` contract, not to one
+   implementation: `build_evidence_catalog` validates any
+   `SqlSchemaResult` it receives before ingesting it.
 
 ## Semantic authority
 

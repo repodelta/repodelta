@@ -154,6 +154,7 @@ FactAuthority = Literal[
     "structural_provider",
     "verification_provider",
     "closure_scan_provider",
+    "sql_schema_provider",
     "supplied",
 ]
 RevisionSide = Literal["head", "base", "review", "unchanged"]
@@ -1864,6 +1865,119 @@ class ClosureScanDiagnostic:
     revision_side: Literal["base", "head"]
 
 
+SqlSchemaStatementKind = Literal[
+    "create_table",
+    "alter_table_add_column",
+    "alter_table_drop_column",
+    "alter_column_set_not_null",
+    "alter_column_drop_not_null",
+]
+SqlSchemaCoverageState = Literal["observed", "partial", "unavailable"]
+SqlSchemaGapReason = Literal[
+    "unsupported_statement", "parse_failure", "unaccounted_column_semantics"
+]
+
+
+@dataclass(frozen=True)
+class SqlSchemaStatement:
+    """One deterministically observed DDL statement, never a folded schema."""
+
+    revision_side: Literal["base", "head"]
+    path: str
+    line_start: int
+    line_end: int
+    kind: SqlSchemaStatementKind
+    table: str
+    column: str | None = None
+    nullable: bool | None = None
+    normalized_text: str = ""
+
+    def __post_init__(self) -> None:
+        if not self.table:
+            raise ValueError("sql schema statement requires a table")
+        requires_column = self.kind != "create_table"
+        if requires_column and not self.column:
+            raise ValueError(f"{self.kind}: sql schema statement requires a column")
+        if not requires_column and self.column is not None:
+            raise ValueError("create_table statement cannot carry a column")
+        requires_nullable = self.kind in {
+            "alter_column_set_not_null",
+            "alter_column_drop_not_null",
+        }
+        if requires_nullable and self.nullable is None:
+            raise ValueError(f"{self.kind}: sql schema statement requires nullable")
+        if not requires_nullable and self.nullable is not None:
+            raise ValueError(f"{self.kind}: sql schema statement cannot carry nullable")
+
+
+@dataclass(frozen=True)
+class SqlSchemaGap:
+    line: int
+    reason: SqlSchemaGapReason
+    excerpt: str = ""
+
+
+@dataclass(frozen=True)
+class SqlSchemaFileCoverage:
+    """Provider-owned coverage for one file on one revision side."""
+
+    revision_side: Literal["base", "head"]
+    path: str
+    state: SqlSchemaCoverageState
+    statement_count: int = 0
+    gaps: tuple[SqlSchemaGap, ...] = ()
+
+    def __post_init__(self) -> None:
+        if self.state == "observed" and self.gaps:
+            raise ValueError(f"{self.path}: observed coverage cannot carry gaps")
+        if self.state == "partial" and not self.gaps:
+            raise ValueError(f"{self.path}: partial coverage requires a gap")
+        if self.state == "unavailable" and (self.statement_count or self.gaps):
+            raise ValueError(
+                f"{self.path}: unavailable coverage cannot carry statements or gaps"
+            )
+
+
+@dataclass(frozen=True)
+class SqlSchemaResult:
+    capabilities: tuple[SqlSchemaStatementKind, ...] = ()
+    statements: tuple[SqlSchemaStatement, ...] = ()
+    coverage: tuple[SqlSchemaFileCoverage, ...] = ()
+    diagnostics: tuple[Diagnostic, ...] = ()
+    schema_version: str = "sql_schema_result.v2"
+
+    def validate_consistency(self) -> None:
+        unclaimed_kinds = {
+            statement.kind
+            for statement in self.statements
+            if statement.kind not in self.capabilities
+        }
+        if unclaimed_kinds:
+            raise ValueError(
+                "sql schema result emitted statement kinds outside its "
+                f"declared capabilities: {sorted(unclaimed_kinds)}"
+            )
+        coverage_keys = tuple(
+            (item.revision_side, item.path) for item in self.coverage
+        )
+        if len(set(coverage_keys)) != len(coverage_keys):
+            raise ValueError("sql schema result contains duplicate file coverage")
+        counted = {}
+        for statement in self.statements:
+            key = (statement.revision_side, statement.path)
+            counted[key] = counted.get(key, 0) + 1
+            if key not in coverage_keys:
+                raise ValueError(
+                    f"{statement.path}: statement missing typed file coverage"
+                )
+        for item in self.coverage:
+            key = (item.revision_side, item.path)
+            if counted.get(key, 0) != item.statement_count:
+                raise ValueError(
+                    f"{item.path}: coverage statement count mismatch"
+                )
+
+
 @dataclass(frozen=True)
 class StructuralChangeIdentity:
     review_symbol_id: str
@@ -1984,6 +2098,7 @@ class EvidenceItem:
     verification_status: str = ""
     verification_conclusion: str = ""
     closure_scan_result: ClosureScanResult | None = None
+    sql_schema_statement: SqlSchemaStatement | None = None
     sources: tuple[SourceRef, ...] = ()
     change_relation_ids: tuple[str, ...] = ()
     structural_path_ids: tuple[str, ...] = ()
@@ -2150,6 +2265,25 @@ class EvidenceItem:
             raise ValueError(
                 f"{self.id}: only closure facts may carry a scan result"
             )
+        if self.kind == "sql_schema_statement":
+            if (
+                self.role != "revision_fact"
+                or self.revision_side not in {"head", "base"}
+                or self.operation != "observed"
+                or self.changed
+                or self.profile != "schema"
+                or self.authority != "sql_schema_provider"
+                or self.sql_schema_statement is None
+            ):
+                raise ValueError(f"{self.id}: invalid sql schema statement")
+            if self.sql_schema_statement.revision_side != self.revision_side:
+                raise ValueError(
+                    f"{self.id}: sql schema statement revision side mismatch"
+                )
+        elif self.sql_schema_statement is not None:
+            raise ValueError(
+                f"{self.id}: only sql schema statements may carry a statement"
+            )
         expected_classifications = {
             "test": {"test"},
             "document": {"document"},
@@ -2173,7 +2307,9 @@ class EvidenceCatalog:
     ] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
     closure_scan_diagnostics: tuple[ClosureScanDiagnostic, ...] = ()
-    schema_version: str = "evidence_catalog.v18"
+    sql_schema_coverage: tuple[SqlSchemaFileCoverage, ...] = ()
+    sql_schema_capabilities: tuple[SqlSchemaStatementKind, ...] = ()
+    schema_version: str = "evidence_catalog.v20"
 
     def by_id(self) -> dict[str, EvidenceItem]:
         return {item.id: item for item in self.items}
@@ -4172,7 +4308,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "repodelta-open-core"
-    schema_version: str = "review_brief.v57"
+    schema_version: str = "review_brief.v59"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
