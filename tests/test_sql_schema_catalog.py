@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from repodelta.changes.hunks import parse_changed_files
 from repodelta.facts.catalog import build_evidence_catalog
 from repodelta.model.contracts import (
@@ -116,3 +118,39 @@ def test_no_sql_schema_result_leaves_catalog_unaffected() -> None:
 
     assert not any(item.kind == "sql_schema_statement" for item in catalog.items)
     assert catalog.sql_schema_coverage == ()
+
+
+def test_ingestion_validates_the_result_even_if_the_provider_did_not() -> None:
+    # A hand-built SqlSchemaResult that never went through its own
+    # validate_consistency() -- standing in for a third-party
+    # SqlSchemaProvider implementation that skipped it. The capability/fact
+    # invariant belongs to the ingestion boundary, not just to
+    # RepositorySqlSchemaProvider's own call site.
+    packet = _packet()
+    statement = SqlSchemaStatement(
+        revision_side="head",
+        path="migrations/001.sql",
+        line_start=1,
+        line_end=1,
+        kind="create_table",
+        table="users",
+    )
+    untrustworthy_result = SqlSchemaResult(
+        capabilities=("alter_table_add_column",),  # does not include create_table
+        statements=(statement,),
+        coverage=(
+            SqlSchemaFileCoverage(
+                revision_side="head",
+                path="migrations/001.sql",
+                state="observed",
+                statement_count=1,
+            ),
+        ),
+    )
+
+    with pytest.raises(ValueError, match="outside its declared capabilities"):
+        build_evidence_catalog(
+            packet,
+            parse_changed_files(packet.changed_files),
+            sql_schema_result=untrustworthy_result,
+        )

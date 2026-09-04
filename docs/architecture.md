@@ -175,7 +175,13 @@ becoming alternate intake, classification, routing, or presentation paths.
    the shape the provider claims to observe is actually intact (its
    parenthesized body closes) before any fact is emitted from it. A
    statement that never completes the shape is a parse failure, not a
-   partially-trusted fact.
+   partially-trusted fact. A tracked path that resolves outside the
+   checkout root is never read; a fact is only evidence for the
+   reviewed revision when its content actually came from that revision,
+   not from wherever a symlink happens to point. The capability/fact
+   invariant belongs to the `SqlSchemaProvider` contract, not to one
+   implementation: `build_evidence_catalog` validates any
+   `SqlSchemaResult` it receives before ingesting it.
 
 ## Semantic authority
 

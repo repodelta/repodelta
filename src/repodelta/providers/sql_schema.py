@@ -40,6 +40,10 @@ _TOKEN = re.compile(
     re.VERBOSE | re.DOTALL,
 )
 
+# The opening half of a dollar-quote tag ($$ or $tag$), used to detect where
+# one starts when scanning char-by-char outside the tokenizer above.
+_DOLLAR_TAG = re.compile(r"\$[A-Za-z_]*\$")
+
 _IDENTIFIER = r'"?[A-Za-z_][\w.]*"?'
 _CREATE_TABLE_VERB = re.compile(r"^CREATE\s+TABLE\b", re.IGNORECASE)
 _CREATE_TABLE = re.compile(
@@ -96,16 +100,27 @@ def _table_body_is_closed(text: str, body_start: int) -> bool:
     depth and quote state well enough to find the matching close paren for
     the one already consumed by the CREATE TABLE regex. A statement whose
     body never closes (truncated, malformed) is not a table declaration --
-    it's a parse failure, and must not be recognized as one.
+    it's a parse failure, and must not be recognized as one. Dollar-quoted
+    bodies are tracked the same way _split_statements() tracks them, so a
+    ')' inside one (a $$...$$ default value, say) can't be mistaken for the
+    structural close.
     """
 
     depth = 1
     in_single = False
     in_double = False
+    dollar_tag: str | None = None
     i = body_start
     n = len(text)
     while i < n:
         ch = text[i]
+        if dollar_tag is not None:
+            if text[i:i + len(dollar_tag)] == dollar_tag:
+                i += len(dollar_tag)
+                dollar_tag = None
+                continue
+            i += 1
+            continue
         if in_single:
             if text[i:i + 2] == "''":
                 i += 2
@@ -126,6 +141,10 @@ def _table_body_is_closed(text: str, body_start: int) -> bool:
             in_single = True
         elif ch == '"':
             in_double = True
+        elif ch == "$" and (match := _DOLLAR_TAG.match(text, i)):
+            dollar_tag = match.group(0)
+            i = match.end()
+            continue
         elif ch == "(":
             depth += 1
         elif ch == ")":
@@ -470,6 +489,19 @@ class RepositorySqlSchemaProvider:
         tuple[SqlSchemaStatement, ...], SqlSchemaFileCoverage, Diagnostic | None
     ]:
         target = root / path
+        if not self._resolves_inside_checkout(root, target):
+            return (
+                (),
+                SqlSchemaFileCoverage(revision_side=side, path=path, state="unavailable"),
+                Diagnostic(
+                    code="sql_schema_symlink_outside_checkout",
+                    message=(
+                        f"{path} resolves outside the {side} checkout root; a "
+                        "symlinked SQL input is not bound to the reviewed "
+                        "revision, so it was not read."
+                    ),
+                ),
+            )
         try:
             raw = target.read_bytes()
         except OSError:
@@ -505,6 +537,22 @@ class RepositorySqlSchemaProvider:
             SqlSchemaFileCoverage(revision_side=side, path=path, state="unavailable")
             for path in paths
         )
+
+    @staticmethod
+    def _resolves_inside_checkout(root: Path, target: Path) -> bool:
+        """Fail closed on a tracked path that resolves outside the checkout.
+
+        A symlinked .sql file is not bound to the reviewed git revision --
+        its target can point anywhere on disk -- so its content must never
+        be read as evidence for that revision.
+        """
+
+        try:
+            resolved_root = root.resolve()
+            resolved_target = target.resolve()
+        except OSError:
+            return False
+        return resolved_target.is_relative_to(resolved_root)
 
 
 def _checkout_revision(root: Path) -> str:

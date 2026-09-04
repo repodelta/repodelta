@@ -253,6 +253,104 @@ def test_create_table_body_close_survives_a_paren_inside_a_string_literal(
     assert result.statements[0].kind == "create_table"
 
 
+def test_create_table_body_close_not_fooled_by_a_paren_inside_a_dollar_quote(
+    tmp_path: Path,
+) -> None:
+    root, revision = _repository(
+        tmp_path,
+        {
+            # No real closing paren for the CREATE TABLE body -- the ')'
+            # is inside a $$...$$ dollar-quoted default value.
+            "migrations/001.sql": (
+                "CREATE TABLE users (\n"
+                "  note text DEFAULT $$abc)def$$\n"
+            ),
+        },
+    )
+    provider = RepositorySqlSchemaProvider(root, expected_head_revision=revision)
+
+    result = provider.observe(head_paths=("migrations/001.sql",))
+
+    assert result.statements == ()
+    coverage = result.coverage[0]
+    assert coverage.state == "partial"
+    assert [gap.reason for gap in coverage.gaps] == ["parse_failure"]
+
+
+def test_create_table_body_close_survives_a_real_dollar_quoted_default(
+    tmp_path: Path,
+) -> None:
+    root, revision = _repository(
+        tmp_path,
+        {
+            "migrations/001.sql": (
+                "CREATE TABLE users (\n"
+                "  note text DEFAULT $$abc)def$$\n"
+                ");\n"
+            ),
+        },
+    )
+    provider = RepositorySqlSchemaProvider(root, expected_head_revision=revision)
+
+    result = provider.observe(head_paths=("migrations/001.sql",))
+
+    assert len(result.statements) == 1
+    assert result.statements[0].kind == "create_table"
+
+
+def test_symlinked_sql_input_fails_closed_instead_of_following_the_link(
+    tmp_path: Path,
+) -> None:
+    outside = tmp_path / "outside.sql"
+    outside.write_text("CREATE TABLE secret_leak (id bigint);\n", encoding="utf-8")
+    root, revision = _repository(tmp_path, {"README.md": "hello\n"})
+    (root / "migrations").mkdir(parents=True, exist_ok=True)
+    (root / "migrations" / "001.sql").symlink_to(outside)
+    subprocess.run(["git", "-C", str(root), "add", "."], check=True)
+    subprocess.run(
+        ["git", "-C", str(root), "commit", "-qm", "add symlink"], check=True
+    )
+    revision = subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "HEAD"],
+        check=True, capture_output=True, text=True,
+    ).stdout.strip()
+    provider = RepositorySqlSchemaProvider(root, expected_head_revision=revision)
+
+    result = provider.observe(head_paths=("migrations/001.sql",))
+
+    assert result.statements == ()
+    assert result.coverage == (
+        SqlSchemaFileCoverage(
+            revision_side="head", path="migrations/001.sql", state="unavailable"
+        ),
+    )
+    assert [d.code for d in result.diagnostics] == [
+        "sql_schema_symlink_outside_checkout"
+    ]
+
+
+def test_symlink_within_the_checkout_is_still_observed(tmp_path: Path) -> None:
+    root, revision = _repository(
+        tmp_path, {"migrations/real.sql": "CREATE TABLE inside_repo (id bigint);\n"}
+    )
+    (root / "migrations" / "alias.sql").symlink_to(root / "migrations" / "real.sql")
+    subprocess.run(["git", "-C", str(root), "add", "."], check=True)
+    subprocess.run(
+        ["git", "-C", str(root), "commit", "-qm", "add alias"], check=True
+    )
+    revision = subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "HEAD"],
+        check=True, capture_output=True, text=True,
+    ).stdout.strip()
+    provider = RepositorySqlSchemaProvider(root, expected_head_revision=revision)
+
+    result = provider.observe(head_paths=("migrations/alias.sql",))
+
+    assert len(result.statements) == 1
+    assert result.statements[0].table == "inside_repo"
+    assert result.coverage[0].state == "observed"
+
+
 def test_capabilities_are_declared_on_every_observed_result(
     tmp_path: Path,
 ) -> None:

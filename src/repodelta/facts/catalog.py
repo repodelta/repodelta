@@ -59,6 +59,11 @@ def build_evidence_catalog(
 ) -> EvidenceCatalog:
     """Normalize source, structural, and supplied facts into one ID-addressed catalog."""
 
+    # The capability/fact invariant belongs to the SqlSchemaProvider contract,
+    # not just to RepositorySqlSchemaProvider's own implementation -- validate
+    # here so any provider behind the protocol is held to it at ingestion.
+    sql_schema_result.validate_consistency()
+
     items: dict[str, EvidenceItem] = {}
     hunks_by_paths: dict[tuple[str | None, str | None], list[ChangedHunk]] = {}
     for hunk in changes.hunks:
