@@ -7,6 +7,12 @@ identities, and the candidate-universe packet. Do not open the retrieval
 observation, structural-focus observation, association sidecar, comparison
 output, or generated report until the reference is frozen.
 
+Follow the companion
+[`R/G semantic reference labeling and verification protocol`](rg-semantic-labeling-protocol.md)
+before opening a labeling batch. The rubric defines row semantics; the protocol
+defines independent roles, source-evidence verification, model reproducibility,
+high-risk review, and disagreement handling.
+
 ## Candidate universe boundary
 
 Every entry is a profile-eligible changed-anchor fact. It is a deliberately
