@@ -1,0 +1,36 @@
+{
+  "schema_version": "rg_semantic_labeling_verifier_structured_output_amendment.v1",
+  "amendment_id": "pr-208-batch-001-verifier-structured-output-amendment-001",
+  "batch_id": "pr-208-batch-001",
+  "status": "effective_before_verification",
+  "applies_to": {
+    "verifier_output_schema_path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.verifier-output.schema.json",
+    "verifier_output_schema_sha256": "f827c8a2126e418872e68f09e21fb806369bb38d0368488fe068a174cec406fb",
+    "verifier_prompt_path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.verifier-prompt.md",
+    "verifier_prompt_sha256": "a6d42a11b0ad6935c3bee62fb7173f1777688694cc0ee3c40a2c7e4e811fa32d"
+  },
+  "observed_runtime_constraint": {
+    "authenticated_default_codex_execution": "available",
+    "cli_output_schema_option": "structured_output_compatibility_failure",
+    "probe_contained_campaign_data": false,
+    "raw_error_retained": false
+  },
+  "plan_delta": {
+    "reason": "The authenticated default Codex execution can run a read-only task, but its local CLI rejects the output-schema option. The schema remains the canonical verifier-output contract; enforcement moves from provider invocation to an immediate deterministic validator that implements every constraint in this frozen schema.",
+    "authority_scope": "campaign-local verifier execution and validation configuration",
+    "owner": "batch manifest and recorded verifier amendments",
+    "unchanged": [
+      "the verifier prompt and its JSON-only instruction",
+      "the frozen output schema",
+      "the isolated verifier bundle",
+      "the full-population verification requirement",
+      "the rule that a challenge or malformed result leaves the batch unverified",
+      "all production and retrieval boundaries"
+    ]
+  },
+  "effective_validation": {
+    "model_invocation": "fresh ephemeral read-only Codex execution without the unsupported CLI output-schema flag",
+    "postcondition": "The final message must parse as JSON and pass deterministic enforcement of every frozen verifier-output schema constraint before any mechanical reconciliation may consume it.",
+    "failure_behavior": "A malformed, schema-invalid, missing, duplicate, or incomplete verifier decision is discarded as no verification output; no semantic reference may be verified."
+  }
+}
