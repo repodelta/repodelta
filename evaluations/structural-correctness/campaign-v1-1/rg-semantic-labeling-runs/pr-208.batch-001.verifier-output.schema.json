@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR 208 batch 001 isolated semantic verifier output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "batch_id",
+    "proposal_sha256",
+    "decisions",
+    "out_of_universe_review",
+    "final_status"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "rg_semantic_verifier_output.v1"
+    },
+    "batch_id": {
+      "const": "pr-208-batch-001"
+    },
+    "proposal_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "decisions": {
+      "type": "array",
+      "minItems": 54,
+      "maxItems": 54,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "candidate_id",
+          "decision",
+          "reviewer_semantic_relation",
+          "reviewer_proofability",
+          "reviewer_proof_basis",
+          "evidence_witnesses",
+          "note"
+        ],
+        "properties": {
+          "candidate_id": {
+            "type": "string"
+          },
+          "decision": {
+            "enum": [
+              "accept",
+              "challenge"
+            ]
+          },
+          "reviewer_semantic_relation": {
+            "enum": [
+              "implements",
+              "constrains",
+              "removes",
+              "directly_verifies",
+              "contextual_support",
+              "unrelated",
+              "insufficient"
+            ]
+          },
+          "reviewer_proofability": {
+            "enum": [
+              "direct_capable",
+              "suggested_only",
+              "not_applicable",
+              "insufficient"
+            ]
+          },
+          "reviewer_proof_basis": {
+            "enum": [
+              "explicit_authoring",
+              "typed_predicate",
+              "bounded_evidence",
+              "deterministic_mapping",
+              "heuristic",
+              "model_suggestion",
+              "none"
+            ]
+          },
+          "evidence_witnesses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "reviewer_semantic_relation": {
+                  "enum": [
+                    "implements",
+                    "constrains",
+                    "removes",
+                    "directly_verifies"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "evidence_witnesses": {
+                  "minItems": 1
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "out_of_universe_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "proposed_count",
+        "decision"
+      ],
+      "properties": {
+        "proposed_count": {
+          "const": 0
+        },
+        "decision": {
+          "const": "accept_empty"
+        }
+      }
+    },
+    "final_status": {
+      "enum": [
+        "all_accepted",
+        "unverified"
+      ]
+    }
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "schema_version": "rg_semantic_labeling_verifier_input_amendment.v1",
+  "amendment_id": "pr-208-batch-001-verifier-input-amendment-001",
+  "batch_id": "pr-208-batch-001",
+  "status": "effective_before_verification",
+  "applies_to": {
+    "manifest_path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.manifest.json",
+    "manifest_sha256": "2b18c0f085ec42723d9c9dc89de4328d91d9bca25d9f8810ff34daf487ff0fd4",
+    "proposal_path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-proposals/pr-208.batch-001.proposed.json",
+    "proposal_sha256": "46fd0a8a0bc5bb9c38b66ecb191e8191677d11b5d9a7eee48c1e5f1d995cccd9"
+  },
+  "plan_delta": {
+    "reason": "The frozen manifest names an independent verifier and prompt implementation but did not yet bind the completed proposal, verifier prompt, or structured verifier-output contract. This amendment freezes those execution inputs before the verifier receives them.",
+    "authority_scope": "campaign-local verifier execution configuration",
+    "owner": "batch manifest and this amendment",
+    "authorized_semantic_dependencies": [
+      "the frozen labeler input",
+      "the frozen protocol and rubric",
+      "the completed proposer reference",
+      "the verifier prompt and output schema declared below"
+    ],
+    "unchanged": [
+      "candidate IDs and candidate-universe digest",
+      "Issue and PR source revisions",
+      "proposer labels and proposed-reference authority",
+      "full-population audit coverage",
+      "semantic-reference lifecycle",
+      "all production and retrieval boundaries"
+    ]
+  },
+  "verifier_bundle": {
+    "labeler_input": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.labeler-input.json",
+      "sha256": "9c0cc908b740c0c1529f0e85f6d19190a5156e17685decb5686a1a7daccc4e2e"
+    },
+    "protocol": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-protocol.md",
+      "sha256": "f8fa4e620a860e59e9551c3080651a02b7d1e885b6f26a12e4c802d5e05770a7"
+    },
+    "rubric": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-reference-rubric.md",
+      "sha256": "2986b6e906ad97e1f56b9d92b59a46c0de8187a47583fea54fce2ca1dd3d130d"
+    },
+    "proposal": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-proposals/pr-208.batch-001.proposed.json",
+      "sha256": "46fd0a8a0bc5bb9c38b66ecb191e8191677d11b5d9a7eee48c1e5f1d995cccd9"
+    },
+    "verifier_prompt": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.verifier-prompt.md",
+      "sha256": "a6d42a11b0ad6935c3bee62fb7173f1777688694cc0ee3c40a2c7e4e811fa32d"
+    },
+    "verifier_output_schema": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.verifier-output.schema.json",
+      "sha256": "f827c8a2126e418872e68f09e21fb806369bb38d0368488fe068a174cec406fb"
+    }
+  },
+  "verifier_execution": {
+    "identity": "openai-codex:gpt-5.6-terra:pr-208-batch-001-verifier",
+    "provider": "OpenAI Codex",
+    "model": "gpt-5.6-terra",
+    "mode": "fresh_ephemeral_read_only",
+    "working_directory": "fresh isolated directory containing exactly verifier_bundle files",
+    "permitted_result": "a complete verifier output that either accepts every proposed label or records challenges and leaves the batch unverified"
+  },
+  "failure_behavior": "Any missing file, digest mismatch, unstructured verifier response, duplicate or missing decision, disagreement, or access outside the verifier bundle leaves the batch unverified. The coordinator may perform only mechanical lifecycle checks and may not alter any semantic label."
+}
