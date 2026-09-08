@@ -1,0 +1,48 @@
+{
+  "schema_version": "rg_semantic_labeling_verifier_model_routing_amendment.v1",
+  "amendment_id": "pr-208-batch-001-verifier-model-routing-amendment-001",
+  "batch_id": "pr-208-batch-001",
+  "status": "effective_before_verification",
+  "applies_to": {
+    "verifier_input_amendment_path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.verifier-input-amendment.json"
+  },
+  "observed_runtime_constraint": {
+    "explicit_model_attempts": [
+      {
+        "requested_model": "gpt-5.6-terra",
+        "result": "model_or_provider_routing_failure",
+        "raw_error_retained": false
+      },
+      {
+        "requested_model": "gpt-5.6",
+        "result": "model_or_provider_routing_failure",
+        "raw_error_retained": false
+      }
+    ],
+    "authenticated_default_probe": {
+      "result": "successful_ephemeral_read_only_execution",
+      "model_identifier_emitted_by_runtime": false,
+      "probe_contained_campaign_data": false
+    }
+  },
+  "plan_delta": {
+    "reason": "The local Codex CLI cannot route either predeclared explicit model identifier, while its authenticated default OpenAI Codex execution is available and does not emit a model identifier. The verifier must use the available fresh default execution without claiming a more precise model identity than the runtime provides.",
+    "authority_scope": "campaign-local verifier execution configuration",
+    "owner": "batch manifest and recorded verifier amendments",
+    "unchanged": [
+      "the isolated six-file verifier bundle",
+      "the completed proposal and all proposer labels",
+      "the verifier prompt, output schema, and full-population review requirement",
+      "the requirement that disagreement leaves the batch unverified",
+      "all production and retrieval boundaries"
+    ]
+  },
+  "effective_verifier_execution": {
+    "identity": "openai-codex:authenticated-default:pr-208-batch-001-verifier",
+    "provider": "OpenAI Codex",
+    "model_identifier": "not_emitted_by_local_cli",
+    "execution": "fresh_ephemeral_read_only execution over the isolated verifier bundle",
+    "procedural_independence": "The proposer is DeepSeek and the verifier is an authenticated OpenAI Codex execution with a separately authored verifier prompt. This establishes provider-separated procedural independence; it does not claim independent error modes or semantic correctness."
+  },
+  "failure_behavior": "If the default verifier execution cannot return a complete schema-valid output, or its identity cannot remain provider-distinct from the proposer, the batch remains unverified. No fallback may silently substitute a shared-provider verifier."
+}
