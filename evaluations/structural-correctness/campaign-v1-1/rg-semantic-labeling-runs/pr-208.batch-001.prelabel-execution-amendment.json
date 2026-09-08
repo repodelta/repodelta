@@ -1,0 +1,64 @@
+{
+  "schema_version": "rg_semantic_labeling_prelabel_execution_amendment.v1",
+  "amendment_id": "pr-208-batch-001-prelabel-execution-amendment-001",
+  "batch_id": "pr-208-batch-001",
+  "status": "effective_before_valid_proposal",
+  "applies_to": {
+    "manifest_path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.manifest.json",
+    "manifest_sha256": "2b18c0f085ec42723d9c9dc89de4328d91d9bca25d9f8810ff34daf487ff0fd4"
+  },
+  "observed_execution_boundary": {
+    "provider": "DeepSeek",
+    "model": "deepseek-v4-flash",
+    "original_decoding": {
+      "temperature": 0,
+      "max_tokens": 12000,
+      "response_format": "json_object",
+      "store": false,
+      "thinking": "provider_default_enabled"
+    },
+    "safe_attempt_observation": {
+      "result": "no_valid_proposal",
+      "http_status": 200,
+      "finish_reason": "length",
+      "visible_content_length": 0,
+      "prompt_tokens": 12919,
+      "completion_tokens": 12000,
+      "request_sha256": "7fd40fa5b7e36953f6eddc8c2c689407b308a5f73dd24499fbdd2ab0af2118f6",
+      "raw_provider_response_retained": false,
+      "semantic_labels_retained": false
+    }
+  },
+  "plan_delta": {
+    "reason": "The provider consumed the declared output limit in its default thinking mode before emitting the required JSON object. The frozen candidate universe and proposer input are unchanged; the execution configuration must explicitly reserve the declared output budget for the visible structured result.",
+    "authority_scope": "campaign-local execution configuration",
+    "owner": "batch manifest and this amendment",
+    "authorized_semantic_dependencies": [
+      "the existing frozen labeler input",
+      "the existing frozen proposer prompt",
+      "the existing 54-candidate audit plan"
+    ],
+    "unchanged": [
+      "candidate IDs and candidate-universe digest",
+      "Issue and PR source revisions",
+      "authorized semantic inputs",
+      "proposer and verifier identities",
+      "full-population audit coverage",
+      "semantic-reference lifecycle",
+      "all production and retrieval boundaries"
+    ]
+  },
+  "effective_proposer_decoding": {
+    "temperature": 0,
+    "max_tokens": 12000,
+    "response_format": "json_object",
+    "store": false,
+    "thinking": {
+      "type": "disabled"
+    }
+  },
+  "failure_behavior": "A response that is not a complete JSON object with every frozen candidate exactly once remains no proposal. It may not create a semantic reference, metric, or production decision. Any future change to inputs, roles, audit coverage, or effective decoding requires a new recorded amendment before a valid proposal is accepted.",
+  "source": {
+    "provider_thinking_control_documentation": "https://api-docs.deepseek.com/guides/thinking_mode/"
+  }
+}
