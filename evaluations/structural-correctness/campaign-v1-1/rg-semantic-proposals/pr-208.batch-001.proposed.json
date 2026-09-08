@@ -1,0 +1,538 @@
+{
+  "authority": {
+    "proposal_digest": "",
+    "proposed_by": "deepseek:deepseek-v4-flash:pr-208-batch-001-proposer",
+    "status": "proposed",
+    "system_under_test_isolated": false,
+    "verification_evidence": [],
+    "verification_method": "",
+    "verified_by": ""
+  },
+  "candidate_universe_digest": "6ee61bf0f516385acfce02172b1b2466a0ffb3a7cec58165e4fcc4b1c5a86502",
+  "labels": [
+    {
+      "candidate_id": "C:G1:E:structural_change:44a2370ce77a6e66f8e7",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test helper modification supports the new behavior but does not directly enforce the guardrail.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:4fbcf96b02d19017c2c9",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test modification exercises the new behavior but does not directly enforce the guardrail.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:5d2be31cc60dea3d2f3b",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test addition verifies the new behavior but does not directly enforce the guardrail.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:7c4162e02e623fea377f",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test modification verifies the new behavior but does not directly enforce the guardrail.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:9ff44326982c1acafe85",
+      "semantic_relation": "constrains",
+      "proofability": "direct_capable",
+      "proof_basis": "deterministic_mapping",
+      "evidence_witnesses": [
+        "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+      ],
+      "note": "Removes the relations parameter from the seed API, preventing evidence-role-based membership decisions.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:d0cf036a1010c1207bc5",
+      "semantic_relation": "constrains",
+      "proofability": "direct_capable",
+      "proof_basis": "deterministic_mapping",
+      "evidence_witnesses": [
+        "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L435-L457"
+      ],
+      "note": "Changes seed derivation to filter solely on node role, not evidence annotation.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:44a2370ce77a6e66f8e7",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test helper modification supports the new behavior but does not directly enforce the guardrail.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:4fbcf96b02d19017c2c9",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test modification exercises the new behavior but does not directly enforce the guardrail.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:5d2be31cc60dea3d2f3b",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test addition verifies the new behavior but does not directly enforce the guardrail.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:7c4162e02e623fea377f",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test modification verifies the new behavior but does not directly enforce the guardrail.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:9ff44326982c1acafe85",
+      "semantic_relation": "constrains",
+      "proofability": "direct_capable",
+      "proof_basis": "deterministic_mapping",
+      "evidence_witnesses": [
+        "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+      ],
+      "note": "Removes the relations parameter from the seed API, preventing evidence-role-based membership decisions.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:d0cf036a1010c1207bc5",
+      "semantic_relation": "constrains",
+      "proofability": "direct_capable",
+      "proof_basis": "deterministic_mapping",
+      "evidence_witnesses": [
+        "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L435-L457"
+      ],
+      "note": "Changes seed derivation to filter solely on node role, not evidence annotation.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:44a2370ce77a6e66f8e7",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test helper modification supports the new behavior but does not directly enforce the guardrail.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:4fbcf96b02d19017c2c9",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test modification exercises the new behavior but does not directly enforce the guardrail.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:5d2be31cc60dea3d2f3b",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test addition verifies the new behavior but does not directly enforce the guardrail.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:7c4162e02e623fea377f",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test modification verifies the new behavior but does not directly enforce the guardrail.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:9ff44326982c1acafe85",
+      "semantic_relation": "constrains",
+      "proofability": "direct_capable",
+      "proof_basis": "deterministic_mapping",
+      "evidence_witnesses": [
+        "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+      ],
+      "note": "Removes the relations parameter from the seed API, preventing evidence-role-based membership decisions.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:d0cf036a1010c1207bc5",
+      "semantic_relation": "constrains",
+      "proofability": "direct_capable",
+      "proof_basis": "deterministic_mapping",
+      "evidence_witnesses": [
+        "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L435-L457"
+      ],
+      "note": "Changes seed derivation to filter solely on node role, not evidence annotation.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:44a2370ce77a6e66f8e7",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test helper modification supports the new behavior but does not directly enforce the guardrail.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:4fbcf96b02d19017c2c9",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test modification exercises the new behavior but does not directly enforce the guardrail.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:5d2be31cc60dea3d2f3b",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test addition verifies the new behavior but does not directly enforce the guardrail.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:7c4162e02e623fea377f",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test modification verifies the new behavior but does not directly enforce the guardrail.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:9ff44326982c1acafe85",
+      "semantic_relation": "constrains",
+      "proofability": "direct_capable",
+      "proof_basis": "deterministic_mapping",
+      "evidence_witnesses": [
+        "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+      ],
+      "note": "Removes the relations parameter from the seed API, preventing evidence-role-based membership decisions.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:d0cf036a1010c1207bc5",
+      "semantic_relation": "constrains",
+      "proofability": "direct_capable",
+      "proof_basis": "deterministic_mapping",
+      "evidence_witnesses": [
+        "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L435-L457"
+      ],
+      "note": "Changes seed derivation to filter solely on node role, not evidence annotation.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:44a2370ce77a6e66f8e7",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test helper modification supports the new behavior but does not directly implement the requirement.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:4fbcf96b02d19017c2c9",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test modification exercises the new behavior but does not directly implement the requirement.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:5d2be31cc60dea3d2f3b",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test addition verifies the new behavior but does not directly implement the requirement.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:7c4162e02e623fea377f",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test modification verifies the new behavior but does not directly implement the requirement.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:9ff44326982c1acafe85",
+      "semantic_relation": "implements",
+      "proofability": "direct_capable",
+      "proof_basis": "deterministic_mapping",
+      "evidence_witnesses": [
+        "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+      ],
+      "note": "Removes the relations parameter from the seed API, making membership independent of evidence annotation.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:d0cf036a1010c1207bc5",
+      "semantic_relation": "implements",
+      "proofability": "direct_capable",
+      "proof_basis": "deterministic_mapping",
+      "evidence_witnesses": [
+        "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L435-L457"
+      ],
+      "note": "Changes seed derivation to filter solely on node role, so test-support anchors are included.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:44a2370ce77a6e66f8e7",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test helper modification supports the new behavior but does not directly implement the requirement.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:4fbcf96b02d19017c2c9",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test modification exercises the new behavior but does not directly implement the requirement.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:5d2be31cc60dea3d2f3b",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test addition verifies the new behavior but does not directly implement the requirement.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:7c4162e02e623fea377f",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test modification verifies the new behavior but does not directly implement the requirement.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:9ff44326982c1acafe85",
+      "semantic_relation": "implements",
+      "proofability": "direct_capable",
+      "proof_basis": "deterministic_mapping",
+      "evidence_witnesses": [
+        "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+      ],
+      "note": "Removes the relations parameter from the seed API, so evidence annotation cannot affect membership.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:d0cf036a1010c1207bc5",
+      "semantic_relation": "implements",
+      "proofability": "direct_capable",
+      "proof_basis": "deterministic_mapping",
+      "evidence_witnesses": [
+        "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L435-L457"
+      ],
+      "note": "Changes seed derivation to filter solely on node role, not evidence annotation.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:44a2370ce77a6e66f8e7",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test helper modification supports the new behavior but does not directly implement the requirement.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:4fbcf96b02d19017c2c9",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test modification exercises the new behavior but does not directly implement the requirement.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:5d2be31cc60dea3d2f3b",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test addition verifies the new behavior but does not directly implement the requirement.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:7c4162e02e623fea377f",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test modification verifies the new behavior but does not directly implement the requirement.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:9ff44326982c1acafe85",
+      "semantic_relation": "implements",
+      "proofability": "direct_capable",
+      "proof_basis": "deterministic_mapping",
+      "evidence_witnesses": [
+        "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+      ],
+      "note": "Removes the relations parameter from the seed API, making the membership contract uniform across R/G and T/CC.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:d0cf036a1010c1207bc5",
+      "semantic_relation": "implements",
+      "proofability": "direct_capable",
+      "proof_basis": "deterministic_mapping",
+      "evidence_witnesses": [
+        "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L435-L457"
+      ],
+      "note": "Changes seed derivation to filter solely on node role, applying the same rule to R/G and T/CC.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:44a2370ce77a6e66f8e7",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test helper modification supports the new behavior but does not directly implement the requirement.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:4fbcf96b02d19017c2c9",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test modification exercises the new behavior but does not directly implement the requirement.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:5d2be31cc60dea3d2f3b",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test addition verifies the new behavior but does not directly implement the requirement.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:7c4162e02e623fea377f",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test modification verifies the new behavior but does not directly implement the requirement.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:9ff44326982c1acafe85",
+      "semantic_relation": "implements",
+      "proofability": "direct_capable",
+      "proof_basis": "deterministic_mapping",
+      "evidence_witnesses": [
+        "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+      ],
+      "note": "Removes the relations parameter from the seed API, preventing evidence-role-based promotion of support nodes.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:d0cf036a1010c1207bc5",
+      "semantic_relation": "implements",
+      "proofability": "direct_capable",
+      "proof_basis": "deterministic_mapping",
+      "evidence_witnesses": [
+        "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L435-L457"
+      ],
+      "note": "Changes seed derivation to filter solely on node role, so intermediate nodes are not seeds.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R5:E:structural_change:44a2370ce77a6e66f8e7",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test helper modification supports the new behavior but does not directly implement the requirement.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R5:E:structural_change:4fbcf96b02d19017c2c9",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test modification exercises the new behavior but does not directly implement the requirement.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R5:E:structural_change:5d2be31cc60dea3d2f3b",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test addition verifies the new behavior but does not directly implement the requirement.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R5:E:structural_change:7c4162e02e623fea377f",
+      "semantic_relation": "contextual_support",
+      "proofability": "not_applicable",
+      "proof_basis": "none",
+      "evidence_witnesses": [],
+      "note": "Test modification verifies the new behavior but does not directly implement the requirement.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R5:E:structural_change:9ff44326982c1acafe85",
+      "semantic_relation": "implements",
+      "proofability": "direct_capable",
+      "proof_basis": "deterministic_mapping",
+      "evidence_witnesses": [
+        "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+      ],
+      "note": "Removes the relations parameter from the seed API, allowing test-support anchors to be included alongside production anchors.",
+      "review_status": "reviewed"
+    },
+    {
+      "candidate_id": "C:R5:E:structural_change:d0cf036a1010c1207bc5",
+      "semantic_relation": "implements",
+      "proofability": "direct_capable",
+      "proof_basis": "deterministic_mapping",
+      "evidence_witnesses": [
+        "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L435-L457"
+      ],
+      "note": "Changes seed derivation to filter solely on node role, so direct test anchors are included with production anchors.",
+      "review_status": "reviewed"
+    }
+  ],
+  "out_of_universe": [],
+  "schema_version": "rg_semantic_candidate_reference.v2"
+}

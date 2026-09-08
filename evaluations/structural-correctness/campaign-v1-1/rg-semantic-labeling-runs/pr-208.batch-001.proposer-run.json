@@ -1,0 +1,51 @@
+{
+  "schema_version": "rg_semantic_proposer_run.v1",
+  "batch_id": "pr-208-batch-001",
+  "role": "proposer",
+  "identity": "deepseek:deepseek-v4-flash:pr-208-batch-001-proposer",
+  "provider": "DeepSeek",
+  "model": "deepseek-v4-flash",
+  "endpoint_class": "deepseek-openai-chat-completions",
+  "execution_contract": {
+    "temperature": 0,
+    "max_tokens": 12000,
+    "response_format": "json_object",
+    "store": false,
+    "thinking": {
+      "type": "disabled"
+    },
+    "model_configuration_sha256": "cc9ffc950b7979146a02abc9887666fee6af222add5c243b884b46a9fc374fd8"
+  },
+  "authorized_inputs": {
+    "labeler_input": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.labeler-input.json",
+      "sha256": "9c0cc908b740c0c1529f0e85f6d19190a5156e17685decb5686a1a7daccc4e2e"
+    },
+    "proposer_prompt": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.proposer-prompt.md",
+      "sha256": "f35bdb46d83c6df49227c6e44424eb61ad643eb159ed3d793e547d63a0b12c3b"
+    },
+    "prelabel_execution_amendment": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.prelabel-execution-amendment.json",
+      "sha256": "f72259c64687c24df22a62c0e85cb2c5625ffdda84e37396fdf2039d9cd8cfa9"
+    }
+  },
+  "safe_completion": {
+    "http_status": 200,
+    "finish_reason": "stop",
+    "input_tokens": 12840,
+    "output_tokens": 6580,
+    "request_sha256": "4839489c3810d86cb67e62d09f01a414cd54c02639afd9515fe50bc71093e0f8",
+    "structured_response_sha256": "bc927c1ea9dcd42b8fec0ccb240ad2dd6c86a27320dba175f554ece7a22a1372",
+    "raw_provider_response_retained": false,
+    "provider_error_text_retained": false
+  },
+  "output": {
+    "proposal_path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-proposals/pr-208.batch-001.proposed.json",
+    "proposal_sha256": "46fd0a8a0bc5bb9c38b66ecb191e8191677d11b5d9a7eee48c1e5f1d995cccd9",
+    "candidate_label_count": 54,
+    "out_of_universe_count": 0,
+    "reference_authority_status": "proposed"
+  },
+  "authority_boundary": "This is a blind proposer output only. It is not a verified semantic reference, a semantic-correctness metric, a production association decision, or an assessment authority."
+}
