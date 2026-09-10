@@ -1,0 +1,95 @@
+{
+  "schema_version": "rg_semantic_canonical_lifecycle_execution_plan.v1",
+  "batch_id": "pr-208-batch-001",
+  "status": "frozen_before_single_canonical_lifecycle_execution",
+  "execution_date": "2026-09-11",
+  "trigger": {
+    "kind": "canonical_transport_replacement",
+    "merged_pull_request": 311,
+    "merged_commit": "99a2986cc933f093d0f9664c61ca248fe6ee002d",
+    "before": "The earlier one-shot and shard attempts used duplicated request/response handling and safely retained no raw response shape.",
+    "after": "This execution uses only repodelta.llm.openai.complete_json_object for DeepSeek JSON-mode request construction, response normalization, and safe failure classification."
+  },
+  "role": "source-evidence lifecycle verifier",
+  "execution": {
+    "identity": "deepseek:deepseek-v4-pro:pr-208-batch-001-canonical-lifecycle-verifier",
+    "provider": "DeepSeek",
+    "configured_model_id": "deepseek-v4-pro",
+    "provider_reported_model_required": true,
+    "endpoint_class": "deepseek-openai-compatible",
+    "base_url": "https://api.deepseek.com",
+    "api_profile": "deepseek",
+    "timeout_seconds": 300.0,
+    "max_output_tokens": 16000,
+    "thinking_mode": "default",
+    "reasoning_effort": "default",
+    "policy_identity": "shadow-policy:d77844da9f5cf0f9636c",
+    "payload_contract": {
+      "response_format": {
+        "type": "json_object"
+      },
+      "max_token_field": "max_tokens",
+      "store": false,
+      "temperature": "not_emitted_by_canonical_adapter",
+      "stream": "not_emitted_by_canonical_adapter"
+    },
+    "known_reasoning_dependencies": [
+      "The verifier shares the DeepSeek provider with the deepseek-v4-flash proposer.",
+      "It also shares the deepseek-v4-pro model identifier with the earlier AI adjudicator, while using a fresh execution and a separately authored lifecycle prompt.",
+      "This establishes procedural separation, not independent error modes or semantic correctness."
+    ]
+  },
+  "authorized_input_artifacts": {
+    "protocol": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-protocol.md",
+      "sha256": "f8fa4e620a860e59e9551c3080651a02b7d1e885b6f26a12e4c802d5e05770a7"
+    },
+    "rubric": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-reference-rubric.md",
+      "sha256": "2986b6e906ad97e1f56b9d92b59a46c0de8187a47583fea54fce2ca1dd3d130d"
+    },
+    "labeler_input": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.labeler-input.json",
+      "sha256": "9c0cc908b740c0c1529f0e85f6d19190a5156e17685decb5686a1a7daccc4e2e"
+    },
+    "proposed_reference": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-proposals/pr-208.batch-001.ai-adjudicated.proposed.json",
+      "sha256": "9e55d0aebc69201a2fcaf6012ce98e8a843b69616879ba0ec8769caf2135b83d"
+    },
+    "prompt": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.canonical-lifecycle-verifier-prompt.md",
+      "sha256": "cf3d0adf9967f25bf3c152f787fa52b1aed37a847d7ff3542e934634a3cab5e3"
+    },
+    "output_schema": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.ai-lifecycle-verifier-output.schema.json",
+      "sha256": "14c68dd639671880dd8eccb5e8122d96763c8ee906167436e30e29aefa0a6b8f"
+    }
+  },
+  "model_input_exclusions": {
+    "adjudication_ledger": "The committed adjudication ledger remains provenance evidence for later lifecycle review but is excluded from this source-evidence model input to avoid agreement pressure and unnecessary context expansion.",
+    "retrieval_surfaces": [
+      "rg-retrieval-observations",
+      "association-attribution",
+      "structural-focus observations",
+      "policy shadows",
+      "comparison outputs",
+      "generated RepoDelta reports"
+    ]
+  },
+  "review_contract": {
+    "candidate_count": 54,
+    "coverage": "full_population_second_source_evidence_review",
+    "direct_rows": "Every semantic-direct proposal label is independently reviewed against source evidence.",
+    "non_direct_rows": "Every non-direct proposal label is independently reviewed under the frozen full-population plan.",
+    "acceptance": "Only 54 accepted, schema-valid decisions with accept_empty out-of-universe review permit the later protocol verification check.",
+    "failure_behavior": "Any provider failure, missing reported model identity, malformed or incomplete output, candidate mismatch, challenge, prohibited-surface access, or unmet protocol diversity condition leaves the proposal unverified and emits no semantic metric."
+  },
+  "attempt_limit": 1,
+  "stop_condition": "This plan permits exactly one lifecycle execution. Any failed or challenged result is committed as bounded evidence; no second execution design or retry is authorized by this plan.",
+  "runner": {
+    "path": "evaluations/structural-correctness/campaign-v1-1/scripts/run_pr208_canonical_lifecycle_verifier.py",
+    "sha256": "7d9ebacdfda81a3e55da984615653ba1febea6e1cf79353acebecd66314fda18",
+    "contract": "The runner verifies every frozen input digest, invokes only the canonical adapter, requires the provider-reported model identity, validates the full lifecycle output before writing it, and persists no raw provider response or error text."
+  },
+  "authority_boundary": "This execution reviews a proposed evaluation reference. It cannot itself verify that reference, produce semantic FI/FE, change production association, or alter formal assessment."
+}
