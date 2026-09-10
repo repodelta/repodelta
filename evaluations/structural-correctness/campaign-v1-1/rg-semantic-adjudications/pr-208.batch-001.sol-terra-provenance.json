@@ -1,0 +1,39 @@
+{
+  "schema_version": "rg_semantic_external_ai_review_provenance.v1",
+  "batch_id": "pr-208-batch-001",
+  "status": "campaign_owner_attested_external_ai_review",
+  "source_artifact": {
+    "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-adjudications/pr-208.batch-001.sol-terra-corrected-source.md",
+    "sha256": "230711e260934abc2e99ca3788a7d90f3a9a86103b66afb865d09e5bbe2b8575",
+    "preservation": "verbatim user-provided artifact; its legacy title and embedded single-model attribution are not rewritten"
+  },
+  "campaign_owner_attestation": {
+    "reported_origin": "GPT-5.6 Sol produced the review and GPT-5.6 Terra performed two subsequent correction passes.",
+    "reported_scope": "The 22 PR 208 batch-001 proposer/verifier disagreements, reviewed against the Issue, exact base/head code, frozen rubric, and unresolved ledger.",
+    "unrecorded_runtime_metadata": [
+      "provider endpoint",
+      "execution dates",
+      "prompt digests",
+      "normalized model configurations",
+      "raw model outputs"
+    ]
+  },
+  "authority_scope": "External multi-AI semantic-review evidence and qualitative cross-check only; it is not a human adjudication, reproducible API run, lifecycle verifier, verified reference, semantic metric, production association decision, assessment authority, or report authority.",
+  "mechanical_comparison_to_deepseek_v4_pro_ai_adjudication": {
+    "comparator": "candidate IDs and semantic/proofability/basis triples only",
+    "agreement_count": 20,
+    "disagreement_count": 2,
+    "disagreements": {
+      "C:G3:E:structural_change:9ff44326982c1acafe85": {
+        "sol_terra": "contextual_support / not_applicable / none",
+        "deepseek_v4_pro": "unrelated / not_applicable / none"
+      },
+      "C:G3:E:structural_change:d0cf036a1010c1207bc5": {
+        "sol_terra": "contextual_support / not_applicable / none",
+        "deepseek_v4_pro": "unrelated / not_applicable / none"
+      }
+    },
+    "direct_label_agreement": "All seven directly_verifies / direct_capable / bounded_evidence labels agree."
+  },
+  "preserved_uncertainty": "The two non-direct G3 differences remain disagreement evidence. They are not silently collapsed or used to change the proposed reference."
+}

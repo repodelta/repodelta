@@ -1,0 +1,110 @@
+{
+  "authority_boundary": "Shards are evaluation lifecycle-review attempts only. They cannot change production behavior, assessment, reports, or create semantic metrics before a separate protocol verification transition.",
+  "batch_id": "pr-208-batch-001",
+  "partition_invariants": {
+    "aggregation": "mechanical only; every shard must accept every assigned label and all shard candidate sets must exactly partition the frozen proposal",
+    "candidate_count": 54,
+    "each_candidate_exactly_once": true,
+    "retrieval_or_association_inputs": "prohibited",
+    "subject_context_is_preserved_within_each_shard": true
+  },
+  "reason": "The one-shot 54-row lifecycle verifier failed twice with provider_response_parse_failure and no retained structured output. This replacement design preserves the same universe and labels while bounding each source-evidence response.",
+  "schema_version": "rg_semantic_ai_lifecycle_shard_plan.v1",
+  "shards": [
+    {
+      "candidate_ids": [
+        "C:G1:E:structural_change:44a2370ce77a6e66f8e7",
+        "C:G1:E:structural_change:4fbcf96b02d19017c2c9",
+        "C:G1:E:structural_change:5d2be31cc60dea3d2f3b",
+        "C:G1:E:structural_change:7c4162e02e623fea377f",
+        "C:G1:E:structural_change:9ff44326982c1acafe85",
+        "C:G1:E:structural_change:d0cf036a1010c1207bc5",
+        "C:G2:E:structural_change:44a2370ce77a6e66f8e7",
+        "C:G2:E:structural_change:4fbcf96b02d19017c2c9",
+        "C:G2:E:structural_change:5d2be31cc60dea3d2f3b",
+        "C:G2:E:structural_change:7c4162e02e623fea377f",
+        "C:G2:E:structural_change:9ff44326982c1acafe85",
+        "C:G2:E:structural_change:d0cf036a1010c1207bc5",
+        "C:G3:E:structural_change:44a2370ce77a6e66f8e7",
+        "C:G3:E:structural_change:4fbcf96b02d19017c2c9",
+        "C:G3:E:structural_change:5d2be31cc60dea3d2f3b",
+        "C:G3:E:structural_change:7c4162e02e623fea377f",
+        "C:G3:E:structural_change:9ff44326982c1acafe85",
+        "C:G3:E:structural_change:d0cf036a1010c1207bc5",
+        "C:G4:E:structural_change:44a2370ce77a6e66f8e7",
+        "C:G4:E:structural_change:4fbcf96b02d19017c2c9",
+        "C:G4:E:structural_change:5d2be31cc60dea3d2f3b",
+        "C:G4:E:structural_change:7c4162e02e623fea377f",
+        "C:G4:E:structural_change:9ff44326982c1acafe85",
+        "C:G4:E:structural_change:d0cf036a1010c1207bc5"
+      ],
+      "shard_id": "pr-208-batch-001-001-guardrails",
+      "subject_ids": [
+        "G1",
+        "G2",
+        "G3",
+        "G4"
+      ]
+    },
+    {
+      "candidate_ids": [
+        "C:R1:E:structural_change:44a2370ce77a6e66f8e7",
+        "C:R1:E:structural_change:4fbcf96b02d19017c2c9",
+        "C:R1:E:structural_change:5d2be31cc60dea3d2f3b",
+        "C:R1:E:structural_change:7c4162e02e623fea377f",
+        "C:R1:E:structural_change:9ff44326982c1acafe85",
+        "C:R1:E:structural_change:d0cf036a1010c1207bc5",
+        "C:R2:E:structural_change:44a2370ce77a6e66f8e7",
+        "C:R2:E:structural_change:4fbcf96b02d19017c2c9",
+        "C:R2:E:structural_change:5d2be31cc60dea3d2f3b",
+        "C:R2:E:structural_change:7c4162e02e623fea377f",
+        "C:R2:E:structural_change:9ff44326982c1acafe85",
+        "C:R2:E:structural_change:d0cf036a1010c1207bc5",
+        "C:R3:E:structural_change:44a2370ce77a6e66f8e7",
+        "C:R3:E:structural_change:4fbcf96b02d19017c2c9",
+        "C:R3:E:structural_change:5d2be31cc60dea3d2f3b",
+        "C:R3:E:structural_change:7c4162e02e623fea377f",
+        "C:R3:E:structural_change:9ff44326982c1acafe85",
+        "C:R3:E:structural_change:d0cf036a1010c1207bc5"
+      ],
+      "shard_id": "pr-208-batch-001-002-requirements-core",
+      "subject_ids": [
+        "R1",
+        "R2",
+        "R3"
+      ]
+    },
+    {
+      "candidate_ids": [
+        "C:R4:E:structural_change:44a2370ce77a6e66f8e7",
+        "C:R4:E:structural_change:4fbcf96b02d19017c2c9",
+        "C:R4:E:structural_change:5d2be31cc60dea3d2f3b",
+        "C:R4:E:structural_change:7c4162e02e623fea377f",
+        "C:R4:E:structural_change:9ff44326982c1acafe85",
+        "C:R4:E:structural_change:d0cf036a1010c1207bc5",
+        "C:R5:E:structural_change:44a2370ce77a6e66f8e7",
+        "C:R5:E:structural_change:4fbcf96b02d19017c2c9",
+        "C:R5:E:structural_change:5d2be31cc60dea3d2f3b",
+        "C:R5:E:structural_change:7c4162e02e623fea377f",
+        "C:R5:E:structural_change:9ff44326982c1acafe85",
+        "C:R5:E:structural_change:d0cf036a1010c1207bc5"
+      ],
+      "shard_id": "pr-208-batch-001-003-requirements-boundaries",
+      "subject_ids": [
+        "R4",
+        "R5"
+      ]
+    }
+  ],
+  "source_inputs": {
+    "labeler_input": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.labeler-input.json",
+      "sha256": "9c0cc908b740c0c1529f0e85f6d19190a5156e17685decb5686a1a7daccc4e2e"
+    },
+    "proposed_reference": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-proposals/pr-208.batch-001.ai-adjudicated.proposed.json",
+      "sha256": "9e55d0aebc69201a2fcaf6012ce98e8a843b69616879ba0ec8769caf2135b83d"
+    }
+  },
+  "status": "frozen_before_shard_review"
+}
