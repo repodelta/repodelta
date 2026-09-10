@@ -227,10 +227,53 @@ def test_deepseek_json_object_completion_uses_canonical_payload_and_parser() -> 
     assert captured["payload"]["store"] is False
     assert "exactly one JSON object" in captured["payload"]["messages"][0]["content"]
     assert "secret-test-key" not in json.dumps(captured["payload"])
-    assert response.model_id == "deepseek-v4-pro"
+    assert response.configured_model_id == "deepseek-v4-pro"
+    assert response.provider_reported_model_id == "deepseek-v4-pro"
+    assert response.effective_model_id == "deepseek-v4-pro"
     assert response.output == {"status": "ok"}
     assert response.input_tokens == 8
     assert response.output_tokens == 3
+
+
+def test_json_object_completion_preserves_missing_reported_model_identity() -> None:
+    response = complete_json_object(
+        OpenAIShadowConfig(api_key="key", model="configured-model"),
+        system_prompt="Return JSON.",
+        user_content="Return a fixed object.",
+        transport=lambda *_: {
+            "choices": [{"message": {"content": '{"status":"ok"}'}}]
+        },
+    )
+
+    assert response.configured_model_id == "configured-model"
+    assert response.provider_reported_model_id is None
+    assert response.effective_model_id == "configured-model"
+
+
+def test_json_object_completion_can_require_provider_reported_model_identity() -> None:
+    with pytest.raises(ShadowProviderFailure) as exc_info:
+        complete_json_object(
+            OpenAIShadowConfig(api_key="key", model="configured-model"),
+            system_prompt="Return JSON.",
+            user_content="Return a fixed object.",
+            require_provider_reported_model=True,
+            transport=lambda *_: {
+                "choices": [{"message": {"content": '{"status":"ok"}'}}]
+            },
+        )
+
+    assert exc_info.value.kind == "provider_model_identity_missing"
+
+
+def test_shadow_provider_preserves_legacy_model_fallback_when_not_required() -> None:
+    response = _api_response(_request())
+    response.pop("model")
+    provider = OpenAIShadowProvider(
+        OpenAIShadowConfig(api_key="key", model="configured-model"),
+        transport=lambda *_: response,
+    )
+
+    assert provider.select(_request()).model_id == "configured-model"
 
 
 @pytest.mark.parametrize("content", (None, "", "   \n\t"))

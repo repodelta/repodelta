@@ -209,4 +209,7 @@ _PROVIDER_FAILURE_MESSAGES = {
     "structured_output_missing": (
         "Shadow provider response contained no usable structured output."
     ),
+    "provider_model_identity_missing": (
+        "Shadow provider response omitted the required provider-reported model identity."
+    ),
 }

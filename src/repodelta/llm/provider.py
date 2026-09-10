@@ -17,6 +17,7 @@ ShadowProviderFailureKind = Literal[
     "transport_response_decode_failure",
     "structured_output_decode_failure",
     "structured_output_missing",
+    "provider_model_identity_missing",
 ]
 _SHADOW_PROVIDER_FAILURE_KINDS = frozenset(
     {
@@ -28,6 +29,7 @@ _SHADOW_PROVIDER_FAILURE_KINDS = frozenset(
         "transport_response_decode_failure",
         "structured_output_decode_failure",
         "structured_output_missing",
+        "provider_model_identity_missing",
     }
 )
 

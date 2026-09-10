@@ -105,6 +105,39 @@ class OpenAIShadowConfig:
         )
 
 
+@dataclass(frozen=True)
+class OpenAIJsonCompletion:
+    """One untrusted JSON-mode response with explicit model provenance."""
+
+    provider_id: str
+    configured_model_id: str
+    provider_reported_model_id: str | None
+    output: Mapping[str, Any]
+    input_tokens: int | None = None
+    output_tokens: int | None = None
+
+    def __post_init__(self) -> None:
+        if not self.provider_id.strip() or not self.configured_model_id.strip():
+            raise ValueError(
+                "JSON completion provider_id and configured_model_id must be non-empty"
+            )
+        if (
+            self.provider_reported_model_id is not None
+            and not self.provider_reported_model_id.strip()
+        ):
+            raise ValueError("provider_reported_model_id must be non-empty when set")
+        for name in ("input_tokens", "output_tokens"):
+            value = getattr(self, name)
+            if value is not None and value < 0:
+                raise ValueError(f"{name} must be non-negative")
+
+    @property
+    def effective_model_id(self) -> str:
+        """Compatibility identity only; callers needing provenance use both fields."""
+
+        return self.provider_reported_model_id or self.configured_model_id
+
+
 class OpenAIShadowProvider:
     """OpenAI-compatible Chat Completions transport without assessment authority."""
 
@@ -122,12 +155,19 @@ class OpenAIShadowProvider:
         return self._config.execution_policy
 
     def select(self, request: ShadowEvidenceRequest) -> ShadowProviderResponse:
-        return _complete_json(
+        completion = _complete_json(
             self._config,
             system_prompt=SHADOW_SELECTION_SYSTEM_PROMPT,
             user_content=_user_content(request, self._config),
             response_format=_response_format(request, self._config),
             transport=self._transport,
+        )
+        return ShadowProviderResponse(
+            provider_id=completion.provider_id,
+            model_id=completion.effective_model_id,
+            output=completion.output,
+            input_tokens=completion.input_tokens,
+            output_tokens=completion.output_tokens,
         )
 
 
@@ -136,8 +176,9 @@ def complete_json_object(
     *,
     system_prompt: str,
     user_content: str,
+    require_provider_reported_model: bool = False,
     transport: JsonTransport | None = None,
-) -> ShadowProviderResponse:
+) -> OpenAIJsonCompletion:
     """Complete one non-authoritative JSON-mode Chat Completions request.
 
     This is the canonical JSON-mode transport and response-normalization seam
@@ -145,13 +186,16 @@ def complete_json_object(
     their own contract before giving it any meaning or persistence.
     """
 
-    return _complete_json(
+    completion = _complete_json(
         config,
         system_prompt=f"{system_prompt.rstrip()}\n\n{JSON_OBJECT_INSTRUCTION}",
         user_content=user_content,
         response_format={"type": "json_object"},
         transport=transport or _post_json,
     )
+    if require_provider_reported_model and completion.provider_reported_model_id is None:
+        raise ShadowProviderFailure("provider_model_identity_missing")
+    return completion
 
 
 def _complete_json(
@@ -161,7 +205,7 @@ def _complete_json(
     user_content: str,
     response_format: Mapping[str, Any],
     transport: JsonTransport,
-) -> ShadowProviderResponse:
+) -> OpenAIJsonCompletion:
     if not system_prompt.strip() or not user_content.strip():
         raise ValueError("JSON-mode completion prompts must be non-empty")
     response = transport(
@@ -186,13 +230,19 @@ def _complete_json(
         raise ShadowProviderFailure("structured_output_missing") from None
     usage = response.get("usage")
     usage = usage if isinstance(usage, Mapping) else {}
-    return ShadowProviderResponse(
+    return OpenAIJsonCompletion(
         provider_id="openai-chat-completions",
-        model_id=str(response.get("model") or config.model),
+        configured_model_id=config.model,
+        provider_reported_model_id=_provider_reported_model_id(response),
         output=output,
         input_tokens=_optional_non_negative_int(usage.get("prompt_tokens")),
         output_tokens=_optional_non_negative_int(usage.get("completion_tokens")),
     )
+
+
+def _provider_reported_model_id(response: Mapping[str, Any]) -> str | None:
+    value = response.get("model")
+    return value.strip() if isinstance(value, str) and value.strip() else None
 
 
 def _response_payload(
