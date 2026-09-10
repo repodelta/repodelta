@@ -12,6 +12,7 @@ from repodelta.llm import (
     ShadowEvidenceCandidate,
     ShadowEvidenceRequest,
     ShadowProviderFailure,
+    complete_json_object,
 )
 
 
@@ -195,6 +196,61 @@ def test_deepseek_profile_maps_neutral_policy_to_provider_payload() -> None:
     assert user_content["required_response_json_schema"]["properties"][
         "selections"
     ]["items"]["additionalProperties"] is False
+
+
+def test_deepseek_json_object_completion_uses_canonical_payload_and_parser() -> None:
+    captured = {}
+
+    def transport(url, headers, payload, timeout):
+        captured.update(url=url, headers=headers, payload=payload, timeout=timeout)
+        return {
+            "model": "deepseek-v4-pro",
+            "choices": [{"message": {"content": '{"status":"ok"}'}}],
+            "usage": {"prompt_tokens": 8, "completion_tokens": 3},
+        }
+
+    response = complete_json_object(
+        OpenAIShadowConfig(
+            api_key="secret-test-key",
+            model="deepseek-v4-pro",
+            base_url="https://api.deepseek.com",
+            api_profile="deepseek",
+        ),
+        system_prompt="Classify this non-semantic capability probe.",
+        user_content="Return the fixed status.",
+        transport=transport,
+    )
+
+    assert captured["url"] == "https://api.deepseek.com/chat/completions"
+    assert captured["payload"]["max_tokens"] == 1_200
+    assert captured["payload"]["response_format"] == {"type": "json_object"}
+    assert captured["payload"]["store"] is False
+    assert "exactly one JSON object" in captured["payload"]["messages"][0]["content"]
+    assert "secret-test-key" not in json.dumps(captured["payload"])
+    assert response.model_id == "deepseek-v4-pro"
+    assert response.output == {"status": "ok"}
+    assert response.input_tokens == 8
+    assert response.output_tokens == 3
+
+
+@pytest.mark.parametrize("content", (None, "", "   \n\t"))
+def test_deepseek_json_object_completion_fails_closed_for_empty_content(
+    content: str | None,
+) -> None:
+    with pytest.raises(ShadowProviderFailure) as exc_info:
+        complete_json_object(
+            OpenAIShadowConfig(
+                api_key="key",
+                model="deepseek-v4-pro",
+                base_url="https://api.deepseek.com",
+                api_profile="deepseek",
+            ),
+            system_prompt="Return JSON.",
+            user_content="Return a fixed object.",
+            transport=lambda *_: {"choices": [{"message": {"content": content}}]},
+        )
+
+    assert exc_info.value.kind == "structured_output_missing"
 
 
 def test_openai_provider_rejects_incomplete_or_missing_output() -> None:

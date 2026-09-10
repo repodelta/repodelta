@@ -53,6 +53,10 @@ dynamic or external surfaces in unresolved_surfaces.
 Return exactly one JSON object matching the requested response contract.
 """
 
+JSON_OBJECT_INSTRUCTION = """\
+Return exactly one JSON object. Do not use a Markdown fence or add prose.
+"""
+
 JsonTransport = Callable[
     [str, Mapping[str, str], Mapping[str, Any], float], Mapping[str, Any]
 ]
@@ -118,35 +122,97 @@ class OpenAIShadowProvider:
         return self._config.execution_policy
 
     def select(self, request: ShadowEvidenceRequest) -> ShadowProviderResponse:
-        response = self._transport(
-            self._config.chat_completions_url,
-            {
-                "Authorization": f"Bearer {self._config.api_key}",
-                "Content-Type": "application/json",
-            },
-            _response_payload(request, self._config),
-            self._config.timeout_seconds,
+        return _complete_json(
+            self._config,
+            system_prompt=SHADOW_SELECTION_SYSTEM_PROMPT,
+            user_content=_user_content(request, self._config),
+            response_format=_response_format(request, self._config),
+            transport=self._transport,
         )
-        try:
-            output = _structured_output(response)
-        except json.JSONDecodeError:
-            raise ShadowProviderFailure("structured_output_decode_failure") from None
-        except (TypeError, ValueError):
-            raise ShadowProviderFailure("structured_output_missing") from None
-        usage = response.get("usage")
-        usage = usage if isinstance(usage, Mapping) else {}
-        return ShadowProviderResponse(
-            provider_id="openai-chat-completions",
-            model_id=str(response.get("model") or self._config.model),
-            output=output,
-            input_tokens=_optional_non_negative_int(usage.get("prompt_tokens")),
-            output_tokens=_optional_non_negative_int(usage.get("completion_tokens")),
-        )
+
+
+def complete_json_object(
+    config: OpenAIShadowConfig,
+    *,
+    system_prompt: str,
+    user_content: str,
+    transport: JsonTransport | None = None,
+) -> ShadowProviderResponse:
+    """Complete one non-authoritative JSON-mode Chat Completions request.
+
+    This is the canonical JSON-mode transport and response-normalization seam
+    for bounded callers. Consumers must validate the returned object against
+    their own contract before giving it any meaning or persistence.
+    """
+
+    return _complete_json(
+        config,
+        system_prompt=f"{system_prompt.rstrip()}\n\n{JSON_OBJECT_INSTRUCTION}",
+        user_content=user_content,
+        response_format={"type": "json_object"},
+        transport=transport or _post_json,
+    )
+
+
+def _complete_json(
+    config: OpenAIShadowConfig,
+    *,
+    system_prompt: str,
+    user_content: str,
+    response_format: Mapping[str, Any],
+    transport: JsonTransport,
+) -> ShadowProviderResponse:
+    if not system_prompt.strip() or not user_content.strip():
+        raise ValueError("JSON-mode completion prompts must be non-empty")
+    response = transport(
+        config.chat_completions_url,
+        {
+            "Authorization": f"Bearer {config.api_key}",
+            "Content-Type": "application/json",
+        },
+        _chat_completions_payload(
+            config,
+            system_prompt=system_prompt,
+            user_content=user_content,
+            response_format=response_format,
+        ),
+        config.timeout_seconds,
+    )
+    try:
+        output = _structured_output(response)
+    except json.JSONDecodeError:
+        raise ShadowProviderFailure("structured_output_decode_failure") from None
+    except (TypeError, ValueError):
+        raise ShadowProviderFailure("structured_output_missing") from None
+    usage = response.get("usage")
+    usage = usage if isinstance(usage, Mapping) else {}
+    return ShadowProviderResponse(
+        provider_id="openai-chat-completions",
+        model_id=str(response.get("model") or config.model),
+        output=output,
+        input_tokens=_optional_non_negative_int(usage.get("prompt_tokens")),
+        output_tokens=_optional_non_negative_int(usage.get("completion_tokens")),
+    )
 
 
 def _response_payload(
     request: ShadowEvidenceRequest,
     config: OpenAIShadowConfig,
+) -> dict[str, Any]:
+    return _chat_completions_payload(
+        config,
+        system_prompt=SHADOW_SELECTION_SYSTEM_PROMPT,
+        user_content=_user_content(request, config),
+        response_format=_response_format(request, config),
+    )
+
+
+def _chat_completions_payload(
+    config: OpenAIShadowConfig,
+    *,
+    system_prompt: str,
+    user_content: str,
+    response_format: Mapping[str, Any],
 ) -> dict[str, Any]:
     payload = {
         "model": config.model,
@@ -155,14 +221,14 @@ def _response_payload(
         "messages": [
             {
                 "role": "system",
-                "content": SHADOW_SELECTION_SYSTEM_PROMPT,
+                "content": system_prompt,
             },
             {
                 "role": "user",
-                "content": _user_content(request, config),
+                "content": user_content,
             },
         ],
-        "response_format": _response_format(request, config),
+        "response_format": dict(response_format),
     }
     if config.api_profile == "siliconflow" and config.thinking_mode != "default":
         payload["enable_thinking"] = config.thinking_mode == "enabled"
@@ -314,6 +380,8 @@ def _structured_output(response: Mapping[str, Any]) -> Mapping[str, Any]:
                 raise ValueError("OpenAI shadow response was refused")
             text = message.get("content")
             if isinstance(text, str):
+                if not text.strip():
+                    raise ValueError("OpenAI shadow response contained empty output")
                 parsed = json.loads(text)
                 if not isinstance(parsed, Mapping):
                     raise ValueError(
