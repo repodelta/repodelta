@@ -1,0 +1,30 @@
+{
+  "schema_version": "rg_semantic_ai_lifecycle_shard_attempt.v1",
+  "batch_id": "pr-208-batch-001",
+  "shard_id": "pr-208-batch-001-001-guardrails",
+  "attempt_id": "pr-208-batch-001-001-guardrails-attempt-002",
+  "role": "source-evidence lifecycle verifier",
+  "identity": "deepseek:deepseek-v4-pro:pr-208-batch-001-001-guardrails-verifier",
+  "provider": "DeepSeek",
+  "model_identifier": "deepseek-v4-pro",
+  "endpoint_class": "deepseek-openai-compatible",
+  "execution_date": "2026-09-10",
+  "transport_amendment": {
+    "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208-batch-001-001-guardrails.transport-amendment.json",
+    "sha256": "84f5239db2a3c11853dc478441e5227851889a768f3b16683910cc8d8b248ae0"
+  },
+  "shard_input": {
+    "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208-batch-001-001-guardrails.input.json",
+    "sha256": "ce4b7dccc2399b1db811f5d136ca3690315c780330c778412a28399d70927885"
+  },
+  "outcome": {
+    "status": "failed",
+    "failure_category": "provider_http_400",
+    "structured_output_retained": false,
+    "raw_provider_response_retained": false,
+    "provider_error_text_retained": false
+  },
+  "diagnostic_observation": "The corrected attempt omitted `store`, but the shard runner still serialized the recorded response format string directly. The previously successful DeepSeek request used the OpenAI-compatible object form `{\"type\": \"json_object\"}`.",
+  "authority_boundary": "This failed attempt produced no semantic-review output. It cannot verify a reference, emit a semantic metric, or alter production behavior.",
+  "next_required_transition": "A separately frozen wire-serialization correction may change only the response-format representation to the documented OpenAI-compatible JSON object while preserving all semantic inputs and inference controls."
+}

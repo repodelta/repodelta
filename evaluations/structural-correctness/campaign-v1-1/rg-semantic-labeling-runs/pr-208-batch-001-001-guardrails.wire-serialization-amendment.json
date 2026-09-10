@@ -1,0 +1,25 @@
+{
+  "schema_version": "rg_semantic_ai_lifecycle_shard_wire_serialization_amendment.v1",
+  "batch_id": "pr-208-batch-001",
+  "shard_id": "pr-208-batch-001-001-guardrails",
+  "status": "frozen_before_wire_serialization_retry",
+  "prior_attempt": {
+    "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208-batch-001-001-guardrails.attempt-002.json",
+    "sha256": "240aec7dcb16ffdb085a9c80a15fbe3ae67b9612ff456722d92ba2dbff134f20",
+    "failure_category": "provider_http_400"
+  },
+  "preserved_shard_input": {
+    "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208-batch-001-001-guardrails.input.json",
+    "sha256": "ce4b7dccc2399b1db811f5d136ca3690315c780330c778412a28399d70927885"
+  },
+  "permitted_transport_delta": "Serialize the unchanged `response_format: json_object` control as the OpenAI-compatible wire object `{\"type\": \"json_object\"}`. Continue omitting the non-wire `store` field. Preserve source input, candidate IDs, prompt, schema, model identifier, temperature, maximum output tokens, and stream=false unchanged.",
+  "prohibited_delta": [
+    "changing source evidence, candidate IDs, or proposed labels",
+    "changing model identifier or inference controls",
+    "exposing retrieval, association, provenance, comparison, or report artifacts",
+    "retaining raw provider response or error text",
+    "automatic retries after this corrected wire-serialization attempt"
+  ],
+  "failure_behavior": "A malformed, incomplete, challenged, or failed corrected attempt leaves the whole proposal unverified and requires a newly reviewed execution design.",
+  "authority_boundary": "This wire correction is a lifecycle-review transport action only. It does not verify the reference or permit semantic FI/FE."
+}
