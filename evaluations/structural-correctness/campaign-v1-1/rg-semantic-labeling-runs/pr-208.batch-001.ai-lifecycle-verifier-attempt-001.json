@@ -1,0 +1,24 @@
+{
+  "schema_version": "rg_semantic_ai_lifecycle_verifier_attempt.v1",
+  "batch_id": "pr-208-batch-001",
+  "attempt_id": "pr-208-batch-001-ai-lifecycle-verifier-attempt-001",
+  "role": "source-evidence lifecycle verifier",
+  "identity": "deepseek:deepseek-v4-pro:pr-208-batch-001-ai-lifecycle-verifier",
+  "provider": "DeepSeek",
+  "model_identifier": "deepseek-v4-pro",
+  "endpoint_class": "deepseek-openai-compatible",
+  "execution_date": "2026-09-10",
+  "input_manifest": {
+    "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.ai-lifecycle-verifier-input.json",
+    "sha256": "d42f499f2607ecfbc272869a3b57441a0025d910b8e5bc693cda6051d69d7445"
+  },
+  "outcome": {
+    "status": "failed",
+    "failure_category": "provider_response_parse_failure",
+    "structured_output_retained": false,
+    "raw_provider_response_retained": false,
+    "provider_error_text_retained": false
+  },
+  "authority_boundary": "This failed attempt produced no semantic-review output. It cannot verify a reference, emit a semantic metric, or alter production behavior.",
+  "next_permitted_transition": "One separately recorded parser-hardening retry may reuse the unchanged frozen input bundle. Any further failure leaves the proposal unverified."
+}
