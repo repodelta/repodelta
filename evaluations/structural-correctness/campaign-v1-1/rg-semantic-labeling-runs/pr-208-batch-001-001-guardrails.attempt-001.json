@@ -1,0 +1,26 @@
+{
+  "schema_version": "rg_semantic_ai_lifecycle_shard_attempt.v1",
+  "batch_id": "pr-208-batch-001",
+  "shard_id": "pr-208-batch-001-001-guardrails",
+  "attempt_id": "pr-208-batch-001-001-guardrails-attempt-001",
+  "role": "source-evidence lifecycle verifier",
+  "identity": "deepseek:deepseek-v4-pro:pr-208-batch-001-001-guardrails-verifier",
+  "provider": "DeepSeek",
+  "model_identifier": "deepseek-v4-pro",
+  "endpoint_class": "deepseek-openai-compatible",
+  "execution_date": "2026-09-10",
+  "shard_input": {
+    "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208-batch-001-001-guardrails.input.json",
+    "sha256": "ce4b7dccc2399b1db811f5d136ca3690315c780330c778412a28399d70927885"
+  },
+  "outcome": {
+    "status": "failed",
+    "failure_category": "provider_http_400",
+    "structured_output_retained": false,
+    "raw_provider_response_retained": false,
+    "provider_error_text_retained": false
+  },
+  "diagnostic_observation": "The shard transport path included the provenance-only `store: false` key, unlike the earlier successful DeepSeek request. The HTTP status alone does not prove this caused the failure.",
+  "authority_boundary": "This failed attempt produced no semantic-review output. It cannot verify a reference, emit a semantic metric, or alter production behavior.",
+  "next_required_transition": "A separately frozen transport-correction amendment may remove only the non-wire `store` field while preserving the exact shard source input, prompt, schema, model, and inference controls."
+}
