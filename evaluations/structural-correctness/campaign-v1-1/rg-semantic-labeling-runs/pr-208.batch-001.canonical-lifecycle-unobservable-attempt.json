@@ -14,6 +14,7 @@
     "authorized_execution_count": 1,
     "consumed_execution_count": 1,
     "retry_permitted": false,
+    "conservative_retry_accounting": "The dispatch is counted as consumed because provider delivery cannot be excluded. This is not an assertion that the provider received or processed a request.",
     "destination": "DeepSeek v4-pro through the canonical OpenAI-compatible adapter",
     "explicit_user_confirmation": "The user explicitly confirmed this frozen payload export before dispatch."
   },
