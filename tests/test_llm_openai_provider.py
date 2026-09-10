@@ -12,6 +12,7 @@ from repodelta.llm import (
     ShadowEvidenceCandidate,
     ShadowEvidenceRequest,
     ShadowProviderFailure,
+    complete_json_object,
 )
 
 
@@ -195,6 +196,104 @@ def test_deepseek_profile_maps_neutral_policy_to_provider_payload() -> None:
     assert user_content["required_response_json_schema"]["properties"][
         "selections"
     ]["items"]["additionalProperties"] is False
+
+
+def test_deepseek_json_object_completion_uses_canonical_payload_and_parser() -> None:
+    captured = {}
+
+    def transport(url, headers, payload, timeout):
+        captured.update(url=url, headers=headers, payload=payload, timeout=timeout)
+        return {
+            "model": "deepseek-v4-pro",
+            "choices": [{"message": {"content": '{"status":"ok"}'}}],
+            "usage": {"prompt_tokens": 8, "completion_tokens": 3},
+        }
+
+    response = complete_json_object(
+        OpenAIShadowConfig(
+            api_key="secret-test-key",
+            model="deepseek-v4-pro",
+            base_url="https://api.deepseek.com",
+            api_profile="deepseek",
+        ),
+        system_prompt="Classify this non-semantic capability probe.",
+        user_content="Return the fixed status.",
+        transport=transport,
+    )
+
+    assert captured["url"] == "https://api.deepseek.com/chat/completions"
+    assert captured["payload"]["max_tokens"] == 1_200
+    assert captured["payload"]["response_format"] == {"type": "json_object"}
+    assert captured["payload"]["store"] is False
+    assert "exactly one JSON object" in captured["payload"]["messages"][0]["content"]
+    assert "secret-test-key" not in json.dumps(captured["payload"])
+    assert response.configured_model_id == "deepseek-v4-pro"
+    assert response.provider_reported_model_id == "deepseek-v4-pro"
+    assert response.effective_model_id == "deepseek-v4-pro"
+    assert response.output == {"status": "ok"}
+    assert response.input_tokens == 8
+    assert response.output_tokens == 3
+
+
+def test_json_object_completion_preserves_missing_reported_model_identity() -> None:
+    response = complete_json_object(
+        OpenAIShadowConfig(api_key="key", model="configured-model"),
+        system_prompt="Return JSON.",
+        user_content="Return a fixed object.",
+        transport=lambda *_: {
+            "choices": [{"message": {"content": '{"status":"ok"}'}}]
+        },
+    )
+
+    assert response.configured_model_id == "configured-model"
+    assert response.provider_reported_model_id is None
+    assert response.effective_model_id == "configured-model"
+
+
+def test_json_object_completion_can_require_provider_reported_model_identity() -> None:
+    with pytest.raises(ShadowProviderFailure) as exc_info:
+        complete_json_object(
+            OpenAIShadowConfig(api_key="key", model="configured-model"),
+            system_prompt="Return JSON.",
+            user_content="Return a fixed object.",
+            require_provider_reported_model=True,
+            transport=lambda *_: {
+                "choices": [{"message": {"content": '{"status":"ok"}'}}]
+            },
+        )
+
+    assert exc_info.value.kind == "provider_model_identity_missing"
+
+
+def test_shadow_provider_preserves_legacy_model_fallback_when_not_required() -> None:
+    response = _api_response(_request())
+    response.pop("model")
+    provider = OpenAIShadowProvider(
+        OpenAIShadowConfig(api_key="key", model="configured-model"),
+        transport=lambda *_: response,
+    )
+
+    assert provider.select(_request()).model_id == "configured-model"
+
+
+@pytest.mark.parametrize("content", (None, "", "   \n\t"))
+def test_deepseek_json_object_completion_fails_closed_for_empty_content(
+    content: str | None,
+) -> None:
+    with pytest.raises(ShadowProviderFailure) as exc_info:
+        complete_json_object(
+            OpenAIShadowConfig(
+                api_key="key",
+                model="deepseek-v4-pro",
+                base_url="https://api.deepseek.com",
+                api_profile="deepseek",
+            ),
+            system_prompt="Return JSON.",
+            user_content="Return a fixed object.",
+            transport=lambda *_: {"choices": [{"message": {"content": content}}]},
+        )
+
+    assert exc_info.value.kind == "structured_output_missing"
 
 
 def test_openai_provider_rejects_incomplete_or_missing_output() -> None:

@@ -39,7 +39,12 @@ from repodelta.llm.labeling import (
     prepare_shadow_labeling_packet,
     write_shadow_labeling_packet,
 )
-from repodelta.llm.openai import OpenAIShadowConfig, OpenAIShadowProvider
+from repodelta.llm.openai import (
+    OpenAIJsonCompletion,
+    OpenAIShadowConfig,
+    OpenAIShadowProvider,
+    complete_json_object,
+)
 from repodelta.llm.provider import (
     ShadowEvidenceProvider,
     ShadowProviderExecutionPolicy,
@@ -61,6 +66,8 @@ __all__ = [
     "ShadowLabelingPacket",
     "OpenAIShadowConfig",
     "OpenAIShadowProvider",
+    "OpenAIJsonCompletion",
+    "complete_json_object",
     "ShadowAdmissionDiagnostic",
     "ShadowAdmissionPolicy",
     "ShadowCandidateAdmission",
