@@ -1,0 +1,19 @@
+{
+  "attempt_id": "pr-208-batch-001-canonical-lifecycle-probe-001",
+  "configured_model_id": "deepseek-v4-pro",
+  "endpoint_class": "deepseek-openai-compatible",
+  "execution_date": "2026-09-11",
+  "failure_category": "structured_output_missing",
+  "phase": "non_semantic_execution_probe",
+  "plan_path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.canonical-lifecycle-probe-plan.json",
+  "plan_sha256": "25e64ef2c4158c1c13ac2453ad3054387d0d38fa4a888bb5703a13b38a7d8d5e",
+  "provider": "DeepSeek",
+  "provider_error_text_retained": false,
+  "raw_provider_response_retained": false,
+  "repository_or_candidate_data_sent": false,
+  "runner_path": "evaluations/structural-correctness/campaign-v1-1/scripts/run_pr208_canonical_lifecycle_probe.py",
+  "runner_sha256": "ac1eb67cd57a4b7013a84bbbbc13e50e8a1f42b749076872f95740f8345a9de9",
+  "schema_version": "rg_semantic_canonical_lifecycle_probe_attempt.v1",
+  "state": "provider_failure",
+  "structured_output_retained": false
+}
