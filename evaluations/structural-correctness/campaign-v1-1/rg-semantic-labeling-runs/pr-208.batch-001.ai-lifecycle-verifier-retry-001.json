@@ -1,0 +1,26 @@
+{
+  "schema_version": "rg_semantic_ai_lifecycle_verifier_retry.v1",
+  "batch_id": "pr-208-batch-001",
+  "retry_id": "pr-208-batch-001-ai-lifecycle-verifier-retry-001",
+  "status": "frozen_before_retry",
+  "prior_attempt": {
+    "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.ai-lifecycle-verifier-attempt-001.json",
+    "sha256": "c21dbe06c104e0de80c6ece3efd677054f0947dcef9529fa82b66c92da372278",
+    "failure_category": "provider_response_parse_failure"
+  },
+  "reused_frozen_input": {
+    "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.ai-lifecycle-verifier-input.json",
+    "sha256": "d42f499f2607ecfbc272869a3b57441a0025d910b8e5bc693cda6051d69d7445"
+  },
+  "execution_identity": "deepseek:deepseek-v4-pro:pr-208-batch-001-ai-lifecycle-verifier-retry-001",
+  "permitted_change": "The response parser may accept a JSON object wrapped in a single Markdown code fence. The model input, candidate universe, proposal, prompt, schema, provider, model identifier, and decoding configuration remain unchanged.",
+  "prohibited_change": [
+    "changing or supplementing source evidence",
+    "changing proposal labels before the retry",
+    "exposing retrieval, association, provenance, comparison, or report artifacts",
+    "retaining raw provider response or error text",
+    "performing another retry after this one"
+  ],
+  "failure_behavior": "If this retry cannot produce one complete, schema-valid output with the frozen 54-candidate set, the proposal remains unverified and no further automatic retry is allowed.",
+  "authority_boundary": "A successful parser retry is still only a lifecycle review attempt. It does not itself verify a reference or permit semantic FI/FE."
+}

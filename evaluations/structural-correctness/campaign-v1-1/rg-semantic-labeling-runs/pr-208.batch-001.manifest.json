@@ -1,0 +1,217 @@
+{
+  "schema_version": "rg_semantic_labeling_batch_manifest.v1",
+  "batch_id": "pr-208-batch-001",
+  "campaign_issue": 306,
+  "status": "frozen_before_labeling",
+  "candidate_universe": {
+    "path": "evaluations/structural-correctness/campaign-v1-1/rg-candidate-universes/pr-208.json",
+    "sha256": "44e2676cf166f1913968f136427d056cee4c4ca1f84dd893bbf68bfff0e56877",
+    "universe_digest": "6ee61bf0f516385acfce02172b1b2466a0ffb3a7cec58165e4fcc4b1c5a86502",
+    "structural_packet_digest": "d0f86cce67cc01b6a483d5343949947bc03e5479f252d4b8b5f3bd8a401196bf",
+    "candidate_count": 54,
+    "candidate_ids": [
+      "C:G1:E:structural_change:44a2370ce77a6e66f8e7",
+      "C:G1:E:structural_change:4fbcf96b02d19017c2c9",
+      "C:G1:E:structural_change:5d2be31cc60dea3d2f3b",
+      "C:G1:E:structural_change:7c4162e02e623fea377f",
+      "C:G1:E:structural_change:9ff44326982c1acafe85",
+      "C:G1:E:structural_change:d0cf036a1010c1207bc5",
+      "C:G2:E:structural_change:44a2370ce77a6e66f8e7",
+      "C:G2:E:structural_change:4fbcf96b02d19017c2c9",
+      "C:G2:E:structural_change:5d2be31cc60dea3d2f3b",
+      "C:G2:E:structural_change:7c4162e02e623fea377f",
+      "C:G2:E:structural_change:9ff44326982c1acafe85",
+      "C:G2:E:structural_change:d0cf036a1010c1207bc5",
+      "C:G3:E:structural_change:44a2370ce77a6e66f8e7",
+      "C:G3:E:structural_change:4fbcf96b02d19017c2c9",
+      "C:G3:E:structural_change:5d2be31cc60dea3d2f3b",
+      "C:G3:E:structural_change:7c4162e02e623fea377f",
+      "C:G3:E:structural_change:9ff44326982c1acafe85",
+      "C:G3:E:structural_change:d0cf036a1010c1207bc5",
+      "C:G4:E:structural_change:44a2370ce77a6e66f8e7",
+      "C:G4:E:structural_change:4fbcf96b02d19017c2c9",
+      "C:G4:E:structural_change:5d2be31cc60dea3d2f3b",
+      "C:G4:E:structural_change:7c4162e02e623fea377f",
+      "C:G4:E:structural_change:9ff44326982c1acafe85",
+      "C:G4:E:structural_change:d0cf036a1010c1207bc5",
+      "C:R1:E:structural_change:44a2370ce77a6e66f8e7",
+      "C:R1:E:structural_change:4fbcf96b02d19017c2c9",
+      "C:R1:E:structural_change:5d2be31cc60dea3d2f3b",
+      "C:R1:E:structural_change:7c4162e02e623fea377f",
+      "C:R1:E:structural_change:9ff44326982c1acafe85",
+      "C:R1:E:structural_change:d0cf036a1010c1207bc5",
+      "C:R2:E:structural_change:44a2370ce77a6e66f8e7",
+      "C:R2:E:structural_change:4fbcf96b02d19017c2c9",
+      "C:R2:E:structural_change:5d2be31cc60dea3d2f3b",
+      "C:R2:E:structural_change:7c4162e02e623fea377f",
+      "C:R2:E:structural_change:9ff44326982c1acafe85",
+      "C:R2:E:structural_change:d0cf036a1010c1207bc5",
+      "C:R3:E:structural_change:44a2370ce77a6e66f8e7",
+      "C:R3:E:structural_change:4fbcf96b02d19017c2c9",
+      "C:R3:E:structural_change:5d2be31cc60dea3d2f3b",
+      "C:R3:E:structural_change:7c4162e02e623fea377f",
+      "C:R3:E:structural_change:9ff44326982c1acafe85",
+      "C:R3:E:structural_change:d0cf036a1010c1207bc5",
+      "C:R4:E:structural_change:44a2370ce77a6e66f8e7",
+      "C:R4:E:structural_change:4fbcf96b02d19017c2c9",
+      "C:R4:E:structural_change:5d2be31cc60dea3d2f3b",
+      "C:R4:E:structural_change:7c4162e02e623fea377f",
+      "C:R4:E:structural_change:9ff44326982c1acafe85",
+      "C:R4:E:structural_change:d0cf036a1010c1207bc5",
+      "C:R5:E:structural_change:44a2370ce77a6e66f8e7",
+      "C:R5:E:structural_change:4fbcf96b02d19017c2c9",
+      "C:R5:E:structural_change:5d2be31cc60dea3d2f3b",
+      "C:R5:E:structural_change:7c4162e02e623fea377f",
+      "C:R5:E:structural_change:9ff44326982c1acafe85",
+      "C:R5:E:structural_change:d0cf036a1010c1207bc5"
+    ]
+  },
+  "authorized_inputs": {
+    "labeler_input": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.labeler-input.json",
+      "sha256": "9c0cc908b740c0c1529f0e85f6d19190a5156e17685decb5686a1a7daccc4e2e"
+    },
+    "proposer_prompt": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.proposer-prompt.md",
+      "sha256": "f35bdb46d83c6df49227c6e44424eb61ad643eb159ed3d793e547d63a0b12c3b"
+    },
+    "protocol": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-protocol.md",
+      "sha256": "f8fa4e620a860e59e9551c3080651a02b7d1e885b6f26a12e4c802d5e05770a7"
+    },
+    "rubric": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-reference-rubric.md",
+      "sha256": "2986b6e906ad97e1f56b9d92b59a46c0de8187a47583fea54fce2ca1dd3d130d"
+    }
+  },
+  "source_revisions": {
+    "issue_number": 207,
+    "pull_request_number": 208,
+    "base_sha": "504e61579387092f5b02dffb2ca26c5fed6b8271",
+    "head_sha": "e6d94bd9c414a09c1027aac0bc658ba025ddf3ad",
+    "unified_diff_sha256": "305d0e0ae631a237669a1e6e0bf605a4a511787debb3f165ba2f5fc2c88fce42"
+  },
+  "roles": {
+    "coordinator": {
+      "identity": "codex-gpt-5.6-terra-current-thread",
+      "scope": "mechanical input packaging and lifecycle checks only",
+      "retrieval_exposed": true,
+      "prohibited_from": [
+        "semantic proposal",
+        "semantic verification",
+        "adjudication"
+      ]
+    },
+    "proposer": {
+      "identity": "deepseek:deepseek-v4-flash:pr-208-batch-001-proposer",
+      "provider": "DeepSeek",
+      "model": "deepseek-v4-flash",
+      "endpoint_class": "deepseek-openai-chat-completions",
+      "decoding": {
+        "temperature": 0,
+        "max_tokens": 12000,
+        "response_format": "json_object",
+        "store": false
+      }
+    },
+    "verifier": {
+      "identity": "openai-codex:gpt-5.6-terra:pr-208-batch-001-verifier",
+      "provider": "OpenAI Codex",
+      "model": "gpt-5.6-terra",
+      "execution": "fresh ephemeral read-only execution over an isolated directory",
+      "prompt_implementation": "independent verifier prompt v1"
+    },
+    "adjudication": {
+      "status": "not_preassigned",
+      "stop_condition": "a high-risk disagreement leaves this batch unverified until a distinct human adjudicator is named"
+    }
+  },
+  "audit_plan": {
+    "kind": "full_population_double_review",
+    "pre_label_selector": {
+      "name": "sorted_candidate_id_all_v1",
+      "seed": "pr-208-batch-001-full-population",
+      "selected_candidate_ids": [
+        "C:G1:E:structural_change:44a2370ce77a6e66f8e7",
+        "C:G1:E:structural_change:4fbcf96b02d19017c2c9",
+        "C:G1:E:structural_change:5d2be31cc60dea3d2f3b",
+        "C:G1:E:structural_change:7c4162e02e623fea377f",
+        "C:G1:E:structural_change:9ff44326982c1acafe85",
+        "C:G1:E:structural_change:d0cf036a1010c1207bc5",
+        "C:G2:E:structural_change:44a2370ce77a6e66f8e7",
+        "C:G2:E:structural_change:4fbcf96b02d19017c2c9",
+        "C:G2:E:structural_change:5d2be31cc60dea3d2f3b",
+        "C:G2:E:structural_change:7c4162e02e623fea377f",
+        "C:G2:E:structural_change:9ff44326982c1acafe85",
+        "C:G2:E:structural_change:d0cf036a1010c1207bc5",
+        "C:G3:E:structural_change:44a2370ce77a6e66f8e7",
+        "C:G3:E:structural_change:4fbcf96b02d19017c2c9",
+        "C:G3:E:structural_change:5d2be31cc60dea3d2f3b",
+        "C:G3:E:structural_change:7c4162e02e623fea377f",
+        "C:G3:E:structural_change:9ff44326982c1acafe85",
+        "C:G3:E:structural_change:d0cf036a1010c1207bc5",
+        "C:G4:E:structural_change:44a2370ce77a6e66f8e7",
+        "C:G4:E:structural_change:4fbcf96b02d19017c2c9",
+        "C:G4:E:structural_change:5d2be31cc60dea3d2f3b",
+        "C:G4:E:structural_change:7c4162e02e623fea377f",
+        "C:G4:E:structural_change:9ff44326982c1acafe85",
+        "C:G4:E:structural_change:d0cf036a1010c1207bc5",
+        "C:R1:E:structural_change:44a2370ce77a6e66f8e7",
+        "C:R1:E:structural_change:4fbcf96b02d19017c2c9",
+        "C:R1:E:structural_change:5d2be31cc60dea3d2f3b",
+        "C:R1:E:structural_change:7c4162e02e623fea377f",
+        "C:R1:E:structural_change:9ff44326982c1acafe85",
+        "C:R1:E:structural_change:d0cf036a1010c1207bc5",
+        "C:R2:E:structural_change:44a2370ce77a6e66f8e7",
+        "C:R2:E:structural_change:4fbcf96b02d19017c2c9",
+        "C:R2:E:structural_change:5d2be31cc60dea3d2f3b",
+        "C:R2:E:structural_change:7c4162e02e623fea377f",
+        "C:R2:E:structural_change:9ff44326982c1acafe85",
+        "C:R2:E:structural_change:d0cf036a1010c1207bc5",
+        "C:R3:E:structural_change:44a2370ce77a6e66f8e7",
+        "C:R3:E:structural_change:4fbcf96b02d19017c2c9",
+        "C:R3:E:structural_change:5d2be31cc60dea3d2f3b",
+        "C:R3:E:structural_change:7c4162e02e623fea377f",
+        "C:R3:E:structural_change:9ff44326982c1acafe85",
+        "C:R3:E:structural_change:d0cf036a1010c1207bc5",
+        "C:R4:E:structural_change:44a2370ce77a6e66f8e7",
+        "C:R4:E:structural_change:4fbcf96b02d19017c2c9",
+        "C:R4:E:structural_change:5d2be31cc60dea3d2f3b",
+        "C:R4:E:structural_change:7c4162e02e623fea377f",
+        "C:R4:E:structural_change:9ff44326982c1acafe85",
+        "C:R4:E:structural_change:d0cf036a1010c1207bc5",
+        "C:R5:E:structural_change:44a2370ce77a6e66f8e7",
+        "C:R5:E:structural_change:4fbcf96b02d19017c2c9",
+        "C:R5:E:structural_change:5d2be31cc60dea3d2f3b",
+        "C:R5:E:structural_change:7c4162e02e623fea377f",
+        "C:R5:E:structural_change:9ff44326982c1acafe85",
+        "C:R5:E:structural_change:d0cf036a1010c1207bc5"
+      ]
+    },
+    "post_proposal_selector": {
+      "name": "all_completed_candidate_ids_v1",
+      "seed": "pr-208-batch-001-full-population",
+      "selection_rule": "mechanically select every completed candidate ID"
+    },
+    "coverage": {
+      "requirements": "all",
+      "guardrails": "all",
+      "direct_contextual_boundary": "all",
+      "node_unresolved_or_not_node_backed": "all",
+      "direct_capable_or_suggested_only": "all"
+    },
+    "acceptance": {
+      "unresolved_mandatory_direct_review": 0,
+      "unresolved_non_direct_review": 0,
+      "material_semantic_disagreements": 0,
+      "on_failure": "record the disagreement, do not verify this batch, and require a new isolated review or named adjudication"
+    }
+  },
+  "stop_conditions": [
+    "any proposer/verifier access to retrieval, association, structural-focus, provenance, comparison, or report artifacts",
+    "missing or duplicate candidate label",
+    "any unresolved proposer/verifier disagreement",
+    "any semantic-direct label without stable source witness",
+    "any audit coverage below the all-candidate plan"
+  ]
+}

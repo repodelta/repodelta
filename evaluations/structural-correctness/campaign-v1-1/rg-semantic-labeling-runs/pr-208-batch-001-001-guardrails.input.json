@@ -1,0 +1,808 @@
+{
+  "authority_boundary": "This shard is source-evidence review input only. It cannot verify the reference, emit semantic FI/FE, or alter production behavior.",
+  "batch_id": "pr-208-batch-001",
+  "candidate_ids": [
+    "C:G1:E:structural_change:44a2370ce77a6e66f8e7",
+    "C:G1:E:structural_change:4fbcf96b02d19017c2c9",
+    "C:G1:E:structural_change:5d2be31cc60dea3d2f3b",
+    "C:G1:E:structural_change:7c4162e02e623fea377f",
+    "C:G1:E:structural_change:9ff44326982c1acafe85",
+    "C:G1:E:structural_change:d0cf036a1010c1207bc5",
+    "C:G2:E:structural_change:44a2370ce77a6e66f8e7",
+    "C:G2:E:structural_change:4fbcf96b02d19017c2c9",
+    "C:G2:E:structural_change:5d2be31cc60dea3d2f3b",
+    "C:G2:E:structural_change:7c4162e02e623fea377f",
+    "C:G2:E:structural_change:9ff44326982c1acafe85",
+    "C:G2:E:structural_change:d0cf036a1010c1207bc5",
+    "C:G3:E:structural_change:44a2370ce77a6e66f8e7",
+    "C:G3:E:structural_change:4fbcf96b02d19017c2c9",
+    "C:G3:E:structural_change:5d2be31cc60dea3d2f3b",
+    "C:G3:E:structural_change:7c4162e02e623fea377f",
+    "C:G3:E:structural_change:9ff44326982c1acafe85",
+    "C:G3:E:structural_change:d0cf036a1010c1207bc5",
+    "C:G4:E:structural_change:44a2370ce77a6e66f8e7",
+    "C:G4:E:structural_change:4fbcf96b02d19017c2c9",
+    "C:G4:E:structural_change:5d2be31cc60dea3d2f3b",
+    "C:G4:E:structural_change:7c4162e02e623fea377f",
+    "C:G4:E:structural_change:9ff44326982c1acafe85",
+    "C:G4:E:structural_change:d0cf036a1010c1207bc5"
+  ],
+  "prohibited_surfaces": [
+    "rg-retrieval-observations",
+    "association-attribution",
+    "structural-focus observations",
+    "policy shadows",
+    "comparison outputs",
+    "generated RepoDelta reports"
+  ],
+  "required_artifacts": {
+    "output_schema": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.ai-lifecycle-shard-verifier-output.schema.json",
+      "sha256": "4b8d81fde14aac2018cb116c44fc1f15d76d41a92abeed4344f211b19d377163"
+    },
+    "prompt": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.ai-lifecycle-shard-verifier-prompt.md",
+      "sha256": "2b6c343adbc794e325c0b0405b9ef192212f797786178905b9e3dbc6043d6d1d"
+    }
+  },
+  "schema_version": "rg_semantic_ai_lifecycle_shard_input.v1",
+  "shard_id": "pr-208-batch-001-001-guardrails",
+  "shard_plan": {
+    "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.ai-lifecycle-shard-plan.json",
+    "sha256": "dc0b163ca27b8001ab070d454c375a478d5f0586b102f8b20010ab53a11af5c3"
+  },
+  "source_bundle": {
+    "anchors": [
+      {
+        "canonical_node_id": "SN:473f603d478751e24b92",
+        "canonical_review_symbol_id": "E:review_symbol:033af31f8636f0da232a",
+        "change_relation_ids": [
+          "hunk:tests/test_projection.py:0:change:0",
+          "hunk:tests/test_projection.py:1:change:0"
+        ],
+        "classification": "test",
+        "evidence_id": "E:structural_change:44a2370ce77a6e66f8e7",
+        "evidence_kind": "structural_change",
+        "node_state": "node_resolved",
+        "operation": "modified",
+        "path": "tests/test_projection.py",
+        "profile": "test",
+        "revision_side": "review",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 847,
+            "line_start": 825,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/tests/test_projection.py#L825-L847"
+          },
+          {
+            "label": "Codegraph symbol",
+            "line_end": 849,
+            "line_start": 825,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L825-L849"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 832,
+            "line_start": 832,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L832"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 848,
+            "line_start": 848,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L848"
+          }
+        ],
+        "summary": "Modified function: test_projection_uses_review_relevant_structural_closure::relation"
+      },
+      {
+        "canonical_node_id": "SN:a3d4b9349331e480ccc9",
+        "canonical_review_symbol_id": "E:review_symbol:3e95ca68e49900f4c965",
+        "change_relation_ids": [
+          "hunk:tests/test_projection.py:10:change:0",
+          "hunk:tests/test_projection.py:8:change:0",
+          "hunk:tests/test_projection.py:9:change:0",
+          "hunk:tests/test_projection.py:9:change:1"
+        ],
+        "classification": "test",
+        "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+        "evidence_kind": "structural_change",
+        "node_state": "node_resolved",
+        "operation": "unresolved",
+        "path": "tests/test_projection.py",
+        "profile": "test",
+        "revision_side": "review",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 1499,
+            "line_start": 1437,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/tests/test_projection.py#L1437-L1499"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1459,
+            "line_start": 1437,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/tests/test_projection.py#L1437-L1459"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1473,
+            "line_start": 1468,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/tests/test_projection.py#L1468-L1473"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1499,
+            "line_start": 1498,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/tests/test_projection.py#L1498-L1499"
+          }
+        ],
+        "summary": "Unresolved function: test_canonical_backbone_seeds_include_rg_and_transformation_anchors"
+      },
+      {
+        "canonical_node_id": "SN:37a3f84572c25e3cbbd4",
+        "canonical_review_symbol_id": "E:review_symbol:5412d94c25e5bc4dd2d0",
+        "change_relation_ids": [
+          "hunk:tests/test_projection.py:10:change:0",
+          "hunk:tests/test_projection.py:8:change:0",
+          "hunk:tests/test_projection.py:9:change:1"
+        ],
+        "classification": "test",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_kind": "structural_change",
+        "node_state": "node_resolved",
+        "operation": "added",
+        "path": "tests/test_projection.py",
+        "profile": "test",
+        "revision_side": "review",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 1514,
+            "line_start": 1473,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1473-L1514"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1473,
+            "line_start": 1473,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1473"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1489,
+            "line_start": 1486,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1486-L1489"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1514,
+            "line_start": 1514,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1514"
+          }
+        ],
+        "summary": "Added function: test_canonical_backbone_seeds_include_all_direct_changed_anchors"
+      },
+      {
+        "canonical_node_id": "SN:3fa93a82bd95f9e201a7",
+        "canonical_review_symbol_id": "E:review_symbol:e1102eb252e1cad7ab34",
+        "change_relation_ids": [
+          "hunk:tests/test_projection.py:2:change:0",
+          "hunk:tests/test_projection.py:3:change:0",
+          "hunk:tests/test_projection.py:4:change:0",
+          "hunk:tests/test_projection.py:5:change:0",
+          "hunk:tests/test_projection.py:6:change:0",
+          "hunk:tests/test_projection.py:7:change:0"
+        ],
+        "classification": "test",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "evidence_kind": "structural_change",
+        "node_state": "node_resolved",
+        "operation": "modified",
+        "path": "tests/test_projection.py",
+        "profile": "test",
+        "revision_side": "review",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 1135,
+            "line_start": 766,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/tests/test_projection.py#L766-L1135"
+          },
+          {
+            "label": "Codegraph symbol",
+            "line_end": 1171,
+            "line_start": 766,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L766-L1171"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 869,
+            "line_start": 858,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L858-L869"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1025,
+            "line_start": 1012,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1012-L1025"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1102,
+            "line_start": 1101,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1101-L1102"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1137,
+            "line_start": 1136,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1136-L1137"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1155,
+            "line_start": 1154,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1154-L1155"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1169,
+            "line_start": 1168,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1168-L1169"
+          }
+        ],
+        "summary": "Modified function: test_projection_uses_review_relevant_structural_closure"
+      },
+      {
+        "canonical_node_id": "SN:09332362e45a8f116f64",
+        "canonical_review_symbol_id": "E:review_symbol:289d9c801e420530dfcd",
+        "change_relation_ids": [
+          "hunk:src/prismcode/projection/build.py:0:change:0"
+        ],
+        "classification": "code",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "evidence_kind": "structural_change",
+        "node_state": "node_resolved",
+        "operation": "modified",
+        "path": "src/prismcode/projection/build.py",
+        "profile": "production",
+        "revision_side": "review",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 433,
+            "line_start": 57,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L57-L433"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 329,
+            "line_start": 329,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L329"
+          },
+          {
+            "label": "Codegraph symbol",
+            "line_end": 432,
+            "line_start": 57,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+          }
+        ],
+        "summary": "Modified function: build_review_projection"
+      },
+      {
+        "canonical_node_id": "SN:e0ab5042bc9453753bcc",
+        "canonical_review_symbol_id": "E:review_symbol:fba3b1f5a90fe869ca2d",
+        "change_relation_ids": [
+          "hunk:src/prismcode/projection/build.py:1:change:0",
+          "hunk:src/prismcode/projection/build.py:1:change:1",
+          "hunk:src/prismcode/projection/build.py:1:change:2"
+        ],
+        "classification": "code",
+        "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_kind": "structural_change",
+        "node_state": "node_resolved",
+        "operation": "modified",
+        "path": "src/prismcode/projection/build.py",
+        "profile": "production",
+        "revision_side": "review",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 461,
+            "line_start": 436,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L436-L461"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 454,
+            "line_start": 442,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L442-L454"
+          },
+          {
+            "label": "Codegraph symbol",
+            "line_end": 457,
+            "line_start": 435,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L435-L457"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 450,
+            "line_start": 442,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L442-L450"
+          }
+        ],
+        "summary": "Modified function: _canonical_backbone_seed_node_ids"
+      }
+    ],
+    "authored_contract": {
+      "issue": {
+        "body": "## Goal\n\nEnsure the default Structural delta graph represents every selected, directly changed structural anchor, including changed tests, without expanding into a repository-reachable graph dump.\n\n## Requirements\n\n- A selected direct changed structural anchor is eligible for default backbone membership regardless of whether its focus-relative evidence annotation is primary, test support, or documentation support.\n- Focus-relative evidence annotation remains available for reviewer explanation and presentation, but cannot add, remove, or suppress structural backbone membership.\n- The same membership contract applies to Issue R/G and PR Transformation/Completion subjects.\n- Intermediate, retained-context, and merely reachable support nodes remain outside the default backbone unless canonical backbone rules independently include them.\n- The graph retains direct production and direct test changes together when both are selected.\n\n## Guardrails\n\n- Do not change Codegraph collection, traversal budgets, changed-anchor association, assessment, LLM behavior, or graph layout.\n- Do not promote all reachable structural support nodes.\n- Do not introduce a second backbone producer or renderer-side membership decision.\n\n## Verification expectations\n\n- A deterministic fixture demonstrates a directly changed production anchor and directly changed test anchors in the default backbone.\n- A primary intermediate/context node remains excluded.\n- The final rendered graph consumes the canonical backbone result and visibly includes the changed test anchor.\n\n## Scope\n\nCanonical changed-backbone membership from selected structural overlays through the review graph projection and renderer sink.\n\n## Out of scope\n\nTraversal convergence, support-path relevance, LLM inference, assessment semantics, and visual-layout redesign.\n\n## Uncertainties\n\nProvider truncation can still limit discovered relations; this work must not infer undiscovered structure.",
+        "number": 207,
+        "state": "closed",
+        "title": "Preserve directly changed test anchors in the structural backbone",
+        "url": "https://github.com/repodelta/repodelta/issues/207"
+      },
+      "pull_request": {
+        "base_sha": "504e61579387092f5b02dffb2ca26c5fed6b8271",
+        "body": "Closes #207\n\n## Parent transformation and responsibility\n\nContinue the canonical structural graph projection: make directly changed structural-anchor membership independent of focus-relative evidence annotation.\n\n## Semantic output and sinks\n\nThe output is the default Structural delta graph backbone. Its production sinks are ReviewStructuralGraph.backbone_node_ids, _change_backbone, and the renderer that consumes those IDs.\n\n## Before topology\n\nR/G selected structural overlays\n\u2192 inspect primary evidence role\n\u2192 backbone seed\n\nT/CC selected structural overlays\n\u2192 inspect changed-anchor node role\n\u2192 backbone seed\n\nA directly changed test anchor was classified as test support and therefore omitted from the R/G backbone despite being selected and structurally mapped.\n\n## After topology\n\nR/G and T/CC selected structural overlays\n\u2192 changed-anchor node role\n\u2192 canonical seed derivation\n\u2192 _change_backbone\n\u2192 ReviewStructuralGraph\n\u2192 renderer\n\n## Affected contracts\n\n- Structural membership is determined only by selected direct changed-anchor role.\n- Primary, test-support, and document-support remain focus-relative evidence annotations; they do not grant or deny membership.\n- Intermediate/context nodes remain non-seeds unless existing backbone expansion independently reaches them.\n- The renderer remains a consumer of canonical graph membership and does not reconstruct it.\n\n## Migration and removal\n\n- Remove the R/G-only relation/evidence-role filter from canonical seed derivation.\n- Remove the relations input from the seed API, so it cannot re-decide membership from evidence annotation.\n- Retain _change_backbone as the only backbone producer and preserve bounded one-hop support behavior.\n\n## Counterfactual and sink evidence\n\n- One selected production anchor plus two selected test-support anchors enter backbone_node_ids and are visible in rendered HTML.\n- A primary intermediate node remains excluded.\n- Existing context and reachable support are not promoted merely because a changed test anchor is visible.\n\n## Stable invariant and enforcement\n\n- Invariant: focus-relative evidence annotation cannot add, remove, or suppress a directly selected changed structural member.\n- Before: a relation-role branch in seed derivation violated the invariant.\n- Target enforcement: the canonical seed API accepts only structural overlays and filters solely on node role; projection and renderer sink tests exercise the two counterfactuals.\n- This is sufficient because relation annotations are no longer available at the membership boundary. A broader static gate or new domain type would not exclude an additional concrete transition.\n\n## Verification\n\n- 379 passed\n- git diff --check passes\n- Codegraph synchronized; producer-to-sink census finds one seed producer feeding _change_backbone and the renderer consumer.\n\n## Unresolved surfaces\n\nCodegraph/provider truncation may still limit discovered relations. This PR neither infers missing structure nor changes traversal, association, assessment, LLM behavior, or layout.\n\n## Merge gates\n\n- Responsibility closure: complete.\n- Contract closure: complete; R/G and T/CC now consume the same membership contract.\n- Abandonment safety: complete; no subsequent PR is required for directly changed test anchors to remain visible.\n- Parent completion: open; broader structural evidence evolution remains separately scoped.",
+        "changed_files": [
+          "src/prismcode/projection/build.py",
+          "tests/test_projection.py"
+        ],
+        "head_sha": "e6d94bd9c414a09c1027aac0bc658ba025ddf3ad",
+        "number": 208,
+        "title": "Preserve directly changed anchors in structural backbone",
+        "url": "https://github.com/repodelta/repodelta/pull/208"
+      }
+    },
+    "candidates": [
+      {
+        "candidate_id": "C:G1:E:structural_change:44a2370ce77a6e66f8e7",
+        "evidence_id": "E:structural_change:44a2370ce77a6e66f8e7",
+        "evidence_role": "test_support",
+        "subject_id": "G1"
+      },
+      {
+        "candidate_id": "C:G1:E:structural_change:4fbcf96b02d19017c2c9",
+        "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+        "evidence_role": "test_support",
+        "subject_id": "G1"
+      },
+      {
+        "candidate_id": "C:G1:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_role": "test_support",
+        "subject_id": "G1"
+      },
+      {
+        "candidate_id": "C:G1:E:structural_change:7c4162e02e623fea377f",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "evidence_role": "test_support",
+        "subject_id": "G1"
+      },
+      {
+        "candidate_id": "C:G1:E:structural_change:9ff44326982c1acafe85",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "evidence_role": "primary",
+        "subject_id": "G1"
+      },
+      {
+        "candidate_id": "C:G1:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_role": "primary",
+        "subject_id": "G1"
+      },
+      {
+        "candidate_id": "C:G2:E:structural_change:44a2370ce77a6e66f8e7",
+        "evidence_id": "E:structural_change:44a2370ce77a6e66f8e7",
+        "evidence_role": "test_support",
+        "subject_id": "G2"
+      },
+      {
+        "candidate_id": "C:G2:E:structural_change:4fbcf96b02d19017c2c9",
+        "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+        "evidence_role": "test_support",
+        "subject_id": "G2"
+      },
+      {
+        "candidate_id": "C:G2:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_role": "test_support",
+        "subject_id": "G2"
+      },
+      {
+        "candidate_id": "C:G2:E:structural_change:7c4162e02e623fea377f",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "evidence_role": "test_support",
+        "subject_id": "G2"
+      },
+      {
+        "candidate_id": "C:G2:E:structural_change:9ff44326982c1acafe85",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "evidence_role": "primary",
+        "subject_id": "G2"
+      },
+      {
+        "candidate_id": "C:G2:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_role": "primary",
+        "subject_id": "G2"
+      },
+      {
+        "candidate_id": "C:G3:E:structural_change:44a2370ce77a6e66f8e7",
+        "evidence_id": "E:structural_change:44a2370ce77a6e66f8e7",
+        "evidence_role": "test_support",
+        "subject_id": "G3"
+      },
+      {
+        "candidate_id": "C:G3:E:structural_change:4fbcf96b02d19017c2c9",
+        "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+        "evidence_role": "test_support",
+        "subject_id": "G3"
+      },
+      {
+        "candidate_id": "C:G3:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_role": "test_support",
+        "subject_id": "G3"
+      },
+      {
+        "candidate_id": "C:G3:E:structural_change:7c4162e02e623fea377f",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "evidence_role": "test_support",
+        "subject_id": "G3"
+      },
+      {
+        "candidate_id": "C:G3:E:structural_change:9ff44326982c1acafe85",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "evidence_role": "primary",
+        "subject_id": "G3"
+      },
+      {
+        "candidate_id": "C:G3:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_role": "primary",
+        "subject_id": "G3"
+      },
+      {
+        "candidate_id": "C:G4:E:structural_change:44a2370ce77a6e66f8e7",
+        "evidence_id": "E:structural_change:44a2370ce77a6e66f8e7",
+        "evidence_role": "test_support",
+        "subject_id": "G4"
+      },
+      {
+        "candidate_id": "C:G4:E:structural_change:4fbcf96b02d19017c2c9",
+        "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+        "evidence_role": "test_support",
+        "subject_id": "G4"
+      },
+      {
+        "candidate_id": "C:G4:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_role": "test_support",
+        "subject_id": "G4"
+      },
+      {
+        "candidate_id": "C:G4:E:structural_change:7c4162e02e623fea377f",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "evidence_role": "test_support",
+        "subject_id": "G4"
+      },
+      {
+        "candidate_id": "C:G4:E:structural_change:9ff44326982c1acafe85",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "evidence_role": "primary",
+        "subject_id": "G4"
+      },
+      {
+        "candidate_id": "C:G4:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_role": "primary",
+        "subject_id": "G4"
+      }
+    ],
+    "exact_diff": {
+      "format": "github_unified_diff",
+      "sha256": "305d0e0ae631a237669a1e6e0bf605a4a511787debb3f165ba2f5fc2c88fce42",
+      "text": "diff --git a/src/prismcode/projection/build.py b/src/prismcode/projection/build.py\nindex 4e91aed..af4d525 100644\n--- a/src/prismcode/projection/build.py\n+++ b/src/prismcode/projection/build.py\n@@ -326,7 +326,6 @@ def build_review_projection(\n     backbone_seed_node_ids = _canonical_backbone_seed_node_ids(\n         slices=tuple(slices),\n         transformation_topology_groups=tuple(transformation_topology_groups),\n-        relations=relations,\n     )\n     (\n         backbone_node_ids,\n@@ -439,19 +438,16 @@ def _canonical_backbone_seed_node_ids(\n     transformation_topology_groups: tuple[\n         TransformationStructuralTopologyGroup, ...\n     ],\n-    relations: dict[str, ProjectionRelation],\n ) -> tuple[str, ...]:\n-    \"\"\"Map typed direct anchors onto one review-level backbone contract.\"\"\"\n+    \"\"\"Map selected direct changed structural anchors onto one backbone.\"\"\"\n \n     seeds = []\n     for review_slice in slices:\n-        for node in review_slice.change_map.structural_overlay.nodes:\n-            if any(\n-                relations[relation_id].slot == \"changed_anchor\"\n-                and relations[relation_id].evidence_role == \"primary\"\n-                for relation_id in node.relation_ids\n-            ):\n-                seeds.append(node.node_id)\n+        seeds.extend(\n+            node.node_id\n+            for node in review_slice.change_map.structural_overlay.nodes\n+            if node.role == \"changed_anchor\"\n+        )\n     for group in transformation_topology_groups:\n         seeds.extend(\n             node.node_id\ndiff --git a/tests/test_projection.py b/tests/test_projection.py\nindex 05f060d..f8076b0 100644\n--- a/tests/test_projection.py\n+++ b/tests/test_projection.py\n@@ -829,6 +829,7 @@ def relation(\n         *,\n         bridges: tuple[str, ...] = (),\n         ordinal: int = 0,\n+        evidence_role: str = \"primary\",\n     ) -> ProjectionRelation:\n         return ProjectionRelation(\n             id=relation_id,\n@@ -844,6 +845,7 @@ def relation(\n             reasons=(),\n             bridge_ids=bridges,\n             source_ordinal=ordinal,\n+            evidence_role=evidence_role,\n         )\n \n     evidence = EvidenceCatalog(\n@@ -853,6 +855,18 @@ def relation(\n             symbol(\"E:test\", \"test\", profile=\"test\", kind=\"variable\"),\n             symbol(\"E:detour\", \"detour\"),\n             symbol(\"E:anchor_2\", \"anchor_2\", changed=True),\n+            symbol(\n+                \"E:test_anchor_one\",\n+                \"test_anchor_one\",\n+                changed=True,\n+                profile=\"test\",\n+            ),\n+            symbol(\n+                \"E:test_anchor_two\",\n+                \"test_anchor_two\",\n+                changed=True,\n+                profile=\"test\",\n+            ),\n             symbol(\"E:runtime_2\", \"runtime_2\"),\n             symbol(\"E:peripheral\", \"peripheral\"),\n             path(\"E:path:runtime\", (\"anchor\", \"runtime\")),\n@@ -995,6 +1009,20 @@ def relation(\n             bridges=(\"E:path:test\",),\n         ),\n         relation(\"A-2\", \"changed_anchor\", \"E:anchor_2\", ordinal=1),\n+        relation(\n+            \"A-test-one\",\n+            \"changed_anchor\",\n+            \"E:test_anchor_one\",\n+            ordinal=2,\n+            evidence_role=\"test_support\",\n+        ),\n+        relation(\n+            \"A-test-two\",\n+            \"changed_anchor\",\n+            \"E:test_anchor_two\",\n+            ordinal=3,\n+            evidence_role=\"test_support\",\n+        ),\n         relation(\n             \"P-independent\",\n             \"structural_path\",\n@@ -1070,6 +1098,8 @@ def relation(\n         \"runtime\",\n         \"test\",\n         \"anchor_2\",\n+        \"test_anchor_one\",\n+        \"test_anchor_two\",\n         \"runtime_2\",\n     }\n     assert len(graph.edges) == 4\n@@ -1103,6 +1133,8 @@ def relation(\n         \"runtime\": (\"P-runtime\", \"P-test\"),\n         \"test\": (\"P-test\",),\n         \"anchor_2\": (\"P-independent\", \"P-anchor-link\"),\n+        \"test_anchor_one\": (),\n+        \"test_anchor_two\": (),\n         \"runtime_2\": (\"P-independent\",),\n     }\n     html = _review_graph(\n@@ -1119,6 +1151,8 @@ def relation(\n     assert graph.backbone_node_ids == (\n         _structural_node_id(\"anchor\"),\n         _structural_node_id(\"anchor_2\"),\n+        _structural_node_id(\"test_anchor_one\"),\n+        _structural_node_id(\"test_anchor_two\"),\n         _structural_node_id(\"runtime\"),\n         _structural_node_id(\"runtime_2\"),\n     )\n@@ -1131,6 +1165,8 @@ def relation(\n     assert \"calls \u00b7 added\" in html\n     assert \"calls \u00b7 retained\" in html\n     assert \"function \u00b7 modified\" in html\n+    assert \"test_anchor_one\" in html\n+    assert \"test_anchor_two\" in html\n     assert \"variable \u00b7 context\" not in html\n     assert 'data-focuses=\"R1 R2\"' in html\n \n@@ -1434,29 +1470,7 @@ def test_change_backbone_keeps_one_hop_retained_support_from_direct_seed() -> No\n     assert edge_ids == (\"D:backbone\",)\n \n \n-def test_canonical_backbone_seeds_include_rg_and_transformation_anchors() -> None:\n-    relations = {\n-        \"P:primary\": ProjectionRelation(\n-            id=\"P:primary\",\n-            focus_statement_id=\"R1\",\n-            slot=\"changed_anchor\",\n-            target_type=\"evidence\",\n-            target_id=\"E:primary\",\n-            association=\"provided_association\",\n-            evidence_role=\"primary\",\n-            reasons=(),\n-        ),\n-        \"P:test\": ProjectionRelation(\n-            id=\"P:test\",\n-            focus_statement_id=\"R1\",\n-            slot=\"changed_anchor\",\n-            target_type=\"evidence\",\n-            target_id=\"E:test\",\n-            association=\"provided_association\",\n-            evidence_role=\"test_support\",\n-            reasons=(),\n-        ),\n-    }\n+def test_canonical_backbone_seeds_include_all_direct_changed_anchors() -> None:\n     review_slice = ReviewSlice(\n         change_map=CanonicalChangeMapEntry(\n             focus_statement_id=\"R1\",\n@@ -1465,12 +1479,14 @@ def test_canonical_backbone_seeds_include_rg_and_transformation_anchors() -> Non\n                     StructuralFocusNode(\n                         node_id=\"N:rg-primary\",\n                         role=\"changed_anchor\",\n-                        relation_ids=(\"P:primary\",),\n                     ),\n                     StructuralFocusNode(\n                         node_id=\"N:rg-test\",\n                         role=\"changed_anchor\",\n-                        relation_ids=(\"P:test\",),\n+                    ),\n+                    StructuralFocusNode(\n+                        node_id=\"N:rg-primary-context\",\n+                        role=\"intermediate\",\n                     ),\n                 )\n             ),\n@@ -1495,8 +1511,7 @@ def test_canonical_backbone_seeds_include_rg_and_transformation_anchors() -> Non\n     assert _canonical_backbone_seed_node_ids(\n         slices=(review_slice,),\n         transformation_topology_groups=(transformation_group,),\n-        relations=relations,\n-    ) == (\"N:rg-primary\", \"N:transformation-anchor\")\n+    ) == (\"N:rg-primary\", \"N:rg-test\", \"N:transformation-anchor\")\n \n \n def test_support_node_delta_requires_exact_base_and_head_facts() -> None:\n"
+    },
+    "proposed_labels": [
+      {
+        "candidate_id": "C:G1:E:structural_change:44a2370ce77a6e66f8e7",
+        "evidence_witnesses": [],
+        "note": "Test helper modification supports the new behavior but does not directly enforce the guardrail.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      {
+        "candidate_id": "C:G1:E:structural_change:4fbcf96b02d19017c2c9",
+        "evidence_witnesses": [],
+        "note": "Test modification exercises the new behavior but does not directly enforce the guardrail.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      {
+        "candidate_id": "C:G1:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_witnesses": [],
+        "note": "Test addition verifies the new behavior but does not directly enforce the guardrail.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      {
+        "candidate_id": "C:G1:E:structural_change:7c4162e02e623fea377f",
+        "evidence_witnesses": [],
+        "note": "Test modification verifies the new behavior but does not directly enforce the guardrail.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      {
+        "candidate_id": "C:G1:E:structural_change:9ff44326982c1acafe85",
+        "evidence_witnesses": [],
+        "note": "The removed relations parameter changes seed-derivation plumbing, not Codegraph collection/traversal budgets/changed-anchor association/assessment/LLM/layout; it does not directly enforce this guardrail.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "unrelated"
+      },
+      {
+        "candidate_id": "C:G1:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_witnesses": [],
+        "note": "The role-only seed derivation is unrelated to preserving Codegraph collection, traversal budgets, changed-anchor association, assessment, LLM behavior, or graph layout.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "unrelated"
+      },
+      {
+        "candidate_id": "C:G2:E:structural_change:44a2370ce77a6e66f8e7",
+        "evidence_witnesses": [],
+        "note": "Test helper modification supports the new behavior but does not directly enforce the guardrail.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      {
+        "candidate_id": "C:G2:E:structural_change:4fbcf96b02d19017c2c9",
+        "evidence_witnesses": [],
+        "note": "Test modification exercises the new behavior but does not directly enforce the guardrail.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      {
+        "candidate_id": "C:G2:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1473-L1514"
+        ],
+        "note": "The added test directly asserts _canonical_backbone_seed_node_ids excludes the inserted intermediate node while retaining changed anchors, directly verifying the guardrail against promoting support nodes.",
+        "proof_basis": "bounded_evidence",
+        "proofability": "direct_capable",
+        "review_status": "reviewed",
+        "semantic_relation": "directly_verifies"
+      },
+      {
+        "candidate_id": "C:G2:E:structural_change:7c4162e02e623fea377f",
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L766-L1171"
+        ],
+        "note": "The modified projection test asserts test_anchor_one and test_anchor_two are included while variable \u00b7 context stays excluded, directly verifying that reachable support/context is not promoted.",
+        "proof_basis": "bounded_evidence",
+        "proofability": "direct_capable",
+        "review_status": "reviewed",
+        "semantic_relation": "directly_verifies"
+      },
+      {
+        "candidate_id": "C:G2:E:structural_change:9ff44326982c1acafe85",
+        "evidence_witnesses": [],
+        "note": "Removing the relations parameter is a supporting API change; the role-only seed function is what directly prevents promotion, so this relation is contextual.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      {
+        "candidate_id": "C:G2:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L435-L457"
+        ],
+        "note": "Changes seed derivation to filter solely on node role, not evidence annotation.",
+        "proof_basis": "deterministic_mapping",
+        "proofability": "direct_capable",
+        "review_status": "reviewed",
+        "semantic_relation": "constrains"
+      },
+      {
+        "candidate_id": "C:G3:E:structural_change:44a2370ce77a6e66f8e7",
+        "evidence_witnesses": [],
+        "note": "Test helper modification supports the new behavior but does not directly enforce the guardrail.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      {
+        "candidate_id": "C:G3:E:structural_change:4fbcf96b02d19017c2c9",
+        "evidence_witnesses": [],
+        "note": "Test modification exercises the new behavior but does not directly enforce the guardrail.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      {
+        "candidate_id": "C:G3:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_witnesses": [],
+        "note": "Test addition verifies the new behavior but does not directly enforce the guardrail.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      {
+        "candidate_id": "C:G3:E:structural_change:7c4162e02e623fea377f",
+        "evidence_witnesses": [],
+        "note": "Test modification verifies the new behavior but does not directly enforce the guardrail.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      {
+        "candidate_id": "C:G3:E:structural_change:9ff44326982c1acafe85",
+        "evidence_witnesses": [],
+        "note": "The change does not introduce a second backbone producer or renderer-side membership decision, nor does it directly enforce that prohibition.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "unrelated"
+      },
+      {
+        "candidate_id": "C:G3:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_witnesses": [],
+        "note": "Altering the seed filter does not directly guard against introducing a second backbone producer or renderer-side membership decision.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "unrelated"
+      },
+      {
+        "candidate_id": "C:G4:E:structural_change:44a2370ce77a6e66f8e7",
+        "evidence_witnesses": [],
+        "note": "Test helper modification supports the new behavior but does not directly enforce the guardrail.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      {
+        "candidate_id": "C:G4:E:structural_change:4fbcf96b02d19017c2c9",
+        "evidence_witnesses": [],
+        "note": "Test modification exercises the new behavior but does not directly enforce the guardrail.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      {
+        "candidate_id": "C:G4:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_witnesses": [],
+        "note": "Test addition verifies the new behavior but does not directly enforce the guardrail.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      {
+        "candidate_id": "C:G4:E:structural_change:7c4162e02e623fea377f",
+        "evidence_witnesses": [],
+        "note": "Test modification verifies the new behavior but does not directly enforce the guardrail.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      {
+        "candidate_id": "C:G4:E:structural_change:9ff44326982c1acafe85",
+        "evidence_witnesses": [],
+        "note": "The modified seed caller is outside the listed out-of-scope areas and does not directly constrain traversal convergence, LLM inference, assessment semantics, or layout.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "unrelated"
+      },
+      {
+        "candidate_id": "C:G4:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_witnesses": [],
+        "note": "The role-only seed derivation is unrelated to traversal convergence, support-path relevance, LLM inference, assessment semantics, and visual-layout redesign.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "unrelated"
+      }
+    ],
+    "subjects": [
+      {
+        "authored_statement": "Do not change Codegraph collection, traversal budgets, changed-anchor association, assessment, LLM behavior, or graph layout.",
+        "profile": "guardrail",
+        "subject_id": "G1",
+        "subject_kind": "guardrail"
+      },
+      {
+        "authored_statement": "Do not promote all reachable structural support nodes.",
+        "profile": "guardrail",
+        "subject_id": "G2",
+        "subject_kind": "guardrail"
+      },
+      {
+        "authored_statement": "Do not introduce a second backbone producer or renderer-side membership decision.",
+        "profile": "guardrail",
+        "subject_id": "G3",
+        "subject_kind": "guardrail"
+      },
+      {
+        "authored_statement": "Traversal convergence, support-path relevance, LLM inference, assessment semantics, and visual-layout redesign.",
+        "profile": "guardrail",
+        "subject_id": "G4",
+        "subject_kind": "guardrail"
+      }
+    ]
+  },
+  "verifier_execution": {
+    "decoding": {
+      "max_tokens": 9000,
+      "response_format": "json_object",
+      "store": false,
+      "stream": false,
+      "temperature": 0
+    },
+    "endpoint_class": "deepseek-openai-compatible",
+    "identity": "deepseek:deepseek-v4-pro:pr-208-batch-001-001-guardrails-verifier",
+    "known_reasoning_dependencies": [
+      "The verifier shares the DeepSeek provider with the deepseek-v4-flash proposer.",
+      "It also shares the deepseek-v4-pro model identifier with the prior AI adjudicator, while using a fresh execution and a separately authored shard-verifier prompt.",
+      "This is procedural separation, not a claim of independent error modes or semantic correctness."
+    ],
+    "model_identifier": "deepseek-v4-pro",
+    "provider": "DeepSeek"
+  }
+}

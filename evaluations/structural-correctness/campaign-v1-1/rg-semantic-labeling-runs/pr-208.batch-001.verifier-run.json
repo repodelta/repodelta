@@ -1,0 +1,54 @@
+{
+  "schema_version": "rg_semantic_verifier_run.v1",
+  "batch_id": "pr-208-batch-001",
+  "role": "verifier",
+  "identity": "openai-codex:authenticated-default:pr-208-batch-001-verifier",
+  "provider": "OpenAI Codex",
+  "model_identifier": "not_emitted_by_local_cli",
+  "execution": {
+    "fresh": true,
+    "ephemeral": true,
+    "sandbox": "read_only",
+    "working_directory": "isolated six-file verifier bundle",
+    "raw_execution_log_retained": false
+  },
+  "authorized_inputs": {
+    "verifier_input_amendment": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.verifier-input-amendment.json",
+      "sha256": "a4a06e4db0d27a7aedb4c2c716660a1afc1e6e9e844a0339adb34ed4a8ceac3a"
+    },
+    "verifier_model_routing_amendment": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.verifier-model-routing-amendment.json",
+      "sha256": "af7628fb94e84ebb6bacb7d29e4da2d91103bbbe209c5b31786c209cf28c00c7"
+    },
+    "verifier_structured_output_amendment": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.verifier-structured-output-amendment.json",
+      "sha256": "38557dab63b81839799ee1ad2699d5af35caf5982672a1f5c0a490f0549bf02f"
+    },
+    "verifier_prompt": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.verifier-prompt.md",
+      "sha256": "a6d42a11b0ad6935c3bee62fb7173f1777688694cc0ee3c40a2c7e4e811fa32d"
+    },
+    "verifier_output_schema": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.verifier-output.schema.json",
+      "sha256": "f827c8a2126e418872e68f09e21fb806369bb38d0368488fe068a174cec406fb"
+    },
+    "proposal": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-proposals/pr-208.batch-001.proposed.json",
+      "sha256": "46fd0a8a0bc5bb9c38b66ecb191e8191677d11b5d9a7eee48c1e5f1d995cccd9"
+    }
+  },
+  "output": {
+    "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-verifications/pr-208.batch-001.verifier-output.json",
+    "sha256": "ca9b682601e3219f01f01af8bc76b4a9f465adb75a8c0ec7dbbb41affce732cc",
+    "schema_valid": true,
+    "decision_count": 54,
+    "accept_count": 32,
+    "challenge_count": 22,
+    "accepted_label_mismatch_count": 0,
+    "out_of_universe_review": "accept_empty",
+    "final_status": "unverified"
+  },
+  "authority_boundary": "The verifier recorded unresolved challenges. This run is not a verified semantic reference and may not create semantic FI/FE metrics, production association changes, or formal assessment conclusions.",
+  "next_required_transition": "Record the disagreements and obtain a new retrieval-isolated review or a named distinct human adjudicator before attempting lifecycle verification."
+}

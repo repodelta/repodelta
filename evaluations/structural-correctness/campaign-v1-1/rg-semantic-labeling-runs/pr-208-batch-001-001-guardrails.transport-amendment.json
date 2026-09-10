@@ -1,0 +1,25 @@
+{
+  "schema_version": "rg_semantic_ai_lifecycle_shard_transport_amendment.v1",
+  "batch_id": "pr-208-batch-001",
+  "shard_id": "pr-208-batch-001-001-guardrails",
+  "status": "frozen_before_transport_retry",
+  "prior_attempt": {
+    "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208-batch-001-001-guardrails.attempt-001.json",
+    "sha256": "b0f64acf54248eb065d095e42bb51b1e54dbbc0a3dc93b6c3167750b70184aaa",
+    "failure_category": "provider_http_400"
+  },
+  "preserved_shard_input": {
+    "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208-batch-001-001-guardrails.input.json",
+    "sha256": "ce4b7dccc2399b1db811f5d136ca3690315c780330c778412a28399d70927885"
+  },
+  "permitted_transport_delta": "Omit the provenance-only `store: false` field from the provider request. Preserve source input, candidate set, prompt, schema, model identifier, temperature, maximum output tokens, JSON-object response format, and stream=false unchanged.",
+  "prohibited_delta": [
+    "changing source evidence, candidate IDs, or proposed labels",
+    "changing the model identifier or inference controls",
+    "exposing retrieval, association, provenance, comparison, or report artifacts",
+    "retaining raw provider response or error text",
+    "automatic retries after this corrected transport attempt"
+  ],
+  "failure_behavior": "A malformed, incomplete, challenged, or failed corrected attempt leaves the whole proposal unverified and requires a newly reviewed execution design.",
+  "authority_boundary": "This is a transport correction for a lifecycle-review attempt only. It does not verify the reference or permit semantic FI/FE."
+}

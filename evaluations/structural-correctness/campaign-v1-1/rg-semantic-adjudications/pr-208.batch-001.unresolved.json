@@ -1,0 +1,1898 @@
+{
+  "authority_scope": "campaign-local disagreement record; not a semantic reference, metric, or production authority",
+  "batch_id": "pr-208-batch-001",
+  "counts": {
+    "resolved": 0,
+    "unresolved": 22
+  },
+  "entries": {
+    "C:G1:E:structural_change:9ff44326982c1acafe85": {
+      "adjudication": {
+        "adjudicator": null,
+        "decision_note": null,
+        "decision_witnesses": [],
+        "final_label": null,
+        "status": "unresolved"
+      },
+      "candidate": {
+        "candidate_id": "C:G1:E:structural_change:9ff44326982c1acafe85",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "evidence_role": "primary",
+        "subject_id": "G1"
+      },
+      "candidate_id": "C:G1:E:structural_change:9ff44326982c1acafe85",
+      "proposer_label": {
+        "candidate_id": "C:G1:E:structural_change:9ff44326982c1acafe85",
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+        ],
+        "note": "Removes the relations parameter from the seed API, preventing evidence-role-based membership decisions.",
+        "proof_basis": "deterministic_mapping",
+        "proofability": "direct_capable",
+        "review_status": "reviewed",
+        "semantic_relation": "constrains"
+      },
+      "source_anchor": {
+        "classification": "code",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "evidence_kind": "structural_change",
+        "evidence_role": "primary",
+        "operation": "modified",
+        "path": "src/prismcode/projection/build.py",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 433,
+            "line_start": 57,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L57-L433"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 329,
+            "line_start": 329,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L329"
+          },
+          {
+            "label": "Codegraph symbol",
+            "line_end": 432,
+            "line_start": 57,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+          }
+        ],
+        "summary": "Modified function: build_review_projection"
+      },
+      "subject": {
+        "authored_statement": "Do not change Codegraph collection, traversal budgets, changed-anchor association, assessment, LLM behavior, or graph layout.",
+        "profile": "guardrail",
+        "subject_id": "G1",
+        "subject_kind": "guardrail"
+      },
+      "verifier_challenge": {
+        "candidate_id": "C:G1:E:structural_change:9ff44326982c1acafe85",
+        "decision": "challenge",
+        "evidence_witnesses": [],
+        "note": "The changed seed code does not itself enforce this guardrail.",
+        "reviewer_proof_basis": "none",
+        "reviewer_proofability": "not_applicable",
+        "reviewer_semantic_relation": "unrelated"
+      }
+    },
+    "C:G1:E:structural_change:d0cf036a1010c1207bc5": {
+      "adjudication": {
+        "adjudicator": null,
+        "decision_note": null,
+        "decision_witnesses": [],
+        "final_label": null,
+        "status": "unresolved"
+      },
+      "candidate": {
+        "candidate_id": "C:G1:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_role": "primary",
+        "subject_id": "G1"
+      },
+      "candidate_id": "C:G1:E:structural_change:d0cf036a1010c1207bc5",
+      "proposer_label": {
+        "candidate_id": "C:G1:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L435-L457"
+        ],
+        "note": "Changes seed derivation to filter solely on node role, not evidence annotation.",
+        "proof_basis": "deterministic_mapping",
+        "proofability": "direct_capable",
+        "review_status": "reviewed",
+        "semantic_relation": "constrains"
+      },
+      "source_anchor": {
+        "classification": "code",
+        "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_kind": "structural_change",
+        "evidence_role": "primary",
+        "operation": "modified",
+        "path": "src/prismcode/projection/build.py",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 461,
+            "line_start": 436,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L436-L461"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 454,
+            "line_start": 442,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L442-L454"
+          },
+          {
+            "label": "Codegraph symbol",
+            "line_end": 457,
+            "line_start": 435,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L435-L457"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 450,
+            "line_start": 442,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L442-L450"
+          }
+        ],
+        "summary": "Modified function: _canonical_backbone_seed_node_ids"
+      },
+      "subject": {
+        "authored_statement": "Do not change Codegraph collection, traversal budgets, changed-anchor association, assessment, LLM behavior, or graph layout.",
+        "profile": "guardrail",
+        "subject_id": "G1",
+        "subject_kind": "guardrail"
+      },
+      "verifier_challenge": {
+        "candidate_id": "C:G1:E:structural_change:d0cf036a1010c1207bc5",
+        "decision": "challenge",
+        "evidence_witnesses": [],
+        "note": "The changed seed code does not itself enforce this guardrail.",
+        "reviewer_proof_basis": "none",
+        "reviewer_proofability": "not_applicable",
+        "reviewer_semantic_relation": "unrelated"
+      }
+    },
+    "C:G2:E:structural_change:5d2be31cc60dea3d2f3b": {
+      "adjudication": {
+        "adjudicator": null,
+        "decision_note": null,
+        "decision_witnesses": [],
+        "final_label": null,
+        "status": "unresolved"
+      },
+      "candidate": {
+        "candidate_id": "C:G2:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_role": "test_support",
+        "subject_id": "G2"
+      },
+      "candidate_id": "C:G2:E:structural_change:5d2be31cc60dea3d2f3b",
+      "proposer_label": {
+        "candidate_id": "C:G2:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_witnesses": [],
+        "note": "Test addition verifies the new behavior but does not directly enforce the guardrail.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      "source_anchor": {
+        "classification": "test",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_kind": "structural_change",
+        "evidence_role": "test_support",
+        "operation": "added",
+        "path": "tests/test_projection.py",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 1514,
+            "line_start": 1473,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1473-L1514"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1473,
+            "line_start": 1473,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1473"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1489,
+            "line_start": 1486,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1486-L1489"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1514,
+            "line_start": 1514,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1514"
+          }
+        ],
+        "summary": "Added function: test_canonical_backbone_seeds_include_all_direct_changed_anchors"
+      },
+      "subject": {
+        "authored_statement": "Do not promote all reachable structural support nodes.",
+        "profile": "guardrail",
+        "subject_id": "G2",
+        "subject_kind": "guardrail"
+      },
+      "verifier_challenge": {
+        "candidate_id": "C:G2:E:structural_change:5d2be31cc60dea3d2f3b",
+        "decision": "challenge",
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1473-L1514"
+        ],
+        "note": "The changed test directly asserts exclusion behavior.",
+        "reviewer_proof_basis": "bounded_evidence",
+        "reviewer_proofability": "direct_capable",
+        "reviewer_semantic_relation": "directly_verifies"
+      }
+    },
+    "C:G2:E:structural_change:7c4162e02e623fea377f": {
+      "adjudication": {
+        "adjudicator": null,
+        "decision_note": null,
+        "decision_witnesses": [],
+        "final_label": null,
+        "status": "unresolved"
+      },
+      "candidate": {
+        "candidate_id": "C:G2:E:structural_change:7c4162e02e623fea377f",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "evidence_role": "test_support",
+        "subject_id": "G2"
+      },
+      "candidate_id": "C:G2:E:structural_change:7c4162e02e623fea377f",
+      "proposer_label": {
+        "candidate_id": "C:G2:E:structural_change:7c4162e02e623fea377f",
+        "evidence_witnesses": [],
+        "note": "Test modification verifies the new behavior but does not directly enforce the guardrail.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      "source_anchor": {
+        "classification": "test",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "evidence_kind": "structural_change",
+        "evidence_role": "test_support",
+        "operation": "modified",
+        "path": "tests/test_projection.py",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 1135,
+            "line_start": 766,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/tests/test_projection.py#L766-L1135"
+          },
+          {
+            "label": "Codegraph symbol",
+            "line_end": 1171,
+            "line_start": 766,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L766-L1171"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 869,
+            "line_start": 858,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L858-L869"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1025,
+            "line_start": 1012,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1012-L1025"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1102,
+            "line_start": 1101,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1101-L1102"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1137,
+            "line_start": 1136,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1136-L1137"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1155,
+            "line_start": 1154,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1154-L1155"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1169,
+            "line_start": 1168,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1168-L1169"
+          }
+        ],
+        "summary": "Modified function: test_projection_uses_review_relevant_structural_closure"
+      },
+      "subject": {
+        "authored_statement": "Do not promote all reachable structural support nodes.",
+        "profile": "guardrail",
+        "subject_id": "G2",
+        "subject_kind": "guardrail"
+      },
+      "verifier_challenge": {
+        "candidate_id": "C:G2:E:structural_change:7c4162e02e623fea377f",
+        "decision": "challenge",
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L766-L1171"
+        ],
+        "note": "The changed test directly asserts exclusion behavior.",
+        "reviewer_proof_basis": "bounded_evidence",
+        "reviewer_proofability": "direct_capable",
+        "reviewer_semantic_relation": "directly_verifies"
+      }
+    },
+    "C:G2:E:structural_change:9ff44326982c1acafe85": {
+      "adjudication": {
+        "adjudicator": null,
+        "decision_note": null,
+        "decision_witnesses": [],
+        "final_label": null,
+        "status": "unresolved"
+      },
+      "candidate": {
+        "candidate_id": "C:G2:E:structural_change:9ff44326982c1acafe85",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "evidence_role": "primary",
+        "subject_id": "G2"
+      },
+      "candidate_id": "C:G2:E:structural_change:9ff44326982c1acafe85",
+      "proposer_label": {
+        "candidate_id": "C:G2:E:structural_change:9ff44326982c1acafe85",
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+        ],
+        "note": "Removes the relations parameter from the seed API, preventing evidence-role-based membership decisions.",
+        "proof_basis": "deterministic_mapping",
+        "proofability": "direct_capable",
+        "review_status": "reviewed",
+        "semantic_relation": "constrains"
+      },
+      "source_anchor": {
+        "classification": "code",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "evidence_kind": "structural_change",
+        "evidence_role": "primary",
+        "operation": "modified",
+        "path": "src/prismcode/projection/build.py",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 433,
+            "line_start": 57,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L57-L433"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 329,
+            "line_start": 329,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L329"
+          },
+          {
+            "label": "Codegraph symbol",
+            "line_end": 432,
+            "line_start": 57,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+          }
+        ],
+        "summary": "Modified function: build_review_projection"
+      },
+      "subject": {
+        "authored_statement": "Do not promote all reachable structural support nodes.",
+        "profile": "guardrail",
+        "subject_id": "G2",
+        "subject_kind": "guardrail"
+      },
+      "verifier_challenge": {
+        "candidate_id": "C:G2:E:structural_change:9ff44326982c1acafe85",
+        "decision": "challenge",
+        "evidence_witnesses": [],
+        "note": "Removing the caller argument supports, but does not itself enforce, exclusion.",
+        "reviewer_proof_basis": "none",
+        "reviewer_proofability": "not_applicable",
+        "reviewer_semantic_relation": "contextual_support"
+      }
+    },
+    "C:G3:E:structural_change:9ff44326982c1acafe85": {
+      "adjudication": {
+        "adjudicator": null,
+        "decision_note": null,
+        "decision_witnesses": [],
+        "final_label": null,
+        "status": "unresolved"
+      },
+      "candidate": {
+        "candidate_id": "C:G3:E:structural_change:9ff44326982c1acafe85",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "evidence_role": "primary",
+        "subject_id": "G3"
+      },
+      "candidate_id": "C:G3:E:structural_change:9ff44326982c1acafe85",
+      "proposer_label": {
+        "candidate_id": "C:G3:E:structural_change:9ff44326982c1acafe85",
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+        ],
+        "note": "Removes the relations parameter from the seed API, preventing evidence-role-based membership decisions.",
+        "proof_basis": "deterministic_mapping",
+        "proofability": "direct_capable",
+        "review_status": "reviewed",
+        "semantic_relation": "constrains"
+      },
+      "source_anchor": {
+        "classification": "code",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "evidence_kind": "structural_change",
+        "evidence_role": "primary",
+        "operation": "modified",
+        "path": "src/prismcode/projection/build.py",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 433,
+            "line_start": 57,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L57-L433"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 329,
+            "line_start": 329,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L329"
+          },
+          {
+            "label": "Codegraph symbol",
+            "line_end": 432,
+            "line_start": 57,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+          }
+        ],
+        "summary": "Modified function: build_review_projection"
+      },
+      "subject": {
+        "authored_statement": "Do not introduce a second backbone producer or renderer-side membership decision.",
+        "profile": "guardrail",
+        "subject_id": "G3",
+        "subject_kind": "guardrail"
+      },
+      "verifier_challenge": {
+        "candidate_id": "C:G3:E:structural_change:9ff44326982c1acafe85",
+        "decision": "challenge",
+        "evidence_witnesses": [],
+        "note": "The changed seed code does not itself enforce this guardrail.",
+        "reviewer_proof_basis": "none",
+        "reviewer_proofability": "not_applicable",
+        "reviewer_semantic_relation": "unrelated"
+      }
+    },
+    "C:G3:E:structural_change:d0cf036a1010c1207bc5": {
+      "adjudication": {
+        "adjudicator": null,
+        "decision_note": null,
+        "decision_witnesses": [],
+        "final_label": null,
+        "status": "unresolved"
+      },
+      "candidate": {
+        "candidate_id": "C:G3:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_role": "primary",
+        "subject_id": "G3"
+      },
+      "candidate_id": "C:G3:E:structural_change:d0cf036a1010c1207bc5",
+      "proposer_label": {
+        "candidate_id": "C:G3:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L435-L457"
+        ],
+        "note": "Changes seed derivation to filter solely on node role, not evidence annotation.",
+        "proof_basis": "deterministic_mapping",
+        "proofability": "direct_capable",
+        "review_status": "reviewed",
+        "semantic_relation": "constrains"
+      },
+      "source_anchor": {
+        "classification": "code",
+        "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_kind": "structural_change",
+        "evidence_role": "primary",
+        "operation": "modified",
+        "path": "src/prismcode/projection/build.py",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 461,
+            "line_start": 436,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L436-L461"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 454,
+            "line_start": 442,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L442-L454"
+          },
+          {
+            "label": "Codegraph symbol",
+            "line_end": 457,
+            "line_start": 435,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L435-L457"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 450,
+            "line_start": 442,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L442-L450"
+          }
+        ],
+        "summary": "Modified function: _canonical_backbone_seed_node_ids"
+      },
+      "subject": {
+        "authored_statement": "Do not introduce a second backbone producer or renderer-side membership decision.",
+        "profile": "guardrail",
+        "subject_id": "G3",
+        "subject_kind": "guardrail"
+      },
+      "verifier_challenge": {
+        "candidate_id": "C:G3:E:structural_change:d0cf036a1010c1207bc5",
+        "decision": "challenge",
+        "evidence_witnesses": [],
+        "note": "The changed seed code does not itself enforce this guardrail.",
+        "reviewer_proof_basis": "none",
+        "reviewer_proofability": "not_applicable",
+        "reviewer_semantic_relation": "unrelated"
+      }
+    },
+    "C:G4:E:structural_change:9ff44326982c1acafe85": {
+      "adjudication": {
+        "adjudicator": null,
+        "decision_note": null,
+        "decision_witnesses": [],
+        "final_label": null,
+        "status": "unresolved"
+      },
+      "candidate": {
+        "candidate_id": "C:G4:E:structural_change:9ff44326982c1acafe85",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "evidence_role": "primary",
+        "subject_id": "G4"
+      },
+      "candidate_id": "C:G4:E:structural_change:9ff44326982c1acafe85",
+      "proposer_label": {
+        "candidate_id": "C:G4:E:structural_change:9ff44326982c1acafe85",
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+        ],
+        "note": "Removes the relations parameter from the seed API, preventing evidence-role-based membership decisions.",
+        "proof_basis": "deterministic_mapping",
+        "proofability": "direct_capable",
+        "review_status": "reviewed",
+        "semantic_relation": "constrains"
+      },
+      "source_anchor": {
+        "classification": "code",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "evidence_kind": "structural_change",
+        "evidence_role": "primary",
+        "operation": "modified",
+        "path": "src/prismcode/projection/build.py",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 433,
+            "line_start": 57,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L57-L433"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 329,
+            "line_start": 329,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L329"
+          },
+          {
+            "label": "Codegraph symbol",
+            "line_end": 432,
+            "line_start": 57,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+          }
+        ],
+        "summary": "Modified function: build_review_projection"
+      },
+      "subject": {
+        "authored_statement": "Traversal convergence, support-path relevance, LLM inference, assessment semantics, and visual-layout redesign.",
+        "profile": "guardrail",
+        "subject_id": "G4",
+        "subject_kind": "guardrail"
+      },
+      "verifier_challenge": {
+        "candidate_id": "C:G4:E:structural_change:9ff44326982c1acafe85",
+        "decision": "challenge",
+        "evidence_witnesses": [],
+        "note": "The changed seed code does not itself enforce this guardrail.",
+        "reviewer_proof_basis": "none",
+        "reviewer_proofability": "not_applicable",
+        "reviewer_semantic_relation": "unrelated"
+      }
+    },
+    "C:G4:E:structural_change:d0cf036a1010c1207bc5": {
+      "adjudication": {
+        "adjudicator": null,
+        "decision_note": null,
+        "decision_witnesses": [],
+        "final_label": null,
+        "status": "unresolved"
+      },
+      "candidate": {
+        "candidate_id": "C:G4:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_role": "primary",
+        "subject_id": "G4"
+      },
+      "candidate_id": "C:G4:E:structural_change:d0cf036a1010c1207bc5",
+      "proposer_label": {
+        "candidate_id": "C:G4:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L435-L457"
+        ],
+        "note": "Changes seed derivation to filter solely on node role, not evidence annotation.",
+        "proof_basis": "deterministic_mapping",
+        "proofability": "direct_capable",
+        "review_status": "reviewed",
+        "semantic_relation": "constrains"
+      },
+      "source_anchor": {
+        "classification": "code",
+        "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_kind": "structural_change",
+        "evidence_role": "primary",
+        "operation": "modified",
+        "path": "src/prismcode/projection/build.py",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 461,
+            "line_start": 436,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L436-L461"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 454,
+            "line_start": 442,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L442-L454"
+          },
+          {
+            "label": "Codegraph symbol",
+            "line_end": 457,
+            "line_start": 435,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L435-L457"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 450,
+            "line_start": 442,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L442-L450"
+          }
+        ],
+        "summary": "Modified function: _canonical_backbone_seed_node_ids"
+      },
+      "subject": {
+        "authored_statement": "Traversal convergence, support-path relevance, LLM inference, assessment semantics, and visual-layout redesign.",
+        "profile": "guardrail",
+        "subject_id": "G4",
+        "subject_kind": "guardrail"
+      },
+      "verifier_challenge": {
+        "candidate_id": "C:G4:E:structural_change:d0cf036a1010c1207bc5",
+        "decision": "challenge",
+        "evidence_witnesses": [],
+        "note": "The changed seed code does not itself enforce this guardrail.",
+        "reviewer_proof_basis": "none",
+        "reviewer_proofability": "not_applicable",
+        "reviewer_semantic_relation": "unrelated"
+      }
+    },
+    "C:R1:E:structural_change:5d2be31cc60dea3d2f3b": {
+      "adjudication": {
+        "adjudicator": null,
+        "decision_note": null,
+        "decision_witnesses": [],
+        "final_label": null,
+        "status": "unresolved"
+      },
+      "candidate": {
+        "candidate_id": "C:R1:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_role": "test_support",
+        "subject_id": "R1"
+      },
+      "candidate_id": "C:R1:E:structural_change:5d2be31cc60dea3d2f3b",
+      "proposer_label": {
+        "candidate_id": "C:R1:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_witnesses": [],
+        "note": "Test addition verifies the new behavior but does not directly implement the requirement.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      "source_anchor": {
+        "classification": "test",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_kind": "structural_change",
+        "evidence_role": "test_support",
+        "operation": "added",
+        "path": "tests/test_projection.py",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 1514,
+            "line_start": 1473,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1473-L1514"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1473,
+            "line_start": 1473,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1473"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1489,
+            "line_start": 1486,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1486-L1489"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1514,
+            "line_start": 1514,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1514"
+          }
+        ],
+        "summary": "Added function: test_canonical_backbone_seeds_include_all_direct_changed_anchors"
+      },
+      "subject": {
+        "authored_statement": "A selected direct changed structural anchor is eligible for default backbone membership regardless of whether its focus-relative evidence annotation is primary, test support, or documentation support.",
+        "profile": "generic",
+        "subject_id": "R1",
+        "subject_kind": "requirement"
+      },
+      "verifier_challenge": {
+        "candidate_id": "C:R1:E:structural_change:5d2be31cc60dea3d2f3b",
+        "decision": "challenge",
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1473-L1514"
+        ],
+        "note": "The changed test directly asserts membership behavior.",
+        "reviewer_proof_basis": "bounded_evidence",
+        "reviewer_proofability": "direct_capable",
+        "reviewer_semantic_relation": "directly_verifies"
+      }
+    },
+    "C:R1:E:structural_change:7c4162e02e623fea377f": {
+      "adjudication": {
+        "adjudicator": null,
+        "decision_note": null,
+        "decision_witnesses": [],
+        "final_label": null,
+        "status": "unresolved"
+      },
+      "candidate": {
+        "candidate_id": "C:R1:E:structural_change:7c4162e02e623fea377f",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "evidence_role": "test_support",
+        "subject_id": "R1"
+      },
+      "candidate_id": "C:R1:E:structural_change:7c4162e02e623fea377f",
+      "proposer_label": {
+        "candidate_id": "C:R1:E:structural_change:7c4162e02e623fea377f",
+        "evidence_witnesses": [],
+        "note": "Test modification verifies the new behavior but does not directly implement the requirement.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      "source_anchor": {
+        "classification": "test",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "evidence_kind": "structural_change",
+        "evidence_role": "test_support",
+        "operation": "modified",
+        "path": "tests/test_projection.py",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 1135,
+            "line_start": 766,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/tests/test_projection.py#L766-L1135"
+          },
+          {
+            "label": "Codegraph symbol",
+            "line_end": 1171,
+            "line_start": 766,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L766-L1171"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 869,
+            "line_start": 858,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L858-L869"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1025,
+            "line_start": 1012,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1012-L1025"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1102,
+            "line_start": 1101,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1101-L1102"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1137,
+            "line_start": 1136,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1136-L1137"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1155,
+            "line_start": 1154,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1154-L1155"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1169,
+            "line_start": 1168,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1168-L1169"
+          }
+        ],
+        "summary": "Modified function: test_projection_uses_review_relevant_structural_closure"
+      },
+      "subject": {
+        "authored_statement": "A selected direct changed structural anchor is eligible for default backbone membership regardless of whether its focus-relative evidence annotation is primary, test support, or documentation support.",
+        "profile": "generic",
+        "subject_id": "R1",
+        "subject_kind": "requirement"
+      },
+      "verifier_challenge": {
+        "candidate_id": "C:R1:E:structural_change:7c4162e02e623fea377f",
+        "decision": "challenge",
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L766-L1171"
+        ],
+        "note": "The changed test directly asserts membership behavior.",
+        "reviewer_proof_basis": "bounded_evidence",
+        "reviewer_proofability": "direct_capable",
+        "reviewer_semantic_relation": "directly_verifies"
+      }
+    },
+    "C:R1:E:structural_change:9ff44326982c1acafe85": {
+      "adjudication": {
+        "adjudicator": null,
+        "decision_note": null,
+        "decision_witnesses": [],
+        "final_label": null,
+        "status": "unresolved"
+      },
+      "candidate": {
+        "candidate_id": "C:R1:E:structural_change:9ff44326982c1acafe85",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "evidence_role": "primary",
+        "subject_id": "R1"
+      },
+      "candidate_id": "C:R1:E:structural_change:9ff44326982c1acafe85",
+      "proposer_label": {
+        "candidate_id": "C:R1:E:structural_change:9ff44326982c1acafe85",
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+        ],
+        "note": "Removes the relations parameter from the seed API, making membership independent of evidence annotation.",
+        "proof_basis": "deterministic_mapping",
+        "proofability": "direct_capable",
+        "review_status": "reviewed",
+        "semantic_relation": "implements"
+      },
+      "source_anchor": {
+        "classification": "code",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "evidence_kind": "structural_change",
+        "evidence_role": "primary",
+        "operation": "modified",
+        "path": "src/prismcode/projection/build.py",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 433,
+            "line_start": 57,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L57-L433"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 329,
+            "line_start": 329,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L329"
+          },
+          {
+            "label": "Codegraph symbol",
+            "line_end": 432,
+            "line_start": 57,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+          }
+        ],
+        "summary": "Modified function: build_review_projection"
+      },
+      "subject": {
+        "authored_statement": "A selected direct changed structural anchor is eligible for default backbone membership regardless of whether its focus-relative evidence annotation is primary, test support, or documentation support.",
+        "profile": "generic",
+        "subject_id": "R1",
+        "subject_kind": "requirement"
+      },
+      "verifier_challenge": {
+        "candidate_id": "C:R1:E:structural_change:9ff44326982c1acafe85",
+        "decision": "challenge",
+        "evidence_witnesses": [],
+        "note": "Removing the caller argument supports the requirement; role-only seed logic realizes it.",
+        "reviewer_proof_basis": "none",
+        "reviewer_proofability": "not_applicable",
+        "reviewer_semantic_relation": "contextual_support"
+      }
+    },
+    "C:R2:E:structural_change:5d2be31cc60dea3d2f3b": {
+      "adjudication": {
+        "adjudicator": null,
+        "decision_note": null,
+        "decision_witnesses": [],
+        "final_label": null,
+        "status": "unresolved"
+      },
+      "candidate": {
+        "candidate_id": "C:R2:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_role": "test_support",
+        "subject_id": "R2"
+      },
+      "candidate_id": "C:R2:E:structural_change:5d2be31cc60dea3d2f3b",
+      "proposer_label": {
+        "candidate_id": "C:R2:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_witnesses": [],
+        "note": "Test addition verifies the new behavior but does not directly implement the requirement.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      "source_anchor": {
+        "classification": "test",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_kind": "structural_change",
+        "evidence_role": "test_support",
+        "operation": "added",
+        "path": "tests/test_projection.py",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 1514,
+            "line_start": 1473,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1473-L1514"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1473,
+            "line_start": 1473,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1473"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1489,
+            "line_start": 1486,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1486-L1489"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1514,
+            "line_start": 1514,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1514"
+          }
+        ],
+        "summary": "Added function: test_canonical_backbone_seeds_include_all_direct_changed_anchors"
+      },
+      "subject": {
+        "authored_statement": "Focus-relative evidence annotation remains available for reviewer explanation and presentation, but cannot add, remove, or suppress structural backbone membership.",
+        "profile": "generic",
+        "subject_id": "R2",
+        "subject_kind": "requirement"
+      },
+      "verifier_challenge": {
+        "candidate_id": "C:R2:E:structural_change:5d2be31cc60dea3d2f3b",
+        "decision": "challenge",
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1473-L1514"
+        ],
+        "note": "The changed test directly asserts membership behavior.",
+        "reviewer_proof_basis": "bounded_evidence",
+        "reviewer_proofability": "direct_capable",
+        "reviewer_semantic_relation": "directly_verifies"
+      }
+    },
+    "C:R2:E:structural_change:7c4162e02e623fea377f": {
+      "adjudication": {
+        "adjudicator": null,
+        "decision_note": null,
+        "decision_witnesses": [],
+        "final_label": null,
+        "status": "unresolved"
+      },
+      "candidate": {
+        "candidate_id": "C:R2:E:structural_change:7c4162e02e623fea377f",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "evidence_role": "test_support",
+        "subject_id": "R2"
+      },
+      "candidate_id": "C:R2:E:structural_change:7c4162e02e623fea377f",
+      "proposer_label": {
+        "candidate_id": "C:R2:E:structural_change:7c4162e02e623fea377f",
+        "evidence_witnesses": [],
+        "note": "Test modification verifies the new behavior but does not directly implement the requirement.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      "source_anchor": {
+        "classification": "test",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "evidence_kind": "structural_change",
+        "evidence_role": "test_support",
+        "operation": "modified",
+        "path": "tests/test_projection.py",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 1135,
+            "line_start": 766,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/tests/test_projection.py#L766-L1135"
+          },
+          {
+            "label": "Codegraph symbol",
+            "line_end": 1171,
+            "line_start": 766,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L766-L1171"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 869,
+            "line_start": 858,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L858-L869"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1025,
+            "line_start": 1012,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1012-L1025"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1102,
+            "line_start": 1101,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1101-L1102"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1137,
+            "line_start": 1136,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1136-L1137"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1155,
+            "line_start": 1154,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1154-L1155"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1169,
+            "line_start": 1168,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1168-L1169"
+          }
+        ],
+        "summary": "Modified function: test_projection_uses_review_relevant_structural_closure"
+      },
+      "subject": {
+        "authored_statement": "Focus-relative evidence annotation remains available for reviewer explanation and presentation, but cannot add, remove, or suppress structural backbone membership.",
+        "profile": "generic",
+        "subject_id": "R2",
+        "subject_kind": "requirement"
+      },
+      "verifier_challenge": {
+        "candidate_id": "C:R2:E:structural_change:7c4162e02e623fea377f",
+        "decision": "challenge",
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L766-L1171"
+        ],
+        "note": "The changed test directly asserts membership behavior.",
+        "reviewer_proof_basis": "bounded_evidence",
+        "reviewer_proofability": "direct_capable",
+        "reviewer_semantic_relation": "directly_verifies"
+      }
+    },
+    "C:R3:E:structural_change:5d2be31cc60dea3d2f3b": {
+      "adjudication": {
+        "adjudicator": null,
+        "decision_note": null,
+        "decision_witnesses": [],
+        "final_label": null,
+        "status": "unresolved"
+      },
+      "candidate": {
+        "candidate_id": "C:R3:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_role": "test_support",
+        "subject_id": "R3"
+      },
+      "candidate_id": "C:R3:E:structural_change:5d2be31cc60dea3d2f3b",
+      "proposer_label": {
+        "candidate_id": "C:R3:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_witnesses": [],
+        "note": "Test addition verifies the new behavior but does not directly implement the requirement.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      "source_anchor": {
+        "classification": "test",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_kind": "structural_change",
+        "evidence_role": "test_support",
+        "operation": "added",
+        "path": "tests/test_projection.py",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 1514,
+            "line_start": 1473,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1473-L1514"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1473,
+            "line_start": 1473,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1473"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1489,
+            "line_start": 1486,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1486-L1489"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1514,
+            "line_start": 1514,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1514"
+          }
+        ],
+        "summary": "Added function: test_canonical_backbone_seeds_include_all_direct_changed_anchors"
+      },
+      "subject": {
+        "authored_statement": "The same membership contract applies to Issue R/G and PR Transformation/Completion subjects.",
+        "profile": "api_contract",
+        "subject_id": "R3",
+        "subject_kind": "requirement"
+      },
+      "verifier_challenge": {
+        "candidate_id": "C:R3:E:structural_change:5d2be31cc60dea3d2f3b",
+        "decision": "challenge",
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1473-L1514"
+        ],
+        "note": "The changed test directly asserts the shared-contract behavior.",
+        "reviewer_proof_basis": "bounded_evidence",
+        "reviewer_proofability": "direct_capable",
+        "reviewer_semantic_relation": "directly_verifies"
+      }
+    },
+    "C:R3:E:structural_change:9ff44326982c1acafe85": {
+      "adjudication": {
+        "adjudicator": null,
+        "decision_note": null,
+        "decision_witnesses": [],
+        "final_label": null,
+        "status": "unresolved"
+      },
+      "candidate": {
+        "candidate_id": "C:R3:E:structural_change:9ff44326982c1acafe85",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "evidence_role": "primary",
+        "subject_id": "R3"
+      },
+      "candidate_id": "C:R3:E:structural_change:9ff44326982c1acafe85",
+      "proposer_label": {
+        "candidate_id": "C:R3:E:structural_change:9ff44326982c1acafe85",
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+        ],
+        "note": "Removes the relations parameter from the seed API, making the membership contract uniform across R/G and T/CC.",
+        "proof_basis": "deterministic_mapping",
+        "proofability": "direct_capable",
+        "review_status": "reviewed",
+        "semantic_relation": "implements"
+      },
+      "source_anchor": {
+        "classification": "code",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "evidence_kind": "structural_change",
+        "evidence_role": "primary",
+        "operation": "modified",
+        "path": "src/prismcode/projection/build.py",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 433,
+            "line_start": 57,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L57-L433"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 329,
+            "line_start": 329,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L329"
+          },
+          {
+            "label": "Codegraph symbol",
+            "line_end": 432,
+            "line_start": 57,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+          }
+        ],
+        "summary": "Modified function: build_review_projection"
+      },
+      "subject": {
+        "authored_statement": "The same membership contract applies to Issue R/G and PR Transformation/Completion subjects.",
+        "profile": "api_contract",
+        "subject_id": "R3",
+        "subject_kind": "requirement"
+      },
+      "verifier_challenge": {
+        "candidate_id": "C:R3:E:structural_change:9ff44326982c1acafe85",
+        "decision": "challenge",
+        "evidence_witnesses": [],
+        "note": "Removing the caller argument supports the requirement; role-only seed logic realizes it.",
+        "reviewer_proof_basis": "none",
+        "reviewer_proofability": "not_applicable",
+        "reviewer_semantic_relation": "contextual_support"
+      }
+    },
+    "C:R4:E:structural_change:5d2be31cc60dea3d2f3b": {
+      "adjudication": {
+        "adjudicator": null,
+        "decision_note": null,
+        "decision_witnesses": [],
+        "final_label": null,
+        "status": "unresolved"
+      },
+      "candidate": {
+        "candidate_id": "C:R4:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_role": "test_support",
+        "subject_id": "R4"
+      },
+      "candidate_id": "C:R4:E:structural_change:5d2be31cc60dea3d2f3b",
+      "proposer_label": {
+        "candidate_id": "C:R4:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_witnesses": [],
+        "note": "Test addition verifies the new behavior but does not directly implement the requirement.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      "source_anchor": {
+        "classification": "test",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_kind": "structural_change",
+        "evidence_role": "test_support",
+        "operation": "added",
+        "path": "tests/test_projection.py",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 1514,
+            "line_start": 1473,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1473-L1514"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1473,
+            "line_start": 1473,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1473"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1489,
+            "line_start": 1486,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1486-L1489"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1514,
+            "line_start": 1514,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1514"
+          }
+        ],
+        "summary": "Added function: test_canonical_backbone_seeds_include_all_direct_changed_anchors"
+      },
+      "subject": {
+        "authored_statement": "Intermediate, retained-context, and merely reachable support nodes remain outside the default backbone unless canonical backbone rules independently include them.",
+        "profile": "generic",
+        "subject_id": "R4",
+        "subject_kind": "requirement"
+      },
+      "verifier_challenge": {
+        "candidate_id": "C:R4:E:structural_change:5d2be31cc60dea3d2f3b",
+        "decision": "challenge",
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1473-L1514"
+        ],
+        "note": "The changed test directly asserts exclusion behavior.",
+        "reviewer_proof_basis": "bounded_evidence",
+        "reviewer_proofability": "direct_capable",
+        "reviewer_semantic_relation": "directly_verifies"
+      }
+    },
+    "C:R4:E:structural_change:7c4162e02e623fea377f": {
+      "adjudication": {
+        "adjudicator": null,
+        "decision_note": null,
+        "decision_witnesses": [],
+        "final_label": null,
+        "status": "unresolved"
+      },
+      "candidate": {
+        "candidate_id": "C:R4:E:structural_change:7c4162e02e623fea377f",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "evidence_role": "test_support",
+        "subject_id": "R4"
+      },
+      "candidate_id": "C:R4:E:structural_change:7c4162e02e623fea377f",
+      "proposer_label": {
+        "candidate_id": "C:R4:E:structural_change:7c4162e02e623fea377f",
+        "evidence_witnesses": [],
+        "note": "Test modification verifies the new behavior but does not directly implement the requirement.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      "source_anchor": {
+        "classification": "test",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "evidence_kind": "structural_change",
+        "evidence_role": "test_support",
+        "operation": "modified",
+        "path": "tests/test_projection.py",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 1135,
+            "line_start": 766,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/tests/test_projection.py#L766-L1135"
+          },
+          {
+            "label": "Codegraph symbol",
+            "line_end": 1171,
+            "line_start": 766,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L766-L1171"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 869,
+            "line_start": 858,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L858-L869"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1025,
+            "line_start": 1012,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1012-L1025"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1102,
+            "line_start": 1101,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1101-L1102"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1137,
+            "line_start": 1136,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1136-L1137"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1155,
+            "line_start": 1154,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1154-L1155"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1169,
+            "line_start": 1168,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1168-L1169"
+          }
+        ],
+        "summary": "Modified function: test_projection_uses_review_relevant_structural_closure"
+      },
+      "subject": {
+        "authored_statement": "Intermediate, retained-context, and merely reachable support nodes remain outside the default backbone unless canonical backbone rules independently include them.",
+        "profile": "generic",
+        "subject_id": "R4",
+        "subject_kind": "requirement"
+      },
+      "verifier_challenge": {
+        "candidate_id": "C:R4:E:structural_change:7c4162e02e623fea377f",
+        "decision": "challenge",
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L766-L1171"
+        ],
+        "note": "The changed test directly asserts exclusion behavior.",
+        "reviewer_proof_basis": "bounded_evidence",
+        "reviewer_proofability": "direct_capable",
+        "reviewer_semantic_relation": "directly_verifies"
+      }
+    },
+    "C:R4:E:structural_change:9ff44326982c1acafe85": {
+      "adjudication": {
+        "adjudicator": null,
+        "decision_note": null,
+        "decision_witnesses": [],
+        "final_label": null,
+        "status": "unresolved"
+      },
+      "candidate": {
+        "candidate_id": "C:R4:E:structural_change:9ff44326982c1acafe85",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "evidence_role": "primary",
+        "subject_id": "R4"
+      },
+      "candidate_id": "C:R4:E:structural_change:9ff44326982c1acafe85",
+      "proposer_label": {
+        "candidate_id": "C:R4:E:structural_change:9ff44326982c1acafe85",
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+        ],
+        "note": "Removes the relations parameter from the seed API, preventing evidence-role-based promotion of support nodes.",
+        "proof_basis": "deterministic_mapping",
+        "proofability": "direct_capable",
+        "review_status": "reviewed",
+        "semantic_relation": "implements"
+      },
+      "source_anchor": {
+        "classification": "code",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "evidence_kind": "structural_change",
+        "evidence_role": "primary",
+        "operation": "modified",
+        "path": "src/prismcode/projection/build.py",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 433,
+            "line_start": 57,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L57-L433"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 329,
+            "line_start": 329,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L329"
+          },
+          {
+            "label": "Codegraph symbol",
+            "line_end": 432,
+            "line_start": 57,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+          }
+        ],
+        "summary": "Modified function: build_review_projection"
+      },
+      "subject": {
+        "authored_statement": "Intermediate, retained-context, and merely reachable support nodes remain outside the default backbone unless canonical backbone rules independently include them.",
+        "profile": "generic",
+        "subject_id": "R4",
+        "subject_kind": "requirement"
+      },
+      "verifier_challenge": {
+        "candidate_id": "C:R4:E:structural_change:9ff44326982c1acafe85",
+        "decision": "challenge",
+        "evidence_witnesses": [],
+        "note": "Removing the caller argument supports the requirement; role-only seed logic realizes it.",
+        "reviewer_proof_basis": "none",
+        "reviewer_proofability": "not_applicable",
+        "reviewer_semantic_relation": "contextual_support"
+      }
+    },
+    "C:R5:E:structural_change:5d2be31cc60dea3d2f3b": {
+      "adjudication": {
+        "adjudicator": null,
+        "decision_note": null,
+        "decision_witnesses": [],
+        "final_label": null,
+        "status": "unresolved"
+      },
+      "candidate": {
+        "candidate_id": "C:R5:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_role": "test_support",
+        "subject_id": "R5"
+      },
+      "candidate_id": "C:R5:E:structural_change:5d2be31cc60dea3d2f3b",
+      "proposer_label": {
+        "candidate_id": "C:R5:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_witnesses": [],
+        "note": "Test addition verifies the new behavior but does not directly implement the requirement.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      "source_anchor": {
+        "classification": "test",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_kind": "structural_change",
+        "evidence_role": "test_support",
+        "operation": "added",
+        "path": "tests/test_projection.py",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 1514,
+            "line_start": 1473,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1473-L1514"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1473,
+            "line_start": 1473,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1473"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1489,
+            "line_start": 1486,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1486-L1489"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1514,
+            "line_start": 1514,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1514"
+          }
+        ],
+        "summary": "Added function: test_canonical_backbone_seeds_include_all_direct_changed_anchors"
+      },
+      "subject": {
+        "authored_statement": "The graph retains direct production and direct test changes together when both are selected.",
+        "profile": "generic",
+        "subject_id": "R5",
+        "subject_kind": "requirement"
+      },
+      "verifier_challenge": {
+        "candidate_id": "C:R5:E:structural_change:5d2be31cc60dea3d2f3b",
+        "decision": "challenge",
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1473-L1514"
+        ],
+        "note": "The changed test directly asserts combined production and test membership.",
+        "reviewer_proof_basis": "bounded_evidence",
+        "reviewer_proofability": "direct_capable",
+        "reviewer_semantic_relation": "directly_verifies"
+      }
+    },
+    "C:R5:E:structural_change:7c4162e02e623fea377f": {
+      "adjudication": {
+        "adjudicator": null,
+        "decision_note": null,
+        "decision_witnesses": [],
+        "final_label": null,
+        "status": "unresolved"
+      },
+      "candidate": {
+        "candidate_id": "C:R5:E:structural_change:7c4162e02e623fea377f",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "evidence_role": "test_support",
+        "subject_id": "R5"
+      },
+      "candidate_id": "C:R5:E:structural_change:7c4162e02e623fea377f",
+      "proposer_label": {
+        "candidate_id": "C:R5:E:structural_change:7c4162e02e623fea377f",
+        "evidence_witnesses": [],
+        "note": "Test modification verifies the new behavior but does not directly implement the requirement.",
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "review_status": "reviewed",
+        "semantic_relation": "contextual_support"
+      },
+      "source_anchor": {
+        "classification": "test",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "evidence_kind": "structural_change",
+        "evidence_role": "test_support",
+        "operation": "modified",
+        "path": "tests/test_projection.py",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 1135,
+            "line_start": 766,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/tests/test_projection.py#L766-L1135"
+          },
+          {
+            "label": "Codegraph symbol",
+            "line_end": 1171,
+            "line_start": 766,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L766-L1171"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 869,
+            "line_start": 858,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L858-L869"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1025,
+            "line_start": 1012,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1012-L1025"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1102,
+            "line_start": 1101,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1101-L1102"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1137,
+            "line_start": 1136,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1136-L1137"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1155,
+            "line_start": 1154,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1154-L1155"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 1169,
+            "line_start": 1168,
+            "path": "tests/test_projection.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1168-L1169"
+          }
+        ],
+        "summary": "Modified function: test_projection_uses_review_relevant_structural_closure"
+      },
+      "subject": {
+        "authored_statement": "The graph retains direct production and direct test changes together when both are selected.",
+        "profile": "generic",
+        "subject_id": "R5",
+        "subject_kind": "requirement"
+      },
+      "verifier_challenge": {
+        "candidate_id": "C:R5:E:structural_change:7c4162e02e623fea377f",
+        "decision": "challenge",
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L766-L1171"
+        ],
+        "note": "The changed test directly asserts combined production and test membership.",
+        "reviewer_proof_basis": "bounded_evidence",
+        "reviewer_proofability": "direct_capable",
+        "reviewer_semantic_relation": "directly_verifies"
+      }
+    },
+    "C:R5:E:structural_change:9ff44326982c1acafe85": {
+      "adjudication": {
+        "adjudicator": null,
+        "decision_note": null,
+        "decision_witnesses": [],
+        "final_label": null,
+        "status": "unresolved"
+      },
+      "candidate": {
+        "candidate_id": "C:R5:E:structural_change:9ff44326982c1acafe85",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "evidence_role": "primary",
+        "subject_id": "R5"
+      },
+      "candidate_id": "C:R5:E:structural_change:9ff44326982c1acafe85",
+      "proposer_label": {
+        "candidate_id": "C:R5:E:structural_change:9ff44326982c1acafe85",
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+        ],
+        "note": "Removes the relations parameter from the seed API, allowing test-support anchors to be included alongside production anchors.",
+        "proof_basis": "deterministic_mapping",
+        "proofability": "direct_capable",
+        "review_status": "reviewed",
+        "semantic_relation": "implements"
+      },
+      "source_anchor": {
+        "classification": "code",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "evidence_kind": "structural_change",
+        "evidence_role": "primary",
+        "operation": "modified",
+        "path": "src/prismcode/projection/build.py",
+        "sources": [
+          {
+            "label": "Codegraph symbol",
+            "line_end": 433,
+            "line_start": 57,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L57-L433"
+          },
+          {
+            "label": "diff hunk",
+            "line_end": 329,
+            "line_start": 329,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/504e61579387092f5b02dffb2ca26c5fed6b8271/src/prismcode/projection/build.py#L329"
+          },
+          {
+            "label": "Codegraph symbol",
+            "line_end": 432,
+            "line_start": 57,
+            "path": "src/prismcode/projection/build.py",
+            "url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py#L57-L432"
+          }
+        ],
+        "summary": "Modified function: build_review_projection"
+      },
+      "subject": {
+        "authored_statement": "The graph retains direct production and direct test changes together when both are selected.",
+        "profile": "generic",
+        "subject_id": "R5",
+        "subject_kind": "requirement"
+      },
+      "verifier_challenge": {
+        "candidate_id": "C:R5:E:structural_change:9ff44326982c1acafe85",
+        "decision": "challenge",
+        "evidence_witnesses": [],
+        "note": "Removing the caller argument supports the requirement; role-only seed logic realizes it.",
+        "reviewer_proof_basis": "none",
+        "reviewer_proofability": "not_applicable",
+        "reviewer_semantic_relation": "contextual_support"
+      }
+    }
+  },
+  "failure_behavior": "No entry may be treated as resolved or used to alter the proposed reference until a distinct human adjudicator records a source-witnessed decision.",
+  "immutable_sources": {
+    "candidate_universe": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-candidate-universes/pr-208.json",
+      "sha256": "44e2676cf166f1913968f136427d056cee4c4ca1f84dd893bbf68bfff0e56877",
+      "universe_digest": "6ee61bf0f516385acfce02172b1b2466a0ffb3a7cec58165e4fcc4b1c5a86502"
+    },
+    "proposer_reference": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-proposals/pr-208.batch-001.proposed.json",
+      "sha256": "46fd0a8a0bc5bb9c38b66ecb191e8191677d11b5d9a7eee48c1e5f1d995cccd9"
+    },
+        "verifier_output": {
+          "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-verifications/pr-208.batch-001.verifier-output.json",
+          "sha256": "ca9b682601e3219f01f01af8bc76b4a9f465adb75a8c0ec7dbbb41affce732cc"
+        },
+        "execution_provenance_amendment": {
+          "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.execution-provenance-amendment.json",
+          "sha256": "efd1c754813ab1f300d468c5cabde4408773d7a37be3e33329bcbdaff00e6869"
+        }
+  },
+  "schema_version": "rg_semantic_adjudication_ledger.v1",
+  "status": "unresolved"
+}

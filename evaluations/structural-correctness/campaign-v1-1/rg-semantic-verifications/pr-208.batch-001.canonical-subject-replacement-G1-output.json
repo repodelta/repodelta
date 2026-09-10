@@ -1,0 +1,83 @@
+{
+  "batch_id": "pr-208-batch-001",
+  "decisions": [
+    {
+      "candidate_id": "C:G1:E:structural_change:44a2370ce77a6e66f8e7",
+      "decision": "challenge",
+      "note": "Proposed contextual_support is underclaimed; the helper change is prerequisite for test_support anchors and directly enables the new fixture. Yet it does not itself verify the guardrail.",
+      "recommended_label": {
+        "evidence_witnesses": [
+          "hunk:tests/test_projection.py:0:change:0",
+          "hunk:tests/test_projection.py:1:change:0"
+        ],
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "semantic_relation": "contextual_support"
+      }
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:4fbcf96b02d19017c2c9",
+      "decision": "challenge",
+      "note": "Proposed contextual_support is underclaimed; this test verifies the new membership contract but does not enforce the guardrail. It is directly_verifies for the requirement, not the guardrail.",
+      "recommended_label": {
+        "evidence_witnesses": [
+          "hunk:tests/test_projection.py:10:change:0",
+          "hunk:tests/test_projection.py:8:change:0",
+          "hunk:tests/test_projection.py:9:change:0",
+          "hunk:tests/test_projection.py:9:change:1"
+        ],
+        "proof_basis": "bounded_evidence",
+        "proofability": "direct_capable",
+        "semantic_relation": "directly_verifies"
+      }
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:5d2be31cc60dea3d2f3b",
+      "decision": "challenge",
+      "note": "Proposed contextual_support is underclaimed; this test verifies the new membership contract but does not enforce the guardrail. It is directly_verifies for the requirement, not the guardrail.",
+      "recommended_label": {
+        "evidence_witnesses": [
+          "hunk:tests/test_projection.py:10:change:0",
+          "hunk:tests/test_projection.py:8:change:0",
+          "hunk:tests/test_projection.py:9:change:1"
+        ],
+        "proof_basis": "bounded_evidence",
+        "proofability": "direct_capable",
+        "semantic_relation": "directly_verifies"
+      }
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:7c4162e02e623fea377f",
+      "decision": "challenge",
+      "note": "Proposed contextual_support is underclaimed; this test verifies the new membership contract but does not enforce the guardrail. It is directly_verifies for the requirement, not the guardrail.",
+      "recommended_label": {
+        "evidence_witnesses": [
+          "hunk:tests/test_projection.py:2:change:0",
+          "hunk:tests/test_projection.py:3:change:0",
+          "hunk:tests/test_projection.py:4:change:0",
+          "hunk:tests/test_projection.py:5:change:0",
+          "hunk:tests/test_projection.py:6:change:0",
+          "hunk:tests/test_projection.py:7:change:0"
+        ],
+        "proof_basis": "bounded_evidence",
+        "proofability": "direct_capable",
+        "semantic_relation": "directly_verifies"
+      }
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:9ff44326982c1acafe85",
+      "decision": "accept",
+      "note": "Removing relations parameter changes seed-derivation plumbing, not Codegraph collection/traversal/association/assessment/LLM/layout. Unrelated to guardrail."
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:d0cf036a1010c1207bc5",
+      "decision": "accept",
+      "note": "Role-only seed derivation does not alter the guardrail-preserved surfaces. Unrelated to guardrail."
+    }
+  ],
+  "final_status": "unverified",
+  "out_of_universe_review": "accept_empty",
+  "schema_version": "rg_semantic_canonical_subject_lifecycle_output.v1",
+  "subject_bundle_sha256": "996d41e96ff42cac5da8ec5144105d4f4ffabbafd136935a5746ab3498ed0332",
+  "subject_id": "G1"
+}

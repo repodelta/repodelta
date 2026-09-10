@@ -1,0 +1,30 @@
+{
+  "schema_version": "rg_semantic_ai_lifecycle_shard_attempt.v1",
+  "batch_id": "pr-208-batch-001",
+  "shard_id": "pr-208-batch-001-001-guardrails",
+  "attempt_id": "pr-208-batch-001-001-guardrails-attempt-003",
+  "role": "source-evidence lifecycle verifier",
+  "identity": "deepseek:deepseek-v4-pro:pr-208-batch-001-001-guardrails-verifier",
+  "provider": "DeepSeek",
+  "model_identifier": "deepseek-v4-pro",
+  "endpoint_class": "deepseek-openai-compatible",
+  "execution_date": "2026-09-10",
+  "wire_serialization_amendment": {
+    "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208-batch-001-001-guardrails.wire-serialization-amendment.json",
+    "sha256": "9cf48f761e44861516081ffbfac42d8f24e816e3000b4543b065aa0ee36a4c10"
+  },
+  "shard_input": {
+    "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208-batch-001-001-guardrails.input.json",
+    "sha256": "ce4b7dccc2399b1db811f5d136ca3690315c780330c778412a28399d70927885"
+  },
+  "outcome": {
+    "status": "failed",
+    "failure_category": "provider_response_parse_failure",
+    "structured_output_retained": false,
+    "raw_provider_response_retained": false,
+    "provider_error_text_retained": false
+  },
+  "diagnostic_observation": "The provider accepted the corrected JSON-mode wire request but the response could not be parsed as the required structured shard output. No raw response was retained by contract, so no additional response-format claim is made.",
+  "authority_boundary": "This failed attempt produced no semantic-review output. It cannot verify a reference, emit a semantic metric, or alter production behavior.",
+  "next_required_transition": "All pre-registered Guardrail-shard attempts are exhausted. Any future execution must use a new, reviewed integration or an independently reproducible provider path; otherwise the reference remains proposed and unverified."
+}

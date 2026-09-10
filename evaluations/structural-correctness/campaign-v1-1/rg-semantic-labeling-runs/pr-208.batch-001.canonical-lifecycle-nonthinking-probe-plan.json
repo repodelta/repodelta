@@ -1,0 +1,57 @@
+{
+  "schema_version": "rg_semantic_canonical_lifecycle_probe_plan.v1",
+  "attempt_id": "pr-208-batch-001-canonical-lifecycle-nonthinking-probe-001",
+  "execution_date": "2026-09-11",
+  "status": "frozen_before_non_semantic_probe",
+  "trigger": {
+    "prior_plan": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.canonical-lifecycle-probe-plan.json",
+    "prior_outcome": "structured_output_missing",
+    "observed_contract_change": "DeepSeek documents that thinking is enabled by default, that generated tokens include thinking and final output, and that thinking can be disabled with the documented thinking field. The prior 128-token probe used the default thinking mode and returned no usable message content.",
+    "reason": "This one-shot replacement holds the canonical adapter, fixed JSON prompt, model, endpoint, provider-reported identity requirement, and no-data boundary constant while disabling thinking and increasing the fixed-output limit to 256 tokens."
+  },
+  "output": {
+    "provenance": "derived from one fixed provider JSON object",
+    "authority_scope": "evaluation-run-local",
+    "owner": "PR 208 batch 001 execution probe",
+    "authorized_semantic_dependencies": [],
+    "value": "The configured non-thinking canonical execution path returned the exact fixed JSON object with a provider-reported model identity.",
+    "permitted_loss": "No repository, candidate, proposal, retrieval, association, semantic label, raw provider response, or provider error text is retained or sent.",
+    "failure_behavior": "A provider or local contract failure is recorded only as a safe category. If the process is interrupted after attempt start, the durable started record remains and no semantic execution is authorized."
+  },
+  "execution": {
+    "identity": "deepseek:deepseek-v4-pro:pr-208-batch-001-canonical-lifecycle-nonthinking-probe",
+    "provider": "DeepSeek",
+    "configured_model_id": "deepseek-v4-pro",
+    "provider_reported_model_required": true,
+    "endpoint_class": "deepseek-openai-compatible",
+    "base_url": "https://api.deepseek.com",
+    "api_profile": "deepseek",
+    "timeout_seconds": 60.0,
+    "max_output_tokens": 256,
+    "thinking_mode": "disabled",
+    "reasoning_effort": "default",
+    "policy_identity": "shadow-policy:348e927ff5a803eea6ab",
+    "payload_contract": {
+      "response_format": {"type": "json_object"},
+      "max_token_field": "max_tokens",
+      "store": false,
+      "thinking": {"type": "disabled"},
+      "temperature": "not_emitted_by_canonical_adapter",
+      "stream": "not_emitted_by_canonical_adapter"
+    }
+  },
+  "authorized_input_artifacts": {
+    "prompt": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.canonical-lifecycle-probe-prompt.md",
+      "sha256": "23fa7b2b641dc0c7b12037755cb123e2580f57eabb4a3a9432493e16e93e076e"
+    }
+  },
+  "runner": {
+    "path": "evaluations/structural-correctness/campaign-v1-1/scripts/run_pr208_canonical_lifecycle_probe.py",
+    "sha256": "ac1eb67cd57a4b7013a84bbbbc13e50e8a1f42b749076872f95740f8345a9de9",
+    "contract": "The runner persists a safe started attempt record before the provider call, requires a provider-reported model identity, validates the exact fixed JSON object, and never retains a raw response or error text."
+  },
+  "attempt_limit": 1,
+  "stop_condition": "This plan permits one non-semantic probe only. A missing, failed, malformed, or interrupted probe leaves the full PR 208 semantic reference proposed and requires a new reviewed plan before any source-evidence execution.",
+  "downstream_gate": "Only a successful non-thinking probe may justify a separately frozen, small subject-partition source-evidence review plan. The probe cannot verify a reference, produce semantic FI/FE, or alter production behavior."
+}
