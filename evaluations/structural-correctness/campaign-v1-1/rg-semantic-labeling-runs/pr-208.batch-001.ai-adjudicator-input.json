@@ -1,0 +1,94 @@
+{
+  "schema_version": "rg_semantic_ai_adjudicator_input.v1",
+  "batch_id": "pr-208-batch-001",
+  "status": "frozen_before_ai_adjudication",
+  "adjudicator_execution": {
+    "identity": "deepseek:deepseek-v4-pro:pr-208-batch-001-ai-adjudicator",
+    "provider": "DeepSeek",
+    "model_identifier": "deepseek-v4-pro",
+    "endpoint_class": "deepseek-openai-compatible",
+    "decoding": {
+      "temperature": 0,
+      "max_tokens": 16000,
+      "response_format": "json_object",
+      "store": false
+    },
+    "known_reasoning_dependencies": [
+      "The adjudicator shares the DeepSeek provider with the deepseek-v4-flash proposer.",
+      "It uses a separately authored prompt and a distinct recorded model identifier.",
+      "This establishes a separate procedural review identity but does not claim independent error modes."
+    ]
+  },
+  "required_input_artifacts": {
+    "ai_adjudication_amendment": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.ai-adjudication-amendment.json",
+      "sha256": "af3ad7ab8810867b8afa3711f102ae6a4d5509a3e3f88d8cd3452c0b932cb88c"
+    },
+    "labeler_input": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.labeler-input.json",
+      "sha256": "9c0cc908b740c0c1529f0e85f6d19190a5156e17685decb5686a1a7daccc4e2e"
+    },
+    "protocol": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-protocol.md",
+      "sha256": "f8fa4e620a860e59e9551c3080651a02b7d1e885b6f26a12e4c802d5e05770a7"
+    },
+    "rubric": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-reference-rubric.md",
+      "sha256": "2986b6e906ad97e1f56b9d92b59a46c0de8187a47583fea54fce2ca1dd3d130d"
+    },
+    "proposed_reference": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-proposals/pr-208.batch-001.proposed.json",
+      "sha256": "46fd0a8a0bc5bb9c38b66ecb191e8191677d11b5d9a7eee48c1e5f1d995cccd9"
+    },
+    "opaque_verifier_output": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-verifications/pr-208.batch-001.verifier-output.json",
+      "sha256": "ca9b682601e3219f01f01af8bc76b4a9f465adb75a8c0ec7dbbb41affce732cc",
+      "authority": "challenge evidence only; never lifecycle verification authority"
+    },
+    "unresolved_ledger": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-adjudications/pr-208.batch-001.unresolved.json",
+      "sha256": "4b769b5a987228cfb63f3de547e6debe945a06585e5ee36d8a03902badc33b6c"
+    },
+    "prompt": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.ai-adjudicator-prompt.md",
+      "sha256": "a669c28c49c1f4eb6f36d2b75746f3f985253eb4261069ff26d36439b89a22c7"
+    },
+    "output_schema": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.ai-adjudicator-output.schema.json",
+      "sha256": "44ce4700d6f3567aee1d4a6fe444bf9b926871fbc737c871d4e3196f045b2dbe"
+    }
+  },
+  "candidate_ids": [
+    "C:G1:E:structural_change:9ff44326982c1acafe85",
+    "C:G1:E:structural_change:d0cf036a1010c1207bc5",
+    "C:G2:E:structural_change:5d2be31cc60dea3d2f3b",
+    "C:G2:E:structural_change:7c4162e02e623fea377f",
+    "C:G2:E:structural_change:9ff44326982c1acafe85",
+    "C:G3:E:structural_change:9ff44326982c1acafe85",
+    "C:G3:E:structural_change:d0cf036a1010c1207bc5",
+    "C:G4:E:structural_change:9ff44326982c1acafe85",
+    "C:G4:E:structural_change:d0cf036a1010c1207bc5",
+    "C:R1:E:structural_change:5d2be31cc60dea3d2f3b",
+    "C:R1:E:structural_change:7c4162e02e623fea377f",
+    "C:R1:E:structural_change:9ff44326982c1acafe85",
+    "C:R2:E:structural_change:5d2be31cc60dea3d2f3b",
+    "C:R2:E:structural_change:7c4162e02e623fea377f",
+    "C:R3:E:structural_change:5d2be31cc60dea3d2f3b",
+    "C:R3:E:structural_change:9ff44326982c1acafe85",
+    "C:R4:E:structural_change:5d2be31cc60dea3d2f3b",
+    "C:R4:E:structural_change:7c4162e02e623fea377f",
+    "C:R4:E:structural_change:9ff44326982c1acafe85",
+    "C:R5:E:structural_change:5d2be31cc60dea3d2f3b",
+    "C:R5:E:structural_change:7c4162e02e623fea377f",
+    "C:R5:E:structural_change:9ff44326982c1acafe85"
+  ],
+  "prohibited_surfaces": [
+    "rg-retrieval-observations",
+    "association-attribution",
+    "structural-focus observations",
+    "policy shadows",
+    "comparison outputs",
+    "generated RepoDelta reports"
+  ],
+  "failure_behavior": "A missing input digest, changed candidate set, unavailable model identifier, malformed or incomplete output, or prohibited-surface access produces no adjudication result and leaves the batch unverified."
+}
