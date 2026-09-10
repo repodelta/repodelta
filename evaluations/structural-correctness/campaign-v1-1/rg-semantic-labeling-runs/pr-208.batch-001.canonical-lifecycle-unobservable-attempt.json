@@ -1,0 +1,38 @@
+{
+  "schema_version": "rg_semantic_canonical_lifecycle_unobservable_attempt.v1",
+  "batch_id": "pr-208.batch-001",
+  "attempted_at_utc": "2026-09-10T16:44:19Z",
+  "execution_plan": {
+    "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.canonical-lifecycle-execution-plan.json",
+    "sha256": "501990ed02efd5f587a12d857c03f6666c0b866f4a162242d891a17bdb38a60f"
+  },
+  "runner": {
+    "path": "evaluations/structural-correctness/campaign-v1-1/scripts/run_pr208_canonical_lifecycle_verifier.py",
+    "sha256": "7d9ebacdfda81a3e55da984615653ba1febea6e1cf79353acebecd66314fda18"
+  },
+  "execution_contract": {
+    "authorized_execution_count": 1,
+    "consumed_execution_count": 1,
+    "retry_permitted": false,
+    "destination": "DeepSeek v4-pro through the canonical OpenAI-compatible adapter",
+    "explicit_user_confirmation": "The user explicitly confirmed this frozen payload export before dispatch."
+  },
+  "observed_outcome": {
+    "status": "unobservable_no_protocol_artifact",
+    "statement": "The execution channel reported that the invocation ended without returning runner stdout. The expected structured lifecycle output and safe run-record files were absent immediately afterwards.",
+    "provider_request_delivery": "unobserved",
+    "provider_model_identity": "unobserved",
+    "provider_failure_category": "unobserved",
+    "structured_output_exists": false,
+    "safe_run_record_exists": false,
+    "raw_provider_response_retained": false,
+    "provider_error_text_retained": false,
+    "semantic_decisions_retained": false
+  },
+  "authority_result": {
+    "reference_status": "proposed",
+    "semantic_fi_fe_comparison_permitted": false,
+    "production_policy_conclusion_permitted": false,
+    "follow_up_execution": "A new execution design requires a separately proposed and frozen plan; this attempt cannot be retried."
+  }
+}
