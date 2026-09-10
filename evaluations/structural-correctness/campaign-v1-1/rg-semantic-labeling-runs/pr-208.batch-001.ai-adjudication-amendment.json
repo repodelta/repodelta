@@ -1,0 +1,59 @@
+{
+  "schema_version": "rg_semantic_labeling_ai_adjudication_amendment.v1",
+  "amendment_id": "pr-208-batch-001-ai-adjudication-amendment-001",
+  "batch_id": "pr-208-batch-001",
+  "status": "effective_before_ai_adjudication",
+  "reason": "The campaign owner selected a scalable multi-AI review path instead of a human-only adjudication path. The original manifest's human-adjudicator stop condition remains part of the original record; this amendment changes only the next permitted disagreement-resolution role before any adjudicator receives the unresolved ledger.",
+  "plan_delta": {
+    "authority_scope": "campaign-local disagreement resolution",
+    "owner": "batch manifest and this amendment",
+    "before": "Twenty-two proposer/verifier disagreements require a named distinct human adjudicator.",
+    "after": "Twenty-two proposer/verifier disagreements require a third, retrieval-isolated, reproducibly identified AI adjudicator with a materially distinct review identity and prompt implementation.",
+    "preserved": [
+      "the frozen 54-candidate universe and source revisions",
+      "the DeepSeek proposer output",
+      "the opaque OpenAI Codex verifier output and its ineligibility for lifecycle authority",
+      "the committed unresolved ledger",
+      "the full-population audit coverage and zero-disagreement acceptance threshold",
+      "all production, retrieval, association, comparison, assessment, and report boundaries"
+    ]
+  },
+  "adjudicator_contract": {
+    "role": "AI adjudicator",
+    "required_identity": [
+      "provider",
+      "model_identifier",
+      "endpoint_class",
+      "execution_date",
+      "prompt revision and SHA-256 digest",
+      "normalized configuration and SHA-256 digest",
+      "allowed-input manifest and SHA-256 values",
+      "structured-output SHA-256 digest"
+    ],
+    "independence": "The adjudicator must be distinct from the DeepSeek deepseek-v4-flash proposer and use a separately authored prompt implementation. It must disclose any shared provider, model family, prompt family, or other material reasoning dependency with earlier roles. Procedural separation is not claimed to establish independent error modes or semantic correctness.",
+    "allowed_inputs": [
+      "the frozen candidate-universe/labeler input bundle",
+      "Issue #207 and PR #208 exact source/diff identities in that bundle",
+      "the frozen rubric and protocol",
+      "the original proposed reference",
+      "the opaque verifier challenges",
+      "the committed unresolved ledger"
+    ],
+    "prohibited_inputs": [
+      "R/G retrieval observations",
+      "association-attribution or structural-focus provenance",
+      "policy shadows or comparison outputs",
+      "generated RepoDelta reports",
+      "any production mapping or assessment conclusion"
+    ],
+    "output_contract": "Return exactly one source-witnessed final label and disposition for each of the 22 ledger candidate IDs. It may retain either existing label or select a rubric-valid alternative. It must report reviewed insufficient when source evidence cannot resolve a row; it must not optimize for agreement.",
+    "failure_behavior": "If the proposed adjudicator lacks any required identity metadata, accesses a prohibited surface, returns an incomplete or schema-invalid output, or leaves any material disagreement unresolved, the batch remains unverified. No semantic metric, production change, or lifecycle verification may follow."
+  },
+  "sequencing": [
+    "Freeze this amendment before the third AI receives ledger contents.",
+    "Record the third AI's source-evidence adjudication output without overwriting either earlier model output.",
+    "Materialize a proposed reference only from recorded final dispositions.",
+    "Run a separate metadata-complete lifecycle verifier over the resulting 54-row proposal.",
+    "Only then, if the protocol stop conditions are satisfied, invoke verify-rg-semantic-reference."
+  ]
+}
