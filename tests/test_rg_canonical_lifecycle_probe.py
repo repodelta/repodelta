@@ -19,6 +19,11 @@ PLAN = (
     / "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/"
     "pr-208.batch-001.canonical-lifecycle-probe-plan.json"
 )
+NONTHINKING_PLAN = (
+    ROOT
+    / "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/"
+    "pr-208.batch-001.canonical-lifecycle-nonthinking-probe-plan.json"
+)
 
 
 def _module():
@@ -83,3 +88,16 @@ def test_probe_records_safe_provider_failure_without_output(
     assert record["failure_category"] == "timeout"
     assert record["provider_error_text_retained"] is False
     assert not output.exists()
+
+
+def test_nonthinking_probe_plan_changes_only_the_documented_execution_mode() -> None:
+    default = json.loads(PLAN.read_text(encoding="utf-8"))
+    nonthinking = json.loads(NONTHINKING_PLAN.read_text(encoding="utf-8"))
+
+    assert default["execution"]["thinking_mode"] == "default"
+    assert nonthinking["execution"]["thinking_mode"] == "disabled"
+    assert nonthinking["execution"]["max_output_tokens"] == 256
+    assert nonthinking["authorized_input_artifacts"] == default[
+        "authorized_input_artifacts"
+    ]
+    assert nonthinking["runner"] == default["runner"]
