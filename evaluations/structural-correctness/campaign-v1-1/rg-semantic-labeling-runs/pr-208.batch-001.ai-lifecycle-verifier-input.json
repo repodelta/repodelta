@@ -1,0 +1,75 @@
+{
+  "schema_version": "rg_semantic_ai_lifecycle_verifier_input.v1",
+  "batch_id": "pr-208-batch-001",
+  "status": "frozen_before_ai_lifecycle_review",
+  "role": "source-evidence lifecycle verifier",
+  "verifier_execution": {
+    "identity": "deepseek:deepseek-v4-pro:pr-208-batch-001-ai-lifecycle-verifier",
+    "provider": "DeepSeek",
+    "model_identifier": "deepseek-v4-pro",
+    "endpoint_class": "deepseek-openai-compatible",
+    "decoding": {
+      "temperature": 0,
+      "max_tokens": 16000,
+      "response_format": "json_object",
+      "store": false,
+      "stream": false
+    },
+    "known_reasoning_dependencies": [
+      "This verifier shares the DeepSeek provider with the deepseek-v4-flash proposer.",
+      "This verifier also uses the deepseek-v4-pro model identifier used by the prior AI adjudicator, but has a fresh execution and separately authored lifecycle-verifier prompt.",
+      "These controls establish a separate procedural review execution. They do not establish independent error modes or semantic correctness."
+    ]
+  },
+  "required_input_artifacts": {
+    "protocol": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-protocol.md",
+      "sha256": "f8fa4e620a860e59e9551c3080651a02b7d1e885b6f26a12e4c802d5e05770a7"
+    },
+    "rubric": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-reference-rubric.md",
+      "sha256": "2986b6e906ad97e1f56b9d92b59a46c0de8187a47583fea54fce2ca1dd3d130d"
+    },
+    "labeler_input": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.labeler-input.json",
+      "sha256": "9c0cc908b740c0c1529f0e85f6d19190a5156e17685decb5686a1a7daccc4e2e"
+    },
+    "ai_adjudicator_run": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.ai-adjudicator-run.json",
+      "sha256": "3b3f29231811d4012ced6e29d88daa67d22e434be073ef0808cc152fdfd80d6b"
+    },
+    "ai_adjudication_ledger": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-adjudications/pr-208.batch-001.ai-adjudicated.json",
+      "sha256": "a38e30fd469007b748a318752825ab182aa023400075f0f648c18627742dcd0b"
+    },
+    "proposed_reference": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-proposals/pr-208.batch-001.ai-adjudicated.proposed.json",
+      "sha256": "9e55d0aebc69201a2fcaf6012ce98e8a843b69616879ba0ec8769caf2135b83d"
+    },
+    "prompt": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.ai-lifecycle-verifier-prompt.md",
+      "sha256": "8a710d9021b2c02bb20d9280a7bfaeb7f5c0cb5c7f67992e6ff37ad7ec086fbe"
+    },
+    "output_schema": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.ai-lifecycle-verifier-output.schema.json",
+      "sha256": "14c68dd639671880dd8eccb5e8122d96763c8ee906167436e30e29aefa0a6b8f"
+    }
+  },
+  "review_contract": {
+    "candidate_count": 54,
+    "coverage": "full_population_second_source_evidence_review",
+    "direct_rows": "every semantic-direct row must be independently reviewed against source evidence",
+    "non_direct_rows": "all non-direct rows are reviewed because this batch pre-registered full population coverage",
+    "acceptance": "only 54 accepted, schema-valid decisions and accept_empty out-of-universe review allow the lifecycle attempt to proceed to a protocol check",
+    "failure_behavior": "any missing input digest, malformed or incomplete output, candidate mismatch, challenge, prohibited-surface access, or unmet protocol diversity condition leaves the proposal unverified and emits no semantic metric"
+  },
+  "prohibited_surfaces": [
+    "rg-retrieval-observations",
+    "association-attribution",
+    "structural-focus observations",
+    "policy shadows",
+    "comparison outputs",
+    "generated RepoDelta reports"
+  ],
+  "authority_boundary": "This is a review attempt over a proposed evaluation reference. It cannot itself alter production behavior, create a semantic metric, or claim a verified reference."
+}
