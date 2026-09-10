@@ -1,0 +1,8 @@
+{
+  "attempt_id": "pr-208-batch-001-canonical-lifecycle-nonthinking-probe-001",
+  "configured_model_id": "deepseek-v4-pro",
+  "policy_identity": "shadow-policy:348e927ff5a803eea6ab",
+  "provider_reported_model_id": "deepseek-v4-pro",
+  "schema_version": "rg_semantic_canonical_lifecycle_probe_output.v1",
+  "status": "ok"
+}
