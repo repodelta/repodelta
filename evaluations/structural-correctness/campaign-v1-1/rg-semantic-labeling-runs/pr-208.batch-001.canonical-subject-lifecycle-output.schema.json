@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PR 208 batch 001 canonical subject lifecycle verifier output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "batch_id",
+    "subject_id",
+    "subject_bundle_sha256",
+    "decisions",
+    "out_of_universe_review",
+    "final_status"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "rg_semantic_canonical_subject_lifecycle_output.v1"
+    },
+    "batch_id": {
+      "const": "pr-208-batch-001"
+    },
+    "subject_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subject_bundle_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["candidate_id", "decision", "note"],
+        "properties": {
+          "candidate_id": {"type": "string", "minLength": 1},
+          "decision": {"enum": ["accept", "challenge"]},
+          "note": {"type": "string", "minLength": 1, "maxLength": 240},
+          "recommended_label": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "semantic_relation",
+              "proofability",
+              "proof_basis",
+              "evidence_witnesses"
+            ],
+            "properties": {
+              "semantic_relation": {
+                "enum": [
+                  "implements",
+                  "constrains",
+                  "removes",
+                  "directly_verifies",
+                  "contextual_support",
+                  "unrelated",
+                  "insufficient"
+                ]
+              },
+              "proofability": {
+                "enum": [
+                  "direct_capable",
+                  "suggested_only",
+                  "not_applicable",
+                  "insufficient"
+                ]
+              },
+              "proof_basis": {
+                "enum": [
+                  "explicit_authoring",
+                  "typed_predicate",
+                  "bounded_evidence",
+                  "deterministic_mapping",
+                  "heuristic",
+                  "model_suggestion",
+                  "none"
+                ]
+              },
+              "evidence_witnesses": {
+                "type": "array",
+                "items": {"type": "string", "minLength": 1}
+              }
+            }
+          }
+        }
+      }
+    },
+    "out_of_universe_review": {
+      "const": "accept_empty"
+    },
+    "final_status": {
+      "enum": ["accepted", "unverified"]
+    }
+  }
+}

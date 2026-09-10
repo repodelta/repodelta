@@ -1,0 +1,96 @@
+{
+  "schema_version": "rg_semantic_canonical_subject_lifecycle_plan.v1",
+  "batch_id": "pr-208-batch-001",
+  "execution_date": "2026-09-11",
+  "status": "frozen_before_subject_lifecycle_review",
+  "trigger": {
+    "successful_probe": {
+      "attempt": {
+        "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.canonical-lifecycle-nonthinking-probe-attempt.json",
+        "sha256": "e191f58bb3b0b2a51ce68d1f7a88ce353b32a891a3701c733c318860b117d77d"
+      },
+      "output": {
+        "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.canonical-lifecycle-nonthinking-probe-output.json",
+        "sha256": "d0577faf639509d2bdcbd80e5ba3b6df154d18c9a3922af00dd29d697e983bb7"
+      }
+    },
+    "reason": "The successful no-data non-thinking probe establishes the canonical execution path and provider-reported model identity for a bounded JSON object. This plan now evaluates the same frozen 54-membership universe in nine source-isolated six-candidate subject calls, reducing each response without changing candidate membership or proposal labels."
+  },
+  "output": {
+    "provenance": "derived from one source-evidence lifecycle-review decision set for a frozen subject bundle",
+    "authority_scope": "campaign-local evaluation evidence",
+    "owner": "PR 208 batch 001 subject lifecycle review",
+    "authorized_semantic_dependencies": ["frozen authored contract", "exact PR diff", "subject-specific changed anchors", "frozen rubric", "frozen protocol", "frozen proposed labels"],
+    "permitted_loss": "The reviewer receives no retrieval observations, association/provenance results, structural focus output, policy shadow, comparison, report, or previous adjudication ledger. Raw provider response and provider error text are not retained.",
+    "failure_behavior": "Each subject has one attempt. Any provider failure, missing model identity, malformed/incomplete output, challenge, or interrupted attempt leaves the reference proposed; no semantic FI/FE comparison or production conclusion is permitted."
+  },
+  "execution": {
+    "identity_prefix": "deepseek:deepseek-v4-pro:pr-208-batch-001-canonical-subject-lifecycle",
+    "provider": "DeepSeek",
+    "configured_model_id": "deepseek-v4-pro",
+    "provider_reported_model_required": true,
+    "endpoint_class": "deepseek-openai-compatible",
+    "base_url": "https://api.deepseek.com",
+    "api_profile": "deepseek",
+    "timeout_seconds": 300.0,
+    "max_output_tokens": 4096,
+    "thinking_mode": "disabled",
+    "reasoning_effort": "default",
+    "policy_identity": "shadow-policy:34811d5b5226470e1855",
+    "payload_contract": {
+      "response_format": {"type": "json_object"},
+      "max_token_field": "max_tokens",
+      "store": false,
+      "thinking": {"type": "disabled"},
+      "temperature": "not_emitted_by_canonical_adapter",
+      "stream": "not_emitted_by_canonical_adapter"
+    },
+    "known_reasoning_dependencies": [
+      "The reviewer shares the DeepSeek provider with the deepseek-v4-flash proposer.",
+      "It shares the deepseek-v4-pro model identifier with the earlier source-evidence adjudicator, while using a fresh execution and a separately authored subject verifier prompt.",
+      "This establishes procedural separation, not independent error modes or semantic correctness."
+    ]
+  },
+  "authorized_input_artifacts": {
+    "protocol": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-protocol.md",
+      "sha256": "f8fa4e620a860e59e9551c3080651a02b7d1e885b6f26a12e4c802d5e05770a7"
+    },
+    "rubric": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-reference-rubric.md",
+      "sha256": "2986b6e906ad97e1f56b9d92b59a46c0de8187a47583fea54fce2ca1dd3d130d"
+    },
+    "labeler_input": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.labeler-input.json",
+      "sha256": "9c0cc908b740c0c1529f0e85f6d19190a5156e17685decb5686a1a7daccc4e2e"
+    },
+    "proposal": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-proposals/pr-208.batch-001.ai-adjudicated.proposed.json",
+      "sha256": "9e55d0aebc69201a2fcaf6012ce98e8a843b69616879ba0ec8769caf2135b83d"
+    },
+    "prompt": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.canonical-subject-lifecycle-verifier-prompt.md",
+      "sha256": "cd2dcdde8b8d8e27fe35a06e1e1b0aa41e8b1f159c5e193b98ba6d48aa4b62ec"
+    },
+    "output_schema": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.canonical-subject-lifecycle-output.schema.json",
+      "sha256": "79eeee699ca198bc016ce3de12810ba0721af25055433720b3adf2a35a5075a9"
+    }
+  },
+  "subject_ids": ["G1", "G2", "G3", "G4", "R1", "R2", "R3", "R4", "R5"],
+  "partition_contract": {
+    "candidate_count": 54,
+    "candidates_per_subject": 6,
+    "each_candidate_exactly_once": true,
+    "subject_context_is_preserved": true,
+    "aggregation": "mechanical only; all nine subject outputs must accept all assigned candidates before the separate reference verification transition."
+  },
+  "runner": {
+    "path": "evaluations/structural-correctness/campaign-v1-1/scripts/run_pr208_canonical_subject_lifecycle_review.py",
+    "sha256": "1949f6b6f7866cac8c741dce2459322a7601521a3ee0d2ccfa4456863f81a6fd",
+    "contract": "The runner derives one subject bundle from only frozen inputs, persists a safe started attempt before the provider call, requires a provider-reported model identity, validates exact subject decision coverage, and retains no raw provider response or error text."
+  },
+  "attempt_limit_per_subject": 1,
+  "stop_condition": "Execute subjects in the frozen listed order. Stop after the first non-successful or challenged subject result. Do not retry an executed subject, aggregate partial results, verify the reference, compare semantic FI/FE, or infer a production policy from partial evidence.",
+  "authority_boundary": "These calls are source-evidence lifecycle review only. They cannot modify the candidate universe, retrieval, association, admission, assessment, report, or production code."
+}
