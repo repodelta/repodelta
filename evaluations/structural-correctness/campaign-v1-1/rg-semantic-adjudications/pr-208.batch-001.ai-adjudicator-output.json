@@ -1,0 +1,264 @@
+{
+  "batch_id": "pr-208-batch-001",
+  "dispositions": [
+    {
+      "candidate_id": "C:G1:E:structural_change:9ff44326982c1acafe85",
+      "disposition": "retain_verifier",
+      "final_label": {
+        "evidence_witnesses": [],
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "semantic_relation": "unrelated"
+      },
+      "note": "The removed relations parameter changes seed-derivation plumbing, not Codegraph collection/traversal budgets/changed-anchor association/assessment/LLM/layout; it does not directly enforce this guardrail."
+    },
+    {
+      "candidate_id": "C:G1:E:structural_change:d0cf036a1010c1207bc5",
+      "disposition": "retain_verifier",
+      "final_label": {
+        "evidence_witnesses": [],
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "semantic_relation": "unrelated"
+      },
+      "note": "The role-only seed derivation is unrelated to preserving Codegraph collection, traversal budgets, changed-anchor association, assessment, LLM behavior, or graph layout."
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:5d2be31cc60dea3d2f3b",
+      "disposition": "retain_verifier",
+      "final_label": {
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1473-L1514"
+        ],
+        "proof_basis": "bounded_evidence",
+        "proofability": "direct_capable",
+        "semantic_relation": "directly_verifies"
+      },
+      "note": "The added test directly asserts _canonical_backbone_seed_node_ids excludes the inserted intermediate node while retaining changed anchors, directly verifying the guardrail against promoting support nodes."
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:7c4162e02e623fea377f",
+      "disposition": "retain_verifier",
+      "final_label": {
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L766-L1171"
+        ],
+        "proof_basis": "bounded_evidence",
+        "proofability": "direct_capable",
+        "semantic_relation": "directly_verifies"
+      },
+      "note": "The modified projection test asserts test_anchor_one and test_anchor_two are included while variable \u00b7 context stays excluded, directly verifying that reachable support/context is not promoted."
+    },
+    {
+      "candidate_id": "C:G2:E:structural_change:9ff44326982c1acafe85",
+      "disposition": "retain_verifier",
+      "final_label": {
+        "evidence_witnesses": [],
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "semantic_relation": "contextual_support"
+      },
+      "note": "Removing the relations parameter is a supporting API change; the role-only seed function is what directly prevents promotion, so this relation is contextual."
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:9ff44326982c1acafe85",
+      "disposition": "retain_verifier",
+      "final_label": {
+        "evidence_witnesses": [],
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "semantic_relation": "unrelated"
+      },
+      "note": "The change does not introduce a second backbone producer or renderer-side membership decision, nor does it directly enforce that prohibition."
+    },
+    {
+      "candidate_id": "C:G3:E:structural_change:d0cf036a1010c1207bc5",
+      "disposition": "retain_verifier",
+      "final_label": {
+        "evidence_witnesses": [],
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "semantic_relation": "unrelated"
+      },
+      "note": "Altering the seed filter does not directly guard against introducing a second backbone producer or renderer-side membership decision."
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:9ff44326982c1acafe85",
+      "disposition": "retain_verifier",
+      "final_label": {
+        "evidence_witnesses": [],
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "semantic_relation": "unrelated"
+      },
+      "note": "The modified seed caller is outside the listed out-of-scope areas and does not directly constrain traversal convergence, LLM inference, assessment semantics, or layout."
+    },
+    {
+      "candidate_id": "C:G4:E:structural_change:d0cf036a1010c1207bc5",
+      "disposition": "retain_verifier",
+      "final_label": {
+        "evidence_witnesses": [],
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "semantic_relation": "unrelated"
+      },
+      "note": "The role-only seed derivation is unrelated to traversal convergence, support-path relevance, LLM inference, assessment semantics, and visual-layout redesign."
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:5d2be31cc60dea3d2f3b",
+      "disposition": "retain_proposer",
+      "final_label": {
+        "evidence_witnesses": [],
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "semantic_relation": "contextual_support"
+      },
+      "note": "The seed test includes changed_anchor roles but omits focus-relative evidence annotations, so it does not directly verify that annotation category cannot affect membership."
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:7c4162e02e623fea377f",
+      "disposition": "retain_verifier",
+      "final_label": {
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L766-L1171"
+        ],
+        "proof_basis": "bounded_evidence",
+        "proofability": "direct_capable",
+        "semantic_relation": "directly_verifies"
+      },
+      "note": "The modified test gives test_anchor_one/two evidence_role=test_support and asserts they appear in backbone_node_ids and html, directly verifying membership regardless of test-support annotation."
+    },
+    {
+      "candidate_id": "C:R1:E:structural_change:9ff44326982c1acafe85",
+      "disposition": "retain_verifier",
+      "final_label": {
+        "evidence_witnesses": [],
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "semantic_relation": "contextual_support"
+      },
+      "note": "Removing relations from the caller is a supporting API change; the role-only seed logic in d0cf directly implements the requirement."
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:5d2be31cc60dea3d2f3b",
+      "disposition": "retain_proposer",
+      "final_label": {
+        "evidence_witnesses": [],
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "semantic_relation": "contextual_support"
+      },
+      "note": "Seed test lacks evidence annotations, so it does not verify that annotations cannot add/remove/suppress membership."
+    },
+    {
+      "candidate_id": "C:R2:E:structural_change:7c4162e02e623fea377f",
+      "disposition": "retain_proposer",
+      "final_label": {
+        "evidence_witnesses": [],
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "semantic_relation": "contextual_support"
+      },
+      "note": "Although test_support annotation is present and membership is asserted, the test does not directly verify annotation remains available for presentation or that primary/document support annotations cannot add/remove membership."
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:5d2be31cc60dea3d2f3b",
+      "disposition": "retain_verifier",
+      "final_label": {
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L1473-L1514"
+        ],
+        "proof_basis": "bounded_evidence",
+        "proofability": "direct_capable",
+        "semantic_relation": "directly_verifies"
+      },
+      "note": "The added test drives one seed function with an R/G slice and a transformation group and asserts both produce expected seeds, directly verifying the shared contract."
+    },
+    {
+      "candidate_id": "C:R3:E:structural_change:9ff44326982c1acafe85",
+      "disposition": "retain_verifier",
+      "final_label": {
+        "evidence_witnesses": [],
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "semantic_relation": "contextual_support"
+      },
+      "note": "Removing the relations parameter is a supporting plumbing change; it does not itself implement that the same contract applies to both subject families."
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:5d2be31cc60dea3d2f3b",
+      "disposition": "retain_proposer",
+      "final_label": {
+        "evidence_witnesses": [],
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "semantic_relation": "contextual_support"
+      },
+      "note": "The test checks only intermediate exclusion, not retained-context or reachable support nodes, so it does not directly verify the whole compound requirement."
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:7c4162e02e623fea377f",
+      "disposition": "retain_proposer",
+      "final_label": {
+        "evidence_witnesses": [],
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "semantic_relation": "contextual_support"
+      },
+      "note": "The projection test checks intermediate/context exclusion but not retained-context or merely reachable support nodes comprehensively."
+    },
+    {
+      "candidate_id": "C:R4:E:structural_change:9ff44326982c1acafe85",
+      "disposition": "retain_verifier",
+      "final_label": {
+        "evidence_witnesses": [],
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "semantic_relation": "contextual_support"
+      },
+      "note": "The caller change supports the role-only seed derivation but does not directly keep support nodes out; the seed function does."
+    },
+    {
+      "candidate_id": "C:R5:E:structural_change:5d2be31cc60dea3d2f3b",
+      "disposition": "retain_proposer",
+      "final_label": {
+        "evidence_witnesses": [],
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "semantic_relation": "contextual_support"
+      },
+      "note": "The seed test includes a primary and test label but does not exercise the rendered graph or production/test retention together."
+    },
+    {
+      "candidate_id": "C:R5:E:structural_change:7c4162e02e623fea377f",
+      "disposition": "retain_verifier",
+      "final_label": {
+        "evidence_witnesses": [
+          "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/tests/test_projection.py#L766-L1171"
+        ],
+        "proof_basis": "bounded_evidence",
+        "proofability": "direct_capable",
+        "semantic_relation": "directly_verifies"
+      },
+      "note": "The modified graph test asserts production anchors and test_anchor_one/two are retained together in backbone_node_ids and html, directly verifying combined retention."
+    },
+    {
+      "candidate_id": "C:R5:E:structural_change:9ff44326982c1acafe85",
+      "disposition": "retain_verifier",
+      "final_label": {
+        "evidence_witnesses": [],
+        "proof_basis": "none",
+        "proofability": "not_applicable",
+        "semantic_relation": "contextual_support"
+      },
+      "note": "Removing the relations parameter supports the role-only seed inclusion but does not directly retain production/test changes; the seed function and graph test do."
+    }
+  ],
+  "final_status": "all_resolved",
+  "out_of_universe_review": {
+    "discovered_count": 0,
+    "note": "No out-of-universe semantic-direct facts were discovered during adjudication."
+  },
+  "schema_version": "rg_semantic_ai_adjudication_output.v1",
+  "unresolved_ledger_sha256": "4b769b5a987228cfb63f3de547e6debe945a06585e5ee36d8a03902badc33b6c"
+}
