@@ -1,0 +1,63 @@
+{
+  "schema_version": "rg_semantic_labeling_execution_provenance_amendment.v1",
+  "amendment_id": "pr-208-batch-001-execution-provenance-amendment-001",
+  "batch_id": "pr-208-batch-001",
+  "status": "recorded_without_mutating_semantic_outputs",
+  "reason": "The initial run records omitted model-assisted execution metadata required by the protocol. This amendment records only contemporaneously observed execution facts and explicitly classifies the verifier attempt as ineligible for lifecycle-verification authority where its model identity remains unavailable.",
+  "immutable_inputs": {
+    "proposer_run": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.proposer-run.json",
+      "sha256": "1152d1ae64eeb418488208207f279e3083bbc2e2ac2e60fe2d23012ad98965a2"
+    },
+    "verifier_run": {
+      "path": "evaluations/structural-correctness/campaign-v1-1/rg-semantic-labeling-runs/pr-208.batch-001.verifier-run.json",
+      "sha256": "a1b94e96c65f16444cf0e4b97445ba7c6f7620f96399eee4cceac5066a18cf0e"
+    }
+  },
+  "proposer_execution": {
+    "execution_date": "2026-09-08",
+    "execution_date_provenance": "observed in the coordinator's contemporaneous execution record; raw provider response was intentionally not retained",
+    "provider": "DeepSeek",
+    "model_identifier": "deepseek-v4-flash",
+    "endpoint_class": "deepseek-openai-chat-completions",
+    "configuration_digest_source": "pr-208.batch-001.proposer-run.json#execution_contract.model_configuration_sha256",
+    "protocol_metadata_complete": true,
+    "authority_scope": "proposed-reference provenance only"
+  },
+  "verifier_execution": {
+    "execution_date": "2026-09-08",
+    "execution_date_provenance": "observed in the coordinator's contemporaneous execution record; the ephemeral execution log was intentionally not retained",
+    "provider": "OpenAI Codex",
+    "endpoint_class": "authenticated-local-codex-cli-default",
+    "model_selector": "provider-default",
+    "model_identifier": "not_emitted_by_local_cli",
+    "normalized_configuration": {
+      "sandbox": "read_only",
+      "ephemeral": true,
+      "skip_git_repo_check": true,
+      "ignore_user_config": true,
+      "ignore_rules": true,
+      "output_schema_enforcement": "local_deterministic_verifier_schema_validation"
+    },
+    "normalized_configuration_sha256": "6a63d97f58778390028a7e6adc70958334bebf0964da63dbc4c063a28dec0b51",
+    "prompt_digest_source": "pr-208.batch-001.verifier-input-amendment.json#verifier_bundle.verifier_prompt.sha256",
+    "protocol_metadata_complete": false,
+    "lifecycle_verification_authority_eligible": false,
+    "permitted_use": "recorded challenge evidence only",
+    "prohibited_use": [
+      "verified_by identity",
+      "semantic-reference lifecycle verification authority",
+      "semantic FI/FE comparison authority",
+      "production association or assessment authority"
+    ],
+    "replacement_requirement": "A subsequent lifecycle-verification authority must have a reproducibly recorded provider, model identifier, endpoint class, execution date, prompt digest, and normalized configuration digest."
+  },
+  "unchanged": [
+    "all proposer labels",
+    "all verifier decisions and challenges",
+    "candidate universe and source revisions",
+    "audit plan and acceptance thresholds",
+    "all production, retrieval, comparison, and assessment boundaries"
+  ],
+  "failure_behavior": "This amendment does not repair the verifier's missing model identity. The batch remains unverified, and no existing or future consumer may treat the opaque verifier attempt as lifecycle-verification authority."
+}
