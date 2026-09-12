@@ -21,6 +21,9 @@ from repodelta.model.contracts import (
     ClosureScanResultSet,
     ReviewSourcePacket,
     SourceRef,
+    SqlSchemaFileCoverage,
+    SqlSchemaResult,
+    SqlSchemaStatement,
     StructuralChangeIdentity,
     StructuralReplacementCandidate,
     StructuralOwnershipChangeIdentity,
@@ -52,8 +55,14 @@ def build_evidence_catalog(
     *,
     supplied: tuple[SuppliedEvidence, ...] = (),
     closure_scan_results: ClosureScanResultSet = ClosureScanResultSet(),
+    sql_schema_result: SqlSchemaResult = SqlSchemaResult(),
 ) -> EvidenceCatalog:
     """Normalize source, structural, and supplied facts into one ID-addressed catalog."""
+
+    # The capability/fact invariant belongs to the SqlSchemaProvider contract,
+    # not just to RepositorySqlSchemaProvider's own implementation -- validate
+    # here so any provider behind the protocol is held to it at ingestion.
+    sql_schema_result.validate_consistency()
 
     items: dict[str, EvidenceItem] = {}
     hunks_by_paths: dict[tuple[str | None, str | None], list[ChangedHunk]] = {}
@@ -154,6 +163,8 @@ def build_evidence_catalog(
     for result in closure_scan_results.results:
         if any(item.state != "unavailable" for item in result.revisions):
             _put(items, closure_evidence(result))
+    for statement in sql_schema_result.statements:
+        _put(items, sql_schema_evidence(statement))
     for item in supplied:
         _put(
             items,
@@ -180,6 +191,7 @@ def build_evidence_catalog(
                 for revision in result.revisions
                 for diagnostic in revision.diagnostics
             ),
+            *sql_schema_result.diagnostics,
         ),
         closure_scan_diagnostics=tuple(
             ClosureScanDiagnostic(
@@ -193,6 +205,8 @@ def build_evidence_catalog(
             for revision in result.revisions
             for diagnostic in revision.diagnostics
         ),
+        sql_schema_coverage=sql_schema_result.coverage,
+        sql_schema_capabilities=sql_schema_result.capabilities,
     )
     catalog.validate_consistency()
     return catalog
@@ -1147,6 +1161,54 @@ def closure_evidence(result: ClosureScanResult) -> EvidenceItem:
         closure_scan_result=result,
         sources=match_sources,
     )
+
+
+def sql_schema_evidence(statement: SqlSchemaStatement) -> EvidenceItem:
+    """Normalize one observed DDL statement. Never a folded schema."""
+
+    identity = "\0".join(
+        (
+            statement.revision_side,
+            statement.path,
+            str(statement.line_start),
+            statement.kind,
+            statement.table,
+            statement.column or "",
+        )
+    )
+    return EvidenceItem(
+        id=evidence_id("sql_schema_statement", identity),
+        summary=_sql_schema_summary(statement),
+        kind="sql_schema_statement",
+        classification="code",
+        profile="schema",
+        authority="sql_schema_provider",
+        revision_side=statement.revision_side,
+        operation="observed",
+        role="revision_fact",
+        changed=False,
+        sql_schema_statement=statement,
+        sources=(
+            SourceRef(
+                label=f"sql schema · {statement.revision_side}",
+                path=statement.path,
+                line_start=statement.line_start,
+                line_end=statement.line_end,
+            ),
+        ),
+    )
+
+
+def _sql_schema_summary(statement: SqlSchemaStatement) -> str:
+    if statement.kind == "create_table":
+        return f"Table {statement.table} declared."
+    if statement.kind == "alter_table_add_column":
+        return f"Column {statement.table}.{statement.column} added."
+    if statement.kind == "alter_table_drop_column":
+        return f"Column {statement.table}.{statement.column} dropped."
+    if statement.kind == "alter_column_set_not_null":
+        return f"Column {statement.table}.{statement.column} declared NOT NULL."
+    return f"Column {statement.table}.{statement.column} declared nullable."
 
 
 def provided_evidence(
