@@ -325,11 +325,11 @@ def test_symlinked_sql_input_fails_closed_instead_of_following_the_link(
         ),
     )
     assert [d.code for d in result.diagnostics] == [
-        "sql_schema_symlink_outside_checkout"
+        "sql_schema_symlinked_input"
     ]
 
 
-def test_symlink_within_the_checkout_is_still_observed(tmp_path: Path) -> None:
+def test_symlink_within_the_checkout_also_fails_closed(tmp_path: Path) -> None:
     root, revision = _repository(
         tmp_path, {"migrations/real.sql": "CREATE TABLE inside_repo (id bigint);\n"}
     )
@@ -346,9 +346,13 @@ def test_symlink_within_the_checkout_is_still_observed(tmp_path: Path) -> None:
 
     result = provider.observe(head_paths=("migrations/alias.sql",))
 
-    assert len(result.statements) == 1
-    assert result.statements[0].table == "inside_repo"
-    assert result.coverage[0].state == "observed"
+    assert result.statements == ()
+    assert result.coverage == (
+        SqlSchemaFileCoverage(
+            revision_side="head", path="migrations/alias.sql", state="unavailable"
+        ),
+    )
+    assert [d.code for d in result.diagnostics] == ["sql_schema_symlinked_input"]
 
 
 def test_capabilities_are_declared_on_every_observed_result(

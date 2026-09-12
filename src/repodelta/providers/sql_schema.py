@@ -489,16 +489,16 @@ class RepositorySqlSchemaProvider:
         tuple[SqlSchemaStatement, ...], SqlSchemaFileCoverage, Diagnostic | None
     ]:
         target = root / path
-        if not self._resolves_inside_checkout(root, target):
+        if self._is_symlinked(root, path):
             return (
                 (),
                 SqlSchemaFileCoverage(revision_side=side, path=path, state="unavailable"),
                 Diagnostic(
-                    code="sql_schema_symlink_outside_checkout",
+                    code="sql_schema_symlinked_input",
                     message=(
-                        f"{path} resolves outside the {side} checkout root; a "
-                        "symlinked SQL input is not bound to the reviewed "
-                        "revision, so it was not read."
+                        f"{path} is a symlinked SQL input; observed evidence "
+                        "must be bound to the reviewed git revision, and a "
+                        "symlink's target is not, so it was not read."
                     ),
                 ),
             )
@@ -539,20 +539,23 @@ class RepositorySqlSchemaProvider:
         )
 
     @staticmethod
-    def _resolves_inside_checkout(root: Path, target: Path) -> bool:
-        """Fail closed on a tracked path that resolves outside the checkout.
+    def _is_symlinked(root: Path, path: str) -> bool:
+        """Fail closed on any symlinked SQL input, inside or outside the checkout.
 
-        A symlinked .sql file is not bound to the reviewed git revision --
-        its target can point anywhere on disk -- so its content must never
-        be read as evidence for that revision.
+        A symlink's target -- even one that resolves inside the checkout --
+        can be an untracked or generated file that the checkout cleanliness
+        check does not see, so it is never provably bound to the reviewed
+        git revision. The invariant is evidence-to-revision binding, not
+        target provenance, so every symlinked input fails closed rather than
+        having its target's location inspected.
         """
 
-        try:
-            resolved_root = root.resolve()
-            resolved_target = target.resolve()
-        except OSError:
-            return False
-        return resolved_target.is_relative_to(resolved_root)
+        current = root
+        for part in Path(path).parts:
+            current = current / part
+            if current.is_symlink():
+                return True
+        return False
 
 
 def _checkout_revision(root: Path) -> str:
