@@ -166,6 +166,24 @@ The intended loop is simple:
 4. The PR is revised or reviewed using those observations; RepoDelta itself
    does not make the merge decision.
 
+## Evidence scope
+
+RepoDelta's interactive report remains centered on deterministic structural
+change: source symbols, relationships, authored statements, checks, and the
+coverage limits around them. Its evidence boundaries are explicit: a retrieved
+candidate is not proof that an authored requirement or claim was implemented.
+
+RepoDelta 0.3 also includes an initial SQL DDL evidence provider. For supported
+`CREATE TABLE` and `ALTER TABLE` column/nullability statements, it records
+source-linked statement facts, per-file coverage, and diagnostics in the
+canonical `EvidenceCatalog`. Unsupported or malformed statements remain
+explicit coverage gaps.
+
+This provider does not reconstruct a final database schema, issue an acceptance
+verdict, or currently change requirement/claim association, assessment, or HTML
+conclusions. It is a narrow evidence boundary—the first step toward broader
+repository evidence, not a replacement for structural review.
+
 ## Deterministic core, optional LLM research
 
 The complete supported product works without an LLM. A normal
