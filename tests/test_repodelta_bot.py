@@ -14,11 +14,24 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 
+from repodelta_bot.acceptance import (  # noqa: E402
+    add_acceptance_owner_to_body,
+    evaluate_acceptance,
+    get_acceptance_owner_from_timeline,
+)
+
+from repodelta_bot.cli import main as bot_main  # noqa: E402
+
 from repodelta_bot.submit import (  # noqa: E402
     SubmissionConfig,
     SubmissionError,
+    _request_json_list,
+    create_acceptance_check_run,
     create_app_jwt,
     create_pull_request,
+    enforce_pull_request_acceptance,
+    evaluate_pull_request_acceptance,
+    get_pull_request_acceptance_state,
     push_head,
     request_installation_token,
     temporary_git_credentials,
@@ -322,6 +335,15 @@ def test_pull_request_creation_requests_human_reviewers(tmp_path: Path) -> None:
     )
     assert "short-token" not in repr(requests)
 
+def test_pull_request_creation_rejects_multiple_acceptance_owners(
+    tmp_path: Path,
+) -> None:
+    with pytest.raises(SubmissionError, match="exactly one acceptance owner"):
+        create_pull_request(
+            _config(tmp_path, reviewers=("maintainer-one", "maintainer-two")),
+            "short-token",
+        )
+
 
 def test_api_failure_is_bounded_without_credential_text() -> None:
     def fake_open(request: object) -> object:
@@ -339,3 +361,815 @@ def test_api_failure_is_bounded_without_credential_text() -> None:
 def test_repository_must_use_owner_name_form(tmp_path: Path) -> None:
     with pytest.raises(SubmissionError, match="owner/name"):
         push_head(_config(tmp_path, repo="https://example.com/repo"), "token")
+
+
+def test_acceptance_owner_approval_of_current_head_passes() -> None:
+    result = evaluate_acceptance(
+        owner="LuxLinho",
+        head_sha="abc123",
+        maintainers=("LuxLinho", "lucybai-dev"),
+        reviews=[
+            {
+                "user": {"login": "LuxLinho"},
+                "state": "APPROVED",
+                "commit_id": "abc123",
+            }
+        ],
+    )
+
+    assert result.approved is True
+
+
+def test_other_maintainer_approval_does_not_satisfy_acceptance_owner() -> None:
+    result = evaluate_acceptance(
+        owner="LuxLinho",
+        head_sha="abc123",
+        maintainers=("LuxLinho", "lucybai-dev"),
+        reviews=[
+            {
+                "user": {"login": "lucybai-dev"},
+                "state": "APPROVED",
+                "commit_id": "abc123",
+            }
+        ],
+    )
+
+    assert result.approved is False
+
+
+def test_acceptance_owner_approval_of_stale_head_fails() -> None:
+    result = evaluate_acceptance(
+        owner="LuxLinho",
+        head_sha="def456",
+        maintainers=("LuxLinho", "lucybai-dev"),
+        reviews=[
+            {
+                "user": {"login": "LuxLinho"},
+                "state": "APPROVED",
+                "commit_id": "abc123",
+            }
+        ],
+    )
+
+    assert result.approved is False
+
+
+def test_acceptance_owner_must_be_maintainer() -> None:
+    result = evaluate_acceptance(
+        owner="external-user",
+        head_sha="abc123",
+        maintainers=("LuxLinho", "lucybai-dev"),
+        reviews=[
+            {
+                "user": {"login": "external-user"},
+                "state": "APPROVED",
+                "commit_id": "abc123",
+            }
+        ],
+    )
+
+    assert result.approved is False
+    assert result.reason == "designated acceptance owner is not a maintainer"
+
+
+def test_previous_acceptance_owner_approval_does_not_survive_owner_change() -> None:
+    result = evaluate_acceptance(
+        owner="lucybai-dev",
+        head_sha="abc123",
+        maintainers=("LuxLinho", "lucybai-dev"),
+        reviews=[
+            {
+                "user": {"login": "LuxLinho"},
+                "state": "APPROVED",
+                "commit_id": "abc123",
+            }
+        ],
+    )
+
+    assert result.approved is False
+
+
+def test_pull_request_result_includes_acceptance_owner(tmp_path: Path) -> None:
+    responses = iter(
+        [
+            JsonResponse(
+                {
+                    "number": 250,
+                    "html_url": "https://github.com/repodelta/repodelta/pull/250",
+                    "user": {"login": "repodelta-change-submitter[bot]"},
+                }
+            ),
+            JsonResponse({}),
+        ]
+    )
+
+    def fake_open(request: object) -> JsonResponse:
+        return next(responses)
+
+    result = create_pull_request(
+        _config(tmp_path, reviewers=("LuxLinho",)),
+        "short-token",
+        open_url=fake_open,
+    )
+
+    assert result.acceptance_owner == "LuxLinho"
+
+
+def test_acceptance_owner_is_embedded_in_pull_request_body() -> None:
+    body = add_acceptance_owner_to_body(
+        "Original pull request body",
+        "LuxLinho",
+    )
+
+    assert body == (
+        "Original pull request body\n\n"
+        "<!-- RepoDelta-Acceptance-Owner: LuxLinho -->\n"
+    )
+
+
+def test_pull_request_creation_embeds_acceptance_owner_in_body(tmp_path: Path) -> None:
+    requests: list[tuple[str, dict[str, object]]] = []
+    responses = iter(
+        [
+            JsonResponse(
+                {
+                    "number": 250,
+                    "html_url": "https://github.com/repodelta/repodelta/pull/250",
+                    "user": {"login": "repodelta-change-submitter[bot]"},
+                }
+            ),
+            JsonResponse({}),
+        ]
+    )
+
+    def fake_open(request: object) -> JsonResponse:
+        requests.append((request.full_url, json.loads(request.data)))
+        return next(responses)
+
+    create_pull_request(
+        _config(tmp_path, reviewers=("LuxLinho",)),
+        "short-token",
+        open_url=fake_open,
+    )
+
+    assert requests[0][1]["body"] == (
+        "Body\n\n"
+        "<!-- RepoDelta-Acceptance-Owner: LuxLinho -->\n"
+    )
+
+
+
+def test_request_json_list_accepts_array_response() -> None:
+    response = JsonResponse(
+        [
+            {
+                "user": {"login": "LuxLinho"},
+                "state": "APPROVED",
+                "commit_id": "abc123",
+            }
+        ]
+    )
+
+    result = _request_json_list(
+        "https://api.github.com/repos/repodelta/repodelta/pulls/250/reviews",
+        method="GET",
+        authorization="Bearer short-token",
+        stage="reading pull request reviews",
+        open_url=lambda request: response,
+    )
+
+    assert result == [
+        {
+            "user": {"login": "LuxLinho"},
+            "state": "APPROVED",
+            "commit_id": "abc123",
+        }
+    ]
+
+
+def test_request_json_list_rejects_object_response() -> None:
+    response = JsonResponse({"message": "not a list"})
+
+    with pytest.raises(SubmissionError, match="invalid response"):
+        _request_json_list(
+            "https://api.github.com/repos/repodelta/repodelta/pulls/250/reviews",
+            method="GET",
+            authorization="Bearer short-token",
+            stage="reading pull request reviews",
+            open_url=lambda request: response,
+        )
+
+
+def test_get_pull_request_acceptance_state_reads_body_head_reviews_and_timeline() -> None:
+    responses = iter(
+        [
+            JsonResponse(
+                {
+                    "body": "Body",
+                    "head": {"sha": "abc123"},
+                }
+            ),
+            JsonResponse(
+                [
+                    {
+                        "user": {"login": "LuxLinho"},
+                        "state": "APPROVED",
+                        "commit_id": "abc123",
+                    }
+                ]
+            ),
+            JsonResponse(
+                [
+                    {
+                        "event": "review_requested",
+                        "actor": {
+                            "login": "repodelta-change-submitter[bot]"
+                        },
+                        "requested_reviewer": {"login": "LuxLinho"},
+                    }
+                ]
+            ),
+        ]
+    )
+
+    def fake_open(request: object) -> JsonResponse:
+        return next(responses)
+
+    state = get_pull_request_acceptance_state(
+        "repodelta/repodelta",
+        250,
+        "short-token",
+        open_url=fake_open,
+    )
+
+    assert state.head_sha == "abc123"
+    assert state.reviews[0]["state"] == "APPROVED"
+    assert state.timeline[0]["event"] == "review_requested"
+
+
+def test_get_pull_request_acceptance_state_rejects_incomplete_pull_response() -> None:
+    response = JsonResponse(
+        {
+            "body": "Body",
+            "head": {},
+        }
+    )
+
+    with pytest.raises(SubmissionError, match="incomplete pull request response"):
+        get_pull_request_acceptance_state(
+            "repodelta/repodelta",
+            250,
+            "short-token",
+            open_url=lambda request: response,
+        )
+
+
+def test_evaluate_pull_request_acceptance_passes_for_designated_owner() -> None:
+    responses = iter(
+        [
+            JsonResponse(
+                {
+                    "body": "Body",
+                    "head": {"sha": "abc123"},
+                }
+            ),
+            JsonResponse(
+                [
+                    {
+                        "user": {"login": "LuxLinho"},
+                        "state": "APPROVED",
+                        "commit_id": "abc123",
+                    }
+                ]
+            ),
+            JsonResponse(
+                [
+                    {
+                        "event": "review_requested",
+                        "actor": {
+                            "login": "repodelta-change-submitter[bot]"
+                        },
+                        "requested_reviewer": {"login": "LuxLinho"},
+                    }
+                ]
+            ),
+        ]
+    )
+
+    def fake_open(request: object) -> JsonResponse:
+        return next(responses)
+
+    result = evaluate_pull_request_acceptance(
+        "repodelta/repodelta",
+        250,
+        "short-token",
+        ("LuxLinho", "lucybai-dev"),
+        open_url=fake_open,
+    )
+
+    assert result.approved is True
+    assert result.owner == "LuxLinho"
+    assert result.head_sha == "abc123"
+
+
+def test_evaluate_pull_request_acceptance_fails_without_bot_designated_owner() -> None:
+    responses = iter(
+        [
+            JsonResponse(
+                {
+                    "body": "Body",
+                    "head": {"sha": "abc123"},
+                }
+            ),
+            JsonResponse([]),
+            JsonResponse([]),
+        ]
+    )
+
+    def fake_open(request: object) -> JsonResponse:
+        return next(responses)
+
+    result = evaluate_pull_request_acceptance(
+        "repodelta/repodelta",
+        250,
+        "short-token",
+        ("LuxLinho", "lucybai-dev"),
+        open_url=fake_open,
+    )
+
+    assert result.approved is False
+    assert result.reason == "pull request does not designate an acceptance owner"
+
+
+def test_evaluate_pull_request_acceptance_fails_for_stale_owner_approval() -> None:
+    responses = iter(
+        [
+            JsonResponse(
+                {
+                    "body": "Body",
+                    "head": {"sha": "def456"},
+                }
+            ),
+            JsonResponse(
+                [
+                    {
+                        "user": {"login": "LuxLinho"},
+                        "state": "APPROVED",
+                        "commit_id": "abc123",
+                    }
+                ]
+            ),
+            JsonResponse(
+                [
+                    {
+                        "event": "review_requested",
+                        "actor": {
+                            "login": "repodelta-change-submitter[bot]"
+                        },
+                        "requested_reviewer": {"login": "LuxLinho"},
+                    }
+                ]
+            ),
+        ]
+    )
+
+    def fake_open(request: object) -> JsonResponse:
+        return next(responses)
+
+    result = evaluate_pull_request_acceptance(
+        "repodelta/repodelta",
+        250,
+        "short-token",
+        ("LuxLinho", "lucybai-dev"),
+        open_url=fake_open,
+    )
+
+    assert result.approved is False
+
+
+def test_acceptance_check_cli_returns_zero_when_approved(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("GITHUB_TOKEN", "short-token")
+
+    monkeypatch.setattr(
+        "repodelta_bot.cli.enforce_pull_request_acceptance",
+        lambda repo, number, token, maintainers: SimpleNamespace(
+            approved=True,
+            reason="designated acceptance owner approved the current head",
+        ),
+    )
+
+    result = bot_main(
+        [
+            "acceptance-check",
+            "--repo",
+            "repodelta/repodelta",
+            "--pr",
+            "250",
+            "--maintainer",
+            "LuxLinho",
+            "--maintainer",
+            "lucybai-dev",
+        ]
+    )
+
+    assert result == 0
+
+
+def test_acceptance_check_cli_returns_one_when_not_approved(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("GITHUB_TOKEN", "short-token")
+
+    monkeypatch.setattr(
+        "repodelta_bot.cli.enforce_pull_request_acceptance",
+        lambda repo, number, token, maintainers: SimpleNamespace(
+            approved=False,
+            reason="designated acceptance owner has not approved the current head",
+        ),
+    )
+
+    result = bot_main(
+        [
+            "acceptance-check",
+            "--repo",
+            "repodelta/repodelta",
+            "--pr",
+            "250",
+            "--maintainer",
+            "LuxLinho",
+            "--maintainer",
+            "lucybai-dev",
+        ]
+    )
+
+    assert result == 1
+
+
+def test_latest_owner_review_state_controls_acceptance() -> None:
+    result = evaluate_acceptance(
+        owner="LuxLinho",
+        head_sha="abc123",
+        maintainers=("LuxLinho", "lucybai-dev"),
+        reviews=[
+            {
+                "user": {"login": "LuxLinho"},
+                "state": "APPROVED",
+                "commit_id": "abc123",
+            },
+            {
+                "user": {"login": "LuxLinho"},
+                "state": "CHANGES_REQUESTED",
+                "commit_id": "abc123",
+            },
+        ],
+    )
+
+    assert result.approved is False
+
+
+def test_acceptance_owner_can_be_read_from_bot_review_request_timeline() -> None:
+    owner = get_acceptance_owner_from_timeline(
+        [
+            {
+                "event": "review_requested",
+                "actor": {"login": "repodelta-change-submitter[bot]"},
+                "requested_reviewer": {"login": "LuxLinho"},
+            }
+        ],
+        bot_login="repodelta-change-submitter[bot]",
+    )
+
+    assert owner == "LuxLinho"
+
+
+def test_manual_review_request_does_not_set_acceptance_owner() -> None:
+    owner = get_acceptance_owner_from_timeline(
+        [
+            {
+                "event": "review_requested",
+                "actor": {"login": "LuxLinho"},
+                "requested_reviewer": {"login": "lucybai-dev"},
+            }
+        ],
+        bot_login="repodelta-change-submitter[bot]",
+    )
+
+    assert owner is None
+
+
+def test_latest_bot_review_request_becomes_acceptance_owner() -> None:
+    owner = get_acceptance_owner_from_timeline(
+        [
+            {
+                "event": "review_requested",
+                "actor": {"login": "repodelta-change-submitter[bot]"},
+                "requested_reviewer": {"login": "LuxLinho"},
+            },
+            {
+                "event": "review_requested",
+                "actor": {"login": "repodelta-change-submitter[bot]"},
+                "requested_reviewer": {"login": "lucybai-dev"},
+            },
+        ],
+        bot_login="repodelta-change-submitter[bot]",
+    )
+
+    assert owner == "lucybai-dev"
+
+
+def test_pull_request_body_marker_cannot_set_acceptance_owner() -> None:
+    responses = iter(
+        [
+            JsonResponse(
+                {
+                    "body": (
+                        "Body\n\n"
+                        "<!-- RepoDelta-Acceptance-Owner: LuxLinho -->\n"
+                    ),
+                    "head": {"sha": "abc123"},
+                }
+            ),
+            JsonResponse(
+                [
+                    {
+                        "user": {"login": "LuxLinho"},
+                        "state": "APPROVED",
+                        "commit_id": "abc123",
+                    }
+                ]
+            ),
+            JsonResponse([]),
+        ]
+    )
+
+    def fake_open(request: object) -> JsonResponse:
+        return next(responses)
+
+    result = evaluate_pull_request_acceptance(
+        "repodelta/repodelta",
+        250,
+        "short-token",
+        ("LuxLinho", "lucybai-dev"),
+        open_url=fake_open,
+    )
+
+    assert result.approved is False
+    assert result.reason == "pull request does not designate an acceptance owner"
+
+
+def test_create_acceptance_check_run_uses_success_for_approved_result() -> None:
+    requests: list[tuple[str, dict[str, object]]] = []
+
+    def fake_open(request: object) -> JsonResponse:
+        requests.append((request.full_url, json.loads(request.data)))
+        return JsonResponse({"id": 123})
+
+    result = create_acceptance_check_run(
+        "repodelta/repodelta",
+        "abc123",
+        "short-token",
+        SimpleNamespace(
+            approved=True,
+            reason="designated acceptance owner approved the current head",
+        ),
+        open_url=fake_open,
+    )
+
+    assert result == {"id": 123}
+    assert requests[0][0] == (
+        "https://api.github.com/repos/repodelta/repodelta/check-runs"
+    )
+    assert requests[0][1]["name"] == "RepoDelta acceptance"
+    assert requests[0][1]["head_sha"] == "abc123"
+    assert requests[0][1]["status"] == "completed"
+    assert requests[0][1]["conclusion"] == "success"
+
+
+def test_create_acceptance_check_run_uses_failure_for_rejected_result() -> None:
+    requests: list[tuple[str, dict[str, object]]] = []
+
+    def fake_open(request: object) -> JsonResponse:
+        requests.append((request.full_url, json.loads(request.data)))
+        return JsonResponse({"id": 456})
+
+    result = create_acceptance_check_run(
+        "repodelta/repodelta",
+        "abc123",
+        "short-token",
+        SimpleNamespace(
+            approved=False,
+            reason="designated acceptance owner has not approved the current head",
+        ),
+        open_url=fake_open,
+    )
+
+    assert result == {"id": 456}
+    assert requests[0][1]["conclusion"] == "failure"
+    assert requests[0][1]["output"]["summary"] == (
+        "designated acceptance owner has not approved the current head"
+    )
+
+
+def test_enforce_pull_request_acceptance_writes_success_check() -> None:
+    requests: list[tuple[str, dict[str, object] | None]] = []
+    responses = iter(
+        [
+            JsonResponse(
+                {
+                    "body": "Body",
+                    "head": {"sha": "abc123"},
+                }
+            ),
+            JsonResponse(
+                [
+                    {
+                        "user": {"login": "LuxLinho"},
+                        "state": "APPROVED",
+                        "commit_id": "abc123",
+                    }
+                ]
+            ),
+            JsonResponse(
+                [
+                    {
+                        "event": "review_requested",
+                        "actor": {
+                            "login": "repodelta-change-submitter[bot]"
+                        },
+                        "requested_reviewer": {"login": "LuxLinho"},
+                    }
+                ]
+            ),
+            JsonResponse({"id": 999}),
+        ]
+    )
+
+    def fake_open(request: object) -> JsonResponse:
+        data = json.loads(request.data) if request.data else None
+        requests.append((request.full_url, data))
+        return next(responses)
+
+    result = enforce_pull_request_acceptance(
+        "repodelta/repodelta",
+        250,
+        "short-token",
+        ("LuxLinho", "lucybai-dev"),
+        open_url=fake_open,
+    )
+
+    assert result.approved is True
+    assert requests[-1][0] == (
+        "https://api.github.com/repos/repodelta/repodelta/check-runs"
+    )
+    assert requests[-1][1]["head_sha"] == "abc123"
+    assert requests[-1][1]["conclusion"] == "success"
+
+
+def test_enforce_pull_request_acceptance_writes_failure_check() -> None:
+    requests: list[tuple[str, dict[str, object] | None]] = []
+    responses = iter(
+        [
+            JsonResponse(
+                {
+                    "body": "Body",
+                    "head": {"sha": "abc123"},
+                }
+            ),
+            JsonResponse([]),
+            JsonResponse(
+                [
+                    {
+                        "event": "review_requested",
+                        "actor": {
+                            "login": "repodelta-change-submitter[bot]"
+                        },
+                        "requested_reviewer": {"login": "LuxLinho"},
+                    }
+                ]
+            ),
+            JsonResponse({"id": 1000}),
+        ]
+    )
+
+    def fake_open(request: object) -> JsonResponse:
+        data = json.loads(request.data) if request.data else None
+        requests.append((request.full_url, data))
+        return next(responses)
+
+    result = enforce_pull_request_acceptance(
+        "repodelta/repodelta",
+        250,
+        "short-token",
+        ("LuxLinho", "lucybai-dev"),
+        open_url=fake_open,
+    )
+
+    assert result.approved is False
+    assert requests[-1][1]["head_sha"] == "abc123"
+    assert requests[-1][1]["conclusion"] == "failure"
+
+
+def test_request_json_list_follows_next_pagination_link() -> None:
+    class PaginatedJsonResponse(JsonResponse):
+        def __init__(
+            self,
+            value: object,
+            *,
+            link: str | None = None,
+        ) -> None:
+            super().__init__(value)
+            self.headers = {"Link": link} if link is not None else {}
+
+    responses = iter(
+        [
+            PaginatedJsonResponse(
+                [{"id": 1}],
+                link=(
+                    '<https://api.github.com/repos/repodelta/repodelta/'
+                    'pulls/250/reviews?page=2>; rel="next"'
+                ),
+            ),
+            PaginatedJsonResponse([{"id": 2}]),
+        ]
+    )
+
+    def fake_open(request: object) -> PaginatedJsonResponse:
+        return next(responses)
+
+    result = _request_json_list(
+        "https://api.github.com/repos/repodelta/repodelta/pulls/250/reviews",
+        method="GET",
+        authorization="Bearer short-token",
+        stage="reading pull request reviews",
+        open_url=fake_open,
+    )
+
+    assert result == [{"id": 1}, {"id": 2}]
+
+
+def test_request_json_list_rejects_cross_host_pagination_link() -> None:
+    class PaginatedJsonResponse(JsonResponse):
+        def __init__(self, value: object, *, link: str) -> None:
+            super().__init__(value)
+            self.headers = {"Link": link}
+
+    response = PaginatedJsonResponse(
+        [{"id": 1}],
+        link='<https://example.com/page=2>; rel="next"',
+    )
+
+    with pytest.raises(SubmissionError, match="unsafe pagination link"):
+        _request_json_list(
+            "https://api.github.com/repos/repodelta/repodelta/pulls/250/reviews",
+            method="GET",
+            authorization="Bearer short-token",
+            stage="reading pull request reviews",
+            open_url=lambda request: response,
+        )
+
+
+def test_bot_review_request_removal_clears_current_acceptance_owner() -> None:
+    owner = get_acceptance_owner_from_timeline(
+        [
+            {
+                "event": "review_requested",
+                "actor": {"login": "repodelta-change-submitter[bot]"},
+                "requested_reviewer": {"login": "LuxLinho"},
+            },
+            {
+                "event": "review_request_removed",
+                "actor": {"login": "repodelta-change-submitter[bot]"},
+                "requested_reviewer": {"login": "LuxLinho"},
+            },
+        ],
+        bot_login="repodelta-change-submitter[bot]",
+    )
+
+    assert owner is None
+
+
+def test_removing_previous_reviewer_does_not_clear_new_acceptance_owner() -> None:
+    owner = get_acceptance_owner_from_timeline(
+        [
+            {
+                "event": "review_requested",
+                "actor": {"login": "repodelta-change-submitter[bot]"},
+                "requested_reviewer": {"login": "LuxLinho"},
+            },
+            {
+                "event": "review_requested",
+                "actor": {"login": "repodelta-change-submitter[bot]"},
+                "requested_reviewer": {"login": "lucybai-dev"},
+            },
+            {
+                "event": "review_request_removed",
+                "actor": {"login": "repodelta-change-submitter[bot]"},
+                "requested_reviewer": {"login": "LuxLinho"},
+            },
+        ],
+        bot_login="repodelta-change-submitter[bot]",
+    )
+
+    assert owner == "lucybai-dev"
