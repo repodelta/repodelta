@@ -9,14 +9,23 @@ import subprocess
 import tempfile
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Iterator, Sequence
 
+from repodelta_bot.acceptance import (
+    AcceptanceResult,
+    add_acceptance_owner_to_body,
+    evaluate_acceptance,
+    get_acceptance_owner_from_timeline,
+)
+
 
 GITHUB_API_URL = "https://api.github.com"
+REPODELTA_BOT_LOGIN = "repodelta-change-submitter[bot]"
 REPOSITORY_PATTERN = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+")
 GIT_OBJECT_PATTERN = re.compile(r"[0-9a-f]{40}")
 
@@ -64,6 +73,14 @@ class SubmittedPullRequest:
     number: int
     url: str
     author: str
+    acceptance_owner: str
+
+
+@dataclass(frozen=True)
+class PullRequestAcceptanceState:
+    head_sha: str
+    reviews: list[dict[str, object]]
+    timeline: list[dict[str, object]]
 
 
 Run = Callable[..., subprocess.CompletedProcess[bytes]]
@@ -173,6 +190,82 @@ def _request_json(
     if not isinstance(result, dict):
         raise SubmissionError(f"GitHub API returned an invalid response while {stage}")
     return result
+
+
+def _request_json_list(
+    url: str,
+    *,
+    method: str,
+    authorization: str,
+    stage: str,
+    open_url: Open = urllib.request.urlopen,
+) -> list[object]:
+    results: list[object] = []
+    next_url: str | None = url
+
+    while next_url is not None:
+        request = urllib.request.Request(
+            next_url,
+            method=method,
+            headers={
+                "Accept": "application/vnd.github+json",
+                "Authorization": authorization,
+                "Content-Type": "application/json",
+                "X-GitHub-Api-Version": "2022-11-28",
+                "User-Agent": "repodelta-bot",
+            },
+        )
+
+        try:
+            with open_url(request) as response:
+                result = json.load(response)
+
+                headers = getattr(response, "headers", None)
+                link_header = (
+                    headers.get("Link")
+                    if headers is not None and hasattr(headers, "get")
+                    else None
+                )
+        except urllib.error.HTTPError as exc:
+            raise SubmissionError(
+                f"GitHub API returned HTTP {exc.code} while {stage}"
+            ) from exc
+        except (OSError, ValueError) as exc:
+            raise SubmissionError(f"GitHub API failed while {stage}") from exc
+
+        if not isinstance(result, list):
+            raise SubmissionError(
+                f"GitHub API returned an invalid response while {stage}"
+            )
+
+        results.extend(result)
+        next_url = None
+
+        if isinstance(link_header, str):
+            for part in link_header.split(","):
+                part = part.strip()
+                if 'rel="next"' not in part:
+                    continue
+                if not part.startswith("<") or ">" not in part:
+                    continue
+
+                candidate = part[1 : part.index(">")]
+
+                original = urllib.parse.urlparse(url)
+                target = urllib.parse.urlparse(candidate)
+
+                if (
+                    target.scheme != original.scheme
+                    or target.netloc != original.netloc
+                ):
+                    raise SubmissionError(
+                        f"GitHub API returned an unsafe pagination link while {stage}"
+                    )
+
+                next_url = candidate
+                break
+
+    return results
 
 
 def request_installation_token(
@@ -361,6 +454,10 @@ def create_pull_request(
     *,
     open_url: Open = urllib.request.urlopen,
 ) -> SubmittedPullRequest:
+    if len(config.reviewers) != 1:
+        raise SubmissionError(
+            "bot-submitted pull requests require exactly one acceptance owner"
+        )
     repo = _validate_repo(config.repo)
     api_root = f"{GITHUB_API_URL}/repos/{repo}"
     pull = _request_json(
@@ -371,7 +468,10 @@ def create_pull_request(
             "title": config.title,
             "head": config.head,
             "base": config.base,
-            "body": config.body,
+            "body": add_acceptance_owner_to_body(
+                config.body,
+                config.reviewers[0],
+            ),
             "draft": config.draft,
         },
         stage="creating the pull request",
@@ -397,7 +497,12 @@ def create_pull_request(
             raise SubmissionError(
                 f"Pull request {url} was created, but requesting human reviewers failed"
             ) from exc
-    return SubmittedPullRequest(number=number, url=url, author=author)
+    return SubmittedPullRequest(
+        number=number,
+        url=url,
+        author=author,
+        acceptance_owner=config.reviewers[0],
+    )
 
 
 def submit_change(
@@ -441,3 +546,146 @@ def submit_head(
         open_url=open_url,
     )
     return push_head(config, token, run=run)
+
+
+def get_pull_request_acceptance_state(
+    repo: str,
+    number: int,
+    token: str,
+    *,
+    open_url: Open = urllib.request.urlopen,
+) -> PullRequestAcceptanceState:
+    repo = _validate_repo(repo)
+    api_root = f"{GITHUB_API_URL}/repos/{repo}"
+
+    pull = _request_json(
+        f"{api_root}/pulls/{number}",
+        method="GET",
+        authorization=f"Bearer {token}",
+        stage="reading the pull request",
+        open_url=open_url,
+    )
+
+    head = pull.get("head")
+    head_sha = head.get("sha") if isinstance(head, dict) else None
+
+    if not isinstance(head_sha, str):
+        raise SubmissionError("GitHub returned an incomplete pull request response")
+
+    raw_reviews = _request_json_list(
+        f"{api_root}/pulls/{number}/reviews",
+        method="GET",
+        authorization=f"Bearer {token}",
+        stage="reading pull request reviews",
+        open_url=open_url,
+    )
+    reviews = [review for review in raw_reviews if isinstance(review, dict)]
+
+    raw_timeline = _request_json_list(
+        f"{api_root}/issues/{number}/timeline",
+        method="GET",
+        authorization=f"Bearer {token}",
+        stage="reading pull request timeline",
+        open_url=open_url,
+    )
+    timeline = [event for event in raw_timeline if isinstance(event, dict)]
+
+    return PullRequestAcceptanceState(
+        head_sha=head_sha,
+        reviews=reviews,
+        timeline=timeline,
+    )
+
+
+def evaluate_pull_request_acceptance(
+    repo: str,
+    number: int,
+    token: str,
+    maintainers: Sequence[str],
+    *,
+    open_url: Open = urllib.request.urlopen,
+) -> AcceptanceResult:
+    state = get_pull_request_acceptance_state(
+        repo,
+        number,
+        token,
+        open_url=open_url,
+    )
+
+    owner = get_acceptance_owner_from_timeline(
+        state.timeline,
+        bot_login=REPODELTA_BOT_LOGIN,
+    )
+
+    if owner is None:
+        return AcceptanceResult(
+            owner="",
+            head_sha=state.head_sha,
+            approved=False,
+            reason="pull request does not designate an acceptance owner",
+        )
+
+    return evaluate_acceptance(
+        owner=owner,
+        head_sha=state.head_sha,
+        maintainers=maintainers,
+        reviews=state.reviews,
+    )
+
+
+def create_acceptance_check_run(
+    repo: str,
+    head_sha: str,
+    token: str,
+    result: AcceptanceResult,
+    *,
+    open_url: Open = urllib.request.urlopen,
+) -> dict[str, object]:
+    repo = _validate_repo(repo)
+
+    conclusion = "success" if result.approved else "failure"
+
+    return _request_json(
+        f"{GITHUB_API_URL}/repos/{repo}/check-runs",
+        method="POST",
+        authorization=f"Bearer {token}",
+        payload={
+            "name": "RepoDelta acceptance",
+            "head_sha": head_sha,
+            "status": "completed",
+            "conclusion": conclusion,
+            "output": {
+                "title": "Designated human acceptance",
+                "summary": result.reason,
+            },
+        },
+        stage="creating the acceptance check run",
+        open_url=open_url,
+    )
+
+
+def enforce_pull_request_acceptance(
+    repo: str,
+    number: int,
+    token: str,
+    maintainers: Sequence[str],
+    *,
+    open_url: Open = urllib.request.urlopen,
+) -> AcceptanceResult:
+    result = evaluate_pull_request_acceptance(
+        repo,
+        number,
+        token,
+        maintainers,
+        open_url=open_url,
+    )
+
+    create_acceptance_check_run(
+        repo,
+        result.head_sha,
+        token,
+        result,
+        open_url=open_url,
+    )
+
+    return result

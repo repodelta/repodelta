@@ -11,6 +11,7 @@ from repodelta_bot.submit import (
     PushConfig,
     SubmissionConfig,
     SubmissionError,
+    enforce_pull_request_acceptance,
     submit_change,
     submit_head,
 )
@@ -54,6 +55,33 @@ def build_parser() -> argparse.ArgumentParser:
         "push",
         help="Push HEAD through the App to an existing pull-request branch",
     )
+    acceptance = subparsers.add_parser(
+        "acceptance-check",
+        help="Verify designated human acceptance for a pull request",
+    )
+    acceptance.add_argument(
+        "--repo",
+        required=True,
+        help="GitHub repository in owner/name form",
+    )
+    acceptance.add_argument(
+        "--pr",
+        required=True,
+        type=int,
+        help="GitHub pull request number",
+    )
+    acceptance.add_argument(
+        "--maintainer",
+        action="append",
+        required=True,
+        help="Allowed RepoDelta maintainer login; repeat for multiple maintainers",
+    )
+    acceptance.add_argument(
+        "--token-env",
+        default="GITHUB_TOKEN",
+        help="Environment variable containing the GitHub token",
+    )
+
     for command in (submit, push):
         command.add_argument(
             "--app-id",
@@ -93,6 +121,28 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+
+    if args.command == "acceptance-check":
+        token = os.environ.get(args.token_env, "").strip()
+        if not token:
+            parser.exit(
+                2,
+                f"repodelta-bot: error: environment variable {args.token_env} is not set\n",
+            )
+
+        try:
+            result = enforce_pull_request_acceptance(
+                args.repo,
+                args.pr,
+                token,
+                tuple(args.maintainer),
+            )
+        except SubmissionError as exc:
+            parser.exit(2, f"repodelta-bot: error: {exc}\n")
+
+        print(result.reason)
+        return 0 if result.approved else 1
+
     try:
         app_id = _configured_value(args.app_id, "REPODELTA_BOT_APP_ID")
         installation_id = _configured_value(

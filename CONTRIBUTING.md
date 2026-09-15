@@ -56,3 +56,31 @@ then let the App perform the branch update:
 Use `--expected-remote-head FULL_SHA` for an intentional history handoff. The
 lease rejects the update if anyone changed the remote branch after that SHA was
 observed.
+
+### Designated acceptance owner gate
+
+Bot-submitted pull requests designate exactly one human acceptance owner.
+
+The merge gate evaluates the current pull request state rather than trusting
+the editable pull request body. The acceptance owner is derived from the most
+recent `review_requested` timeline event created by the RepoDelta GitHub App.
+
+A pull request passes the acceptance gate only when:
+
+- the designated acceptance owner is a RepoDelta maintainer;
+- that exact maintainer has approved the pull request's current HEAD; and
+- no later review state from that owner revokes the approval.
+
+Approval from another maintainer does not substitute for the designated owner,
+and an approval becomes stale when the pull request HEAD changes.
+
+The gate publishes a check named `RepoDelta acceptance` for the current HEAD.
+To enforce this repository-wide, the RepoDelta GitHub App must have:
+
+- Checks: read and write;
+- Pull requests: read; and
+- the existing repository permissions required for bot-authored pushes.
+
+Repository branch protection or rulesets should require the
+`RepoDelta acceptance` check and, where supported, require that check to come
+from the RepoDelta GitHub App.
