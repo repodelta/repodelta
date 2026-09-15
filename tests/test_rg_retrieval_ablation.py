@@ -178,6 +178,24 @@ def test_pr208_ablation_is_reproducible_and_preserves_boundaries() -> None:
     assert all(value["current_fact_emitted"] is False for value in controls.values())
 
 
+def test_materialized_input_replays_without_historical_git_objects() -> None:
+    ablation_input = json.loads(
+        (
+            CAMPAIGN / "results/rg-retrieval-ablation/pr-208.input.json"
+        ).read_text(encoding="utf-8")
+    )
+    replayed = run_retrieval_ablation(ablation_input)
+    committed = json.loads(
+        (
+            CAMPAIGN / "results/rg-retrieval-ablation/pr-208.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert replayed["input_digest"] == committed["input_digest"]
+    assert replayed["aggregate"] == committed["aggregate"]
+    assert replayed["per_miss"] == committed["per_miss"]
+    assert replayed["history_resolution"] == committed["history_resolution"]
+
+
 def test_retrieval_input_rejects_semantic_label_leak() -> None:
     with pytest.raises(ValueError, match="leaked semantic-label input"):
         run_retrieval_ablation(

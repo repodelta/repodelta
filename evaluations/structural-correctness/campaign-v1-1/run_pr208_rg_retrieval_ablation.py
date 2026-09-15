@@ -56,20 +56,43 @@ def build_pr208_rg_retrieval_ablation(
     if known_misses != KNOWN_MISS_IDS:
         raise ValueError("PR #208 retrieval ablation known-miss selection drifted")
     history_manifest = _read_json(history_path)
-    _require_commit(repository, REVIEWED_HEAD)
-    _require_commit(repository, PRESENT_REPOSITORY_HEAD)
-    history_resolution = _resolve_history(repository, history_manifest)
-    ablation_input = build_ablation_input(
-        universe,
-        retrieval,
-        known_miss_candidate_ids=known_misses,
-        reviewed_head=REVIEWED_HEAD,
-        repository_head=PRESENT_REPOSITORY_HEAD,
-        history_manifest=history_manifest,
+    materialized_input_path = (
+        campaign / "results/rg-retrieval-ablation/pr-208.input.json"
     )
+    if _has_commit(repository, REVIEWED_HEAD) and _has_commit(
+        repository, PRESENT_REPOSITORY_HEAD
+    ):
+        history_resolution = _resolve_history(repository, history_manifest)
+        ablation_input = build_ablation_input(
+            universe,
+            retrieval,
+            known_miss_candidate_ids=known_misses,
+            reviewed_head=REVIEWED_HEAD,
+            repository_head=PRESENT_REPOSITORY_HEAD,
+            history_manifest=history_manifest,
+        )
+        ablation_input["reviewed_source_snapshots"] = _reviewed_source_snapshots(
+            repository, ablation_input
+        )
+        ablation_input["history_resolution_at_pinned_repository_head"] = history_resolution
+    elif materialized_input_path.is_file():
+        ablation_input = _read_json(materialized_input_path)
+        history_resolution = ablation_input.get(
+            "history_resolution_at_pinned_repository_head"
+        )
+        if not isinstance(history_resolution, dict):
+            raise ValueError("materialized retrieval-ablation input lacks history resolution")
+    else:
+        _require_commit(repository, REVIEWED_HEAD)
+        _require_commit(repository, PRESENT_REPOSITORY_HEAD)
+        raise AssertionError("unreachable")
     result = run_retrieval_ablation(
         ablation_input,
-        read_revision_file=lambda revision, path: _git_show(repository, revision, path),
+        read_revision_file=(
+            lambda revision, path: _git_show(repository, revision, path)
+            if _has_commit(repository, REVIEWED_HEAD)
+            else None
+        ),
         history_resolution=history_resolution,
     )
     result["input_provenance"] = {
@@ -84,6 +107,32 @@ def build_pr208_rg_retrieval_ablation(
         ),
     }
     return result
+
+
+def _reviewed_source_snapshots(
+    repository: Path, ablation_input: dict[str, Any]
+) -> list[dict[str, Any]]:
+    reviewed_head = ablation_input["reviewed_change"]["head_revision"]
+    snapshots: list[dict[str, Any]] = []
+    seen: set[tuple[str, int, int]] = set()
+    for candidate in ablation_input["candidate_source_index"]:
+        span = candidate["source_span"]
+        if span is None:
+            continue
+        key = (span["path"], span["line_start"], span["line_end"])
+        if key in seen:
+            continue
+        seen.add(key)
+        lines = _git_show(repository, reviewed_head, span["path"]).splitlines()
+        text = "\n".join(lines[span["line_start"] - 1 : span["line_end"]])
+        snapshots.append(
+            {
+                "source_span": span,
+                "sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+                "text": text,
+            }
+        )
+    return snapshots
 
 
 def _historical_known_misses(declaration: Any, retrieval: Any) -> tuple[str, ...]:
@@ -261,8 +310,15 @@ def _git(repository: Path, *args: str, check: bool = True) -> subprocess.Complet
 
 
 def _require_commit(repository: Path, revision: str) -> None:
-    if _git(repository, "cat-file", "-e", f"{revision}^{{commit}}", check=False).returncode:
+    if not _has_commit(repository, revision):
         raise ValueError(f"retrieval ablation repository lacks pinned commit {revision}")
+
+
+def _has_commit(repository: Path, revision: str) -> bool:
+    return (
+        _git(repository, "cat-file", "-e", f"{revision}^{{commit}}", check=False).returncode
+        == 0
+    )
 
 
 def _file_identity(campaign: Path, path: Path) -> dict[str, str]:

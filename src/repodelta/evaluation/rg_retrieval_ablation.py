@@ -272,8 +272,8 @@ def build_ablation_input(
 def run_retrieval_ablation(
     ablation_input: Mapping[str, Any],
     *,
-    read_revision_file: Callable[[str, str], str],
-    history_resolution: Mapping[str, Mapping[str, Any]],
+    read_revision_file: Callable[[str, str], str] | None = None,
+    history_resolution: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Run declared lexical stages against only the reviewed source spans.
 
@@ -283,6 +283,14 @@ def run_retrieval_ablation(
     """
 
     _validate_ablation_input(ablation_input)
+    resolved_history = history_resolution or ablation_input.get(
+        "history_resolution_at_pinned_repository_head"
+    )
+    if not isinstance(resolved_history, Mapping):
+        raise ValueError("retrieval-ablation run requires resolved history provenance")
+    stored_history = ablation_input.get("history_resolution_at_pinned_repository_head")
+    if stored_history is not None and dict(resolved_history) != stored_history:
+        raise ValueError("retrieval-ablation history resolution drifted from its pinned input")
     reviewed_head = ablation_input["reviewed_change"]["head_revision"]
     diagnostics = ablation_input["diagnostics"]
     source_index = ablation_input["candidate_source_index"]
@@ -292,7 +300,12 @@ def run_retrieval_ablation(
     q0_terms = ablation_input["query_groups"]["Q0_authored_terms"]["terms_by_subject"]
     q1_terms = ablation_input["query_groups"]["Q1_explicit_identifiers"]["terms_by_subject"]
 
-    source_texts = _source_texts(source_index, reviewed_head, read_revision_file)
+    source_texts = _source_texts(
+        source_index,
+        reviewed_head,
+        read_revision_file,
+        ablation_input.get("reviewed_source_snapshots"),
+    )
     stage_order = (
         ("baseline_current_association", "baseline", None),
         ("Q1_identifier_variants", "Q1", q1_terms),
@@ -311,7 +324,7 @@ def run_retrieval_ablation(
             source_texts=source_texts,
             terms_by_subject=terms_by_subject,
             allowed_history_terms=(
-                _allowed_history_terms(history_resolution) if group == "Q2" else None
+                _allowed_history_terms(resolved_history) if group == "Q2" else None
             ),
         )
         stage_memberships[mechanism] = memberships
@@ -377,7 +390,7 @@ def run_retrieval_ablation(
         },
         "input_digest": stable_json_digest(ablation_input),
         "input": ablation_input,
-        "history_resolution": dict(history_resolution),
+        "history_resolution": dict(resolved_history),
         "per_miss": records,
         "aggregate": aggregate,
         "completion": _completion(all_recovered_by_q0, records),
@@ -437,19 +450,47 @@ def _validate_ablation_input(ablation_input: Mapping[str, Any]) -> None:
 def _source_texts(
     source_index: Iterable[Mapping[str, Any]],
     reviewed_head: str,
-    read_revision_file: Callable[[str, str], str],
+    read_revision_file: Callable[[str, str], str] | None,
+    snapshots: Any,
 ) -> dict[tuple[str, int, int], str]:
     result: dict[tuple[str, int, int], str] = {}
+    snapshot_texts = _snapshot_texts(snapshots)
     files: dict[str, list[str]] = {}
     for item in source_index:
         span = item.get("source_span")
         if span is None:
             continue
         path = span["path"]
+        key = (path, span["line_start"], span["line_end"])
+        if key in snapshot_texts:
+            result[key] = snapshot_texts[key]
+            continue
+        if read_revision_file is None:
+            raise ValueError("retrieval-ablation input lacks a required source snapshot")
         if path not in files:
             files[path] = read_revision_file(reviewed_head, path).splitlines()
-        key = (path, span["line_start"], span["line_end"])
         result[key] = "\n".join(files[path][key[1] - 1 : key[2]]).lower()
+    return result
+
+
+def _snapshot_texts(snapshots: Any) -> dict[tuple[str, int, int], str]:
+    if snapshots is None:
+        return {}
+    if not isinstance(snapshots, list):
+        raise ValueError("retrieval-ablation source snapshots must be a list")
+    result: dict[tuple[str, int, int], str] = {}
+    for snapshot in snapshots:
+        span = snapshot.get("source_span")
+        text = snapshot.get("text")
+        digest = snapshot.get("sha256")
+        if not isinstance(span, Mapping) or not isinstance(text, str) or not isinstance(digest, str):
+            raise ValueError("retrieval-ablation source snapshot is malformed")
+        if hashlib.sha256(text.encode("utf-8")).hexdigest() != digest:
+            raise ValueError("retrieval-ablation source snapshot digest mismatch")
+        key = (span["path"], span["line_start"], span["line_end"])
+        if key in result and result[key] != text.lower():
+            raise ValueError("retrieval-ablation source snapshot conflicts")
+        result[key] = text.lower()
     return result
 
 
