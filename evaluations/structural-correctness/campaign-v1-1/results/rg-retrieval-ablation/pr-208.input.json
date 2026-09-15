@@ -512,9 +512,11 @@
   },
   "classification": {
     "admission_authority": "not_evaluated",
+    "general_requirement_to_code_retrieval": false,
     "kind": "evaluation_only_retrieval_ablation",
     "production_changed": false,
     "proofability": "not_input",
+    "retrieval_scope": "frozen_pre_association_candidate_universe_with_reviewed_source_spans",
     "semantic_relation": "not_input"
   },
   "diagnostic_selection": {
@@ -917,6 +919,7 @@
   "query_groups": {
     "Q0_authored_terms": {
       "authority": "authored_statement",
+      "scope": "broad lexical candidate generation only within the frozen pre-association candidate universe and its reviewed source spans",
       "terms_by_subject": {
         "G2": [
           "nodes",

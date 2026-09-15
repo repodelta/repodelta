@@ -129,6 +129,10 @@ def test_pr208_ablation_is_reproducible_and_preserves_boundaries() -> None:
     assert json.loads(json.dumps(result)) == committed
     assert result["classification"] == {
         "kind": "evaluation_only_retrieval_ablation",
+        "retrieval_scope": (
+            "frozen_pre_association_candidate_universe_with_reviewed_source_spans"
+        ),
+        "general_requirement_to_code_retrieval": False,
         "semantic_relation": "not_emitted",
         "proofability": "not_emitted",
         "admission_authority": "not_emitted",
@@ -161,8 +165,38 @@ def test_pr208_ablation_is_reproducible_and_preserves_boundaries() -> None:
         ],
         "stale_history_candidates_introduced": 0,
         "unresolved_cases": 0,
-        "additional_candidate_interpretation": "unassessed retrieval candidates, not semantic-noise labels",
+        "additional_candidate_interpretation": (
+            "query-only retrieval candidates; any semantic characterization must be "
+            "a separate post-hoc evaluation consumer"
+        ),
     }
+    q0_oracle = result["post_hoc_q0_extra_characterization"]
+    assert q0_oracle["authority"] == (
+        "historical_proposed_calibration_evaluation_oracle_only"
+    )
+    assert q0_oracle["reference_status"] == "proposed"
+    assert q0_oracle["query_input_used"] is False
+    assert q0_oracle["candidate_membership_changed"] is False
+    assert q0_oracle["production_authority_changed"] is False
+    assert q0_oracle["counts"] == {
+        "historical_declared_direct": 2,
+        "historical_declared_non_direct": 8,
+        "historical_declared_insufficient": 0,
+    }
+    assert all(
+        {"semantic_relation", "proofability", "proof_basis", "label"}.isdisjoint(item)
+        for item in result["input"]["candidate_source_index"]
+    )
+    assert all(
+        item["candidate_id"] in aggregate["Q0_authored_lexical"]["additional_candidate_ids"]
+        for item in q0_oracle["records"]
+    )
+    assert result["completion"][
+        "semantic_or_agentic_search_required_to_recover_these_seven_bounded_diagnostics"
+    ] is False
+    assert result["completion"]["semantic_or_agentic_search_required_for_general_retrieval"] == (
+        "not_determined"
+    )
     assert aggregate["Q2_history_vocabulary_then_reviewed_head_lexical"][
         "incremental_recoveries"
     ] == 0

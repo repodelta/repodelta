@@ -95,15 +95,24 @@ def build_pr208_rg_retrieval_ablation(
         ),
         history_resolution=history_resolution,
     )
+    result["post_hoc_q0_extra_characterization"] = _characterize_q0_extras(
+        result, declaration
+    )
     result["input_provenance"] = {
         "candidate_universe": _file_identity(campaign, universe_path),
         "observed_retrieval": _file_identity(campaign, retrieval_path),
-        "historical_calibration_selection": _file_identity(campaign, declaration_path),
+        "historical_calibration": _file_identity(campaign, declaration_path),
         "historical_vocabulary_and_controls": _file_identity(campaign, history_path),
         "known_miss_selection_boundary": (
             "The historical calibration selects seven diagnostic candidate IDs only. "
             "The retrieval input excludes semantic relation, proofability, proof "
             "basis, and label content."
+        ),
+        "post_hoc_oracle_boundary": (
+            "After retrieval completes, the historical proposed calibration may "
+            "characterize Q0 extra memberships as an evaluation oracle only. Its "
+            "dispositions do not enter query generation, candidate membership, or "
+            "production authority."
         ),
     }
     return result
@@ -151,6 +160,67 @@ def _historical_known_misses(declaration: Any, retrieval: Any) -> tuple[str, ...
             and retrieval_rows[label.candidate_id].retrieval_state == "not_retrieved"
         )
     )
+
+
+def _characterize_q0_extras(result: dict[str, object], declaration: Any) -> dict[str, object]:
+    """Describe Q0 extras after retrieval without feeding labels back into it."""
+
+    q0 = next(
+        item
+        for item in result["aggregate"]  # type: ignore[index]
+        if item["mechanism"] == "Q0_authored_lexical"
+    )
+    labels = {label.candidate_id: label for label in declaration.labels}
+    direct_relations = {
+        "implements",
+        "constrains",
+        "removes",
+        "directly_verifies",
+    }
+    records: list[dict[str, str]] = []
+    counts = {
+        "historical_declared_direct": 0,
+        "historical_declared_non_direct": 0,
+        "historical_declared_insufficient": 0,
+    }
+    for candidate_id in q0["additional_candidate_ids"]:
+        label = labels.get(candidate_id)
+        if label is None:
+            raise ValueError("Q0 extra candidate lacks historical calibration disposition")
+        if label.semantic_relation in direct_relations:
+            disposition = "historical_declared_direct"
+        elif label.semantic_relation == "insufficient":
+            disposition = "historical_declared_insufficient"
+        else:
+            disposition = "historical_declared_non_direct"
+        counts[disposition] += 1
+        records.append(
+            {
+                "candidate_id": candidate_id,
+                "historical_disposition": disposition,
+                "semantic_relation": label.semantic_relation,
+                "proofability": label.proofability,
+            }
+        )
+    return {
+        "authority": "historical_proposed_calibration_evaluation_oracle_only",
+        "reference_status": declaration.authority.status,
+        "query_input_used": False,
+        "candidate_membership_changed": False,
+        "production_authority_changed": False,
+        "boundary": (
+            "This is a post-hoc description of Q0 extras. Historical dispositions "
+            "did not enter term derivation, lexical matching, or candidate membership."
+        ),
+        "counts": counts,
+        "records": records,
+        "interpretation": (
+            "The proposed historical calibration describes eight of ten Q0 extras "
+            "as non-direct contextual support and two as direct. The result is not "
+            "verified semantic truth, but it is sufficient to show that broad lexical "
+            "candidate generation requires downstream semantic resolution."
+        ),
+    }
 
 
 def _resolve_history(
@@ -344,7 +414,10 @@ def render_findings(result: dict[str, Any]) -> str:
         "",
         "This Issue #322 experiment is evaluation-only. The seven diagnostic IDs "
         "were selected by historical calibration, but no semantic label, proof "
-        "value, or admission decision enters query generation.",
+        "value, or admission decision enters query generation. Q0 is broad lexical "
+        "candidate generation only within the frozen pre-association candidate "
+        "universe and its reviewed source spans; it is not general "
+        "requirement-to-code retrieval.",
         "",
         "## Bounded result",
         "",
@@ -354,7 +427,7 @@ def render_findings(result: dict[str, Any]) -> str:
     labels = {
         "baseline_current_association": "Baseline current association",
         "Q1_identifier_variants": "Explicit identifier variants",
-        "Q0_authored_lexical": "Authored terms → reviewed-head lexical spans",
+        "Q0_authored_lexical": "Authored terms → bounded reviewed-head lexical spans",
         "Q2_history_vocabulary_then_reviewed_head_lexical": "Historical vocabulary → reviewed-head lexical spans",
     }
     for mechanism, label in labels.items():
@@ -366,20 +439,47 @@ def render_findings(result: dict[str, Any]) -> str:
         )
     q0 = aggregate["Q0_authored_lexical"]
     q2 = aggregate["Q2_history_vocabulary_then_reviewed_head_lexical"]
+    q0_oracle = result["post_hoc_q0_extra_characterization"]
     rows.extend(
         [
             "",
             "All seven diagnostics are recovered by normalized authored R/G terms "
-            "searched only inside source spans at the frozen PR #208 head. This is "
-            "retrieval evidence only: its "
-            f"{q0['additional_candidate_count']} additional memberships remain "
-            "semantically unassessed.",
+            "searched only inside the frozen pre-association candidate universe's "
+            "source spans at the frozen PR #208 head. This is bounded candidate "
+            "generation, not a general requirement-to-code retrieval result.",
+            "",
+            "## Post-hoc Q0 extra characterization",
+            "",
+            "The existing historical calibration is used here only as an "
+            "evaluation oracle after Q0 membership has been fixed. It did not enter "
+            "query terms, lexical matching, or membership selection, and its "
+            "`proposed` dispositions are not verified semantic truth.",
+            "",
+            "| Q0 extra disposition in historical calibration | Count |",
+            "| --- | ---: |",
+        ]
+    )
+    rows.extend(
+        f"| {label.replace('_', ' ')} | {count} |"
+        for label, count in q0_oracle["counts"].items()
+    )
+    rows.extend(
+        [
+            "",
+            f"Of Q0's {q0['additional_candidate_count']} extras, eight are "
+            "historically declared non-direct contextual support and two are "
+            "historically declared direct. That mixture means cheap lexical search "
+            "gives sufficient bounded recall for these seven diagnostics, but "
+            "downstream semantic resolution remains necessary.",
             "",
             "Historical Issue/PR vocabulary also finds reviewed-head candidates but "
             f"adds no incremental recovery in this set ({q2['incremental_recoveries']}). "
             "It is therefore not part of the minimum retrieval substrate. There are "
             "no residual misses, so Q3 current-vocabulary expansion, Q4 structural "
-            "expansion, and Q5 semantic/LLM/agentic search were not run.",
+            "expansion, and Q5 semantic/LLM/agentic search were not run. Semantic "
+            "or agentic search was not required to recover these seven bounded "
+            "diagnostics; this experiment does not determine whether it is required "
+            "for general retrieval or semantic resolution.",
             "",
             "## History/current boundary",
             "",
@@ -406,9 +506,10 @@ def render_findings(result: dict[str, Any]) -> str:
             "",
             "A later, separately scoped production experiment can add "
             "provenance-preserving reviewed-head lexical R/G candidates as "
-            "`suggested` retrieval evidence, without changing semantic relation, "
-            "proof, or admission authority. This experiment does not itself justify "
-            "a production change or LLM/embedding retrieval.",
+            "`suggested` retrieval evidence, paired with a separate semantic "
+            "resolution stage and without changing proof or admission authority. "
+            "This experiment does not itself justify a production change or a "
+            "general conclusion about LLM/embedding retrieval.",
             "",
         ]
     )

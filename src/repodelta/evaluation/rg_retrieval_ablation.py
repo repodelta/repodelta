@@ -1,9 +1,11 @@
 """Bounded, provenance-preserving R/G retrieval ablations.
 
 This module is deliberately an evaluation-only consumer.  It observes whether
-small, declared query groups can rediscover a frozen changed-anchor candidate
-at the *reviewed* revision.  It neither infers a semantic relation nor changes
-production association, admission, assessment, or presentation.
+small, declared query groups can rediscover a frozen pre-association candidate
+inside its reviewed source span at the *reviewed* revision.  It is not a
+general requirement-to-code retrieval system.  It neither infers a semantic
+relation nor changes production association, admission, assessment, or
+presentation.
 
 The runner supplies known diagnostic candidate IDs selected from historical
 calibration evidence.  Those IDs scope the experiment only: no semantic label,
@@ -193,6 +195,10 @@ def build_ablation_input(
         "schema_version": RG_RETRIEVAL_ABLATION_INPUT_SCHEMA,
         "classification": {
             "kind": "evaluation_only_retrieval_ablation",
+            "retrieval_scope": (
+                "frozen_pre_association_candidate_universe_with_reviewed_source_spans"
+            ),
+            "general_requirement_to_code_retrieval": False,
             "semantic_relation": "not_input",
             "proofability": "not_input",
             "admission_authority": "not_evaluated",
@@ -233,6 +239,10 @@ def build_ablation_input(
         "query_groups": {
             "Q0_authored_terms": {
                 "authority": "authored_statement",
+                "scope": (
+                    "broad lexical candidate generation only within the frozen "
+                    "pre-association candidate universe and its reviewed source spans"
+                ),
                 "terms_by_subject": {
                     subject_id: list(authored_query_terms(subjects[subject_id].authored_statement))
                     for subject_id in sorted({item["subject_id"] for item in diagnostics})
@@ -360,8 +370,8 @@ def run_retrieval_ablation(
                 == "Q2_history_vocabulary_then_reviewed_head_lexical",
                 "additional_candidate_interpretation": (
                     "Additional memberships are retrieval candidates outside the "
-                    "seven diagnostic IDs. Their semantic usefulness is unassessed "
-                    "by this retrieval-only experiment."
+                    "seven diagnostic IDs. This query-only run does not classify "
+                    "their semantic usefulness."
                 ),
                 "limitations": [
                     "A lexical hit is not a semantic relation, proof basis, or admission decision.",
@@ -382,6 +392,10 @@ def run_retrieval_ablation(
         "schema_version": RG_RETRIEVAL_ABLATION_RESULT_SCHEMA,
         "classification": {
             "kind": "evaluation_only_retrieval_ablation",
+            "retrieval_scope": (
+                "frozen_pre_association_candidate_universe_with_reviewed_source_spans"
+            ),
+            "general_requirement_to_code_retrieval": False,
             "semantic_relation": "not_emitted",
             "proofability": "not_emitted",
             "admission_authority": "not_emitted",
@@ -567,7 +581,8 @@ def _aggregate_stages(
                 "stale_history_candidates_introduced": 0,
                 "unresolved_cases": len(known_ids - recovered),
                 "additional_candidate_interpretation": (
-                    "unassessed retrieval candidates, not semantic-noise labels"
+                    "query-only retrieval candidates; any semantic characterization "
+                    "must be a separate post-hoc evaluation consumer"
                 ),
             }
         )
@@ -585,8 +600,10 @@ def _completion(all_recovered_by_q0: bool, records: Iterable[Mapping[str, Any]])
         return {
             "state": "sufficient_for_bounded_retrieval_hypothesis",
             "finding": (
-                "All seven historical diagnostic misses are recoverable by authored "
-                "R/G lexical search over source spans at the reviewed PR head."
+                "All seven historical diagnostic misses are recoverable by broad "
+                "authored R/G lexical candidate generation inside the frozen "
+                "pre-association universe and reviewed source spans at the reviewed "
+                "PR head."
             ),
             "historical_retrieval": (
                 "Historical vocabulary added no incremental recovery in this bounded "
@@ -595,9 +612,11 @@ def _completion(all_recovered_by_q0: bool, records: Iterable[Mapping[str, Any]])
             "future_production_hypothesis": (
                 "A separately scoped experiment can add provenance-preserving, "
                 "reviewed-head lexical R/G candidates as suggested retrieval evidence, "
-                "without changing semantic relation, proof, or admission authority."
+                "without treating lexical retrieval itself as semantic relation, proof, "
+                "or admission authority."
             ),
-            "semantic_or_agentic_search_required": False,
+            "semantic_or_agentic_search_required_to_recover_these_seven_bounded_diagnostics": False,
+            "semantic_or_agentic_search_required_for_general_retrieval": "not_determined",
         }
     return {
         "state": "insufficient_evidence",
@@ -606,5 +625,6 @@ def _completion(all_recovered_by_q0: bool, records: Iterable[Mapping[str, Any]])
             "One or more bounded diagnostics remain unrecovered by declared lexical "
             "and history-grounded mechanisms."
         ),
-        "semantic_or_agentic_search_required": "not_determined",
+        "semantic_or_agentic_search_required_to_recover_these_seven_bounded_diagnostics": "not_determined",
+        "semantic_or_agentic_search_required_for_general_retrieval": "not_determined",
     }

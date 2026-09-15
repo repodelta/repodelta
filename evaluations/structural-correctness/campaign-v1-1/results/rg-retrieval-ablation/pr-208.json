@@ -3,7 +3,7 @@
     {
       "additional_candidate_count": 0,
       "additional_candidate_ids": [],
-      "additional_candidate_interpretation": "unassessed retrieval candidates, not semantic-noise labels",
+      "additional_candidate_interpretation": "query-only retrieval candidates; any semantic characterization must be a separate post-hoc evaluation consumer",
       "incremental_recoveries": 0,
       "known_misses_recovered": 0,
       "mechanism": "baseline_current_association",
@@ -13,7 +13,7 @@
     {
       "additional_candidate_count": 0,
       "additional_candidate_ids": [],
-      "additional_candidate_interpretation": "unassessed retrieval candidates, not semantic-noise labels",
+      "additional_candidate_interpretation": "query-only retrieval candidates; any semantic characterization must be a separate post-hoc evaluation consumer",
       "incremental_recoveries": 0,
       "known_misses_recovered": 0,
       "mechanism": "Q1_identifier_variants",
@@ -34,7 +34,7 @@
         "C:R5:E:structural_change:9ff44326982c1acafe85",
         "C:R5:E:structural_change:d0cf036a1010c1207bc5"
       ],
-      "additional_candidate_interpretation": "unassessed retrieval candidates, not semantic-noise labels",
+      "additional_candidate_interpretation": "query-only retrieval candidates; any semantic characterization must be a separate post-hoc evaluation consumer",
       "incremental_recoveries": 7,
       "known_misses_recovered": 7,
       "mechanism": "Q0_authored_lexical",
@@ -58,7 +58,7 @@
         "C:R5:E:structural_change:9ff44326982c1acafe85",
         "C:R5:E:structural_change:d0cf036a1010c1207bc5"
       ],
-      "additional_candidate_interpretation": "unassessed retrieval candidates, not semantic-noise labels",
+      "additional_candidate_interpretation": "query-only retrieval candidates; any semantic characterization must be a separate post-hoc evaluation consumer",
       "incremental_recoveries": 0,
       "known_misses_recovered": 7,
       "mechanism": "Q2_history_vocabulary_then_reviewed_head_lexical",
@@ -68,17 +68,20 @@
   ],
   "classification": {
     "admission_authority": "not_emitted",
+    "general_requirement_to_code_retrieval": false,
     "kind": "evaluation_only_retrieval_ablation",
     "production_changed": false,
     "proofability": "not_emitted",
+    "retrieval_scope": "frozen_pre_association_candidate_universe_with_reviewed_source_spans",
     "semantic_or_model_search_run": false,
     "semantic_relation": "not_emitted"
   },
   "completion": {
-    "finding": "All seven historical diagnostic misses are recoverable by authored R/G lexical search over source spans at the reviewed PR head.",
-    "future_production_hypothesis": "A separately scoped experiment can add provenance-preserving, reviewed-head lexical R/G candidates as suggested retrieval evidence, without changing semantic relation, proof, or admission authority.",
+    "finding": "All seven historical diagnostic misses are recoverable by broad authored R/G lexical candidate generation inside the frozen pre-association universe and reviewed source spans at the reviewed PR head.",
+    "future_production_hypothesis": "A separately scoped experiment can add provenance-preserving, reviewed-head lexical R/G candidates as suggested retrieval evidence, without treating lexical retrieval itself as semantic relation, proof, or admission authority.",
     "historical_retrieval": "Historical vocabulary added no incremental recovery in this bounded set; it remains context/vocabulary only and requires current-head resolution.",
-    "semantic_or_agentic_search_required": false,
+    "semantic_or_agentic_search_required_for_general_retrieval": "not_determined",
+    "semantic_or_agentic_search_required_to_recover_these_seven_bounded_diagnostics": false,
     "state": "sufficient_for_bounded_retrieval_hypothesis"
   },
   "history_resolution": {
@@ -780,9 +783,11 @@
     },
     "classification": {
       "admission_authority": "not_evaluated",
+      "general_requirement_to_code_retrieval": false,
       "kind": "evaluation_only_retrieval_ablation",
       "production_changed": false,
       "proofability": "not_input",
+      "retrieval_scope": "frozen_pre_association_candidate_universe_with_reviewed_source_spans",
       "semantic_relation": "not_input"
     },
     "diagnostic_selection": {
@@ -1185,6 +1190,7 @@
     "query_groups": {
       "Q0_authored_terms": {
         "authority": "authored_statement",
+        "scope": "broad lexical candidate generation only within the frozen pre-association candidate universe and its reviewed source spans",
         "terms_by_subject": {
           "G2": [
             "nodes",
@@ -1330,13 +1336,13 @@
     ],
     "schema_version": "rg_retrieval_ablation_input.v1"
   },
-  "input_digest": "5594a078ca08f1332b29cb5ede18c88f67741bac7c8fb18fefff7e6c0f05cad1",
+  "input_digest": "93587d09f71858c83add53aed9cd62f6d4ab87310b6d2a58399c493875cb6359",
   "input_provenance": {
     "candidate_universe": {
       "path": "rg-candidate-universes/pr-208.json",
       "sha256": "44e2676cf166f1913968f136427d056cee4c4ca1f84dd893bbf68bfff0e56877"
     },
-    "historical_calibration_selection": {
+    "historical_calibration": {
       "path": "rg-semantic-proposals/pr-208.batch-001.ai-adjudicated.proposed.json",
       "sha256": "9e55d0aebc69201a2fcaf6012ce98e8a843b69616879ba0ec8769caf2135b83d"
     },
@@ -1348,11 +1354,12 @@
     "observed_retrieval": {
       "path": "rg-retrieval-observations/pr-208.json",
       "sha256": "23cdb982ef6a14e38f9b9749b91a50b41ede446f3033c73d3b9f47913669b04d"
-    }
+    },
+    "post_hoc_oracle_boundary": "After retrieval completes, the historical proposed calibration may characterize Q0 extra memberships as an evaluation oracle only. Its dispositions do not enter query generation, candidate membership, or production authority."
   },
   "per_miss": [
     {
-      "additional_candidate_interpretation": "Additional memberships are retrieval candidates outside the seven diagnostic IDs. Their semantic usefulness is unassessed by this retrieval-only experiment.",
+      "additional_candidate_interpretation": "Additional memberships are retrieval candidates outside the seven diagnostic IDs. This query-only run does not classify their semantic usefulness.",
       "baseline_retrieved": false,
       "candidate": {
         "authored_statement": "Do not promote all reachable structural support nodes.",
@@ -1425,7 +1432,7 @@
       ]
     },
     {
-      "additional_candidate_interpretation": "Additional memberships are retrieval candidates outside the seven diagnostic IDs. Their semantic usefulness is unassessed by this retrieval-only experiment.",
+      "additional_candidate_interpretation": "Additional memberships are retrieval candidates outside the seven diagnostic IDs. This query-only run does not classify their semantic usefulness.",
       "baseline_retrieved": false,
       "candidate": {
         "authored_statement": "Do not promote all reachable structural support nodes.",
@@ -1500,7 +1507,7 @@
       ]
     },
     {
-      "additional_candidate_interpretation": "Additional memberships are retrieval candidates outside the seven diagnostic IDs. Their semantic usefulness is unassessed by this retrieval-only experiment.",
+      "additional_candidate_interpretation": "Additional memberships are retrieval candidates outside the seven diagnostic IDs. This query-only run does not classify their semantic usefulness.",
       "baseline_retrieved": false,
       "candidate": {
         "authored_statement": "Do not promote all reachable structural support nodes.",
@@ -1573,7 +1580,7 @@
       ]
     },
     {
-      "additional_candidate_interpretation": "Additional memberships are retrieval candidates outside the seven diagnostic IDs. Their semantic usefulness is unassessed by this retrieval-only experiment.",
+      "additional_candidate_interpretation": "Additional memberships are retrieval candidates outside the seven diagnostic IDs. This query-only run does not classify their semantic usefulness.",
       "baseline_retrieved": false,
       "candidate": {
         "authored_statement": "Focus-relative evidence annotation remains available for reviewer explanation and presentation, but cannot add, remove, or suppress structural backbone membership.",
@@ -1652,7 +1659,7 @@
       ]
     },
     {
-      "additional_candidate_interpretation": "Additional memberships are retrieval candidates outside the seven diagnostic IDs. Their semantic usefulness is unassessed by this retrieval-only experiment.",
+      "additional_candidate_interpretation": "Additional memberships are retrieval candidates outside the seven diagnostic IDs. This query-only run does not classify their semantic usefulness.",
       "baseline_retrieved": false,
       "candidate": {
         "authored_statement": "The same membership contract applies to Issue R/G and PR Transformation/Completion subjects.",
@@ -1724,7 +1731,7 @@
       ]
     },
     {
-      "additional_candidate_interpretation": "Additional memberships are retrieval candidates outside the seven diagnostic IDs. Their semantic usefulness is unassessed by this retrieval-only experiment.",
+      "additional_candidate_interpretation": "Additional memberships are retrieval candidates outside the seven diagnostic IDs. This query-only run does not classify their semantic usefulness.",
       "baseline_retrieved": false,
       "candidate": {
         "authored_statement": "The same membership contract applies to Issue R/G and PR Transformation/Completion subjects.",
@@ -1796,7 +1803,7 @@
       ]
     },
     {
-      "additional_candidate_interpretation": "Additional memberships are retrieval candidates outside the seven diagnostic IDs. Their semantic usefulness is unassessed by this retrieval-only experiment.",
+      "additional_candidate_interpretation": "Additional memberships are retrieval candidates outside the seven diagnostic IDs. This query-only run does not classify their semantic usefulness.",
       "baseline_retrieved": false,
       "candidate": {
         "authored_statement": "The graph retains direct production and direct test changes together when both are selected.",
@@ -1873,5 +1880,81 @@
       ]
     }
   ],
+  "post_hoc_q0_extra_characterization": {
+    "authority": "historical_proposed_calibration_evaluation_oracle_only",
+    "boundary": "This is a post-hoc description of Q0 extras. Historical dispositions did not enter term derivation, lexical matching, or candidate membership.",
+    "candidate_membership_changed": false,
+    "counts": {
+      "historical_declared_direct": 2,
+      "historical_declared_insufficient": 0,
+      "historical_declared_non_direct": 8
+    },
+    "interpretation": "The proposed historical calibration describes eight of ten Q0 extras as non-direct contextual support and two as direct. The result is not verified semantic truth, but it is sufficient to show that broad lexical candidate generation requires downstream semantic resolution.",
+    "production_authority_changed": false,
+    "query_input_used": false,
+    "records": [
+      {
+        "candidate_id": "C:G2:E:structural_change:44a2370ce77a6e66f8e7",
+        "historical_disposition": "historical_declared_non_direct",
+        "proofability": "not_applicable",
+        "semantic_relation": "contextual_support"
+      },
+      {
+        "candidate_id": "C:G2:E:structural_change:9ff44326982c1acafe85",
+        "historical_disposition": "historical_declared_non_direct",
+        "proofability": "not_applicable",
+        "semantic_relation": "contextual_support"
+      },
+      {
+        "candidate_id": "C:R2:E:structural_change:44a2370ce77a6e66f8e7",
+        "historical_disposition": "historical_declared_non_direct",
+        "proofability": "not_applicable",
+        "semantic_relation": "contextual_support"
+      },
+      {
+        "candidate_id": "C:R2:E:structural_change:5d2be31cc60dea3d2f3b",
+        "historical_disposition": "historical_declared_non_direct",
+        "proofability": "not_applicable",
+        "semantic_relation": "contextual_support"
+      },
+      {
+        "candidate_id": "C:R2:E:structural_change:7c4162e02e623fea377f",
+        "historical_disposition": "historical_declared_non_direct",
+        "proofability": "not_applicable",
+        "semantic_relation": "contextual_support"
+      },
+      {
+        "candidate_id": "C:R2:E:structural_change:d0cf036a1010c1207bc5",
+        "historical_disposition": "historical_declared_direct",
+        "proofability": "direct_capable",
+        "semantic_relation": "implements"
+      },
+      {
+        "candidate_id": "C:R3:E:structural_change:9ff44326982c1acafe85",
+        "historical_disposition": "historical_declared_non_direct",
+        "proofability": "not_applicable",
+        "semantic_relation": "contextual_support"
+      },
+      {
+        "candidate_id": "C:R5:E:structural_change:5d2be31cc60dea3d2f3b",
+        "historical_disposition": "historical_declared_non_direct",
+        "proofability": "not_applicable",
+        "semantic_relation": "contextual_support"
+      },
+      {
+        "candidate_id": "C:R5:E:structural_change:9ff44326982c1acafe85",
+        "historical_disposition": "historical_declared_non_direct",
+        "proofability": "not_applicable",
+        "semantic_relation": "contextual_support"
+      },
+      {
+        "candidate_id": "C:R5:E:structural_change:d0cf036a1010c1207bc5",
+        "historical_disposition": "historical_declared_direct",
+        "proofability": "direct_capable",
+        "semantic_relation": "implements"
+      }
+    ],
+    "reference_status": "proposed"
+  },
   "schema_version": "rg_retrieval_ablation_result.v1"
 }
