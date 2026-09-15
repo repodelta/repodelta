@@ -1,0 +1,87 @@
+{
+  "schema_version": "rg_retrieval_ablation_history.v1",
+  "purpose": "Bounded historical vocabulary and negative controls for the PR #208 retrieval ablation. Historical material supplies query vocabulary or rationale only; every term is resolved against the pinned repository head before it can be searched.",
+  "applies_to_subject_ids": ["G2", "R2", "R3", "R5"],
+  "vocabulary": [
+    {
+      "record_id": "H:issue-207:changed-anchor",
+      "term": "changed_anchor",
+      "use": "query_expansion",
+      "source_kind": "github_issue",
+      "source_url": "https://github.com/repodelta/repodelta/issues/207",
+      "source_excerpt": "A selected direct changed structural anchor is eligible for default backbone membership.",
+      "historical_role": "project_vocabulary",
+      "current_claim": "not_asserted"
+    },
+    {
+      "record_id": "H:pr-208:backbone",
+      "term": "backbone",
+      "use": "query_expansion",
+      "source_kind": "github_pull_request",
+      "source_url": "https://github.com/repodelta/repodelta/pull/208",
+      "source_excerpt": "Remove the R/G-only relation/evidence-role filter from canonical seed derivation.",
+      "historical_role": "project_vocabulary",
+      "current_claim": "not_asserted"
+    },
+    {
+      "record_id": "H:pr-208:test-support",
+      "term": "test_support",
+      "use": "query_expansion",
+      "source_kind": "github_pull_request",
+      "source_url": "https://github.com/repodelta/repodelta/pull/208",
+      "source_excerpt": "Primary, test-support, and document-support remain focus-relative evidence annotations.",
+      "historical_role": "project_vocabulary",
+      "current_claim": "not_asserted"
+    },
+    {
+      "record_id": "H:findings-318:retrieval-layer",
+      "term": "semantic_relation",
+      "use": "context_only",
+      "source_kind": "github_issue",
+      "source_url": "https://github.com/repodelta/repodelta/issues/318",
+      "source_excerpt": "Retrieval reason and semantic relation must remain separate layers.",
+      "historical_role": "evaluation_rationale",
+      "current_claim": "not_asserted"
+    }
+  ],
+  "negative_controls": [
+    {
+      "control_id": "NC:renamed-path",
+      "historical_fact": "PR #208 changed src/prismcode/projection/build.py.",
+      "source_url": "https://github.com/repodelta/repodelta/pull/208/files",
+      "historical_path": "src/prismcode/projection/build.py",
+      "expected_status": "renamed_or_replaced",
+      "successor_path": "src/repodelta/projection/build.py",
+      "resolution_commit": "23447e28e3ad7f49f24a1b5f5d6f7f7a7e5e6910",
+      "must_not_become_current_fact": "The historical path itself is not a present repository path."
+    },
+    {
+      "control_id": "NC:renamed-product-term",
+      "historical_fact": "The reviewed source package was named prismcode.",
+      "source_url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py",
+      "historical_term": "prismcode",
+      "expected_status": "renamed_or_replaced",
+      "successor_term": "repodelta",
+      "resolution_commit": "23447e28e3ad7f49f24a1b5f5d6f7f7a7e5e6910",
+      "must_not_become_current_fact": "A historical package name is not current project identity."
+    },
+    {
+      "control_id": "NC:former-seed-owner",
+      "historical_fact": "Before PR #208, the canonical seed function accepted relations and used relation evidence-role to decide R/G membership.",
+      "source_revision": "504e61579387092f5b02dffb2ca26c5fed6b8271",
+      "source_path": "src/prismcode/projection/build.py",
+      "expected_status": "superseded",
+      "current_path": "src/repodelta/projection/build.py",
+      "must_not_become_current_fact": "The former relation/evidence-role membership owner cannot be emitted as the current owner."
+    },
+    {
+      "control_id": "NC:rejected-primary-gate",
+      "historical_fact": "Before PR #208, only evidence_role=primary could seed an R/G changed anchor.",
+      "source_revision": "504e61579387092f5b02dffb2ca26c5fed6b8271",
+      "source_path": "src/prismcode/projection/build.py",
+      "expected_status": "superseded",
+      "current_path": "src/repodelta/projection/build.py",
+      "must_not_become_current_fact": "The rejected primary-only gate may explain history but cannot be a current membership rule."
+    }
+  ]
+}

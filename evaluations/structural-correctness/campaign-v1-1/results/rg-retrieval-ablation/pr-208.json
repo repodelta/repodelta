@@ -1,0 +1,1645 @@
+{
+  "aggregate": [
+    {
+      "additional_candidate_count": 0,
+      "additional_candidate_ids": [],
+      "additional_candidate_interpretation": "unassessed retrieval candidates, not semantic-noise labels",
+      "incremental_recoveries": 0,
+      "known_misses_recovered": 0,
+      "mechanism": "baseline_current_association",
+      "stale_history_candidates_introduced": 0,
+      "unresolved_cases": 7
+    },
+    {
+      "additional_candidate_count": 0,
+      "additional_candidate_ids": [],
+      "additional_candidate_interpretation": "unassessed retrieval candidates, not semantic-noise labels",
+      "incremental_recoveries": 0,
+      "known_misses_recovered": 0,
+      "mechanism": "Q1_identifier_variants",
+      "stale_history_candidates_introduced": 0,
+      "unresolved_cases": 7
+    },
+    {
+      "additional_candidate_count": 10,
+      "additional_candidate_ids": [
+        "C:G2:E:structural_change:44a2370ce77a6e66f8e7",
+        "C:G2:E:structural_change:9ff44326982c1acafe85",
+        "C:R2:E:structural_change:44a2370ce77a6e66f8e7",
+        "C:R2:E:structural_change:5d2be31cc60dea3d2f3b",
+        "C:R2:E:structural_change:7c4162e02e623fea377f",
+        "C:R2:E:structural_change:d0cf036a1010c1207bc5",
+        "C:R3:E:structural_change:9ff44326982c1acafe85",
+        "C:R5:E:structural_change:5d2be31cc60dea3d2f3b",
+        "C:R5:E:structural_change:9ff44326982c1acafe85",
+        "C:R5:E:structural_change:d0cf036a1010c1207bc5"
+      ],
+      "additional_candidate_interpretation": "unassessed retrieval candidates, not semantic-noise labels",
+      "incremental_recoveries": 7,
+      "known_misses_recovered": 7,
+      "mechanism": "Q0_authored_lexical",
+      "stale_history_candidates_introduced": 0,
+      "unresolved_cases": 0
+    },
+    {
+      "additional_candidate_count": 13,
+      "additional_candidate_ids": [
+        "C:G2:E:structural_change:44a2370ce77a6e66f8e7",
+        "C:G2:E:structural_change:9ff44326982c1acafe85",
+        "C:R2:E:structural_change:44a2370ce77a6e66f8e7",
+        "C:R2:E:structural_change:5d2be31cc60dea3d2f3b",
+        "C:R2:E:structural_change:7c4162e02e623fea377f",
+        "C:R2:E:structural_change:d0cf036a1010c1207bc5",
+        "C:R3:E:structural_change:44a2370ce77a6e66f8e7",
+        "C:R3:E:structural_change:7c4162e02e623fea377f",
+        "C:R3:E:structural_change:9ff44326982c1acafe85",
+        "C:R5:E:structural_change:44a2370ce77a6e66f8e7",
+        "C:R5:E:structural_change:5d2be31cc60dea3d2f3b",
+        "C:R5:E:structural_change:9ff44326982c1acafe85",
+        "C:R5:E:structural_change:d0cf036a1010c1207bc5"
+      ],
+      "additional_candidate_interpretation": "unassessed retrieval candidates, not semantic-noise labels",
+      "incremental_recoveries": 0,
+      "known_misses_recovered": 7,
+      "mechanism": "Q2_history_vocabulary_then_reviewed_head_lexical",
+      "stale_history_candidates_introduced": 0,
+      "unresolved_cases": 0
+    }
+  ],
+  "classification": {
+    "admission_authority": "not_emitted",
+    "kind": "evaluation_only_retrieval_ablation",
+    "production_changed": false,
+    "proofability": "not_emitted",
+    "semantic_or_model_search_run": false,
+    "semantic_relation": "not_emitted"
+  },
+  "completion": {
+    "finding": "All seven historical diagnostic misses are recoverable by authored R/G lexical search over source spans at the reviewed PR head.",
+    "future_production_hypothesis": "A separately scoped experiment can add provenance-preserving, reviewed-head lexical R/G candidates as suggested retrieval evidence, without changing semantic relation, proof, or admission authority.",
+    "historical_retrieval": "Historical vocabulary added no incremental recovery in this bounded set; it remains context/vocabulary only and requires current-head resolution.",
+    "semantic_or_agentic_search_required": false,
+    "state": "sufficient_for_bounded_retrieval_hypothesis"
+  },
+  "history_resolution": {
+    "H:findings-318:retrieval-layer": {
+      "authority_boundary": "Vocabulary resolution permits a search term only; it does not emit a current owner, responsibility, semantic relation, or admission.",
+      "current_head_paths": [
+        "src/repodelta/evaluation/rg_calibration.py",
+        "src/repodelta/evaluation/rg_candidate_universe.py",
+        "tests/test_rg_calibration.py",
+        "tests/test_rg_candidate_universe.py"
+      ],
+      "source_url": "https://github.com/repodelta/repodelta/issues/318",
+      "status": "active_current_vocabulary",
+      "term": "semantic_relation"
+    },
+    "H:issue-207:changed-anchor": {
+      "authority_boundary": "Vocabulary resolution permits a search term only; it does not emit a current owner, responsibility, semantic relation, or admission.",
+      "current_head_paths": [
+        "src/repodelta/convergence/core.py",
+        "src/repodelta/evaluation/association_attribution.py",
+        "src/repodelta/evaluation/rg_candidate_universe.py",
+        "src/repodelta/facts/catalog.py",
+        "src/repodelta/facts/transformation.py",
+        "src/repodelta/llm/convergence.py",
+        "src/repodelta/model/contracts.py",
+        "src/repodelta/projection/build.py",
+        "src/repodelta/routing/candidates.py",
+        "src/repodelta/routing/focus_anchors.py",
+        "src/repodelta/routing/semantics.py",
+        "tests/test_association.py",
+        "tests/test_convergence.py",
+        "tests/test_evaluation.py",
+        "tests/test_evidence_graph.py",
+        "tests/test_focus_membership.py",
+        "tests/test_focus_provenance.py",
+        "tests/test_identifier_specificity.py",
+        "tests/test_llm_shadow_admission.py",
+        "tests/test_llm_shadow_convergence.py",
+        "tests/test_projection.py",
+        "tests/test_rg_candidate_universe.py",
+        "tests/test_structural_correctness_campaign.py",
+        "tests/test_structural_overview.py",
+        "tests/test_structural_ownership_changes.py",
+        "tests/test_transformation_assessment.py",
+        "tests/test_transformation_closure.py",
+        "tests/test_transformation_subjects.py",
+        "tests/test_verification_projection.py"
+      ],
+      "source_url": "https://github.com/repodelta/repodelta/issues/207",
+      "status": "active_current_vocabulary",
+      "term": "changed_anchor"
+    },
+    "H:pr-208:backbone": {
+      "authority_boundary": "Vocabulary resolution permits a search term only; it does not emit a current owner, responsibility, semantic relation, or admission.",
+      "current_head_paths": [
+        "src/repodelta/convergence/structural.py",
+        "src/repodelta/model/contracts.py",
+        "src/repodelta/presentation/html.py",
+        "src/repodelta/projection/architecture.py",
+        "src/repodelta/projection/build.py",
+        "src/repodelta/projection/structural_groups.py",
+        "src/repodelta/projection/structural_overview.py",
+        "tests/test_convergence.py",
+        "tests/test_projection.py",
+        "tests/test_structural_graph.py",
+        "tests/test_structural_overview.py",
+        "tests/test_structural_relation_groups.py"
+      ],
+      "source_url": "https://github.com/repodelta/repodelta/pull/208",
+      "status": "active_current_vocabulary",
+      "term": "backbone"
+    },
+    "H:pr-208:test-support": {
+      "authority_boundary": "Vocabulary resolution permits a search term only; it does not emit a current owner, responsibility, semantic relation, or admission.",
+      "current_head_paths": [
+        "src/repodelta/convergence/ordering.py",
+        "src/repodelta/model/contracts.py",
+        "src/repodelta/projection/build.py",
+        "src/repodelta/projection/verification.py",
+        "src/repodelta/routing/semantics.py",
+        "tests/test_codegraph_workspace.py",
+        "tests/test_convergence.py",
+        "tests/test_product_identity.py",
+        "tests/test_projection.py"
+      ],
+      "source_url": "https://github.com/repodelta/repodelta/pull/208",
+      "status": "active_current_vocabulary",
+      "term": "test_support"
+    },
+    "NC:former-seed-owner": {
+      "boundary": "The former relation/evidence-role membership owner cannot be emitted as the current owner.",
+      "current_fact_emitted": false,
+      "historical_predicate_observed": true,
+      "predicate_observed_at_current_head": false,
+      "status": "superseded"
+    },
+    "NC:rejected-primary-gate": {
+      "boundary": "The rejected primary-only gate may explain history but cannot be a current membership rule.",
+      "current_fact_emitted": false,
+      "historical_predicate_observed": true,
+      "predicate_observed_at_current_head": false,
+      "status": "superseded"
+    },
+    "NC:renamed-path": {
+      "boundary": "The historical path itself is not a present repository path.",
+      "current_fact_emitted": false,
+      "historical_path_exists_at_current_head": false,
+      "rename_recorded": true,
+      "status": "renamed_or_replaced",
+      "successor_path_exists_at_current_head": true
+    },
+    "NC:renamed-product-term": {
+      "boundary": "A historical package name is not current project identity.",
+      "current_fact_emitted": false,
+      "historical_term_paths_at_current_head": [],
+      "status": "renamed_or_replaced",
+      "successor_term_paths_at_current_head": [
+        "src/repodelta/__init__.py",
+        "src/repodelta/assessment/__init__.py",
+        "src/repodelta/assessment/migration.py",
+        "src/repodelta/assessment/transformation.py",
+        "src/repodelta/changes/hunks.py",
+        "src/repodelta/cli.py",
+        "src/repodelta/closure/planning.py",
+        "src/repodelta/closure/scanning.py",
+        "src/repodelta/convergence/core.py",
+        "src/repodelta/convergence/ordering.py",
+        "src/repodelta/convergence/structural.py",
+        "src/repodelta/convergence/transformation.py",
+        "src/repodelta/evaluation/association_attribution.py",
+        "src/repodelta/evaluation/comparison.py",
+        "src/repodelta/evaluation/core.py",
+        "src/repodelta/evaluation/focus_membership.py",
+        "src/repodelta/evaluation/focus_provenance.py",
+        "src/repodelta/evaluation/identifier_specificity.py",
+        "src/repodelta/evaluation/rg_calibration.py",
+        "src/repodelta/evaluation/rg_candidate_universe.py",
+        "src/repodelta/evaluation/shadow.py",
+        "src/repodelta/evaluation/structural_correctness.py",
+        "src/repodelta/facts/__init__.py",
+        "src/repodelta/facts/catalog.py",
+        "src/repodelta/facts/lexical.py",
+        "src/repodelta/facts/path_profile.py",
+        "src/repodelta/facts/transformation.py",
+        "src/repodelta/intake/fixture.py",
+        "src/repodelta/intake/github.py",
+        "src/repodelta/llm/__init__.py",
+        "src/repodelta/llm/admission.py",
+        "src/repodelta/llm/convergence.py",
+        "src/repodelta/llm/execution.py",
+        "src/repodelta/llm/labeling.py",
+        "src/repodelta/llm/openai.py",
+        "src/repodelta/llm/packet.py",
+        "src/repodelta/llm/provider.py",
+        "src/repodelta/llm/replay.py",
+        "src/repodelta/llm/runner.py",
+        "src/repodelta/model/contracts.py",
+        "src/repodelta/model/predicate_refs.py",
+        "src/repodelta/model/structural_refs.py",
+        "src/repodelta/pipeline.py",
+        "src/repodelta/presentation/html.py",
+        "src/repodelta/presentation/status.py",
+        "src/repodelta/projection/architecture.py",
+        "src/repodelta/projection/build.py",
+        "src/repodelta/projection/overview.py",
+        "src/repodelta/projection/structural_groups.py",
+        "src/repodelta/projection/structural_navigation.py",
+        "src/repodelta/projection/structural_overview.py",
+        "src/repodelta/projection/verification.py",
+        "src/repodelta/providers/codegraph.py",
+        "src/repodelta/providers/mapping.py",
+        "src/repodelta/providers/sql_schema.py",
+        "src/repodelta/providers/structural.py",
+        "src/repodelta/providers/workspace.py",
+        "src/repodelta/routing/association.py",
+        "src/repodelta/routing/candidates.py",
+        "src/repodelta/routing/coverage.py",
+        "src/repodelta/routing/focus_anchors.py",
+        "src/repodelta/routing/relations.py",
+        "src/repodelta/routing/semantics.py",
+        "src/repodelta/routing/transformation.py",
+        "src/repodelta/routing/transformation_subjects.py",
+        "src/repodelta/semantics/criteria.py",
+        "src/repodelta/semantics/review.py"
+      ]
+    }
+  },
+  "input": {
+    "candidate_source_index": [
+      {
+        "candidate_id": "C:G1:E:structural_change:44a2370ce77a6e66f8e7",
+        "evidence_id": "E:structural_change:44a2370ce77a6e66f8e7",
+        "source_span": {
+          "line_end": 849,
+          "line_start": 825,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "G1"
+      },
+      {
+        "candidate_id": "C:G1:E:structural_change:4fbcf96b02d19017c2c9",
+        "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+        "source_span": null,
+        "subject_id": "G1"
+      },
+      {
+        "candidate_id": "C:G1:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "source_span": {
+          "line_end": 1514,
+          "line_start": 1473,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "G1"
+      },
+      {
+        "candidate_id": "C:G1:E:structural_change:7c4162e02e623fea377f",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "source_span": {
+          "line_end": 1171,
+          "line_start": 766,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "G1"
+      },
+      {
+        "candidate_id": "C:G1:E:structural_change:9ff44326982c1acafe85",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "source_span": {
+          "line_end": 432,
+          "line_start": 57,
+          "path": "src/prismcode/projection/build.py"
+        },
+        "subject_id": "G1"
+      },
+      {
+        "candidate_id": "C:G1:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+        "source_span": {
+          "line_end": 457,
+          "line_start": 435,
+          "path": "src/prismcode/projection/build.py"
+        },
+        "subject_id": "G1"
+      },
+      {
+        "candidate_id": "C:G2:E:structural_change:44a2370ce77a6e66f8e7",
+        "evidence_id": "E:structural_change:44a2370ce77a6e66f8e7",
+        "source_span": {
+          "line_end": 849,
+          "line_start": 825,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "G2"
+      },
+      {
+        "candidate_id": "C:G2:E:structural_change:4fbcf96b02d19017c2c9",
+        "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+        "source_span": null,
+        "subject_id": "G2"
+      },
+      {
+        "candidate_id": "C:G2:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "source_span": {
+          "line_end": 1514,
+          "line_start": 1473,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "G2"
+      },
+      {
+        "candidate_id": "C:G2:E:structural_change:7c4162e02e623fea377f",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "source_span": {
+          "line_end": 1171,
+          "line_start": 766,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "G2"
+      },
+      {
+        "candidate_id": "C:G2:E:structural_change:9ff44326982c1acafe85",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "source_span": {
+          "line_end": 432,
+          "line_start": 57,
+          "path": "src/prismcode/projection/build.py"
+        },
+        "subject_id": "G2"
+      },
+      {
+        "candidate_id": "C:G2:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+        "source_span": {
+          "line_end": 457,
+          "line_start": 435,
+          "path": "src/prismcode/projection/build.py"
+        },
+        "subject_id": "G2"
+      },
+      {
+        "candidate_id": "C:G3:E:structural_change:44a2370ce77a6e66f8e7",
+        "evidence_id": "E:structural_change:44a2370ce77a6e66f8e7",
+        "source_span": {
+          "line_end": 849,
+          "line_start": 825,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "G3"
+      },
+      {
+        "candidate_id": "C:G3:E:structural_change:4fbcf96b02d19017c2c9",
+        "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+        "source_span": null,
+        "subject_id": "G3"
+      },
+      {
+        "candidate_id": "C:G3:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "source_span": {
+          "line_end": 1514,
+          "line_start": 1473,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "G3"
+      },
+      {
+        "candidate_id": "C:G3:E:structural_change:7c4162e02e623fea377f",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "source_span": {
+          "line_end": 1171,
+          "line_start": 766,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "G3"
+      },
+      {
+        "candidate_id": "C:G3:E:structural_change:9ff44326982c1acafe85",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "source_span": {
+          "line_end": 432,
+          "line_start": 57,
+          "path": "src/prismcode/projection/build.py"
+        },
+        "subject_id": "G3"
+      },
+      {
+        "candidate_id": "C:G3:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+        "source_span": {
+          "line_end": 457,
+          "line_start": 435,
+          "path": "src/prismcode/projection/build.py"
+        },
+        "subject_id": "G3"
+      },
+      {
+        "candidate_id": "C:G4:E:structural_change:44a2370ce77a6e66f8e7",
+        "evidence_id": "E:structural_change:44a2370ce77a6e66f8e7",
+        "source_span": {
+          "line_end": 849,
+          "line_start": 825,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "G4"
+      },
+      {
+        "candidate_id": "C:G4:E:structural_change:4fbcf96b02d19017c2c9",
+        "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+        "source_span": null,
+        "subject_id": "G4"
+      },
+      {
+        "candidate_id": "C:G4:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "source_span": {
+          "line_end": 1514,
+          "line_start": 1473,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "G4"
+      },
+      {
+        "candidate_id": "C:G4:E:structural_change:7c4162e02e623fea377f",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "source_span": {
+          "line_end": 1171,
+          "line_start": 766,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "G4"
+      },
+      {
+        "candidate_id": "C:G4:E:structural_change:9ff44326982c1acafe85",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "source_span": {
+          "line_end": 432,
+          "line_start": 57,
+          "path": "src/prismcode/projection/build.py"
+        },
+        "subject_id": "G4"
+      },
+      {
+        "candidate_id": "C:G4:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+        "source_span": {
+          "line_end": 457,
+          "line_start": 435,
+          "path": "src/prismcode/projection/build.py"
+        },
+        "subject_id": "G4"
+      },
+      {
+        "candidate_id": "C:R1:E:structural_change:44a2370ce77a6e66f8e7",
+        "evidence_id": "E:structural_change:44a2370ce77a6e66f8e7",
+        "source_span": {
+          "line_end": 849,
+          "line_start": 825,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "R1"
+      },
+      {
+        "candidate_id": "C:R1:E:structural_change:4fbcf96b02d19017c2c9",
+        "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+        "source_span": null,
+        "subject_id": "R1"
+      },
+      {
+        "candidate_id": "C:R1:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "source_span": {
+          "line_end": 1514,
+          "line_start": 1473,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "R1"
+      },
+      {
+        "candidate_id": "C:R1:E:structural_change:7c4162e02e623fea377f",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "source_span": {
+          "line_end": 1171,
+          "line_start": 766,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "R1"
+      },
+      {
+        "candidate_id": "C:R1:E:structural_change:9ff44326982c1acafe85",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "source_span": {
+          "line_end": 432,
+          "line_start": 57,
+          "path": "src/prismcode/projection/build.py"
+        },
+        "subject_id": "R1"
+      },
+      {
+        "candidate_id": "C:R1:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+        "source_span": {
+          "line_end": 457,
+          "line_start": 435,
+          "path": "src/prismcode/projection/build.py"
+        },
+        "subject_id": "R1"
+      },
+      {
+        "candidate_id": "C:R2:E:structural_change:44a2370ce77a6e66f8e7",
+        "evidence_id": "E:structural_change:44a2370ce77a6e66f8e7",
+        "source_span": {
+          "line_end": 849,
+          "line_start": 825,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "R2"
+      },
+      {
+        "candidate_id": "C:R2:E:structural_change:4fbcf96b02d19017c2c9",
+        "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+        "source_span": null,
+        "subject_id": "R2"
+      },
+      {
+        "candidate_id": "C:R2:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "source_span": {
+          "line_end": 1514,
+          "line_start": 1473,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "R2"
+      },
+      {
+        "candidate_id": "C:R2:E:structural_change:7c4162e02e623fea377f",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "source_span": {
+          "line_end": 1171,
+          "line_start": 766,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "R2"
+      },
+      {
+        "candidate_id": "C:R2:E:structural_change:9ff44326982c1acafe85",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "source_span": {
+          "line_end": 432,
+          "line_start": 57,
+          "path": "src/prismcode/projection/build.py"
+        },
+        "subject_id": "R2"
+      },
+      {
+        "candidate_id": "C:R2:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+        "source_span": {
+          "line_end": 457,
+          "line_start": 435,
+          "path": "src/prismcode/projection/build.py"
+        },
+        "subject_id": "R2"
+      },
+      {
+        "candidate_id": "C:R3:E:structural_change:44a2370ce77a6e66f8e7",
+        "evidence_id": "E:structural_change:44a2370ce77a6e66f8e7",
+        "source_span": {
+          "line_end": 849,
+          "line_start": 825,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "R3"
+      },
+      {
+        "candidate_id": "C:R3:E:structural_change:4fbcf96b02d19017c2c9",
+        "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+        "source_span": null,
+        "subject_id": "R3"
+      },
+      {
+        "candidate_id": "C:R3:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "source_span": {
+          "line_end": 1514,
+          "line_start": 1473,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "R3"
+      },
+      {
+        "candidate_id": "C:R3:E:structural_change:7c4162e02e623fea377f",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "source_span": {
+          "line_end": 1171,
+          "line_start": 766,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "R3"
+      },
+      {
+        "candidate_id": "C:R3:E:structural_change:9ff44326982c1acafe85",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "source_span": {
+          "line_end": 432,
+          "line_start": 57,
+          "path": "src/prismcode/projection/build.py"
+        },
+        "subject_id": "R3"
+      },
+      {
+        "candidate_id": "C:R3:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+        "source_span": {
+          "line_end": 457,
+          "line_start": 435,
+          "path": "src/prismcode/projection/build.py"
+        },
+        "subject_id": "R3"
+      },
+      {
+        "candidate_id": "C:R4:E:structural_change:44a2370ce77a6e66f8e7",
+        "evidence_id": "E:structural_change:44a2370ce77a6e66f8e7",
+        "source_span": {
+          "line_end": 849,
+          "line_start": 825,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "R4"
+      },
+      {
+        "candidate_id": "C:R4:E:structural_change:4fbcf96b02d19017c2c9",
+        "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+        "source_span": null,
+        "subject_id": "R4"
+      },
+      {
+        "candidate_id": "C:R4:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "source_span": {
+          "line_end": 1514,
+          "line_start": 1473,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "R4"
+      },
+      {
+        "candidate_id": "C:R4:E:structural_change:7c4162e02e623fea377f",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "source_span": {
+          "line_end": 1171,
+          "line_start": 766,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "R4"
+      },
+      {
+        "candidate_id": "C:R4:E:structural_change:9ff44326982c1acafe85",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "source_span": {
+          "line_end": 432,
+          "line_start": 57,
+          "path": "src/prismcode/projection/build.py"
+        },
+        "subject_id": "R4"
+      },
+      {
+        "candidate_id": "C:R4:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+        "source_span": {
+          "line_end": 457,
+          "line_start": 435,
+          "path": "src/prismcode/projection/build.py"
+        },
+        "subject_id": "R4"
+      },
+      {
+        "candidate_id": "C:R5:E:structural_change:44a2370ce77a6e66f8e7",
+        "evidence_id": "E:structural_change:44a2370ce77a6e66f8e7",
+        "source_span": {
+          "line_end": 849,
+          "line_start": 825,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "R5"
+      },
+      {
+        "candidate_id": "C:R5:E:structural_change:4fbcf96b02d19017c2c9",
+        "evidence_id": "E:structural_change:4fbcf96b02d19017c2c9",
+        "source_span": null,
+        "subject_id": "R5"
+      },
+      {
+        "candidate_id": "C:R5:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "source_span": {
+          "line_end": 1514,
+          "line_start": 1473,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "R5"
+      },
+      {
+        "candidate_id": "C:R5:E:structural_change:7c4162e02e623fea377f",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "source_span": {
+          "line_end": 1171,
+          "line_start": 766,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "R5"
+      },
+      {
+        "candidate_id": "C:R5:E:structural_change:9ff44326982c1acafe85",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "source_span": {
+          "line_end": 432,
+          "line_start": 57,
+          "path": "src/prismcode/projection/build.py"
+        },
+        "subject_id": "R5"
+      },
+      {
+        "candidate_id": "C:R5:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+        "source_span": {
+          "line_end": 457,
+          "line_start": 435,
+          "path": "src/prismcode/projection/build.py"
+        },
+        "subject_id": "R5"
+      }
+    ],
+    "candidate_universe": {
+      "candidate_count": 54,
+      "digest": "6ee61bf0f516385acfce02172b1b2466a0ffb3a7cec58165e4fcc4b1c5a86502",
+      "structural_packet_digest": "d0f86cce67cc01b6a483d5343949947bc03e5479f252d4b8b5f3bd8a401196bf"
+    },
+    "classification": {
+      "admission_authority": "not_evaluated",
+      "kind": "evaluation_only_retrieval_ablation",
+      "production_changed": false,
+      "proofability": "not_input",
+      "semantic_relation": "not_input"
+    },
+    "diagnostic_selection": {
+      "boundary": "These identities scope evaluation only. No semantic label, proofability value, or reference witness is supplied to query generation or retrieval.",
+      "candidate_ids": [
+        "C:G2:E:structural_change:5d2be31cc60dea3d2f3b",
+        "C:G2:E:structural_change:7c4162e02e623fea377f",
+        "C:G2:E:structural_change:d0cf036a1010c1207bc5",
+        "C:R2:E:structural_change:9ff44326982c1acafe85",
+        "C:R3:E:structural_change:5d2be31cc60dea3d2f3b",
+        "C:R3:E:structural_change:d0cf036a1010c1207bc5",
+        "C:R5:E:structural_change:7c4162e02e623fea377f"
+      ],
+      "kind": "historical_calibration_known_miss_ids"
+    },
+    "diagnostics": [
+      {
+        "authored_statement": "Do not promote all reachable structural support nodes.",
+        "baseline_retrieval_state": "not_retrieved",
+        "candidate_id": "C:G2:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_path": "tests/test_projection.py",
+        "evidence_summary": "Added function: test_canonical_backbone_seeds_include_all_direct_changed_anchors",
+        "source_span": {
+          "line_end": 1514,
+          "line_start": 1473,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "G2",
+        "subject_kind": "guardrail"
+      },
+      {
+        "authored_statement": "Do not promote all reachable structural support nodes.",
+        "baseline_retrieval_state": "not_retrieved",
+        "candidate_id": "C:G2:E:structural_change:7c4162e02e623fea377f",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "evidence_path": "tests/test_projection.py",
+        "evidence_summary": "Modified function: test_projection_uses_review_relevant_structural_closure",
+        "source_span": {
+          "line_end": 1171,
+          "line_start": 766,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "G2",
+        "subject_kind": "guardrail"
+      },
+      {
+        "authored_statement": "Do not promote all reachable structural support nodes.",
+        "baseline_retrieval_state": "not_retrieved",
+        "candidate_id": "C:G2:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_path": "src/prismcode/projection/build.py",
+        "evidence_summary": "Modified function: _canonical_backbone_seed_node_ids",
+        "source_span": {
+          "line_end": 457,
+          "line_start": 435,
+          "path": "src/prismcode/projection/build.py"
+        },
+        "subject_id": "G2",
+        "subject_kind": "guardrail"
+      },
+      {
+        "authored_statement": "Focus-relative evidence annotation remains available for reviewer explanation and presentation, but cannot add, remove, or suppress structural backbone membership.",
+        "baseline_retrieval_state": "not_retrieved",
+        "candidate_id": "C:R2:E:structural_change:9ff44326982c1acafe85",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "evidence_path": "src/prismcode/projection/build.py",
+        "evidence_summary": "Modified function: build_review_projection",
+        "source_span": {
+          "line_end": 432,
+          "line_start": 57,
+          "path": "src/prismcode/projection/build.py"
+        },
+        "subject_id": "R2",
+        "subject_kind": "requirement"
+      },
+      {
+        "authored_statement": "The same membership contract applies to Issue R/G and PR Transformation/Completion subjects.",
+        "baseline_retrieval_state": "not_retrieved",
+        "candidate_id": "C:R3:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_path": "tests/test_projection.py",
+        "evidence_summary": "Added function: test_canonical_backbone_seeds_include_all_direct_changed_anchors",
+        "source_span": {
+          "line_end": 1514,
+          "line_start": 1473,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "R3",
+        "subject_kind": "requirement"
+      },
+      {
+        "authored_statement": "The same membership contract applies to Issue R/G and PR Transformation/Completion subjects.",
+        "baseline_retrieval_state": "not_retrieved",
+        "candidate_id": "C:R3:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_path": "src/prismcode/projection/build.py",
+        "evidence_summary": "Modified function: _canonical_backbone_seed_node_ids",
+        "source_span": {
+          "line_end": 457,
+          "line_start": 435,
+          "path": "src/prismcode/projection/build.py"
+        },
+        "subject_id": "R3",
+        "subject_kind": "requirement"
+      },
+      {
+        "authored_statement": "The graph retains direct production and direct test changes together when both are selected.",
+        "baseline_retrieval_state": "not_retrieved",
+        "candidate_id": "C:R5:E:structural_change:7c4162e02e623fea377f",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "evidence_path": "tests/test_projection.py",
+        "evidence_summary": "Modified function: test_projection_uses_review_relevant_structural_closure",
+        "source_span": {
+          "line_end": 1171,
+          "line_start": 766,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "R5",
+        "subject_kind": "requirement"
+      }
+    ],
+    "history_manifest": {
+      "applies_to_subject_ids": [
+        "G2",
+        "R2",
+        "R3",
+        "R5"
+      ],
+      "negative_controls": [
+        {
+          "control_id": "NC:renamed-path",
+          "expected_status": "renamed_or_replaced",
+          "historical_fact": "PR #208 changed src/prismcode/projection/build.py.",
+          "historical_path": "src/prismcode/projection/build.py",
+          "must_not_become_current_fact": "The historical path itself is not a present repository path.",
+          "resolution_commit": "23447e28e3ad7f49f24a1b5f5d6f7f7a7e5e6910",
+          "source_url": "https://github.com/repodelta/repodelta/pull/208/files",
+          "successor_path": "src/repodelta/projection/build.py"
+        },
+        {
+          "control_id": "NC:renamed-product-term",
+          "expected_status": "renamed_or_replaced",
+          "historical_fact": "The reviewed source package was named prismcode.",
+          "historical_term": "prismcode",
+          "must_not_become_current_fact": "A historical package name is not current project identity.",
+          "resolution_commit": "23447e28e3ad7f49f24a1b5f5d6f7f7a7e5e6910",
+          "source_url": "https://github.com/repodelta/repodelta/blob/e6d94bd9c414a09c1027aac0bc658ba025ddf3ad/src/prismcode/projection/build.py",
+          "successor_term": "repodelta"
+        },
+        {
+          "control_id": "NC:former-seed-owner",
+          "current_path": "src/repodelta/projection/build.py",
+          "expected_status": "superseded",
+          "historical_fact": "Before PR #208, the canonical seed function accepted relations and used relation evidence-role to decide R/G membership.",
+          "must_not_become_current_fact": "The former relation/evidence-role membership owner cannot be emitted as the current owner.",
+          "source_path": "src/prismcode/projection/build.py",
+          "source_revision": "504e61579387092f5b02dffb2ca26c5fed6b8271"
+        },
+        {
+          "control_id": "NC:rejected-primary-gate",
+          "current_path": "src/repodelta/projection/build.py",
+          "expected_status": "superseded",
+          "historical_fact": "Before PR #208, only evidence_role=primary could seed an R/G changed anchor.",
+          "must_not_become_current_fact": "The rejected primary-only gate may explain history but cannot be a current membership rule.",
+          "source_path": "src/prismcode/projection/build.py",
+          "source_revision": "504e61579387092f5b02dffb2ca26c5fed6b8271"
+        }
+      ],
+      "purpose": "Bounded historical vocabulary and negative controls for the PR #208 retrieval ablation. Historical material supplies query vocabulary or rationale only; every term is resolved against the pinned repository head before it can be searched.",
+      "schema_version": "rg_retrieval_ablation_history.v1",
+      "vocabulary": [
+        {
+          "current_claim": "not_asserted",
+          "historical_role": "project_vocabulary",
+          "record_id": "H:issue-207:changed-anchor",
+          "source_excerpt": "A selected direct changed structural anchor is eligible for default backbone membership.",
+          "source_kind": "github_issue",
+          "source_url": "https://github.com/repodelta/repodelta/issues/207",
+          "term": "changed_anchor",
+          "use": "query_expansion"
+        },
+        {
+          "current_claim": "not_asserted",
+          "historical_role": "project_vocabulary",
+          "record_id": "H:pr-208:backbone",
+          "source_excerpt": "Remove the R/G-only relation/evidence-role filter from canonical seed derivation.",
+          "source_kind": "github_pull_request",
+          "source_url": "https://github.com/repodelta/repodelta/pull/208",
+          "term": "backbone",
+          "use": "query_expansion"
+        },
+        {
+          "current_claim": "not_asserted",
+          "historical_role": "project_vocabulary",
+          "record_id": "H:pr-208:test-support",
+          "source_excerpt": "Primary, test-support, and document-support remain focus-relative evidence annotations.",
+          "source_kind": "github_pull_request",
+          "source_url": "https://github.com/repodelta/repodelta/pull/208",
+          "term": "test_support",
+          "use": "query_expansion"
+        },
+        {
+          "current_claim": "not_asserted",
+          "historical_role": "evaluation_rationale",
+          "record_id": "H:findings-318:retrieval-layer",
+          "source_excerpt": "Retrieval reason and semantic relation must remain separate layers.",
+          "source_kind": "github_issue",
+          "source_url": "https://github.com/repodelta/repodelta/issues/318",
+          "term": "semantic_relation",
+          "use": "context_only"
+        }
+      ]
+    },
+    "query_groups": {
+      "Q0_authored_terms": {
+        "authority": "authored_statement",
+        "terms_by_subject": {
+          "G2": [
+            "nodes",
+            "promote",
+            "reachable",
+            "structural",
+            "support"
+          ],
+          "R2": [
+            "annotation",
+            "backbone",
+            "cannot",
+            "evidence",
+            "explanation",
+            "focus_relative",
+            "membership",
+            "presentation",
+            "remove",
+            "reviewer",
+            "structural",
+            "suppress"
+          ],
+          "R3": [
+            "completion",
+            "contract",
+            "issue",
+            "membership",
+            "subjects",
+            "transformation"
+          ],
+          "R5": [
+            "changes",
+            "direct",
+            "graph",
+            "production",
+            "retains",
+            "selected",
+            "test"
+          ]
+        }
+      },
+      "Q1_explicit_identifiers": {
+        "authority": "authored_statement",
+        "terms_by_subject": {
+          "G2": [],
+          "R2": [],
+          "R3": [],
+          "R5": []
+        }
+      },
+      "Q2_historical_vocabulary": {
+        "authority": "historical_context_only",
+        "boundary": "Terms require current repository-head resolution before use. Their source records do not become current responsibility facts.",
+        "terms_by_subject": {
+          "G2": [
+            "backbone",
+            "changed_anchor",
+            "test_support"
+          ],
+          "R2": [
+            "backbone",
+            "changed_anchor",
+            "test_support"
+          ],
+          "R3": [
+            "backbone",
+            "changed_anchor",
+            "test_support"
+          ],
+          "R5": [
+            "backbone",
+            "changed_anchor",
+            "test_support"
+          ]
+        }
+      },
+      "Q3_current_repository_vocabulary": {
+        "status": "not_required_if_prior_groups_recover_all_diagnostics"
+      },
+      "Q4_structural_expansion": {
+        "status": "not_required_if_prior_groups_recover_all_diagnostics"
+      },
+      "Q5_semantic_hypotheses": {
+        "status": "not_run_without_residual_retrieval_misses"
+      }
+    },
+    "repository_head_at_experiment": {
+      "meaning": "Present repository state resolves the status of historical terms; it does not rewrite facts about the reviewed PR head.",
+      "revision": "4f5b310c2ec173386e46edc70f41daec09205ecc"
+    },
+    "reviewed_change": {
+      "base_revision": "504e61579387092f5b02dffb2ca26c5fed6b8271",
+      "head_revision": "e6d94bd9c414a09c1027aac0bc658ba025ddf3ad",
+      "meaning": "The reviewed PR head is the only source-of-code authority for candidate recovery in this historical review experiment.",
+      "pull_number": 208
+    },
+    "schema_version": "rg_retrieval_ablation_input.v1"
+  },
+  "input_digest": "690a2eed0fba9304372c0bf65079dfe45d8819da781c844cd188bfe100bcb037",
+  "input_provenance": {
+    "candidate_universe": {
+      "path": "rg-candidate-universes/pr-208.json",
+      "sha256": "44e2676cf166f1913968f136427d056cee4c4ca1f84dd893bbf68bfff0e56877"
+    },
+    "historical_calibration_selection": {
+      "path": "rg-semantic-proposals/pr-208.batch-001.ai-adjudicated.proposed.json",
+      "sha256": "9e55d0aebc69201a2fcaf6012ce98e8a843b69616879ba0ec8769caf2135b83d"
+    },
+    "historical_vocabulary_and_controls": {
+      "path": "rg-retrieval-ablation-history/pr-208.json",
+      "sha256": "e0edec781f40b16984da05c3a80a6f1c156324c5485f8b94c0c7d6cb170e981c"
+    },
+    "known_miss_selection_boundary": "The historical calibration selects seven diagnostic candidate IDs only. The retrieval input excludes semantic relation, proofability, proof basis, and label content.",
+    "observed_retrieval": {
+      "path": "rg-retrieval-observations/pr-208.json",
+      "sha256": "23cdb982ef6a14e38f9b9749b91a50b41ede446f3033c73d3b9f47913669b04d"
+    }
+  },
+  "per_miss": [
+    {
+      "additional_candidate_interpretation": "Additional memberships are retrieval candidates outside the seven diagnostic IDs. Their semantic usefulness is unassessed by this retrieval-only experiment.",
+      "baseline_retrieved": false,
+      "candidate": {
+        "authored_statement": "Do not promote all reachable structural support nodes.",
+        "baseline_retrieval_state": "not_retrieved",
+        "candidate_id": "C:G2:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_path": "tests/test_projection.py",
+        "evidence_summary": "Added function: test_canonical_backbone_seeds_include_all_direct_changed_anchors",
+        "source_span": {
+          "line_end": 1514,
+          "line_start": 1473,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "G2",
+        "subject_kind": "guardrail"
+      },
+      "first_recovery_mechanism": "Q0_authored_lexical",
+      "historical_context_required": false,
+      "limitations": [
+        "A lexical hit is not a semantic relation, proof basis, or admission decision.",
+        "Candidate identity was selected from historical calibration only after retrieval inputs were frozen."
+      ],
+      "mechanism_observations": [
+        {
+          "hits": [],
+          "mechanism": "baseline_current_association",
+          "recovered": false
+        },
+        {
+          "hits": [],
+          "mechanism": "Q1_identifier_variants",
+          "recovered": false
+        },
+        {
+          "hits": [
+            {
+              "provenance": "reviewed_head_source_span",
+              "query_terms": [
+                "nodes",
+                "structural"
+              ],
+              "source_span": {
+                "line_end": 1514,
+                "line_start": 1473,
+                "path": "tests/test_projection.py"
+              }
+            }
+          ],
+          "mechanism": "Q0_authored_lexical",
+          "recovered": true
+        },
+        {
+          "hits": [
+            {
+              "provenance": "reviewed_head_source_span",
+              "query_terms": [
+                "backbone",
+                "changed_anchor"
+              ],
+              "source_span": {
+                "line_end": 1514,
+                "line_start": 1473,
+                "path": "tests/test_projection.py"
+              }
+            }
+          ],
+          "mechanism": "Q2_history_vocabulary_then_reviewed_head_lexical",
+          "recovered": true
+        }
+      ]
+    },
+    {
+      "additional_candidate_interpretation": "Additional memberships are retrieval candidates outside the seven diagnostic IDs. Their semantic usefulness is unassessed by this retrieval-only experiment.",
+      "baseline_retrieved": false,
+      "candidate": {
+        "authored_statement": "Do not promote all reachable structural support nodes.",
+        "baseline_retrieval_state": "not_retrieved",
+        "candidate_id": "C:G2:E:structural_change:7c4162e02e623fea377f",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "evidence_path": "tests/test_projection.py",
+        "evidence_summary": "Modified function: test_projection_uses_review_relevant_structural_closure",
+        "source_span": {
+          "line_end": 1171,
+          "line_start": 766,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "G2",
+        "subject_kind": "guardrail"
+      },
+      "first_recovery_mechanism": "Q0_authored_lexical",
+      "historical_context_required": false,
+      "limitations": [
+        "A lexical hit is not a semantic relation, proof basis, or admission decision.",
+        "Candidate identity was selected from historical calibration only after retrieval inputs were frozen."
+      ],
+      "mechanism_observations": [
+        {
+          "hits": [],
+          "mechanism": "baseline_current_association",
+          "recovered": false
+        },
+        {
+          "hits": [],
+          "mechanism": "Q1_identifier_variants",
+          "recovered": false
+        },
+        {
+          "hits": [
+            {
+              "provenance": "reviewed_head_source_span",
+              "query_terms": [
+                "nodes",
+                "structural",
+                "support"
+              ],
+              "source_span": {
+                "line_end": 1171,
+                "line_start": 766,
+                "path": "tests/test_projection.py"
+              }
+            }
+          ],
+          "mechanism": "Q0_authored_lexical",
+          "recovered": true
+        },
+        {
+          "hits": [
+            {
+              "provenance": "reviewed_head_source_span",
+              "query_terms": [
+                "backbone",
+                "changed_anchor",
+                "test_support"
+              ],
+              "source_span": {
+                "line_end": 1171,
+                "line_start": 766,
+                "path": "tests/test_projection.py"
+              }
+            }
+          ],
+          "mechanism": "Q2_history_vocabulary_then_reviewed_head_lexical",
+          "recovered": true
+        }
+      ]
+    },
+    {
+      "additional_candidate_interpretation": "Additional memberships are retrieval candidates outside the seven diagnostic IDs. Their semantic usefulness is unassessed by this retrieval-only experiment.",
+      "baseline_retrieved": false,
+      "candidate": {
+        "authored_statement": "Do not promote all reachable structural support nodes.",
+        "baseline_retrieval_state": "not_retrieved",
+        "candidate_id": "C:G2:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_path": "src/prismcode/projection/build.py",
+        "evidence_summary": "Modified function: _canonical_backbone_seed_node_ids",
+        "source_span": {
+          "line_end": 457,
+          "line_start": 435,
+          "path": "src/prismcode/projection/build.py"
+        },
+        "subject_id": "G2",
+        "subject_kind": "guardrail"
+      },
+      "first_recovery_mechanism": "Q0_authored_lexical",
+      "historical_context_required": false,
+      "limitations": [
+        "A lexical hit is not a semantic relation, proof basis, or admission decision.",
+        "Candidate identity was selected from historical calibration only after retrieval inputs were frozen."
+      ],
+      "mechanism_observations": [
+        {
+          "hits": [],
+          "mechanism": "baseline_current_association",
+          "recovered": false
+        },
+        {
+          "hits": [],
+          "mechanism": "Q1_identifier_variants",
+          "recovered": false
+        },
+        {
+          "hits": [
+            {
+              "provenance": "reviewed_head_source_span",
+              "query_terms": [
+                "nodes",
+                "structural"
+              ],
+              "source_span": {
+                "line_end": 457,
+                "line_start": 435,
+                "path": "src/prismcode/projection/build.py"
+              }
+            }
+          ],
+          "mechanism": "Q0_authored_lexical",
+          "recovered": true
+        },
+        {
+          "hits": [
+            {
+              "provenance": "reviewed_head_source_span",
+              "query_terms": [
+                "backbone",
+                "changed_anchor"
+              ],
+              "source_span": {
+                "line_end": 457,
+                "line_start": 435,
+                "path": "src/prismcode/projection/build.py"
+              }
+            }
+          ],
+          "mechanism": "Q2_history_vocabulary_then_reviewed_head_lexical",
+          "recovered": true
+        }
+      ]
+    },
+    {
+      "additional_candidate_interpretation": "Additional memberships are retrieval candidates outside the seven diagnostic IDs. Their semantic usefulness is unassessed by this retrieval-only experiment.",
+      "baseline_retrieved": false,
+      "candidate": {
+        "authored_statement": "Focus-relative evidence annotation remains available for reviewer explanation and presentation, but cannot add, remove, or suppress structural backbone membership.",
+        "baseline_retrieval_state": "not_retrieved",
+        "candidate_id": "C:R2:E:structural_change:9ff44326982c1acafe85",
+        "evidence_id": "E:structural_change:9ff44326982c1acafe85",
+        "evidence_path": "src/prismcode/projection/build.py",
+        "evidence_summary": "Modified function: build_review_projection",
+        "source_span": {
+          "line_end": 432,
+          "line_start": 57,
+          "path": "src/prismcode/projection/build.py"
+        },
+        "subject_id": "R2",
+        "subject_kind": "requirement"
+      },
+      "first_recovery_mechanism": "Q0_authored_lexical",
+      "historical_context_required": false,
+      "limitations": [
+        "A lexical hit is not a semantic relation, proof basis, or admission decision.",
+        "Candidate identity was selected from historical calibration only after retrieval inputs were frozen."
+      ],
+      "mechanism_observations": [
+        {
+          "hits": [],
+          "mechanism": "baseline_current_association",
+          "recovered": false
+        },
+        {
+          "hits": [],
+          "mechanism": "Q1_identifier_variants",
+          "recovered": false
+        },
+        {
+          "hits": [
+            {
+              "provenance": "reviewed_head_source_span",
+              "query_terms": [
+                "backbone",
+                "cannot",
+                "evidence",
+                "membership",
+                "presentation",
+                "remove",
+                "structural"
+              ],
+              "source_span": {
+                "line_end": 432,
+                "line_start": 57,
+                "path": "src/prismcode/projection/build.py"
+              }
+            }
+          ],
+          "mechanism": "Q0_authored_lexical",
+          "recovered": true
+        },
+        {
+          "hits": [
+            {
+              "provenance": "reviewed_head_source_span",
+              "query_terms": [
+                "backbone",
+                "changed_anchor",
+                "test_support"
+              ],
+              "source_span": {
+                "line_end": 432,
+                "line_start": 57,
+                "path": "src/prismcode/projection/build.py"
+              }
+            }
+          ],
+          "mechanism": "Q2_history_vocabulary_then_reviewed_head_lexical",
+          "recovered": true
+        }
+      ]
+    },
+    {
+      "additional_candidate_interpretation": "Additional memberships are retrieval candidates outside the seven diagnostic IDs. Their semantic usefulness is unassessed by this retrieval-only experiment.",
+      "baseline_retrieved": false,
+      "candidate": {
+        "authored_statement": "The same membership contract applies to Issue R/G and PR Transformation/Completion subjects.",
+        "baseline_retrieval_state": "not_retrieved",
+        "candidate_id": "C:R3:E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_id": "E:structural_change:5d2be31cc60dea3d2f3b",
+        "evidence_path": "tests/test_projection.py",
+        "evidence_summary": "Added function: test_canonical_backbone_seeds_include_all_direct_changed_anchors",
+        "source_span": {
+          "line_end": 1514,
+          "line_start": 1473,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "R3",
+        "subject_kind": "requirement"
+      },
+      "first_recovery_mechanism": "Q0_authored_lexical",
+      "historical_context_required": false,
+      "limitations": [
+        "A lexical hit is not a semantic relation, proof basis, or admission decision.",
+        "Candidate identity was selected from historical calibration only after retrieval inputs were frozen."
+      ],
+      "mechanism_observations": [
+        {
+          "hits": [],
+          "mechanism": "baseline_current_association",
+          "recovered": false
+        },
+        {
+          "hits": [],
+          "mechanism": "Q1_identifier_variants",
+          "recovered": false
+        },
+        {
+          "hits": [
+            {
+              "provenance": "reviewed_head_source_span",
+              "query_terms": [
+                "transformation"
+              ],
+              "source_span": {
+                "line_end": 1514,
+                "line_start": 1473,
+                "path": "tests/test_projection.py"
+              }
+            }
+          ],
+          "mechanism": "Q0_authored_lexical",
+          "recovered": true
+        },
+        {
+          "hits": [
+            {
+              "provenance": "reviewed_head_source_span",
+              "query_terms": [
+                "backbone",
+                "changed_anchor"
+              ],
+              "source_span": {
+                "line_end": 1514,
+                "line_start": 1473,
+                "path": "tests/test_projection.py"
+              }
+            }
+          ],
+          "mechanism": "Q2_history_vocabulary_then_reviewed_head_lexical",
+          "recovered": true
+        }
+      ]
+    },
+    {
+      "additional_candidate_interpretation": "Additional memberships are retrieval candidates outside the seven diagnostic IDs. Their semantic usefulness is unassessed by this retrieval-only experiment.",
+      "baseline_retrieved": false,
+      "candidate": {
+        "authored_statement": "The same membership contract applies to Issue R/G and PR Transformation/Completion subjects.",
+        "baseline_retrieval_state": "not_retrieved",
+        "candidate_id": "C:R3:E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_id": "E:structural_change:d0cf036a1010c1207bc5",
+        "evidence_path": "src/prismcode/projection/build.py",
+        "evidence_summary": "Modified function: _canonical_backbone_seed_node_ids",
+        "source_span": {
+          "line_end": 457,
+          "line_start": 435,
+          "path": "src/prismcode/projection/build.py"
+        },
+        "subject_id": "R3",
+        "subject_kind": "requirement"
+      },
+      "first_recovery_mechanism": "Q0_authored_lexical",
+      "historical_context_required": false,
+      "limitations": [
+        "A lexical hit is not a semantic relation, proof basis, or admission decision.",
+        "Candidate identity was selected from historical calibration only after retrieval inputs were frozen."
+      ],
+      "mechanism_observations": [
+        {
+          "hits": [],
+          "mechanism": "baseline_current_association",
+          "recovered": false
+        },
+        {
+          "hits": [],
+          "mechanism": "Q1_identifier_variants",
+          "recovered": false
+        },
+        {
+          "hits": [
+            {
+              "provenance": "reviewed_head_source_span",
+              "query_terms": [
+                "transformation"
+              ],
+              "source_span": {
+                "line_end": 457,
+                "line_start": 435,
+                "path": "src/prismcode/projection/build.py"
+              }
+            }
+          ],
+          "mechanism": "Q0_authored_lexical",
+          "recovered": true
+        },
+        {
+          "hits": [
+            {
+              "provenance": "reviewed_head_source_span",
+              "query_terms": [
+                "backbone",
+                "changed_anchor"
+              ],
+              "source_span": {
+                "line_end": 457,
+                "line_start": 435,
+                "path": "src/prismcode/projection/build.py"
+              }
+            }
+          ],
+          "mechanism": "Q2_history_vocabulary_then_reviewed_head_lexical",
+          "recovered": true
+        }
+      ]
+    },
+    {
+      "additional_candidate_interpretation": "Additional memberships are retrieval candidates outside the seven diagnostic IDs. Their semantic usefulness is unassessed by this retrieval-only experiment.",
+      "baseline_retrieved": false,
+      "candidate": {
+        "authored_statement": "The graph retains direct production and direct test changes together when both are selected.",
+        "baseline_retrieval_state": "not_retrieved",
+        "candidate_id": "C:R5:E:structural_change:7c4162e02e623fea377f",
+        "evidence_id": "E:structural_change:7c4162e02e623fea377f",
+        "evidence_path": "tests/test_projection.py",
+        "evidence_summary": "Modified function: test_projection_uses_review_relevant_structural_closure",
+        "source_span": {
+          "line_end": 1171,
+          "line_start": 766,
+          "path": "tests/test_projection.py"
+        },
+        "subject_id": "R5",
+        "subject_kind": "requirement"
+      },
+      "first_recovery_mechanism": "Q0_authored_lexical",
+      "historical_context_required": false,
+      "limitations": [
+        "A lexical hit is not a semantic relation, proof basis, or admission decision.",
+        "Candidate identity was selected from historical calibration only after retrieval inputs were frozen."
+      ],
+      "mechanism_observations": [
+        {
+          "hits": [],
+          "mechanism": "baseline_current_association",
+          "recovered": false
+        },
+        {
+          "hits": [],
+          "mechanism": "Q1_identifier_variants",
+          "recovered": false
+        },
+        {
+          "hits": [
+            {
+              "provenance": "reviewed_head_source_span",
+              "query_terms": [
+                "direct",
+                "graph",
+                "production",
+                "selected",
+                "test"
+              ],
+              "source_span": {
+                "line_end": 1171,
+                "line_start": 766,
+                "path": "tests/test_projection.py"
+              }
+            }
+          ],
+          "mechanism": "Q0_authored_lexical",
+          "recovered": true
+        },
+        {
+          "hits": [
+            {
+              "provenance": "reviewed_head_source_span",
+              "query_terms": [
+                "backbone",
+                "changed_anchor",
+                "test_support"
+              ],
+              "source_span": {
+                "line_end": 1171,
+                "line_start": 766,
+                "path": "tests/test_projection.py"
+              }
+            }
+          ],
+          "mechanism": "Q2_history_vocabulary_then_reviewed_head_lexical",
+          "recovered": true
+        }
+      ]
+    }
+  ],
+  "schema_version": "rg_retrieval_ablation_result.v1"
+}
