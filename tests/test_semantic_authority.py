@@ -1149,6 +1149,72 @@ def test_pr297_style_bare_issue_contract_headings_remain_nonformal_but_visible()
     )
 
 
+def test_issue_transition_syntax_is_redirected_to_the_pr_not_formalized_in_issue() -> None:
+    packet = _packet(
+        issue_body=(
+            "## Transformation\n"
+            "Move credentials onto the canonical path.\n\n"
+            "Before\n"
+            "Credentials were written through the legacy path.\n"
+        ),
+    )
+
+    extracted = extract_packet_semantics(packet)
+    diagnostics = extracted.contract_diagnostics
+
+    assert extracted.statements.transformation_contract.claims == ()
+    assert [item.code for item in diagnostics] == [
+        "authored_issue_transition_section_out_of_scope",
+        "authored_issue_transition_section_out_of_scope",
+    ]
+    assert [item.sources[0].line_start for item in diagnostics] == [1, 4]
+    assert all("implementation PR" in item.message for item in diagnostics)
+    assert all("## Change" not in item.message for item in diagnostics)
+    assert all("## Before" not in item.message for item in diagnostics)
+
+
+def test_linked_issue_prevents_pr_bare_requirements_from_becoming_duplicate_guidance() -> None:
+    packet = _packet(
+        issue_body=(
+            "## Requirements\n"
+            "- Keep the provider boundary explicit.\n"
+        ),
+        pr_body=(
+            "Requirements\n"
+            "- Keep the provider boundary explicit.\n"
+        ),
+    )
+
+    extracted = extract_packet_semantics(packet)
+
+    assert [item.text for item in extracted.statements.obligations] == [
+        "Keep the provider boundary explicit."
+    ]
+    assert [item.code for item in extracted.contract_diagnostics] == [
+        "authored_pr_contract_section_duplicates_issue"
+    ]
+    message = extracted.contract_diagnostics[0].message
+    assert "linked Issue already owns formal requirements" in message
+    assert "## Requirements" not in message
+
+
+def test_external_pr_requirement_fallback_still_gets_markdown_guidance() -> None:
+    packet = _packet(
+        pr_body=(
+            "Requirements\n"
+            "- Keep the provider boundary explicit.\n"
+        ),
+    )
+
+    extracted = extract_packet_semantics(packet)
+
+    assert extracted.statements.obligations == ()
+    assert [item.code for item in extracted.contract_diagnostics] == [
+        "authored_contract_heading_requires_markdown"
+    ]
+    assert "## Requirements" in extracted.contract_diagnostics[0].message
+
+
 def test_pr311_and_pr323_style_transformation_headings_remain_context_but_visible() -> None:
     packet = _packet(
         pr_body=(

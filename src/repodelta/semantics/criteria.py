@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, replace
+from typing import Literal
 
 from repodelta.model.contracts import (
     Diagnostic,
@@ -761,13 +762,19 @@ def extract_review_semantics(
     )
     transformation_contract.validate_consistency()
     contract_diagnostics = tuple(
-        item
-        for parsed, source in (
-            (issue, issue_source),
-            (pr, pr_source),
+        _contract_syntax_diagnostics(
+            issue,
+            issue_source,
+            surface="issue",
         )
-        if source is not None
-        for item in _contract_syntax_diagnostics(parsed, source)
+        if issue_source is not None
+        else ()
+    ) + _contract_syntax_diagnostics(
+        pr,
+        pr_source,
+        surface="pull_request",
+        issue_owns_requirements=bool(issue_obligations),
+        issue_owns_guardrails=bool(issue_boundaries),
     )
     if pr.introductory_intent:
         intent = ReviewStatement(
@@ -808,33 +815,96 @@ def extract_review_semantics(
 def _contract_syntax_diagnostics(
     parsed: ParsedBody,
     source: SourceRef,
+    *,
+    surface: Literal["issue", "pull_request"],
+    issue_owns_requirements: bool = False,
+    issue_owns_guardrails: bool = False,
 ) -> tuple[Diagnostic, ...]:
-    """Expose exact authored near-misses without promoting their contents."""
+    """Expose source-aware near-misses without promoting their contents.
 
-    return tuple(
-        Diagnostic(
-            code=(
-                "authored_contract_heading_requires_markdown"
-                if hint.kind == "bare_formal_heading"
-                else "authored_transformation_heading_unrecognized"
-            ),
-            message=(
-                f"`{hint.heading}` looks like a formal contract section but is "
-                "plain text. Use an exact Markdown heading such as "
-                f"`## {hint.heading}`; its contents remain context and do not "
-                "create a formal RepoDelta contract."
-                if hint.kind == "bare_formal_heading"
-                else f"`{hint.heading}` is not an exact machine-recognized PR "
-                "transformation section. Use a specific Markdown heading such "
-                "as `## Change`, `## Before`, `## After`, "
-                "`## Canonical authority`, `## Production path`, "
-                "`## Migration`, `## Removed legacy paths`, or "
-                "`## Completion conditions`; its contents remain context."
-            ),
-            sources=(replace(source, line_start=hint.line),),
+    The parser deliberately records syntax-shaped prose without knowing whether
+    it came from an Issue or a pull request.  Remediation must make that
+    authority distinction here: an Issue cannot be taught to author PR
+    transition claims, and a PR cannot be taught to duplicate requirements
+    already owned by its linked Issue.
+    """
+
+    diagnostics: list[Diagnostic] = []
+    for hint in parsed.contract_syntax_hints:
+        heading = _normalize_heading(hint.heading)
+        is_transition = (
+            hint.kind == "unrecognized_transformation_heading"
+            or heading in _TRANSFORMATION_HEADINGS
         )
-        for hint in parsed.contract_syntax_hints
-    )
+        if surface == "issue" and is_transition:
+            diagnostics.append(
+                Diagnostic(
+                    code="authored_issue_transition_section_out_of_scope",
+                    message=(
+                        f"`{hint.heading}` describes an implementation transition. "
+                        "Transition declarations belong in the implementation PR, "
+                        "not the Issue requirement contract; its contents remain "
+                        "context and do not create Issue R/G."
+                    ),
+                    sources=(replace(source, line_start=hint.line),),
+                )
+            )
+            continue
+
+        is_requirement_duplicate = (
+            surface == "pull_request"
+            and hint.kind == "bare_formal_heading"
+            and heading in _OBLIGATION_HEADINGS
+            and issue_owns_requirements
+        )
+        is_guardrail_duplicate = (
+            surface == "pull_request"
+            and hint.kind == "bare_formal_heading"
+            and heading in _BOUNDARY_HEADINGS
+            and issue_owns_guardrails
+        )
+        if is_requirement_duplicate or is_guardrail_duplicate:
+            contract_kind = (
+                "requirements" if is_requirement_duplicate else "guardrails"
+            )
+            diagnostics.append(
+                Diagnostic(
+                    code="authored_pr_contract_section_duplicates_issue",
+                    message=(
+                        f"`{hint.heading}` is plain text, and the linked Issue "
+                        f"already owns formal {contract_kind}. Do not create a "
+                        "second requirement contract in the PR; keep PR-specific "
+                        "transformation and evidence here. Its contents remain context."
+                    ),
+                    sources=(replace(source, line_start=hint.line),),
+                )
+            )
+            continue
+
+        diagnostics.append(
+            Diagnostic(
+                code=(
+                    "authored_contract_heading_requires_markdown"
+                    if hint.kind == "bare_formal_heading"
+                    else "authored_transformation_heading_unrecognized"
+                ),
+                message=(
+                    f"`{hint.heading}` looks like a formal contract section but is "
+                    "plain text. Use an exact Markdown heading such as "
+                    f"`## {hint.heading}`; its contents remain context and do not "
+                    "create a formal RepoDelta contract."
+                    if hint.kind == "bare_formal_heading"
+                    else f"`{hint.heading}` is not an exact machine-recognized PR "
+                    "transformation section. Use a specific Markdown heading such "
+                    "as `## Change`, `## Before`, `## After`, "
+                    "`## Canonical authority`, `## Production path`, "
+                    "`## Migration`, `## Removed legacy paths`, or "
+                    "`## Completion conditions`; its contents remain context."
+                ),
+                sources=(replace(source, line_start=hint.line),),
+            )
+        )
+    return tuple(diagnostics)
 
 
 def _transformation_contract(
