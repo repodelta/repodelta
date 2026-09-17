@@ -2393,13 +2393,18 @@ def _structural_standalone_name(item: EvidenceItem) -> str:
 
 
 def _attention(brief: ReviewBrief) -> str:
+    attention = tuple(
+        item
+        for item in brief.overview.attention
+        if item.provider != "authoring_contract"
+    )
     rows = (
         '<div class="attention-row">'
         f'<div class="attention-kind">{escape(item.label)}</div>'
         f'<div class="attention-copy">{escape(", ".join(item.focus_statement_ids))}'
         + (" · " if item.focus_statement_ids else "")
         + f"{escape(item.message)}</div></div>"
-        for item in brief.overview.attention
+        for item in attention
     )
     rendered = "".join(rows)
     return rendered or '<p class="empty">No unresolved attention items.</p>'
@@ -2622,12 +2627,47 @@ def _structural_focus_empty_label(state: str) -> str:
 
 
 def _coverage_limits(brief: ReviewBrief) -> str:
-    if not brief.overview.attention:
+    attention_count = sum(
+        item.provider != "authoring_contract" for item in brief.overview.attention
+    )
+    if not attention_count:
         return ""
     return (
         '<details class="coverage-limits"><summary>Coverage limits · '
-        f'{len(brief.overview.attention)}</summary>'
+        f'{attention_count}</summary>'
         f'<div class="attention-list">{_attention(brief)}</div></details>'
+    )
+
+
+def _authored_contract_notice(brief: ReviewBrief) -> str:
+    """Show source-extraction near-misses before a missing contract is mistaken for absence."""
+
+    attention = tuple(
+        item
+        for item in brief.overview.attention
+        if item.provider == "authoring_contract"
+    )
+    if not attention:
+        return ""
+    rows = "".join(
+        '<li><p>'
+        f'{escape(item.message)}</p>'
+        '<span class="source-note">Source: '
+        + (
+            " · ".join(_source(source) for source in item.sources)
+            if item.sources
+            else "source location unavailable"
+        )
+        + "</span></li>"
+        for item in attention
+    )
+    return (
+        '<section class="section authored-contract-notice">'
+        '<span class="eyebrow">Authored contract</span>'
+        '<h2>Formal contract syntax was not recognized</h2>'
+        '<p>The source is preserved as context; RepoDelta did not promote it '
+        'to requirements or transformation claims.</p>'
+        f'<ul>{rows}</ul></section>'
     )
 
 
@@ -2745,6 +2785,7 @@ def render_html(brief: ReviewBrief) -> str:
     )
     transformation_summary = _transformation_summary(brief)
     coverage_limits = _coverage_limits(brief)
+    authored_contract_notice = _authored_contract_notice(brief)
     brief_goals = _brief_goals(brief)
     primary_context = brief_goals or (
         f'<div class="intent">{escape(brief.intent.text)}</div>'
@@ -2897,7 +2938,7 @@ def render_html(brief: ReviewBrief) -> str:
 .evidence-kind{{color:var(--blue);font-size:8px;text-transform:uppercase}}
 .assessment-reasons{{margin:0;padding-left:17px;color:var(--muted);font-size:9px}}.assessment-reasons li+li{{margin-top:7px}}
 .verification-coverage,.display-boundary{{display:block;margin-top:10px;color:var(--faint);font-size:8px}}
-.coverage-limits{{margin-top:14px;padding:0 12px;border:1px solid rgba(111,128,135,.2);border-radius:9px;background:rgba(3,7,9,.2)}}.coverage-limits>summary{{padding:10px 0;cursor:pointer;color:var(--amber);font-size:10px}}
+.coverage-limits{{margin-top:14px;padding:0 12px;border:1px solid rgba(111,128,135,.2);border-radius:9px;background:rgba(3,7,9,.2)}}.coverage-limits>summary{{padding:10px 0;cursor:pointer;color:var(--amber);font-size:10px}}.authored-contract-notice{{border-left-color:var(--amber)}}.authored-contract-notice>p{{max-width:850px;margin:0;color:var(--muted);font-size:12px}}.authored-contract-notice>ul{{display:grid;gap:10px;margin:16px 0 0;padding:0;list-style:none}}.authored-contract-notice li{{padding:11px 13px;border:1px solid rgba(231,202,124,.28);border-radius:9px;background:rgba(106,85,30,.09)}}.authored-contract-notice li p{{margin:0 0 7px;font-size:12px}}
 @media(max-width:800px){{.transformation-strip{{grid-template-columns:1fr}}.summary-arrow{{transform:rotate(90deg)}}.verification-detail{{grid-template-columns:1fr}}.focus-assessment-heading{{grid-template-columns:1fr}}}}
 @media(max-width:760px){{.file-delta-canvas{{min-width:680px}}.file-member-graph{{grid-template-columns:1fr}}.delta-focus-families{{grid-template-columns:1fr}}.delta-focus-family{{grid-template-columns:82px minmax(0,1fr)}}}}
 .file-graph-node,.file-delta-edge,.retained-context-chip{{transition:opacity .16s ease,filter .16s ease}}
@@ -2957,6 +2998,7 @@ def render_html(brief: ReviewBrief) -> str:
 </style></head><body><main class="shell">
 <div class="topbar"><span class="brand-mark"></span>RepoDelta</div>
 <section class="section"><div class="meta">{pr_link}<span>·</span><span>{escape(pr_state)}</span><span>·</span><span>{brief.overview.changed_file_count} changed files</span><span>·</span><span>{escape(ci_copy)}</span><span>·</span><span>{escape(llm_shadow_copy)}</span></div><h1>{escape(packet.title)}</h1>{primary_context}<span class="source-note">Source: {source_line}</span>{review_context}</section>
+{authored_contract_notice}
 <section class="section structural-graph-section">{review_graph}</section>
 {transformation_summary}
     {coverage_limits}

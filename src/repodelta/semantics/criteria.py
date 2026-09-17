@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, replace
+from typing import Literal
 
 from repodelta.model.contracts import (
+    Diagnostic,
     Requirement,
     ReviewStatement,
     SourceRef,
@@ -271,6 +273,24 @@ _TRANSFORMATION_CHILD_HEADINGS: dict[
     ("migrations", "consumers"): "consumer_migration",
     ("migrations", "tests"): "test_migration",
 }
+_FORMAL_ISSUE_CONTRACT_HEADINGS = frozenset(
+    {
+        *_OBLIGATION_HEADINGS,
+        *_OBJECTIVE_HEADINGS,
+        *_SCOPE_HEADINGS,
+        *_BOUNDARY_HEADINGS,
+        *_VERIFICATION_HEADINGS,
+    }
+)
+_TRANSFORMATION_NEAR_MISS_HEADINGS = frozenset(
+    {
+        "transformation",
+        "before and after",
+        "responsibility and authority",
+        "contract and limits",
+        "completion and limits",
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -291,6 +311,13 @@ class _ParsedTransformationItem:
     line: int
 
 
+@dataclass(frozen=True)
+class _ContractSyntaxHint:
+    heading: str
+    line: int
+    kind: str
+
+
 @dataclass
 class _ListItem:
     text: str
@@ -308,6 +335,7 @@ class _ListItem:
 class ParsedBody:
     items: tuple[_ParsedItem, ...] = ()
     transformation_items: tuple[_ParsedTransformationItem, ...] = ()
+    contract_syntax_hints: tuple[_ContractSyntaxHint, ...] = ()
     introductory_intent: str = ""
     introductory_line: int | None = None
 
@@ -321,6 +349,7 @@ class ReviewSemantics:
     verification_expectations: tuple[ReviewStatement, ...] = ()
     claims: tuple[ReviewStatement, ...] = ()
     transformation_contract: TransformationContract = TransformationContract()
+    contract_diagnostics: tuple[Diagnostic, ...] = ()
 
 
 def _clean_markdown_text(value: str) -> str:
@@ -386,6 +415,7 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
         return ParsedBody()
     items: list[_ParsedItem] = []
     transformation_items: list[_ParsedTransformationItem] = []
+    contract_syntax_hints: list[_ContractSyntaxHint] = []
     seen: set[tuple[StatementRole, StatementPurpose, str]] = set()
     seen_transformation: set[tuple[TransformationClaimKind, str]] = set()
     current_section = ""
@@ -529,7 +559,33 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
             )
             current_role = semantics[0] if semantics is not None else None
             current_purpose = semantics[1] if semantics is not None else None
+            if normalized_heading in _TRANSFORMATION_NEAR_MISS_HEADINGS:
+                contract_syntax_hints.append(
+                    _ContractSyntaxHint(
+                        heading=current_section,
+                        line=line_number,
+                        kind="unrecognized_transformation_heading",
+                    )
+                )
             continue
+
+        if (
+            raw_line == raw_line.lstrip()
+            and raw_line.strip()
+            and not raw_line.lstrip().startswith(("-", "*", "+"))
+        ):
+            bare_heading = _normalize_heading(raw_line)
+            if (
+                bare_heading in _FORMAL_ISSUE_CONTRACT_HEADINGS
+                or bare_heading in _TRANSFORMATION_HEADINGS
+            ):
+                contract_syntax_hints.append(
+                    _ContractSyntaxHint(
+                        heading=_clean_markdown_text(raw_line),
+                        line=line_number,
+                        kind="bare_formal_heading",
+                    )
+                )
 
         list_match = _LIST_ITEM_RE.match(raw_line)
         if list_match:
@@ -595,6 +651,7 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
     return ParsedBody(
         items=tuple(items),
         transformation_items=tuple(transformation_items),
+        contract_syntax_hints=tuple(contract_syntax_hints),
         introductory_intent=intro,
         introductory_line=introductory[0][0] if introductory else None,
     )
@@ -704,6 +761,21 @@ def extract_review_semantics(
         ),
     )
     transformation_contract.validate_consistency()
+    contract_diagnostics = tuple(
+        _contract_syntax_diagnostics(
+            issue,
+            issue_source,
+            surface="issue",
+        )
+        if issue_source is not None
+        else ()
+    ) + _contract_syntax_diagnostics(
+        pr,
+        pr_source,
+        surface="pull_request",
+        issue_owns_requirements=bool(issue_obligations),
+        issue_owns_guardrails=bool(issue_boundaries),
+    )
     if pr.introductory_intent:
         intent = ReviewStatement(
             id="I1",
@@ -736,7 +808,103 @@ def extract_review_semantics(
         verification_expectations=verification_expectations,
         claims=claims,
         transformation_contract=transformation_contract,
+        contract_diagnostics=contract_diagnostics,
     )
+
+
+def _contract_syntax_diagnostics(
+    parsed: ParsedBody,
+    source: SourceRef,
+    *,
+    surface: Literal["issue", "pull_request"],
+    issue_owns_requirements: bool = False,
+    issue_owns_guardrails: bool = False,
+) -> tuple[Diagnostic, ...]:
+    """Expose source-aware near-misses without promoting their contents.
+
+    The parser deliberately records syntax-shaped prose without knowing whether
+    it came from an Issue or a pull request.  Remediation must make that
+    authority distinction here: an Issue cannot be taught to author PR
+    transition claims, and a PR cannot be taught to duplicate requirements
+    already owned by its linked Issue.
+    """
+
+    diagnostics: list[Diagnostic] = []
+    for hint in parsed.contract_syntax_hints:
+        heading = _normalize_heading(hint.heading)
+        is_transition = (
+            hint.kind == "unrecognized_transformation_heading"
+            or heading in _TRANSFORMATION_HEADINGS
+        )
+        if surface == "issue" and is_transition:
+            diagnostics.append(
+                Diagnostic(
+                    code="authored_issue_transition_section_out_of_scope",
+                    message=(
+                        f"`{hint.heading}` describes an implementation transition. "
+                        "Transition declarations belong in the implementation PR, "
+                        "not the Issue requirement contract; its contents remain "
+                        "context and do not create Issue R/G."
+                    ),
+                    sources=(replace(source, line_start=hint.line),),
+                )
+            )
+            continue
+
+        is_requirement_duplicate = (
+            surface == "pull_request"
+            and hint.kind == "bare_formal_heading"
+            and heading in _OBLIGATION_HEADINGS
+            and issue_owns_requirements
+        )
+        is_guardrail_duplicate = (
+            surface == "pull_request"
+            and hint.kind == "bare_formal_heading"
+            and heading in _BOUNDARY_HEADINGS
+            and issue_owns_guardrails
+        )
+        if is_requirement_duplicate or is_guardrail_duplicate:
+            contract_kind = (
+                "requirements" if is_requirement_duplicate else "guardrails"
+            )
+            diagnostics.append(
+                Diagnostic(
+                    code="authored_pr_contract_section_duplicates_issue",
+                    message=(
+                        f"`{hint.heading}` is plain text, and the linked Issue "
+                        f"already owns formal {contract_kind}. Do not create a "
+                        "second requirement contract in the PR; keep PR-specific "
+                        "transformation and evidence here. Its contents remain context."
+                    ),
+                    sources=(replace(source, line_start=hint.line),),
+                )
+            )
+            continue
+
+        diagnostics.append(
+            Diagnostic(
+                code=(
+                    "authored_contract_heading_requires_markdown"
+                    if hint.kind == "bare_formal_heading"
+                    else "authored_transformation_heading_unrecognized"
+                ),
+                message=(
+                    f"`{hint.heading}` looks like a formal contract section but is "
+                    "plain text. Use an exact Markdown heading such as "
+                    f"`## {hint.heading}`; its contents remain context and do not "
+                    "create a formal RepoDelta contract."
+                    if hint.kind == "bare_formal_heading"
+                    else f"`{hint.heading}` is not an exact machine-recognized PR "
+                    "transformation section. Use a specific Markdown heading such "
+                    "as `## Change`, `## Before`, `## After`, "
+                    "`## Canonical authority`, `## Production path`, "
+                    "`## Migration`, `## Removed legacy paths`, or "
+                    "`## Completion conditions`; its contents remain context."
+                ),
+                sources=(replace(source, line_start=hint.line),),
+            )
+        )
+    return tuple(diagnostics)
 
 
 def _transformation_contract(

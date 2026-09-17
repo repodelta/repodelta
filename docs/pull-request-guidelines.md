@@ -28,6 +28,39 @@ Record applicable items only; do not fill absent concepts with template noise:
 - responsibility closure, contract closure, abandonment safety, and parent
   completion as separate states.
 
+## Formal transformation contract
+
+If a PR is intended to supply formal T/CC claims, use exact Markdown ATX
+headings (`##`) for the applicable claims. The canonical headings are:
+
+```text
+## Change
+## Before
+## After
+## Selected region
+### Inputs
+### Outputs
+### Boundaries
+## Before topology
+## After topology
+## Canonical authority
+## Production path
+## Migration
+### Producers
+### Consumers
+### Tests
+## Removed legacy paths
+## Completion conditions
+## Uncertainties
+```
+
+The parser preserves established compatible headings, but free prose and
+approximate headings—such as `## Transformation`, `## Before and after`, or
+`## Responsibility and authority`—remain context and do not create formal
+T/CC claims. RepoDelta reports a source-backed warning for these recognized
+near-misses rather than inferring their semantics. Use the precise headings
+above when structural selection or deterministic T/CC assessment is intended.
+
 A derived result is not automatically cross-consumer truth. If consumer-local,
 state why the projection is allowed and does not alter canonical facts.
 Consumers must not silently produce or re-decide upstream semantics.
