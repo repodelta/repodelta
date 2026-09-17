@@ -171,6 +171,7 @@ class DeterministicAnalyzer:
             analysis_input.structural_graph,
             diagnostic_presentation=diagnostic_presentation,
             structural_graph_disabled=analysis_input.structural_graph_disabled,
+            authoring_contract_diagnostics=extracted.contract_diagnostics,
         )
         return ReviewBrief(
             packet=packet,

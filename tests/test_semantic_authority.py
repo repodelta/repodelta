@@ -11,6 +11,7 @@ from repodelta.model.contracts import (
 )
 from repodelta.semantics.criteria import extract_review_semantics
 from repodelta.semantics.criteria import parse_markdown_semantics
+from repodelta.semantics.review import extract_packet_semantics
 from repodelta.presentation.html import render_html
 
 
@@ -189,6 +190,7 @@ def test_code_fences_do_not_create_semantic_items() -> None:
         "Add the adapter.",
         "Wire the adapter into runtime.",
     ]
+    assert parsed.contract_syntax_hints == ()
 
 
 def test_exact_implementation_aliases_share_one_typed_claim_path() -> None:
@@ -1112,3 +1114,112 @@ def test_transformation_source_state_distinguishes_missing_extraction() -> None:
     assert absent.transformation_contract.source_state == "source_absent"
     assert unrelated.transformation_contract.source_state == "extraction_missing"
     assert unrelated.transformation_contract.claims == ()
+
+
+def test_pr297_style_bare_issue_contract_headings_remain_nonformal_but_visible() -> None:
+    packet = _packet(
+        issue_body=(
+            "Goal\n"
+            "Keep provider evidence explicit.\n\n"
+            "Requirements\n"
+            "- Preserve SQL evidence provenance.\n\n"
+            "Guardrails\n"
+            "- Do not infer a SQL verdict.\n\n"
+            "Verification expectations\n"
+            "- Provider boundary tests cover unsupported input.\n"
+        ),
+    )
+
+    extracted = extract_packet_semantics(packet)
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    diagnostics = extracted.contract_diagnostics
+
+    assert extracted.statements.obligations == ()
+    assert [item.code for item in diagnostics] == [
+        "authored_contract_heading_requires_markdown",
+        "authored_contract_heading_requires_markdown",
+        "authored_contract_heading_requires_markdown",
+        "authored_contract_heading_requires_markdown",
+    ]
+    assert [item.sources[0].line_start for item in diagnostics] == [1, 4, 7, 10]
+    assert "Formal contract syntax was not recognized" in render_html(brief)
+    assert "## Requirements" in render_html(brief)
+    assert any(
+        item.provider == "authoring_contract" for item in brief.overview.attention
+    )
+
+
+def test_pr311_and_pr323_style_transformation_headings_remain_context_but_visible() -> None:
+    packet = _packet(
+        pr_body=(
+            "## Transformation\n"
+            "Move transport handling behind one authority.\n\n"
+            "## Responsibility and authority\n"
+            "The adapter owns credential transport.\n\n"
+            "## Before and after\n"
+            "The former direct path is replaced by the canonical path.\n\n"
+            "## Completion and limits\n"
+            "The focused checks pass.\n"
+        )
+    )
+
+    extracted = extract_packet_semantics(packet)
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+
+    assert extracted.statements.transformation_contract.claims == ()
+    assert [item.code for item in extracted.contract_diagnostics] == [
+        "authored_transformation_heading_unrecognized",
+        "authored_transformation_heading_unrecognized",
+        "authored_transformation_heading_unrecognized",
+        "authored_transformation_heading_unrecognized",
+    ]
+    assert [item.sources[0].line_start for item in extracted.contract_diagnostics] == [
+        1,
+        4,
+        7,
+        10,
+    ]
+    html = render_html(brief)
+    assert "Formal contract syntax was not recognized" in html
+    assert "## Canonical authority" in html
+    assert "## Completion conditions" in html
+
+
+def test_canonical_issue_and_pr_headings_produce_formal_contract_without_warning() -> None:
+    packet = _packet(
+        issue_body=(
+            "## Requirements\n"
+            "- Preserve the explicit provider boundary.\n\n"
+            "## Guardrails\n"
+            "- Do not infer unsupported provider semantics.\n\n"
+            "## Verification expectations\n"
+            "- Boundary tests cover unsupported input.\n"
+        ),
+        pr_body=(
+            "## Change\n"
+            "- Add `SqlSchemaEvidenceProvider`.\n\n"
+            "## Before\n"
+            "- SQL evidence is unavailable.\n\n"
+            "## After\n"
+            "- `SqlSchemaEvidenceProvider` records schema evidence.\n\n"
+            "## Canonical authority\n"
+            "- `SqlSchemaEvidenceProvider` owns SQL evidence.\n\n"
+            "## Completion conditions\n"
+            "- `tests/test_sql_schema_boundary.py` passes.\n"
+        ),
+    )
+
+    extracted = extract_packet_semantics(packet)
+
+    assert [item.id for item in extracted.statements.obligations] == ["R1", "G1"]
+    assert [item.id for item in extracted.statements.verification_expectations] == [
+        "V1"
+    ]
+    assert [item.kind for item in extracted.statements.transformation_contract.claims] == [
+        "change",
+        "before_state",
+        "after_state",
+        "authority",
+        "completion_condition",
+    ]
+    assert extracted.contract_diagnostics == ()

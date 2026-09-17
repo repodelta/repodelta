@@ -15,23 +15,27 @@ A focused Issue has at most one active implementation PR, including a Draft.
 Other Issues do not supply focused implementation ownership; parent or
 hierarchy semantics are outside this guidance.
 
-Prefer these headings when applicable:
+For a formal RepoDelta Issue contract, use Markdown ATX headings exactly as
+shown (`##`, not bare text labels). These are the canonical authoring headings:
 
 ```text
-Goal
-Requirements
-Guardrails
-Verification expectations
-Scope
-Out of scope
-Uncertainties
+## Goal
+## Requirements
+## Guardrails
+## Verification expectations
+## Scope
+## Out of scope
+## Uncertainties
 ```
 
 `Requirements`, `Acceptance criteria`, `Definition of done`, and `Success
-criteria` are requirement aliases; prefer `Requirements` for consistent
-authoring. Write one independently reviewable semantic obligation per list
-item. Goals explain intent and guardrails constrain the solution; neither is a
-requirement.
+criteria` remain accepted requirement aliases; prefer `## Requirements` for
+consistent authoring. Bare labels such as `Requirements` are context, not a
+formal section. RepoDelta reports a source-backed warning when it sees a
+contract-looking bare label, but never promotes its contents by inference.
+
+Write one independently reviewable semantic obligation per list item. Goals
+explain intent and guardrails constrain the solution; neither is a requirement.
 
 Keep optional sections optional. Use Scope for included responsibility and Out
 of scope for explicit exclusions. Verification expectations name the kind of

@@ -4,6 +4,7 @@ import re
 from dataclasses import dataclass, replace
 
 from repodelta.model.contracts import (
+    Diagnostic,
     Requirement,
     ReviewStatement,
     SourceRef,
@@ -271,6 +272,24 @@ _TRANSFORMATION_CHILD_HEADINGS: dict[
     ("migrations", "consumers"): "consumer_migration",
     ("migrations", "tests"): "test_migration",
 }
+_FORMAL_ISSUE_CONTRACT_HEADINGS = frozenset(
+    {
+        *_OBLIGATION_HEADINGS,
+        *_OBJECTIVE_HEADINGS,
+        *_SCOPE_HEADINGS,
+        *_BOUNDARY_HEADINGS,
+        *_VERIFICATION_HEADINGS,
+    }
+)
+_TRANSFORMATION_NEAR_MISS_HEADINGS = frozenset(
+    {
+        "transformation",
+        "before and after",
+        "responsibility and authority",
+        "contract and limits",
+        "completion and limits",
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -291,6 +310,13 @@ class _ParsedTransformationItem:
     line: int
 
 
+@dataclass(frozen=True)
+class _ContractSyntaxHint:
+    heading: str
+    line: int
+    kind: str
+
+
 @dataclass
 class _ListItem:
     text: str
@@ -308,6 +334,7 @@ class _ListItem:
 class ParsedBody:
     items: tuple[_ParsedItem, ...] = ()
     transformation_items: tuple[_ParsedTransformationItem, ...] = ()
+    contract_syntax_hints: tuple[_ContractSyntaxHint, ...] = ()
     introductory_intent: str = ""
     introductory_line: int | None = None
 
@@ -321,6 +348,7 @@ class ReviewSemantics:
     verification_expectations: tuple[ReviewStatement, ...] = ()
     claims: tuple[ReviewStatement, ...] = ()
     transformation_contract: TransformationContract = TransformationContract()
+    contract_diagnostics: tuple[Diagnostic, ...] = ()
 
 
 def _clean_markdown_text(value: str) -> str:
@@ -386,6 +414,7 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
         return ParsedBody()
     items: list[_ParsedItem] = []
     transformation_items: list[_ParsedTransformationItem] = []
+    contract_syntax_hints: list[_ContractSyntaxHint] = []
     seen: set[tuple[StatementRole, StatementPurpose, str]] = set()
     seen_transformation: set[tuple[TransformationClaimKind, str]] = set()
     current_section = ""
@@ -529,7 +558,33 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
             )
             current_role = semantics[0] if semantics is not None else None
             current_purpose = semantics[1] if semantics is not None else None
+            if normalized_heading in _TRANSFORMATION_NEAR_MISS_HEADINGS:
+                contract_syntax_hints.append(
+                    _ContractSyntaxHint(
+                        heading=current_section,
+                        line=line_number,
+                        kind="unrecognized_transformation_heading",
+                    )
+                )
             continue
+
+        if (
+            raw_line == raw_line.lstrip()
+            and raw_line.strip()
+            and not raw_line.lstrip().startswith(("-", "*", "+"))
+        ):
+            bare_heading = _normalize_heading(raw_line)
+            if (
+                bare_heading in _FORMAL_ISSUE_CONTRACT_HEADINGS
+                or bare_heading in _TRANSFORMATION_HEADINGS
+            ):
+                contract_syntax_hints.append(
+                    _ContractSyntaxHint(
+                        heading=_clean_markdown_text(raw_line),
+                        line=line_number,
+                        kind="bare_formal_heading",
+                    )
+                )
 
         list_match = _LIST_ITEM_RE.match(raw_line)
         if list_match:
@@ -595,6 +650,7 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
     return ParsedBody(
         items=tuple(items),
         transformation_items=tuple(transformation_items),
+        contract_syntax_hints=tuple(contract_syntax_hints),
         introductory_intent=intro,
         introductory_line=introductory[0][0] if introductory else None,
     )
@@ -704,6 +760,15 @@ def extract_review_semantics(
         ),
     )
     transformation_contract.validate_consistency()
+    contract_diagnostics = tuple(
+        item
+        for parsed, source in (
+            (issue, issue_source),
+            (pr, pr_source),
+        )
+        if source is not None
+        for item in _contract_syntax_diagnostics(parsed, source)
+    )
     if pr.introductory_intent:
         intent = ReviewStatement(
             id="I1",
@@ -736,6 +801,39 @@ def extract_review_semantics(
         verification_expectations=verification_expectations,
         claims=claims,
         transformation_contract=transformation_contract,
+        contract_diagnostics=contract_diagnostics,
+    )
+
+
+def _contract_syntax_diagnostics(
+    parsed: ParsedBody,
+    source: SourceRef,
+) -> tuple[Diagnostic, ...]:
+    """Expose exact authored near-misses without promoting their contents."""
+
+    return tuple(
+        Diagnostic(
+            code=(
+                "authored_contract_heading_requires_markdown"
+                if hint.kind == "bare_formal_heading"
+                else "authored_transformation_heading_unrecognized"
+            ),
+            message=(
+                f"`{hint.heading}` looks like a formal contract section but is "
+                "plain text. Use an exact Markdown heading such as "
+                f"`## {hint.heading}`; its contents remain context and do not "
+                "create a formal RepoDelta contract."
+                if hint.kind == "bare_formal_heading"
+                else f"`{hint.heading}` is not an exact machine-recognized PR "
+                "transformation section. Use a specific Markdown heading such "
+                "as `## Change`, `## Before`, `## After`, "
+                "`## Canonical authority`, `## Production path`, "
+                "`## Migration`, `## Removed legacy paths`, or "
+                "`## Completion conditions`; its contents remain context."
+            ),
+            sources=(replace(source, line_start=hint.line),),
+        )
+        for hint in parsed.contract_syntax_hints
     )
 
 
