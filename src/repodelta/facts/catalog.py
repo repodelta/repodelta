@@ -19,11 +19,13 @@ from repodelta.model.contracts import (
     ClosureScanDiagnostic,
     ClosureScanResult,
     ClosureScanResultSet,
+    CLOSURE_SCAN_PROVIDER,
+    ProviderContribution,
+    ProviderFact,
+    ProviderPlan,
     ReviewSourcePacket,
+    SchemaFact,
     SourceRef,
-    SqlSchemaFileCoverage,
-    SqlSchemaResult,
-    SqlSchemaStatement,
     StructuralChangeIdentity,
     StructuralReplacementCandidate,
     StructuralOwnershipChangeIdentity,
@@ -33,11 +35,13 @@ from repodelta.model.contracts import (
     VerificationObservation,
     VerificationIdentity,
     canonical_verification_name,
+    derive_evidence_conflicts,
 )
 from repodelta.changes.hunks import (
     ChangedHunk,
     DiffHunkCollection,
 )
+from repodelta.facts.federation import ingest_contributions
 from repodelta.facts.lexical import association_signature, merge_signatures
 from repodelta.facts.path_profile import fact_profile, path_classification
 from repodelta.providers.structural import (
@@ -55,14 +59,21 @@ def build_evidence_catalog(
     *,
     supplied: tuple[SuppliedEvidence, ...] = (),
     closure_scan_results: ClosureScanResultSet = ClosureScanResultSet(),
-    sql_schema_result: SqlSchemaResult = SqlSchemaResult(),
+    provider_plan: ProviderPlan | None = None,
+    provider_contributions: tuple[ProviderContribution, ...] = (),
 ) -> EvidenceCatalog:
     """Normalize source, structural, and supplied facts into one ID-addressed catalog."""
 
-    # The capability/fact invariant belongs to the SqlSchemaProvider contract,
-    # not just to RepositorySqlSchemaProvider's own implementation -- validate
-    # here so any provider behind the protocol is held to it at ingestion.
-    sql_schema_result.validate_consistency()
+    # Contributions are re-validated against their declaration and dispatch
+    # here, so no provider is trusted on its own say-so at ingestion.
+    # ``None`` means federation was not consulted; an empty plan would claim it
+    # was and found nothing to dispatch.
+    plan = provider_plan if provider_plan is not None else ProviderPlan()
+    federated = ingest_contributions(plan, provider_contributions)
+    if provider_plan is not None and provider_plan.changed_files != tuple(
+        sorted({_display_path(item) for item in packet.changed_files})
+    ):
+        raise ValueError("provider plan does not match the packet's changed files")
 
     items: dict[str, EvidenceItem] = {}
     hunks_by_paths: dict[tuple[str | None, str | None], list[ChangedHunk]] = {}
@@ -163,8 +174,8 @@ def build_evidence_catalog(
     for result in closure_scan_results.results:
         if any(item.state != "unavailable" for item in result.revisions):
             _put(items, closure_evidence(result))
-    for statement in sql_schema_result.statements:
-        _put(items, sql_schema_evidence(statement))
+    for fact in federated.facts:
+        _put(items, schema_fact_evidence(fact))
     for item in supplied:
         _put(
             items,
@@ -177,8 +188,9 @@ def build_evidence_catalog(
             ),
         )
 
+    catalog_items = tuple(sorted(items.values(), key=lambda item: item.id))
     catalog = EvidenceCatalog(
-        items=tuple(sorted(items.values(), key=lambda item: item.id)),
+        items=catalog_items,
         change_relations=change_relations,
         structural_replacement_candidates=replacement_candidates,
         diagnostics=(
@@ -191,7 +203,7 @@ def build_evidence_catalog(
                 for revision in result.revisions
                 for diagnostic in revision.diagnostics
             ),
-            *sql_schema_result.diagnostics,
+            *federated.diagnostics,
         ),
         closure_scan_diagnostics=tuple(
             ClosureScanDiagnostic(
@@ -205,8 +217,9 @@ def build_evidence_catalog(
             for revision in result.revisions
             for diagnostic in revision.diagnostics
         ),
-        sql_schema_coverage=sql_schema_result.coverage,
-        sql_schema_capabilities=sql_schema_result.capabilities,
+        provider_plan=plan,
+        provider_coverage=federated.coverage,
+        provider_conflicts=derive_evidence_conflicts(catalog_items),
     )
     catalog.validate_consistency()
     return catalog
@@ -295,6 +308,7 @@ def _put_structural_revision(
                     items,
                     _symbol_item(
                         symbol,
+                        provider=structural_graph.index.provider,
                         changed=False,
                         operation="unchanged",
                         revision_side=revision_side,
@@ -309,6 +323,7 @@ def _put_structural_revision(
                 items,
                 _symbol_item(
                     symbol,
+                    provider=structural_graph.index.provider,
                     changed=False,
                     operation="unchanged",
                     revision_side=revision_side,
@@ -330,6 +345,7 @@ def _put_structural_revision(
                 items,
                 _symbol_item(
                     overlap.symbol,
+                    provider=structural_graph.index.provider,
                     changed=True,
                     operation=operation,
                     revision_side=revision_side,
@@ -363,6 +379,7 @@ def _put_structural_revision(
                     classification=path_classification(relation.child.file_path),
                     profile="unknown",
                     authority="structural_provider",
+                    providers=(structural_graph.index.provider,),
                     revision_side=revision_side,
                     operation="observed",
                     role="structural_ownership",
@@ -390,6 +407,7 @@ def _put_structural_revision(
                         items,
                         _symbol_item(
                             symbol,
+                            provider=structural_graph.index.provider,
                             changed=False,
                             operation="unchanged",
                             revision_side=revision_side,
@@ -408,6 +426,7 @@ def _put_structural_revision(
                     classification=path.classification,
                     profile="structural_path",
                     authority="structural_provider",
+                    providers=(structural_graph.index.provider,),
                     revision_side=revision_side,
                     operation="observed",
                     role="structural_path",
@@ -509,6 +528,7 @@ def _put_structural_changes(
                 classification=exemplar.classification,
                 profile=exemplar.profile,
                 authority="structural_provider",
+                providers=_collection_providers(structural_graph),
                 revision_side="review",
                 operation=operation,
                 role="changed_anchor",
@@ -872,6 +892,7 @@ def _put_structural_ownership_changes(
                 ),
                 profile="unknown",
                 authority="structural_provider",
+                providers=_collection_providers(structural_graph),
                 revision_side="review",
                 operation=operation,
                 role="structural_ownership",
@@ -1056,6 +1077,7 @@ def _put_structural_relation_changes(
                 ),
                 profile="structural_path",
                 authority="structural_provider",
+                providers=_collection_providers(structural_graph),
                 revision_side="review",
                 operation=operation,
                 role="structural_relation",
@@ -1120,6 +1142,16 @@ def _opposite_revision_proves_absence(
     )
 
 
+def _collection_providers(
+    structural_graph: StructuralGraphCollection,
+) -> tuple[str, ...]:
+    """Derived structural facts draw on every revision graph they converge."""
+
+    return tuple(
+        sorted({item.index.provider for item in structural_graph.revisions})
+    )
+
+
 def evidence_id(kind: str, identity: str) -> str:
     digest = hashlib.sha256(f"{kind}\0{identity}".encode("utf-8")).hexdigest()[:20]
     return f"E:{kind}:{digest}"
@@ -1154,6 +1186,7 @@ def closure_evidence(result: ClosureScanResult) -> EvidenceItem:
         classification="mixed",
         profile="unknown",
         authority="closure_scan_provider",
+        providers=(CLOSURE_SCAN_PROVIDER,),
         revision_side="review",
         operation="observed",
         role="closure_fact",
@@ -1163,52 +1196,45 @@ def closure_evidence(result: ClosureScanResult) -> EvidenceItem:
     )
 
 
-def sql_schema_evidence(statement: SqlSchemaStatement) -> EvidenceItem:
-    """Normalize one observed DDL statement. Never a folded schema."""
+def schema_fact_evidence(fact: ProviderFact) -> EvidenceItem:
+    """One provider-neutral identity per (side, subject, attribute, value).
+
+    Two providers asserting the same value land on one item whose sources and
+    provider identities record both assertions; differing values stay separate
+    items and surface as a typed conflict, never merged.
+    """
 
     identity = "\0".join(
-        (
-            statement.revision_side,
-            statement.path,
-            str(statement.line_start),
-            statement.kind,
-            statement.table,
-            statement.column or "",
-        )
+        (fact.revision_side, fact.subject, fact.attribute, fact.value)
     )
     return EvidenceItem(
-        id=evidence_id("sql_schema_statement", identity),
-        summary=_sql_schema_summary(statement),
-        kind="sql_schema_statement",
+        id=evidence_id("schema_fact", identity),
+        summary=f"{fact.subject} {fact.attribute} is {fact.value}.",
+        kind="schema_fact",
         classification="code",
         profile="schema",
-        authority="sql_schema_provider",
-        revision_side=statement.revision_side,
+        authority="evidence_provider",
+        revision_side=fact.revision_side,
         operation="observed",
         role="revision_fact",
         changed=False,
-        sql_schema_statement=statement,
+        schema_fact=SchemaFact(
+            subject=fact.subject, attribute=fact.attribute, value=fact.value
+        ),
+        providers=(fact.provider,),
         sources=(
             SourceRef(
-                label=f"sql schema · {statement.revision_side}",
-                path=statement.path,
-                line_start=statement.line_start,
-                line_end=statement.line_end,
+                label=f"{fact.provider} · {fact.revision_side}",
+                path=fact.path,
+                line_start=fact.line_start,
+                line_end=fact.line_end,
             ),
         ),
     )
 
 
-def _sql_schema_summary(statement: SqlSchemaStatement) -> str:
-    if statement.kind == "create_table":
-        return f"Table {statement.table} declared."
-    if statement.kind == "alter_table_add_column":
-        return f"Column {statement.table}.{statement.column} added."
-    if statement.kind == "alter_table_drop_column":
-        return f"Column {statement.table}.{statement.column} dropped."
-    if statement.kind == "alter_column_set_not_null":
-        return f"Column {statement.table}.{statement.column} declared NOT NULL."
-    return f"Column {statement.table}.{statement.column} declared nullable."
+def _display_path(changed_file: ChangedFile) -> str:
+    return changed_file.head_path or changed_file.base_path or ""
 
 
 def provided_evidence(
@@ -1389,6 +1415,7 @@ def verification_evidence(observation: VerificationObservation) -> EvidenceItem:
         classification="runtime" if observation.kind == "manual" else "ci",
         profile="verification",
         authority="verification_provider",
+        providers=(identity.provider,),
         revision_side="review",
         operation="observed",
         role="verification",
@@ -1410,6 +1437,7 @@ def _symbol_item(
     *,
     changed: bool,
     operation: ChangeOperation,
+    provider: str,
     revision_side: StructuralRevision = "head",
     structural_path_ids: tuple[str, ...],
     extra_sources: tuple[SourceRef, ...] = (),
@@ -1431,6 +1459,7 @@ def _symbol_item(
         classification=path_classification(symbol.file_path),
         profile=fact_profile(symbol.file_path),
         authority="structural_provider",
+        providers=(provider,),
         revision_side=revision_side,
         operation=operation,
         role=role
@@ -1616,6 +1645,7 @@ def _put(items: dict[str, EvidenceItem], candidate: EvidenceItem) -> None:
         structural_path_ids=tuple(
             sorted({*existing.structural_path_ids, *candidate.structural_path_ids})
         ),
+        providers=tuple(sorted({*existing.providers, *candidate.providers})),
         head_signature=merge_signatures(
             existing.head_signature,
             candidate.head_signature,

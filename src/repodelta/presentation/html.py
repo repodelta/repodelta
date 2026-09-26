@@ -7,6 +7,10 @@ from pathlib import Path
 import re
 from urllib.parse import quote, urlparse, urlunparse
 
+from repodelta.presentation.status import (
+    format_provider_coverage,
+    format_unclaimed_files,
+)
 from repodelta.model.contracts import (
     ArchitecturalComponent,
     EvidenceCatalog,
@@ -2621,13 +2625,33 @@ def _structural_focus_empty_label(state: str) -> str:
     return _structural_focus_label(state).capitalize() + "."
 
 
+def _provider_coverage_rows(brief: ReviewBrief) -> tuple[str, ...]:
+    """Project canonical provider coverage; nothing is re-decided here."""
+
+    rows = [
+        format_provider_coverage(item) for item in brief.overview.provider_coverage
+    ]
+    unclaimed = format_unclaimed_files(brief.overview.unclaimed_changed_files)
+    if unclaimed:
+        rows.append(unclaimed)
+    return tuple(rows)
+
+
 def _coverage_limits(brief: ReviewBrief) -> str:
-    if not brief.overview.attention:
+    provider_rows = _provider_coverage_rows(brief)
+    if not brief.overview.attention and not provider_rows:
         return ""
+    rendered_provider_rows = "".join(
+        '<div class="attention-row"><span class="attention-kind">'
+        f'Evidence providers</span><span class="attention-copy">{escape(row)}'
+        '</span></div>'
+        for row in provider_rows
+    )
     return (
         '<details class="coverage-limits"><summary>Coverage limits · '
-        f'{len(brief.overview.attention)}</summary>'
-        f'<div class="attention-list">{_attention(brief)}</div></details>'
+        f'{len(brief.overview.attention) + len(provider_rows)}</summary>'
+        f'<div class="attention-list">{_attention(brief)}'
+        f'{rendered_provider_rows}</div></details>'
     )
 
 

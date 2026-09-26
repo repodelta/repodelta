@@ -201,6 +201,26 @@ def build_review_overview(
                 scope="review",
             )
         )
+    if evidence_catalog.provider_conflicts:
+        attention.append(
+            ReviewAttention(
+                id=_attention_id(
+                    "provider_conflicts",
+                    tuple(item.id for item in evidence_catalog.provider_conflicts),
+                ),
+                label="Provider conflicts",
+                message=" ".join(
+                    f"{item.subject} {item.attribute} ({item.revision_side}): "
+                    + " vs ".join(
+                        f"{side.value} by {', '.join(side.providers)}"
+                        for side in item.sides
+                    )
+                    + "."
+                    for item in evidence_catalog.provider_conflicts
+                ),
+                scope="review",
+            )
+        )
     guardrails = tuple(item for item in requirements if item.kind == "guardrail")
     if guardrails:
         attention.append(
@@ -233,6 +253,9 @@ def build_review_overview(
                 "remain context and were not promoted to requirements."
             )
         ),
+        provider_coverage=evidence_catalog.provider_coverage,
+        unclaimed_changed_files=evidence_catalog.provider_plan.unclaimed_files,
+        provider_conflicts=evidence_catalog.provider_conflicts,
     )
 
 
