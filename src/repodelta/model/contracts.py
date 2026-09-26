@@ -4,6 +4,7 @@ import hashlib
 import json
 import unicodedata
 from dataclasses import asdict, dataclass, field, replace
+from fnmatch import fnmatchcase
 from typing import TYPE_CHECKING, Any, Literal
 
 if TYPE_CHECKING:
@@ -154,9 +155,20 @@ FactAuthority = Literal[
     "structural_provider",
     "verification_provider",
     "closure_scan_provider",
-    "sql_schema_provider",
+    "evidence_provider",
     "supplied",
 ]
+CLOSURE_SCAN_PROVIDER = "repository-closure-scan"
+# Authorities whose facts a concrete provider asserted. github_diff is the
+# review source itself and supplied is caller-declared, so neither is a provider.
+PROVIDER_AUTHORITIES: frozenset[str] = frozenset(
+    {
+        "structural_provider",
+        "verification_provider",
+        "closure_scan_provider",
+        "evidence_provider",
+    }
+)
 RevisionSide = Literal["head", "base", "review", "unchanged"]
 ChangeOperation = Literal[
     "added",
@@ -1978,6 +1990,333 @@ class SqlSchemaResult:
                 )
 
 
+SelectorKind = Literal["suffix", "exact", "path_glob"]
+ProviderCoverageState = Literal["observed", "partial", "unavailable"]
+ProviderAggregateState = Literal[
+    "observed", "partial", "unavailable", "not_requested"
+]
+
+
+def selector_path(path: str) -> str | None:
+    """Casefolded posix path, or None when it is absolute or escapes upward.
+
+    Applicability is a dispatch decision over repository-relative paths; a path
+    that is absolute or contains a parent segment is never repository-relative
+    and no selector may claim it.
+    """
+
+    normalized = path.replace("\\", "/")
+    if normalized.startswith("/"):
+        return None
+    parts = [part for part in normalized.split("/") if part not in {"", "."}]
+    if not parts or ".." in parts:
+        return None
+    return "/".join(parts).casefold()
+
+
+@dataclass(frozen=True)
+class FileSelector:
+    """One declared path-applicability rule of an evidence provider.
+
+    ``path_glob`` uses fnmatch semantics: ``*`` also crosses directory
+    separators. Matching is casefolded so dispatch is platform-independent.
+    """
+
+    kind: SelectorKind
+    pattern: str
+
+    def __post_init__(self) -> None:
+        if not self.pattern.strip():
+            raise ValueError("file selector requires a pattern")
+        if self.kind == "suffix":
+            if "/" in self.pattern or "\\" in self.pattern:
+                raise ValueError("suffix selector cannot contain a path separator")
+        elif selector_path(self.pattern) is None:
+            raise ValueError(
+                f"{self.kind} selector must be a repository-relative pattern"
+            )
+
+    def matches(self, path: str) -> bool:
+        normalized = selector_path(path)
+        if normalized is None:
+            return False
+        if self.kind == "suffix":
+            return normalized.endswith(self.pattern.casefold())
+        pattern = selector_path(self.pattern)
+        assert pattern is not None
+        if self.kind == "exact":
+            return normalized == pattern
+        return fnmatchcase(normalized, pattern)
+
+
+@dataclass(frozen=True)
+class ProviderDescriptor:
+    """What a provider declares it can honestly assert, before it runs."""
+
+    provider: str
+    capabilities: tuple[str, ...]
+    selectors: tuple[FileSelector, ...]
+    schema_version: str = "provider_descriptor.v1"
+
+    def __post_init__(self) -> None:
+        if not self.provider or self.provider != self.provider.strip() or any(
+            character.isspace() for character in self.provider
+        ):
+            raise ValueError("provider descriptor requires a concrete identity")
+        if not self.capabilities or len(set(self.capabilities)) != len(
+            self.capabilities
+        ):
+            raise ValueError(
+                f"{self.provider}: capabilities must be non-empty and unique"
+            )
+        if any(not value.strip() for value in self.capabilities):
+            raise ValueError(f"{self.provider}: blank capability")
+        if not self.selectors:
+            raise ValueError(f"{self.provider}: descriptor requires a selector")
+
+    def claims(self, path: str) -> bool:
+        return any(selector.matches(path) for selector in self.selectors)
+
+
+@dataclass(frozen=True)
+class ProviderPlanEntry:
+    """Files dispatched to one provider. Dispatch is not a coverage claim."""
+
+    provider: str
+    head_paths: tuple[str, ...] = ()
+    base_paths: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class ProviderPlan:
+    """Deterministic dispatch of changed files, including the unclaimed ones."""
+
+    changed_files: tuple[str, ...] = ()
+    entries: tuple[ProviderPlanEntry, ...] = ()
+    unclaimed_files: tuple[str, ...] = ()
+    schema_version: str = "provider_plan.v1"
+
+    def validate_consistency(self) -> None:
+        for name, values in (
+            ("changed_files", self.changed_files),
+            ("unclaimed_files", self.unclaimed_files),
+        ):
+            if values != tuple(sorted(set(values))):
+                raise ValueError(f"provider plan {name} must be sorted and unique")
+        providers = tuple(entry.provider for entry in self.entries)
+        if providers != tuple(sorted(set(providers))):
+            raise ValueError("provider plan entries must be sorted and unique")
+        if set(self.unclaimed_files) - set(self.changed_files):
+            raise ValueError("provider plan leaves an unknown file unclaimed")
+        dispatched = {
+            path
+            for entry in self.entries
+            for path in (*entry.head_paths, *entry.base_paths)
+        }
+        if dispatched & set(self.unclaimed_files):
+            raise ValueError("provider plan dispatches an unclaimed file")
+        for entry in self.entries:
+            for values in (entry.head_paths, entry.base_paths):
+                if values != tuple(sorted(set(values))):
+                    raise ValueError(
+                        f"{entry.provider}: plan paths must be sorted and unique"
+                    )
+
+
+@dataclass(frozen=True)
+class ProviderFact:
+    """One provider-attributed assertion: subject, attribute and value."""
+
+    provider: str
+    capability: str
+    subject: str
+    attribute: str
+    value: str
+    revision_side: Literal["base", "head"]
+    path: str
+    line_start: int
+    line_end: int
+
+    def __post_init__(self) -> None:
+        for name in ("provider", "capability", "subject", "attribute", "value"):
+            if not getattr(self, name).strip():
+                raise ValueError(f"provider fact requires {name}")
+        if not self.path or self.line_start < 1 or self.line_end < self.line_start:
+            raise ValueError("provider fact requires a source location")
+
+
+@dataclass(frozen=True)
+class ProviderGap:
+    line: int
+    reason: str
+    excerpt: str = ""
+
+
+@dataclass(frozen=True)
+class ProviderFileCoverage:
+    """Provider-owned coverage for one file on one revision side."""
+
+    revision_side: Literal["base", "head"]
+    path: str
+    state: ProviderCoverageState
+    fact_count: int = 0
+    gaps: tuple[ProviderGap, ...] = ()
+
+    def __post_init__(self) -> None:
+        if self.state == "observed" and self.gaps:
+            raise ValueError(f"{self.path}: observed coverage cannot carry gaps")
+        if self.state == "partial" and not self.gaps:
+            raise ValueError(f"{self.path}: partial coverage requires a gap")
+        if self.state == "unavailable" and (self.fact_count or self.gaps):
+            raise ValueError(
+                f"{self.path}: unavailable coverage cannot carry facts or gaps"
+            )
+
+
+@dataclass(frozen=True)
+class ProviderObservation:
+    """Facts, coverage and diagnostics only; never a review conclusion."""
+
+    provider: str
+    facts: tuple[ProviderFact, ...] = ()
+    coverage: tuple[ProviderFileCoverage, ...] = ()
+    diagnostics: tuple[Diagnostic, ...] = ()
+    schema_version: str = "provider_observation.v1"
+
+    def validate_consistency(
+        self,
+        descriptor: ProviderDescriptor,
+        *,
+        head_paths: tuple[str, ...] = (),
+        base_paths: tuple[str, ...] = (),
+    ) -> None:
+        """Hold an observation to its declaration and its dispatch at ingestion."""
+
+        if self.provider != descriptor.provider:
+            raise ValueError(
+                f"{descriptor.provider}: observation attributed to {self.provider}"
+            )
+        allowed = {"head": set(head_paths), "base": set(base_paths)}
+        keys = tuple((item.revision_side, item.path) for item in self.coverage)
+        if len(set(keys)) != len(keys):
+            raise ValueError(f"{self.provider}: duplicate file coverage")
+        for side, path in keys:
+            if path not in allowed[side]:
+                raise ValueError(
+                    f"{self.provider}: coverage for {path} outside its dispatch"
+                )
+        counted: dict[tuple[str, str], int] = {}
+        for fact in self.facts:
+            if fact.provider != self.provider:
+                raise ValueError(
+                    f"{self.provider}: fact attributed to {fact.provider}"
+                )
+            if fact.capability not in descriptor.capabilities:
+                raise ValueError(
+                    f"{self.provider}: fact capability {fact.capability!r} "
+                    "outside its declared capabilities"
+                )
+            # A fact's file must carry coverage, and coverage is held to the
+            # dispatch above, so a fact outside the dispatch cannot pass.
+            key = (fact.revision_side, fact.path)
+            if key not in keys:
+                raise ValueError(f"{fact.path}: fact missing typed file coverage")
+            counted[key] = counted.get(key, 0) + 1
+        for item in self.coverage:
+            if counted.get((item.revision_side, item.path), 0) != item.fact_count:
+                raise ValueError(f"{item.path}: coverage fact count mismatch")
+
+
+@dataclass(frozen=True)
+class ProviderContribution:
+    """One provider's declaration paired with what it returned for its dispatch."""
+
+    descriptor: ProviderDescriptor
+    observation: ProviderObservation
+
+
+@dataclass(frozen=True)
+class ProviderCoverage:
+    """Per-provider coverage row: capabilities it operated under, files it saw."""
+
+    provider: str
+    capabilities: tuple[str, ...]
+    state: ProviderAggregateState
+    files: tuple[ProviderFileCoverage, ...] = ()
+    fact_count: int = 0
+    schema_version: str = "provider_coverage.v1"
+
+    def validate_consistency(self) -> None:
+        if self.state != aggregate_provider_state(self.files):
+            raise ValueError(f"{self.provider}: coverage state does not match files")
+        if self.fact_count != sum(item.fact_count for item in self.files):
+            raise ValueError(f"{self.provider}: coverage fact count mismatch")
+
+
+def aggregate_provider_state(
+    files: tuple[ProviderFileCoverage, ...],
+) -> ProviderAggregateState:
+    if not files:
+        return "not_requested"
+    states = {item.state for item in files}
+    if states == {"observed"}:
+        return "observed"
+    if states == {"unavailable"}:
+        return "unavailable"
+    return "partial"
+
+
+@dataclass(frozen=True)
+class SchemaFact:
+    """Provider-neutral schema assertion: what corroboration and conflict key on."""
+
+    subject: str
+    attribute: str
+    value: str
+
+
+def _schema_identifier(raw: str) -> str:
+    # Permitted loss: quoting and case are folded, so identifiers that differ
+    # only by case corroborate. Schema qualification is kept, never stripped.
+    return raw.strip().strip('"').strip("`").strip().casefold()
+
+
+def table_subject(table: str) -> str:
+    return f"table:{_schema_identifier(table)}"
+
+
+def column_subject(table: str, column: str) -> str:
+    return f"column:{_schema_identifier(table)}.{_schema_identifier(column)}"
+
+
+@dataclass(frozen=True)
+class EvidenceConflictSide:
+    value: str
+    evidence_id: str
+    providers: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class EvidenceConflict:
+    """Contradictory provider assertions, both retained and never merged."""
+
+    id: str
+    subject: str
+    attribute: str
+    revision_side: Literal["base", "head"]
+    sides: tuple[EvidenceConflictSide, ...]
+    schema_version: str = "evidence_conflict.v1"
+
+    def validate_consistency(self) -> None:
+        values = tuple(side.value for side in self.sides)
+        if len(self.sides) < 2 or len(set(values)) != len(values):
+            raise ValueError(f"{self.id}: conflict requires distinct values")
+        if values != tuple(sorted(values)):
+            raise ValueError(f"{self.id}: conflict sides must be ordered")
+        if len({provider for side in self.sides for provider in side.providers}) < 2:
+            raise ValueError(f"{self.id}: conflict requires distinct providers")
+
+
 @dataclass(frozen=True)
 class StructuralChangeIdentity:
     review_symbol_id: str
@@ -2098,7 +2437,8 @@ class EvidenceItem:
     verification_status: str = ""
     verification_conclusion: str = ""
     closure_scan_result: ClosureScanResult | None = None
-    sql_schema_statement: SqlSchemaStatement | None = None
+    schema_fact: SchemaFact | None = None
+    providers: tuple[str, ...] = ()
     sources: tuple[SourceRef, ...] = ()
     change_relation_ids: tuple[str, ...] = ()
     structural_path_ids: tuple[str, ...] = ()
@@ -2265,25 +2605,31 @@ class EvidenceItem:
             raise ValueError(
                 f"{self.id}: only closure facts may carry a scan result"
             )
-        if self.kind == "sql_schema_statement":
+        if self.kind == "schema_fact":
             if (
                 self.role != "revision_fact"
                 or self.revision_side not in {"head", "base"}
                 or self.operation != "observed"
                 or self.changed
                 or self.profile != "schema"
-                or self.authority != "sql_schema_provider"
-                or self.sql_schema_statement is None
+                or self.authority != "evidence_provider"
+                or self.schema_fact is None
             ):
-                raise ValueError(f"{self.id}: invalid sql schema statement")
-            if self.sql_schema_statement.revision_side != self.revision_side:
+                raise ValueError(f"{self.id}: invalid schema fact")
+        elif self.schema_fact is not None:
+            raise ValueError(f"{self.id}: only schema facts may carry a schema fact")
+        if self.authority in PROVIDER_AUTHORITIES:
+            if (
+                not self.providers
+                or self.providers != tuple(sorted(set(self.providers)))
+                or any(not value.strip() for value in self.providers)
+            ):
                 raise ValueError(
-                    f"{self.id}: sql schema statement revision side mismatch"
+                    f"{self.id}: {self.authority} fact requires sorted, unique "
+                    "provider identities"
                 )
-        elif self.sql_schema_statement is not None:
-            raise ValueError(
-                f"{self.id}: only sql schema statements may carry a statement"
-            )
+        elif self.providers:
+            raise ValueError(f"{self.id}: {self.authority} fact has no provider")
         expected_classifications = {
             "test": {"test"},
             "document": {"document"},
@@ -2307,9 +2653,10 @@ class EvidenceCatalog:
     ] = ()
     diagnostics: tuple[Diagnostic, ...] = ()
     closure_scan_diagnostics: tuple[ClosureScanDiagnostic, ...] = ()
-    sql_schema_coverage: tuple[SqlSchemaFileCoverage, ...] = ()
-    sql_schema_capabilities: tuple[SqlSchemaStatementKind, ...] = ()
-    schema_version: str = "evidence_catalog.v20"
+    provider_plan: ProviderPlan = ProviderPlan()
+    provider_coverage: tuple[ProviderCoverage, ...] = ()
+    provider_conflicts: tuple[EvidenceConflict, ...] = ()
+    schema_version: str = "evidence_catalog.v21"
 
     def by_id(self) -> dict[str, EvidenceItem]:
         return {item.id: item for item in self.items}
@@ -2610,6 +2957,105 @@ class EvidenceCatalog:
             raise ValueError(
                 "evidence catalog contains duplicate structural ownership identities"
             )
+        self._validate_provider_federation()
+
+    def _validate_provider_federation(self) -> None:
+        self.provider_plan.validate_consistency()
+        coverage_providers = tuple(item.provider for item in self.provider_coverage)
+        if coverage_providers != tuple(sorted(set(coverage_providers))):
+            raise ValueError("provider coverage must be sorted and unique")
+        for coverage in self.provider_coverage:
+            coverage.validate_consistency()
+        known = set(coverage_providers)
+        for item in self.items:
+            if item.authority == "evidence_provider" and not set(
+                item.providers
+            ) <= known:
+                raise ValueError(
+                    f"{item.id}: fact attributed to a provider without coverage"
+                )
+        # Conflicts are derived state: recompute them from the canonical facts
+        # instead of trusting a persisted record.
+        if self.provider_conflicts != derive_evidence_conflicts(self.items):
+            raise ValueError(
+                "provider conflicts do not match the catalog's schema facts"
+            )
+        for conflict in self.provider_conflicts:
+            conflict.validate_consistency()
+
+
+def evidence_conflict_id(
+    revision_side: str, subject: str, attribute: str
+) -> str:
+    digest = hashlib.sha256(
+        "\0".join((revision_side, subject, attribute)).encode()
+    ).hexdigest()[:20]
+    return f"C:{digest}"
+
+
+def derive_evidence_conflicts(
+    items: tuple[EvidenceItem, ...],
+) -> tuple[EvidenceConflict, ...]:
+    """Cross-provider contradictions over one (side, subject, attribute).
+
+    Two facts contradict when their values differ and different providers
+    asserted them. One provider asserting differing values (sequential
+    statements) is not a conflict. Nothing is merged, ranked or scored.
+    """
+
+    groups: dict[tuple[str, str, str], list[EvidenceItem]] = {}
+    for item in items:
+        if item.kind != "schema_fact" or item.schema_fact is None:
+            continue
+        key = (
+            item.revision_side,
+            item.schema_fact.subject,
+            item.schema_fact.attribute,
+        )
+        groups.setdefault(key, []).append(item)
+    conflicts: list[EvidenceConflict] = []
+    for (side, subject, attribute), members in sorted(groups.items()):
+        by_value = sorted(
+            members,
+            key=lambda member: (
+                member.schema_fact.value if member.schema_fact else "",
+                member.id,
+            ),
+        )
+        involved = [
+            member
+            for member in by_value
+            if any(
+                other.schema_fact.value != member.schema_fact.value
+                and any(
+                    first != second
+                    for first in member.providers
+                    for second in other.providers
+                )
+                for other in by_value
+                if other.schema_fact is not None and member.schema_fact is not None
+            )
+        ]
+        if len(involved) < 2:
+            continue
+        conflicts.append(
+            EvidenceConflict(
+                id=evidence_conflict_id(side, subject, attribute),
+                subject=subject,
+                attribute=attribute,
+                revision_side=side,  # type: ignore[arg-type]
+                sides=tuple(
+                    EvidenceConflictSide(
+                        value=member.schema_fact.value,
+                        evidence_id=member.id,
+                        providers=member.providers,
+                    )
+                    for member in involved
+                    if member.schema_fact is not None
+                ),
+            )
+        )
+    return tuple(conflicts)
 
 
 @dataclass(frozen=True)
@@ -4244,6 +4690,11 @@ class ReviewOverview:
     llm_shadow: LLMShadowExecutionSummary = field(
         default_factory=LLMShadowExecutionSummary
     )
+    # Projected verbatim from the EvidenceCatalog; the overview never re-decides
+    # provider coverage, routing or conflicts.
+    provider_coverage: tuple[ProviderCoverage, ...] = ()
+    unclaimed_changed_files: tuple[str, ...] = ()
+    provider_conflicts: tuple[EvidenceConflict, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -4308,7 +4759,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "repodelta-open-core"
-    schema_version: str = "review_brief.v59"
+    schema_version: str = "review_brief.v60"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

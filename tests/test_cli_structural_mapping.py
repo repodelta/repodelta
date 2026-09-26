@@ -447,3 +447,27 @@ def test_cli_verbose_prints_structural_diagnostics(
         "  - Structural coverage · codegraph · provider unavailable:"
         in stderr
     )
+
+
+def test_cli_registers_every_evidence_provider_and_reports_the_unclaimed_file(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    fixture = _write_fixture(tmp_path)
+    repo_root = tmp_path / "repo"
+    _write_index(repo_root)
+
+    assert _run_cli(
+        monkeypatch, fixture, repo_root, tmp_path / "review.html"
+    ) == 0
+
+    err = capsys.readouterr().err
+    # A provider missing from the composition root would be dead code: it could
+    # never declare, route or report coverage.
+    assert "Evidence provider sql-schema: not_requested" in err
+    assert "Evidence provider alembic-migration: not_requested" in err
+    assert (
+        "Evidence providers: 1 changed files claimed by no provider · src/service.py"
+        in err
+    )

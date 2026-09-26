@@ -1,17 +1,29 @@
 from __future__ import annotations
 
 import re
-import subprocess
 from pathlib import Path
 from typing import Literal, Protocol
 
+from repodelta.providers.checkout import (
+    checkout_revision,
+    is_symlinked,
+    tracked_checkout_clean,
+)
 from repodelta.model.contracts import (
     Diagnostic,
+    FileSelector,
+    ProviderDescriptor,
+    ProviderFact,
+    ProviderFileCoverage,
+    ProviderGap,
+    ProviderObservation,
     SqlSchemaFileCoverage,
     SqlSchemaGap,
     SqlSchemaResult,
     SqlSchemaStatement,
     SqlSchemaStatementKind,
+    column_subject,
+    table_subject,
 )
 
 _MAX_BYTES_PER_FILE = 2_000_000
@@ -363,25 +375,6 @@ class SqlSchemaProvider(Protocol):
     ) -> SqlSchemaResult: ...
 
 
-def unavailable_sql_schema_result(
-    *,
-    head_paths: tuple[str, ...] = (),
-    base_paths: tuple[str, ...] = (),
-    message: str = "No repository SQL schema provider was configured.",
-) -> SqlSchemaResult:
-    coverage = tuple(
-        SqlSchemaFileCoverage(revision_side=side, path=path, state="unavailable")
-        for side, paths in (("head", head_paths), ("base", base_paths))
-        for path in paths
-    )
-    diagnostics = (
-        (Diagnostic(code="sql_schema_provider_unavailable", message=message),)
-        if coverage
-        else ()
-    )
-    return SqlSchemaResult(coverage=coverage, diagnostics=diagnostics)
-
-
 class RepositorySqlSchemaProvider:
     """Observe exact base/head checkouts without interpreting the DDL further."""
 
@@ -447,7 +440,7 @@ class RepositorySqlSchemaProvider:
                     ),
                 ),
             )
-        revision = _checkout_revision(root)
+        revision = checkout_revision(root)
         expected = self.expected_revisions[side]
         if not revision or (expected and revision != expected):
             return (), self._unavailable_coverage(side, paths), (
@@ -460,7 +453,7 @@ class RepositorySqlSchemaProvider:
                     ),
                 ),
             )
-        if not _tracked_checkout_clean(root):
+        if not tracked_checkout_clean(root):
             return (), self._unavailable_coverage(side, paths), (
                 Diagnostic(
                     code="sql_schema_dirty_checkout",
@@ -489,7 +482,7 @@ class RepositorySqlSchemaProvider:
         tuple[SqlSchemaStatement, ...], SqlSchemaFileCoverage, Diagnostic | None
     ]:
         target = root / path
-        if self._is_symlinked(root, path):
+        if is_symlinked(root, path):
             return (
                 (),
                 SqlSchemaFileCoverage(revision_side=side, path=path, state="unavailable"),
@@ -538,43 +531,82 @@ class RepositorySqlSchemaProvider:
             for path in paths
         )
 
-    @staticmethod
-    def _is_symlinked(root: Path, path: str) -> bool:
-        """Fail closed on any symlinked SQL input, inside or outside the checkout.
 
-        A symlink's target -- even one that resolves inside the checkout --
-        can be an untracked or generated file that the checkout cleanliness
-        check does not see, so it is never provably bound to the reviewed
-        git revision. The invariant is evidence-to-revision binding, not
-        target provenance, so every symlinked input fails closed rather than
-        having its target's location inspected.
-        """
-
-        current = root
-        for part in Path(path).parts:
-            current = current / part
-            if current.is_symlink():
-                return True
-        return False
+SQL_SCHEMA_PROVIDER = "sql-schema"
 
 
-def _checkout_revision(root: Path) -> str:
-    try:
-        result = subprocess.run(
-            ["git", "-C", str(root), "rev-parse", "HEAD"],
-            check=True, capture_output=True, text=True, timeout=5,
+class SqlSchemaEvidenceProvider:
+    """Federation adapter: declares applicability and speaks neutral schema facts.
+
+    The wrapped SqlSchemaProvider keeps its own contract and behavior; this
+    adapter only declares which paths it may be dispatched and translates each
+    observed statement into one provider-attributed schema fact.
+    """
+
+    def __init__(self, provider: SqlSchemaProvider) -> None:
+        self._provider = provider
+
+    def descriptor(self) -> ProviderDescriptor:
+        return ProviderDescriptor(
+            provider=SQL_SCHEMA_PROVIDER,
+            capabilities=_CAPABILITIES,
+            selectors=(FileSelector(kind="suffix", pattern=".sql"),),
         )
-    except (OSError, subprocess.SubprocessError):
-        return ""
-    return result.stdout.strip()
+
+    def observe(
+        self,
+        *,
+        head_paths: tuple[str, ...] = (),
+        base_paths: tuple[str, ...] = (),
+    ) -> ProviderObservation:
+        result = self._provider.observe(head_paths=head_paths, base_paths=base_paths)
+        # The result contract is the SQL provider's own; hold any provider
+        # behind the protocol to it before its output is translated.
+        result.validate_consistency()
+        return observation_from_sql_result(result)
 
 
-def _tracked_checkout_clean(root: Path) -> bool:
-    try:
-        result = subprocess.run(
-            ["git", "-C", str(root), "status", "--porcelain", "--untracked-files=no"],
-            check=True, capture_output=True, text=True, timeout=5,
-        )
-    except (OSError, subprocess.SubprocessError):
-        return False
-    return not result.stdout.strip()
+def observation_from_sql_result(result: SqlSchemaResult) -> ProviderObservation:
+    return ProviderObservation(
+        provider=SQL_SCHEMA_PROVIDER,
+        facts=tuple(_fact(statement) for statement in result.statements),
+        coverage=tuple(
+            ProviderFileCoverage(
+                revision_side=item.revision_side,
+                path=item.path,
+                state=item.state,
+                fact_count=item.statement_count,
+                gaps=tuple(
+                    ProviderGap(line=gap.line, reason=gap.reason, excerpt=gap.excerpt)
+                    for gap in item.gaps
+                ),
+            )
+            for item in result.coverage
+        ),
+        diagnostics=result.diagnostics,
+    )
+
+
+def _fact(statement: SqlSchemaStatement) -> ProviderFact:
+    if statement.kind == "create_table":
+        subject, attribute, value = table_subject(statement.table), "exists", "true"
+    else:
+        assert statement.column is not None
+        subject = column_subject(statement.table, statement.column)
+        attribute, value = {
+            "alter_table_add_column": ("exists", "true"),
+            "alter_table_drop_column": ("exists", "false"),
+            "alter_column_set_not_null": ("nullable", "false"),
+            "alter_column_drop_not_null": ("nullable", "true"),
+        }[statement.kind]
+    return ProviderFact(
+        provider=SQL_SCHEMA_PROVIDER,
+        capability=statement.kind,
+        subject=subject,
+        attribute=attribute,
+        value=value,
+        revision_side=statement.revision_side,
+        path=statement.path,
+        line_start=statement.line_start,
+        line_end=statement.line_end,
+    )
