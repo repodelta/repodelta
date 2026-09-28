@@ -339,3 +339,30 @@ def test_api_failure_is_bounded_without_credential_text() -> None:
 def test_repository_must_use_owner_name_form(tmp_path: Path) -> None:
     with pytest.raises(SubmissionError, match="owner/name"):
         push_head(_config(tmp_path, repo="https://example.com/repo"), "token")
+
+
+def test_bot_pull_request_does_not_require_a_reviewer(tmp_path: Path) -> None:
+    requests: list[tuple[str, dict[str, object]]] = []
+
+    def fake_open(request: object) -> JsonResponse:
+        requests.append((request.full_url, json.loads(request.data)))
+        return JsonResponse(
+            {
+                "number": 251,
+                "html_url": "https://github.com/repodelta/repodelta/pull/251",
+                "user": {"login": "repodelta-change-submitter[bot]"},
+            }
+        )
+
+    result = create_pull_request(
+        _config(tmp_path, reviewers=()),
+        "short-token",
+        open_url=fake_open,
+    )
+
+    assert result.number == 251
+    assert result.author == "repodelta-change-submitter[bot]"
+    assert len(requests) == 1
+    assert requests[0][0] == (
+        "https://api.github.com/repos/repodelta/repodelta/pulls"
+    )

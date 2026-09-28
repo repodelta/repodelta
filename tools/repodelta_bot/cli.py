@@ -46,13 +46,16 @@ def _current_branch(repo_root: Path) -> str:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="repodelta-bot",
-        description="Submit a local change through a GitHub App for human review",
+        description="Create or update pull requests using the RepoDelta GitHub App identity",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
-    submit = subparsers.add_parser("submit", help="Push HEAD and create a pull request")
+    submit = subparsers.add_parser(
+        "submit",
+        help="Push HEAD and create a pull request using the Bot identity",
+    )
     push = subparsers.add_parser(
         "push",
-        help="Push HEAD through the App to an existing pull-request branch",
+        help="Update an existing pull-request branch using the Bot identity",
     )
     for command in (submit, push):
         command.add_argument(
