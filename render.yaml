@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: repodelta-bot
+    runtime: python
+    plan: free
+    buildCommand: pip install -e .
+    startCommand: python tools/repodelta_bot/server.py
+    healthCheckPath: /health
+    envVars:
+      - key: GITHUB_WEBHOOK_SECRET
+        sync: false
