@@ -286,12 +286,24 @@ class GitHubPullRequestAdapter:
         repository_row = data.get("repository") if isinstance(data, dict) else None
         pr_row = repository_row.get("pullRequest") if isinstance(repository_row, dict) else None
         references = pr_row.get("closingIssuesReferences") if isinstance(pr_row, dict) else None
-        nodes = references.get("nodes", []) if isinstance(references, dict) else []
+        nodes = references.get("nodes") if isinstance(references, dict) else None
+        if not isinstance(nodes, list):
+            return [], [
+                Diagnostic(
+                    code="github_linked_issues_unavailable",
+                    message=(
+                        "GitHub linked-Issue lookup returned an incomplete or "
+                        "malformed closingIssuesReferences structure."
+                    ),
+                )
+            ]
         records: list[SourceRecord] = []
-        for row in nodes if isinstance(nodes, list) else []:
-            if not isinstance(row, dict) or not isinstance(row.get("number"), int):
+        malformed_node = False
+        for row in nodes:
+            issue_number = row.get("number") if isinstance(row, dict) else None
+            if type(issue_number) is not int or issue_number <= 0:
+                malformed_node = True
                 continue
-            issue_number = row["number"]
             issue_title = str(row.get("title") or f"Issue #{issue_number}")
             issue_body = str(row.get("body") or "")
             records.append(
@@ -307,6 +319,17 @@ class GitHubPullRequestAdapter:
                 )
             )
         diagnostics = []
+        if malformed_node:
+            diagnostics.append(
+                Diagnostic(
+                    code="github_linked_issues_unavailable",
+                    message=(
+                        "GitHub linked-Issue lookup returned one or more malformed "
+                        "Issue records; valid records were retained but the result "
+                        "is not complete enough to resolve governing-Issue authority."
+                    ),
+                )
+            )
         if len(records) > 1:
             diagnostics.append(
                 Diagnostic(

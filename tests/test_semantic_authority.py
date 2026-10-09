@@ -4,6 +4,7 @@ from repodelta.pipeline import DeterministicAnalyzer
 from repodelta.model.contracts import (
     AnalysisInput,
     ChangedFile,
+    Diagnostic,
     Requirement,
     ReviewSourcePacket,
     SourceRef,
@@ -53,6 +54,47 @@ def _packet(
     ).with_revision()
 
 
+def _github_authority_packet(
+    *,
+    pr_body: str,
+    issue_bodies: tuple[str, ...] = (),
+    diagnostic_codes: tuple[str, ...] = (),
+) -> ReviewSourcePacket:
+    records = [
+        SourceRecord(
+            id="github-pr:acme/widget#8",
+            kind="pull_request",
+            repository="acme/widget",
+            url="https://github.com/acme/widget/pull/8",
+            title="Authority boundary",
+            body=pr_body,
+        )
+    ]
+    records.extend(
+        SourceRecord(
+            id=f"github-issue:acme/widget#{index}",
+            kind="linked_issue",
+            repository="acme/widget",
+            url=f"https://github.com/acme/widget/issues/{index}",
+            title=f"Issue {index}",
+            body=body,
+        )
+        for index, body in enumerate(issue_bodies, start=1)
+    )
+    return ReviewSourcePacket(
+        repository="acme/widget",
+        pull_request=8,
+        title="Authority boundary",
+        source_records=tuple(records),
+        source_url="https://github.com/acme/widget/pull/8",
+        diagnostics=tuple(
+            Diagnostic(code=code, message=f"source state: {code}")
+            for code in diagnostic_codes
+        ),
+        metadata={"source": "github"},
+    ).with_revision()
+
+
 def test_issue_obligations_override_pr_authored_acceptance_criteria() -> None:
     semantics = extract_review_semantics(
         issue_body=(
@@ -90,6 +132,96 @@ def test_issue_obligations_override_pr_authored_acceptance_criteria() -> None:
     assert [item.text for item in semantics.claims] == [
         "Adds a Codegraph provider."
     ]
+
+
+def test_ambiguous_github_issues_block_pr_obligation_fallback_but_keep_tcc() -> None:
+    packet = _github_authority_packet(
+        pr_body=(
+            "## Requirements\n"
+            "- Everything is implemented.\n\n"
+            "## Change\n"
+            "- Route credentials through the canonical adapter.\n\n"
+            "## Completion conditions\n"
+            "- The focused checks pass.\n"
+        ),
+        issue_bodies=(
+            "## Requirements\n- Preserve provider A.",
+            "## Requirements\n- Preserve provider B.",
+        ),
+        diagnostic_codes=("github_linked_issues_ambiguous",),
+    )
+
+    extracted = extract_packet_semantics(packet)
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+
+    assert extracted.statements.obligations == ()
+    assert [
+        item.kind for item in extracted.statements.transformation_contract.claims
+    ] == ["change", "completion_condition"]
+    assert len(
+        [item for item in packet.source_records if item.kind == "linked_issue"]
+    ) == 2
+    assert any(item.label == "Source coverage" for item in brief.overview.attention)
+    assert "github_linked_issues_ambiguous" in render_html(brief)
+
+
+def test_unavailable_github_issue_lookup_blocks_pr_obligation_fallback() -> None:
+    packet = _github_authority_packet(
+        pr_body=(
+            "## Requirements\n"
+            "- Everything is implemented.\n\n"
+            "## Change\n"
+            "- Route credentials through the canonical adapter.\n"
+        ),
+        diagnostic_codes=("github_linked_issues_unavailable",),
+    )
+
+    extracted = extract_packet_semantics(packet)
+
+    assert extracted.statements.obligations == ()
+    assert [
+        item.kind for item in extracted.statements.transformation_contract.claims
+    ] == ["change"]
+
+
+def test_confirmed_absent_github_issue_preserves_pr_obligation_fallback() -> None:
+    packet = _github_authority_packet(
+        pr_body="## Requirements\n- Preserve fallback behavior.\n",
+        diagnostic_codes=("github_linked_issue_not_found",),
+    )
+
+    extracted = extract_packet_semantics(packet)
+
+    assert [item.text for item in extracted.statements.obligations] == [
+        "Preserve fallback behavior."
+    ]
+    assert extracted.statements.obligations[0].authority == "pr_description"
+
+
+def test_non_github_packet_preserves_established_pr_obligation_fallback() -> None:
+    packet = _packet(
+        pr_body="## Requirements\n- Preserve fixture fallback behavior.\n"
+    )
+
+    extracted = extract_packet_semantics(packet)
+
+    assert [item.text for item in extracted.statements.obligations] == [
+        "Preserve fixture fallback behavior."
+    ]
+
+
+def test_unique_issue_without_obligations_preserves_existing_pr_fallback() -> None:
+    packet = _github_authority_packet(
+        pr_body="## Requirements\n- Preserve the existing fallback policy.\n",
+        issue_bodies=("## Goal\n- Explain the intent without requirements.\n",),
+    )
+
+    extracted = extract_packet_semantics(packet)
+
+    assert [item.text for item in extracted.statements.obligations] == [
+        "Preserve the existing fallback policy."
+    ]
+    assert extracted.statements.obligations[0].authority == "pr_description"
 
 
 def _pr_source():

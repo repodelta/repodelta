@@ -23,6 +23,7 @@ from repodelta.providers.structural import StructuralGraphCollection
 
 _SOURCE_COVERAGE_CODES = {
     "github_linked_issue_not_found",
+    "github_linked_issues_ambiguous",
     "github_linked_issues_unavailable",
     "github_patch_unavailable",
     "github_file_limit_reached",

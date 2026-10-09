@@ -694,6 +694,7 @@ def extract_review_semantics(
     pr_body: str | None,
     pr_source: SourceRef,
     pr_title: str,
+    allow_pr_obligation_fallback: bool = True,
 ) -> ReviewSemantics:
     """Apply the single authority policy to already collected source bodies."""
 
@@ -705,7 +706,9 @@ def extract_review_semantics(
         else ()
     )
     pr_obligations = tuple(item for item in pr.items if item.role == "obligation")
-    selected_obligations = issue_obligations or pr_obligations
+    selected_obligations = issue_obligations or (
+        pr_obligations if allow_pr_obligation_fallback else ()
+    )
     obligation_authority: StatementAuthority = (
         "issue" if issue_obligations else "pr_description"
     )

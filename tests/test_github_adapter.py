@@ -6,9 +6,16 @@ import pytest
 
 from repodelta.pipeline import DeterministicAnalyzer
 from repodelta.model.contracts import AnalysisInput
-from repodelta.intake.github import GitHubClient, GitHubPullRequestAdapter
+from repodelta.intake.github import (
+    GitHubApiError,
+    GitHubClient,
+    GitHubPullRequestAdapter,
+)
 from repodelta.semantics.criteria import extract_intent, extract_requirement_texts
 from repodelta.presentation.html import render_html
+
+
+_DEFAULT_GRAPHQL = object()
 
 
 class FakeClient:
@@ -17,15 +24,23 @@ class FakeClient:
         responses: dict[tuple[str, tuple[tuple[str, str | int], ...]], Any],
         *,
         linked_issues: list[dict[str, Any]] | None = None,
+        graphql_payload: Any = _DEFAULT_GRAPHQL,
+        graphql_error: GitHubApiError | None = None,
     ) -> None:
         self.responses = responses
         self.linked_issues = linked_issues or []
+        self.graphql_payload = graphql_payload
+        self.graphql_error = graphql_error
 
     def get_json(self, path: str, query: dict[str, str | int] | None = None) -> Any:
         return self.responses[(path, tuple(sorted((query or {}).items())))]
 
     def post_graphql(self, query: str, variables: dict[str, object]) -> Any:
         assert "closingIssuesReferences" in query
+        if self.graphql_error is not None:
+            raise self.graphql_error
+        if self.graphql_payload is not _DEFAULT_GRAPHQL:
+            return self.graphql_payload
         return {
             "data": {
                 "repository": {
@@ -207,6 +222,94 @@ def test_github_graphql_linked_issue_supplies_primary_acceptance_criteria() -> N
     assert "Issue #41 · Acceptance criteria" in html
     assert "https://github.com/acme/widget/issues/41#acceptance-criteria" in html
     assert ">linked issue<" not in html
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {},
+        {"data": {}},
+        {"data": {"repository": {}}},
+        {"data": {"repository": {"pullRequest": {}}}},
+        {
+            "data": {
+                "repository": {
+                    "pullRequest": {"closingIssuesReferences": {}}
+                }
+            }
+        },
+        {
+            "data": {
+                "repository": {
+                    "pullRequest": {
+                        "closingIssuesReferences": {"nodes": {}}
+                    }
+                }
+            }
+        },
+    ],
+)
+def test_malformed_linked_issue_structure_is_unavailable(payload: Any) -> None:
+    records, diagnostics = GitHubPullRequestAdapter(
+        client=FakeClient({}, graphql_payload=payload)
+    )._load_linked_issues(
+        repository="acme/widget",
+        owner="acme",
+        name="widget",
+        pull_request=42,
+    )
+
+    assert records == []
+    assert [item.code for item in diagnostics] == [
+        "github_linked_issues_unavailable"
+    ]
+    assert all(item.code != "github_linked_issue_not_found" for item in diagnostics)
+
+
+def test_linked_issue_lookup_failure_is_unavailable() -> None:
+    records, diagnostics = GitHubPullRequestAdapter(
+        client=FakeClient(
+            {},
+            graphql_error=GitHubApiError("linked-Issue lookup failed"),
+        )
+    )._load_linked_issues(
+        repository="acme/widget",
+        owner="acme",
+        name="widget",
+        pull_request=42,
+    )
+
+    assert records == []
+    assert [item.code for item in diagnostics] == [
+        "github_linked_issues_unavailable"
+    ]
+
+
+def test_partial_malformed_issue_nodes_retain_valid_records_but_are_unavailable() -> None:
+    records, diagnostics = GitHubPullRequestAdapter(
+        client=FakeClient(
+            {},
+            linked_issues=[
+                {
+                    "number": 41,
+                    "title": "Retained issue",
+                    "body": "## Requirements\n- Preserve the boundary.",
+                },
+                {"title": "Missing number"},
+                {"number": True, "title": "Boolean is not an Issue number"},
+            ],
+        )
+    )._load_linked_issues(
+        repository="acme/widget",
+        owner="acme",
+        name="widget",
+        pull_request=42,
+    )
+
+    assert [item.id for item in records] == ["github-issue:acme/widget#41"]
+    assert [item.code for item in diagnostics] == [
+        "github_linked_issues_unavailable"
+    ]
 
 
 def test_token_is_not_sent_to_untrusted_or_unsafe_api_url() -> None:
