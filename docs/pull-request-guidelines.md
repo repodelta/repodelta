@@ -30,8 +30,8 @@ Record applicable items only; do not fill absent concepts with template noise:
 
 ## Formal transformation contract
 
-If a PR is intended to supply formal T/CC claims, use exact Markdown ATX
-headings (`##`) for the applicable claims. The canonical headings are:
+If a PR is intended to supply formal T/CC claims, use the canonical Markdown
+ATX headings and levels shown below. The canonical headings are:
 
 ```text
 ## Change

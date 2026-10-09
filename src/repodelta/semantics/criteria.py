@@ -282,6 +282,7 @@ _FORMAL_ISSUE_CONTRACT_HEADINGS = frozenset(
         *_VERIFICATION_HEADINGS,
     }
 )
+_ISSUE_AUTHORED_CONTEXT_HEADINGS = frozenset({"uncertainty", "uncertainties"})
 _TRANSFORMATION_NEAR_MISS_HEADINGS = frozenset(
     {
         "transformation",
@@ -521,6 +522,19 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
         list_items = []
         list_stack = []
 
+    def terminate_semantic_section() -> None:
+        """End inherited formal meaning at an observed non-formal boundary."""
+
+        nonlocal current_section
+        nonlocal current_role, current_purpose, current_transformation_kind
+        finish_paragraph()
+        finish_list()
+        current_section = ""
+        current_role = None
+        current_purpose = None
+        current_transformation_kind = None
+        heading_stack.clear()
+
     heading_seen = False
     for line_number, raw_line in enumerate(body.splitlines(), start=1):
         fence_match = _FENCE_RE.match(raw_line)
@@ -579,6 +593,7 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
                 bare_heading in _FORMAL_ISSUE_CONTRACT_HEADINGS
                 or bare_heading in _TRANSFORMATION_HEADINGS
             ):
+                terminate_semantic_section()
                 contract_syntax_hints.append(
                     _ContractSyntaxHint(
                         heading=_clean_markdown_text(raw_line),
@@ -586,6 +601,7 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
                         kind="bare_formal_heading",
                     )
                 )
+                continue
 
         list_match = _LIST_ITEM_RE.match(raw_line)
         if list_match:
@@ -832,7 +848,10 @@ def _contract_syntax_diagnostics(
     diagnostics: list[Diagnostic] = []
     for hint in parsed.contract_syntax_hints:
         heading = _normalize_heading(hint.heading)
-        is_transition = (
+        is_issue_authored_context = (
+            surface == "issue" and heading in _ISSUE_AUTHORED_CONTEXT_HEADINGS
+        )
+        is_transition = not is_issue_authored_context and (
             hint.kind == "unrecognized_transformation_heading"
             or heading in _TRANSFORMATION_HEADINGS
         )

@@ -1215,6 +1215,93 @@ def test_external_pr_requirement_fallback_still_gets_markdown_guidance() -> None
     assert "## Requirements" in extracted.contract_diagnostics[0].message
 
 
+def test_bare_requirement_terminates_inherited_pr_claim_semantics() -> None:
+    parsed = parse_markdown_semantics(
+        "## Summary\n"
+        "- Add the adapter.\n\n"
+        "Requirements\n"
+        "- The adapter must be registered in production.\n"
+    )
+
+    assert [item.text for item in parsed.items] == ["Add the adapter."]
+    assert parsed.transformation_items == ()
+    assert [hint.heading for hint in parsed.contract_syntax_hints] == [
+        "Requirements"
+    ]
+
+
+def test_bare_before_terminates_inherited_transformation_semantics() -> None:
+    parsed = parse_markdown_semantics(
+        "## Change\n"
+        "- Introduce Provider B.\n\n"
+        "Before\n"
+        "Provider B was not active.\n"
+    )
+
+    assert [(item.text, item.kind) for item in parsed.transformation_items] == [
+        ("Introduce Provider B.", "change")
+    ]
+    assert parsed.items == ()
+
+
+def test_bare_contract_boundary_flushes_an_active_list_without_absorbing_label() -> None:
+    parsed = parse_markdown_semantics(
+        "## Summary\n"
+        "- Add the adapter.\n"
+        "Requirements\n"
+        "- Register it in production.\n"
+    )
+
+    assert [item.text for item in parsed.items] == ["Add the adapter."]
+
+
+def test_bare_contract_boundary_breaks_transformation_parentage() -> None:
+    parsed = parse_markdown_semantics(
+        "## Selected region\n"
+        "- Provider integration.\n\n"
+        "Requirements\n"
+        "ordinary prose\n\n"
+        "### Inputs\n"
+        "- Provider configuration.\n"
+    )
+
+    assert [(item.text, item.kind) for item in parsed.transformation_items] == [
+        ("Provider integration.", "selected_region")
+    ]
+
+
+def test_issue_uncertainties_are_authored_context_not_transition_semantics() -> None:
+    packet = _packet(
+        issue_body=(
+            "## Uncertainties\n"
+            "- Whether the provider is active in every deployment.\n"
+        )
+    )
+
+    extracted = extract_packet_semantics(packet)
+
+    assert extracted.statements.obligations == ()
+    assert extracted.statements.verification_expectations == ()
+    assert extracted.statements.transformation_contract.claims == ()
+    assert extracted.contract_diagnostics == ()
+
+
+def test_bare_issue_uncertainties_get_authoring_not_transition_guidance() -> None:
+    packet = _packet(
+        issue_body=(
+            "Uncertainties\n"
+            "- Whether the provider is active in every deployment.\n"
+        )
+    )
+
+    extracted = extract_packet_semantics(packet)
+
+    assert [item.code for item in extracted.contract_diagnostics] == [
+        "authored_contract_heading_requires_markdown"
+    ]
+    assert "## Uncertainties" in extracted.contract_diagnostics[0].message
+
+
 def test_pr311_and_pr323_style_transformation_headings_remain_context_but_visible() -> None:
     packet = _packet(
         pr_body=(
