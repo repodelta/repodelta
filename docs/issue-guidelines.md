@@ -15,28 +15,35 @@ A focused Issue has at most one active implementation PR, including a Draft.
 Other Issues do not supply focused implementation ownership; parent or
 hierarchy semantics are outside this guidance.
 
-Prefer these headings when applicable:
+For a RepoDelta Issue, use the canonical Markdown ATX headings and levels shown
+below (`##`, not bare text labels):
 
 ```text
-Goal
-Requirements
-Guardrails
-Verification expectations
-Scope
-Out of scope
-Uncertainties
+## Goal
+## Requirements
+## Guardrails
+## Verification expectations
+## Scope
+## Out of scope
+## Uncertainties
 ```
 
 `Requirements`, `Acceptance criteria`, `Definition of done`, and `Success
-criteria` are requirement aliases; prefer `Requirements` for consistent
-authoring. Write one independently reviewable semantic obligation per list
-item. Goals explain intent and guardrails constrain the solution; neither is a
-requirement.
+criteria` remain accepted requirement aliases; prefer `## Requirements` for
+consistent authoring. The parser continues to accept established compatible
+ATX headings and aliases for backward compatibility. Bare labels such as
+`Requirements` are context, not a formal section. RepoDelta reports a
+source-backed warning when it sees a contract-looking bare label, but never
+promotes its contents by inference.
+
+Write one independently reviewable semantic obligation per list item. Goals
+explain intent and guardrails constrain the solution; neither is a requirement.
 
 Keep optional sections optional. Use Scope for included responsibility and Out
 of scope for explicit exclusions. Verification expectations name the kind of
 evidence required without claiming that evidence already exists. Uncertainties
-record dynamic or external surfaces that cannot yet be covered.
+record dynamic or external surfaces that cannot yet be covered. `Uncertainties`
+is canonical authored context, not an R/G/V field or a PR T/CC declaration.
 
 Do not put PR-level `Before`, `After`, authority transitions, migrations,
 completion evidence, closure state, or `Completion conditions` in the Issue.

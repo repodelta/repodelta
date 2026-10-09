@@ -51,3 +51,10 @@ product's support for reviewing external PRs without linked Issues.
 For non-trivial behavioral, responsibility, contract, data-flow, or
 cross-component changes, follow `docs/agent-change-protocol.md`. Before an
 Issue, commit, or PR, follow its corresponding guideline in `docs/`.
+
+## Machine-recognized authoring contract
+
+When an Issue or PR is intended to supply a formal RepoDelta contract, use the
+exact Markdown headings in `docs/issue-guidelines.md` and
+`docs/pull-request-guidelines.md`. Free prose and approximate headings remain
+context; they are not a substitute for formal R/G or T/CC declarations.

@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from repodelta.model.contracts import ReviewSourcePacket, SourceRef
+from repodelta.model.contracts import Diagnostic, ReviewSourcePacket, SourceRef
 from repodelta.semantics.criteria import ReviewSemantics, extract_review_semantics
 
 
@@ -13,6 +13,7 @@ class ExtractedReviewSemantics:
     claim_source_state: Literal[
         "source_absent", "extraction_missing", "available"
     ]
+    contract_diagnostics: tuple[Diagnostic, ...] = ()
 
 
 def extract_packet_semantics(
@@ -54,4 +55,5 @@ def extract_packet_semantics(
             if not statements.claims
             else "available"
         ),
+        contract_diagnostics=statements.contract_diagnostics,
     )
