@@ -372,6 +372,12 @@ def _normalize_heading(value: str) -> str:
     return _HEADING_DECORATION_RE.sub("", normalized).strip()
 
 
+def _normalize_bare_contract_label(value: str) -> str:
+    """Normalize only plain labels, without erasing Markdown structure."""
+
+    return " ".join(value.strip().removesuffix(":").split()).casefold()
+
+
 def _indent_width(value: str) -> int:
     return sum(4 if character == "\t" else 1 for character in value)
 
@@ -583,12 +589,13 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
                 )
             continue
 
+        list_match = _LIST_ITEM_RE.match(raw_line)
         if (
             raw_line == raw_line.lstrip()
             and raw_line.strip()
-            and not raw_line.lstrip().startswith(("-", "*", "+"))
+            and list_match is None
         ):
-            bare_heading = _normalize_heading(raw_line)
+            bare_heading = _normalize_bare_contract_label(raw_line)
             if (
                 bare_heading in _FORMAL_ISSUE_CONTRACT_HEADINGS
                 or bare_heading in _TRANSFORMATION_HEADINGS
@@ -603,7 +610,6 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
                 )
                 continue
 
-        list_match = _LIST_ITEM_RE.match(raw_line)
         if list_match:
             finish_paragraph()
             if (

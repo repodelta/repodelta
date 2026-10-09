@@ -1270,6 +1270,60 @@ def test_bare_contract_boundary_breaks_transformation_parentage() -> None:
     ]
 
 
+def test_numbered_contract_words_remain_implementation_claims() -> None:
+    parsed = parse_markdown_semantics(
+        "## Summary\n"
+        "1. Requirements\n"
+        "2. Preserve fallback behavior.\n"
+    )
+
+    assert [item.text for item in parsed.items] == [
+        "Requirements",
+        "Preserve fallback behavior.",
+    ]
+    assert parsed.contract_syntax_hints == ()
+
+
+def test_unicode_bullet_contract_words_remain_implementation_claims() -> None:
+    parsed = parse_markdown_semantics(
+        "## Summary\n"
+        "• Requirements\n"
+        "• Preserve fallback behavior.\n"
+    )
+
+    assert [item.text for item in parsed.items] == [
+        "Requirements",
+        "Preserve fallback behavior.",
+    ]
+    assert parsed.contract_syntax_hints == ()
+
+
+def test_blockquoted_contract_word_is_not_a_bare_contract_boundary() -> None:
+    parsed = parse_markdown_semantics(
+        "## Summary\n"
+        "> Requirements\n"
+        "Preserve fallback behavior.\n"
+    )
+
+    assert [item.text for item in parsed.items] == [
+        "> Requirements Preserve fallback behavior."
+    ]
+    assert parsed.contract_syntax_hints == ()
+
+
+def test_colon_suffixed_plain_label_remains_a_bare_contract_boundary() -> None:
+    parsed = parse_markdown_semantics(
+        "## Summary\n"
+        "Requirements:\n"
+        "Preserve fallback behavior.\n"
+    )
+
+    assert parsed.items == ()
+    assert [hint.heading for hint in parsed.contract_syntax_hints] == [
+        "Requirements:"
+    ]
+
+
 def test_issue_uncertainties_are_authored_context_not_transition_semantics() -> None:
     packet = _packet(
         issue_body=(
