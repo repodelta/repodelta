@@ -312,6 +312,65 @@ def test_partial_malformed_issue_nodes_retain_valid_records_but_are_unavailable(
     ]
 
 
+@pytest.mark.parametrize(
+    ("issue_body", "fallback_expected"),
+    [
+        ("", True),
+        (None, False),
+        ({"unexpected": "value"}, False),
+    ],
+)
+def test_issue_body_validity_controls_pr_obligation_fallback_end_to_end(
+    issue_body: Any,
+    fallback_expected: bool,
+) -> None:
+    pr_path = "/repos/acme/widget/pulls/43"
+    files_path = "/repos/acme/widget/pulls/43/files"
+    client = FakeClient(
+        {
+            (pr_path, ()): {
+                "html_url": "https://github.com/acme/widget/pull/43",
+                "title": "Harden Issue authority",
+                "body": (
+                    "## Requirements\n"
+                    "- Treat the PR as requirement authority.\n\n"
+                    "## Change\n"
+                    "- Preserve transformation extraction.\n"
+                ),
+                "changed_files": 0,
+                "head": {},
+                "base": {},
+                "user": {},
+            },
+            (files_path, (("page", 1), ("per_page", 100))): [],
+        },
+        linked_issues=[
+            {
+                "number": 41,
+                "title": "Real governing Issue",
+                "body": issue_body,
+                "url": "https://github.com/acme/widget/issues/41",
+            }
+        ],
+    )
+
+    packet = GitHubPullRequestAdapter(client=client).load("acme/widget", 43)
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+
+    assert [item.text for item in brief.requirements] == (
+        ["Treat the PR as requirement authority."] if fallback_expected else []
+    )
+    assert [item.kind for item in brief.transformation_contract.claims] == ["change"]
+    unavailable = [
+        item for item in packet.diagnostics
+        if item.code == "github_linked_issues_unavailable"
+    ]
+    assert bool(unavailable) is not fallback_expected
+    assert all(
+        item.code != "github_linked_issue_not_found" for item in packet.diagnostics
+    )
+
+
 def test_token_is_not_sent_to_untrusted_or_unsafe_api_url() -> None:
     with pytest.raises(ValueError, match="HTTPS"):
         GitHubClient(token="secret", api_url="http://github.example/api/v3")

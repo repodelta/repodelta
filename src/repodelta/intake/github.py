@@ -301,11 +301,15 @@ class GitHubPullRequestAdapter:
         malformed_node = False
         for row in nodes:
             issue_number = row.get("number") if isinstance(row, dict) else None
-            if type(issue_number) is not int or issue_number <= 0:
+            issue_body = row.get("body") if isinstance(row, dict) else None
+            if (
+                type(issue_number) is not int
+                or issue_number <= 0
+                or not isinstance(issue_body, str)
+            ):
                 malformed_node = True
                 continue
             issue_title = str(row.get("title") or f"Issue #{issue_number}")
-            issue_body = str(row.get("body") or "")
             records.append(
                 SourceRecord(
                     id=f"github-issue:{repository}#{issue_number}",
