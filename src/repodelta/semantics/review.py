@@ -7,6 +7,35 @@ from repodelta.model.contracts import Diagnostic, ReviewSourcePacket, SourceRef
 from repodelta.semantics.criteria import ReviewSemantics, extract_review_semantics
 
 
+GoverningIssueResolution = Literal[
+    "non_github", "unique", "confirmed_absent", "ambiguous", "unavailable"
+]
+_GITHUB_ISSUE_UNAVAILABLE = "github_linked_issues_unavailable"
+_GITHUB_ISSUE_AMBIGUOUS = "github_linked_issues_ambiguous"
+_GITHUB_ISSUE_NOT_FOUND = "github_linked_issue_not_found"
+
+
+def _governing_issue_resolution(
+    packet: ReviewSourcePacket,
+    *,
+    issue_count: int,
+) -> GoverningIssueResolution:
+    """Derive local fallback permission without replacing canonical packet facts."""
+
+    if packet.metadata.get("source") != "github":
+        return "non_github"
+    diagnostic_codes = {item.code for item in packet.diagnostics}
+    if _GITHUB_ISSUE_UNAVAILABLE in diagnostic_codes:
+        return "unavailable"
+    if _GITHUB_ISSUE_AMBIGUOUS in diagnostic_codes or issue_count > 1:
+        return "ambiguous"
+    if issue_count == 1:
+        return "unique"
+    if _GITHUB_ISSUE_NOT_FOUND in diagnostic_codes:
+        return "confirmed_absent"
+    return "unavailable"
+
+
 @dataclass(frozen=True)
 class ExtractedReviewSemantics:
     statements: ReviewSemantics
@@ -31,7 +60,16 @@ def extract_packet_semantics(
         for item in packet.source_records
         if item.kind in {"linked_issue", "ticket"}
     )
-    issue_record = issue_records[0] if len(issue_records) == 1 else None
+    issue_resolution = _governing_issue_resolution(
+        packet,
+        issue_count=len(issue_records),
+    )
+    issue_record = (
+        issue_records[0]
+        if len(issue_records) == 1
+        and issue_resolution in {"non_github", "unique"}
+        else None
+    )
     statements = extract_review_semantics(
         issue_body=issue_record.body if issue_record else None,
         issue_source=(
@@ -45,6 +83,8 @@ def extract_packet_semantics(
             url=(pr_record.url if pr_record else None) or packet.source_url,
         ),
         pr_title=packet.title,
+        allow_pr_obligation_fallback=issue_resolution
+        in {"non_github", "unique", "confirmed_absent"},
     )
     return ExtractedReviewSemantics(
         statements=statements,

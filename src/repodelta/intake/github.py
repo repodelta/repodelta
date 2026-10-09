@@ -4,7 +4,7 @@ import json
 from hashlib import sha256
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
-from typing import Any, Protocol
+from typing import Any, Literal, Protocol
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode, urlparse
 from urllib.request import Request, urlopen
@@ -20,6 +20,9 @@ from repodelta.model.contracts import (
 
 JsonValue = dict[str, Any] | list[Any]
 Transport = Callable[[Request, float], tuple[int, Mapping[str, str], bytes]]
+LinkedIssueLookupState = Literal[
+    "unique", "confirmed_absent", "ambiguous", "unavailable"
+]
 _LINKED_ISSUES_QUERY = """
 query RepoDeltaLinkedIssues($owner: String!, $name: String!, $number: Int!) {
   repository(owner: $owner, name: $name) {
@@ -43,6 +46,13 @@ class GitHubJsonClient(Protocol):
     def get_json(self, path: str, query: Mapping[str, str | int] | None = None) -> JsonValue: ...
 
     def post_graphql(self, query: str, variables: Mapping[str, object]) -> JsonValue: ...
+
+
+@dataclass(frozen=True)
+class _LinkedIssueLookup:
+    state: LinkedIssueLookupState
+    records: tuple[SourceRecord, ...] = ()
+    diagnostics: tuple[Diagnostic, ...] = ()
 
 
 def _default_transport(request: Request, timeout: float) -> tuple[int, Mapping[str, str], bytes]:
@@ -200,15 +210,15 @@ class GitHubPullRequestAdapter:
                 revision="sha256:" + sha256(f"{title}\0{record_body}".encode("utf-8")).hexdigest(),
             )
         ]
-        linked_issue_records, issue_diagnostics = self._load_linked_issues(
+        linked_issue_lookup = self._load_linked_issues(
             repository=repository,
             owner=owner,
             name=name,
             pull_request=pull_request,
         )
-        source_records.extend(linked_issue_records)
-        diagnostics.extend(issue_diagnostics)
-        if not linked_issue_records and not issue_diagnostics:
+        source_records.extend(linked_issue_lookup.records)
+        diagnostics.extend(linked_issue_lookup.diagnostics)
+        if linked_issue_lookup.state == "confirmed_absent":
             diagnostics.append(
                 Diagnostic(
                     code="github_linked_issue_not_found",
@@ -274,26 +284,53 @@ class GitHubPullRequestAdapter:
         owner: str,
         name: str,
         pull_request: int,
-    ) -> tuple[list[SourceRecord], list[Diagnostic]]:
+    ) -> _LinkedIssueLookup:
         try:
             payload = self.client.post_graphql(
                 _LINKED_ISSUES_QUERY,
                 {"owner": owner, "name": name, "number": pull_request},
             )
         except GitHubApiError as exc:
-            return [], [Diagnostic(code="github_linked_issues_unavailable", message=str(exc))]
+            return _LinkedIssueLookup(
+                state="unavailable",
+                diagnostics=(
+                    Diagnostic(
+                        code="github_linked_issues_unavailable",
+                        message=str(exc),
+                    ),
+                ),
+            )
         data = payload.get("data") if isinstance(payload, dict) else None
         repository_row = data.get("repository") if isinstance(data, dict) else None
         pr_row = repository_row.get("pullRequest") if isinstance(repository_row, dict) else None
         references = pr_row.get("closingIssuesReferences") if isinstance(pr_row, dict) else None
-        nodes = references.get("nodes", []) if isinstance(references, dict) else []
+        nodes = references.get("nodes") if isinstance(references, dict) else None
+        if not isinstance(nodes, list):
+            return _LinkedIssueLookup(
+                state="unavailable",
+                diagnostics=(
+                    Diagnostic(
+                        code="github_linked_issues_unavailable",
+                        message=(
+                            "GitHub linked-Issue lookup returned an incomplete or "
+                            "malformed closingIssuesReferences structure."
+                        ),
+                    ),
+                ),
+            )
         records: list[SourceRecord] = []
-        for row in nodes if isinstance(nodes, list) else []:
-            if not isinstance(row, dict) or not isinstance(row.get("number"), int):
+        malformed_node = False
+        for row in nodes:
+            issue_number = row.get("number") if isinstance(row, dict) else None
+            issue_body = row.get("body") if isinstance(row, dict) else None
+            if (
+                type(issue_number) is not int
+                or issue_number <= 0
+                or not isinstance(issue_body, str)
+            ):
+                malformed_node = True
                 continue
-            issue_number = row["number"]
             issue_title = str(row.get("title") or f"Issue #{issue_number}")
-            issue_body = str(row.get("body") or "")
             records.append(
                 SourceRecord(
                     id=f"github-issue:{repository}#{issue_number}",
@@ -306,15 +343,39 @@ class GitHubPullRequestAdapter:
                     + sha256(f"{issue_title}\0{issue_body}".encode("utf-8")).hexdigest(),
                 )
             )
-        diagnostics = []
-        if len(records) > 1:
-            diagnostics.append(
-                Diagnostic(
-                    code="github_linked_issues_ambiguous",
-                    message=f"GitHub returned {len(records)} linked Issues; no single primary Issue was inferred.",
-                )
+        if malformed_node:
+            return _LinkedIssueLookup(
+                state="unavailable",
+                records=tuple(records),
+                diagnostics=(
+                    Diagnostic(
+                        code="github_linked_issues_unavailable",
+                        message=(
+                            "GitHub linked-Issue lookup returned one or more malformed "
+                            "Issue records; valid records were retained but the result "
+                            "is not complete enough to resolve governing-Issue authority."
+                        ),
+                    ),
+                ),
             )
-        return records, diagnostics
+        if len(records) > 1:
+            return _LinkedIssueLookup(
+                state="ambiguous",
+                records=tuple(records),
+                diagnostics=(
+                    Diagnostic(
+                        code="github_linked_issues_ambiguous",
+                        message=(
+                            f"GitHub returned {len(records)} linked Issues; "
+                            "no single primary Issue was inferred."
+                        ),
+                    ),
+                ),
+            )
+        return _LinkedIssueLookup(
+            state="unique" if records else "confirmed_absent",
+            records=tuple(records),
+        )
 
     def _load_verification(
         self,
