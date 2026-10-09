@@ -587,6 +587,14 @@ def parse_markdown_semantics(body: str | None) -> ParsedBody:
                         kind="unrecognized_transformation_heading",
                     )
                 )
+            elif current_transformation_kind is not None:
+                contract_syntax_hints.append(
+                    _ContractSyntaxHint(
+                        heading=current_section,
+                        line=line_number,
+                        kind="recognized_transformation_heading",
+                    )
+                )
             continue
 
         list_match = _LIST_ITEM_RE.match(raw_line)
@@ -857,8 +865,17 @@ def _contract_syntax_diagnostics(
         is_issue_authored_context = (
             surface == "issue" and heading in _ISSUE_AUTHORED_CONTEXT_HEADINGS
         )
+        is_recognized_transition = hint.kind == "recognized_transformation_heading"
+        if is_recognized_transition and (
+            surface == "pull_request" or is_issue_authored_context
+        ):
+            continue
         is_transition = not is_issue_authored_context and (
-            hint.kind == "unrecognized_transformation_heading"
+            hint.kind
+            in {
+                "recognized_transformation_heading",
+                "unrecognized_transformation_heading",
+            }
             or heading in _TRANSFORMATION_HEADINGS
         )
         if surface == "issue" and is_transition:

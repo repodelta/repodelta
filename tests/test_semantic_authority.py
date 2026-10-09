@@ -1173,6 +1173,38 @@ def test_issue_transition_syntax_is_redirected_to_the_pr_not_formalized_in_issue
     assert all("## Before" not in item.message for item in diagnostics)
 
 
+def test_recognized_pr_transition_headings_are_visible_when_authored_in_issue() -> None:
+    packet = _packet(
+        issue_body=(
+            "## Change\n"
+            "- Move credential handling to the canonical adapter.\n\n"
+            "## Before\n"
+            "- Provider B was not active.\n"
+        ),
+    )
+
+    extracted = extract_packet_semantics(packet)
+
+    assert extracted.statements.obligations == ()
+    assert extracted.statements.objectives == ()
+    assert extracted.statements.scope == ()
+    assert extracted.statements.verification_expectations == ()
+    assert extracted.statements.claims == ()
+    assert extracted.statements.transformation_contract.claims == ()
+    assert [item.code for item in extracted.contract_diagnostics] == [
+        "authored_issue_transition_section_out_of_scope",
+        "authored_issue_transition_section_out_of_scope",
+    ]
+    assert [item.sources[0].line_start for item in extracted.contract_diagnostics] == [
+        1,
+        4,
+    ]
+    assert all(
+        "implementation PR" in item.message
+        for item in extracted.contract_diagnostics
+    )
+
+
 def test_linked_issue_prevents_pr_bare_requirements_from_becoming_duplicate_guidance() -> None:
     packet = _packet(
         issue_body=(
