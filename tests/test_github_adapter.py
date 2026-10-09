@@ -371,6 +371,65 @@ def test_issue_body_validity_controls_pr_obligation_fallback_end_to_end(
     )
 
 
+@pytest.mark.parametrize(
+    ("linked_issues", "graphql_error", "expected_code"),
+    [
+        (
+            [
+                {"number": 41, "title": "Issue A", "body": ""},
+                {"number": 42, "title": "Issue B", "body": ""},
+            ],
+            None,
+            "github_linked_issues_ambiguous",
+        ),
+        (
+            [],
+            GitHubApiError("linked-Issue lookup unavailable"),
+            "github_linked_issues_unavailable",
+        ),
+    ],
+)
+def test_unresolved_issue_source_reaches_review_sink_without_pr_requirements(
+    linked_issues: list[dict[str, Any]],
+    graphql_error: GitHubApiError | None,
+    expected_code: str,
+) -> None:
+    pr_path = "/repos/acme/widget/pulls/44"
+    files_path = "/repos/acme/widget/pulls/44/files"
+    client = FakeClient(
+        {
+            (pr_path, ()): {
+                "html_url": "https://github.com/acme/widget/pull/44",
+                "title": "Preserve unresolved authority",
+                "body": (
+                    "## Requirements\n"
+                    "- Everything is implemented.\n\n"
+                    "## Change\n"
+                    "- Preserve production behavior.\n"
+                ),
+                "changed_files": 0,
+                "head": {},
+                "base": {},
+                "user": {},
+            },
+            (files_path, (("page", 1), ("per_page", 100))): [],
+        },
+        linked_issues=linked_issues,
+        graphql_error=graphql_error,
+    )
+
+    packet = GitHubPullRequestAdapter(client=client).load("acme/widget", 44)
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    html = render_html(brief)
+
+    assert brief.requirements == ()
+    assert brief.guardrails == ()
+    assert [item.kind for item in brief.transformation_contract.claims] == ["change"]
+    assert expected_code in {item.code for item in packet.diagnostics}
+    assert "Source coverage" in html
+    assert "No explicit acceptance criteria found." in html
+
+
 def test_token_is_not_sent_to_untrusted_or_unsafe_api_url() -> None:
     with pytest.raises(ValueError, match="HTTPS"):
         GitHubClient(token="secret", api_url="http://github.example/api/v3")
