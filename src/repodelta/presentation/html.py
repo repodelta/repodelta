@@ -2664,9 +2664,9 @@ def _authored_contract_notice(brief: ReviewBrief) -> str:
     return (
         '<section class="section authored-contract-notice">'
         '<span class="eyebrow">Authored contract</span>'
-        '<h2>Formal contract syntax was not recognized</h2>'
-        '<p>The source is preserved as context; RepoDelta did not promote it '
-        'to requirements or transformation claims.</p>'
+        '<h2>Authored contract needs attention</h2>'
+        '<p>The referenced source was not admitted to the formal contract. '
+        'See each diagnostic for the required authoring form or surface.</p>'
         f'<ul>{rows}</ul></section>'
     )
 

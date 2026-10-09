@@ -1142,7 +1142,7 @@ def test_pr297_style_bare_issue_contract_headings_remain_nonformal_but_visible()
         "authored_contract_heading_requires_markdown",
     ]
     assert [item.sources[0].line_start for item in diagnostics] == [1, 4, 7, 10]
-    assert "Formal contract syntax was not recognized" in render_html(brief)
+    assert "Authored contract needs attention" in render_html(brief)
     assert "## Requirements" in render_html(brief)
     assert any(
         item.provider == "authoring_contract" for item in brief.overview.attention
@@ -1203,6 +1203,10 @@ def test_recognized_pr_transition_headings_are_visible_when_authored_in_issue() 
         "implementation PR" in item.message
         for item in extracted.contract_diagnostics
     )
+    html = render_html(DeterministicAnalyzer().analyze(AnalysisInput(packet=packet)))
+    assert "Authored contract needs attention" in html
+    assert "required authoring form or surface" in html
+    assert "syntax was not recognized" not in html
 
 
 def test_linked_issue_prevents_pr_bare_requirements_from_becoming_duplicate_guidance() -> None:
@@ -1419,7 +1423,7 @@ def test_pr311_and_pr323_style_transformation_headings_remain_context_but_visibl
         10,
     ]
     html = render_html(brief)
-    assert "Formal contract syntax was not recognized" in html
+    assert "Authored contract needs attention" in html
     assert "## Canonical authority" in html
     assert "## Completion conditions" in html
 
