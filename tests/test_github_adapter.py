@@ -441,6 +441,63 @@ def test_unresolved_lookup_fails_closed_at_review_sink(
     assert "No explicit acceptance criteria found." in html
 
 
+def test_partial_malformed_lookup_fails_closed_through_review_sink() -> None:
+    pr_path = "/repos/acme/widget/pulls/45"
+    files_path = "/repos/acme/widget/pulls/45/files"
+    client = GraphQLScenarioClient(
+        {
+            (pr_path, ()): {
+                "html_url": "https://github.com/acme/widget/pull/45",
+                "title": "Retain unresolved Issue evidence",
+                "body": (
+                    "## Requirements\n"
+                    "- Everything is implemented.\n\n"
+                    "## Change\n"
+                    "- Preserve routing.\n\n"
+                    "## Completion conditions\n"
+                    "- CLI check passes.\n"
+                ),
+                "changed_files": 0,
+                "head": {},
+                "base": {},
+                "user": {},
+            },
+            (files_path, (("page", 1), ("per_page", 100))): [],
+        },
+        payload=_lookup_payload(
+            [
+                {
+                    "number": 41,
+                    "title": "Valid governing Issue",
+                    "body": "## Requirements\n- Preserve Issue authority.\n",
+                    "url": "https://github.com/acme/widget/issues/41",
+                },
+                {"number": 42, "title": "Missing body"},
+            ]
+        ),
+    )
+
+    packet = GitHubPullRequestAdapter(client=client).load("acme/widget", 45)
+    packet.validate_consistency()
+    brief = DeterministicAnalyzer().analyze(AnalysisInput(packet=packet))
+    html = render_html(brief)
+
+    assert [item.id for item in packet.source_records if item.kind == "linked_issue"] == [
+        "github-issue:acme/widget#41"
+    ]
+    assert "github_linked_issues_unavailable" in {
+        item.code for item in packet.diagnostics
+    }
+    assert brief.requirements == ()
+    assert brief.guardrails == ()
+    assert [item.kind for item in brief.transformation_contract.claims] == [
+        "change",
+        "completion_condition",
+    ]
+    assert "Source coverage" in html
+    assert "No explicit acceptance criteria found." in html
+
+
 def test_unique_issue_without_obligations_preserves_pr_fallback() -> None:
     pr_path = "/repos/acme/widget/pulls/44"
     files_path = "/repos/acme/widget/pulls/44/files"
