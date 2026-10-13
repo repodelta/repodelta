@@ -15,6 +15,7 @@ from repodelta.model.contracts import (
     ProjectionCandidateSet,
     ProjectionRelation,
     Requirement,
+    RequirementTransformationTrace,
     ReviewProjection,
     ReviewSourcePacket,
     ReviewSlice,
@@ -91,6 +92,9 @@ def build_review_projection(
     transformation_structural_closure: TransformationStructuralClosure,
     transformation_alignment: TransformationAlignment,
     transformation_assessment: TransformationAssessment,
+    requirement_transformation_trace: RequirementTransformationTrace = (
+        RequirementTransformationTrace()
+    ),
 ) -> ReviewProjection:
     """Project converged canonical facts without performing retrieval or selection."""
 
@@ -468,6 +472,7 @@ def build_review_projection(
         review_graph,
         transformation_structural_topology=transformation_topology,
         transformation_structural_closure=transformation_structural_closure,
+        requirement_transformation_trace=requirement_transformation_trace,
     )
     structural_overview = project_structural_overview(
         review_graph,
