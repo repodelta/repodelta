@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import unicodedata
 from dataclasses import asdict, dataclass, field, replace
 from typing import TYPE_CHECKING, Any, Literal
@@ -11,6 +12,10 @@ if TYPE_CHECKING:
     from repodelta.providers.structural import StructuralGraphCollection
 
 DiagnosticSeverity = Literal["info", "warning", "error"]
+_FORMAL_FOCUS_REFERENCE_RE = re.compile(
+    r"\b(?:R|G)[-_ ]?\d+\b",
+    re.IGNORECASE,
+)
 RequirementKind = Literal["deliverable", "guardrail", "manual_acceptance"]
 StatementRole = Literal["obligation", "objective", "claim", "context", "intent"]
 StatementPurpose = Literal[
@@ -98,6 +103,14 @@ TransformationAssessmentStatus = Literal[
     "partial",
     "contradicted",
     "unverified",
+]
+RequirementTransformationCoverageState = Literal[
+    "associated",
+    "no_explicit_association",
+    "transformation_source_absent",
+]
+RequirementTransformationTraceDiagnosticState = Literal[
+    "unknown_focus_reference",
 ]
 TransformationAssessmentReasonKind = Literal[
     "exact_fact_observed",
@@ -1551,6 +1564,295 @@ class TransformationAssessment:
                     raise ValueError(
                         f"{predicate_assessment.id}: contradicted predicate requires conflict"
                     )
+
+
+@dataclass(frozen=True)
+class TransformationEvidenceSlice:
+    """Reference-only view of one claim's canonical verification artifacts."""
+
+    id: str
+    claim_id: str
+    structural_closure_claim_id: str
+    subject_match_ids: tuple[str, ...] = ()
+    transformation_binding_ids: tuple[str, ...] = ()
+    assessment_id: str = ""
+    diagnostic_ids: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class RequirementTransformationAssociation:
+    """One explicit authored R/G-to-T/CC relation, never satisfaction."""
+
+    id: str
+    focus_statement_id: str
+    transformation_claim_id: str
+    evidence_slice_id: str
+    association: Literal["explicit_reference"] = "explicit_reference"
+    reasons: tuple[AssociationReason, ...] = ()
+
+
+@dataclass(frozen=True)
+class RequirementTransformationTraceGroup:
+    focus_statement_id: str
+    association_ids: tuple[str, ...] = ()
+    coverage_state: RequirementTransformationCoverageState = (
+        "no_explicit_association"
+    )
+
+
+@dataclass(frozen=True)
+class RequirementTransformationTraceDiagnostic:
+    id: str
+    claim_id: str
+    referenced_focus_statement_id: str
+    state: RequirementTransformationTraceDiagnosticState
+    message: str
+    sources: tuple[SourceRef, ...] = ()
+
+
+@dataclass(frozen=True)
+class RequirementTransformationTrace:
+    """Canonical cross-contract references without requirement assessment."""
+
+    groups: tuple[RequirementTransformationTraceGroup, ...] = ()
+    associations: tuple[RequirementTransformationAssociation, ...] = ()
+    evidence_slices: tuple[TransformationEvidenceSlice, ...] = ()
+    diagnostics: tuple[RequirementTransformationTraceDiagnostic, ...] = ()
+    requirement_source_state: Literal["source_absent", "available"] = (
+        "source_absent"
+    )
+    schema_version: str = "requirement_transformation_trace.v1"
+
+    def associations_by_focus_id(
+        self,
+    ) -> dict[str, tuple[RequirementTransformationAssociation, ...]]:
+        associations = {item.id: item for item in self.associations}
+        return {
+            group.focus_statement_id: tuple(
+                associations[item] for item in group.association_ids
+            )
+            for group in self.groups
+        }
+
+    def validate_consistency(
+        self,
+        focus_statements: tuple[Requirement, ...],
+        contract: TransformationContract,
+        subject_selection: TransformationSubjectSelection,
+        structural_closure: TransformationStructuralClosure,
+        alignment: TransformationAlignment,
+        assessment: TransformationAssessment,
+    ) -> None:
+        if self.schema_version != "requirement_transformation_trace.v1":
+            raise ValueError("unsupported requirement transformation trace schema")
+        focus_ids = tuple(item.id for item in focus_statements)
+        claim_ids = tuple(item.id for item in contract.claims)
+        if self.requirement_source_state != (
+            "available" if focus_statements else "source_absent"
+        ):
+            raise ValueError("trace requirement source state conflicts with formal R/G")
+        if tuple(item.focus_statement_id for item in self.groups) != focus_ids:
+            raise ValueError(
+                "requirement transformation trace must preserve every R/G once"
+            )
+        associations = {item.id: item for item in self.associations}
+        if len(associations) != len(self.associations):
+            raise ValueError(
+                "requirement transformation trace contains duplicate associations"
+            )
+        slices = {item.id: item for item in self.evidence_slices}
+        if len(slices) != len(self.evidence_slices):
+            raise ValueError(
+                "requirement transformation trace contains duplicate slices"
+            )
+        referenced_association_ids = tuple(
+            association_id
+            for group in self.groups
+            for association_id in group.association_ids
+        )
+        if len(referenced_association_ids) != len(set(referenced_association_ids)):
+            raise ValueError(
+                "one trace association cannot belong to multiple R/G groups"
+            )
+        if set(referenced_association_ids) != set(associations):
+            raise ValueError("trace groups must reference every association exactly once")
+        selection_matches = {item.id: item for item in subject_selection.matches}
+        closure_claim_ids = set(structural_closure.by_claim_id())
+        binding_ids = {item.id: item for item in alignment.bindings}
+        assessment_ids = {item.id: item for item in assessment.claims}
+        claims_by_id = {item.id: item for item in contract.claims}
+        diagnostic_claim_ids = {
+            **{item.id: item.claim_id for item in subject_selection.diagnostics},
+            **{item.id: item.claim_id for item in structural_closure.diagnostics},
+            **{item.id: item.claim_id for item in alignment.diagnostics},
+        }
+        associated_claim_ids = tuple(
+            dict.fromkeys(item.transformation_claim_id for item in self.associations)
+        )
+        if tuple(item.claim_id for item in self.evidence_slices) != tuple(
+            claim_id for claim_id in claim_ids if claim_id in associated_claim_ids
+        ):
+            raise ValueError("trace slices must preserve associated claim source order")
+        for evidence_slice in self.evidence_slices:
+            if evidence_slice.id != f"TES:{evidence_slice.claim_id}":
+                raise ValueError(
+                    f"{evidence_slice.id}: non-canonical evidence slice ID"
+                )
+            if evidence_slice.claim_id not in claim_ids:
+                raise ValueError(f"{evidence_slice.id}: slice references unknown claim")
+            if (
+                evidence_slice.structural_closure_claim_id != evidence_slice.claim_id
+                or evidence_slice.structural_closure_claim_id not in closure_claim_ids
+            ):
+                raise ValueError(f"{evidence_slice.id}: slice changed closure ownership")
+            if any(
+                selection_matches.get(item) is None
+                or selection_matches[item].claim_id != evidence_slice.claim_id
+                for item in evidence_slice.subject_match_ids
+            ):
+                raise ValueError(
+                    f"{evidence_slice.id}: slice references invalid subject match"
+                )
+            expected_subject_match_ids = tuple(
+                item.id
+                for item in subject_selection.matches
+                if item.claim_id == evidence_slice.claim_id
+            )
+            if evidence_slice.subject_match_ids != expected_subject_match_ids:
+                raise ValueError(
+                    f"{evidence_slice.id}: slice changed subject selection"
+                )
+            if any(
+                binding_ids.get(item) is None
+                or binding_ids[item].claim_id != evidence_slice.claim_id
+                for item in evidence_slice.transformation_binding_ids
+            ):
+                raise ValueError(
+                    f"{evidence_slice.id}: slice references invalid binding"
+                )
+            expected_binding_ids = tuple(
+                item.id
+                for item in alignment.bindings
+                if item.claim_id == evidence_slice.claim_id
+            )
+            if evidence_slice.transformation_binding_ids != expected_binding_ids:
+                raise ValueError(
+                    f"{evidence_slice.id}: slice changed transformation alignment"
+                )
+            assessment_item = assessment_ids.get(evidence_slice.assessment_id)
+            if (
+                assessment_item is None
+                or assessment_item.claim_id != evidence_slice.claim_id
+            ):
+                raise ValueError(
+                    f"{evidence_slice.id}: slice references invalid assessment"
+                )
+            if any(
+                diagnostic_claim_ids.get(item) != evidence_slice.claim_id
+                for item in evidence_slice.diagnostic_ids
+            ):
+                raise ValueError(
+                    f"{evidence_slice.id}: slice references invalid diagnostic"
+                )
+            expected_diagnostic_ids = tuple(
+                item.id
+                for item in (
+                    *subject_selection.diagnostics,
+                    *structural_closure.diagnostics,
+                    *alignment.diagnostics,
+                )
+                if item.claim_id == evidence_slice.claim_id
+            )
+            if evidence_slice.diagnostic_ids != expected_diagnostic_ids:
+                raise ValueError(
+                    f"{evidence_slice.id}: slice changed diagnostic coverage"
+                )
+        for association in self.associations:
+            if association.id != (
+                f"RTA:{association.focus_statement_id}:"
+                f"{association.transformation_claim_id}"
+            ):
+                raise ValueError(f"{association.id}: non-canonical trace association ID")
+            if (
+                association.focus_statement_id not in focus_ids
+                or association.transformation_claim_id not in claim_ids
+                or association.evidence_slice_id
+                != f"TES:{association.transformation_claim_id}"
+                or association.evidence_slice_id not in slices
+                or association.association != "explicit_reference"
+                or not association.reasons
+                or association.reasons[0].kind != "explicit_reference"
+            ):
+                raise ValueError(f"{association.id}: invalid explicit trace association")
+            claim_references = {
+                value.replace("_", "")
+                .replace("-", "")
+                .replace(" ", "")
+                .upper()
+                for value in _FORMAL_FOCUS_REFERENCE_RE.findall(
+                    claims_by_id[association.transformation_claim_id].text
+                )
+            }
+            if (
+                association.focus_statement_id not in claim_references
+                or association.reasons[0].matched_terms
+                != (association.focus_statement_id,)
+            ):
+                raise ValueError(
+                    f"{association.id}: explicit trace is not source-backed"
+                )
+        focus_order = {item: index for index, item in enumerate(focus_ids)}
+        claim_order = {item: index for index, item in enumerate(claim_ids)}
+        if self.associations != tuple(
+            sorted(
+                self.associations,
+                key=lambda item: (
+                    focus_order[item.focus_statement_id],
+                    claim_order[item.transformation_claim_id],
+                ),
+            )
+        ):
+            raise ValueError("trace associations must use deterministic source order")
+        for group in self.groups:
+            group_associations = tuple(
+                associations[item] for item in group.association_ids
+            )
+            if any(
+                item.focus_statement_id != group.focus_statement_id
+                for item in group_associations
+            ):
+                raise ValueError("trace group references another R/G association")
+            expected_group_ids = tuple(
+                item.id
+                for item in self.associations
+                if item.focus_statement_id == group.focus_statement_id
+            )
+            if group.association_ids != expected_group_ids:
+                raise ValueError("trace group changed association source order")
+            expected_state: RequirementTransformationCoverageState = (
+                "transformation_source_absent"
+                if contract.source_state != "available"
+                else "associated"
+                if group_associations
+                else "no_explicit_association"
+            )
+            if group.coverage_state != expected_state:
+                raise ValueError("trace group coverage conflicts with canonical inputs")
+        diagnostic_ids = tuple(item.id for item in self.diagnostics)
+        if len(diagnostic_ids) != len(set(diagnostic_ids)):
+            raise ValueError(
+                "requirement transformation trace contains duplicate diagnostics"
+            )
+        for diagnostic in self.diagnostics:
+            if (
+                diagnostic.id
+                != f"RTD:{diagnostic.claim_id}:{diagnostic.referenced_focus_statement_id}"
+                or diagnostic.claim_id not in claim_ids
+                or diagnostic.referenced_focus_statement_id in focus_ids
+                or diagnostic.state != "unknown_focus_reference"
+                or not diagnostic.message.strip()
+            ):
+                raise ValueError(f"{diagnostic.id}: invalid trace diagnostic")
 
 
 @dataclass(frozen=True)
@@ -3546,9 +3848,12 @@ class VerificationWorkspace:
     transformation_structural_topology: TransformationStructuralTopology = (
         TransformationStructuralTopology()
     )
+    requirement_transformation_trace: RequirementTransformationTrace = (
+        RequirementTransformationTrace()
+    )
     matrix: tuple[VerificationMatrixEntry, ...] = ()
     inspections: tuple[VerificationEvidenceInspection, ...] = ()
-    schema_version: str = "verification_workspace.v8"
+    schema_version: str = "verification_workspace.v9"
 
     def by_subject_id(self) -> dict[str, VerificationMatrixEntry]:
         return {item.subject_id: item for item in self.matrix}
@@ -3570,7 +3875,7 @@ class ReviewProjection:
     structural_overview: StructuralOverviewProjection = (
         StructuralOverviewProjection()
     )
-    schema_version: str = "review_projection.v34"
+    schema_version: str = "review_projection.v35"
 
     def validate_consistency(
         self,
@@ -4296,6 +4601,9 @@ class ReviewBrief:
     )
     transformation_alignment: TransformationAlignment = TransformationAlignment()
     transformation_assessment: TransformationAssessment = TransformationAssessment()
+    requirement_transformation_trace: RequirementTransformationTrace = (
+        RequirementTransformationTrace()
+    )
     closure_scan_plans: ClosureScanPlanSet = ClosureScanPlanSet()
     evidence_catalog: EvidenceCatalog = EvidenceCatalog()
     projection_candidates: ProjectionCandidateSet = ProjectionCandidateSet()
@@ -4308,7 +4616,7 @@ class ReviewBrief:
         structural_coverage=StructuralCoverage(state="unavailable"),
     )
     generated_by: str = "repodelta-open-core"
-    schema_version: str = "review_brief.v59"
+    schema_version: str = "review_brief.v60"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

@@ -76,3 +76,10 @@ incomplete semantics must fail closed.
 Keep the PR Draft while responsibility, contracts, or a merge gate is unsettled.
 Mark ready only after auditing the final tree. Link the focused Issue that owns
 this PR's obligations and stop conditions.
+
+When a formal T/CC claim implements or verifies a particular Issue obligation,
+name its canonical R/G identity in that claim (for example, `R1` or `G2`).
+RepoDelta treats only that explicit authored reference as a canonical
+requirement-to-transformation association. Identifier overlap, similar prose,
+and graph proximity remain non-authoritative; an association does not mean the
+R/G is satisfied.

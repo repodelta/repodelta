@@ -22,6 +22,9 @@ from repodelta.providers.sql_schema import (
 from repodelta.routing.candidates import build_projection_candidates
 from repodelta.routing.transformation import build_transformation_alignment
 from repodelta.routing.transformation_subjects import select_transformation_subjects
+from repodelta.routing.requirement_transformation import (
+    build_requirement_transformation_trace,
+)
 from repodelta.assessment.transformation import assess_transformation
 from repodelta.convergence.core import converge_candidates
 from repodelta.convergence.transformation import converge_transformation_closure
@@ -126,6 +129,14 @@ class DeterministicAnalyzer:
             subject_selection=transformation_subject_selection,
             structural_closure=transformation_structural_closure,
         )
+        requirement_transformation_trace = build_requirement_transformation_trace(
+            requirements,
+            semantics.transformation_contract,
+            transformation_subject_selection,
+            transformation_structural_closure,
+            transformation_alignment,
+            transformation_assessment,
+        )
         projection_candidates = build_projection_candidates(
             requirements=requirements,
             claims=semantics.claims,
@@ -163,6 +174,7 @@ class DeterministicAnalyzer:
             transformation_structural_closure=transformation_structural_closure,
             transformation_alignment=transformation_alignment,
             transformation_assessment=transformation_assessment,
+            requirement_transformation_trace=requirement_transformation_trace,
         )
         overview = build_review_overview(
             packet,
@@ -188,6 +200,7 @@ class DeterministicAnalyzer:
             transformation_structural_closure=transformation_structural_closure,
             transformation_alignment=transformation_alignment,
             transformation_assessment=transformation_assessment,
+            requirement_transformation_trace=requirement_transformation_trace,
             closure_scan_plans=closure_scan_plans,
             evidence_catalog=evidence_catalog,
             projection_candidates=projection_candidates,

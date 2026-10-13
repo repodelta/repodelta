@@ -2423,6 +2423,8 @@ def _focus_assessment_inspector(
         return ""
     evidence = evidence_catalog.by_id()
     inspections = workspace.inspections_by_subject_id()
+    trace = getattr(workspace, "requirement_transformation_trace", None)
+    trace_associations = tuple(getattr(trace, "associations", ()))
     rows = []
     for entry in workspace.matrix:
         inspection = inspections[entry.subject_id]
@@ -2498,6 +2500,32 @@ def _focus_assessment_inspector(
         membership_summary = _focus_membership_summary(
             inspection.structural_overlay
         )
+        associated_claim_ids = tuple(
+            item.transformation_claim_id
+            for item in trace_associations
+            if item.focus_statement_id == entry.subject_id
+        )
+        associated_focus_ids = tuple(
+            item.focus_statement_id
+            for item in trace_associations
+            if item.transformation_claim_id == entry.subject_id
+        )
+        trace_copy = ""
+        if associated_claim_ids:
+            trace_copy = (
+                '<div class="requirement-transformation-trace">'
+                '<span class="projection-heading">Explicit transformation trace</span>'
+                f'<span>{escape(", ".join(associated_claim_ids))}</span>'
+                '<small>Association only; requirement satisfaction is not assessed.</small>'
+                '</div>'
+            )
+        elif associated_focus_ids:
+            trace_copy = (
+                '<div class="requirement-transformation-trace">'
+                '<span class="projection-heading">Explicit requirement trace</span>'
+                f'<span>{escape(", ".join(associated_focus_ids))}</span>'
+                '</div>'
+            )
         rows.append(
             '<article class="focus-assessment" hidden '
             f'data-verification-subject="{escape(entry.subject_id, quote=True)}"'
@@ -2514,6 +2542,7 @@ def _focus_assessment_inspector(
             + '</span>'
             f'<span class="status-pill status-{escape(entry.status)}">'
             f'{escape(entry.status.replace("_", " "))}</span></div>'
+            f'{trace_copy}'
             f'{membership_summary}'
             + (
                 f'<div class="focus-exceptions" aria-label="Visible review exceptions">{exception_chips}</div>'

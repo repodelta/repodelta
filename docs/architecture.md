@@ -54,6 +54,12 @@ fixture or GitHub
        -> complete revision-aware closure for absence/transition conclusions
        -> current-head verification identity for execution conclusions
        -> typed reasons and explicit uncertainty; never merge approval
+  -> requirement-to-transformation trace
+       -> explicit authored R/G-to-T/CC references only
+       -> reference-only slices over canonical selection, closure, binding,
+          assessment, and diagnostic identities
+       -> complete per-R/G association coverage without requirement satisfaction
+       -> unknown focus references remain source-backed diagnostics
   -> deterministic typed fact routing
        -> eligibility by fact profile and projection slot
        -> per-R/G claim, changed-anchor, runtime, test, CI, path, closure candidates
@@ -159,7 +165,12 @@ becoming alternate intake, classification, routing, or presentation paths.
 8. `TransformationAssessment` is the only authority for deterministic T/CC
    status. Missing association is unverified, local change is not global
    absence proof, and no status implies acceptance or mergeability.
-9. SQL schema providers declare a flat capability list, and return
+9. `RequirementTransformationTrace` is the only authority for canonical
+   R/G-to-T/CC association. It admits explicit authored references, points to
+   existing transformation artifacts without copying their truth, and never
+   promotes a T/CC assessment into R/G satisfaction. Lexical overlap,
+   structural reachability, and presentation proximity cannot create a trace.
+10. SQL schema providers declare a flat capability list, and return
    statement-level repository facts, typed per-file coverage, and
    diagnostics only, never a folded schema or a contract verdict. An
    unsupported or malformed statement becomes an explicit coverage gap;

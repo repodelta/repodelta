@@ -7,6 +7,7 @@ from repodelta.model.contracts import (
     ObservedTransformation,
     ProjectionCandidateSet,
     Requirement,
+    RequirementTransformationTrace,
     ReviewSlice,
     ReviewStructuralGraph,
     StructuralFocusDisposition,
@@ -39,6 +40,9 @@ def project_verification_workspace(
     *,
     transformation_structural_topology: TransformationStructuralTopology,
     transformation_structural_closure: TransformationStructuralClosure,
+    requirement_transformation_trace: RequirementTransformationTrace = (
+        RequirementTransformationTrace()
+    ),
 ) -> VerificationWorkspace:
     """Project all review subjects onto one matrix and inspector boundary."""
 
@@ -186,6 +190,7 @@ def project_verification_workspace(
             assessment,
         ),
         transformation_structural_topology=transformation_structural_topology,
+        requirement_transformation_trace=requirement_transformation_trace,
         matrix=tuple(matrix),
         inspections=tuple(inspections),
     )
@@ -202,6 +207,7 @@ def project_verification_workspace(
         review_graph,
         transformation_structural_topology,
         transformation_structural_closure,
+        requirement_transformation_trace,
     )
     return workspace
 
@@ -424,9 +430,15 @@ def _validate_workspace(
     graph: ReviewStructuralGraph,
     transformation_structural_topology: TransformationStructuralTopology,
     transformation_structural_closure: TransformationStructuralClosure,
+    requirement_transformation_trace: RequirementTransformationTrace,
 ) -> None:
-    if workspace.schema_version != "verification_workspace.v8":
+    if workspace.schema_version != "verification_workspace.v9":
         raise ValueError("unsupported verification workspace schema")
+    if (
+        workspace.requirement_transformation_trace
+        != requirement_transformation_trace
+    ):
+        raise ValueError("verification workspace changed requirement transformation trace")
     if workspace.transformation_structural_topology != (
         transformation_structural_topology
     ):
