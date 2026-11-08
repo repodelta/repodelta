@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Protocol
+from typing import Protocol, Sequence
 
 from repodelta.model.contracts import (
     AnalysisInput,
@@ -15,9 +15,10 @@ from repodelta.closure.scanning import (
     ClosureScanner,
     unavailable_scan_results,
 )
-from repodelta.providers.sql_schema import (
-    SqlSchemaProvider,
-    unavailable_sql_schema_result,
+from repodelta.providers.planning import (
+    EvidenceProvider,
+    plan_providers,
+    run_providers,
 )
 from repodelta.routing.candidates import build_projection_candidates
 from repodelta.routing.transformation import build_transformation_alignment
@@ -43,10 +44,10 @@ class DeterministicAnalyzer:
         self,
         *,
         closure_scanner: ClosureScanner | None = None,
-        sql_schema_provider: SqlSchemaProvider | None = None,
+        evidence_providers: Sequence[EvidenceProvider] = (),
     ) -> None:
         self.closure_scanner = closure_scanner
-        self.sql_schema_provider = sql_schema_provider
+        self.evidence_providers = tuple(evidence_providers)
 
     def analyze(self, analysis_input: AnalysisInput) -> ReviewBrief:
         packet = analysis_input.packet
@@ -69,26 +70,12 @@ class DeterministicAnalyzer:
             if self.closure_scanner is not None
             else unavailable_scan_results(closure_scan_plans)
         )
-        sql_head_paths = tuple(
-            changed_file.head_path
-            for changed_file in packet.changed_files
-            if changed_file.head_path
-            and changed_file.head_path.lower().endswith(".sql")
+        provider_plan = plan_providers(
+            packet.changed_files,
+            (provider.descriptor() for provider in self.evidence_providers),
         )
-        sql_base_paths = tuple(
-            changed_file.base_path
-            for changed_file in packet.changed_files
-            if changed_file.base_path
-            and changed_file.base_path.lower().endswith(".sql")
-        )
-        sql_schema_result = (
-            self.sql_schema_provider.observe(
-                head_paths=sql_head_paths, base_paths=sql_base_paths
-            )
-            if self.sql_schema_provider is not None
-            else unavailable_sql_schema_result(
-                head_paths=sql_head_paths, base_paths=sql_base_paths
-            )
+        provider_contributions = run_providers(
+            self.evidence_providers, provider_plan
         )
         evidence_catalog = build_evidence_catalog(
             packet,
@@ -96,7 +83,8 @@ class DeterministicAnalyzer:
             analysis_input.structural_graph,
             supplied=analysis_input.supplied_evidence,
             closure_scan_results=closure_scan_results,
-            sql_schema_result=sql_schema_result,
+            provider_plan=provider_plan,
+            provider_contributions=provider_contributions,
         )
         observed_transformation = reconstruct_observed_transformation(
             evidence_catalog

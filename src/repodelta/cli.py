@@ -12,7 +12,11 @@ from urllib.parse import urlparse
 from repodelta.pipeline import DeterministicAnalyzer
 from repodelta.providers.codegraph import CodegraphProvider
 from repodelta.closure.scanning import RepositoryClosureScanner
-from repodelta.providers.sql_schema import RepositorySqlSchemaProvider
+from repodelta.providers.alembic_migration import RepositoryAlembicProvider
+from repodelta.providers.sql_schema import (
+    RepositorySqlSchemaProvider,
+    SqlSchemaEvidenceProvider,
+)
 from repodelta.model.contracts import AnalysisInput
 from repodelta.evaluation.core import (
     evaluate_suite,
@@ -75,7 +79,11 @@ from repodelta.providers.workspace import (
     isolated_review_roots,
     remote_review_roots,
 )
-from repodelta.presentation.status import format_structural_coverage
+from repodelta.presentation.status import (
+    format_provider_coverage,
+    format_structural_coverage,
+    format_unclaimed_files,
+)
 from repodelta.changes.hunks import parse_changed_files
 from repodelta.llm import (
     OpenAIShadowConfig,
@@ -751,6 +759,18 @@ def main() -> int:
                     analysis_input,
                     structural_graph=structural_graph,
                 )
+            # Every evidence provider observes the same exact base/head
+            # checkouts; fixture mode has no revision to bind to.
+            checkout_bindings = dict(
+                head_root=roots.head,
+                expected_head_revision=(
+                    analysis_input.packet.head_sha if not args.fixture else None
+                ),
+                base_root=roots.base,
+                expected_base_revision=(
+                    analysis_input.packet.base_sha if not args.fixture else None
+                ),
+            )
             brief = DeterministicAnalyzer(
                 closure_scanner=RepositoryClosureScanner(
                     roots.head,
@@ -762,15 +782,11 @@ def main() -> int:
                         analysis_input.packet.base_sha if not args.fixture else None
                     ),
                 ),
-                sql_schema_provider=RepositorySqlSchemaProvider(
-                    roots.head,
-                    expected_head_revision=(
-                        analysis_input.packet.head_sha if not args.fixture else None
+                evidence_providers=(
+                    SqlSchemaEvidenceProvider(
+                        RepositorySqlSchemaProvider(**checkout_bindings)
                     ),
-                    base_root=roots.base,
-                    expected_base_revision=(
-                        analysis_input.packet.base_sha if not args.fixture else None
-                    ),
+                    RepositoryAlembicProvider(**checkout_bindings),
                 ),
             ).analyze(analysis_input)
             structural_correctness_outputs: tuple[Path, ...] | None = None
@@ -933,6 +949,11 @@ def main() -> int:
         format_structural_coverage(brief.overview.structural_coverage),
         file=sys.stderr,
     )
+    for provider_coverage in brief.overview.provider_coverage:
+        print(format_provider_coverage(provider_coverage), file=sys.stderr)
+    unclaimed = format_unclaimed_files(brief.overview.unclaimed_changed_files)
+    if unclaimed:
+        print(unclaimed, file=sys.stderr)
     print(f"LLM shadow: {brief.overview.llm_shadow.state}", file=sys.stderr)
     if args.verbose:
         for diagnostic in brief.overview.attention:

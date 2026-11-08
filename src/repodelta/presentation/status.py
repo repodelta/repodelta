@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from repodelta.model.contracts import StructuralCoverage
+from repodelta.model.contracts import ProviderCoverage, StructuralCoverage
 
 
 def format_structural_coverage(coverage: StructuralCoverage) -> str:
@@ -54,3 +54,33 @@ def _base_coverage(coverage: StructuralCoverage) -> str:
             f"{coverage.base_symbol_count} symbols"
         )
     return f"base {coverage.base_state}"
+
+
+def format_provider_coverage(coverage: ProviderCoverage) -> str:
+    """One line per provider: state, examined files, gaps and declared capabilities."""
+
+    if coverage.state == "not_requested":
+        scope = "no changed files dispatched"
+    else:
+        examined = sum(1 for item in coverage.files if item.state != "unavailable")
+        declined = len(coverage.files) - examined
+        gaps = sum(len(item.gaps) for item in coverage.files)
+        scope = (
+            f"{examined}/{len(coverage.files)} files examined"
+            + (f", {declined} unavailable" if declined else "")
+            + (f", {gaps} uninterpreted" if gaps else "")
+            + f" · {coverage.fact_count} facts"
+        )
+    return (
+        f"Evidence provider {coverage.provider}: {coverage.state} · {scope} · "
+        f"capabilities: {', '.join(coverage.capabilities)}"
+    )
+
+
+def format_unclaimed_files(paths: tuple[str, ...]) -> str | None:
+    if not paths:
+        return None
+    return (
+        f"Evidence providers: {len(paths)} changed files claimed by no provider · "
+        + ", ".join(paths)
+    )

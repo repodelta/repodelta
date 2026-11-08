@@ -218,6 +218,33 @@ def build_review_overview(
                 scope="review",
             )
         )
+    if evidence_catalog.provider_divergences:
+        attention.append(
+            ReviewAttention(
+                id=_attention_id(
+                    "provider_divergences",
+                    tuple(item.id for item in evidence_catalog.provider_divergences),
+                ),
+                label="Provider assertions differ",
+                message=" ".join(
+                    (
+                        *(
+                            f"{item.subject} {item.attribute} ({item.revision_side}): "
+                            + " vs ".join(
+                                f"{side.value} by {', '.join(side.providers)}"
+                                for side in item.sides
+                            )
+                            + "."
+                            for item in evidence_catalog.provider_divergences
+                        ),
+                        "These are source assertions, possibly from sequential "
+                        "statements; the effective database state is not "
+                        "established.",
+                    )
+                ),
+                scope="review",
+            )
+        )
     guardrails = tuple(item for item in requirements if item.kind == "guardrail")
     if guardrails:
         attention.append(
@@ -250,6 +277,9 @@ def build_review_overview(
                 "remain context and were not promoted to requirements."
             )
         ),
+        provider_coverage=evidence_catalog.provider_coverage,
+        unclaimed_changed_files=evidence_catalog.provider_plan.unclaimed_files,
+        provider_divergences=evidence_catalog.provider_divergences,
     )
 
 
