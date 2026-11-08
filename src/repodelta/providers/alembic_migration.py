@@ -147,9 +147,10 @@ def _create_table(body: _Body, statement: ast.stmt, call: ast.Call) -> None:
     if table is None or any(keyword.arg == "table_name" for keyword in call.keywords):
         body.gap(statement, "parse_failure")
         return
-    if any(keyword.arg == "schema" for keyword in call.keywords):
+    if any(keyword.arg in {None, "schema"} for keyword in call.keywords):
         # A schema-qualified table is a different subject than the bare name;
-        # asserting the bare name would risk false agreement.
+        # asserting the bare name would risk false agreement. ``**kwargs`` may
+        # carry a schema that cannot be read statically, so it is the same gap.
         body.gap(statement, "unsupported_statement")
         return
     body.fact(statement, "op.create_table", table_subject(table), "exists", "true")
@@ -169,7 +170,9 @@ def _add_column(body: _Body, statement: ast.stmt, call: ast.Call) -> None:
     ):
         body.gap(statement, "parse_failure")
         return
-    if any(keyword.arg for keyword in call.keywords):
+    if call.keywords:
+        # Any keyword, including ``**kwargs`` (arg is None), may qualify the
+        # subject (schema=...); none is understood, so no fact is asserted.
         body.gap(statement, "unsupported_statement")
         return
     body.fact(

@@ -526,6 +526,51 @@ def test_persisted_divergence_is_recomputed_not_trusted() -> None:
         replace(catalog, provider_divergences=(forged,)).validate_consistency()
 
 
+def test_coverage_cannot_be_rewritten_away_from_the_planned_dispatch() -> None:
+    catalog = _diverging_catalog()
+    emptied = tuple(
+        replace(row, state="not_requested", files=(), fact_count=0)
+        if row.provider == "sql"
+        else row
+        for row in catalog.provider_coverage
+    )
+
+    with pytest.raises(ValueError, match="planned dispatch"):
+        replace(catalog, provider_coverage=emptied).validate_consistency()
+
+
+def test_coverage_must_agree_with_the_facts_it_covers() -> None:
+    catalog = _diverging_catalog()
+
+    def rewrite(**changes):
+        rows = tuple(
+            replace(
+                row,
+                files=tuple(replace(f, **changes) for f in row.files),
+                fact_count=changes.get("fact_count", row.fact_count),
+                state=changes.get("state", row.state),
+            )
+            if row.provider == "sql"
+            else row
+            for row in catalog.provider_coverage
+        )
+        return replace(catalog, provider_coverage=rows)
+
+    with pytest.raises(ValueError, match="does not match its facts"):
+        rewrite(fact_count=0).validate_consistency()
+    with pytest.raises(ValueError, match="does not match its facts"):
+        rewrite(state="unavailable", fact_count=0).validate_consistency()
+    stripped = replace(
+        catalog,
+        items=tuple(
+            replace(item, sources=()) if item.kind == "schema_fact" else item
+            for item in catalog.items
+        ),
+    )
+    with pytest.raises(ValueError, match="does not match its facts"):
+        stripped.validate_consistency()
+
+
 def test_coverage_state_is_recomputed_from_its_files() -> None:
     catalog = _diverging_catalog()
     row = replace(catalog.provider_coverage[0], state="unavailable")

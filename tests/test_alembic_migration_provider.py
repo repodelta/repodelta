@@ -115,6 +115,23 @@ def test_unrecognized_or_unaccounted_constructs_are_explicit_gaps(
     assert len(extracted) == facts == coverage.fact_count
 
 
+@pytest.mark.parametrize(
+    "statement",
+    [
+        'op.add_column("users", sa.Column("x", sa.Integer()), **{"schema": "audit"})',
+        'op.add_column("users", sa.Column("x", sa.Integer()), **extra)',
+        'op.create_table("users", sa.Column("id", sa.Integer()), **{"schema": "audit"})',
+        'op.create_table("users", **extra)',
+    ],
+)
+def test_dynamic_kwargs_are_a_gap_never_an_understood_operation(statement: str) -> None:
+    extracted, coverage = _observe(f"def upgrade():\n    {statement}\n")
+
+    assert extracted == ()
+    assert coverage.state == "partial"
+    assert [gap.reason for gap in coverage.gaps] == ["unsupported_statement"]
+
+
 def test_missing_upgrade_and_unparsable_files_are_gaps_not_silence() -> None:
     _, no_upgrade = _observe("def downgrade():\n    pass\n")
     _, broken = observe_migration_text("head", "v/1.py", "def upgrade(:\n")

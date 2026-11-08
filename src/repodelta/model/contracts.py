@@ -3013,6 +3013,49 @@ class EvidenceCatalog:
             raise ValueError(
                 "provider coverage does not match its planned declarations"
             )
+        # Coverage and facts are bound back to the planned dispatch: a coverage
+        # row cannot claim files other than the ones dispatched, and provider
+        # facts and per-file coverage must agree on what was observed.
+        entries = {entry.provider: entry for entry in self.provider_plan.entries}
+        for coverage in self.provider_coverage:
+            entry = entries.get(coverage.provider, ProviderPlanEntry(coverage.provider))
+            dispatched = {
+                *(("head", path) for path in entry.head_paths),
+                *(("base", path) for path in entry.base_paths),
+            }
+            if {(f.revision_side, f.path) for f in coverage.files} != dispatched:
+                raise ValueError(
+                    f"{coverage.provider}: coverage files do not match its "
+                    "planned dispatch"
+                )
+        attributed: dict[tuple[str, str, str | None], int] = {}
+        for item in self.items:
+            if item.kind != "schema_fact":
+                continue
+            for provider in item.providers:
+                label = f"{provider} \u00b7 {item.revision_side}"
+                for source in item.sources:
+                    if source.label == label:
+                        key = (provider, item.revision_side, source.path)
+                        attributed[key] = attributed.get(key, 0) + 1
+        covered_files = {
+            (row.provider, f.revision_side, f.path): f
+            for row in self.provider_coverage
+            for f in row.files
+        }
+        for key in attributed:
+            if key not in covered_files:
+                raise ValueError(
+                    f"{key[0]}: fact in {key[2]} has no coverage for that file"
+                )
+        for (provider, side, path), file in covered_files.items():
+            count = attributed.get((provider, side, path), 0)
+            if (file.state == "unavailable" and count) or (
+                bool(count) != bool(file.fact_count) or count > file.fact_count
+            ):
+                raise ValueError(
+                    f"{provider}: coverage for {path} does not match its facts"
+                )
         # Divergences are derived state: recompute them from the canonical facts
         # instead of trusting a persisted record.
         if self.provider_divergences != derive_evidence_divergences(self.items):
